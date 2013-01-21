@@ -10,11 +10,11 @@ The widget can be customised with custom/pre-made panels and modes.
 
 Here are some screenshots:
 
-![White style](https://www.dropbox.com/s/91ur7tq09yiebtx/white_style.png)
+![White style](https://www.dropbox.com/s/1x76r18sc6b9bv9/white_style.jpg)
 
-![Dark style](https://www.dropbox.com/s/2u9sp7sb1gbs8vv/dark_style.png)
+![Dark style](https://www.dropbox.com/s/0xyf0jdfwu9z710/dark_style.jpg)
 
-![Search panel in action](https://www.dropbox.com/s/009fmmxtnoog4e4/search.png)
+![Search panel in action](https://www.dropbox.com/s/iq02ofj0ht30lk9/search.jpg)
 
 
 License
