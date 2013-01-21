@@ -8,13 +8,7 @@ It provides an editor widget ready to be used in any PySide applications.
 The widget can be customised with custom/pre-made panels and modes.
 
 
-Here are some screenshots:
-
-![White style](https://www.dropbox.com/s/1x76r18sc6b9bv9/white_style.jpg)
-
-![Dark style](https://www.dropbox.com/s/0xyf0jdfwu9z710/dark_style.jpg)
-
-![Search panel in action](https://www.dropbox.com/s/iq02ofj0ht30lk9/search.jpg)
+Here are some [screenshots](https://www.dropbox.com/sh/f0xpcu5zapciuma/Ef10GaBnhD)
 
 
 License
