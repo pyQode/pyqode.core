@@ -453,7 +453,7 @@
      <normaloff>:/icons/rc/edit-find-replace.png</normaloff>:/icons/rc/edit-find-replace.png</iconset>
    </property>
    <property name="text">
-    <string>actionSearchAndReplace</string>
+    <string>Search and replace</string>
    </property>
    <property name="toolTip">
     <string>Show the search and replace panel</string>

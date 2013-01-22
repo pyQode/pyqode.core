@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Thu Jan 10 23:16:18 2013
-#      by: pyside-uic 0.2.13 running on PySide 1.1.1
+# Created: Tue Jan 22 21:01:04 2013
+#      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -217,7 +217,7 @@ class Ui_SearchPanel(object):
         self.actionSearch.setText(QtGui.QApplication.translate("SearchPanel", "Search", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+F", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionActionSearchAndReplace.setText(QtGui.QApplication.translate("SearchPanel", "actionSearchAndReplace", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionActionSearchAndReplace.setText(QtGui.QApplication.translate("SearchPanel", "Search and replace", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search and replace panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFindNext.setText(QtGui.QApplication.translate("SearchPanel", "Find next", None, QtGui.QApplication.UnicodeUTF8))
