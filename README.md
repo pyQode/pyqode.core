@@ -17,17 +17,17 @@ Features
 
 Here is the features list:
 
- * syntax highlighting (using pygments)
+ * syntax highlighting mode (using pygments)
  * line number panel
  * code folding panel
  * markers panel (to add breakpoints, bookmarks, errors,...)
- * right margin indicator
- * active line highlighting
+ * right margin indicator mode
+ * active line highlighting mode
  * find and replace panel
  * text decorations (squiggle, box)
  * unicode support (specify encoding when you load your file)
  * styling (builtin white and dark styles + possibility to customize)
- * flexible framework to add custom widgets or specific behaviour
+ * flexible framework to add custom panels/modes
 
 Plans are to to add code completion and python support (using rope, pylint,...)
 
