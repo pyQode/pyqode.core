@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.7
 # coding: latin-1
 #-------------------------------------------------------------------------------
-# Copyright 2012, 
+# Copyright 2012,
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -65,6 +65,12 @@ def openFileInEditor(editor, filename, encoding='utf8',
 
 
 def saveFileFromEditor(editor, filename, encoding='utf8'):
+    """
+    Save the editor content to a file
+    :param editor: Editor instance
+    :param filename: The filename to save
+    :param encoding: The save encoding
+    """
     content = unicode(editor.textEdit.toPlainText())
     f = open(filename, "w")
     f.write(content.encode(encoding))

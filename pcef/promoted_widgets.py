@@ -11,11 +11,21 @@
 """
 Contains the promoted widgets used in the Qt Designer ui
 """
-from PySide.QtCore import Qt, Signal, QRect
-from PySide.QtGui import QTextEdit, QTextOption, QFont, QKeyEvent, QTextCursor,\
-    QMenu, QPaintEvent, QMouseEvent, QTextDocument, QPlainTextEdit, QTextBlock, QScrollBar, QAbstractSlider, QWheelEvent
+from PySide.QtCore import Qt
+from PySide.QtCore import Signal
+from PySide.QtCore import QRect
+from PySide.QtGui import QTextEdit
+from PySide.QtGui import QTextOption
+from PySide.QtGui import QFont
+from PySide.QtGui import QKeyEvent
+from PySide.QtGui import QTextCursor
+from PySide.QtGui import QMenu
+from PySide.QtGui import QPaintEvent
+from PySide.QtGui import QMouseEvent
+from PySide.QtGui import QTextDocument
+from PySide.QtGui import QPlainTextEdit
+from PySide.QtGui import QWheelEvent
 from pygments.token import Token
-
 from pcef.config.svconfig import StyledObject
 
 
@@ -56,6 +66,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         - newTextSet()
 
     """
+    #: Stylesheet
     QSS = """QPlainTextEdit
     {
         background-color: %(b)s;
@@ -98,6 +109,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             self._dirty = dirty
             self.dirtyChanged.emit(dirty)
 
+    #: Tells whether the editor is dirty(changes have been made to the document)
     dirty = property(__get_dirty, __set_dirty)
 
     #---------------------------------------------------------------------------
@@ -127,23 +139,38 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         #: Shortcuts for sharing the filename currently edited.
         #  This is only set when using the openFileInEditor function.
         self.filename = None
-        self._updateStyling()
+        self.updateStyling()
 
         #: weakref to the editor
         self.editor = None
 
     def addAction(self, action):
+        """
+        Adds an action to the text edit context menu
+        :param action: QAction
+        """
         QTextEdit.addAction(self, action)
         self._context_menu.addAction(action)
 
     def addSeparator(self):
+        """
+        Adds a seperator to the context menu
+        """
         self._context_menu.addSeparator()
 
     def addDecoration(self, decoration):
+        """
+        Add a text decoration
+        :param decoration: pcef.base.TextDecoration
+        """
         self.selections.append(decoration)
         self.setExtraSelections(self.selections)
 
     def removeDecoration(self, decoration):
+        """
+        Remove text decoration.
+        :param decoration: The decoration to remove
+        """
         try:
             self.selections.remove(decoration)
             self.setExtraSelections(self.selections)
@@ -151,6 +178,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             pass
 
     def setShowWhitespaces(self, show):
+        """
+        Shows/Hides whitespaces.
+        :param show: True to show whitespaces, False to hide them
+        """
         doc = self.document()
         options = doc.defaultTextOption()
         if show:
@@ -225,7 +256,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """
+        Update widget style when the global style changed.
+        """
         self.setFont(QFont(self.currentStyle.fontName,
                            self.currentStyle.fontSize))
         self.fm = self.fontMetrics()
@@ -234,16 +268,23 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             't': self.currentStyle.tokenColor(Token),
             "bs": self.currentStyle.selectionBackgroundColor,
             "ts": self.currentStyle.selectionTextColor}
-#            "sep": self.currentStyle.panelSeparatorColor}
         self.setShowWhitespaces(self.currentStyle.showWhitespaces)
         self.setStyleSheet(qss)
 
     def paintEvent(self, event):
+        """
+        Emits prePainting and postPainting signals
+        :param event: QPaintEvent
+        """
         self.prePainting.emit(event)
         QPlainTextEdit.paintEvent(self, event)
         self.postPainting.emit(event)
 
     def keyPressEvent(self, event):
+        """
+        Performs indentation if tab key presed, else emits the keyPressed signal
+        :param event: QKeyEvent
+        """
         assert isinstance(event, QKeyEvent)
         event.setAccepted(False)
         # replace tabs by space
@@ -263,6 +304,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             QPlainTextEdit.keyPressEvent(self, event)
 
     def mousePressEvent(self, event):
+        """
+        Emits mousePressed signal.
+        :param event: QMouseEvent
+        """
         event.setAccepted(False)
         self.mousePressed.emit(event)
         if not event.isAccepted():
@@ -270,6 +315,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
+        """
+        Emits mouseReleased signal.
+        :param event: QMouseEvent
+        """
         event.setAccepted(False)
         self.mouseReleased.emit(event)
         if not event.isAccepted():
@@ -277,6 +326,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
+        """
+        Emits the mouseWheelActivated signal.
+        :param event: QMouseEvent
+        """
         event.setAccepted(False)
         self.mouseWheelActivated.emit(event)
         if not event.isAccepted():
@@ -284,20 +337,30 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             QPlainTextEdit.wheelEvent(self, event)
 
     def contextMenuEvent(self, event):
+        """ Shows our own context menu """
         self._context_menu.exec_(event.globalPos())
 
     def resizeEvent(self, event):
+        """ Updates visible blocks on resize """
         self._onBlocksChanged()
         QPlainTextEdit.resizeEvent(self, event)
 
     def _onTextChanged(self):
+        """ Sets dirty to true """
         self.dirty = True
 
     def setPlainText(self, txt):
+        """ Sets the text edit content and emits newTextSet signal.
+        :param txt: New text to display
+        """
         QPlainTextEdit.setPlainText(self, txt)
         self.newTextSet.emit()
 
     def _onBlocksChanged(self):
+        """
+        Updates the list of visible blocks and emits visibleBlocksChanged
+        signal.
+        """
         visible_blocks = []
         block = self.firstVisibleBlock()
         row = block.blockNumber() + 1
@@ -323,6 +386,12 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         self.visibleBlocksChanged.emit()
 
     def fold(self, start, end, fold=True):
+        """ Fold/Unfold a block of text delimitted by start/end line numbers
+        :param start: Start folding line (this line is not fold, only the next
+        ones)
+        :param end: End folding line.
+        :param fold: True to fold, False to unfold
+        """
         for i in range(start + 1, end):
             self.document().findBlockByNumber(i).setVisible(not fold)
             self.update()

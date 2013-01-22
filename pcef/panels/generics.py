@@ -12,22 +12,34 @@
 Contains the generic panels (used by the generic code editor widget)
 """
 import logging
-import weakref
-
-from PySide.QtCore import Qt, QSize, QRect, Signal, QTimer, QPoint, Slot
-from PySide.QtGui import QFont, QColor, QFontMetricsF, QPainter, QPen,\
-    QBrush, QToolTip, QKeyEvent, QTextCursor, QTextDocument
-
-from pygments.token import Text, Whitespace
-
-from pcef.base import QEditorPanel, TextDecoration
-from pcef.modes.generics import SyntaxHighlightingMode
+from PySide.QtCore import Qt
+from PySide.QtCore import QPoint
+from PySide.QtCore import QRect
+from PySide.QtCore import QSize
+from PySide.QtCore import QTimer
+from PySide.QtCore import Signal
+from PySide.QtCore import Slot
+from PySide.QtGui import QFont
+from PySide.QtGui import QColor
+from PySide.QtGui import QFontMetricsF
+from PySide.QtGui import QPainter
+from PySide.QtGui import QPen
+from PySide.QtGui import QBrush
+from PySide.QtGui import QToolTip
+from PySide.QtGui import QKeyEvent
+from PySide.QtGui import QTextCursor
+from PySide.QtGui import QTextDocument
+from pygments.token import Text
+from pcef.base import QEditorPanel
+from pcef.base import TextDecoration
 from pcef.promoted_widgets import QPlainCodeEdit
-
 from pcef.ui import search_panel_ui
 
 
 class QLineNumberPanel(QEditorPanel):
+    """ This panel show the line numbers """
+
+    #: Panel identifier
     IDENTIFIER = "LineNumberPanel"
 
     def __init__(self, parent=None):
@@ -39,7 +51,8 @@ class QLineNumberPanel(QEditorPanel):
         self.editor.textEdit.visibleBlocksChanged.connect(self.update)
         self.editor.textEdit.blockCountChanged.connect(self.updateGeometry)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates brushes and pens """
         if self.editor is not None:
             self.font = self.editor.textEdit.font()
             self.back_brush = QBrush(QColor(
@@ -52,12 +65,19 @@ class QLineNumberPanel(QEditorPanel):
             self.updateGeometry()
 
     def sizeHint(self):
+        """
+        Return the size hint of the widget (depends on the editor font)
+        """
         s = str(self.editor.textEdit.blockCount())
         fm = QFontMetricsF(self.font)
         # +1 needed on window xp! (not needed on seven nor on GNU/Linux)
         return QSize(fm.width('A') * (len(s) + 1), 0)
 
     def paintEvent(self, event):
+        """ Paints the widgets:
+         - paints the background
+         - paint each visible blocks that intersects the widget bbox.
+        """
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
         painter.setPen(self.text_pen)
@@ -76,9 +96,6 @@ class QLineNumberPanel(QEditorPanel):
                 painter.fillRect(vb.rect, self.active_line_brush)
             painter_drawText(0, vb.top, w - 2, vb.height, align_right,
                              str(row))
-        #        painter.setPen(self.separator_pen)
-        #        painter.drawLine(event.rect().width() - 1, 0,
-        #                         event.rect().width() - 1, event.rect().height())
         return QEditorPanel.paintEvent(self, event)
 
 
@@ -117,6 +134,7 @@ class QMarkersPanel(QEditorPanel):
     markerOutOfDoc is emitted.
     """
 
+    #: Stylesheet
     QSS = """QToolTip {
          background-color: %(back)s;
          color: %(color)s;
@@ -147,17 +165,21 @@ class QMarkersPanel(QEditorPanel):
         self.timer = QTimer()
         self._tooltipPos = -1
         self._prev_line = -1
-        self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
+        self.logger = logging.getLogger(
+            __name__ + "." + self.__class__.__name__)
 
     def addMarker(self, marker):
+        """ Adds a marker to be displayed """
         self.markers.append(marker)
         self.update()
 
     def removeMarker(self, marker):
+        """ Remove a marker """
         self.markers.remove(marker)
         self.update()
 
     def clearMarkers(self, emit=False):
+        """ Clear marker list """
         self.clearingMarkers.emit(self)
         self.markers[:] = []
         self.update()
@@ -167,12 +189,13 @@ class QMarkersPanel(QEditorPanel):
         self.editor.textEdit.visibleBlocksChanged.connect(self.update)
         fm = QFontMetricsF(self.editor.textEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
-        editor.textEdit.blockCountChanged.connect(self._onBlockCountChanged)
+        editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
         self.bc = self.editor.textEdit.blockCount()
-        self.editor.textEdit.newTextSet.connect(self._onNewTextSet)
-        self.editor.textEdit.keyPressed.connect(self._updateCursorPos)
+        self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
+        self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates stylesheet and brushes. """
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
@@ -183,39 +206,45 @@ class QMarkersPanel(QEditorPanel):
         self.updateGeometry()
 
     def sizeHint(self):
+        """ Returns the widget size hint (based on the editor font size) """
         fm = QFontMetricsF(self.editor.textEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
         return self.size_hint
 
-    def _onNewTextSet(self):
+    def onNewTextSet(self):
+        """ Clears markers when a new text is set """
         self.clearMarkers(True)
 
-    def _getMarkerForLine(self, line):
+    def getMarkerForLine(self, l):
+        """ Retusn the marker for the line l if any, else return None """
         for m in self.markers:
-            if m.position == line:
+            if m.position == l:
                 return m
         return None
 
-    def _updateCursorPos(self):
+    def updateCursorPos(self):
+        """ Update cursor pos variables """
         self.tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
         self.tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
 
-    def _onBlockCountChanged(self, num):
-        # a line has beeen inserted or removed
+    def onBlockCountChanged(self, num):
+        """ Handles lines added/removed events """
+        # a l has beeen inserted or removed
         tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
         tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
         bc = self.bc
         if bc < num:
-            self._onLinesAdded(num - bc, tcPos, tcPosInBlock)
+            self.onLinesAdded(num - bc, tcPos, tcPosInBlock)
         else:
-            self._onLinesRemoved(bc - num, tcPos, tcPosInBlock)
+            self.onLinesRemoved(bc - num, tcPos, tcPosInBlock)
         self.tcPosInBlock = self.tcPosInBlock
         self.bc = num
 
-    def _onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
+    def onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
+        """ Offsets markers positions with the number of line added """
         if self.tcPosInBlock > 0:
             self.tcPos += 1
-            # offset each line after the tcPos by nbLines
+            # offset each l after the tcPos by nbLines
         for marker in self.markers:
             if marker.position >= self.tcPos:
                 marker.position += nbLines
@@ -223,7 +252,8 @@ class QMarkersPanel(QEditorPanel):
         self.tcPosInBlock = tcPosInBlock
         self.update()
 
-    def _onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
+    def onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
+        """ Offsets markers positions with the number of line removed """
         for marker in self.markers:
             if marker.position >= self.tcPos:
                 marker.position -= nbLines
@@ -234,15 +264,16 @@ class QMarkersPanel(QEditorPanel):
         self.update()
 
     def paintEvent(self, event):
+        """ Paints the widget """
         QEditorPanel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
         active = self.editor.textEdit.textCursor().blockNumber()
         for vb in self.editor.textEdit.visible_blocks:
-            line = vb.row
-            if line == active + 1:
+            l = vb.row
+            if l == active + 1:
                 painter.fillRect(vb.rect, self.active_line_brush)
-            marker = self._getMarkerForLine(line)
+            marker = self.getMarkerForLine(l)
             if marker:
                 if marker.icon is not None:
                     r = QRect()
@@ -251,22 +282,22 @@ class QMarkersPanel(QEditorPanel):
                     r.setWidth(self.size_hint.width())
                     r.setHeight(self.size_hint.height())
                     marker.icon.paint(painter, r)
-                #        painter.setPen(self.separator_pen)
-                #        painter.drawLine(event.rect().width() - 1, 0,
-                #                         event.rect().width() - 1, event.rect().height())
         return
 
     def leaveEvent(self, event):
+        """ Resets prev line to -1 when we leave otherwise the tooltip won't be
+        shown next time we hover the marker """
         self._prev_line = -1
 
     def mouseMoveEvent(self, event):
+        """ Shows a tooltip """
         pos = event.pos()
         y = pos.y()
         for vb in self.editor.textEdit.visible_blocks:
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self._getMarkerForLine(vb.row)
+                marker = self.getMarkerForLine(vb.row)
                 if (marker is not None and
                         marker.tooltip is not None and
                         marker.tooltip != ""):
@@ -277,7 +308,7 @@ class QMarkersPanel(QEditorPanel):
                         centerY = vb.rect.y()
                         self._tooltipPos = QPoint(centerX, centerY)
                         self._prev_line = vb.row
-                        self.timer.singleShot(1500, self._displayTooltip)
+                        self.timer.singleShot(1500, self.displayTooltip)
                 return
 
     def mouseReleaseEvent(self, event):
@@ -292,7 +323,7 @@ class QMarkersPanel(QEditorPanel):
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self._getMarkerForLine(vb.row)
+                marker = self.getMarkerForLine(vb.row)
                 if marker is not None:
                     self.removeMarker(marker)
                     self.markerRemoved.emit(self, marker)
@@ -301,66 +332,86 @@ class QMarkersPanel(QEditorPanel):
                     self.logger.debug("Marker add requested (l: %d)" % vb.row)
                     self.addMarkerRequested.emit(self, vb.row)
 
-    def _displayTooltip(self):
+    def displayTooltip(self):
+        """ Display the tooltip """
         QToolTip.showText(self.mapToGlobal(self._tooltipPos),
                           self._tooltip,
                           self)
 
 
-class FoldMarker(object):
+class FoldIndicator(object):
     """
     A fold marker is used by the QFoldPanel to display code folding indicators.
 
-    A fold marker is defined by two line number (start and end) and a boolean property
-    that tells whether the code block is folded or not.
+    A fold marker is defined by two line number (start and end) and a boolean
+    property that tells whether the code block is folded or not.
 
     Fields:
         - start: start line nbr(where the +/- indicator is drawn)
         - end: end line nbr (wher |_ is drawn)
     """
     def __init__(self, start, end):
+        #: Start line
         self.start = start
+        #: End line
         self.end = end
+        #: Is folded ?
         self.folded = False
+        #: Is hover ?
         self.hover = False
 
 
 class QFoldPanel(QEditorPanel):
+    """ This panel display folding indicators and folds/unfolds text """
+    #: Panel identifier
     IDENTIFIER = "QFoldPanel"
 
     def __init__(self, parent=None):
         QEditorPanel.__init__(
             self, self.IDENTIFIER, "Display code folding indicators", parent)
-        self.fold_markers = []
+        self.fold_indicators = []
         self.setMouseTracking(True)
-        self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
+        self.logger = logging.getLogger(
+            __name__ + "." + self.__class__.__name__)
 
-    def addFoldMarker(self, start, end):
-        self.fold_markers.append(FoldMarker(start, end))
+    def addIndicator(self, start, end):
+        """
+        Adds a fold indicator
+        :param start: Start line (1 based)
+        :param end: End line
+        """
+        self.fold_indicators.append(FoldIndicator(start, end))
         self.update()
 
-    def removeFoldMarker(self, marker):
-        self.fold_markers.remove(marker)
+    def removeIndicator(self, indicator):
+        """
+        Remove a fold indicator
+        :param indicator: Indicator to remove
+        """
+        self.fold_indicators.remove(indicator)
         self.update()
 
-    def clearFoldMarkers(self):
-        self.fold_markers[:] = []
+    def clearIndicators(self):
+        """ Remove all indicators """
+        self.fold_indicators[:] = []
         self.update()
 
     def install(self, editor):
+        """ Install the panel on the editor """
         QEditorPanel.install(self, editor)
         self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-        self._updateCursorPos()
+        self.updateCursorPos()
         self.font = QFont(self.currentStyle.fontName, 7)
         self.font.setBold(True)
         fm = QFontMetricsF(self.editor.textEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
-        editor.textEdit.blockCountChanged.connect(self._onBlockCountChanged)
+        editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
         self.bc = self.editor.textEdit.blockCount()
-        self.editor.textEdit.newTextSet.connect(self._onNewTextSet)
-        self.editor.textEdit.keyPressed.connect(self._updateCursorPos)
+        self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
+        self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates brushes and pens """
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
@@ -370,39 +421,46 @@ class QFoldPanel(QEditorPanel):
         self.updateGeometry()
 
     def sizeHint(self):
+        """ Returns a fixed size hint (16x16) """
         self.size_hint = QSize(16, 16)
         return self.size_hint
 
-    def _onNewTextSet(self):
-        self.clearFoldMarkers()
+    def onNewTextSet(self):
+        self.clearIndicators()
 
-    def _getMarkerForLine(self, line):
-        for m in self.fold_markers:
+    def getIndicatorForLine(self, line):
+        """ Returns the fold indicator whose start position equals the line
+        :param line: Line nbr of the start position of the indicator to get.
+        :return: FoldIndicator or None
+        """
+        for m in self.fold_indicators:
             if m.start == line:
                 return m
         return None
 
-    def _updateCursorPos(self):
+    def updateCursorPos(self):
         self.tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
         self.tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
 
-    def _onBlockCountChanged(self, num):
+    def onBlockCountChanged(self, num=-1):
+        """ Handles line added/removed event """
         # a line has been inserted or removed
         tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
         tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
         bc = self.bc
         if bc < num:
-            self._onLinesAdded(num - bc, tcPos, tcPosInBlock)
+            self.onLinesAdded(num - bc, tcPos, tcPosInBlock)
         else:
-            self._onLinesRemoved(bc - num, tcPos, tcPosInBlock)
+            self.onLinesRemoved(bc - num, tcPos, tcPosInBlock)
         self.tcPosInBlock = self.tcPosInBlock
         self.bc = num
 
-    def _onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
+    def onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
+        """ Offsets markers positions with the number of line added """
         if self.tcPosInBlock > 0:
             self.tcPos += 1
-            # offset each line after the tcPos by nbLines
-        for marker in self.fold_markers:
+        # offset each line after the tcPos by nbLines
+        for marker in self.fold_indicators:
             if marker.start >= self.tcPos:
                 marker.start += nbLines
                 marker.end += nbLines
@@ -410,18 +468,20 @@ class QFoldPanel(QEditorPanel):
         self.tcPosInBlock = tcPosInBlock
         self.update()
 
-    def _onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
-        for marker in self.fold_markers:
+    def onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
+        """ Offsets markers positions with the number of line removed """
+        for marker in self.fold_indicators:
             if marker.start >= self.tcPos:
                 marker.start -= nbLines
                 marker.end -= nbLines
                 if marker.start < 1:
-                    self.removeFoldMarker(marker)
+                    self.removeIndicator(marker)
         self.tcPos = tcPos
         self.tcPosInBlock = tcPosInBlock
         self.update()
 
     def paintEvent(self, event):
+        """ Paints the widget """
         QEditorPanel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
@@ -435,7 +495,7 @@ class QFoldPanel(QEditorPanel):
         for vb in self.editor.textEdit.visible_blocks:
             line = vb.row
             # paint marker for line
-            marker = self._getMarkerForLine(line)
+            marker = self.getIndicatorForLine(line)
             if marker is None:
                 continue
             # use the normal pen to draw the fold indicator
@@ -476,15 +536,18 @@ class QFoldPanel(QEditorPanel):
         return
 
     def leaveEvent(self, event):
-        for m in self.fold_markers:
+        """ Clears indicator hover states and repaint """
+        for m in self.fold_indicators:
             m.hover = False
         self.repaint()
 
     def mouseMoveEvent(self, event):
+        """ Detects indicator hover states """
+
         pos = event.pos()
         y = pos.y()
         repaint = False
-        for m in self.fold_markers:
+        for m in self.fold_indicators:
             if m.hover is True:
                 m.hover = False
                 repaint = True
@@ -492,7 +555,7 @@ class QFoldPanel(QEditorPanel):
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self._getMarkerForLine(vb.row)
+                marker = self.getIndicatorForLine(vb.row)
                 if marker is not None:
                     # mark it as hover and repaint
                     marker.hover = True
@@ -510,7 +573,7 @@ class QFoldPanel(QEditorPanel):
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self._getMarkerForLine(vb.row)
+                marker = self.getIndicatorForLine(vb.row)
                 if marker is not None:
                     marker.folded = not marker.folded
                     self.editor.textEdit.fold(marker.start - 1, marker.end, marker.folded)
@@ -533,7 +596,7 @@ class QSearchPanel(QEditorPanel):
     .. note:: The widget use a custom stylesheet similar to the search panel of
               Qt Creator.
     """
-
+    #: Stylesheet
     QSS = """QWidget
     {
         background-color: %(bck)s;
@@ -587,6 +650,7 @@ class QSearchPanel(QEditorPanel):
     }
     """
 
+    #: Emitted when the nbr of occurences has changed
     numOccurrencesChanged = Signal()
 
     def __get_numOccurrences(self):
@@ -597,6 +661,7 @@ class QSearchPanel(QEditorPanel):
             self._numOccurrences = numOccurrences
             self.numOccurrencesChanged.emit()
 
+    #: Nb occurences detected
     numOccurrences = property(__get_numOccurrences, __set_numOccurrences)
 
     def __init__(self, parent=None):
@@ -607,7 +672,7 @@ class QSearchPanel(QEditorPanel):
         self._decorations = []
         self._numOccurrences = 0
         self._processing = False
-        self.numOccurrencesChanged.connect(self._updateUi)
+        self.numOccurrencesChanged.connect(self.updateUi)
         self.ui.actionFindNext.triggered.connect(self.findNext)
         self.ui.actionFindPrevious.triggered.connect(self.findPrevious)
         self.ui.actionSearch.triggered.connect(self.showSearchPanel)
@@ -617,6 +682,7 @@ class QSearchPanel(QEditorPanel):
         self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
 
     def showSearchPanel(self):
+        """ Shows the search panel """
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.hide()
@@ -626,6 +692,7 @@ class QSearchPanel(QEditorPanel):
         self.ui.lineEditSearch.setFocus()
 
     def showSearchAndReplacePanel(self):
+        """ Shows the search and replace panel """
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.show()
@@ -634,7 +701,8 @@ class QSearchPanel(QEditorPanel):
             self.ui.lineEditSearch.setText(selectedText)
         self.ui.lineEditReplace.setFocus()
 
-    def _updateUi(self):
+    def updateUi(self):
+        """ Updates user interface (checkbox states, nb matches, ...) """
         # update matches label
         self.ui.labelMatches.setText("%d matches" % self.numOccurrences)
         color = "#CC0000"
@@ -653,7 +721,8 @@ class QSearchPanel(QEditorPanel):
         self.ui.pushButtonDown.setEnabled(enableNavigation)
         self.ui.pushButtonUp.setEnabled(enableNavigation)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Change stylesheet """
         qss = self.QSS % {"bck": self.currentStyle.panelsBackgroundColor,
                           "txt_bck": self.currentStyle.backgroundColor,
                           "color": self.currentStyle.tokenColor(Text),
@@ -661,13 +730,15 @@ class QSearchPanel(QEditorPanel):
         self.setStyleSheet(qss)
 
     def install(self, editor):
+        """  Install the panel on the editor """
         QEditorPanel.install(self, editor)
-        self.editor.textEdit.cursorPositionChanged.connect(self._onCursorMoved)
-        self.editor.textEdit.textChanged.connect(self._updateSearchResults)
-        self._updateUi()
-        self._installActions()
+        self.editor.textEdit.cursorPositionChanged.connect(self.onCursorMoved)
+        self.editor.textEdit.textChanged.connect(self.updateSearchResults)
+        self.updateUi()
+        self.installActions()
 
-    def _installActions(self):
+    def installActions(self):
+        """ Installs actions on the editor context menu """
         editor = self.editor.textEdit
         assert isinstance(editor, QPlainCodeEdit)
         editor.addSeparator()
@@ -677,11 +748,13 @@ class QSearchPanel(QEditorPanel):
         editor.addAction(self.ui.actionFindNext)
 
     @Slot()
-    def _updateSearchResults(self):
+    def updateSearchResults(self):
+        """  Updates the search results """
         txt = self.ui.lineEditSearch.text()
-        self._highlightOccurrences(txt)
+        self.highlightOccurrences(txt)
 
     def findNext(self):
+        """ Finds the next occurrence """
         txt = self.ui.lineEditSearch.text()
         sf = self.getUserSearchFlag()
         if not self.editor.textEdit.find(txt, sf):
@@ -693,9 +766,11 @@ class QSearchPanel(QEditorPanel):
 
     @Slot()
     def on_pushButtonDown_clicked(self):
+        """ Finds the next occurrence """
         self.findNext()
 
     def findPrevious(self):
+        """ Finds the previous occurrence """
         txt = self.ui.lineEditSearch.text()
         sf = self.getUserSearchFlag()
         sf |= QTextDocument.FindBackward
@@ -708,24 +783,29 @@ class QSearchPanel(QEditorPanel):
 
     @Slot()
     def on_pushButtonUp_clicked(self):
+        """ Finds the previous occurrence """
         self.findPrevious()
 
     @Slot()
     def on_pushButtonClose_clicked(self):
+        """ Hides the panel """
         self.hide()
         self.ui.lineEditSearch.setText("")
 
     @Slot(int)
     def on_checkBoxCase_stateChanged(self, state):
+        """ Re-highlight occurences """
         if self._processing is False:
-            self._highlightOccurrences(self.ui.lineEditSearch.text())
+            self.highlightOccurrences(self.ui.lineEditSearch.text())
 
     @Slot(int)
     def on_checkBoxWholeWords_stateChanged(self, state):
+        """ Re-highlight occurences """
         if self._processing is False:
-            self._highlightOccurrences(self.ui.lineEditSearch.text())
+            self.highlightOccurrences(self.ui.lineEditSearch.text())
 
     def keyPressEvent(self, event):
+        """ Handles key pressed: Return = next occurence, Esc = close panel """
         assert isinstance(event, QKeyEvent)
         if event.key() == Qt.Key_Escape:
             self.on_pushButtonClose_clicked()
@@ -737,21 +817,25 @@ class QSearchPanel(QEditorPanel):
 
     @Slot(unicode)
     def on_lineEditSearch_textChanged(self, text):
+        """ Re-highlight occurences """
         if self._processing is False:
-            self._highlightOccurrences(text, True)
+            self.highlightOccurrences(text, True)
 
     @Slot(unicode)
     def on_lineEditReplace_textChanged(self, text):
-        self._updateUi()
+        """ Updates user interface """
+        self.updateUi()
 
     @Slot()
     def on_pushButtonReplace_clicked(self):
+        """ Replace current selection and select first next occurence """
         txt = self.ui.lineEditReplace.text()
         self.editor.textEdit.insertPlainText(txt)
         self.selectFirst()
 
     @Slot()
     def on_pushButtonReplaceAll_clicked(self):
+        """ Replace all occurences """
         txt = self.ui.lineEditReplace.text()
         if not self.ui.checkBoxCase.isChecked() and txt.upper() == self.ui.lineEditSearch.text().upper():
             return
@@ -759,11 +843,13 @@ class QSearchPanel(QEditorPanel):
             self.editor.textEdit.insertPlainText(txt)
             self.selectFirst()
 
-    def _onCursorMoved(self):
+    def onCursorMoved(self):
+        """ Re-highlight occurences """
         if self._processing is False:
-            self._highlightOccurrences(self.ui.lineEditSearch.text())
+            self.highlightOccurrences(self.ui.lineEditSearch.text())
 
     def selectFirst(self):
+        """ Select the first next occurences """
         searchFlag = self.getUserSearchFlag()
         txt = self.ui.lineEditSearch.text()
         tc = self.editor.textEdit.textCursor()
@@ -771,7 +857,8 @@ class QSearchPanel(QEditorPanel):
         self.editor.textEdit.setTextCursor(tc)
         self.editor.textEdit.find(txt, searchFlag)
 
-    def _createDecoration(self, tc):
+    def createDecoration(self, tc):
+        """ Creates the text occurence decoration """
         deco = TextDecoration(tc)
         deco.setBackground(QBrush(QColor(
             self.currentStyle.searchBackgroundColor)))
@@ -780,6 +867,7 @@ class QSearchPanel(QEditorPanel):
         return deco
 
     def highlightAllOccurrences(self):
+        """ Highlight all occurrences """
         if not self.isVisible():
             return
         searchFlag = self.getUserSearchFlag()
@@ -790,7 +878,7 @@ class QSearchPanel(QEditorPanel):
         cptMatches = 0
         tc = doc.find(txt, tc, searchFlag)
         while not tc.isNull():
-            deco = self._createDecoration(tc)
+            deco = self.createDecoration(tc)
             self._decorations.append(deco)
             self.editor.textEdit.addDecoration(deco)
             tc.setPosition(tc.position() + 1)
@@ -799,10 +887,13 @@ class QSearchPanel(QEditorPanel):
         self.numOccurrences = cptMatches
 
     def clearDecorations(self):
+        """ Remove all decorations """
         for deco in self._decorations:
             self.editor.textEdit.removeDecoration(deco)
+        self._decorations[:] = []
 
     def getUserSearchFlag(self):
+        """ Returns the user search flag """
         searchFlag = 0
         if self.ui.checkBoxCase.isChecked():
             searchFlag |= QTextDocument.FindCaseSensitively
@@ -810,13 +901,14 @@ class QSearchPanel(QEditorPanel):
             searchFlag |= QTextDocument.FindWholeWords
         return searchFlag
 
-    def _highlightOccurrences(self, txt, selectFirst=False):
-        # start processing (prevent _onCursorMoved to call us while we are
-        # moving the cursor ourselves
+    def highlightOccurrences(self, txt, selectFirst=False):
+        """ Highlight occurences
+        :param txt: Text to highlight
+        :param selectFirst: True to select the first occurence
+        """
         self._processing = True
         self.clearDecorations()
         self.highlightAllOccurrences()
         if selectFirst:
             self.selectFirst()
-            # end processing
         self._processing = False

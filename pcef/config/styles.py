@@ -13,13 +13,11 @@ Contains default styles definitions (both for the PCEF and pygmens)
 """
 from pygments.style import Style as PygmentsStyle
 from pygments.token import *
+from pcef.config.style import Style
+from pcef.config.style import DEFAULT_FONT
+from pcef.config.style import DEFAULT_FONT_SIZE
 
-from pcef.config.style import Style, DEFAULT_FONT, DEFAULT_FONT_SIZE
 
-
-#
-# Builtin pygments styles
-#
 class PygmentsWhiteStyle(PygmentsStyle):
     """
     Our default white pygments style definition
@@ -42,30 +40,6 @@ class PygmentsWhiteStyle(PygmentsStyle):
         Comment:                'noinherit #128026',
         Name.Builtin:           'noinherit #4174fa',
         Name.Builtin.Pseudo:    'noinherit #94558D'}
-
-
-#class PygmentsDarkStyle(PygmentsStyle):
-#    """
-#    Our default dark pygments styles definition
-#    """
-#    background_color = '#1a1d1f'
-#    styles = {
-#        Token:                  "noinherit #bcbcbc",
-#        Text:                   'noinherit #bcbcbc',
-#        Whitespace:             'noinherit #3a3a3a',
-#        Error:                  'noinherit #CC0000 underline',
-#        Keyword:                'noinherit #4174fa bold',
-#        Name.Function:          'noinherit #FFBB09',
-#        Name.Class:             'noinherit #008080 bold',
-#        Name.Decorator:         'noinherit #4174fa',
-#        String:                 'noinherit #9A1016 italic',
-#        String.Doc:             'noinherit #8080FF italic',
-#        Number:                 'noinherit #FF12D7',
-#        Operator:               'noinherit #FF6466',
-#        Punctuation:            'noinherit #BCBCBC',
-#        Comment:                'noinherit #128026',
-#        Name.Builtin:           'noinherit #4174fa',
-#        Name.Builtin.Pseudo:    'noinherit #94558D'}
 
 
 class PygmentsDarkStyle(PygmentsStyle):
@@ -97,9 +71,7 @@ class DefaultWhiteStyle(Style):
 
     def __init__(self):
         super(DefaultWhiteStyle, self).__init__()
-        #: Pygments syntax highlighting style
         self.pygmentsStyle = PygmentsWhiteStyle
-        #: Right margin color
         self.marginColor = '#FF0000'
         self.marginPos = 80
         self.activeLineColor = '#FFFFC0'
@@ -119,9 +91,7 @@ class DefaultDarkStyle(Style):
 
     def __init__(self):
         super(DefaultDarkStyle, self).__init__()
-        #: Pygments syntax highlighting style
         self.pygmentsStyle = PygmentsDarkStyle
-        #: Right margin color
         self.marginColor = '#FF0000'
         self.activeLineColor = '#323232'
         self.selectionBackgroundColor = '#2142A3'

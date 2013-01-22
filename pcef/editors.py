@@ -13,9 +13,7 @@ Contains a series of pre-configured editors classes ready to be used in your
 PySide application
 """
 from PySide.QtCore import Slot
-
 from pcef.base import QCodeEditor
-
 from pcef.modes.generics import RightMarginMode
 from pcef.modes.generics import SyntaxHighlightingMode
 from pcef.modes.generics import HighlightLineMode
@@ -45,32 +43,44 @@ class QGenericEditor(QCodeEditor):
     #---------------------------------------------------------------------------
     @property
     def rightMarginMode(self):
-        """
-        Returns the right margin mode instance
-        :return:
+        """ Returns the right margin mode instance.
+        :return: RightMarginMode
         """
         return self.modes[RightMarginMode.IDENTIFIER]
 
     @property
     def syntaxHighlightingMode(self):
+        """ Returns the syntax hilighting mode instance.
+        :return: SyntaxHighlightingMode
+        """
         return self.modes[SyntaxHighlightingMode.IDENTIFIER]
 
     @property
     def highlightLineMode(self):
+        """ Returns the highlight active line mode instance.
+        :return: HighlightLineMode
+        """
         return self.modes[HighlightLineMode.IDENTIFIER]
 
     @property
     def lineNumberPanel(self):
+        """ Returns the line number panel instance.
+        :return: QLineNumberPanel
+        """
         return self.panels[QLineNumberPanel.IDENTIFIER]
 
     @property
     def foldPanel(self):
+        """ Returns the fold panel instance
+        :return: QFoldPanel
+        """
         return self.panels[QFoldPanel.IDENTIFIER]
 
     #---------------------------------------------------------------------------
     # Methods
     #---------------------------------------------------------------------------
     def _installActions(self):
+        """ Install generic actions """
         self.textEdit.addAction(self.ui.actionUndo)
         self.textEdit.addAction(self.ui.actionRedo)
         self.textEdit.addSeparator()

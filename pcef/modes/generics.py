@@ -11,14 +11,25 @@
 """
 This module contains the base class for editor modes and a few builtin modes
 """
-from PySide.QtCore import Slot, Qt
-from PySide.QtGui import QPainter, QPen, QBrush, QColor, QWheelEvent, QInputEvent, QKeyEvent
+from PySide.QtCore import Qt
+from PySide.QtCore import Slot
+from PySide.QtGui import QBrush
+from PySide.QtGui import QColor
+from PySide.QtGui import QKeyEvent
+from PySide.QtGui import QPainter
+from PySide.QtGui import QPen
+from PySide.QtGui import QWheelEvent
+from pcef.base import TextDecoration
+from pcef.base import Mode
 from pcef.config import svconfig
 from pcef.tools.highlighter import QPygmentsHighlighter
-from pcef.base import TextDecoration, Mode
 
 
 class RightMarginMode(Mode):
+    """
+    Display the right margin
+    """
+    #: Mode identifier
     IDENTIFIER = "RightMargin"
 
     def __init__(self):
@@ -34,10 +45,12 @@ class RightMarginMode(Mode):
         super(RightMarginMode, self).install(editor)
         editor.textEdit.postPainting.connect(self.__paintMargin)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates the margin pen color """
         self.pen = QPen(self.currentStyle.marginColor)
 
     def __paintMargin(self, event):
+        """ Paints the right margin as postPainting step. """
         if self.enabled:
             rect = event.rect()
             fm = self.editor.textEdit.fm
@@ -51,6 +64,10 @@ class RightMarginMode(Mode):
 
 
 class SyntaxHighlightingMode(Mode):
+    """
+    This mode enable syntax highlighting (using the QPygmentsHighlighter)
+    """
+    #: Mode identifier
     IDENTIFIER = "SyntaxHighlighting"
 
     def __init__(self):
@@ -60,10 +77,14 @@ class SyntaxHighlightingMode(Mode):
             "Apply syntax highlighting to the editor using ")
 
     def install(self, editor):
+        """
+        :type editor: pcef.editors.QGenericEditor
+        """
         self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
         super(SyntaxHighlightingMode, self).install(editor)
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates the pygments style """
         if self.highlighter is not None:
             self.highlighter.style = self.currentStyle.pygmentsStyle
 
@@ -87,6 +108,10 @@ class SyntaxHighlightingMode(Mode):
 
 
 class HighlightLineMode(Mode):
+    """
+    This mode highlights the current line.
+    """
+    #: Mode identifier
     IDENTIFIER = "HighlightLine"
 
     def __init__(self):
@@ -97,16 +122,21 @@ class HighlightLineMode(Mode):
         self.brush = None
 
     def install(self, editor):
+        """
+        :type editor: pcef.editors.QGenericEditor
+        """
         super(HighlightLineMode, self).install(editor)
         self.editor.textEdit.cursorPositionChanged.connect(
-            self._updateCursorPos)
-        self._updateCursorPos()
+            self.changeActiveLine)
+        self.changeActiveLine()
 
-    def _updateStyling(self):
+    def updateStyling(self):
+        """ Updates the pygments style """
         self.brush = QBrush(QColor(self.currentStyle.activeLineColor))
 
     @Slot()
-    def _updateCursorPos(self):
+    def changeActiveLine(self):
+        """ Changes the active line. """
         tc = self.editor.textEdit.textCursor()
         pos = tc.blockNumber
         if pos != self._pos:
@@ -121,6 +151,10 @@ class HighlightLineMode(Mode):
 
 
 class EditorZoomMode(Mode):
+    """
+    This mode provide editor zoom (the editor font is increased/decreased)
+    """
+    #: Mode identifier
     IDENTIFIER = "EditorZoom"
 
     def __init__(self):
@@ -129,10 +163,17 @@ class EditorZoomMode(Mode):
         self.prev_delta = 0
 
     def install(self, editor):
+        """
+        :type editor: pcef.editors.QGenericEditor
+        """
         super(EditorZoomMode, self).install(editor)
         self.editor.textEdit.mouseWheelActivated.connect(
             self.onWheelEvent)
         self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+        self.default_font_size = svconfig.getGlobalStyle().fontSize
+
+    def updateStyling(self):
+        """ Updates the default font size """
         self.default_font_size = svconfig.getGlobalStyle().fontSize
 
     def onKeyPressed(self, event):
@@ -142,7 +183,8 @@ class EditorZoomMode(Mode):
         :type event: QKeyEvent
         :return:
         """
-        if event.key() == Qt.Key_0 and event.modifiers() & Qt.ControlModifier > 0:
+        if (event.key() == Qt.Key_0 and
+                event.modifiers() & Qt.ControlModifier > 0):
             style = svconfig.getGlobalStyle()
             style.fontSize = self.default_font_size
             event.setAccepted(True)
@@ -151,10 +193,10 @@ class EditorZoomMode(Mode):
 
     def onWheelEvent(self, event):
         """
-        Increments or decrements editor fonts settings on mouse wheel event if ctrl modifier is on.
-        :param event: wheelEvent
+        Increments or decrements editor fonts settings on mouse wheel event
+        if ctrl modifier is on.
+        :param event: wheel event
         :type event: QWheelEvent
-        :return:
         """
         delta = event.delta()
         if event.modifiers() & Qt.ControlModifier > 0:

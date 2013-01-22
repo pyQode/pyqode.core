@@ -18,13 +18,16 @@ Contains the bases classes of the project:
 """
 import logging
 import weakref
-
-from PySide.QtGui import QWidget, QBoxLayout
-from PySide.QtCore import Qt, QRect
-from PySide.QtGui import QTextEdit, QFont, QTextCursor, QColor, \
-    QTextCharFormat, QTextFormat
-
-from config.svconfig import StyledObject
+from PySide.QtCore import Qt
+from PySide.QtGui import QWidget
+from PySide.QtGui import QBoxLayout
+from PySide.QtGui import QTextEdit
+from PySide.QtGui import QFont
+from PySide.QtGui import QTextCursor
+from PySide.QtGui import QColor
+from PySide.QtGui import QTextCharFormat
+from PySide.QtGui import QTextFormat
+from pcef.config.svconfig import StyledObject
 from pcef.ui import editor_ui
 
 
@@ -62,7 +65,7 @@ class Mode(StyledObject):
         #: Editor instance
         self.editor = None
 
-    def _updateStyling(self):
+    def updateStyling(self):
         pass  # not all modes need styling
 
     def install(self, editor):
@@ -70,18 +73,16 @@ class Mode(StyledObject):
         Install the mode on the editor.
 
         .. warning::
-            For internal use only. User should use the installMode method of the
-            PCEF.
+            For internal use only. User should use the installMode method.
 
         .. warning::
             Don't forget to call **super** when subclassing
-
 
         :param editor: PCEF instance
         :type editor: pcef.editors.QGenericEditor
         """
         self.editor = editor
-        self._updateStyling()
+        self.updateStyling()
 
 
 class QEditorPanel(QWidget, StyledObject):
@@ -101,11 +102,20 @@ class QEditorPanel(QWidget, StyledObject):
 
     def install(self, editor):
         """
-        :param editor:
+        Install the mode on the editor.
+
+        .. warning::
+            For internal use only. User should use the installPanel method.
+
+        .. warning::
+            Don't forget to call **super** when subclassing
+
+
+        :param editor: PCEF instance
         :type editor: pcef.editors.QGenericEditor
         """
         self.editor = editor
-        self._updateStyling()
+        self.updateStyling()
 
 
 class TextDecoration(QTextEdit.ExtraSelection):
@@ -124,28 +134,40 @@ class TextDecoration(QTextEdit.ExtraSelection):
         self.cursor = cursor
 
     def setBold(self):
+        """ Uses bold text """
         self.format.setFontWeight(QFont.Bold)
 
     def setForeground(self, color):
+        """ Sets the foreground color.
+        :param color: QColor """
         self.format.setForeground(color)
 
     def setBackground(self, brush):
+        """ Sets the background color
+        :param brush: QBrush
+        """
         self.format.setBackground(brush)
 
     def setFullWidth(self, flag=True):
+        """ Sets full width selection
+        :param flag: True to use full width selection.
+        """
         self.cursor.clearSelection()
-        self.format.setProperty(
-            QTextFormat.FullWidthSelection, flag)
+        self.format.setProperty(QTextFormat.FullWidthSelection, flag)
 
-    def setSpellchecking(self, color=Qt.red):
+    def setSpellchecking(self, color=Qt.blue):
+        """ Underlines text as a spellcheck error.
+        """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
     def setError(self, color=Qt.red):
+        """ Highlights text as a syntax error """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
     def setWarning(self, color=QColor("orange")):
+        """ Highlights text as a syntax warning """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
@@ -187,6 +209,10 @@ class QCodeEditor(QWidget):
 
     @property
     def textEdit(self):
+        """
+        Return the editor plain text edit
+        :return: pcef.promoted_widgets.QPlainCodeEdit
+        """
         return self.ui.textEdit
 
     def __init__(self, parent=None):
@@ -207,14 +233,23 @@ class QCodeEditor(QWidget):
             self.PANEL_ZONE_RIGHT:  self.ui.layoutRight}
         self.panels = {}
         self.filename = None
-        self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
+        self.logger = logging.getLogger(
+            __name__ + "." + self.__class__.__name__)
 
     def installMode(self, mode):
+        """ Installs a mode on the widget.
+        :param mode:  Mode instance to install.
+        """
         self.logger.info("Installing mode %s" % mode.name)
         self.modes[mode.name] = mode
         mode.install(self)
 
     def installPanel(self, panel, zone):
+        """ Installs a panel on the widget.
+        :param panel: Panel instance to install
+        :param zone: The zone where the panel will be install
+        QCodeEditor.PANEL_ZONE_XXX.
+        """
         self.logger.info("Installing panel {0} on zone {1}".format(panel.name,
                                                                 zone))
         self.panels[panel.name] = panel

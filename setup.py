@@ -10,8 +10,8 @@
 #
 """
 PCEF is a framework to help creating a code editor in a pyside application.
-
-This is the setup script, install it as any python package. You will need to install PySide on your own
+This is the setup script, install it as any python package.
+You will need to install PySide on your own.
 """
 from setuptools import setup, find_packages
 
@@ -25,5 +25,6 @@ setup(
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
-    description='PySide Code Editing Framework (P.C.E.F.)'
+    description='PySide Code Editing Framework (P.C.E.F.)',
+    requires=['pygments', 'PySide']
 )

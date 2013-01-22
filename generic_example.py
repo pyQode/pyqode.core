@@ -10,10 +10,8 @@
 #
 """ PCEF generic editor demo """
 import sys
-
 from PySide.QtGui import QApplication
 from PySide.QtGui import QMainWindow
-
 from pcef import openFileInEditor
 from pcef.editors import QGenericEditor
 from pcef.panels.utils import QBookmarkPanel
@@ -33,7 +31,7 @@ def main():
     p = QBookmarkPanel()
     editor.installPanel(p, editor.PANEL_ZONE_LEFT)
     # add a fold indicator around the main
-    editor.foldPanel.addFoldMarker(22, 47)
+    editor.foldPanel.addIndicator(20, 45)
 
     # set the editor as the central widget
     window.setCentralWidget(editor)

@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.7
 # coding: latin-1
 #-------------------------------------------------------------------------------
-# Copyright 2012, 
+# Copyright 2012,
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -18,5 +18,6 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------
 """
-
+Contains the ui needed by the various widgets. (Resources/Icons are stored in
+the rc subdirectory.
 """

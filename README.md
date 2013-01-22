@@ -11,12 +11,6 @@ The widget can be customised with custom/pre-made panels and modes.
 Here are some [screenshots](https://www.dropbox.com/sh/f0xpcu5zapciuma/Ef10GaBnhD)
 
 
-License
----------
-
-LGPL v3
-
-
 Features
 -----------
 
@@ -37,6 +31,10 @@ Here is the features list:
 
 Plans are to to add code completion and python support (using rope, pylint,...)
 
+License
+---------
+
+LGPL v3
 
 Installation
 --------------

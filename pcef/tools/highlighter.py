@@ -15,11 +15,17 @@ Contains the highlighter classes used in the application:
  - QPygmentsHighlighter: highlights python code using pygments
 """
 from PySide import QtGui
-from PySide.QtCore import Qt, QRegExp
-from PySide.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont
-from pygments.lexers import get_lexer_for_filename
+from PySide.QtCore import Qt
+from PySide.QtCore import QRegExp
+from PySide.QtGui import QSyntaxHighlighter
+from PySide.QtGui import QTextCharFormat
+from PySide.QtGui import QFont
 from pygments.formatters.html import HtmlFormatter
-from pygments.lexer import RegexLexer, _TokenType, Text, Error
+from pygments.lexer import Error
+from pygments.lexer import RegexLexer
+from pygments.lexer import Text
+from pygments.lexer import _TokenType
+from pygments.lexers import get_lexer_for_filename
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace
@@ -118,8 +124,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
         self.style = "default"
-        #: highlighter can be used to highlight occurences (for seaches).
-        self.__highlighted_occurrence = None
 
     def setLexerFromFilename(self, filename):
         try:
@@ -174,20 +178,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             self.setFormat(index, length, self._get_format(Whitespace))
             index = expression.indexIn(original_text, index + length)
 
-        if (isinstance(self.highlightedOccurrence, unicode) and
-                self.highlightedOccurrence != ""):
-            myClassFormat = QTextCharFormat()
-            myClassFormat.setFontWeight(QFont.Bold)
-            myClassFormat.setForeground(Qt.white)
-            myClassFormat.setBackground(Qt.red)
-            expression = QRegExp(self.__highlighted_occurrence)
-            index = expression.indexIn(original_text, 0)
-            while index >= 0:
-                index = expression.pos(0)
-                length = len(expression.cap(0))
-                self.setFormat(index, length, myClassFormat)
-                index = expression.indexIn(original_text, index + length)
-
     #---------------------------------------------------------------------------
     # 'PygmentsHighlighter' interface
     #---------------------------------------------------------------------------
@@ -217,16 +207,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
 
     #: gets/sets the **pygments** style.
     style = property(__get_style, __set_style)
-
-    def __getHighlightedOccurrence(self):
-        return self.__highlighted_occurrence
-
-    def __setHighlighterOccurrence(self, occurence):
-        self.__highlighted_occurrence = occurence
-        self.rehighlight()
-
-    highlightedOccurrence = property(__getHighlightedOccurrence,
-                                     __setHighlighterOccurrence)
 
     #---------------------------------------------------------------------------
     # Protected interface

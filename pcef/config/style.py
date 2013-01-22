@@ -17,11 +17,12 @@ from pygments.styles import get_style_by_name
 #
 # Constants
 #
+#: Default editor font (monospace on GNU/Linux, Courier New on windows)
 DEFAULT_FONT = "monospace"
-DEFAULT_FONT_SIZE = 10
 if sys.platform == "win32":
     DEFAULT_FONT = "Courier New"
-    DEFAULT_FONT_SIZE = 10
+#: Default editor font size
+DEFAULT_FONT_SIZE = 10
 
 
 class Style(object):

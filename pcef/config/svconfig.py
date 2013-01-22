@@ -20,15 +20,14 @@ and settings for all PCEF instances. It provides way to change the global
 style and global settings for the code editor.
 
 """
-from PySide.QtCore import QObject, Signal
-from pcef.config.styles import DefaultWhiteStyle, DefaultDarkStyle
+from pcef.config.styles import DefaultWhiteStyle
+from pcef.config.styles import DefaultDarkStyle
 
 
 class StyleChangedSignal(object):
     """
-    Wraps a Qt signal so that we can make it a global variable.
+    Style changed signal
     """
-#    signal = Signal()
 
     def __init__(self):
         self.slots = set()
@@ -37,23 +36,14 @@ class StyleChangedSignal(object):
         """Connect a slot to the wrapped qt signal
         :param slot: the slot to connect (method or function)
         """
-#        if self._signal is None:
-#            self._signal = Signal()
-#        self.signal.connect(slot)
         self.slots.add(slot)
 
     def disconnect(self, slot):
-        """Disconnects a slot from the wrapped qt signal
-        """
-#        assert self.signal is not None
-#        self.signal.disconnect(slot)
+        """ Disconnects a slot from the wrapped qt signal """
         self.slots.remove(slot)
 
     def emit(self, *args):
-        """
-        Emits the wrapped qt signal
-        """
-#        assert self.signal is not None
+        """ Emits the wrapped qt signal """
         for slot in self.slots:
             slot.__call__(*args)
 
@@ -62,7 +52,7 @@ class StyleChangedSignal(object):
 
 
 #: Signal emitted when the style is changed by the changeGlobalStyle function
-styleChanged = StyleChangedSignal()
+__styleChanged = StyleChangedSignal()
 
 
 #: Global style variable
@@ -70,20 +60,24 @@ __globalStyle = DefaultWhiteStyle()
 
 
 def connectToStyleChanged(slot):
-    global styleChanged
-    styleChanged.connect(slot)
+    """
+    Connect a slot to the __styleChanged signal.
+    :param slot: Slot to connect to the signal
+    """
+    global __styleChanged
+    __styleChanged.connect(slot)
 
 
 def changeGlobalStyle(style):
     """
-    Changes the global style and emit the styleChanged signal.
+    Changes the global style and emit the __styleChanged signal.
 
     :param style: The new style instance that will be shared by all
     editor/panel/modes instances who have the inheritGlobalStyle set to True.
     """
-    global __globalStyle, styleChanged
+    global __globalStyle, __styleChanged
     __globalStyle = style
-    styleChanged.emit()
+    __styleChanged.emit()
 
 
 def getGlobalStyle():
@@ -104,7 +98,7 @@ class StyledObject(object):
     """
 
     def __init__(self):
-        global styleChanged
+        global __styleChanged
         self._style = getGlobalStyle()
         self._inheritsGlobalStyle = True
         connectToStyleChanged(self.onStyleChanged)
@@ -128,8 +122,9 @@ class StyledObject(object):
 
     def __set_style(self, style):
         self._style = style
-        self._updateStyling()
+        self.updateStyling()
 
+    #: Current style instance
     currentStyle = property(__get_style, __set_style)
 
     def __get_inheritsGlobalStyle(self):
@@ -146,7 +141,7 @@ class StyledObject(object):
         if self.inheritsGlobalStyle:
             self.currentStyle = getGlobalStyle()
 
-    def _updateStyling(self):
+    def updateStyling(self):
         """
         Raises not ImplementError.
         Subclasses must overrides this method to update themselves whenever the
