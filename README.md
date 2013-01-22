@@ -1,7 +1,7 @@
 PySide Code Editing Framework
 =====================================
 
-Provides a flexible framework to develop code editing tools with PySide.
+A flexible framework to develop code editing tools with PySide/Qt.
 
 It provides an editor widget ready to be used in any PySide applications.
 
