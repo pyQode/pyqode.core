@@ -93,8 +93,10 @@ class QLineNumberPanel(QEditorPanel):
         for vb in self.editor.textEdit.visible_blocks:
             row = vb.row
             if row == active + 1:
-                painter.fillRect(vb.rect, self.active_line_brush)
-            painter_drawText(0, vb.top, w - 2, vb.height, align_right,
+                painter.setFont(bold_font)
+            else:
+                painter.setFont(normal_font)
+            painter_drawText(0, vb.top, w , vb.height, align_right,
                              str(row))
         return QEditorPanel.paintEvent(self, event)
 
@@ -271,8 +273,8 @@ class QMarkersPanel(QEditorPanel):
         active = self.editor.textEdit.textCursor().blockNumber()
         for vb in self.editor.textEdit.visible_blocks:
             l = vb.row
-            if l == active + 1:
-                painter.fillRect(vb.rect, self.active_line_brush)
+#            if l == active + 1:
+#                painter.fillRect(vb.rect, self.active_line_brush)
             marker = self.getMarkerForLine(l)
             if marker:
                 if marker.icon is not None:
@@ -486,11 +488,11 @@ class QFoldPanel(QEditorPanel):
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
 
-        # paint active line first
-        active = self.editor.textEdit.textCursor().blockNumber()
-        for vb in self.editor.textEdit.visible_blocks:
-            if vb.row == active + 1:
-                painter.fillRect(vb.rect, self.active_line_brush)
+#        # paint active line first
+#        active = self.editor.textEdit.textCursor().blockNumber()
+#        for vb in self.editor.textEdit.visible_blocks:
+#            if vb.row == active + 1:
+#                painter.fillRect(vb.rect, self.active_line_brush)
 
         for vb in self.editor.textEdit.visible_blocks:
             line = vb.row
