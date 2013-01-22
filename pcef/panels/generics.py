@@ -425,11 +425,15 @@ class QFoldPanel(QEditorPanel):
         QEditorPanel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
+
+        # paint active line first
         active = self.editor.textEdit.textCursor().blockNumber()
         for vb in self.editor.textEdit.visible_blocks:
-            line = vb.row
-            if line == active + 1:
+            if vb.row == active + 1:
                 painter.fillRect(vb.rect, self.active_line_brush)
+
+        for vb in self.editor.textEdit.visible_blocks:
+            line = vb.row
             # paint marker for line
             marker = self._getMarkerForLine(line)
             if marker is None:
@@ -468,6 +472,7 @@ class QFoldPanel(QEditorPanel):
                 bottom = (top[0], top[1] + delta)
                 painter.drawLine(top[0], top[1], bottom[0], bottom[1])
                 painter.drawLine(bottom[0], bottom[1], bottom[0] + self.size_hint.width() / 2.0, bottom[1])
+
         return
 
     def leaveEvent(self, event):
