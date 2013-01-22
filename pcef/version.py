@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
-# <Project>
+# PCEF - PySide Code Editing framework
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
 # This software is released under the LGPLv3 license.
