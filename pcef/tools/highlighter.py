@@ -15,6 +15,7 @@ Contains the highlighter classes used in the application:
  - QPygmentsHighlighter: highlights python code using pygments
 """
 from PySide import QtGui
+from pygments.lexers.compiled import CLexer, CppLexer
 from PySide.QtCore import Qt
 from PySide.QtCore import QRegExp
 from PySide.QtGui import QSyntaxHighlighter
@@ -28,7 +29,7 @@ from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name
-from pygments.token import Whitespace
+from pygments.token import Whitespace, Comment
 from pygments.util import ClassNotFound
 
 
@@ -91,6 +92,32 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
 # Monkeypatch!
 RegexLexer.get_tokens_unprocessed = get_tokens_unprocessed
 
+
+# Even with the above monkey patch to store state, multiline comments do not
+# work since they are stateless (Pygments uses a single multiline regex for
+# these comments, but Qt lexes by line). So we need to add a state for comments
+# to the C and C++ lexers. This means that nested multiline comments will appear
+# to be valid C/C++, but this is better than the alternative for now.
+
+def replace_pattern(tokens, new_pattern):
+    """ Given a RegexLexer token dictionary 'tokens', replace all patterns that
+        match the token specified in 'new_pattern' with 'new_pattern'.
+    """
+    for state in tokens.values():
+        for index, pattern in enumerate(state):
+            if isinstance(pattern, tuple) and pattern[1] == new_pattern[1]:
+                state[index] = new_pattern
+
+# More monkeypatching!
+comment_start = (r'/\*', Comment.Multiline, 'comment')
+comment_state = [(r'[^*/]', Comment.Multiline),
+                 (r'/\*', Comment.Multiline, '#push'),
+                 (r'\*/', Comment.Multiline, '#pop'),
+                 (r'[*/]', Comment.Multiline)]
+replace_pattern(CLexer.tokens, comment_start)
+replace_pattern(CppLexer.tokens, comment_start)
+CLexer.tokens['comment'] = comment_state
+CppLexer.tokens['comment'] = comment_state
 
 class PygmentsBlockUserData(QtGui.QTextBlockUserData):
     """ Storage for the user data associated with each line.
