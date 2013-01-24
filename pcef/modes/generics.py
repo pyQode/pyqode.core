@@ -81,6 +81,8 @@ class SyntaxHighlightingMode(Mode):
         :type editor: pcef.editors.QGenericEditor
         """
         self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
+        # todo the best would be to only rehighlight when there is a multilin oment/string
+        editor.textEdit.blockCountChanged.connect(self.highlighter.rehighlight)
         super(SyntaxHighlightingMode, self).install(editor)
 
     def updateStyling(self):
