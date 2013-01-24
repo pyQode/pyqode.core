@@ -195,6 +195,7 @@ class QMarkersPanel(QEditorPanel):
         self.bc = self.editor.textEdit.blockCount()
         self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
         self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+        self.updateCursorPos()
 
     def updateStyling(self):
         """ Updates stylesheet and brushes. """
