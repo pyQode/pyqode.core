@@ -48,9 +48,9 @@ def openFileInEditor(editor, filename, encoding='utf8',
     content = unicode(f.read().decode(encoding))
     if replaceTabsBySpaces:
         content = content.replace("\t", " " * editor.TAB_SIZE)
-    editor.textEdit.setPlainText(content)
     editor.textEdit.filename = filename
-    # todo change highlighter lexer here
+    editor.syntaxHighlightingMode.setLexerFromFilename(filename)
+    editor.textEdit.setPlainText(content)
     editor.ui.textEdit.dirty = False
     module_logger.info("File opened: {0}".format(filename))
 
