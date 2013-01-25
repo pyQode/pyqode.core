@@ -83,6 +83,8 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     dirtyChanged = Signal(bool)
     #: Emitted when a key is pressed
     keyPressed = Signal(QKeyEvent)
+    #: Emitted when a key is released
+    keyReleased = Signal(QKeyEvent)
     #: emitted when a mouse button is pressed
     mousePressed = Signal(QMouseEvent)
     #: emitted when a mouse button is released
@@ -302,6 +304,18 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         if not event.isAccepted():
             event.setAccepted(True)
             QPlainTextEdit.keyPressEvent(self, event)
+
+    def keyReleaseEvent(self, event):
+        """
+        Performs indentation if tab key presed, else emits the keyPressed signal
+        :param event: QKeyEvent
+        """
+        assert isinstance(event, QKeyEvent)
+        event.setAccepted(False)
+        self.keyReleased.emit(event)
+        if not event.isAccepted():
+            event.setAccepted(True)
+            QPlainTextEdit.keyReleaseEvent(self, event)
 
     def mousePressEvent(self, event):
         """
