@@ -13,7 +13,7 @@ This module contains the base class for editor modes and a few builtin modes
 """
 from PySide.QtCore import Qt
 from PySide.QtCore import Slot
-from PySide.QtGui import QBrush
+from PySide.QtGui import QBrush, QPlainTextEdit, QTextCursor
 from PySide.QtGui import QColor
 from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QPainter
@@ -75,6 +75,7 @@ class SyntaxHighlightingMode(Mode):
         super(SyntaxHighlightingMode, self).__init__(
             self.IDENTIFIER,
             "Apply syntax highlighting to the editor using ")
+        self.multiline_triggers = ["/*", "'''", '"""']
 
     def install(self, editor):
         """
@@ -82,8 +83,20 @@ class SyntaxHighlightingMode(Mode):
         """
         self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
         # todo the best would be to only rehighlight when there is a multilin oment/string
+        editor.textEdit.keyReleased.connect(self.onTextChanged)
         editor.textEdit.blockCountChanged.connect(self.highlighter.rehighlight)
         super(SyntaxHighlightingMode, self).install(editor)
+
+    def onTextChanged(self, event):
+        # get current line
+        txt = unicode(self.editor.textEdit.textCursor().block().text())
+        if event.key() == Qt.Key_Backspace:
+            self.highlighter.rehighlight()
+            return
+        for trigger in self.multiline_triggers:
+            if trigger in txt:
+                self.highlighter.rehighlight()
+                break
 
     def updateStyling(self):
         """ Updates the pygments style """
