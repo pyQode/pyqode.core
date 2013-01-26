@@ -28,9 +28,12 @@ class SimpleEditor(QMainWindow):
         self.ui.setupUi(self)
         editor = self.ui.genericEditor
 
-        # open a file
-        openFileInEditor(self.ui.genericEditor,
-                         os.path.join(os.getcwd(), "examples", "generic_example.py"))
+        # open ourselves
+        if __name__ == "__main__":
+            openFileInEditor(self.ui.genericEditor, __file__)
+        else:
+            openFileInEditor(self.ui.genericEditor,
+                             os.path.join(os.getcwd(), "examples", "generic_example.py"))
 
         # install a bookmark panel with a fixed set of markers
         p = QBookmarkPanel()
