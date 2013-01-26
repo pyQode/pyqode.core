@@ -14,7 +14,7 @@ from PySide.QtCore import Qt
 from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QWheelEvent
 from pcef.base import Mode
-import style
+from pcef import style
 
 
 class EditorZoomMode(Mode):
