@@ -15,7 +15,7 @@ from PySide.QtCore import Slot
 from PySide.QtGui import QApplication, QFileDialog
 from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
-from pcef.panels.utils import QBookmarkPanel
+from pcef.panels.bookmark import QBookmarkPanel
 from examples.ui import simple_editor_ui
 
 

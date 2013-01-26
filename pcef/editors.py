@@ -14,12 +14,13 @@ PySide application
 """
 from PySide.QtCore import Slot
 from pcef.base import QCodeEditor
-from pcef.modes.generics import RightMarginMode
-from pcef.modes.generics import SyntaxHighlightingMode
-from pcef.modes.generics import HighlightLineMode
-from pcef.modes.generics import EditorZoomMode
-from pcef.panels.generics import QLineNumberPanel, QFoldPanel
-from pcef.panels.generics import QSearchPanel
+from pcef.modes.clh import HighlightLineMode
+from pcef.modes.margin import RightMarginMode
+from pcef.modes.sh import SyntaxHighlighterMode
+from pcef.modes.zoom import EditorZoomMode
+from pcef.panels.line_numbers import QLineNumberPanel
+from pcef.panels.folding import QFoldPanel
+from pcef.panels.search_and_replace import QSearchPanel
 
 
 class QGenericEditor(QCodeEditor):
@@ -53,7 +54,7 @@ class QGenericEditor(QCodeEditor):
         """ Returns the syntax hilighting mode instance.
         :return: SyntaxHighlightingMode
         """
-        return self.modes[SyntaxHighlightingMode.IDENTIFIER]
+        return self.modes[SyntaxHighlighterMode.IDENTIFIER]
 
     @property
     def highlightLineMode(self):
@@ -103,7 +104,7 @@ class QGenericEditor(QCodeEditor):
 
         # Install modes
         self.installMode(RightMarginMode())
-        self.installMode(SyntaxHighlightingMode())
+        self.installMode(SyntaxHighlighterMode())
         self.installMode(HighlightLineMode())
         self.installMode(EditorZoomMode())
 

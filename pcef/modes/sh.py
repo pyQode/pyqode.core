@@ -9,14 +9,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the highlighter classes used in the application:
-
- - QMacroHighlighter: highlights macros in a QTextDocument
- - QPygmentsHighlighter: highlights python code using pygments
+This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
+from PySide.QtCore import Qt
+from pcef.base import Mode
 from PySide import QtGui
 from pygments.lexers.compiled import CLexer, CppLexer
-from PySide.QtCore import Qt
 from PySide.QtCore import QRegExp
 from PySide.QtGui import QSyntaxHighlighter
 from PySide.QtGui import QTextCharFormat
@@ -119,6 +117,7 @@ replace_pattern(CppLexer.tokens, comment_start)
 CLexer.tokens['comment'] = comment_state
 CppLexer.tokens['comment'] = comment_state
 
+
 class PygmentsBlockUserData(QtGui.QTextBlockUserData):
     """ Storage for the user data associated with each line.
     """
@@ -212,7 +211,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         """ Sets the style to the specified Pygments style.
         """
         if (isinstance(style, str) or
-                isinstance(style, unicode)):
+            isinstance(style, unicode)):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()
@@ -311,3 +310,63 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
                       int(color[2:4], base=16),
                       int(color[4:6], base=16))
         return qcolor
+
+
+class SyntaxHighlighterMode(Mode):
+    """
+    This mode enable syntax highlighting (using the QPygmentsHighlighter)
+    """
+    #: Mode identifier
+    IDENTIFIER = "SyntaxHighlighting"
+
+    def __init__(self):
+        self.highlighter = None
+        super(SyntaxHighlighterMode, self).__init__(
+            self.IDENTIFIER,
+            "Apply syntax highlighting to the editor using ")
+        self.multiline_triggers = ["/*", "'''", '"""']
+
+    def install(self, editor):
+        """
+        :type editor: pcef.editors.QGenericEditor
+        """
+        self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
+        # todo the best would be to only rehighlight when there is a multilin oment/string
+        editor.textEdit.keyReleased.connect(self.onTextChanged)
+        editor.textEdit.blockCountChanged.connect(self.highlighter.rehighlight)
+        super(SyntaxHighlighterMode, self).install(editor)
+
+    def onTextChanged(self, event):
+        # get current line
+        txt = unicode(self.editor.textEdit.textCursor().block().text())
+        if event.key() == Qt.Key_Backspace:
+            self.highlighter.rehighlight()
+            return
+        for trigger in self.multiline_triggers:
+            if trigger in txt:
+                self.highlighter.rehighlight()
+                break
+
+    def updateStyling(self):
+        """ Updates the pygments style """
+        if self.highlighter is not None:
+            self.highlighter.style = self.currentStyle.pygmentsStyle
+            self.highlighter.rehighlight()
+
+    def setLexerFromFilename(self, fn="file.py"):
+        """
+        Change the highlighter lexer on the fly by supplying the filename
+        to highlight
+
+        .. note::
+            A fake filename is enough to get the correct lexer based on the
+            extension).
+
+        .. note::
+            The default lexer is the Python lexer
+
+        :param fn: str -- Filename
+        """
+        assert self.highlighter is not None, "SyntaxHighlightingMode not "\
+                                             "installed"
+        self.highlighter.setLexerFromFilename(fn)

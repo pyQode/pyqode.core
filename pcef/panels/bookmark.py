@@ -14,8 +14,8 @@ ide writers:
     - QBookmarkPanel
 """
 from PySide.QtGui import QIcon
-from pcef.panels.generics import QMarkersPanel
-from pcef.panels.generics import Marker
+from pcef.panels.marker import QMarkersPanel
+from pcef.panels.marker import Marker
 
 
 class QBookmarkPanel(QMarkersPanel):
