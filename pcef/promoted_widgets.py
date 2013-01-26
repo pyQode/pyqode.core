@@ -26,7 +26,7 @@ from PySide.QtGui import QTextDocument
 from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
-from pcef.config.svconfig import StyledObject
+from pcef.style import StyledObject
 
 
 class VisibleBlock(object):

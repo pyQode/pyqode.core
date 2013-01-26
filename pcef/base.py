@@ -27,7 +27,7 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QColor
 from PySide.QtGui import QTextCharFormat
 from PySide.QtGui import QTextFormat
-from pcef.config.svconfig import StyledObject
+from pcef.style import StyledObject
 from pcef.ui import editor_ui
 
 
@@ -172,7 +172,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
         self.format.setUnderlineColor(color)
 
 
-class QCodeEditor(QWidget):
+class QCodeEditor(QWidget, StyledObject):
     """Base class for the end user editor widgets.
 
     QCodeEditor is a widget whose ui is setup from a Qt designer ui file.
@@ -217,6 +217,7 @@ class QCodeEditor(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        StyledObject.__init__(self)
         self.ui = editor_ui.Ui_Form()
         self.ui.setupUi(self)
         self.textEdit.editor = weakref.ref(self)
@@ -243,6 +244,7 @@ class QCodeEditor(QWidget):
         self.logger.info("Installing mode %s" % mode.name)
         self.modes[mode.name] = mode
         mode.install(self)
+        mode.currentStyle = self.currentStyle
 
     def installPanel(self, panel, zone):
         """ Installs a panel on the widget.
@@ -254,4 +256,13 @@ class QCodeEditor(QWidget):
                                                                 zone))
         self.panels[panel.name] = panel
         panel.install(self)
+        panel.currentStyle = self.currentStyle
         self.zones[zone].addWidget(panel)
+
+    def updateStyling(self):
+        """ Update installed modes and panels style. """
+        self.textEdit.currentStyle = self.currentStyle
+        for panel in self.panels.values():
+            panel.currentStyle = self.currentStyle
+        for mode in self.modes.values():
+            mode.currentStyle = self.currentStyle

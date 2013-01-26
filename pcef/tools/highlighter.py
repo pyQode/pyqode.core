@@ -211,7 +211,8 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     def __set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
-        if isinstance(style, str):
+        if (isinstance(style, str) or
+                isinstance(style, unicode)):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()

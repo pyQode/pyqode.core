@@ -11,6 +11,7 @@
 """
 This module contains the base class for editor modes and a few builtin modes
 """
+import copy
 from PySide.QtCore import Qt
 from PySide.QtCore import Slot
 from PySide.QtGui import QBrush, QPlainTextEdit, QTextCursor
@@ -21,8 +22,9 @@ from PySide.QtGui import QPen
 from PySide.QtGui import QWheelEvent
 from pcef.base import TextDecoration
 from pcef.base import Mode
-from pcef.config import svconfig
+# from pcef.config import svconfig
 from pcef.tools.highlighter import QPygmentsHighlighter
+import style
 
 
 class RightMarginMode(Mode):
@@ -102,6 +104,7 @@ class SyntaxHighlightingMode(Mode):
         """ Updates the pygments style """
         if self.highlighter is not None:
             self.highlighter.style = self.currentStyle.pygmentsStyle
+            self.highlighter.rehighlight()
 
     def setLexerFromFilename(self, fn="file.py"):
         """
@@ -148,6 +151,7 @@ class HighlightLineMode(Mode):
     def updateStyling(self):
         """ Updates the pygments style """
         self.brush = QBrush(QColor(self.currentStyle.activeLineColor))
+        self.changeActiveLine()
 
     @Slot()
     def changeActiveLine(self):
@@ -176,6 +180,7 @@ class EditorZoomMode(Mode):
         super(EditorZoomMode, self).__init__(
             self.IDENTIFIER, "Zoom the editor with ctrl+mouse wheel")
         self.prev_delta = 0
+        self.default_font_size = style.DEFAULT_FONT_SIZE
 
     def install(self, editor):
         """
@@ -185,11 +190,9 @@ class EditorZoomMode(Mode):
         self.editor.textEdit.mouseWheelActivated.connect(
             self.onWheelEvent)
         self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
-        self.default_font_size = svconfig.getGlobalStyle().fontSize
 
     def updateStyling(self):
-        """ Updates the default font size """
-        self.default_font_size = svconfig.getGlobalStyle().fontSize
+        pass
 
     def onKeyPressed(self, event):
         """
@@ -200,11 +203,10 @@ class EditorZoomMode(Mode):
         """
         if (event.key() == Qt.Key_0 and
                 event.modifiers() & Qt.ControlModifier > 0):
-            style = svconfig.getGlobalStyle()
+            style = copy.copy(self.currentStyle)
             style.fontSize = self.default_font_size
             event.setAccepted(True)
-            svconfig.changeGlobalStyle(style)
-            svconfig.changeGlobalStyle(style)
+            self.editor.currentStyle = style
 
     def onWheelEvent(self, event):
         """
@@ -215,7 +217,8 @@ class EditorZoomMode(Mode):
         """
         delta = event.delta()
         if event.modifiers() & Qt.ControlModifier > 0:
-            style = svconfig.getGlobalStyle()
+            style = copy.copy(self.currentStyle)
+            self.editor.currentStyle = style
             if delta < self.prev_delta:
                 style.fontSize -= 1
             else:
@@ -223,4 +226,4 @@ class EditorZoomMode(Mode):
             if style.fontSize <= 0:
                 style.fontSize = 1
             event.setAccepted(True)
-            svconfig.changeGlobalStyle(style)
+            self.editor.currentStyle = style
