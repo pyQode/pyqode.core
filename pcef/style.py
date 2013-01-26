@@ -70,7 +70,7 @@ class Style(object):
         self.resetDefault()
 
     def resetDefault(self):
-        self.pygmentsStyle = 'default'
+        self.pygmentsStyle = 'friendly'
         self.marginColor = '#FF0000'
         self.marginPos = 80
         self.activeLineColor = '#FFFFC0'
