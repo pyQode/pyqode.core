@@ -38,7 +38,7 @@ class Style(object):
     """
 
     def __init__(self, name):
-        self.name = name
+        self.name = ""
         #: Pygments syntax highlighting style (used by SyntaxHighlighting Mode)
         self.pygmentsStyle = ''
         #: Right margin color (used by
@@ -73,12 +73,12 @@ class Style(object):
         self.pygmentsStyle = 'friendly'
         self.marginColor = '#FF0000'
         self.marginPos = 80
-        self.activeLineColor = '#FFFFC0'
+        self.activeLineColor = '#E4EDF8'
         self.selectionBackgroundColor = '#6182F3'
         self.selectionTextColor = '#ffffff'
         self.lineNbrColor = '#808080'
-        self.panelSeparatorColor = '#dddddd'
-        self.panelsBackgroundColor = '#eeeeee'
+        self.panelSeparatorColor = '#cccccc'
+        self.panelsBackgroundColor = '#dddddd'
         self.fontName = DEFAULT_FONT
         self.fontSize = DEFAULT_FONT_SIZE
         self.searchColor = '#000000'

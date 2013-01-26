@@ -8,12 +8,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from pcef.styles.default import DefaultStyle
 from pcef.styles.darcula import DarculaStyle
+from pcef.style import Style
 
 
 #: Styles map
-__STYLES = {'Default': DefaultStyle(),
+__STYLES = {'Default': Style("Default"),
             'Darcula': DarculaStyle()}
 
 
