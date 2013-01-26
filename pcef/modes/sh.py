@@ -324,28 +324,37 @@ class SyntaxHighlighterMode(Mode):
         super(SyntaxHighlighterMode, self).__init__(
             self.IDENTIFIER,
             "Apply syntax highlighting to the editor using ")
-        self.multiline_triggers = ["/*", "'''", '"""']
+        self.triggers = ["*", '"', "'", "/"]
 
     def install(self, editor):
         """
         :type editor: pcef.editors.QGenericEditor
         """
         self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
-        # todo the best would be to only rehighlight when there is a multilin oment/string
-        editor.textEdit.keyReleased.connect(self.onTextChanged)
-        editor.textEdit.blockCountChanged.connect(self.highlighter.rehighlight)
+        editor.textEdit.keyReleased.connect(self.onKeyReleased)
+#        editor.textEdit.keyReleased.blockCountChanged.connect(self.onTextChanged)
+        self.prev_txt = ""
         super(SyntaxHighlighterMode, self).install(editor)
 
-    def onTextChanged(self, event):
-        # get current line
-        txt = unicode(self.editor.textEdit.textCursor().block().text())
+    def onKeyReleased(self, event):
+        txt = self.editor.textEdit.textCursor().block().text()
         if event.key() == Qt.Key_Backspace:
-            self.highlighter.rehighlight()
-            return
-        for trigger in self.multiline_triggers:
-            if trigger in txt:
-                self.highlighter.rehighlight()
-                break
+            for trigger in self.triggers:
+                if trigger in txt or trigger in self.prev_txt:
+                    self.highlighter.rehighlight()
+                    break
+        # Search for a triggering key
+        else:
+            try:
+                txt = chr(event.key())
+                for trigger in self.triggers:
+                    if trigger in txt:
+                        self.highlighter.rehighlight()
+                        break
+            except ValueError:
+                pass  # probably a function key (arrow,...)
+        self.prev_txt = txt
+
 
     def updateStyling(self):
         """ Updates the pygments style """
