@@ -104,7 +104,7 @@ class QFoldPanel(QEditorPanel):
         self.separator_pen = QPen(QColor(style.panelSeparatorColor))
         self.normal_pen = QPen(QColor(style.lineNbrColor))
         self.highlight_pen = QPen(QColor(style.tokenColor(Text)))
-        self.updateGeometry()
+        self.repaint()
 
     def sizeHint(self):
         """ Returns a fixed size hint (16x16) """

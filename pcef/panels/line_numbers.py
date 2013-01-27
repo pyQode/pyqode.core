@@ -49,6 +49,7 @@ class QLineNumberPanel(QEditorPanel):
             self.active_line_brush = QBrush(QColor(
                 self.currentStyle.activeLineColor))
             self.updateGeometry()
+        self.repaint()
 
     def sizeHint(self):
         """

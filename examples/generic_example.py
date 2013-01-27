@@ -8,13 +8,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-""" PCEF generic editor demo """
+""" PCEF generic editor demo"""
 import os
 import sys
 from PySide.QtCore import Slot
-from PySide.QtGui import QApplication, QFileDialog
+from PySide.QtGui import QApplication, QFileDialog, QActionGroup, QAction
 from PySide.QtGui import QMainWindow
-from pcef import openFileInEditor
+from pcef import openFileInEditor, saveFileFromEditor
+from pcef import styles
 from pcef.panels.bookmark import QBookmarkPanel
 from examples.ui import simple_editor_ui
 
@@ -28,7 +29,7 @@ class SimpleEditor(QMainWindow):
         self.ui.setupUi(self)
         editor = self.ui.genericEditor
 
-        # open ourselves
+        # open this file
         if __name__ == "__main__":
             openFileInEditor(self.ui.genericEditor, __file__)
         else:
@@ -42,6 +43,24 @@ class SimpleEditor(QMainWindow):
         # add a fold indicator around our class and the main
         editor.foldPanel.addIndicator(22, 47)
         editor.foldPanel.addIndicator(50, 56)
+
+        # add styles actions
+        allStyles = styles.getAllStyles()
+        self.styleActionGroup = QActionGroup(self)
+        for i, style in enumerate(allStyles):
+            action = QAction(unicode(style), self.ui.menuStyle)
+            action.setCheckable(True)
+            action.setChecked(i == 0)
+            self.styleActionGroup.addAction(action)
+            self.ui.menuStyle.addAction(action)
+        self.styleActionGroup.triggered.connect(self.on_styleActionGroup_triggered)
+
+    def on_styleActionGroup_triggered(self, action):
+        self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
+
+    @Slot()
+    def on_actionSave_triggered(self):
+        saveFileFromEditor(self.ui.genericEditor)
 
     @Slot()
     def on_actionOpen_triggered(self):
