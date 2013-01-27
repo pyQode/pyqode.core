@@ -52,15 +52,12 @@
      <property name="title">
       <string>Style</string>
      </property>
-     <addaction name="actionWhiteStyle"/>
-     <addaction name="actionDarkStyle"/>
     </widget>
     <addaction name="menuStyle"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>

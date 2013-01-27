@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Thu Jan 24 21:51:05 2013
+# Created: Sun Jan 27 20:47:06 2013
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,9 +33,6 @@ class Ui_MainWindow(object):
         self.menuStyle = QtGui.QMenu(self.menuSettings)
         self.menuStyle.setObjectName("menuStyle")
         MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
@@ -65,8 +62,6 @@ class Ui_MainWindow(object):
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_as)
-        self.menuStyle.addAction(self.actionWhiteStyle)
-        self.menuStyle.addAction(self.actionDarkStyle)
         self.menuSettings.addAction(self.menuStyle.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuSettings.menuAction())
