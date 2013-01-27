@@ -55,17 +55,18 @@ def openFileInEditor(editor, filename, encoding='utf8',
     module_logger.info("File opened: {0}".format(filename))
 
 
-def saveFileFromEditor(editor, filename, encoding='utf8'):
+def saveFileFromEditor(editor, filename=None, encoding='utf8'):
     """
     Save the editor content to a file
     :param editor: Editor instance
-    :param filename: The filename to save
+    :param filename: The filename to save. If none the editor filename attribute is used.
     :param encoding: The save encoding
     """
+    if filename is None:
+        filename = editor.textEdit.filename
     content = unicode(editor.textEdit.toPlainText())
-    f = open(filename, "w")
-    f.write(content.encode(encoding))
-    f.close()
+    with open(filename, "w") as f:
+        f.write(content.encode(encoding))
     editor.textEdit.dirty = False
-    editor.filename = filename
+    editor.textEdit.filename = filename
     module_logger.info("File saved: {0}".format(filename))
