@@ -150,6 +150,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
         self.style = "default"
+        self.enabled = True
 
     def setLexerFromFilename(self, filename):
         try:
@@ -160,6 +161,8 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     def highlightBlock(self, text):
         """ Highlight a block of text.
         """
+        if self.enabled is False:
+            return
         text = unicode(text)
         original_text = text
         prev_data = self.currentBlock().previous().userData()
@@ -317,7 +320,7 @@ class SyntaxHighlighterMode(Mode):
     This mode enable syntax highlighting (using the QPygmentsHighlighter)
     """
     #: Mode identifier
-    IDENTIFIER = "SyntaxHighlighting"
+    IDENTIFIER = "Syntax highlighter"
 
     def __init__(self):
         self.highlighter = None
@@ -331,10 +334,16 @@ class SyntaxHighlighterMode(Mode):
         :type editor: pcef.editors.QGenericEditor
         """
         self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
-        editor.textEdit.keyReleased.connect(self.onKeyReleased)
-#        editor.textEdit.keyReleased.blockCountChanged.connect(self.onTextChanged)
         self.prev_txt = ""
         super(SyntaxHighlighterMode, self).install(editor)
+
+    def _onStateChanged(self, state):
+        self.highlighter.enabled = state
+        if state is True:
+            self.editor.textEdit.keyReleased.connect(self.onKeyReleased)
+        else:
+            self.editor.textEdit.keyReleased.disconnect(self.onKeyReleased)
+        self.highlighter.rehighlight()
 
     def onKeyReleased(self, event):
         txt = self.editor.textEdit.textCursor().block().text()
@@ -354,7 +363,6 @@ class SyntaxHighlighterMode(Mode):
             except ValueError:
                 pass  # probably a function key (arrow,...)
         self.prev_txt = txt
-
 
     def _onStyleChanged(self):
         """ Updates the pygments style """

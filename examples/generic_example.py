@@ -59,15 +59,51 @@ class SimpleEditor(QMainWindow):
 
         # add styles actions
         allStyles = styles.getAllStyles()
+        allStyles.sort()
         self.styleActionGroup = QActionGroup(self)
         for i, style in enumerate(allStyles):
             action = QAction(unicode(style), self.ui.menuStyle)
             action.setCheckable(True)
-            action.setChecked(i == 0)
+            action.setChecked(style == "Default")
             self.styleActionGroup.addAction(action)
             self.ui.menuStyle.addAction(action)
-        self.styleActionGroup.triggered.connect(
-            self.on_styleActionGroup_triggered)
+        self.styleActionGroup.triggered.connect(self.on_styleActionGroup_triggered)
+
+        # add panels actions
+        allPanels = self.ui.genericEditor.panels.keys()
+        allPanels.sort()
+        self.panels_actions = []
+        for i, panel in enumerate(allPanels):
+            action = QAction(unicode(panel), self.ui.menuPanels)
+            action.setCheckable(True)
+            action.setChecked(self.ui.genericEditor.panels[panel].enabled)
+            self.ui.menuPanels.addAction(action)
+            self.panels_actions.append(action)
+            action.triggered.connect(self.onPanelActionTriggered)
+
+        # add panels actions
+        allModes = self.ui.genericEditor.modes.keys()
+        allModes.sort()
+        self.modes_actions = []
+        for i, mode in enumerate(allModes):
+            action = QAction(unicode(mode), self.ui.menuModes)
+            action.setCheckable(True)
+            action.setChecked(self.ui.genericEditor.modes[mode].enabled)
+            self.ui.menuModes.addAction(action)
+            self.modes_actions.append(action)
+            action.triggered.connect(self.onModeActionTriggered)
+
+    def onModeActionTriggered(self):
+        keys = self.ui.genericEditor.modes.keys()
+        keys.sort()
+        for key, action in zip(keys, self.modes_actions):
+            self.ui.genericEditor.modes[key].enabled = action.isChecked()
+
+    def onPanelActionTriggered(self):
+        keys = self.ui.genericEditor.panels.keys()
+        keys.sort()
+        for key, action in zip(keys, self.panels_actions):
+            self.ui.genericEditor.panels[key].enabled = action.isChecked()
 
     def on_styleActionGroup_triggered(self, action):
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())

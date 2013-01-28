@@ -112,7 +112,7 @@ class QSearchPanel(QEditorPanel):
     numOccurrences = property(__get_numOccurrences, __set_numOccurrences)
 
     def __init__(self, parent=None):
-        QEditorPanel.__init__(self, "SearchPanel",
+        QEditorPanel.__init__(self, "Search and replace",
                               "The search and replace panel", parent)
         self.ui = search_panel_ui.Ui_SearchPanel()
         self.ui.setupUi(self)
@@ -179,10 +179,16 @@ class QSearchPanel(QEditorPanel):
     def install(self, editor):
         """  Install the panel on the editor """
         QEditorPanel.install(self, editor)
-        self.editor.textEdit.cursorPositionChanged.connect(self.onCursorMoved)
-        self.editor.textEdit.textChanged.connect(self.updateSearchResults)
         self.updateUi()
         self.installActions()
+
+    def _onStateChanged(self, state):
+        if state is True:
+            self.editor.textEdit.cursorPositionChanged.connect(self.onCursorMoved)
+            self.editor.textEdit.textChanged.connect(self.updateSearchResults)
+        else:
+            self.editor.textEdit.cursorPositionChanged.disconnect(self.onCursorMoved)
+            self.editor.textEdit.textChanged.connect(self.updateSearchResults)
 
     def installActions(self):
         """ Installs actions on the editor context menu """

@@ -103,17 +103,17 @@ class QGenericEditor(QCodeEditor):
         # Install actions
         self._installActions()
 
+        # Install panels
+        self.installPanel(QFoldPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(QLineNumberPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
+
         # Install modes
         self.installMode(RightMarginMode())
         self.installMode(SyntaxHighlighterMode())
         self.installMode(HighlightLineMode())
         self.installMode(EditorZoomMode())
         self.installMode(AutoIndentMode())
-
-        # Install panels
-        self.installPanel(QFoldPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(QLineNumberPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
 
         # Manual slot connections
         self.on_textEdit_redoAvailable(False)

@@ -21,7 +21,7 @@ class HighlightLineMode(Mode):
     This mode highlights the current line.
     """
     #: Mode identifier
-    IDENTIFIER = "HighlightLine"
+    IDENTIFIER = "Highlight line"
 
     def __init__(self):
         super(HighlightLineMode, self).__init__(
@@ -30,14 +30,13 @@ class HighlightLineMode(Mode):
         self._decoration = None
         self.brush = None
 
-    def install(self, editor):
-        """
-        :type editor: pcef.editors.QGenericEditor
-        """
-        super(HighlightLineMode, self).install(editor)
-        self.editor.textEdit.cursorPositionChanged.connect(
-            self.changeActiveLine)
-        self.changeActiveLine()
+    def _onStateChanged(self, state):
+        if state is True:
+            self.editor.textEdit.cursorPositionChanged.connect(self.changeActiveLine)
+            self.changeActiveLine()
+        else:
+            self.editor.textEdit.cursorPositionChanged.disconnect(self.changeActiveLine)
+            self.editor.textEdit.removeDecoration(self._decoration)
 
     def _onStyleChanged(self):
         """ Updates the pygments style """

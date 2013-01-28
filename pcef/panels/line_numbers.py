@@ -26,7 +26,7 @@ class QLineNumberPanel(QEditorPanel):
     """ This panel show the line numbers """
 
     #: Panel identifier
-    IDENTIFIER = "LineNumberPanel"
+    IDENTIFIER = "Line numbers"
 
     def __init__(self, parent=None):
         QEditorPanel.__init__(
@@ -34,8 +34,15 @@ class QLineNumberPanel(QEditorPanel):
 
     def install(self, editor):
         QEditorPanel.install(self, editor)
-        self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-        self.editor.textEdit.blockCountChanged.connect(self.updateGeometry)
+
+    def _onStateChanged(self, state):
+        QEditorPanel._onStateChanged(self, state)
+        if state is True:
+            self.editor.textEdit.visibleBlocksChanged.connect(self.update)
+            self.editor.textEdit.blockCountChanged.connect(self.updateGeometry)
+        else:
+            self.editor.textEdit.visibleBlocksChanged.disconnect(self.update)
+            self.editor.textEdit.blockCountChanged.disconnect(self.updateGeometry)
 
     def _onStyleChanged(self):
         """ Updates brushes and pens """

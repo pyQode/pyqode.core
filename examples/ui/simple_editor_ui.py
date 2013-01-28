@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Mon Jan 28 21:39:56 2013
+# Created: Mon Jan 28 22:54:48 2013
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,10 @@ class Ui_MainWindow(object):
         self.menuSettings.setObjectName("menuSettings")
         self.menuStyle = QtGui.QMenu(self.menuSettings)
         self.menuStyle.setObjectName("menuStyle")
+        self.menuPanels = QtGui.QMenu(self.menuSettings)
+        self.menuPanels.setObjectName("menuPanels")
+        self.menuModes = QtGui.QMenu(self.menuSettings)
+        self.menuModes.setObjectName("menuModes")
         MainWindow.setMenuBar(self.menubar)
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName("toolBar")
@@ -58,11 +62,17 @@ class Ui_MainWindow(object):
         self.actionDarkStyle = QtGui.QAction(MainWindow)
         self.actionDarkStyle.setCheckable(True)
         self.actionDarkStyle.setObjectName("actionDarkStyle")
+        self.actionPanel = QtGui.QAction(MainWindow)
+        self.actionPanel.setObjectName("actionPanel")
+        self.actionModes_2 = QtGui.QAction(MainWindow)
+        self.actionModes_2.setObjectName("actionModes_2")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_as)
         self.menuSettings.addAction(self.menuStyle.menuAction())
+        self.menuSettings.addAction(self.menuPanels.menuAction())
+        self.menuSettings.addAction(self.menuModes.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuSettings.menuAction())
         self.toolBar.addAction(self.actionOpen)
@@ -77,6 +87,8 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuSettings.setTitle(QtGui.QApplication.translate("MainWindow", "Settings", None, QtGui.QApplication.UnicodeUTF8))
         self.menuStyle.setTitle(QtGui.QApplication.translate("MainWindow", "Style", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuPanels.setTitle(QtGui.QApplication.translate("MainWindow", "Panels", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuModes.setTitle(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setText(QtGui.QApplication.translate("MainWindow", "Open", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
@@ -86,6 +98,8 @@ class Ui_MainWindow(object):
         self.actionSave_as.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Shift+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionWhiteStyle.setText(QtGui.QApplication.translate("MainWindow", "White", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDarkStyle.setText(QtGui.QApplication.translate("MainWindow", "Dark", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPanel.setText(QtGui.QApplication.translate("MainWindow", "Panel", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionModes_2.setText(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
 
 from pcef.editors import QGenericEditor
 import examples_rc

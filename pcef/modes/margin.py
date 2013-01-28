@@ -20,7 +20,7 @@ class RightMarginMode(Mode):
     Display the right margin
     """
     #: Mode identifier
-    IDENTIFIER = "RightMargin"
+    IDENTIFIER = "Right margin"
 
     def __init__(self):
         Mode.__init__(self, self.IDENTIFIER, "Draw the right margin on the "
@@ -28,26 +28,23 @@ class RightMarginMode(Mode):
         #: Defines the margin position
         self.marginPos = 80
 
-    def install(self, editor):
-        """
-        :type editor: pcef.editors.QGenericEditor
-        """
-        super(RightMarginMode, self).install(editor)
-        editor.textEdit.postPainting.connect(self.__paintMargin)
-
     def _onStyleChanged(self):
         """ Updates the margin pen color """
         self.pen = QPen(self.currentStyle.marginColor)
 
+    def _onStateChanged(self, state):
+        if state is True:
+            self.editor.textEdit.postPainting.connect(self.__paintMargin)
+        else:
+            self.editor.textEdit.postPainting.disconnect(self.__paintMargin)
+
     def __paintMargin(self, event):
         """ Paints the right margin as postPainting step. """
-        if self.enabled:
-            rect = event.rect()
-            fm = self.editor.textEdit.fm
-            pos = self.marginPos
-            offset = self.editor.textEdit.contentOffset().x() +\
-                     self.editor.textEdit.document().documentMargin()
-            x80 = round(fm.averageCharWidth() * pos) + offset
-            p = QPainter(self.editor.textEdit.viewport())
-            p.setPen(self.pen)
-            p.drawLine(x80, rect.top(), x80, rect.bottom())
+        rect = event.rect()
+        fm = self.editor.textEdit.fm
+        pos = self.marginPos
+        offset = self.editor.textEdit.contentOffset().x() + self.editor.textEdit.document().documentMargin()
+        x80 = round(fm.averageCharWidth() * pos) + offset
+        p = QPainter(self.editor.textEdit.viewport())
+        p.setPen(self.pen)
+        p.drawLine(x80, rect.top(), x80, rect.bottom())

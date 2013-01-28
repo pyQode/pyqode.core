@@ -22,7 +22,7 @@ class QUserMarkersPanel(QMarkersPanel):
     This could be used for bookmarks, breakpoints,...
     """
     def __init__(self, icon=":/icons/rc/bookmark.png", parent=None):
-        QMarkersPanel.__init__(self, "BookmarksPanel", False, parent)
+        QMarkersPanel.__init__(self, "User markers", False, parent)
         self.addMarkerRequested.connect(self.addUserMarker)
         #: marker icon
         self._icon = icon

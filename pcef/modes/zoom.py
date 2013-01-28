@@ -22,7 +22,7 @@ class EditorZoomMode(Mode):
     This mode provide editor zoom (the editor font is increased/decreased)
     """
     #: Mode identifier
-    IDENTIFIER = "EditorZoom"
+    IDENTIFIER = "Editor zoom"
 
     def __init__(self):
         super(EditorZoomMode, self).__init__(
@@ -30,14 +30,14 @@ class EditorZoomMode(Mode):
         self.prev_delta = 0
         self.default_font_size = style.DEFAULT_FONT_SIZE
 
-    def install(self, editor):
-        """
-        :type editor: pcef.editors.QGenericEditor
-        """
-        super(EditorZoomMode, self).install(editor)
-        self.editor.textEdit.mouseWheelActivated.connect(
-            self.onWheelEvent)
-        self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+    def _onStateChanged(self, state):
+        if state is True:
+            self.editor.textEdit.mouseWheelActivated.connect(
+                self.onWheelEvent)
+            self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+        else:
+            self.editor.textEdit.mouseWheelActivated.disconnect(self.onWheelEvent)
+            self.editor.textEdit.keyPressed.disconnect(self.onKeyPressed)
 
     def _onStyleChanged(self):
         pass

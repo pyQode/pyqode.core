@@ -21,20 +21,16 @@ class AutoIndentMode(Mode):
 
     This mode can be extended by overriding the getIndent method.
     """
-    IDENTIFIER = "AutoIndentMode"
+    IDENTIFIER = "Auto indent"
     DESCRIPTION = """ A basic auto indent mode that provides a basic auto indentation based on the previous
     line indentation.
     """
 
-    def __init__(self, enable=True):
-        super(AutoIndentMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION, enable)
+    def __init__(self):
+        super(AutoIndentMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
 
     def _onStyleChanged(self):
         pass  # style not needed
-
-    def install(self, editor):
-        super(AutoIndentMode, self).install(editor)
-        self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
 
     def getIndent(self, tc):
         pos = tc.position()
@@ -46,13 +42,18 @@ class AutoIndentMode(Mode):
         tc.setPosition(pos)
         return indent
 
+    def _onStateChanged(self, state):
+        if state is True:
+            self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+        else:
+            self.editor.textEdit.keyPressed.disconnect(self.onKeyPressed)
+
     def onKeyPressed(self, keyEvent):
         """
         Auto indent if the released key is the return key.
         :param keyEvent: the key event
         """
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
-            print "Must auto indent"
             # go next line
             tc = self.editor.textEdit.textCursor()
             tc.insertText("\n")

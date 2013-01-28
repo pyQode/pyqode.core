@@ -114,17 +114,26 @@ class QMarkersPanel(QEditorPanel):
 
     def install(self, editor):
         QEditorPanel.install(self, editor)
-        self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-        fm = QFontMetricsF(self.editor.textEdit.font())
-        self.size_hint = QSize(fm.height(), fm.height())
-        editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
         self.bc = self.editor.textEdit.blockCount()
-        self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
-        self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
         self.updateCursorPos()
+
+    def _onStateChanged(self, state):
+        QEditorPanel._onStateChanged(self, state)
+        if state is True:
+            self.editor.textEdit.visibleBlocksChanged.connect(self.update)
+            self.editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
+            self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
+            self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+        else:
+            self.editor.textEdit.visibleBlocksChanged.disconnect(self.update)
+            self.editor.textEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
+            self.editor.textEdit.newTextSet.disconnect(self.onNewTextSet)
+            self.editor.textEdit.keyPressed.disconnect(self.updateCursorPos)
 
     def _onStyleChanged(self):
         """ Updates stylesheet and brushes. """
+        fm = QFontMetricsF(self.editor.textEdit.font())
+        self.size_hint = QSize(fm.height(), fm.height())
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
@@ -194,6 +203,8 @@ class QMarkersPanel(QEditorPanel):
 
     def paintEvent(self, event):
         """ Paints the widget """
+        if self.enabled is False:
+            return
         QEditorPanel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
@@ -213,10 +224,14 @@ class QMarkersPanel(QEditorPanel):
     def leaveEvent(self, event):
         """ Resets prev line to -1 when we leave otherwise the tooltip won't be
         shown next time we hover the marker """
+        if self.enabled is False:
+            return
         self._prev_line = -1
 
     def mouseMoveEvent(self, event):
         """ Shows a tooltip """
+        if self.enabled is False:
+            return
         pos = event.pos()
         y = pos.y()
         for vb in self.editor.textEdit.visible_blocks:
@@ -241,6 +256,8 @@ class QMarkersPanel(QEditorPanel):
         """
         Adds/Remove markers on click
         """
+        if self.enabled is False:
+            return
         if self.markersReadOnly is True:
             return
         pos = event.pos()

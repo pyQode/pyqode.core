@@ -50,7 +50,7 @@ class FoldIndicator(object):
 class QFoldPanel(QEditorPanel):
     """ This panel display folding indicators and folds/unfolds text """
     #: Panel identifier
-    IDENTIFIER = "QFoldPanel"
+    IDENTIFIER = "Folding"
 
     def __init__(self, parent=None):
         QEditorPanel.__init__(
@@ -85,20 +85,29 @@ class QFoldPanel(QEditorPanel):
     def install(self, editor):
         """ Install the panel on the editor """
         QEditorPanel.install(self, editor)
-        self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-        self.updateCursorPos()
-        self.font = QFont(self.currentStyle.fontName, 7)
-        self.font.setBold(True)
-        fm = QFontMetricsF(self.editor.textEdit.font())
-        self.size_hint = QSize(fm.height(), fm.height())
-        editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
         self.bc = self.editor.textEdit.blockCount()
-        self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
-        self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+        self.updateCursorPos()
+
+    def _onStateChanged(self, state):
+        QEditorPanel._onStateChanged(self, state)
+        if state is True:
+            self.editor.textEdit.visibleBlocksChanged.connect(self.update)
+            self.editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
+            self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
+            self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+        else:
+            self.editor.textEdit.visibleBlocksChanged.disconnect(self.update)
+            self.editor.textEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
+            self.editor.textEdit.newTextSet.disconnect(self.onNewTextSet)
+            self.editor.textEdit.keyPressed.disconnect(self.updateCursorPos)
 
     def _onStyleChanged(self):
         """ Updates brushes and pens """
         style = self.currentStyle
+        self.font = QFont(self.currentStyle.fontName, 7)
+        self.font.setBold(True)
+        fm = QFontMetricsF(self.editor.textEdit.font())
+        self.size_hint = QSize(fm.height(), fm.height())
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
         self.separator_pen = QPen(QColor(style.panelSeparatorColor))
@@ -172,6 +181,8 @@ class QFoldPanel(QEditorPanel):
 
     def paintEvent(self, event):
         """ Paints the widget """
+        if self.enabled is False:
+            return
         QEditorPanel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
@@ -227,7 +238,8 @@ class QFoldPanel(QEditorPanel):
 
     def mouseMoveEvent(self, event):
         """ Detects indicator hover states """
-
+        if self.enabled is False:
+            return
         pos = event.pos()
         y = pos.y()
         repaint = False
@@ -251,6 +263,8 @@ class QFoldPanel(QEditorPanel):
         """
         Folds/Unfolds code blocks
         """
+        if self.enabled is False:
+            return
         pos = event.pos()
         y = pos.y()
         for vb in self.editor.textEdit.visible_blocks:

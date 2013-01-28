@@ -53,7 +53,19 @@
       <string>Style</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuPanels">
+     <property name="title">
+      <string>Panels</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuModes">
+     <property name="title">
+      <string>Modes</string>
+     </property>
+    </widget>
     <addaction name="menuStyle"/>
+    <addaction name="menuPanels"/>
+    <addaction name="menuModes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -125,6 +137,16 @@
    </property>
    <property name="text">
     <string>Dark</string>
+   </property>
+  </action>
+  <action name="actionPanel">
+   <property name="text">
+    <string>Panel</string>
+   </property>
+  </action>
+  <action name="actionModes_2">
+   <property name="text">
+    <string>Modes</string>
    </property>
   </action>
  </widget>

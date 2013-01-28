@@ -31,7 +31,41 @@ from pcef.style import StyledObject
 from pcef.ui import editor_ui
 
 
-class Mode(StyledObject):
+class EditorExtension(StyledObject):
+
+    def __init__(self, name, description):
+        StyledObject.__init__(self)
+        #: Extension name
+        self.name = name
+        #: Extension description
+        self.description = description
+        #: Extension enables state (subclasses must implement _onStateChanged to disconnect their slots to
+        # disable any actions)
+        self.__enabled = False
+        #: Editor instance
+        self.editor = None
+
+    def install(self, editor):
+        pass
+
+    def _onStateChanged(self, state):
+        """ Called when the enable state changed. Subclasses must override this method to disconnect their slots.
+        """
+        raise NotImplementedError()
+
+    def __get_enabled(self):
+        return self.__enabled
+
+    def __set_enabled(self, enabled):
+        if enabled != self.__enabled:
+            self.__enabled = enabled
+            self._onStateChanged(enabled)
+
+    #: Tells whether the extension is enabled or not
+    enabled = property(__get_enabled, __set_enabled)
+
+
+class Mode(EditorExtension):
     """
     A mode is an object installable on the PCEF to provides a
     unique feature to the editor.
@@ -48,22 +82,12 @@ class Mode(StyledObject):
     This class is just a basic abstract interfaces to quickly creates new modes.
     """
 
-    def __init__(self, name, description, enable=True):
+    def __init__(self, name, description):
         """
         :param name: The mode name
         :param description: The mode description
-        :param enable: Enable/Disable the mode (enabled by default)
         """
-        StyledObject.__init__(self)
-        #: Mode name
-        self.name = name
-        #: Mode description
-        self.description = description
-        #: Mode enable state (subtypes should always perfrom enable state check
-        #: before executing their actions)
-        self.enabled = enable
-        #: Editor instance
-        self.editor = None
+        EditorExtension.__init__(self, name, description)
 
     def _onStyleChanged(self):
         pass  # not all modes need styling
@@ -85,7 +109,7 @@ class Mode(StyledObject):
         self._onStyleChanged()
 
 
-class QEditorPanel(QWidget, StyledObject):
+class QEditorPanel(QWidget, EditorExtension):
     """
     Base class for panel widgets.
 
@@ -94,10 +118,7 @@ class QEditorPanel(QWidget, StyledObject):
     """
 
     def __init__(self, name, description, parent):
-        self.name = name
-        self.description = description
-        self.editor = None
-        StyledObject.__init__(self)
+        EditorExtension.__init__(self, name, description)
         QWidget.__init__(self, parent)
 
     def install(self, editor):
@@ -116,6 +137,14 @@ class QEditorPanel(QWidget, StyledObject):
         """
         self.editor = editor
         self._onStyleChanged()
+
+    def _onStateChanged(self, state):
+        """ Shows/Hides the panel
+        """
+        if state is True:
+            self.show()
+        else:
+            self.hide()
 
 
 class TextDecoration(QTextEdit.ExtraSelection):
@@ -245,6 +274,7 @@ class QCodeEditor(QWidget, StyledObject):
         self.modes[mode.name] = mode
         mode.install(self)
         mode.currentStyle = self.currentStyle
+        mode.enabled = True
 
     def installPanel(self, panel, zone):
         """ Installs a panel on the widget.
@@ -257,6 +287,7 @@ class QCodeEditor(QWidget, StyledObject):
         self.panels[panel.name] = panel
         panel.install(self)
         panel.currentStyle = self.currentStyle
+        panel.enabled = True
         self.zones[zone].addWidget(panel)
 
     def _onStyleChanged(self):
