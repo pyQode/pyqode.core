@@ -35,7 +35,7 @@ class RightMarginMode(Mode):
         super(RightMarginMode, self).install(editor)
         editor.textEdit.postPainting.connect(self.__paintMargin)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates the margin pen color """
         self.pen = QPen(self.currentStyle.marginColor)
 

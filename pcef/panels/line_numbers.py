@@ -37,7 +37,7 @@ class QLineNumberPanel(QEditorPanel):
         self.editor.textEdit.visibleBlocksChanged.connect(self.update)
         self.editor.textEdit.blockCountChanged.connect(self.updateGeometry)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates brushes and pens """
         if self.editor is not None:
             self.font = self.editor.textEdit.font()

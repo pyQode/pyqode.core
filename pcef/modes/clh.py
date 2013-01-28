@@ -39,7 +39,7 @@ class HighlightLineMode(Mode):
             self.changeActiveLine)
         self.changeActiveLine()
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates the pygments style """
         self.brush = QBrush(QColor(self.currentStyle.activeLineColor))
         self.changeActiveLine()

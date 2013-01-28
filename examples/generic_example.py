@@ -22,7 +22,7 @@ from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
 from pcef import saveFileFromEditor
 from pcef import styles
-from pcef.panels.bookmark import QBookmarkPanel
+from pcef.panels.misc import QUserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
@@ -31,8 +31,8 @@ class SimpleEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
 
-    The ui has been designed in Qt Designer and use the promoted widgets system to
-    instantiate a QGenericEditor. (self.ui.genericEditor)
+    The ui has been designed in Qt Designer and use the promoted widgets system
+    to instantiate a QGenericEditor. (self.ui.genericEditor)
     """
     def __init__(self):
         QMainWindow.__init__(self)
@@ -47,14 +47,15 @@ class SimpleEditor(QMainWindow):
             openFileInEditor(self.ui.genericEditor, __file__)
         else:
             openFileInEditor(self.ui.genericEditor,
-                             os.path.join(os.getcwd(), "examples", "generic_example.py"))
+                             os.path.join(os.getcwd(), "examples",
+                             "generic_example.py"))
 
-        # install a bookmark panel with a fixed set of markers
-        p = QBookmarkPanel()
+        # install panel where user can add its own markers
+        p = QUserMarkersPanel()
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(90, 96)
+        editor.foldPanel.addIndicator(92, 98)
 
         # add styles actions
         allStyles = styles.getAllStyles()
@@ -65,7 +66,8 @@ class SimpleEditor(QMainWindow):
             action.setChecked(i == 0)
             self.styleActionGroup.addAction(action)
             self.ui.menuStyle.addAction(action)
-        self.styleActionGroup.triggered.connect(self.on_styleActionGroup_triggered)
+        self.styleActionGroup.triggered.connect(
+            self.on_styleActionGroup_triggered)
 
     def on_styleActionGroup_triggered(self, action):
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())

@@ -96,7 +96,7 @@ class QFoldPanel(QEditorPanel):
         self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
         self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates brushes and pens """
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))

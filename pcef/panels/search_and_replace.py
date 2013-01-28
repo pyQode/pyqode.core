@@ -23,7 +23,7 @@ from PySide.QtGui import QTextDocument
 from pygments.token import Text
 from pcef.base import QEditorPanel
 from pcef.base import TextDecoration
-from pcef.promoted_widgets import QPlainCodeEdit
+from pcef.qplaincodeedit import QPlainCodeEdit
 from pcef.ui import search_panel_ui
 
 
@@ -168,7 +168,7 @@ class QSearchPanel(QEditorPanel):
         self.ui.pushButtonDown.setEnabled(enableNavigation)
         self.ui.pushButtonUp.setEnabled(enableNavigation)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Change stylesheet """
         qss = self.QSS % {"bck": self.currentStyle.panelsBackgroundColor,
                           "txt_bck": self.currentStyle.backgroundColor,

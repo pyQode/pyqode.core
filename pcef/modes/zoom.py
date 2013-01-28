@@ -39,7 +39,7 @@ class EditorZoomMode(Mode):
             self.onWheelEvent)
         self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         pass
 
     def onKeyPressed(self, event):

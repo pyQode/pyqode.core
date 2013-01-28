@@ -356,7 +356,7 @@ class SyntaxHighlighterMode(Mode):
         self.prev_txt = txt
 
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates the pygments style """
         if self.highlighter is not None:
             self.highlighter.style = self.currentStyle.pygmentsStyle

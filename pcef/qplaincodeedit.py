@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the promoted widgets used in the Qt Designer ui
+Contains the qplaincodeedit (an extension of the QPlainCodeEdit used as a promoted widget by the QCodeEditor ui)
 """
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
@@ -141,7 +141,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         #: Shortcuts for sharing the filename currently edited.
         #  This is only set when using the openFileInEditor function.
         self.filename = None
-        self.updateStyling()
+        self._onStyleChanged()
 
         #: weakref to the editor
         self.editor = None
@@ -258,7 +258,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """
         Update widget style when the global style changed.
         """

@@ -13,6 +13,7 @@ Contains a series of pre-configured editors classes ready to be used in your
 PySide application
 """
 from PySide.QtCore import Slot
+from modes.ident import AutoIndentMode
 from pcef.base import QCodeEditor
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
@@ -107,6 +108,7 @@ class QGenericEditor(QCodeEditor):
         self.installMode(SyntaxHighlighterMode())
         self.installMode(HighlightLineMode())
         self.installMode(EditorZoomMode())
+        self.installMode(AutoIndentMode())
 
         # Install panels
         self.installPanel(QFoldPanel(), self.PANEL_ZONE_LEFT)

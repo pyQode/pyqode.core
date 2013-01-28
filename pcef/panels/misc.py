@@ -9,17 +9,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains utils panel that are not used by any editor but could be useful to
-ide writers:
-    - QBookmarkPanel
+Contains miscellaneous panels not used by the editors but that could be useful for the end user
+(at least them are examples or custom panels)
 """
 from PySide.QtGui import QIcon
 from pcef.panels.marker import QMarkersPanel
 from pcef.panels.marker import Marker
 
 
-class QBookmarkPanel(QMarkersPanel):
-
+class QUserMarkersPanel(QMarkersPanel):
+    """ A simple marker panel that let the user add/remove marker using mouse clicks.
+    This could be used for bookmarks, breakpoints,...
+    """
     def __init__(self, icon=":/icons/rc/bookmark.png", parent=None):
         QMarkersPanel.__init__(self, "BookmarksPanel", False, parent)
         self.addMarkerRequested.connect(self.addUserMarker)

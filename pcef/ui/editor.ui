@@ -278,7 +278,7 @@
   <customwidget>
    <class>QPlainCodeEdit</class>
    <extends>QTextEdit</extends>
-   <header>pcef/promoted_widgets.h</header>
+   <header>pcef/qplaincodeedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

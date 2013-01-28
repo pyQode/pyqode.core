@@ -65,7 +65,7 @@ class Mode(StyledObject):
         #: Editor instance
         self.editor = None
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         pass  # not all modes need styling
 
     def install(self, editor):
@@ -82,7 +82,7 @@ class Mode(StyledObject):
         :type editor: pcef.editors.QGenericEditor
         """
         self.editor = editor
-        self.updateStyling()
+        self._onStyleChanged()
 
 
 class QEditorPanel(QWidget, StyledObject):
@@ -115,7 +115,7 @@ class QEditorPanel(QWidget, StyledObject):
         :type editor: pcef.editors.QGenericEditor
         """
         self.editor = editor
-        self.updateStyling()
+        self._onStyleChanged()
 
 
 class TextDecoration(QTextEdit.ExtraSelection):
@@ -259,7 +259,7 @@ class QCodeEditor(QWidget, StyledObject):
         panel.currentStyle = self.currentStyle
         self.zones[zone].addWidget(panel)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Update installed modes and panels style. """
         self.textEdit.currentStyle = self.currentStyle
         for panel in self.panels.values():

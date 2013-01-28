@@ -123,7 +123,7 @@ class QMarkersPanel(QEditorPanel):
         self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
         self.updateCursorPos()
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """ Updates stylesheet and brushes. """
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))

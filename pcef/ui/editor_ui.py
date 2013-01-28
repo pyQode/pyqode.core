@@ -160,5 +160,5 @@ class Ui_Form(object):
         self.actionUnindent.setToolTip(QtGui.QApplication.translate("Form", "Unindent selction", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUnindent.setShortcut(QtGui.QApplication.translate("Form", "Ctrl+Shift+I", None, QtGui.QApplication.UnicodeUTF8))
 
-from pcef.promoted_widgets import QPlainCodeEdit
+from pcef.qplaincodeedit import QPlainCodeEdit
 import editor_rc

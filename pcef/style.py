@@ -8,9 +8,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""
-Contains the definition of the PCEF style options
-"""
+""" Contains the definition of the PCEF style options """
 import json
 import sys
 from pygments.styles import get_style_by_name
@@ -154,12 +152,12 @@ class StyledObject(object):
         """
         assert isinstance(style, Style)
         self._style = style
-        self.updateStyling()
+        self._onStyleChanged()
 
     #: Current style instance
     currentStyle = property(__get_style, __set_style)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """
         Raises not ImplementError.
         Subclasses must overrides this method to update themselves whenever the
