@@ -11,16 +11,29 @@
 """ PCEF generic editor demo """
 import os
 import sys
+
 from PySide.QtCore import Slot
-from PySide.QtGui import QApplication, QFileDialog, QActionGroup, QAction
+from PySide.QtGui import QAction
+from PySide.QtGui import QActionGroup
+from PySide.QtGui import QApplication
+from PySide.QtGui import QFileDialog
 from PySide.QtGui import QMainWindow
-from pcef import openFileInEditor, saveFileFromEditor
+
+from pcef import openFileInEditor
+from pcef import saveFileFromEditor
 from pcef import styles
 from pcef.panels.bookmark import QBookmarkPanel
+
 from examples.ui import simple_editor_ui
 
 
 class SimpleEditor(QMainWindow):
+    """
+    A simple editor window that can open/save files.
+
+    The ui has been designed in Qt Designer and use the promoted widgets system to
+    instantiate a QGenericEditor. (self.ui.genericEditor)
+    """
     def __init__(self):
         QMainWindow.__init__(self)
         # setup ui (the pcef QGenericEditor is created there using
@@ -41,8 +54,7 @@ class SimpleEditor(QMainWindow):
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(22, 47)
-        editor.foldPanel.addIndicator(50, 56)
+        editor.foldPanel.addIndicator(90, 96)
 
         # add styles actions
         allStyles = styles.getAllStyles()
