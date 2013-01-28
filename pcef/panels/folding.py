@@ -145,10 +145,11 @@ class QFoldPanel(QEditorPanel):
         """ Offsets markers positions with the number of line added """
         if self.tcPosInBlock > 0:
             self.tcPos += 1
-            # offset each line after the tcPos by nbLines
+        # offset each line after the tcPos by nbLines
         for marker in self.fold_indicators:
             if marker.start >= self.tcPos:
                 marker.start += nbLines
+            if marker.end >= self.tcPos:
                 marker.end += nbLines
         self.tcPos = tcPos
         self.tcPosInBlock = tcPosInBlock
@@ -159,9 +160,12 @@ class QFoldPanel(QEditorPanel):
         for marker in self.fold_indicators:
             if marker.start >= self.tcPos:
                 marker.start -= nbLines
-                marker.end -= nbLines
                 if marker.start < 1:
                     self.removeIndicator(marker)
+            if marker.end >= self.tcPos:
+                marker.end -= nbLines
+            if marker.end == marker.start:
+                self.removeIndicator(marker)
         self.tcPos = tcPos
         self.tcPosInBlock = tcPosInBlock
         self.update()
