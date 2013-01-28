@@ -8,7 +8,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-""" PCEF generic editor demo"""
+""" PCEF generic editor demo """
 import os
 import sys
 from PySide.QtCore import Slot
@@ -61,6 +61,12 @@ class SimpleEditor(QMainWindow):
     @Slot()
     def on_actionSave_triggered(self):
         saveFileFromEditor(self.ui.genericEditor)
+
+    @Slot()
+    def on_actionSave_as_triggered(self):
+        filename = QFileDialog.getSaveFileName(self)[0]
+        if filename != "":
+            saveFileFromEditor(self.ui.genericEditor, filename)
 
     @Slot()
     def on_actionOpen_triggered(self):
