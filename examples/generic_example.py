@@ -125,10 +125,9 @@ class SimpleEditor(QMainWindow):
             openFileInEditor(self.ui.genericEditor, filename)
 
 
-def main(app=None):
+def main():
     """ Application entry point """
-    if app is None:
-        app = QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = SimpleEditor()
     window.show()
     app.exec_()
