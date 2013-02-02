@@ -122,6 +122,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         StyledObject.__init__(self)
         self._completer = None
         self.filename = None
+        self.encoding = 'utf8'
         self._dirty = False
         self._context_menu = QMenu()
         self.selections = []
