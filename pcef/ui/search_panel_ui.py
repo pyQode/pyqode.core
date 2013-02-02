@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Tue Jan 22 21:01:04 2013
+# Created: Sat Feb  2 16:26:10 2013
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -183,17 +183,21 @@ class Ui_SearchPanel(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(":/icons/rc/edit-find.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSearch.setIcon(icon3)
+        self.actionSearch.setIconVisibleInMenu(True)
         self.actionSearch.setObjectName("actionSearch")
         self.actionActionSearchAndReplace = QtGui.QAction(SearchPanel)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(":/icons/rc/edit-find-replace.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionActionSearchAndReplace.setIcon(icon4)
+        self.actionActionSearchAndReplace.setIconVisibleInMenu(True)
         self.actionActionSearchAndReplace.setObjectName("actionActionSearchAndReplace")
         self.actionFindNext = QtGui.QAction(SearchPanel)
         self.actionFindNext.setIcon(icon1)
+        self.actionFindNext.setIconVisibleInMenu(True)
         self.actionFindNext.setObjectName("actionFindNext")
         self.actionFindPrevious = QtGui.QAction(SearchPanel)
         self.actionFindPrevious.setIcon(icon)
+        self.actionFindPrevious.setIconVisibleInMenu(True)
         self.actionFindPrevious.setObjectName("actionFindPrevious")
 
         self.retranslateUi(SearchPanel)

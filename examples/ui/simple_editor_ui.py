@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Mon Jan 28 22:54:48 2013
+# Created: Sat Feb  2 16:26:08 2013
 #      by: pyside-uic 0.2.13 running on PySide 1.1.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,16 +44,19 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/example_icons/rc/folder.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpen.setIcon(icon)
+        self.actionOpen.setIconVisibleInMenu(True)
         self.actionOpen.setObjectName("actionOpen")
         self.actionSave = QtGui.QAction(MainWindow)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/example_icons/rc/document-save.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSave.setIcon(icon1)
+        self.actionSave.setIconVisibleInMenu(True)
         self.actionSave.setObjectName("actionSave")
         self.actionSave_as = QtGui.QAction(MainWindow)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/example_icons/rc/document-save-as.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSave_as.setIcon(icon2)
+        self.actionSave_as.setIconVisibleInMenu(True)
         self.actionSave_as.setObjectName("actionSave_as")
         self.actionWhiteStyle = QtGui.QAction(MainWindow)
         self.actionWhiteStyle.setCheckable(True)
