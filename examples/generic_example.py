@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
 # PCEF - PySide Code Editing framework
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
@@ -11,7 +10,6 @@
 """ PCEF generic editor demo """
 import os
 import sys
-
 from PySide.QtCore import Slot
 from PySide.QtGui import QAction
 from PySide.QtGui import QActionGroup
@@ -26,11 +24,10 @@ from pcef.panels.misc import QUserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
-
 class SimpleEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
-
+    
     The ui has been designed in Qt Designer and use the promoted widgets system
     to instantiate a QGenericEditor. (self.ui.genericEditor)
     """

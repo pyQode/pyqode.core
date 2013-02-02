@@ -14,7 +14,7 @@ Contains the qplaincodeedit (an extension of the QPlainCodeEdit used as a promot
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
-from PySide.QtGui import QTextEdit
+from PySide.QtGui import QTextEdit, QFocusEvent
 from PySide.QtGui import QTextOption
 from PySide.QtGui import QFont
 from PySide.QtGui import QKeyEvent
@@ -99,6 +99,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     visibleBlocksChanged = Signal()
     #: Emitted when setPlainText is invoked
     newTextSet = Signal()
+    focusedIn = Signal(QFocusEvent)
 
     #---------------------------------------------------------------------------
     # Properties
@@ -317,6 +318,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         if not event.isAccepted():
             event.setAccepted(True)
             QPlainTextEdit.keyReleaseEvent(self, event)
+
+    def focusInEvent(self, event):
+        self.focusedIn.emit(event)
+        QPlainTextEdit.focusInEvent(self, event)
 
     def mousePressEvent(self, event):
         """

@@ -11,7 +11,7 @@
 """ Contains smart indent modes """
 import re
 from PySide.QtCore import Qt
-from PySide.QtGui import QTextCursor
+from PySide.QtGui import QTextCursor, QKeyEvent
 from pcef.base import Mode
 
 
@@ -53,10 +53,11 @@ class AutoIndentMode(Mode):
         Auto indent if the released key is the return key.
         :param keyEvent: the key event
         """
+        assert isinstance(keyEvent, QKeyEvent)
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             # go next line
             tc = self.editor.textEdit.textCursor()
-            tc.insertText("\n")
+            # tc.insertText("\n")
             indent = self.getIndent(tc)
             tc.insertText(indent)
             tc.movePosition(QTextCursor.EndOfLine)

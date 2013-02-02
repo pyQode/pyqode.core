@@ -19,6 +19,7 @@ from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
 from pcef.modes.sh import SyntaxHighlighterMode
 from pcef.modes.zoom import EditorZoomMode
+from pcef.modes.code_completion import CodeCompletionMode
 from pcef.panels.line_numbers import QLineNumberPanel
 from pcef.panels.folding import QFoldPanel
 from pcef.panels.search_and_replace import QSearchPanel
@@ -109,6 +110,7 @@ class QGenericEditor(QCodeEditor):
         self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
 
         # Install modes
+        self.installMode(CodeCompletionMode())
         self.installMode(RightMarginMode())
         self.installMode(SyntaxHighlighterMode())
         self.installMode(HighlightLineMode())
