@@ -44,8 +44,8 @@ def openFileInEditor(editor, filename, encoding='utf8',
     :param filename: Filename of the file to open
     :param encoding: Encoding to use to load the file
     """
-    f = open(filename, 'r')
-    content = unicode(f.read().decode(encoding))
+    with open(filename, 'r') as f:
+        content = unicode(f.read().decode(encoding))
     if replaceTabsBySpaces:
         content = content.replace("\t", " " * editor.TAB_SIZE)
     editor.textEdit.filename = filename
