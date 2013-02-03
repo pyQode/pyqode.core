@@ -25,7 +25,6 @@ from pcef.panels.misc import QUserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
-
 class SimpleEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
