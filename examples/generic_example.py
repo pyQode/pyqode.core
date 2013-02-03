@@ -10,6 +10,7 @@
 """ PCEF generic editor demo """
 import os
 import sys
+
 from PySide.QtCore import Slot
 from PySide.QtGui import QAction
 from PySide.QtGui import QActionGroup
@@ -24,13 +25,15 @@ from pcef.panels.misc import QUserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
+
 class SimpleEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
-    
+
     The ui has been designed in Qt Designer and use the promoted widgets system
     to instantiate a QGenericEditor. (self.ui.genericEditor)
     """
+
     def __init__(self):
         QMainWindow.__init__(self)
         # setup ui (the pcef QGenericEditor is created there using
@@ -52,7 +55,7 @@ class SimpleEditor(QMainWindow):
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(92, 98)
+        editor.foldPanel.addIndicator(135, 140)
 
         # add styles actions
         allStyles = styles.getAllStyles()
@@ -64,7 +67,8 @@ class SimpleEditor(QMainWindow):
             action.setChecked(style == "Default")
             self.styleActionGroup.addAction(action)
             self.ui.menuStyle.addAction(action)
-        self.styleActionGroup.triggered.connect(self.on_styleActionGroup_triggered)
+        self.styleActionGroup.triggered.connect(
+            self.on_styleActionGroup_triggered)
 
         # add panels actions
         allPanels = self.ui.genericEditor.panels.keys()
@@ -91,32 +95,38 @@ class SimpleEditor(QMainWindow):
             action.triggered.connect(self.onModeActionTriggered)
 
     def onModeActionTriggered(self):
+        """ Enables/Disables a mode """
         keys = self.ui.genericEditor.modes.keys()
         keys.sort()
         for key, action in zip(keys, self.modes_actions):
             self.ui.genericEditor.modes[key].enabled = action.isChecked()
 
     def onPanelActionTriggered(self):
+        """ Enables/Disables a panel """
         keys = self.ui.genericEditor.panels.keys()
         keys.sort()
         for key, action in zip(keys, self.panels_actions):
             self.ui.genericEditor.panels[key].enabled = action.isChecked()
 
     def on_styleActionGroup_triggered(self, action):
+        """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
 
     @Slot()
     def on_actionSave_triggered(self):
+        """ Save the current file """
         saveFileFromEditor(self.ui.genericEditor)
 
     @Slot()
     def on_actionSave_as_triggered(self):
+        """ Save the current file as"""
         filename = QFileDialog.getSaveFileName(self)[0]
         if filename != "":
             saveFileFromEditor(self.ui.genericEditor, filename)
 
     @Slot()
     def on_actionOpen_triggered(self):
+        """ Open a new file in the editor """
         filename = QFileDialog.getOpenFileName(self)[0]
         if filename != "":
             openFileInEditor(self.ui.genericEditor, filename)
