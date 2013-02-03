@@ -25,6 +25,7 @@ from pcef.panels.misc import QUserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
+
 class SimpleEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
@@ -92,6 +93,7 @@ class SimpleEditor(QMainWindow):
             self.ui.menuModes.addAction(action)
             self.modes_actions.append(action)
             action.triggered.connect(self.onModeActionTriggered)
+
 
     def onModeActionTriggered(self):
         """ Enables/Disables a mode """
