@@ -16,7 +16,7 @@ from pcef.style import DEFAULT_FONT
 from pcef.style import DEFAULT_FONT_SIZE
 
 
-class PygmentsDarculaStyle(PygmentsStyle):
+class PygmentsDarkStyle(PygmentsStyle):
     """
     Pygments theme inspired by the darcula theme (Pycharm)
     """
@@ -41,12 +41,12 @@ class PygmentsDarculaStyle(PygmentsStyle):
         Name.Builtin.Pseudo:    'noinherit #94558D'}
 
 
-class DarculaStyle(Style):
+class DarkStyle(Style):
     """ Our default dark style"""
 
     def __init__(self):
-        super(DarculaStyle, self).__init__("Darcula")
-        self.pygmentsStyle = PygmentsDarculaStyle
+        super(DarkStyle, self).__init__("Dark")
+        self.pygmentsStyle = PygmentsDarkStyle
         self.marginColor = '#FF0000'
         self.activeLineColor = '#323232'
         self.selectionBackgroundColor = '#2142A3'
