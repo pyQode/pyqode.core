@@ -23,13 +23,15 @@ From source
 
 You can download the `source archive`_ from the `github repository`_
 
-Alternatively you can clone the repository using git::
-
-    git clone git@github.com:ColinDuquesnoy/PCEF.git
-
 Then you can install the package by opening a terminal an typing the following commands::
 
     cd path/to/source/
+    python setup.py install
+
+Alternatively you can clone the repository using git::
+
+    git clone git@github.com:ColinDuquesnoy/PCEF.git
+    cd PCEF
     python setup.py install
 
 .. _source archive: https://github.com/ColinDuquesnoy/PCEF/archive/master.zip
