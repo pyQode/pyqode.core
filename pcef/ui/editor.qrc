@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>rc/text-generic.png</file>
     <file>rc/close.png</file>
     <file>rc/bookmark.png</file>
     <file>rc/edit-copy.png</file>
