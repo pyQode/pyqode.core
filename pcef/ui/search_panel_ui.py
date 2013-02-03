@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Sat Feb  2 16:28:19 2013
-#      by: pyside-uic 0.2.13 running on PySide 1.1.0
+# Created: Sun Feb  3 14:49:22 2013
+#      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
 
