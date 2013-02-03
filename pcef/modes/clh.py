@@ -47,7 +47,7 @@ class HighlightLineMode(Mode):
     def changeActiveLine(self):
         """ Changes the active line. """
         tc = self.editor.textEdit.textCursor()
-        pos = tc.blockNumber
+        pos = tc.blockNumber()
         if pos != self._pos:
             self._pos = pos
             # remove previous selection

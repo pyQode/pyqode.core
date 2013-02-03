@@ -8,8 +8,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import os
+
 from PySide.QtCore import Qt
-from PySide.QtGui import QStandardItemModel, QCompleter, QTextCursor, QPlainTextEdit
+from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QPlainTextEdit, QIcon
+
 from pcef.base import Mode
 
 
@@ -26,17 +29,25 @@ class Suggestion(object):
 
 class CompletionModel(object):
     """
-    Represents a completion model. A model is a single list of suggestions associated with a priority.
+    Base class for representing a completion model.
+
+    A completion model is a single list of suggestions associated with a priority.
+
+    This base class can be used directly with a static list of words.
     """
     @property
     def suggestions(self):
         return self._suggestions
 
-    def __init__(self, wordList=None, priority=0):
+    def __init__(self, words, priority=0):
+        """
+        Create a basic completion model based
+        :param words:
+        :param priority:
+        :return:
+        """
         self.priority = priority
         self._suggestions = []
-        for word in wordList:
-            self._suggestions.append(Suggestion(word))
 
     def update(self, source_code, line, col, filename, encoding):
         """ Non-static completion model should overrides this method to update
@@ -47,9 +58,54 @@ class CompletionModel(object):
         pass
 
 
-def containsAny(str, set):
-    """Check whether 'str' contains ANY of the chars in 'set'"""
-    return 1 in [c in str for c in set]
+class DocumentWordsCompletionModel(CompletionModel):
+    """
+    Provides suggestions based on the current document words.
+    """
+
+    def split(self, txt, seps):
+        """
+        Split the document in a meaningful list of words.
+        :param txt:
+        :param seps:
+        :return: A set of words found in the document (excluding punctuations, numbers, ...)
+        """
+        default_sep = seps[0]
+        for sep in seps[1:]:  # we skip seps[0] because that's the default separator
+            txt = txt.replace(sep, default_sep)
+        words = txt.split(default_sep)
+        for w in words:
+            w.strip()
+            if w == '':
+                words.remove(w)
+            if len(w) == 1:
+                words.remove(w)
+            try:
+                int(w)
+                words.remove(w)
+            except:
+                pass
+        return set(words)
+
+    def update(self, source_code, line, col, filename, encoding):
+        """
+        Update the suggestion list.
+        :param source_code: document text
+        :param line: current line number (starting at 1)
+        :param col: current column number (starting at 0)
+        :param filename: the document filename if any
+        :param encoding: the document encoding if any
+        :return:
+        """
+        words = self.split(
+            source_code, ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '{', '}', '|', ':', '"',
+                          "'", "<", ">", "?", ",", ".", "/", ";", '[', ']', '\\', '\n', '\t', '-', '=', ' '])
+        self._suggestions[:] = []
+        for w in words:
+            self._suggestions.append(Suggestion(w, QIcon(":/icons/rc/text-generic.png")))
+
+    def __init__(self):
+        super(DocumentWordsCompletionModel, self).__init__(0)
 
 
 class CodeCompletionMode(Mode):
@@ -72,10 +128,13 @@ class CodeCompletionMode(Mode):
         self.completer = QCompleter()
         self.completer.activated.connect(self.insertCompletion)
         self.completer.highlighted.connect(self.onHighlighted)
+        #: List of completion models
+        self._models = [DocumentWordsCompletionModel()]
 
     def install(self, editor):
         super(CodeCompletionMode, self).install(editor)
         self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+        self.editor.textEdit.textChanged.connect(self.onTextChanged)
         self.editor.textEdit.focusedIn.connect(self.onFocusIn)
         self.completer.setWidget(editor.textEdit)
         self.completer.setCompletionMode(QCompleter.PopupCompletion)
@@ -84,16 +143,35 @@ class CodeCompletionMode(Mode):
     def _onStateChanged(self, state):
         pass
 
+    def containsAny(self, str, set):
+        """Check whether 'str' contains ANY of the chars in 'set'"""
+        return 1 in [c in str for c in set]
+
     def onFocusIn(self, event):
         self.completer.setWidget(self.editor.textEdit)
 
     def onHighlighted(self, completion):
         self.currentCompletion = completion
 
+    def onTextChanged(self):
+        completionPrefix = self.textUnderCursor()
+        eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
+        # hide popup if completion prefix len < 3 or end of word
+        if len(completionPrefix) < 3 or self.containsAny(completionPrefix, eow):
+            self.completer.popup().hide()
+            return
+        if completionPrefix != self.completer.completionPrefix():
+            self.updateModels(completionPrefix)
+            self.completer.setCompletionPrefix(completionPrefix)
+            self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+        c = self.completer
+        cr = self.editor.textEdit.cursorRect()
+        cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
+        c.complete(cr)  # popup it up!
+
     def onKeyPressed(self, event):
         if self.completer.popup().isVisible():
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
-                print "Insert completion"
                 self.insertCompletion(self.currentCompletion)
                 self.completer.popup().hide()
                 event.setAccepted(True)
@@ -103,34 +181,43 @@ class CodeCompletionMode(Mode):
                 event.setAccepted(True)
                 return  # let the completer do default behavior
         isShortcut = ((event.modifiers() & Qt.ControlModifier > 0) and event.key() == Qt.Key_Space)  # CTRL+SPACE
-        if not isShortcut and not event.isAccepted():
-            QPlainTextEdit.keyPressEvent(self.editor.textEdit, event)
-            event.setAccepted(True)
-        completionPrefix = self.textUnderCursor()
-        ctrlOrShift = event.modifiers() & Qt.ControlModifier > 0 or event.modifiers() & Qt.ShiftModifier > 0
-        isEmptyText = completionPrefix == ""
-        eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
-        hasModifier = (event.modifiers() != Qt.NoModifier) and not ctrlOrShift
-        if isShortcut is False and (hasModifier or isEmptyText or len(completionPrefix) < 3 or containsAny(completionPrefix, eow)):
-            self.completer.popup().hide()
-            event.setAccepted(True)
-            return
-        if completionPrefix != self.completer.completionPrefix():
-            self.updateModels()
-            self.completer.setCompletionPrefix(completionPrefix)
-            self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-        c = self.completer
-        cr = self.editor.textEdit.cursorRect()
-        cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
-        c.complete(cr)  # popup it up!
+        if isShortcut:
+            completionPrefix = self.textUnderCursor()
+            self.updateModels(completionPrefix)
+            c = self.completer
+            c.setCompletionPrefix(completionPrefix)
+            c.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+            cr = self.editor.textEdit.cursorRect()
+            cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
+            c.complete(cr)  # popup it up!
 
     def textUnderCursor(self):
         tc = self.editor.textEdit.textCursor()
-        tc.select(QTextCursor.WordUnderCursor)
+        tc.movePosition ( QTextCursor.StartOfWord, QTextCursor.KeepAnchor)
         return tc.selectedText()
 
-    def updateModels(self):
-        pass
+    def updateModels(self, completionPrefix):
+        sorted_models = sorted(self._models, key=lambda mdl: mdl.priority, reverse=True)
+        tc = self.editor.textEdit.textCursor()
+        line = tc.blockNumber() + 1
+        col = tc.columnNumber()
+        fn = self.editor.textEdit.filename
+        encoding = self.editor.textEdit.encoding
+        cc_model = QStandardItemModel()
+        cptSuggestion = 0
+        for model in sorted_models:
+            model.update(self.editor.textEdit.toPlainText(), line, col, fn, encoding)
+            for s in model.suggestions:
+                if s.display != completionPrefix:
+                    item = QStandardItem()
+                    item.setData(s.display, Qt.DisplayRole)
+                    if s.decoration is not None:
+                        item.setData(s.decoration, Qt.DecorationRole)
+                    cc_model.appendRow(item)
+                    cptSuggestion += 1
+            if cptSuggestion >= 50:
+                break
+        self.completer.setModel(cc_model)
 
     def insertCompletion(self, completion=""):
         tc = self.editor.textEdit.textCursor()

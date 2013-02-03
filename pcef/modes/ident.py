@@ -54,10 +54,12 @@ class AutoIndentMode(Mode):
         :param keyEvent: the key event
         """
         assert isinstance(keyEvent, QKeyEvent)
+        if keyEvent.isAccepted():
+            return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             # go next line
             tc = self.editor.textEdit.textCursor()
-            # tc.insertText("\n")
+            tc.insertText("\n")
             indent = self.getIndent(tc)
             tc.insertText(indent)
             tc.movePosition(QTextCursor.EndOfLine)
