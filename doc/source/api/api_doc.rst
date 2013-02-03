@@ -1,39 +1,45 @@
-API Documentation
+API Reference
 *********************
+.. hlist::
+   :columns: 2
 
-Editor
------------------
-.. automodule:: qcodeeditor.editor
-  :members:
-  :private-members:
+   * .. glossary::
 
-Widgets
------------------
-.. automodule:: qcodeeditor.widgets
-  :members:
-  :private-members:
+      :doc:`base`
+         The base module documentation.
 
-Modes
------------------
-.. automodule:: qcodeeditor.modes
-  :members:
-  :private-members:
+   * .. glossary::
 
-Constants
------------------
-.. automodule:: qcodeeditor.constants
-  :members:
-  :private-members:
+      :doc:`editors`
+         The editors module documentation.
 
-Utils
-------------------
-.. automodule:: qcodeeditor.utils
-  :members:
-  :private-members:
+   * .. glossary::
 
-Syntax highlighting
---------------------
-.. automodule:: qcodeeditor.syntax_highlighting
-  :members:
-  :private-members:
+      :doc:`modes`
+         Documentation about the modules and classes related to pcef modes
 
+   * .. glossary::
+
+      :doc:`panels`
+         Documentation about the modules and classes related to pcef panels
+
+   * .. glossary::
+
+      :doc:`styling`
+         Documentation about the modules and classes related to pcef styling
+
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+
+    base
+    editors
+    modes
+    panels
+    styling
+
+
+.. note:: In order to keep the api documentation clean, not all the classes and functions are documented here, only
+          the one that makes sense from a user point of view. Also the documentation organization does not always the
+          source organisation (for example the pcef.style and pcef.styles modules are put in the same section: styling)
