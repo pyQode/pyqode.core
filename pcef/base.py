@@ -216,9 +216,10 @@ class QCodeEditor(QWidget, StyledObject):
     defined in the editors module will take care of that.
 
     .. note:: There is a filename attribute defined. This field must be view as
-    a tag object to share the filename to other modules that might need this
-    information. This field is only set if you use the openFileInEditor function
-    (importable for the qcef package itself)
+              a tag object to share the filename to other modules that might need this
+              information. This field is only set if you use the openFileInEditor function
+              (importable for the qcef package itself)
+
     """
     #: The default value used to for indentation. (All indentation modes should
     #  uses this value)

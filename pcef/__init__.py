@@ -40,9 +40,14 @@ def openFileInEditor(editor, filename, encoding='utf8',
                      replaceTabsBySpaces=True):
     """
     Open a file in an editor
+
     :param editor: Editor instance where the file content will be displayed
+
     :param filename: Filename of the file to open
+
     :param encoding: Encoding to use to load the file
+
+    :param replaceTabsBySpaces: True to replace tabs by spaces
     """
     with open(filename, 'r') as f:
         content = unicode(f.read().decode(encoding))
@@ -59,8 +64,11 @@ def openFileInEditor(editor, filename, encoding='utf8',
 def saveFileFromEditor(editor, filename=None, encoding=None):
     """
     Save the editor content to a file
+
     :param editor: Editor instance
+
     :param filename: The filename to save. If none the editor filename attribute is used.
+
     :param encoding: The save encoding
     """
     if filename is None:

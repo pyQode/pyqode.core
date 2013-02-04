@@ -62,6 +62,10 @@ Parts of the documentation:
     examples
     changelog
     api/api_doc
+    bugs
+    contribute
+    license
+    credits
 
 
 .. hlist::

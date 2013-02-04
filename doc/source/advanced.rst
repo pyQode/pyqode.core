@@ -9,9 +9,7 @@ Styling
 ----------
 
 You can easily create new styles by subclassing :class:`pcef.style.Style` or by creating a JSON file with the following
-structure:
-
-.. code-block:: json
+structure::
 
     {
         "marginColor": "#FF0000",

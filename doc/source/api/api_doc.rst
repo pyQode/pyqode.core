@@ -5,13 +5,13 @@ API Reference
 
    * .. glossary::
 
-      :doc:`base`
-         The base module documentation.
+      :doc:`core`
+         The core modules/classes documentation.
 
    * .. glossary::
 
       :doc:`editors`
-         The editors module documentation.
+         The pre-configured editors documentation.
 
    * .. glossary::
 
@@ -28,18 +28,24 @@ API Reference
       :doc:`styling`
          Documentation about the modules and classes related to pcef styling
 
+   * .. glossary::
+
+      :doc:`class_diagram`
+         PCEF inheritance diagram
+
 
 .. toctree::
     :maxdepth: 1
     :hidden:
 
-    base
+    core
     editors
     modes
     panels
     styling
+    class_diagram
 
 
-.. note:: In order to keep the api documentation clean, not all the classes and functions are documented here, only
-          the one that makes sense from a user point of view. Also the documentation organization does not always the
-          source organisation (for example the pcef.style and pcef.styles modules are put in the same section: styling)
+.. note:: In order to keep the api documentation clean, not all the classes and functions are documented.
+          Also the documentation organization does not always reflects the source organization (for example the
+          pcef.style and pcef.styles modules are put in the same section: styling)

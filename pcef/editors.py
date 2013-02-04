@@ -13,7 +13,7 @@ Contains a series of pre-configured editors classes ready to be used in your
 PySide application
 """
 from PySide.QtCore import Slot
-from modes.ident import AutoIndentMode
+from modes.indent import AutoIndentMode
 from pcef.base import QCodeEditor
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
@@ -26,16 +26,15 @@ from pcef.panels.search_and_replace import QSearchPanel
 
 
 class QGenericEditor(QCodeEditor):
-    """A generic (language independent) code editor widget.
-    It comes with the following modes/panels installed:
-        - syntax highlighting mode using pygments (see the pygments project for
-          the complete list of supported languages)
-        - code completion mode (not implemented)
-        - right margin mode
-        - active line highlighting mode
-        - line number panel
-        - folding panel (not implemented)
-        - document search and replace panel/mode (not implemented)
+    """
+    A generic (language independent) code editor widget. It comes with the following modes/panels installed:
+        * syntax highlighting mode using pygments
+        * code completion mode (not implemented)
+        * right margin mode
+        * active line highlighting mode
+        * line number panel
+        * folding panel (not implemented)
+        * document search and replace panel/mode (not implemented)
 
     It also populates the text edit context menu with a set of default actions.
     (some modes might also add their own menu entry or sub-menus).

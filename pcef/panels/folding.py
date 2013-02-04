@@ -33,8 +33,8 @@ class FoldIndicator(object):
     property that tells whether the code block is folded or not.
 
     Fields:
-        - start: start line nbr(where the +/- indicator is drawn)
-        - end: end line nbr (wher |_ is drawn)
+        * **start** line nbr
+        * **end** line nbr
     """
     def __init__(self, start, end):
         #: Start line

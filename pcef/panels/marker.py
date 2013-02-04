@@ -56,10 +56,10 @@ class QMarkersPanel(QEditorPanel):
 
     .. note:: The markers position is updated whenever a line is added/removed.
     .. note:: The markers list is cleared when a new text is set on the text
-        edit (see QCodeEdit.newTextSet signal)
+              edit (see QCodeEdit.newTextSet signal)
 
     .. note:: If a marker goes out of documents (line number <= 0) the
-    markerOutOfDoc is emitted.
+              markerOutOfDoc is emitted.
     """
 
     #: Stylesheet
