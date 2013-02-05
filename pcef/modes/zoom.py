@@ -13,7 +13,7 @@ import copy
 from PySide.QtCore import Qt
 from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QWheelEvent
-from pcef.base import Mode
+from pcef.core import Mode
 from pcef import style
 
 
@@ -30,16 +30,16 @@ class EditorZoomMode(Mode):
         self.prev_delta = 0
         self.default_font_size = style.DEFAULT_FONT_SIZE
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         if state is True:
-            self.editor.textEdit.mouseWheelActivated.connect(
+            self.editor.codeEdit.mouseWheelActivated.connect(
                 self.onWheelEvent)
-            self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+            self.editor.codeEdit.keyPressed.connect(self.onKeyPressed)
         else:
-            self.editor.textEdit.mouseWheelActivated.disconnect(self.onWheelEvent)
-            self.editor.textEdit.keyPressed.disconnect(self.onKeyPressed)
+            self.editor.codeEdit.mouseWheelActivated.disconnect(self.onWheelEvent)
+            self.editor.codeEdit.keyPressed.disconnect(self.onKeyPressed)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         pass
 
     def onKeyPressed(self, event):

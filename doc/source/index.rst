@@ -1,7 +1,9 @@
-.. QCodeEditor documentation master file, created by
-   sphinx-quickstart on Thu Jan  3 17:16:17 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. PCEF - PySide Code Editing framework
+.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+
+.. This document is released under the LGPLv3 license.
+.. You should have received a copy of the GNU Lesser General Public License
+.. along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 Welcome to PCEF documentation!
 =======================================
@@ -21,13 +23,13 @@ Here are the core features:
 
  * **syntax highlighting mode** (using pygments)
  * **code completion** (static word list, from document words)
- * line number panel
- * **code folding** panel
- * markers panel (to add breakpoints, bookmarks, errors,...)
+ * line number Panel
+ * **code folding** Panel
+ * markers Panel (to add breakpoints, bookmarks, errors,...)
  * right margin indicator mode
  * active line highlighting mode
  * **editor zoom** mode
- * find and replace panel
+ * find and replace Panel
  * **text decorations** (squiggle, box)
  * unicode support (specify encoding when you load your file)
  * **easy styling** (built-in white and dark styles + possibility to customize using **JSON style schemes**)

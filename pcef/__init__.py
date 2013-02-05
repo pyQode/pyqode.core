@@ -53,11 +53,11 @@ def openFileInEditor(editor, filename, encoding='utf8',
         content = unicode(f.read().decode(encoding))
     if replaceTabsBySpaces:
         content = content.replace("\t", " " * editor.TAB_SIZE)
-    editor.textEdit.filename = filename
-    editor.textEdit.encoding = encoding
+    editor.codeEdit.filename = filename
+    editor.codeEdit.encoding = encoding
     editor.syntaxHighlightingMode.setLexerFromFilename(filename)
-    editor.textEdit.setPlainText(content)
-    editor.ui.textEdit.dirty = False
+    editor.codeEdit.setPlainText(content)
+    editor.ui.codeEdit.dirty = False
     module_logger.info("File opened: {0}".format(filename))
 
 
@@ -72,13 +72,13 @@ def saveFileFromEditor(editor, filename=None, encoding=None):
     :param encoding: The save encoding
     """
     if filename is None:
-        filename = editor.textEdit.filename
+        filename = editor.codeEdit.filename
     if encoding is None:
-        encoding = editor.textEdit.encoding
-    content = unicode(editor.textEdit.toPlainText()).encode(encoding)
+        encoding = editor.codeEdit.encoding
+    content = unicode(editor.codeEdit.toPlainText()).encode(encoding)
     with open(filename, "w") as f:
         f.write(content)
-    editor.textEdit.dirty = False
-    editor.textEdit.filename = filename
-    editor.textEdit.encoding = encoding
+    editor.codeEdit.dirty = False
+    editor.codeEdit.filename = filename
+    editor.codeEdit.encoding = encoding
     module_logger.info("File saved: {0}".format(filename))

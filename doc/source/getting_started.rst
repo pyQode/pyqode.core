@@ -1,3 +1,10 @@
+.. PCEF - PySide Code Editing framework
+.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+
+.. This document is released under the LGPLv3 license.
+.. You should have received a copy of the GNU Lesser General Public License
+.. along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 Getting started
 ===============
 
@@ -9,7 +16,7 @@ For that purpose, there is two way to use pcef:
     - using a pre-made editor that already fits your needs (from pcef.editors import)
     - using a raw editor widget where you can install the modes/panels you really need.
 
-In both cases user will always have a way to add a new mode/panel or to disable already installed one.
+In both cases user will always have a way to add a new mode/Panel or to disable already installed one.
 
 .. contents:: :local:
 
@@ -18,7 +25,7 @@ The editor widget
 
 The editor widget is not a subclass of a QPlainTextEdit, it's just a regular widget with an ui designed in Qt designer.
 
-The widget ui contains a widget promoted to pcef.qplaincodeedit.QPlainCodeEdit and 4 layouts where the panels are
+The widget ui contains a widget promoted to pcef.qplaincodeedit.CodeEdit and 4 layouts where the panels are
 added.
 
 .. image:: _static/editor_widget.png
@@ -30,7 +37,7 @@ User can retrieve the text edit control by using the textEdit property.
 
 The editor widget provides flexibility by the use of editor extensions. There are two types of extensions:
 
-    - Panel: a panel is a QWidget that is added to one of the four layouts (top, bottom, left, right)
+    - Panel: a Panel is a QWidget that is added to one of the four layouts (top, bottom, left, right)
     - Mode: a mode is an object that adds a new behaviour to the editor usually by connecting to the text edit events.
 
 The text edit is a subclass of a QPlainTextEdit to adds a few new events:
@@ -78,7 +85,7 @@ Here is a minimal example code:
 
 Using a raw editor
 --------------------
-If you want a full customisation of the editor, you should start with the base editor class:
+If you want a full customisation of the editor, you should start with the core editor class:
 
 .. code-block:: python
 
@@ -86,7 +93,7 @@ If you want a full customisation of the editor, you should start with the base e
     from PySide.QtGui import QApplication
     from PySide.QtGui import QMainWindow
     from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pcef.base import QCodeEditor  # the most basic editor widget (no modes nor panels installed)
+    from pcef.core import CodeEditorWidget  # the most basic editor widget (no modes nor panels installed)
 
 
     def main():
@@ -94,7 +101,7 @@ If you want a full customisation of the editor, you should start with the base e
         # create qt objects (app, window and our editor)
         app = QApplication(sys.argv)
         window = QMainWindow()
-        editor = QCodeEditor()
+        editor = CodeEditorWidget()
         window.setCentralWidget(editor)
 
         # open a file
@@ -119,22 +126,22 @@ Here is how you can add a new mode on an editor widget:
 
 .. code-block:: python
 
-    myMode = MyMode()  # a subclass of pcef.base.Mode
+    myMode = MyMode()  # a subclass of pcef.core.Mode
     editor.installMode(myMode)
 
 
-And here is how to add a new panel:
+And here is how to add a new Panel:
 
 .. code-block:: python
 
-    myPanel = MyPanel()  # a subclass of pcef.base.QEditorPanel
+    myPanel = MyPanel()  # a subclass of pcef.core.Panel
     editor.installPanel(myPanel, editor.PANEL_ZONE_TOP)
 
 
-Retrieving a mode/panel
+Retrieving a mode/Panel
 --------------------------------
 
-The editor panels/modes dictionary is left public so that user can easily get a mode/panel using its name:
+The editor panels/modes dictionary is left public so that user can easily get a mode/Panel using its name:
 
 
 .. code-block:: python
@@ -142,7 +149,7 @@ The editor panels/modes dictionary is left public so that user can easily get a 
     # disable code completion
     editor.modes['Code completion'].enabled = False
 
-    # show search and replace panel
+    # show search and replace Panel
     editor.panels['Search and replace'].show()
 
 

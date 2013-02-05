@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Sun Feb  3 18:18:24 2013
+# Created: Tue Feb  5 22:16:59 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -219,10 +219,10 @@ class Ui_SearchPanel(object):
         self.pushButtonReplace.setText(QtGui.QApplication.translate("SearchPanel", "Replace", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButtonReplaceAll.setText(QtGui.QApplication.translate("SearchPanel", "Replace All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setText(QtGui.QApplication.translate("SearchPanel", "Search", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSearch.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search panel", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSearch.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search Panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+F", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setText(QtGui.QApplication.translate("SearchPanel", "Search and replace", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionActionSearchAndReplace.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search and replace panel", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionActionSearchAndReplace.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search and replace Panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFindNext.setText(QtGui.QApplication.translate("SearchPanel", "Find next", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFindNext.setToolTip(QtGui.QApplication.translate("SearchPanel", "Find the next occurrence (downward)", None, QtGui.QApplication.UnicodeUTF8))

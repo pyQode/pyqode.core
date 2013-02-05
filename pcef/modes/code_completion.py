@@ -13,7 +13,7 @@ import os
 from PySide.QtCore import Qt
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QPlainTextEdit, QIcon
 
-from pcef.base import Mode
+from pcef.core import Mode
 
 
 class Suggestion(object):
@@ -133,14 +133,14 @@ class CodeCompletionMode(Mode):
 
     def install(self, editor):
         super(CodeCompletionMode, self).install(editor)
-        self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
-        self.editor.textEdit.textChanged.connect(self.onTextChanged)
-        self.editor.textEdit.focusedIn.connect(self.onFocusIn)
-        self.completer.setWidget(editor.textEdit)
+        self.editor.codeEdit.keyPressed.connect(self.onKeyPressed)
+        self.editor.codeEdit.textChanged.connect(self.onTextChanged)
+        self.editor.codeEdit.focusedIn.connect(self.onFocusIn)
+        self.completer.setWidget(editor.codeEdit)
         self.completer.setCompletionMode(QCompleter.PopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseSensitive)
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         pass
 
     def containsAny(self, str, set):
@@ -148,7 +148,7 @@ class CodeCompletionMode(Mode):
         return 1 in [c in str for c in set]
 
     def onFocusIn(self, event):
-        self.completer.setWidget(self.editor.textEdit)
+        self.completer.setWidget(self.editor.codeEdit)
 
     def onHighlighted(self, completion):
         self.currentCompletion = completion
@@ -165,7 +165,7 @@ class CodeCompletionMode(Mode):
             self.completer.setCompletionPrefix(completionPrefix)
             self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
         c = self.completer
-        cr = self.editor.textEdit.cursorRect()
+        cr = self.editor.codeEdit.cursorRect()
         cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
         c.complete(cr)  # popup it up!
 
@@ -187,26 +187,26 @@ class CodeCompletionMode(Mode):
             c = self.completer
             c.setCompletionPrefix(completionPrefix)
             c.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
-            cr = self.editor.textEdit.cursorRect()
+            cr = self.editor.codeEdit.cursorRect()
             cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
             c.complete(cr)  # popup it up!
 
     def textUnderCursor(self):
-        tc = self.editor.textEdit.textCursor()
+        tc = self.editor.codeEdit.textCursor()
         tc.movePosition ( QTextCursor.StartOfWord, QTextCursor.KeepAnchor)
         return tc.selectedText()
 
     def updateModels(self, completionPrefix):
         sorted_models = sorted(self._models, key=lambda mdl: mdl.priority, reverse=True)
-        tc = self.editor.textEdit.textCursor()
+        tc = self.editor.codeEdit.textCursor()
         line = tc.blockNumber() + 1
         col = tc.columnNumber()
-        fn = self.editor.textEdit.filename
-        encoding = self.editor.textEdit.encoding
+        fn = self.editor.codeEdit.filename
+        encoding = self.editor.codeEdit.encoding
         cc_model = QStandardItemModel()
         cptSuggestion = 0
         for model in sorted_models:
-            model.update(self.editor.textEdit.toPlainText(), line, col, fn, encoding)
+            model.update(self.editor.codeEdit.toPlainText(), line, col, fn, encoding)
             for s in model.suggestions:
                 if s.display != completionPrefix:
                     item = QStandardItem()
@@ -220,7 +220,7 @@ class CodeCompletionMode(Mode):
         self.completer.setModel(cc_model)
 
     def insertCompletion(self, completion=""):
-        tc = self.editor.textEdit.textCursor()
+        tc = self.editor.codeEdit.textCursor()
         tc.select(QTextCursor.WordUnderCursor)
         tc.insertText(completion)
-        self.editor.textEdit.setTextCursor(tc)
+        self.editor.codeEdit.setTextCursor(tc)

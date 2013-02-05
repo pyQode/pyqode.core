@@ -51,9 +51,9 @@ class Style(object):
         self.selectionTextColor = ''
         #: the line nbr color
         self.lineNbrColor = ''
-        #: A default panel background color
+        #: A default Panel background color
         self.panelsBackgroundColor = ''
-        #: A default panel separator color
+        #: A default Panel separator color
         self.panelSeparatorColor = ''
         #: A default font
         self.fontName = ''
@@ -152,12 +152,12 @@ class StyledObject(object):
         """
         assert isinstance(style, Style)
         self._style = style
-        self._onStyleChanged()
+        self.onStyleChanged()
 
     #: Current style instance
     currentStyle = property(__get_style, __set_style)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """
         Raises not ImplementError.
         Subclasses must overrides this method to update themselves whenever the

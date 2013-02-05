@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the search and replace panel
+Contains the search and replace Panel
 """
 import logging
 from PySide.QtCore import Qt
@@ -21,26 +21,26 @@ from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextCursor
 from PySide.QtGui import QTextDocument
 from pygments.token import Text
-from pcef.base import QEditorPanel
-from pcef.base import TextDecoration
-from pcef.qplaincodeedit import QPlainCodeEdit
+from pcef.core import Panel
+from pcef.core import TextDecoration
+from pcef.code_edit import CodeEdit
 from pcef.ui import search_panel_ui
 
 
-class QSearchPanel(QEditorPanel):
+class QSearchPanel(Panel):
     """
-    Search (& replace) panel. Allow the user to search for content in the editor
+    Search (& replace) Panel. Allow the user to search for content in the editor
     All occurrences are highlighted using the pygments syntax highlighter.
     The occurrence under the cursor is selected using the find method of the
     plain text edit. User can go backward and forward.
 
-    The panel add a few actions to the editor menu(search, replace, next,
+    The Panel add a few actions to the editor menu(search, replace, next,
     previous, replace, replace all)
 
-    The panel is show with ctrl-f for a search, ctrl-r for a search and replace.
-    The panel is hidden with ESC or by using the close button (white cross).
+    The Panel is show with ctrl-f for a search, ctrl-r for a search and replace.
+    The Panel is hidden with ESC or by using the close button (white cross).
 
-    .. note:: The widget use a custom stylesheet similar to the search panel of
+    .. note:: The widget use a custom stylesheet similar to the search Panel of
               Qt Creator.
     """
     #: Stylesheet
@@ -112,8 +112,8 @@ class QSearchPanel(QEditorPanel):
     numOccurrences = property(__get_numOccurrences, __set_numOccurrences)
 
     def __init__(self, parent=None):
-        QEditorPanel.__init__(self, "Search and replace",
-                              "The search and replace panel", parent)
+        Panel.__init__(self, "Search and replace",
+                              "The search and replace Panel", parent)
         self.ui = search_panel_ui.Ui_SearchPanel()
         self.ui.setupUi(self)
         self._decorations = []
@@ -129,21 +129,21 @@ class QSearchPanel(QEditorPanel):
         self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
 
     def showSearchPanel(self):
-        """ Shows the search panel """
+        """ Shows the search Panel """
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.hide()
-        selectedText = self.editor.textEdit.textCursor().selectedText()
+        selectedText = self.editor.codeEdit.textCursor().selectedText()
         if selectedText != "":
             self.ui.lineEditSearch.setText(selectedText)
         self.ui.lineEditSearch.setFocus()
 
     def showSearchAndReplacePanel(self):
-        """ Shows the search and replace panel """
+        """ Shows the search and replace Panel """
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.show()
-        selectedText = self.editor.textEdit.textCursor().selectedText()
+        selectedText = self.editor.codeEdit.textCursor().selectedText()
         if selectedText != "":
             self.ui.lineEditSearch.setText(selectedText)
         self.ui.lineEditReplace.setFocus()
@@ -168,7 +168,7 @@ class QSearchPanel(QEditorPanel):
         self.ui.pushButtonDown.setEnabled(enableNavigation)
         self.ui.pushButtonUp.setEnabled(enableNavigation)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Change stylesheet """
         qss = self.QSS % {"bck": self.currentStyle.panelsBackgroundColor,
                           "txt_bck": self.currentStyle.backgroundColor,
@@ -177,23 +177,23 @@ class QSearchPanel(QEditorPanel):
         self.setStyleSheet(qss)
 
     def install(self, editor):
-        """  Install the panel on the editor """
-        QEditorPanel.install(self, editor)
+        """  Install the Panel on the editor """
+        Panel.install(self, editor)
         self.updateUi()
         self.installActions()
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         if state is True:
-            self.editor.textEdit.cursorPositionChanged.connect(self.onCursorMoved)
-            self.editor.textEdit.textChanged.connect(self.updateSearchResults)
+            self.editor.codeEdit.cursorPositionChanged.connect(self.onCursorMoved)
+            self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
         else:
-            self.editor.textEdit.cursorPositionChanged.disconnect(self.onCursorMoved)
-            self.editor.textEdit.textChanged.connect(self.updateSearchResults)
+            self.editor.codeEdit.cursorPositionChanged.disconnect(self.onCursorMoved)
+            self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
 
     def installActions(self):
         """ Installs actions on the editor context menu """
-        editor = self.editor.textEdit
-        assert isinstance(editor, QPlainCodeEdit)
+        editor = self.editor.codeEdit
+        assert isinstance(editor, CodeEdit)
         editor.addSeparator()
         editor.addAction(self.ui.actionSearch)
         editor.addAction(self.ui.actionActionSearchAndReplace)
@@ -210,12 +210,12 @@ class QSearchPanel(QEditorPanel):
         """ Finds the next occurrence """
         txt = self.ui.lineEditSearch.text()
         sf = self.getUserSearchFlag()
-        if not self.editor.textEdit.find(txt, sf):
+        if not self.editor.codeEdit.find(txt, sf):
             # restart from start
-            tc = self.editor.textEdit.textCursor()
+            tc = self.editor.codeEdit.textCursor()
             tc.movePosition(QTextCursor.Start)
-            self.editor.textEdit.setTextCursor(tc)
-            self.editor.textEdit.find(txt, sf)
+            self.editor.codeEdit.setTextCursor(tc)
+            self.editor.codeEdit.find(txt, sf)
 
     @Slot()
     def on_pushButtonDown_clicked(self):
@@ -227,12 +227,12 @@ class QSearchPanel(QEditorPanel):
         txt = self.ui.lineEditSearch.text()
         sf = self.getUserSearchFlag()
         sf |= QTextDocument.FindBackward
-        if not self.editor.textEdit.find(txt, sf):
+        if not self.editor.codeEdit.find(txt, sf):
             # restart from end
-            tc = self.editor.textEdit.textCursor()
+            tc = self.editor.codeEdit.textCursor()
             tc.movePosition(QTextCursor.End)
-            self.editor.textEdit.setTextCursor(tc)
-            self.editor.textEdit.find(self.ui.lineEditSearch.text(), sf)
+            self.editor.codeEdit.setTextCursor(tc)
+            self.editor.codeEdit.find(self.ui.lineEditSearch.text(), sf)
 
     @Slot()
     def on_pushButtonUp_clicked(self):
@@ -241,7 +241,7 @@ class QSearchPanel(QEditorPanel):
 
     @Slot()
     def on_pushButtonClose_clicked(self):
-        """ Hides the panel """
+        """ Hides the Panel """
         self.hide()
         self.ui.lineEditSearch.setText("")
 
@@ -258,7 +258,7 @@ class QSearchPanel(QEditorPanel):
             self.highlightOccurrences(self.ui.lineEditSearch.text())
 
     def keyPressEvent(self, event):
-        """ Handles key pressed: Return = next occurence, Esc = close panel """
+        """ Handles key pressed: Return = next occurence, Esc = close Panel """
         assert isinstance(event, QKeyEvent)
         if event.key() == Qt.Key_Escape:
             self.on_pushButtonClose_clicked()
@@ -283,7 +283,7 @@ class QSearchPanel(QEditorPanel):
     def on_pushButtonReplace_clicked(self):
         """ Replace current selection and select first next occurence """
         txt = self.ui.lineEditReplace.text()
-        self.editor.textEdit.insertPlainText(txt)
+        self.editor.codeEdit.insertPlainText(txt)
         self.selectFirst()
 
     @Slot()
@@ -293,7 +293,7 @@ class QSearchPanel(QEditorPanel):
         if not self.ui.checkBoxCase.isChecked() and txt.upper() == self.ui.lineEditSearch.text().upper():
             return
         while self.numOccurrences > 0:
-            self.editor.textEdit.insertPlainText(txt)
+            self.editor.codeEdit.insertPlainText(txt)
             self.selectFirst()
 
     def onCursorMoved(self):
@@ -305,10 +305,10 @@ class QSearchPanel(QEditorPanel):
         """ Select the first next occurences """
         searchFlag = self.getUserSearchFlag()
         txt = self.ui.lineEditSearch.text()
-        tc = self.editor.textEdit.textCursor()
+        tc = self.editor.codeEdit.textCursor()
         tc.movePosition(QTextCursor.Start)
-        self.editor.textEdit.setTextCursor(tc)
-        self.editor.textEdit.find(txt, searchFlag)
+        self.editor.codeEdit.setTextCursor(tc)
+        self.editor.codeEdit.find(txt, searchFlag)
 
     def createDecoration(self, tc):
         """ Creates the text occurence decoration """
@@ -325,15 +325,15 @@ class QSearchPanel(QEditorPanel):
             return
         searchFlag = self.getUserSearchFlag()
         txt = self.ui.lineEditSearch.text()
-        tc = self.editor.textEdit.textCursor()
-        doc = self.editor.textEdit.document()
+        tc = self.editor.codeEdit.textCursor()
+        doc = self.editor.codeEdit.document()
         tc.movePosition(QTextCursor.Start)
         cptMatches = 0
         tc = doc.find(txt, tc, searchFlag)
         while not tc.isNull():
             deco = self.createDecoration(tc)
             self._decorations.append(deco)
-            self.editor.textEdit.addDecoration(deco)
+            self.editor.codeEdit.addDecoration(deco)
             tc.setPosition(tc.position() + 1)
             tc = doc.find(txt, tc, searchFlag)
             cptMatches += 1
@@ -342,7 +342,7 @@ class QSearchPanel(QEditorPanel):
     def clearDecorations(self):
         """ Remove all decorations """
         for deco in self._decorations:
-            self.editor.textEdit.removeDecoration(deco)
+            self.editor.codeEdit.removeDecoration(deco)
         self._decorations[:] = []
 
     def getUserSearchFlag(self):

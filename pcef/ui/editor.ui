@@ -57,7 +57,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPlainCodeEdit" name="textEdit">
+         <widget class="CodeEdit" name="codeEdit">
           <property name="contextMenuPolicy">
            <enum>Qt::DefaultContextMenu</enum>
           </property>
@@ -315,9 +315,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QPlainCodeEdit</class>
+   <class>CodeEdit</class>
    <extends>QTextEdit</extends>
-   <header>pcef/qplaincodeedit.h</header>
+   <header>pcef/code_edit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

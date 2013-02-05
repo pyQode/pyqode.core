@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor.ui'
 #
-# Created: Sun Feb  3 18:18:24 2013
+# Created: Tue Feb  5 22:16:59 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,12 +36,12 @@ class Ui_Form(object):
         self.layoutLeft.setContentsMargins(0, -1, -1, -1)
         self.layoutLeft.setObjectName("layoutLeft")
         self.layoutCenter.addLayout(self.layoutLeft)
-        self.textEdit = QPlainCodeEdit(self.frame)
-        self.textEdit.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
-        self.textEdit.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textEdit.setFrameShadow(QtGui.QFrame.Plain)
-        self.textEdit.setObjectName("textEdit")
-        self.layoutCenter.addWidget(self.textEdit)
+        self.codeEdit = CodeEdit(self.frame)
+        self.codeEdit.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.codeEdit.setFrameShape(QtGui.QFrame.NoFrame)
+        self.codeEdit.setFrameShadow(QtGui.QFrame.Plain)
+        self.codeEdit.setObjectName("codeEdit")
+        self.layoutCenter.addWidget(self.codeEdit)
         self.layoutRight = QtGui.QHBoxLayout()
         self.layoutRight.setObjectName("layoutRight")
         self.layoutCenter.addLayout(self.layoutRight)
@@ -173,5 +173,5 @@ class Ui_Form(object):
         self.actionUnindent.setToolTip(QtGui.QApplication.translate("Form", "Unindent selction", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUnindent.setShortcut(QtGui.QApplication.translate("Form", "Ctrl+Shift+I", None, QtGui.QApplication.UnicodeUTF8))
 
-from pcef.qplaincodeedit import QPlainCodeEdit
+from pcef.code_edit import CodeEdit
 import editor_rc

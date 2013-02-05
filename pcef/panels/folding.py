@@ -22,7 +22,7 @@ from PySide.QtGui import QPainter
 from PySide.QtGui import QPen
 from PySide.QtGui import QBrush
 from pygments.token import Text
-from pcef.base import QEditorPanel
+from pcef.core import Panel
 
 
 class FoldIndicator(object):
@@ -47,13 +47,13 @@ class FoldIndicator(object):
         self.hover = False
 
 
-class QFoldPanel(QEditorPanel):
-    """ This panel display folding indicators and folds/unfolds text """
+class QFoldPanel(Panel):
+    """ This Panel display folding indicators and folds/unfolds text """
     #: Panel identifier
     IDENTIFIER = "Folding"
 
     def __init__(self, parent=None):
-        QEditorPanel.__init__(
+        Panel.__init__(
             self, self.IDENTIFIER, "Display code folding indicators", parent)
         self.fold_indicators = []
         self.setMouseTracking(True)
@@ -83,30 +83,30 @@ class QFoldPanel(QEditorPanel):
         self.update()
 
     def install(self, editor):
-        """ Install the panel on the editor """
-        QEditorPanel.install(self, editor)
-        self.bc = self.editor.textEdit.blockCount()
+        """ Install the Panel on the editor """
+        Panel.install(self, editor)
+        self.bc = self.editor.codeEdit.blockCount()
         self.updateCursorPos()
 
-    def _onStateChanged(self, state):
-        QEditorPanel._onStateChanged(self, state)
+    def onStateChanged(self, state):
+        Panel.onStateChanged(self, state)
         if state is True:
-            self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-            self.editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
-            self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
-            self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+            self.editor.codeEdit.visibleBlocksChanged.connect(self.update)
+            self.editor.codeEdit.blockCountChanged.connect(self.onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.connect(self.onNewTextSet)
+            self.editor.codeEdit.keyPressed.connect(self.updateCursorPos)
         else:
-            self.editor.textEdit.visibleBlocksChanged.disconnect(self.update)
-            self.editor.textEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
-            self.editor.textEdit.newTextSet.disconnect(self.onNewTextSet)
-            self.editor.textEdit.keyPressed.disconnect(self.updateCursorPos)
+            self.editor.codeEdit.visibleBlocksChanged.disconnect(self.update)
+            self.editor.codeEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.disconnect(self.onNewTextSet)
+            self.editor.codeEdit.keyPressed.disconnect(self.updateCursorPos)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Updates brushes and pens """
         style = self.currentStyle
         self.font = QFont(self.currentStyle.fontName, 7)
         self.font.setBold(True)
-        fm = QFontMetricsF(self.editor.textEdit.font())
+        fm = QFontMetricsF(self.editor.codeEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
@@ -134,14 +134,14 @@ class QFoldPanel(QEditorPanel):
         return None
 
     def updateCursorPos(self):
-        self.tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
-        self.tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
+        self.tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
+        self.tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
 
     def onBlockCountChanged(self, num=-1):
         """ Handles line added/removed event """
         # a line has been inserted or removed
-        tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
-        tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
+        tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
+        tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
         bc = self.bc
         if bc < num:
             self.onLinesAdded(num - bc, tcPos, tcPosInBlock)
@@ -183,11 +183,11 @@ class QFoldPanel(QEditorPanel):
         """ Paints the widget """
         if self.enabled is False:
             return
-        QEditorPanel.paintEvent(self, event)
+        Panel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
 
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             line = vb.row
             # paint marker for line
             marker = self.getIndicatorForLine(line)
@@ -207,7 +207,7 @@ class QFoldPanel(QEditorPanel):
                 txt = '+'
             offset = 4
             h = self.size_hint.height()
-            fm = QFontMetricsF(self.editor.textEdit.font())
+            fm = QFontMetricsF(self.editor.codeEdit.font())
             hoffset = (fm.height() - h) / 2.0
             r = QRect(vb.rect.x(), vb.rect.y() + hoffset, self.size_hint.width(), self.size_hint.height())
             painter.setFont(self.font)
@@ -247,7 +247,7 @@ class QFoldPanel(QEditorPanel):
             if m.hover is True:
                 m.hover = False
                 repaint = True
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             top = vb.top
             height = vb.height
             if top < y < top + height:
@@ -267,12 +267,12 @@ class QFoldPanel(QEditorPanel):
             return
         pos = event.pos()
         y = pos.y()
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             top = vb.top
             height = vb.height
             if top < y < top + height:
                 marker = self.getIndicatorForLine(vb.row)
                 if marker is not None:
                     marker.folded = not marker.folded
-                    self.editor.textEdit.fold(marker.start - 1, marker.end, marker.folded)
+                    self.editor.codeEdit.fold(marker.start - 1, marker.end, marker.folded)
                     self.repaint()

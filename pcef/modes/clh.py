@@ -12,8 +12,8 @@
 from PySide.QtCore import Slot
 from PySide.QtGui import QBrush
 from PySide.QtGui import QColor
-from pcef.base import TextDecoration
-from pcef.base import Mode
+from pcef.core import TextDecoration
+from pcef.core import Mode
 
 
 class HighlightLineMode(Mode):
@@ -30,15 +30,15 @@ class HighlightLineMode(Mode):
         self._decoration = None
         self.brush = None
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         if state is True:
-            self.editor.textEdit.cursorPositionChanged.connect(self.changeActiveLine)
+            self.editor.codeEdit.cursorPositionChanged.connect(self.changeActiveLine)
             self.changeActiveLine()
         else:
-            self.editor.textEdit.cursorPositionChanged.disconnect(self.changeActiveLine)
-            self.editor.textEdit.removeDecoration(self._decoration)
+            self.editor.codeEdit.cursorPositionChanged.disconnect(self.changeActiveLine)
+            self.editor.codeEdit.removeDecoration(self._decoration)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Updates the pygments style """
         self.brush = QBrush(QColor(self.currentStyle.activeLineColor))
         self.changeActiveLine()
@@ -46,14 +46,14 @@ class HighlightLineMode(Mode):
     @Slot()
     def changeActiveLine(self):
         """ Changes the active line. """
-        tc = self.editor.textEdit.textCursor()
+        tc = self.editor.codeEdit.textCursor()
         pos = tc.blockNumber()
         if pos != self._pos:
             self._pos = pos
             # remove previous selection
-            self.editor.textEdit.removeDecoration(self._decoration)
+            self.editor.codeEdit.removeDecoration(self._decoration)
             # add new selection
             self._decoration = TextDecoration(tc)
             self._decoration.setBackground(self.brush)
             self._decoration.setFullWidth()
-            self.editor.textEdit.addDecoration(self._decoration)
+            self.editor.codeEdit.addDecoration(self._decoration)

@@ -12,7 +12,7 @@
 This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
 from PySide.QtCore import Qt
-from pcef.base import Mode
+from pcef.core import Mode
 from PySide import QtGui
 from pygments.lexers.compiled import CLexer, CppLexer
 from PySide.QtCore import QRegExp
@@ -333,20 +333,20 @@ class SyntaxHighlighterMode(Mode):
         """
         :type editor: pcef.editors.QGenericEditor
         """
-        self.highlighter = QPygmentsHighlighter(editor.textEdit.document())
+        self.highlighter = QPygmentsHighlighter(editor.codeEdit.document())
         self.prev_txt = ""
         super(SyntaxHighlighterMode, self).install(editor)
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         self.highlighter.enabled = state
         if state is True:
-            self.editor.textEdit.keyReleased.connect(self.onKeyReleased)
+            self.editor.codeEdit.keyReleased.connect(self.onKeyReleased)
         else:
-            self.editor.textEdit.keyReleased.disconnect(self.onKeyReleased)
+            self.editor.codeEdit.keyReleased.disconnect(self.onKeyReleased)
         self.highlighter.rehighlight()
 
     def onKeyReleased(self, event):
-        txt = self.editor.textEdit.textCursor().block().text()
+        txt = self.editor.codeEdit.textCursor().block().text()
         if event.key() == Qt.Key_Backspace:
             for trigger in self.triggers:
                 if trigger in txt or trigger in self.prev_txt:
@@ -364,7 +364,7 @@ class SyntaxHighlighterMode(Mode):
                 pass  # probably a function key (arrow,...)
         self.prev_txt = txt
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Updates the pygments style """
         if self.highlighter is not None:
             self.highlighter.style = self.currentStyle.pygmentsStyle

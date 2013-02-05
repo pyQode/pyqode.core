@@ -50,7 +50,7 @@ class SimpleEditor(QMainWindow):
                              os.path.join(os.getcwd(), "examples",
                              "generic_example.py"))
 
-        # install panel where user can add its own markers
+        # install Panel where user can add its own markers
         p = QUserMarkersPanel()
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
@@ -103,7 +103,7 @@ class SimpleEditor(QMainWindow):
             self.ui.genericEditor.modes[key].enabled = action.isChecked()
 
     def onPanelActionTriggered(self):
-        """ Enables/Disables a panel """
+        """ Enables/Disables a Panel """
         keys = self.ui.genericEditor.panels.keys()
         keys.sort()
         for key, action in zip(keys, self.panels_actions):

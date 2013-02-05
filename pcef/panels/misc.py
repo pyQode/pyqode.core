@@ -18,7 +18,7 @@ from pcef.panels.marker import Marker
 
 
 class QUserMarkersPanel(QMarkersPanel):
-    """ A simple marker panel that let the user add/remove marker using mouse clicks.
+    """ A simple marker Panel that let the user add/remove marker using mouse clicks.
     This could be used for bookmarks, breakpoints,...
     """
     def __init__(self, icon=":/icons/rc/bookmark.png", parent=None):

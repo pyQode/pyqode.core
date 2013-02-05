@@ -1,3 +1,10 @@
+.. PCEF - PySide Code Editing framework
+.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+
+.. This document is released under the LGPLv3 license.
+.. You should have received a copy of the GNU Lesser General Public License
+.. along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 Advanced topics
 ==================
 
@@ -55,14 +62,14 @@ Here is how you can retrieve a built-in style (or a style you added using addSty
 Creating custom modes and panels
 ----------------------------------
 
-To create a custom mode or panel you should first inherit :class: `pcef.base.Mode` or :class: `pcef.base.Panel` as shown
+To create a custom mode or Panel you should first inherit :class: `pcef.core.Mode` or :class: `pcef.core.Panel` as shown
 in the following example:
 
 
 .. code-block:: python
 
-    from pcef.base import Mode
-    from pcef.base import QEditorPanel
+    from pcef.core import Mode
+    from pcef.core import Panel
 
     class MyMode(Mode):
 
@@ -78,10 +85,10 @@ in the following example:
             else:
                 pass  # disconnect from self.editor.textEdit events
 
-    class MyPanel(QEditorPanel):
+    class MyPanel(Panel):
 
         def __init__(self):
-            super(MyPanel, self).__init__("My panel", "An example of custom panel")
+            super(MyPanel, self).__init__("My Panel", "An example of custom Panel")
 
         def _onStyleChanged(self):
             pass  # overrides this if you need to update colors, brushes, ...

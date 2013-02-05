@@ -12,8 +12,8 @@
 Contains the bases classes of the project:
     - StyledObject
     - Mode
-    - QEditorPanel
-    - QPlainCodeEdit
+    - Panel
+    - CodeEdit
     - QCodeEditorBase
 """
 import logging
@@ -32,8 +32,25 @@ from pcef.ui import editor_ui
 
 
 class EditorExtension(StyledObject):
+    """
+    Base class for editor extension. An extension is a "thing" that can be installed on the QCodeEditorWidget
+    to add new behaviours.
+
+    An editor extension is a :class:`pcef.style.StyledObject` as some extension might need to get access to the editor
+    style and to update their brushes,...
+
+    An editor extension is also an object that can be enabled/disabled. Its provides an enable property that
+    automatically call the abstract method onStateChanged.
+    """
 
     def __init__(self, name, description):
+        """
+        Creates the extension.
+
+        :param name: Extension name (used as an identifier)
+
+        :param description: A description of the extension (mainly used for gui (settings about the extension)).
+        """
         StyledObject.__init__(self)
         #: Extension name
         self.name = name
@@ -46,10 +63,24 @@ class EditorExtension(StyledObject):
         self.editor = None
 
     def install(self, editor):
-        pass
+        """
+        Abstract method called when the extension is installed on the editor widget.
 
-    def _onStateChanged(self, state):
-        """ Called when the enable state changed. Subclasses must override this method to disconnect their slots.
+        :param editor: editor instance.
+
+        .. warning: Raises a NotImplementedError. Subclasses must override this method to connect to the text edit
+                    signals.
+        """
+        raise NotImplementedError()
+
+    def onStateChanged(self, state):
+        """
+        Called when the enable state changed.
+
+        .. warning: Raises NotImplementedError. Subclasses must override this method to disconnect their slots.
+
+        :param state: True = enabled, False = disabled
+        :type state: bool
         """
         raise NotImplementedError()
 
@@ -59,7 +90,7 @@ class EditorExtension(StyledObject):
     def __set_enabled(self, enabled):
         if enabled != self.__enabled:
             self.__enabled = enabled
-            self._onStateChanged(enabled)
+            self.onStateChanged(enabled)
 
     #: Tells whether the extension is enabled or not
     enabled = property(__get_enabled, __set_enabled)
@@ -67,29 +98,26 @@ class EditorExtension(StyledObject):
 
 class Mode(EditorExtension):
     """
-    A mode is an object installable on the PCEF to provides a
-    unique feature to the editor.
+    Base class for editor modes.
 
-    To use a mode, one must install the mode on the editor widget. Installing
-    a mode gives the mode a pointer to PCEF so that the mode
-    can connect to various editor signals.
+    A mode is a :class:`pcef.core.EditorExtension` that is is generally a non-visual element (not a QWidget).
 
-    For example we might have modes that connect to the paints signals to paint
-    a right margin on the text edit, another mode might connect to the key
-    pressed event to provides code completion or smart formatting,...
+    Examples of modes are Code completion, syntax highlighting,...
 
-
-    This class is just a basic abstract interfaces to quickly creates new modes.
+    To use a mode, one must install the mode on the editor widget.
     """
 
     def __init__(self, name, description):
         """
+        Creates a Mode.
+
         :param name: The mode name
+
         :param description: The mode description
         """
         EditorExtension.__init__(self, name, description)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         pass  # not all modes need styling
 
     def install(self, editor):
@@ -102,19 +130,18 @@ class Mode(EditorExtension):
         .. warning::
             Don't forget to call **super** when subclassing
 
-        :param editor: PCEF instance
-        :type editor: pcef.editors.QGenericEditor
+        :param editor: editor widget instance
+        :type editor: pcef.core.CodeEditorWidget
         """
         self.editor = editor
-        self._onStyleChanged()
+        self.onStyleChanged()
 
 
-class QEditorPanel(QWidget, EditorExtension):
+class Panel(QWidget, EditorExtension):
     """
-    Base class for panel widgets.
+    Base class for editor Panel widgets.
 
-    A panel widget is identified by a name and is place in
-    one of the four zones of the PCEF widget.
+    A Panel is a QWidget and :class:`pcef.core.EditorExtension` that can be installed around the text edit widget.
     """
 
     def __init__(self, name, description, parent):
@@ -123,23 +150,26 @@ class QEditorPanel(QWidget, EditorExtension):
 
     def install(self, editor):
         """
-        Install the mode on the editor.
+        Install the Panel on the editor.
 
         .. warning::
-            For internal use only. User should use the installPanel method.
+            For internal use only. User should use the installPanel method from :class:`pcef.core.CodeEditorWidget`
 
         .. warning::
             Don't forget to call **super** when subclassing
 
 
-        :param editor: PCEF instance
+        :param editor: editor instance
         :type editor: pcef.editors.QGenericEditor
         """
         self.editor = editor
-        self._onStyleChanged()
+        self.onStyleChanged()
 
-    def _onStateChanged(self, state):
-        """ Shows/Hides the panel
+    def onStateChanged(self, state):
+        """ Shows/Hides the Panel
+
+        :param state: True = enabled, False = disabled
+        :type state: bool
         """
         if state is True:
             self.show()
@@ -149,11 +179,22 @@ class QEditorPanel(QWidget, EditorExtension):
 
 class TextDecoration(QTextEdit.ExtraSelection):
     """
-    Helps defining extra selection (text decorations)
+    Helper class to quickly create a text decoration.
     """
 
-    def __init__(self, cursorOrBlockOrDoc,
-                 startPos=None, endPos=None):
+    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None):
+        """
+        Creates a text decoration
+
+        :param cursorOrBlockOrDoc: Selection
+        :type cursorOrBlockOrDoc: QTextCursor or QTextBlock or QTextDocument
+
+        :param startPos: Selection start pos
+
+        :param endPos: Selection end pos
+
+        .. note:: Use the cursor selection if startPos and endPos are none.
+        """
         QTextEdit.ExtraSelection.__init__(self)
         cursor = QTextCursor(cursorOrBlockOrDoc)
         if startPos is not None:
@@ -173,12 +214,14 @@ class TextDecoration(QTextEdit.ExtraSelection):
 
     def setBackground(self, brush):
         """ Sets the background color
+
         :param brush: QBrush
         """
         self.format.setBackground(brush)
 
     def setFullWidth(self, flag=True):
         """ Sets full width selection
+
         :param flag: True to use full width selection.
         """
         self.cursor.clearSelection()
@@ -186,39 +229,56 @@ class TextDecoration(QTextEdit.ExtraSelection):
 
     def setSpellchecking(self, color=Qt.blue):
         """ Underlines text as a spellcheck error.
+
+        :param color: color
+        :type color: QColor
         """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
     def setError(self, color=Qt.red):
-        """ Highlights text as a syntax error """
+        """ Highlights text as a syntax error
+
+        :param color: color
+        :type color: QColor
+        """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
     def setWarning(self, color=QColor("orange")):
-        """ Highlights text as a syntax warning """
+        """
+        Highlights text as a syntax warning
+
+        :param color: color
+        :type color: QColor
+        """
         self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
 
-class QCodeEditor(QWidget, StyledObject):
+class CodeEditorWidget(QWidget, StyledObject):
     """Base class for the end user editor widgets.
 
-    QCodeEditor is a widget whose ui is setup from a Qt designer ui file.
-    It embeds a QPlainCodeEdit instances (using widget promotion from the
-    designer) and 4 zones to add panels.
+    CodeEditorWidget is a :class:`PySide.QtGui.QWidget` made from a QT designer ui.
 
-    The editor behaviour and widgets can be enriched by installing modes and
-    panels.
+    It embeds a :class:`pcef.code_edit.CodeEdit` instance (using widget promotion from the designer) and four zones
+    to add panels.
 
-    The base class itself does not install any modes or panels by itself. It
-    does not add actions to the text edit context menu neither. Subclasses in
-    defined in the editors module will take care of that.
+    .. note: The CodeEdit widget can be retrieved from the ui object but there is also a convenience property
+             :attr:`pcef.core.CodeEditorWidget.codeEdit`
+
+    The editor behaviour and widgets can be enriched by installing modes and panels.
+
+    The base class itself does not install any modes or panels by itself. It does not add actions to the text edit
+    context menu neither.
+
+    Subclasses defined in the editors module will take care of that.
+
+    You can also use the CodeEditorWidget directly and install the modes/panels/actions that you are interested in.
 
     .. note:: There is a filename attribute defined. This field must be view as
               a tag object to share the filename to other modules that might need this
-              information. This field is only set if you use the openFileInEditor function
-              (importable for the qcef package itself)
+              information. This field is only set if you use the :func:`pcef.openFileInEditor`
 
     """
     #: The default value used to for indentation. (All indentation modes should
@@ -228,29 +288,35 @@ class QCodeEditor(QWidget, StyledObject):
     #
     # Panels zones definitions
     #
-    #: Top panel zone id
+    #: Top Panel zone id
     PANEL_ZONE_TOP = 0
-    #: Bottom panel zone id
+    #: Bottom Panel zone id
     PANEL_ZONE_BOTTOM = 1
-    #: Left panel zone id
+    #: Left Panel zone id
     PANEL_ZONE_LEFT = 2
-    #: Right panel zone id
+    #: Right Panel zone id
     PANEL_ZONE_RIGHT = 3
 
     @property
-    def textEdit(self):
+    def codeEdit(self):
         """
-        Return the editor plain text edit
-        :return: pcef.promoted_widgets.QPlainCodeEdit
+        Return the codeEdit widget
+
+        :returns: pcef.code_edit.CodeEdit
         """
-        return self.ui.textEdit
+        return self.ui.codeEdit
 
     def __init__(self, parent=None):
+        """
+        Creates the widget.
+
+        :param parent: Optional parent widget
+        """
         QWidget.__init__(self, parent)
         StyledObject.__init__(self)
         self.ui = editor_ui.Ui_Form()
         self.ui.setupUi(self)
-        self.textEdit.editor = weakref.ref(self)
+        self.codeEdit.editor = weakref.ref(self)
 
         #: List of installed modes
         self.modes = {}
@@ -269,6 +335,7 @@ class QCodeEditor(QWidget, StyledObject):
 
     def installMode(self, mode):
         """ Installs a mode on the widget.
+
         :param mode:  Mode instance to install.
         """
         self.logger.info("Installing mode %s" % mode.name)
@@ -278,12 +345,13 @@ class QCodeEditor(QWidget, StyledObject):
         mode.enabled = True
 
     def installPanel(self, panel, zone):
-        """ Installs a panel on the widget.
+        """ Installs a Panel on the widget.
+
         :param panel: Panel instance to install
-        :param zone: The zone where the panel will be install
-        QCodeEditor.PANEL_ZONE_XXX.
+
+        :param zone: The zone where the Panel will be installed (CodeEditorWidget.PANEL_ZONE_XXX)
         """
-        self.logger.info("Installing panel {0} on zone {1}".format(panel.name,
+        self.logger.info("Installing Panel {0} on zone {1}".format(panel.name,
                                                                 zone))
         self.panels[panel.name] = panel
         panel.install(self)
@@ -291,9 +359,9 @@ class QCodeEditor(QWidget, StyledObject):
         panel.enabled = True
         self.zones[zone].addWidget(panel)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Update installed modes and panels style. """
-        self.textEdit.currentStyle = self.currentStyle
+        self.codeEdit.currentStyle = self.currentStyle
         for panel in self.panels.values():
             panel.currentStyle = self.currentStyle
         for mode in self.modes.values():

@@ -12,7 +12,7 @@
 """
 from PySide.QtGui import QPainter
 from PySide.QtGui import QPen
-from pcef.base import Mode
+from pcef.core import Mode
 
 
 class RightMarginMode(Mode):
@@ -28,23 +28,23 @@ class RightMarginMode(Mode):
         #: Defines the margin position
         self.marginPos = 80
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Updates the margin pen color """
         self.pen = QPen(self.currentStyle.marginColor)
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         if state is True:
-            self.editor.textEdit.postPainting.connect(self.__paintMargin)
+            self.editor.codeEdit.postPainting.connect(self.__paintMargin)
         else:
-            self.editor.textEdit.postPainting.disconnect(self.__paintMargin)
+            self.editor.codeEdit.postPainting.disconnect(self.__paintMargin)
 
     def __paintMargin(self, event):
         """ Paints the right margin as postPainting step. """
         rect = event.rect()
-        fm = self.editor.textEdit.fm
+        fm = self.editor.codeEdit.fm
         pos = self.marginPos
-        offset = self.editor.textEdit.contentOffset().x() + self.editor.textEdit.document().documentMargin()
+        offset = self.editor.codeEdit.contentOffset().x() + self.editor.codeEdit.document().documentMargin()
         x80 = round(fm.averageCharWidth() * pos) + offset
-        p = QPainter(self.editor.textEdit.viewport())
+        p = QPainter(self.editor.codeEdit.viewport())
         p.setPen(self.pen)
         p.drawLine(x80, rect.top(), x80, rect.bottom())

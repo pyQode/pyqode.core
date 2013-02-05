@@ -12,7 +12,7 @@
 import re
 from PySide.QtCore import Qt
 from PySide.QtGui import QTextCursor, QKeyEvent
-from pcef.base import Mode
+from pcef.core import Mode
 
 
 class AutoIndentMode(Mode):
@@ -29,7 +29,7 @@ class AutoIndentMode(Mode):
     def __init__(self):
         super(AutoIndentMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         pass  # style not needed
 
     def getIndent(self, tc):
@@ -42,11 +42,11 @@ class AutoIndentMode(Mode):
         tc.setPosition(pos)
         return indent
 
-    def _onStateChanged(self, state):
+    def onStateChanged(self, state):
         if state is True:
-            self.editor.textEdit.keyPressed.connect(self.onKeyPressed)
+            self.editor.codeEdit.keyPressed.connect(self.onKeyPressed)
         else:
-            self.editor.textEdit.keyPressed.disconnect(self.onKeyPressed)
+            self.editor.codeEdit.keyPressed.disconnect(self.onKeyPressed)
 
     def onKeyPressed(self, keyEvent):
         """
@@ -58,7 +58,7 @@ class AutoIndentMode(Mode):
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             # go next line
-            tc = self.editor.textEdit.textCursor()
+            tc = self.editor.codeEdit.textCursor()
             tc.insertText("\n")
             indent = self.getIndent(tc)
             tc.insertText(indent)

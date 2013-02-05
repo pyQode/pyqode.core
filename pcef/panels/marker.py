@@ -24,7 +24,7 @@ from PySide.QtGui import QPen
 from PySide.QtGui import QBrush
 from PySide.QtGui import QToolTip
 from pygments.token import Text
-from pcef.base import QEditorPanel
+from pcef.core import Panel
 
 
 class Marker(object):
@@ -43,7 +43,7 @@ class Marker(object):
         self.tooltip = tooltip
 
 
-class QMarkersPanel(QEditorPanel):
+class QMarkersPanel(Panel):
     """
     Panel used to draw a collection of marker.
     A marker is 16x16 icon placed at a specific line number.
@@ -73,18 +73,18 @@ class QMarkersPanel(QEditorPanel):
     """
 
     #: Signal emitted with the line number where the marker must be added
-    addMarkerRequested = Signal(QEditorPanel, int)
+    addMarkerRequested = Signal(Panel, int)
     #: Signal emitted when a marker is removed by the user.
-    markerRemoved = Signal(QEditorPanel, Marker)
+    markerRemoved = Signal(Panel, Marker)
     #: Signal emitted when a marker is out of the document. This usually
     #  happen when the user delete lines from the beginning of the doc.
-    markerOutOfDoc = Signal(QEditorPanel, Marker)
+    markerOutOfDoc = Signal(Panel, Marker)
     #: Signal emitted before clearing the markers when a new text is set to give
     #  a chance to the user to save the markers list.
-    clearingMarkers = Signal(QEditorPanel)
+    clearingMarkers = Signal(Panel)
 
     def __init__(self, name, markersReadOnly=False, parent=None):
-        QEditorPanel.__init__(
+        Panel.__init__(
             self, name, "Display markers foreach line", parent)
         self.markers = []
         #: prevent user from adding/removing markers with mouse click
@@ -113,26 +113,26 @@ class QMarkersPanel(QEditorPanel):
         self.update()
 
     def install(self, editor):
-        QEditorPanel.install(self, editor)
-        self.bc = self.editor.textEdit.blockCount()
+        Panel.install(self, editor)
+        self.bc = self.editor.codeEdit.blockCount()
         self.updateCursorPos()
 
-    def _onStateChanged(self, state):
-        QEditorPanel._onStateChanged(self, state)
+    def onStateChanged(self, state):
+        Panel.onStateChanged(self, state)
         if state is True:
-            self.editor.textEdit.visibleBlocksChanged.connect(self.update)
-            self.editor.textEdit.blockCountChanged.connect(self.onBlockCountChanged)
-            self.editor.textEdit.newTextSet.connect(self.onNewTextSet)
-            self.editor.textEdit.keyPressed.connect(self.updateCursorPos)
+            self.editor.codeEdit.visibleBlocksChanged.connect(self.update)
+            self.editor.codeEdit.blockCountChanged.connect(self.onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.connect(self.onNewTextSet)
+            self.editor.codeEdit.keyPressed.connect(self.updateCursorPos)
         else:
-            self.editor.textEdit.visibleBlocksChanged.disconnect(self.update)
-            self.editor.textEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
-            self.editor.textEdit.newTextSet.disconnect(self.onNewTextSet)
-            self.editor.textEdit.keyPressed.disconnect(self.updateCursorPos)
+            self.editor.codeEdit.visibleBlocksChanged.disconnect(self.update)
+            self.editor.codeEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.disconnect(self.onNewTextSet)
+            self.editor.codeEdit.keyPressed.disconnect(self.updateCursorPos)
 
-    def _onStyleChanged(self):
+    def onStyleChanged(self):
         """ Updates stylesheet and brushes. """
-        fm = QFontMetricsF(self.editor.textEdit.font())
+        fm = QFontMetricsF(self.editor.codeEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
         style = self.currentStyle
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
@@ -145,7 +145,7 @@ class QMarkersPanel(QEditorPanel):
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
-        fm = QFontMetricsF(self.editor.textEdit.font())
+        fm = QFontMetricsF(self.editor.codeEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
         return self.size_hint
 
@@ -162,14 +162,14 @@ class QMarkersPanel(QEditorPanel):
 
     def updateCursorPos(self):
         """ Update cursor pos variables """
-        self.tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
-        self.tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
+        self.tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
+        self.tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
 
     def onBlockCountChanged(self, num):
         """ Handles lines added/removed events """
         # a l has beeen inserted or removed
-        tcPos = self.editor.textEdit.textCursor().blockNumber() + 1
-        tcPosInBlock = self.editor.textEdit.textCursor().positionInBlock()
+        tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
+        tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
         bc = self.bc
         if bc < num:
             self.onLinesAdded(num - bc, tcPos, tcPosInBlock)
@@ -205,10 +205,10 @@ class QMarkersPanel(QEditorPanel):
         """ Paints the widget """
         if self.enabled is False:
             return
-        QEditorPanel.paintEvent(self, event)
+        Panel.paintEvent(self, event)
         painter = QPainter(self)
         painter.fillRect(event.rect(), self.back_brush)
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             l = vb.row
             marker = self.getMarkerForLine(l)
             if marker:
@@ -234,7 +234,7 @@ class QMarkersPanel(QEditorPanel):
             return
         pos = event.pos()
         y = pos.y()
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             top = vb.top
             height = vb.height
             if top < y < top + height:
@@ -262,7 +262,7 @@ class QMarkersPanel(QEditorPanel):
             return
         pos = event.pos()
         y = pos.y()
-        for vb in self.editor.textEdit.visible_blocks:
+        for vb in self.editor.codeEdit.visible_blocks:
             top = vb.top
             height = vb.height
             if top < y < top + height:
