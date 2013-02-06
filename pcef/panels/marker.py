@@ -29,7 +29,7 @@ from pcef.core import Panel
 
 class Marker(object):
     """
-    A marker is a rect drawn on a QMarkersPanel at a specific block position.
+    A marker is a rect drawn on a MarkersPanel at a specific block position.
 
     Fields:
         - position: block count
@@ -43,18 +43,20 @@ class Marker(object):
         self.tooltip = tooltip
 
 
-class QMarkersPanel(Panel):
+class MarkersPanel(Panel):
     """
     Panel used to draw a collection of marker.
     A marker is 16x16 icon placed at a specific line number.
 
-    A marker is added/removed when the user click on the the widget or
-    programmatically. Actually if there is no marker where the user clicked, the
-    markerAddRequested signal is emitted as we don't known the marker
-    properties. When a marker is removed by the user, the markerRemoved is
-    emitted.
+    A marker is added/removed when the user click on the the widget or manually (using addMarker).
+
+    Actually if there is no marker where the user clicked, the markerAddRequested signal is emitted as we don't known
+    what kind of marker we must add.
+
+    When a marker is removed by the user, the markerRemoved signal is emitted.
 
     .. note:: The markers position is updated whenever a line is added/removed.
+
     .. note:: The markers list is cleared when a new text is set on the text
               edit (see QCodeEdit.newTextSet signal)
 
@@ -102,12 +104,12 @@ class QMarkersPanel(Panel):
         self.update()
 
     def removeMarker(self, marker):
-        """ Remove a marker """
+        """ Removes a marker """
         self.markers.remove(marker)
         self.update()
 
-    def clearMarkers(self, emit=False):
-        """ Clear marker list """
+    def clearMarkers(self):
+        """ Clears the markers list """
         self.clearingMarkers.emit(self)
         self.markers[:] = []
         self.update()
@@ -115,22 +117,22 @@ class QMarkersPanel(Panel):
     def install(self, editor):
         Panel.install(self, editor)
         self.bc = self.editor.codeEdit.blockCount()
-        self.updateCursorPos()
+        self.__updateCursorPos()
 
-    def onStateChanged(self, state):
-        Panel.onStateChanged(self, state)
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
         if state is True:
             self.editor.codeEdit.visibleBlocksChanged.connect(self.update)
-            self.editor.codeEdit.blockCountChanged.connect(self.onBlockCountChanged)
-            self.editor.codeEdit.newTextSet.connect(self.onNewTextSet)
-            self.editor.codeEdit.keyPressed.connect(self.updateCursorPos)
+            self.editor.codeEdit.blockCountChanged.connect(self.__onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.connect(self.__onNewTextSet)
+            self.editor.codeEdit.keyPressed.connect(self.__updateCursorPos)
         else:
             self.editor.codeEdit.visibleBlocksChanged.disconnect(self.update)
-            self.editor.codeEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
-            self.editor.codeEdit.newTextSet.disconnect(self.onNewTextSet)
-            self.editor.codeEdit.keyPressed.disconnect(self.updateCursorPos)
+            self.editor.codeEdit.blockCountChanged.disconnect(self.__onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.disconnect(self.__onNewTextSet)
+            self.editor.codeEdit.keyPressed.disconnect(self.__updateCursorPos)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Updates stylesheet and brushes. """
         fm = QFontMetricsF(self.editor.codeEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
@@ -149,23 +151,23 @@ class QMarkersPanel(Panel):
         self.size_hint = QSize(fm.height(), fm.height())
         return self.size_hint
 
-    def onNewTextSet(self):
+    def __onNewTextSet(self):
         """ Clears markers when a new text is set """
         self.clearMarkers(True)
 
-    def getMarkerForLine(self, l):
-        """ Retusn the marker for the line l if any, else return None """
+    def __getMarkerForLine(self, l):
+        """ Returns the marker for the line l if any, else return None """
         for m in self.markers:
             if m.position == l:
                 return m
         return None
 
-    def updateCursorPos(self):
-        """ Update cursor pos variables """
+    def __updateCursorPos(self):
+        """ Updates cursor pos variables """
         self.tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
         self.tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
 
-    def onBlockCountChanged(self, num):
+    def __onBlockCountChanged(self, num):
         """ Handles lines added/removed events """
         # a l has beeen inserted or removed
         tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
@@ -210,7 +212,7 @@ class QMarkersPanel(Panel):
         painter.fillRect(event.rect(), self.back_brush)
         for vb in self.editor.codeEdit.visible_blocks:
             l = vb.row
-            marker = self.getMarkerForLine(l)
+            marker = self.__getMarkerForLine(l)
             if marker:
                 if marker.icon is not None:
                     r = QRect()
@@ -238,7 +240,7 @@ class QMarkersPanel(Panel):
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self.getMarkerForLine(vb.row)
+                marker = self.__getMarkerForLine(vb.row)
                 if (marker is not None and
                     marker.tooltip is not None and
                     marker.tooltip != ""):
@@ -266,7 +268,7 @@ class QMarkersPanel(Panel):
             top = vb.top
             height = vb.height
             if top < y < top + height:
-                marker = self.getMarkerForLine(vb.row)
+                marker = self.__getMarkerForLine(vb.row)
                 if marker is not None:
                     self.removeMarker(marker)
                     self.markerRemoved.emit(self, marker)

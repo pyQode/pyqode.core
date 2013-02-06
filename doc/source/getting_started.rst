@@ -8,15 +8,9 @@
 Getting started
 ===============
 
-This framework aims to keep things simple for the basic user while not preventing advanced user from doing more
-complex things.
+This page is a gentle introduction to the pcef framework. Before reading this you should have PCEF and
+PySide :doc:`installed </download>` on your system.
 
-For that purpose, there is two way to use pcef:
-
-    - using a pre-made editor that already fits your needs (from pcef.editors import)
-    - using a raw editor widget where you can install the modes/panels you really need.
-
-In both cases user will always have a way to add a new mode/Panel or to disable already installed one.
 
 .. contents:: :local:
 
@@ -43,6 +37,16 @@ The editor widget provides flexibility by the use of editor extensions. There ar
 The text edit is a subclass of a QPlainTextEdit to adds a few new events:
     - newTextSet
     - keyReleased, keyPressed, ....
+
+.. note:: This framework aims to keep things simple for the basic user while not preventing advanced user from doing
+          more complex things.
+
+          For that purpose, there is two way to use pcef:
+
+            - use a pre-made editor that already fits your needs (from pcef.editors import)
+            - use the raw/core editor widget where you can install the modes/panels you really need.
+
+          In both cases user will always have a way to add a new mode/Panel or to disable already installed one.
 
 Using a pre-made editor
 ----------------------------

@@ -30,18 +30,20 @@ from pcef.ui import search_panel_ui
 class QSearchPanel(Panel):
     """
     Search (& replace) Panel. Allow the user to search for content in the editor
-    All occurrences are highlighted using the pygments syntax highlighter.
+
+    All occurrences are highlighted using text decorations.
+
     The occurrence under the cursor is selected using the find method of the
     plain text edit. User can go backward and forward.
 
     The Panel add a few actions to the editor menu(search, replace, next,
     previous, replace, replace all)
 
-    The Panel is show with ctrl-f for a search, ctrl-r for a search and replace.
+    The Panel is shown with ctrl-f for a search, ctrl-r for a search and replace.
+
     The Panel is hidden with ESC or by using the close button (white cross).
 
-    .. note:: The widget use a custom stylesheet similar to the search Panel of
-              Qt Creator.
+    .. note:: The widget use a custom ui designed in Qt Designer
     """
     #: Stylesheet
     QSS = """QWidget
@@ -108,7 +110,7 @@ class QSearchPanel(Panel):
             self._numOccurrences = numOccurrences
             self.numOccurrencesChanged.emit()
 
-    #: Nb occurences detected
+    #: Nb occurrences detected
     numOccurrences = property(__get_numOccurrences, __set_numOccurrences)
 
     def __init__(self, parent=None):
@@ -119,7 +121,7 @@ class QSearchPanel(Panel):
         self._decorations = []
         self._numOccurrences = 0
         self._processing = False
-        self.numOccurrencesChanged.connect(self.updateUi)
+        self.numOccurrencesChanged.connect(self.__updateUi)
         self.ui.actionFindNext.triggered.connect(self.findNext)
         self.ui.actionFindPrevious.triggered.connect(self.findPrevious)
         self.ui.actionSearch.triggered.connect(self.showSearchPanel)
@@ -148,7 +150,7 @@ class QSearchPanel(Panel):
             self.ui.lineEditSearch.setText(selectedText)
         self.ui.lineEditReplace.setFocus()
 
-    def updateUi(self):
+    def __updateUi(self):
         """ Updates user interface (checkbox states, nb matches, ...) """
         # update matches label
         self.ui.labelMatches.setText("%d matches" % self.numOccurrences)
@@ -168,7 +170,7 @@ class QSearchPanel(Panel):
         self.ui.pushButtonDown.setEnabled(enableNavigation)
         self.ui.pushButtonUp.setEnabled(enableNavigation)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Change stylesheet """
         qss = self.QSS % {"bck": self.currentStyle.panelsBackgroundColor,
                           "txt_bck": self.currentStyle.backgroundColor,
@@ -179,18 +181,18 @@ class QSearchPanel(Panel):
     def install(self, editor):
         """  Install the Panel on the editor """
         Panel.install(self, editor)
-        self.updateUi()
-        self.installActions()
+        self.__updateUi()
+        self.__installActions()
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state is True:
-            self.editor.codeEdit.cursorPositionChanged.connect(self.onCursorMoved)
+            self.editor.codeEdit.cursorPositionChanged.connect(self.__onCursorMoved)
             self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
         else:
-            self.editor.codeEdit.cursorPositionChanged.disconnect(self.onCursorMoved)
+            self.editor.codeEdit.cursorPositionChanged.disconnect(self.__onCursorMoved)
             self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
 
-    def installActions(self):
+    def __installActions(self):
         """ Installs actions on the editor context menu """
         editor = self.editor.codeEdit
         assert isinstance(editor, CodeEdit)
@@ -277,7 +279,7 @@ class QSearchPanel(Panel):
     @Slot(unicode)
     def on_lineEditReplace_textChanged(self, text):
         """ Updates user interface """
-        self.updateUi()
+        self.__updateUi()
 
     @Slot()
     def on_pushButtonReplace_clicked(self):
@@ -296,8 +298,8 @@ class QSearchPanel(Panel):
             self.editor.codeEdit.insertPlainText(txt)
             self.selectFirst()
 
-    def onCursorMoved(self):
-        """ Re-highlight occurences """
+    def __onCursorMoved(self):
+        """ (Re)highlights occurrences """
         if self._processing is False:
             self.highlightOccurrences(self.ui.lineEditSearch.text())
 
@@ -310,8 +312,8 @@ class QSearchPanel(Panel):
         self.editor.codeEdit.setTextCursor(tc)
         self.editor.codeEdit.find(txt, searchFlag)
 
-    def createDecoration(self, tc):
-        """ Creates the text occurence decoration """
+    def __createDecoration(self, tc):
+        """ Creates the text occurences decoration """
         deco = TextDecoration(tc)
         deco.setBackground(QBrush(QColor(
             self.currentStyle.searchBackgroundColor)))
@@ -319,19 +321,18 @@ class QSearchPanel(Panel):
             self.currentStyle.searchColor)))
         return deco
 
-    def highlightAllOccurrences(self):
+    def highlightAllOccurrences(self, txt):
         """ Highlight all occurrences """
         if not self.isVisible():
             return
         searchFlag = self.getUserSearchFlag()
-        txt = self.ui.lineEditSearch.text()
         tc = self.editor.codeEdit.textCursor()
         doc = self.editor.codeEdit.document()
         tc.movePosition(QTextCursor.Start)
         cptMatches = 0
         tc = doc.find(txt, tc, searchFlag)
         while not tc.isNull():
-            deco = self.createDecoration(tc)
+            deco = self.__createDecoration(tc)
             self._decorations.append(deco)
             self.editor.codeEdit.addDecoration(deco)
             tc.setPosition(tc.position() + 1)
@@ -355,13 +356,14 @@ class QSearchPanel(Panel):
         return searchFlag
 
     def highlightOccurrences(self, txt, selectFirst=False):
-        """ Highlight occurences
+        """ Highlights occurrences
+
         :param txt: Text to highlight
-        :param selectFirst: True to select the first occurence
+        :param selectFirst: True to select the first occurrence
         """
         self._processing = True
         self.clearDecorations()
-        self.highlightAllOccurrences()
+        self.highlightAllOccurrences(txt)
         if selectFirst:
             self.selectFirst()
         self._processing = False

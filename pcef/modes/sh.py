@@ -153,14 +153,18 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self.enabled = True
 
     def setLexerFromFilename(self, filename):
+        """
+        Change the lexer based on the filename (actually only the extension is needed)
+
+        :param filename: Filename or extension
+        """
         try:
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
             self._lexer = PythonLexer()
 
     def highlightBlock(self, text):
-        """ Highlight a block of text.
-        """
+        """ Highlight a block of text """
         if self.enabled is False:
             return
         text = unicode(text)
@@ -321,12 +325,13 @@ class SyntaxHighlighterMode(Mode):
     """
     #: Mode identifier
     IDENTIFIER = "Syntax highlighter"
+    #: Mode description
+    DESCRIPTION = "Apply syntax highlighting to the editor using "
 
     def __init__(self):
         self.highlighter = None
         super(SyntaxHighlighterMode, self).__init__(
-            self.IDENTIFIER,
-            "Apply syntax highlighting to the editor using ")
+            self.IDENTIFIER, self.DESCRIPTION)
         self.triggers = ["*", '"', "'", "/"]
 
     def install(self, editor):
@@ -337,15 +342,15 @@ class SyntaxHighlighterMode(Mode):
         self.prev_txt = ""
         super(SyntaxHighlighterMode, self).install(editor)
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         self.highlighter.enabled = state
         if state is True:
-            self.editor.codeEdit.keyReleased.connect(self.onKeyReleased)
+            self.editor.codeEdit.keyReleased.connect(self.__onKeyReleased)
         else:
-            self.editor.codeEdit.keyReleased.disconnect(self.onKeyReleased)
+            self.editor.codeEdit.keyReleased.disconnect(self.__onKeyReleased)
         self.highlighter.rehighlight()
 
-    def onKeyReleased(self, event):
+    def __onKeyReleased(self, event):
         txt = self.editor.codeEdit.textCursor().block().text()
         if event.key() == Qt.Key_Backspace:
             for trigger in self.triggers:
@@ -364,7 +369,7 @@ class SyntaxHighlighterMode(Mode):
                 pass  # probably a function key (arrow,...)
         self.prev_txt = txt
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Updates the pygments style """
         if self.highlighter is not None:
             self.highlighter.style = self.currentStyle.pygmentsStyle
@@ -376,13 +381,13 @@ class SyntaxHighlighterMode(Mode):
         to highlight
 
         .. note::
-            A fake filename is enough to get the correct lexer based on the
-            extension).
+            Actually only the file extension is needed
 
         .. note::
             The default lexer is the Python lexer
 
-        :param fn: str -- Filename
+        :param fn: Filename or extension
+        :type fn: str
         """
         assert self.highlighter is not None, "SyntaxHighlightingMode not "\
                                              "installed"

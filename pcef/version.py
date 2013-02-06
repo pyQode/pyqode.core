@@ -11,11 +11,5 @@
 """
 Contains the PCEF version information
 """
-#: PCEF major version
-major = 0
-#: PCEF minor version
-minor = 1
-#: PCEF build version (a new build is made when we upload a new package to pypi)
-build = 0
 #: PCEF version string
-__version__ = "{0}.{1}.{2}-dev".format(major, minor, build)
+__version__ = "0.1.0-dev"

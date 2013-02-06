@@ -13,19 +13,25 @@ Contains miscellaneous panels not used by the editors but that could be useful f
 (at least them are examples or custom panels)
 """
 from PySide.QtGui import QIcon
-from pcef.panels.marker import QMarkersPanel
+from pcef.panels.marker import MarkersPanel
 from pcef.panels.marker import Marker
 
 
-class QUserMarkersPanel(QMarkersPanel):
+class UserMarkersPanel(MarkersPanel):
     """ A simple marker Panel that let the user add/remove marker using mouse clicks.
     This could be used for bookmarks, breakpoints,...
     """
     def __init__(self, icon=":/icons/rc/bookmark.png", parent=None):
-        QMarkersPanel.__init__(self, "User markers", False, parent)
-        self.addMarkerRequested.connect(self.addUserMarker)
+        MarkersPanel.__init__(self, "User markers", False, parent)
+        self.addMarkerRequested.connect(self.__addUserMarker)
         #: marker icon
         self._icon = icon
 
-    def addUserMarker(self, panel, lineNbr):
+    def __addUserMarker(self, panel, lineNbr):
+        """
+        Add a user marker automatically on click
+
+        :param panel: panel instance (self)
+        :param lineNbr: where to put the marker
+        """
         panel.addMarker(Marker(lineNbr, QIcon(self._icon), None))

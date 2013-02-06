@@ -24,15 +24,12 @@ DEFAULT_FONT_SIZE = 10
 
 
 class Style(object):
-    """Visual style options placeholder.
+    """
+    Defines style options used by all pcef widgets to setup their style.
 
-    This class contains the style options needed by all the components of
-    PCEF project (from text edit widget to panels,...)
+    It mainly consists of a font definition, a pygments style and a series of colors used for various purposes.
 
-    Style options mainly consists of colors and the font definition.
-
-    User can extend this class to define their own style or to add extra options
-    needed by their own modes/widgets.
+    A style can be serialised to a JSON file using :func:`pcef.style.toJSON` and :func:`pcef.style.fromJSON`
     """
 
     def __init__(self, name):
@@ -41,8 +38,6 @@ class Style(object):
         self.pygmentsStyle = ''
         #: Right margin color (used by
         self.marginColor = ''
-        #: Right margin pos
-        self.marginPos = 80
         #: The active line color
         self.activeLineColor = ''
         #: The selection background color
@@ -68,9 +63,12 @@ class Style(object):
         self.resetDefault()
 
     def resetDefault(self):
+        """
+        Reset the style to the default white style.
+        """
         self.pygmentsStyle = 'friendly'
         self.marginColor = '#FF0000'
-        self.marginPos = 80
+        self.marginPos = 120
         self.activeLineColor = '#E4EDF8'
         self.selectionBackgroundColor = '#6182F3'
         self.selectionTextColor = '#ffffff'
@@ -85,7 +83,7 @@ class Style(object):
     @property
     def backgroundColor(self):
         """
-        Return the style background color as defined by the pygmentsStyle
+        Returns the style background color as defined in the pygmentsStyle.
         """
         style = self.pygmentsStyle
         if (isinstance(self.pygmentsStyle, str) or
@@ -95,9 +93,11 @@ class Style(object):
 
     def tokenColor(self, token):
         """
-        Get a token color out of the pygmentsStyle.
+        Gets a token color out of the pygmentsStyle.
         If the toke color is not found or null, the method returns '#000000'
-        :return: str -- the color string formatted as html color (#RRggBB)
+
+        :return: The color string formatted as html color (#RRggBB)
+        :rtype: str
         """
         style = self.pygmentsStyle
         if (isinstance(self.pygmentsStyle, str) or
@@ -110,9 +110,11 @@ class Style(object):
 
 
 def toJSON(style):
-    """ Serialises a style to a json file
+    """
+    Serialises a style to a json file
+
     :param style: style to serialise
-    :type style: Style or str (name)
+    :type style: pcef.style.Style
     """
     assert isinstance(style, Style)
     with open("{0}.json".format(style.name), "w") as jsonFile:
@@ -121,9 +123,11 @@ def toJSON(style):
 
 def fromJSON(filename):
     """
-    Return a style instance from a json file
+    :returns: A style instance read from a json file
+
     :param filename: style json filename
-    :return: Style
+
+    :rtype: pcef.style.Style or None
     """
     style = Style("")
     with open(filename, "r") as jsonFile:
@@ -146,22 +150,18 @@ class StyledObject(object):
         return self._style
 
     def __set_style(self, style):
-        """
-        Changes the object style
-        :param style: style instance
-        """
         assert isinstance(style, Style)
         self._style = style
-        self.onStyleChanged()
+        self._onStyleChanged()
 
-    #: Current style instance
+    #: Current style
     currentStyle = property(__get_style, __set_style)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """
         Raises not ImplementError.
+
         Subclasses must overrides this method to update themselves whenever the
         style changed
-        :return:
         """
         raise NotImplementedError

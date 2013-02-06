@@ -21,7 +21,7 @@ from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
 from pcef import saveFileFromEditor
 from pcef import styles
-from pcef.panels.misc import QUserMarkersPanel
+from pcef.panels.misc import UserMarkersPanel
 
 from examples.ui import simple_editor_ui
 
@@ -51,7 +51,7 @@ class SimpleEditor(QMainWindow):
                              "generic_example.py"))
 
         # install Panel where user can add its own markers
-        p = QUserMarkersPanel()
+        p = UserMarkersPanel()
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
@@ -71,43 +71,42 @@ class SimpleEditor(QMainWindow):
             self.on_styleActionGroup_triggered)
 
         # add panels actions
-        allPanels = self.ui.genericEditor.panels.keys()
+        allPanels = self.ui.genericEditor.panels()
         allPanels.sort()
         self.panels_actions = []
         for i, panel in enumerate(allPanels):
             action = QAction(unicode(panel), self.ui.menuPanels)
             action.setCheckable(True)
-            action.setChecked(self.ui.genericEditor.panels[panel].enabled)
+            action.setChecked(panel.enabled)
             self.ui.menuPanels.addAction(action)
             self.panels_actions.append(action)
             action.triggered.connect(self.onPanelActionTriggered)
 
         # add panels actions
-        allModes = self.ui.genericEditor.modes.keys()
+        allModes = self.ui.genericEditor.modes()
         allModes.sort()
         self.modes_actions = []
         for i, mode in enumerate(allModes):
             action = QAction(unicode(mode), self.ui.menuModes)
             action.setCheckable(True)
-            action.setChecked(self.ui.genericEditor.modes[mode].enabled)
+            action.setChecked(mode.enabled)
             self.ui.menuModes.addAction(action)
             self.modes_actions.append(action)
             action.triggered.connect(self.onModeActionTriggered)
 
-
     def onModeActionTriggered(self):
         """ Enables/Disables a mode """
-        keys = self.ui.genericEditor.modes.keys()
-        keys.sort()
-        for key, action in zip(keys, self.modes_actions):
-            self.ui.genericEditor.modes[key].enabled = action.isChecked()
+        modes = self.ui.genericEditor.modes()
+        modes.sort()
+        for mode, action in zip(modes, self.modes_actions):
+            mode.enabled = action.isChecked()
 
     def onPanelActionTriggered(self):
         """ Enables/Disables a Panel """
-        keys = self.ui.genericEditor.panels.keys()
-        keys.sort()
-        for key, action in zip(keys, self.panels_actions):
-            self.ui.genericEditor.panels[key].enabled = action.isChecked()
+        panels = self.ui.genericEditor.panels()
+        panels.sort()
+        for panel, action in zip(panels, self.panels_actions):
+            panel.enabled = action.isChecked()
 
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """

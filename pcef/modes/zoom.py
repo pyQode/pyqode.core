@@ -19,30 +19,32 @@ from pcef import style
 
 class EditorZoomMode(Mode):
     """
-    This mode provide editor zoom (the editor font is increased/decreased)
+    Zoom in/out mode. (the editor font is increased/decreased)
     """
     #: Mode identifier
     IDENTIFIER = "Editor zoom"
+    #: Mode description
+    DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
 
     def __init__(self):
         super(EditorZoomMode, self).__init__(
-            self.IDENTIFIER, "Zoom the editor with ctrl+mouse wheel")
+            self.IDENTIFIER, self.DESCRIPTION)
         self.prev_delta = 0
         self.default_font_size = style.DEFAULT_FONT_SIZE
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state is True:
             self.editor.codeEdit.mouseWheelActivated.connect(
-                self.onWheelEvent)
-            self.editor.codeEdit.keyPressed.connect(self.onKeyPressed)
+                self.__onWheelEvent)
+            self.editor.codeEdit.keyPressed.connect(self.__onKeyPressed)
         else:
-            self.editor.codeEdit.mouseWheelActivated.disconnect(self.onWheelEvent)
-            self.editor.codeEdit.keyPressed.disconnect(self.onKeyPressed)
+            self.editor.codeEdit.mouseWheelActivated.disconnect(self.__onWheelEvent)
+            self.editor.codeEdit.keyPressed.disconnect(self.__onKeyPressed)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         pass
 
-    def onKeyPressed(self, event):
+    def __onKeyPressed(self, event):
         """
         Resets editor font size to the default font size
         :param event: wheelEvent
@@ -56,7 +58,7 @@ class EditorZoomMode(Mode):
             event.setAccepted(True)
             self.editor.currentStyle = style
 
-    def onWheelEvent(self, event):
+    def __onWheelEvent(self, event):
         """
         Increments or decrements editor fonts settings on mouse wheel event
         if ctrl modifier is on.

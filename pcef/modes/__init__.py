@@ -9,5 +9,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains the different modes developed for the pcef framework
+This package contains all official pcef modes
 """

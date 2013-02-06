@@ -108,11 +108,11 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     # Properties
     #---------------------------------------------------------------------------
     def __get_dirty(self):
-        return self._dirty
+        return self.__dirty
 
     def __set_dirty(self, dirty):
-        if dirty != self._dirty:
-            self._dirty = dirty
+        if dirty != self.__dirty:
+            self.__dirty = dirty
             self.dirtyChanged.emit(dirty)
 
     #: Tells whether the editor is dirty(changes have been made to the document)
@@ -129,32 +129,32 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         """
         QPlainTextEdit.__init__(self, parent)
         StyledObject.__init__(self)
-        self._completer = None
-        self.filename = None
-        self.encoding = 'utf8'
-        self._dirty = False
-        self._context_menu = QMenu()
-        self.selections = []
+        #: Tag member used to remeber the filename of the edited text if any
+        self.tagFilename = None
+        #: Tag member used to remeber the filename of the edited text if any
+        self.tagEncoding = 'utf8'
+        #: Weakref to the editor
+        self.editor = None
+
+        #: dirty flag
+        self.__dirty = False
+        #: our custom context menu
+        self.__context_menu = QMenu()
+        #: The list of active extra-selections (TextDecoration)
+        self.__selections = []
+        self.__numBlocks = -1
+
+        #: Shortcut to the fontMetrics
         self.fm = self.fontMetrics()
 
-        doc = self.document()
-        assert isinstance(doc, QTextDocument)
-        self.textChanged.connect(self.onTextChanged)
-        self.blockCountChanged.connect(self.onBlocksChanged)
-        self.verticalScrollBar().valueChanged.connect(self.onBlocksChanged)
-        self.newTextSet.connect(self.onBlocksChanged)
-        self.cursorPositionChanged.connect(self.onBlocksChanged)
+        self.textChanged.connect(self.__onTextChanged)
+        self.blockCountChanged.connect(self.__onBlocksChanged)
+        self.verticalScrollBar().valueChanged.connect(self.__onBlocksChanged)
+        self.newTextSet.connect(self.__onBlocksChanged)
+        self.cursorPositionChanged.connect(self.__onBlocksChanged)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
-        self.numBlocks = -1
-
-        #: Shortcuts for sharing the filename currently edited.
-        #  This is only set when using the openFileInEditor function.
-        self.filename = None
-        self.onStyleChanged()
-
-        #: weakref to the editor
-        self.editor = None
+        self._onStyleChanged()
 
     def addAction(self, action):
         """
@@ -163,13 +163,13 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param action: QAction
         """
         QTextEdit.addAction(self, action)
-        self._context_menu.addAction(action)
+        self.__context_menu.addAction(action)
 
     def addSeparator(self):
         """
         Adds a separator to the context menu
         """
-        self._context_menu.addSeparator()
+        self.__context_menu.addSeparator()
 
     def addDecoration(self, decoration):
         """
@@ -178,8 +178,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param decoration: Text decoration
         :type decoration: pcef.core.TextDecoration
         """
-        self.selections.append(decoration)
-        self.setExtraSelections(self.selections)
+        self.__selections.append(decoration)
+        self.setExtraSelections(self.__selections)
 
     def removeDecoration(self, decoration):
         """
@@ -189,8 +189,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :type decoration: pcef.core.TextDecoration
         """
         try:
-            self.selections.remove(decoration)
-            self.setExtraSelections(self.selections)
+            self.__selections.remove(decoration)
+            self.setExtraSelections(self.__selections)
         except ValueError:
             pass
 
@@ -277,7 +277,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """
         Updates widget style when style changed.
         """
@@ -386,14 +386,14 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
     def contextMenuEvent(self, event):
         """ Shows our own context menu """
-        self._context_menu.exec_(event.globalPos())
+        self.__context_menu.exec_(event.globalPos())
 
     def resizeEvent(self, event):
         """ Updates visible blocks on resize """
-        self.onBlocksChanged()
+        self.__onBlocksChanged()
         QPlainTextEdit.resizeEvent(self, event)
 
-    def onTextChanged(self):
+    def __onTextChanged(self):
         """ Sets dirty to true """
         self.dirty = True
 
@@ -404,7 +404,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         QPlainTextEdit.setPlainText(self, txt)
         self.newTextSet.emit()
 
-    def onBlocksChanged(self):
+    def __onBlocksChanged(self):
         """
         Updates the list of visible blocks and emits visibleBlocksChanged
         signal.
@@ -443,5 +443,5 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         for i in range(start + 1, end):
             self.document().findBlockByNumber(i).setVisible(not fold)
             self.update()
-        self.onBlocksChanged()
+        self.__onBlocksChanged()
 

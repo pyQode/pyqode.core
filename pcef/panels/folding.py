@@ -27,14 +27,10 @@ from pcef.core import Panel
 
 class FoldIndicator(object):
     """
-    A fold marker is used by the QFoldPanel to display code folding indicators.
+    A fold marker is used by the FoldPanel to display code folding indicators.
 
     A fold marker is defined by two line number (start and end) and a boolean
     property that tells whether the code block is folded or not.
-
-    Fields:
-        * **start** line nbr
-        * **end** line nbr
     """
     def __init__(self, start, end):
         #: Start line
@@ -47,14 +43,22 @@ class FoldIndicator(object):
         self.hover = False
 
 
-class QFoldPanel(Panel):
-    """ This Panel display folding indicators and folds/unfolds text """
+class FoldPanel(Panel):
+    """ This Panel display folding indicators and manage folding/unfolding a text
+
+
+    The panel also handles line added/removed and update the indicators position automatically.
+
+    .. note:: It does not parse the code to put fold indicators, this is the task of a code folder mode. Instead it
+              provides an easy way for other modes to put fold indicators on the left margin.
+    """
     #: Panel identifier
     IDENTIFIER = "Folding"
+    DESCRIPTION = "Display code folding indicators"
 
     def __init__(self, parent=None):
         Panel.__init__(
-            self, self.IDENTIFIER, "Display code folding indicators", parent)
+            self, self.IDENTIFIER, self.DESCRIPTION, parent)
         self.fold_indicators = []
         self.setMouseTracking(True)
         self.logger = logging.getLogger(
@@ -86,22 +90,22 @@ class QFoldPanel(Panel):
         """ Install the Panel on the editor """
         Panel.install(self, editor)
         self.bc = self.editor.codeEdit.blockCount()
-        self.updateCursorPos()
+        self.__updateCursorPos()
 
-    def onStateChanged(self, state):
-        Panel.onStateChanged(self, state)
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
         if state is True:
             self.editor.codeEdit.visibleBlocksChanged.connect(self.update)
-            self.editor.codeEdit.blockCountChanged.connect(self.onBlockCountChanged)
-            self.editor.codeEdit.newTextSet.connect(self.onNewTextSet)
-            self.editor.codeEdit.keyPressed.connect(self.updateCursorPos)
+            self.editor.codeEdit.blockCountChanged.connect(self.__onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.connect(self.__onNewTextSet)
+            self.editor.codeEdit.keyPressed.connect(self.__updateCursorPos)
         else:
             self.editor.codeEdit.visibleBlocksChanged.disconnect(self.update)
-            self.editor.codeEdit.blockCountChanged.disconnect(self.onBlockCountChanged)
-            self.editor.codeEdit.newTextSet.disconnect(self.onNewTextSet)
-            self.editor.codeEdit.keyPressed.disconnect(self.updateCursorPos)
+            self.editor.codeEdit.blockCountChanged.disconnect(self.__onBlockCountChanged)
+            self.editor.codeEdit.newTextSet.disconnect(self.__onNewTextSet)
+            self.editor.codeEdit.keyPressed.disconnect(self.__updateCursorPos)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Updates brushes and pens """
         style = self.currentStyle
         self.font = QFont(self.currentStyle.fontName, 7)
@@ -120,7 +124,7 @@ class QFoldPanel(Panel):
         self.size_hint = QSize(16, 16)
         return self.size_hint
 
-    def onNewTextSet(self):
+    def __onNewTextSet(self):
         self.clearIndicators()
 
     def getIndicatorForLine(self, line):
@@ -133,24 +137,28 @@ class QFoldPanel(Panel):
                 return m
         return None
 
-    def updateCursorPos(self):
+    def __updateCursorPos(self):
+        """
+        Update tcPos and tcPosInBlock
+        :return:
+        """
         self.tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
         self.tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
 
-    def onBlockCountChanged(self, num=-1):
+    def __onBlockCountChanged(self, num=-1):
         """ Handles line added/removed event """
         # a line has been inserted or removed
         tcPos = self.editor.codeEdit.textCursor().blockNumber() + 1
         tcPosInBlock = self.editor.codeEdit.textCursor().positionInBlock()
         bc = self.bc
         if bc < num:
-            self.onLinesAdded(num - bc, tcPos, tcPosInBlock)
+            self.__onLinesAdded(num - bc, tcPos, tcPosInBlock)
         else:
-            self.onLinesRemoved(bc - num, tcPos, tcPosInBlock)
+            self.__onLinesRemoved(bc - num, tcPos, tcPosInBlock)
         self.tcPosInBlock = self.tcPosInBlock
         self.bc = num
 
-    def onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
+    def __onLinesAdded(self, nbLines, tcPos, tcPosInBlock):
         """ Offsets markers positions with the number of line added """
         if self.tcPosInBlock > 0:
             self.tcPos += 1
@@ -164,7 +172,7 @@ class QFoldPanel(Panel):
         self.tcPosInBlock = tcPosInBlock
         self.update()
 
-    def onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
+    def __onLinesRemoved(self, nbLines, tcPos, tcPosInBlock):
         """ Offsets markers positions with the number of line removed """
         for marker in self.fold_indicators:
             if marker.start >= self.tcPos:

@@ -26,6 +26,7 @@ def getAllStyles():
 def addStyle(newStyle):
     """
     Add a new style to the style map (can be loaded from a json file)
+
     :param newStyle: Style subclass instance
     """
     global __STYLES
@@ -34,6 +35,7 @@ def addStyle(newStyle):
 
 def getStyle(name='Default'):
     """ Returns the style instance that match the style name
+
     :param name: style name
     :return: Style or None
     """

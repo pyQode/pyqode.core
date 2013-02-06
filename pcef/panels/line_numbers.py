@@ -22,7 +22,7 @@ from PySide.QtGui import QBrush
 from pcef.core import Panel
 
 
-class QLineNumberPanel(Panel):
+class LineNumberPanel(Panel):
     """ This Panel show the line numbers """
 
     #: Panel identifier
@@ -35,8 +35,8 @@ class QLineNumberPanel(Panel):
     def install(self, editor):
         Panel.install(self, editor)
 
-    def onStateChanged(self, state):
-        Panel.onStateChanged(self, state)
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
         if state is True:
             self.editor.codeEdit.visibleBlocksChanged.connect(self.update)
             self.editor.codeEdit.blockCountChanged.connect(self.updateGeometry)
@@ -44,7 +44,7 @@ class QLineNumberPanel(Panel):
             self.editor.codeEdit.visibleBlocksChanged.disconnect(self.update)
             self.editor.codeEdit.blockCountChanged.disconnect(self.updateGeometry)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Updates brushes and pens """
         if self.editor is not None:
             self.font = self.editor.codeEdit.font()

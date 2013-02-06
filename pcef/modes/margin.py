@@ -25,14 +25,14 @@ class RightMarginMode(Mode):
     def __init__(self):
         Mode.__init__(self, self.IDENTIFIER, "Draw the right margin on the "
                                              "document")
-        #: Defines the margin position
+        #: Defines the margin position. 80 is the default
         self.marginPos = 80
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Updates the margin pen color """
         self.pen = QPen(self.currentStyle.marginColor)
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state is True:
             self.editor.codeEdit.postPainting.connect(self.__paintMargin)
         else:

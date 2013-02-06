@@ -19,9 +19,11 @@ class AutoIndentMode(Mode):
     """ A basic auto indent mode that provides a basic auto indentation based on the previous
     line indentation.
 
-    This mode can be extended by overriding the getIndent method.
+    This mode can be extended by overriding the _getIndent method.
     """
+    #: Mode identifier
     IDENTIFIER = "Auto indent"
+    #: Mode description
     DESCRIPTION = """ A basic auto indent mode that provides a basic auto indentation based on the previous
     line indentation.
     """
@@ -29,10 +31,15 @@ class AutoIndentMode(Mode):
     def __init__(self):
         super(AutoIndentMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         pass  # style not needed
 
-    def getIndent(self, tc):
+    def _getIndent(self, tc):
+        """
+        Return the indentation text (a series of spaces, tabs)
+
+        :param tc: QTextCursor
+        """
         pos = tc.position()
         tc.movePosition(QTextCursor.StartOfLine)
         tc.setPosition(tc.position() - 1)
@@ -42,13 +49,13 @@ class AutoIndentMode(Mode):
         tc.setPosition(pos)
         return indent
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state is True:
-            self.editor.codeEdit.keyPressed.connect(self.onKeyPressed)
+            self.editor.codeEdit.keyPressed.connect(self.__onKeyPressed)
         else:
-            self.editor.codeEdit.keyPressed.disconnect(self.onKeyPressed)
+            self.editor.codeEdit.keyPressed.disconnect(self.__onKeyPressed)
 
-    def onKeyPressed(self, keyEvent):
+    def __onKeyPressed(self, keyEvent):
         """
         Auto indent if the released key is the return key.
         :param keyEvent: the key event
@@ -60,7 +67,7 @@ class AutoIndentMode(Mode):
             # go next line
             tc = self.editor.codeEdit.textCursor()
             tc.insertText("\n")
-            indent = self.getIndent(tc)
+            indent = self._getIndent(tc)
             tc.insertText(indent)
             tc.movePosition(QTextCursor.EndOfLine)
             keyEvent.setAccepted(True)

@@ -62,18 +62,27 @@ class EditorExtension(StyledObject):
         #: Editor instance
         self.editor = None
 
+    def __str__(self):
+        return self.name
+
     def install(self, editor):
         """
-        Abstract method called when the extension is installed on the editor widget.
+        Installs the extension on the editor.
 
-        :param editor: editor instance.
+        .. warning::
+            For internal use only. User may needs to override this method to have a chance to connect to the editor
+            signals.
 
-        .. warning: Raises a NotImplementedError. Subclasses must override this method to connect to the text edit
-                    signals.
+        .. warning::
+            Don't forget to call **super** when subclassing
+
+        :param editor: editor widget instance
+        :type editor: pcef.core.CodeEditorWidget
         """
-        raise NotImplementedError()
+        self.editor = editor
+        self._onStyleChanged()
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         Called when the enable state changed.
 
@@ -90,7 +99,7 @@ class EditorExtension(StyledObject):
     def __set_enabled(self, enabled):
         if enabled != self.__enabled:
             self.__enabled = enabled
-            self.onStateChanged(enabled)
+            self._onStateChanged(enabled)
 
     #: Tells whether the extension is enabled or not
     enabled = property(__get_enabled, __set_enabled)
@@ -117,24 +126,8 @@ class Mode(EditorExtension):
         """
         EditorExtension.__init__(self, name, description)
 
-    def onStyleChanged(self):
-        pass  # not all modes need styling
-
-    def install(self, editor):
-        """
-        Install the mode on the editor.
-
-        .. warning::
-            For internal use only. User should use the installMode method.
-
-        .. warning::
-            Don't forget to call **super** when subclassing
-
-        :param editor: editor widget instance
-        :type editor: pcef.core.CodeEditorWidget
-        """
-        self.editor = editor
-        self.onStyleChanged()
+    def _onStyleChanged(self):
+        pass  # not all modes need styling, don't force them to implement something they don't need
 
 
 class Panel(QWidget, EditorExtension):
@@ -148,24 +141,7 @@ class Panel(QWidget, EditorExtension):
         EditorExtension.__init__(self, name, description)
         QWidget.__init__(self, parent)
 
-    def install(self, editor):
-        """
-        Install the Panel on the editor.
-
-        .. warning::
-            For internal use only. User should use the installPanel method from :class:`pcef.core.CodeEditorWidget`
-
-        .. warning::
-            Don't forget to call **super** when subclassing
-
-
-        :param editor: editor instance
-        :type editor: pcef.editors.QGenericEditor
-        """
-        self.editor = editor
-        self.onStyleChanged()
-
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """ Shows/Hides the Panel
 
         :param state: True = enabled, False = disabled
@@ -306,6 +282,40 @@ class CodeEditorWidget(QWidget, StyledObject):
         """
         return self.ui.codeEdit
 
+    def mode(self, identifier):
+        """
+        Returns the mode that match the identifier.
+
+        :param identifier: Mode identifier
+
+        :return: Mode or None
+        :rtype: pcef.base.Mode or None
+        """
+        return self.__modes[identifier]
+
+    def modes(self):
+        """
+        Returns the panels list
+        """
+        return self.__modes.values()
+
+    def panel(self, identifier):
+        """
+        Returns the panel that match the identifier.
+
+        :param identifier: Panel identifier
+
+        :return: Panel or None
+        :rtype: pcef.base.Panel or None
+        """
+        return self.__panels[identifier]
+
+    def panels(self):
+        """
+        Returns the panels list
+        """
+        return self.__panels.values()
+
     def __init__(self, parent=None):
         """
         Creates the widget.
@@ -314,23 +324,30 @@ class CodeEditorWidget(QWidget, StyledObject):
         """
         QWidget.__init__(self, parent)
         StyledObject.__init__(self)
+        #: The designer ui (public so that user may access the internal ui (this might be useful for e.g. people who
+        #  would to replace the default actions icons)
         self.ui = editor_ui.Ui_Form()
         self.ui.setupUi(self)
+
+        # setup a weakref on the code edit widget
         self.codeEdit.editor = weakref.ref(self)
 
-        #: List of installed modes
-        self.modes = {}
-        #: List of installed panels
+        #: Map of installed modes
+        self.__modes = {}
+
+        #: Map of installed panels
+        self.__panels = {}
         self.ui.layoutLeft.setDirection(QBoxLayout.RightToLeft)
         self.ui.layoutTop.setDirection(QBoxLayout.BottomToTop)
-        self.zones = {
+
+        # Maps the ui layouts to a zone key
+        self.__zones = {
             self.PANEL_ZONE_TOP:    self.ui.layoutTop,
             self.PANEL_ZONE_BOTTOM: self.ui.layoutBottom,
             self.PANEL_ZONE_LEFT:   self.ui.layoutLeft,
             self.PANEL_ZONE_RIGHT:  self.ui.layoutRight}
-        self.panels = {}
-        self.filename = None
-        self.logger = logging.getLogger(
+
+        self.__logger = logging.getLogger(
             __name__ + "." + self.__class__.__name__)
 
     def installMode(self, mode):
@@ -338,8 +355,8 @@ class CodeEditorWidget(QWidget, StyledObject):
 
         :param mode:  Mode instance to install.
         """
-        self.logger.info("Installing mode %s" % mode.name)
-        self.modes[mode.name] = mode
+        self.__logger.info("Installing mode %s" % mode.name)
+        self.__modes[mode.name] = mode
         mode.install(self)
         mode.currentStyle = self.currentStyle
         mode.enabled = True
@@ -351,18 +368,18 @@ class CodeEditorWidget(QWidget, StyledObject):
 
         :param zone: The zone where the Panel will be installed (CodeEditorWidget.PANEL_ZONE_XXX)
         """
-        self.logger.info("Installing Panel {0} on zone {1}".format(panel.name,
+        self.__logger.info("Installing Panel {0} on zone {1}".format(panel.name,
                                                                 zone))
-        self.panels[panel.name] = panel
+        self.__panels[panel.name] = panel
         panel.install(self)
         panel.currentStyle = self.currentStyle
         panel.enabled = True
-        self.zones[zone].addWidget(panel)
+        self.__zones[zone].addWidget(panel)
 
-    def onStyleChanged(self):
+    def _onStyleChanged(self):
         """ Update installed modes and panels style. """
         self.codeEdit.currentStyle = self.currentStyle
-        for panel in self.panels.values():
+        for panel in self.__panels.values():
             panel.currentStyle = self.currentStyle
-        for mode in self.modes.values():
+        for mode in self.__modes.values():
             mode.currentStyle = self.currentStyle

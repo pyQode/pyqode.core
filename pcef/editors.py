@@ -21,8 +21,8 @@ from pcef.modes.margin import RightMarginMode
 from pcef.modes.sh import SyntaxHighlighterMode
 from pcef.modes.zoom import EditorZoomMode
 from pcef.modes.code_completion import CodeCompletionMode
-from pcef.panels.line_numbers import QLineNumberPanel
-from pcef.panels.folding import QFoldPanel
+from pcef.panels.line_numbers import LineNumberPanel
+from pcef.panels.folding import FoldPanel
 from pcef.panels.search_and_replace import QSearchPanel
 
 
@@ -41,8 +41,8 @@ class QGenericEditor(CodeEditorWidget):
 
     **Installed panels**:
 
-        * :class:`pcef.panels.line_numbers.QLineNumberPanel`
-        * :class:`pcef.panels.folding.QFoldPanel`
+        * :class:`pcef.panels.line_numbers.LineNumberPanel`
+        * :class:`pcef.panels.folding.FoldPanel`
         * :class:`pcef.panels.search_and_replace.QSearchPanel`
 
     It also populates the text edit context menu with a set of default actions.
@@ -58,7 +58,7 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the right margin mode instance.
         :rtype: pcef.modes.margin.RightMarginMode
         """
-        return self.modes[RightMarginMode.IDENTIFIER]
+        return self.mode(RightMarginMode.IDENTIFIER)
 
     @property
     def syntaxHighlightingMode(self):
@@ -66,7 +66,7 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the syntax highlighting mode instance.
         :rtype: pcef.modes.sh.SyntaxHighlighterMod
         """
-        return self.modes[SyntaxHighlighterMode.IDENTIFIER]
+        return self.mode(SyntaxHighlighterMode.IDENTIFIER)
 
     @property
     def highlightLineMode(self):
@@ -74,7 +74,7 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the highlight active line mode instance.
         :rtype: pcef.modes.clh.HighlightLineMode
         """
-        return self.modes[HighlightLineMode.IDENTIFIER]
+        return self.mode(HighlightLineMode.IDENTIFIER)
 
     @property
     def zoomMode(self):
@@ -82,7 +82,7 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the editor zoom mode.
         :rtype: pcef.modes.zoom.EditorZoomMode
         """
-        return self.modes[EditorZoomMode.IDENTIFIER]
+        return self.mode(EditorZoomMode.IDENTIFIER)
 
     @property
     def autoIndentMode(self):
@@ -90,7 +90,7 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the editor auto indent mode
         :rtype: pcef.modes.indent.AutoIndentMode
         """
-        return self.modes[AutoIndentMode.IDENTIFIER]
+        return self.mode(AutoIndentMode.IDENTIFIER)
 
     @property
     def codeCompletionMode(self):
@@ -98,23 +98,23 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the code completion mode.
         :rtype: pcef.modes.code_completion.CodeCompletionMode
         """
-        return self.modes[CodeCompletionMode.IDENTIFIER]
+        return self.mode(CodeCompletionMode.IDENTIFIER)
 
     @property
     def lineNumberPanel(self):
         """
         :returns: the line number Panel instance.
-        :return: pcef.panels.line_numbers.QLineNumberPanel
+        :return: pcef.panels.line_numbers.LineNumberPanel
         """
-        return self.panels[QLineNumberPanel.IDENTIFIER]
+        return self.panel(LineNumberPanel.IDENTIFIER)
 
     @property
     def foldPanel(self):
         """
-        returns: the fold Panel instance
-        :rtype: pcef.panels.folding.QFoldPanel
+        :returns: the fold Panel instance
+        :rtype: pcef.panels.folding.FoldPanel
         """
-        return self.panels[QFoldPanel.IDENTIFIER]
+        return self.panel(FoldPanel.IDENTIFIER)
 
     @property
     def searchPanel(self):
@@ -123,7 +123,7 @@ class QGenericEditor(CodeEditorWidget):
 
         :return: pcef.panels.search_and_replace.QSearchPanel
         """
-        return self.panels[QSearchPanel.IDENTIFIER]
+        return self.panel(QSearchPanel.IDENTIFIER)
 
     #---------------------------------------------------------------------------
     # Methods
@@ -135,8 +135,8 @@ class QGenericEditor(CodeEditorWidget):
         self._installActions()
 
         # Install panels
-        self.installPanel(QFoldPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(QLineNumberPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
 
         # Install modes
@@ -147,13 +147,12 @@ class QGenericEditor(CodeEditorWidget):
         self.installMode(EditorZoomMode())
         self.installMode(AutoIndentMode())
 
-        # Manual slot connections
         self.on_codeEdit_redoAvailable(False)
         self.on_codeEdit_undoAvailable(False)
         self.ui.codeEdit.setUndoRedoEnabled(True)
         self.on_codeEdit_copyAvailable(False)
 
-    def installActions(self):
+    def _installActions(self):
         self.codeEdit.addAction(self.ui.actionUndo)
         self.codeEdit.addAction(self.ui.actionRedo)
         self.codeEdit.addSeparator()
