@@ -114,8 +114,7 @@ class QSearchPanel(Panel):
     numOccurrences = property(__get_numOccurrences, __set_numOccurrences)
 
     def __init__(self, parent=None):
-        Panel.__init__(self, "Search and replace",
-                              "The search and replace Panel", parent)
+        Panel.__init__(self, "Search and replace", "The search and replace Panel", parent)
         self.ui = search_panel_ui.Ui_SearchPanel()
         self.ui.setupUi(self)
         self._decorations = []

@@ -131,8 +131,7 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
 
     def __repr__(self):
         attrs = ['syntax_stack']
-        kwds = ', '.join([ '%s=%r' % (attr, getattr(self, attr))
-                           for attr in attrs ])
+        kwds = ', '.join(['%s=%r' % (attr, getattr(self, attr)) for attr in attrs])
         return 'PygmentsBlockUserData(%s)' % kwds
 
 
@@ -218,7 +217,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         """ Sets the style to the specified Pygments style.
         """
         if (isinstance(style, str) or
-            isinstance(style, unicode)):
+                isinstance(style, unicode)):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()

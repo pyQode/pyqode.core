@@ -153,7 +153,7 @@ class MarkersPanel(Panel):
 
     def __onNewTextSet(self):
         """ Clears markers when a new text is set """
-        self.clearMarkers(True)
+        self.clearMarkers()
 
     def __getMarkerForLine(self, l):
         """ Returns the marker for the line l if any, else return None """
@@ -242,8 +242,8 @@ class MarkersPanel(Panel):
             if top < y < top + height:
                 marker = self.__getMarkerForLine(vb.row)
                 if (marker is not None and
-                    marker.tooltip is not None and
-                    marker.tooltip != ""):
+                        marker.tooltip is not None and
+                        marker.tooltip != ""):
                     if self._prev_line != vb.row:
                         self.timer.stop()
                         self._tooltip = marker.tooltip

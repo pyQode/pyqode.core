@@ -8,10 +8,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import os
-
 from PySide.QtCore import Qt
-from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QPlainTextEdit, QIcon
+from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QIcon
 
 from pcef.core import Mode
 
@@ -41,7 +39,7 @@ class CompletionModel(object):
     def suggestions(self):
         return self._suggestions
 
-    def __init__(self, words, priority=0):
+    def __init__(self, words=None, priority=0):
         """
         Creates a basic completion model based
 
@@ -53,6 +51,10 @@ class CompletionModel(object):
         self.priority = priority
         #: List of suggestions (accessible through the suggestions property).
         self._suggestions = []
+        if words is not None:
+            for word in words:
+                suggestion = Suggestion(word)
+                self._suggestions.append(suggestion)
 
     def update(self, source_code, line, col, filename, encoding):
         """
@@ -92,7 +94,7 @@ class DocumentWordsCompletionModel(CompletionModel):
             try:
                 int(w)
                 words.remove(w)
-            except:
+            except ValueError:
                 pass
         return set(words)
 
@@ -118,7 +120,7 @@ class DocumentWordsCompletionModel(CompletionModel):
             self._suggestions.append(Suggestion(w, QIcon(":/icons/rc/text-generic.png")))
 
     def __init__(self):
-        super(DocumentWordsCompletionModel, self).__init__(0)
+        super(DocumentWordsCompletionModel, self).__init__(priority=0)
 
 
 class CodeCompletionMode(Mode):

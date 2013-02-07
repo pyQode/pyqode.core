@@ -40,6 +40,7 @@ class SimpleEditor(QMainWindow):
         # the promoted widgets system)
         self.ui = simple_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("PCEF - Generic Example")
         editor = self.ui.genericEditor
 
         # open this file

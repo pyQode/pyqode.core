@@ -1,25 +1,15 @@
-#! /usr/bin/env python2.7
-# coding: latin-1
-#-------------------------------------------------------------------------------
-# Copyright 2012, DTM
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version.
+# PCEF - PySide Code Editing framework
+# Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
-#  This library is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#  Lesser General Public License for more details.
-#
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#-------------------------------------------------------------------------------
+# This software is released under the LGPLv3 license.
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-This script call the pyside ui compiler on all ui files found in the cwd.
-(It also compile the qrc files to *_rc.py)
+This script calls the pyside ui compiler on all ui files found in the cwd.
+(It also compiles the qrc files to *_rc.py)
 """
 import glob
 import os

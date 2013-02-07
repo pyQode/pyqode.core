@@ -368,8 +368,8 @@ class CodeEditorWidget(QWidget, StyledObject):
 
         :param zone: The zone where the Panel will be installed (CodeEditorWidget.PANEL_ZONE_XXX)
         """
-        self.__logger.info("Installing Panel {0} on zone {1}".format(panel.name,
-                                                                zone))
+        self.__logger.info(
+            "Installing Panel {0} on zone {1}".format(panel.name, zone))
         self.__panels[panel.name] = panel
         panel.install(self)
         panel.currentStyle = self.currentStyle

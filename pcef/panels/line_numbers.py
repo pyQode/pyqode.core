@@ -90,6 +90,6 @@ class LineNumberPanel(Panel):
                 painter.setFont(bold_font)
             else:
                 painter.setFont(normal_font)
-            painter_drawText(0, vb.top, w , vb.height, align_right,
+            painter_drawText(0, vb.top, w, vb.height, align_right,
                              str(row))
         return Panel.paintEvent(self, event)

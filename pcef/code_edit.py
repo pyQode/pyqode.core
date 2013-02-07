@@ -23,7 +23,6 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QMenu
 from PySide.QtGui import QPaintEvent
 from PySide.QtGui import QMouseEvent
-from PySide.QtGui import QTextDocument
 from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
@@ -444,4 +443,3 @@ class CodeEdit(QPlainTextEdit, StyledObject):
             self.document().findBlockByNumber(i).setVisible(not fold)
             self.update()
         self.__onBlocksChanged()
-

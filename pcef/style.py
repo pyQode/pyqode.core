@@ -33,7 +33,7 @@ class Style(object):
     """
 
     def __init__(self, name):
-        self.name = ""
+        self.name = name
         #: Pygments syntax highlighting style (used by SyntaxHighlighting Mode)
         self.pygmentsStyle = ''
         #: Right margin color (used by
