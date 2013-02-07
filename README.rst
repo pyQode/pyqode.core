@@ -9,8 +9,8 @@ The widget can be customised with custom/pre-made panels and modes.
 
 
 Here are some screenshots:
-    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/white_style
-    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/dark_style
+    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/white_style.png
+    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/dark_style.png
 
 
 Features
