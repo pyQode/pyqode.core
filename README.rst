@@ -54,7 +54,7 @@ Resources
 ------------
 
 * Source repository: https://github.com/ColinDuquesnoy/PCEF/
-* Documentation: http://packages.python.org/PCEF/getting_started.html
+* Documentation: http://packages.python.org/PCEF
 * Package repository: http://pypi.python.org/pypi/PCEF/0.1.0
 
 
