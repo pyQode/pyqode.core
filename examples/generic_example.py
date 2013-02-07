@@ -56,7 +56,7 @@ class SimpleEditor(QMainWindow):
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(135, 140)
+        editor.foldPanel.addIndicator(136, 141)
 
         # add styles actions
         allStyles = styles.getAllStyles()

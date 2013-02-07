@@ -45,7 +45,7 @@ And here are some screenshots (taken from the generic_example v.0.1):
     :height: 358
 
 .. image:: _static/dark_style.png
-    :alt: Default style
+    :alt: Dark style
     :width: 407
     :height: 358
 

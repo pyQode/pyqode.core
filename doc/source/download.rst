@@ -11,8 +11,16 @@ Download
 Here you'll find all the necessary explanations for installing PCEF.
 
 
-.. note:: PCEF is a pure python package to use in a PySide application. It is assumed that you already have PySide installed
-          on your system.
+Requirements:
+----------------
+You will need to install the following packages yourself:
+    - setuptools
+    - pip
+    - PySide
+
+The following packages will be installed automatically:
+    - pygments
+
 
 Easy install
 ---------------
@@ -20,10 +28,6 @@ Easy install
 PCEF can be installed from pypi using easy_install or pip::
 
     pip install PCEF
-
-or::
-
-    easy_install PCEF
 
 From source
 ----------------
