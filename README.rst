@@ -43,10 +43,9 @@ project and execute example.py (require PySide to be installed)
 Usage
 --------
 
+.. highlight:: python
 
-Here is a simple example:
-
-.. code-block::python
+Here is a simple example::
 
     #!/usr/bin/env python2  # python 2 only at the moment
     import sys
@@ -82,10 +81,5 @@ Screenshots
 --------------
 
     .. image:: /doc/source/_static/white_style.png
-:width: 407
-        :height: 358
 
-        .. image:: /doc/source/_static/dark_style.png
-:width: 407
-        :height: 358
-
+    .. image:: /doc/source/_static/dark_style.png
