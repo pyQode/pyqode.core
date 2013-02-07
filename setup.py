@@ -16,10 +16,11 @@ This is the setup script, install it as any python package.
 .. note:: You will need to install PySide on your own
 """
 from setuptools import setup, find_packages
+execfile('pcef/version.py')
 
 setup(
     name='PCEF',
-    version='0.1.0-dev',
+    version=__version__,
     packages=find_packages(),
     package_data={'pcef.ui': ['rc/*'], 'examples.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
