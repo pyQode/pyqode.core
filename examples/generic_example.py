@@ -46,10 +46,6 @@ class SimpleEditor(QMainWindow):
         # open this file
         if __name__ == "__main__":
             openFileInEditor(self.ui.genericEditor, __file__)
-        else:
-            openFileInEditor(self.ui.genericEditor,
-                             os.path.join(os.getcwd(), "examples",
-                             "generic_example.py"))
 
         # install Panel where user can add its own markers
         p = UserMarkersPanel()

@@ -15,8 +15,13 @@ This is the setup script, install it as any python package.
 
 .. note:: You will need to install PySide on your own
 """
+from IPython.core.release import long_description
 from setuptools import setup, find_packages
 execfile('pcef/version.py')
+
+with open('README.rst', 'r') as readme:
+    long_desc = readme.read()
+
 
 setup(
     name='PCEF',
@@ -29,6 +34,7 @@ setup(
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='PySide Code Editing Framework (P.C.E.F.)',
+    long_description=long_desc,
     requires=['pygments', 'PySide'],
     entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main']}
 )
