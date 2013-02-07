@@ -7,10 +7,15 @@ It provides an editor widget ready to be used in any PySide applications.
 
 The widget can be customised with custom/pre-made panels and modes.
 
-
 Here are some screenshots:
+
     .. image:: /doc/source/_static/white_style.png
+        :width: 407
+        :height: 358
+
     .. image:: /doc/source/_static/dark_style.png
+        :width: 407
+        :height: 358
 
 
 Features
