@@ -1,11 +1,8 @@
 <RCC>
   <qresource prefix="icons">
-    <file>rc/next.png</file>
-    <file>rc/previous.png</file>
+    <file>rc/text-generic.png</file>
     <file>rc/close.png</file>
     <file>rc/bookmark.png</file>
-    <file>rc/document-save-as.png</file>
-    <file>rc/document-save.png</file>
     <file>rc/edit-copy.png</file>
     <file>rc/edit-cut.png</file>
     <file>rc/edit-delete.png</file>
@@ -15,7 +12,6 @@
     <file>rc/edit-redo.png</file>
     <file>rc/edit-select-all.png</file>
     <file>rc/edit-undo.png</file>
-    <file>rc/folder.png</file>
     <file>rc/format-indent-less.png</file>
     <file>rc/format-indent-more.png</file>
     <file>rc/go-down.png</file>

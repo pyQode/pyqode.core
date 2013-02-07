@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Thu Jan 10 23:16:18 2013
-#      by: pyside-uic 0.2.13 running on PySide 1.1.1
+# Created: Wed Feb  6 22:42:37 2013
+#      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -183,17 +183,21 @@ class Ui_SearchPanel(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap(":/icons/rc/edit-find.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSearch.setIcon(icon3)
+        self.actionSearch.setIconVisibleInMenu(True)
         self.actionSearch.setObjectName("actionSearch")
         self.actionActionSearchAndReplace = QtGui.QAction(SearchPanel)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap(":/icons/rc/edit-find-replace.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionActionSearchAndReplace.setIcon(icon4)
+        self.actionActionSearchAndReplace.setIconVisibleInMenu(True)
         self.actionActionSearchAndReplace.setObjectName("actionActionSearchAndReplace")
         self.actionFindNext = QtGui.QAction(SearchPanel)
         self.actionFindNext.setIcon(icon1)
+        self.actionFindNext.setIconVisibleInMenu(True)
         self.actionFindNext.setObjectName("actionFindNext")
         self.actionFindPrevious = QtGui.QAction(SearchPanel)
         self.actionFindPrevious.setIcon(icon)
+        self.actionFindPrevious.setIconVisibleInMenu(True)
         self.actionFindPrevious.setObjectName("actionFindPrevious")
 
         self.retranslateUi(SearchPanel)
@@ -217,7 +221,7 @@ class Ui_SearchPanel(object):
         self.actionSearch.setText(QtGui.QApplication.translate("SearchPanel", "Search", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+F", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionActionSearchAndReplace.setText(QtGui.QApplication.translate("SearchPanel", "actionSearchAndReplace", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionActionSearchAndReplace.setText(QtGui.QApplication.translate("SearchPanel", "Search and replace", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setToolTip(QtGui.QApplication.translate("SearchPanel", "Show the search and replace panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionActionSearchAndReplace.setShortcut(QtGui.QApplication.translate("SearchPanel", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
         self.actionFindNext.setText(QtGui.QApplication.translate("SearchPanel", "Find next", None, QtGui.QApplication.UnicodeUTF8))

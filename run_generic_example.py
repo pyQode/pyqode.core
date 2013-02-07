@@ -9,5 +9,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains tools functions/classes used internally
+This script allow to execute the generic example without actually installing it.
 """
+from examples import generic_example
+
+
+def main():
+    generic_example.main()
+
+
+if __name__ == "__main__":
+    main()

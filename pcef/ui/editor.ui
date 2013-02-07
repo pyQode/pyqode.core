@@ -57,7 +57,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPlainCodeEdit" name="textEdit">
+         <widget class="CodeEdit" name="codeEdit">
           <property name="contextMenuPolicy">
            <enum>Qt::DefaultContextMenu</enum>
           </property>
@@ -95,6 +95,9 @@
    <property name="shortcut">
     <string>Ctrl+Z</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionRedo">
    <property name="icon">
@@ -109,6 +112,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Y</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionCopy">
@@ -125,6 +131,9 @@
    <property name="shortcut">
     <string>Ctrl+C</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionCut">
    <property name="icon">
@@ -139,6 +148,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionPaste">
@@ -155,6 +167,9 @@
    <property name="shortcut">
     <string>Ctrl+V</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionDelete">
    <property name="icon">
@@ -170,6 +185,9 @@
    <property name="shortcut">
     <string>Del</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionSelectAll">
    <property name="icon">
@@ -181,6 +199,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionFind">
@@ -197,6 +218,9 @@
    <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionFind_and_replace">
    <property name="icon">
@@ -211,6 +235,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionFindPrevious">
@@ -227,6 +254,9 @@
    <property name="shortcut">
     <string>Shift+F3</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionFindNext">
    <property name="icon">
@@ -241,6 +271,9 @@
    </property>
    <property name="shortcut">
     <string>F3</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionIndent">
@@ -257,6 +290,9 @@
    <property name="shortcut">
     <string>Ctrl+I</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionUnindent">
    <property name="icon">
@@ -272,13 +308,16 @@
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QPlainCodeEdit</class>
+   <class>CodeEdit</class>
    <extends>QTextEdit</extends>
-   <header>pcef/promoted_widgets.h</header>
+   <header>pcef/code_edit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -9,12 +9,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the promoted widgets used in the Qt Designer ui
+Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
+:class:`pcef.core.CodeEditorWidget` ui)
 """
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
-from PySide.QtGui import QTextEdit
+from PySide.QtGui import QTextEdit, QFocusEvent
 from PySide.QtGui import QTextOption
 from PySide.QtGui import QFont
 from PySide.QtGui import QKeyEvent
@@ -22,11 +23,10 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QMenu
 from PySide.QtGui import QPaintEvent
 from PySide.QtGui import QMouseEvent
-from PySide.QtGui import QTextDocument
 from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
-from pcef.config.svconfig import StyledObject
+from pcef.style import StyledObject
 
 
 class VisibleBlock(object):
@@ -46,7 +46,7 @@ class VisibleBlock(object):
         self.rect = QRect(*rect)
 
 
-class QPlainCodeEdit(QPlainTextEdit, StyledObject):
+class CodeEdit(QPlainTextEdit, StyledObject):
     """
     The code editor text edit. This is a specialized QPlainTextEdit made to
     expose additional signals, styling and methods. It also provides a custom
@@ -57,16 +57,17 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
 
     Additional signals:
         - dirtyChanged(bool)
+        - focusedIn(QFocusEvent)
         - keyPressed(QKeyEvent)
+        - keyReleased(QKeyEvent)
         - mousePressed(QMouseEvent)
         - mouseReleased(QMouseEvent)
+        - newTextSet()
         - prePainting(QPaintEvent)
         - postPainting(QPaintEvent)
         - visibleBlocksChanged()
-        - newTextSet()
 
     """
-    #: Stylesheet
     QSS = """QPlainTextEdit
     {
         background-color: %(b)s;
@@ -79,34 +80,38 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     #---------------------------------------------------------------------------
     # Signals
     #---------------------------------------------------------------------------
-    #: Emitted when the dirty state of the document changed
+    #: Signal emitted when the dirty state of the document changed
     dirtyChanged = Signal(bool)
-    #: Emitted when a key is pressed
+    #: Signal emitted when a key is pressed
     keyPressed = Signal(QKeyEvent)
-    #: emitted when a mouse button is pressed
+    #: Signal emitted when a key is released
+    keyReleased = Signal(QKeyEvent)
+    #: Signal emitted when a mouse button is pressed
     mousePressed = Signal(QMouseEvent)
-    #: emitted when a mouse button is released
+    #: Signal emitted when a mouse button is released
     mouseReleased = Signal(QMouseEvent)
-    #: emitted on a wheel event
+    #: Signal emitted on a wheel event
     mouseWheelActivated = Signal(QWheelEvent)
-    #: Emitted before painting the core widget
+    #: Signal emitted before painting the core widget
     prePainting = Signal(QPaintEvent)
-    #: Emitted after painting the core widget
+    #: Signal emitted after painting the core widget
     postPainting = Signal(QPaintEvent)
-    #: Emitted when the list of visible blocks changed
+    #: Signal emitted when the list of visible blocks changed
     visibleBlocksChanged = Signal()
-    #: Emitted when setPlainText is invoked
+    #: Signal emitted when setPlainText is invoked
     newTextSet = Signal()
+    #: Signal emitted when focusInEvent is is called
+    focusedIn = Signal(QFocusEvent)
 
     #---------------------------------------------------------------------------
     # Properties
     #---------------------------------------------------------------------------
     def __get_dirty(self):
-        return self._dirty
+        return self.__dirty
 
     def __set_dirty(self, dirty):
-        if dirty != self._dirty:
-            self._dirty = dirty
+        if dirty != self.__dirty:
+            self.__dirty = dirty
             self.dirtyChanged.emit(dirty)
 
     #: Tells whether the editor is dirty(changes have been made to the document)
@@ -116,71 +121,84 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     # Methods
     #---------------------------------------------------------------------------
     def __init__(self, parent=None):
+        """
+        Creates the widget.
+
+        :param parent: Optional parent widget
+        """
         QPlainTextEdit.__init__(self, parent)
         StyledObject.__init__(self)
-        self._completer = None
-        self.filename = None
-        self._dirty = False
-        self._context_menu = QMenu()
-        self.selections = []
+        #: Tag member used to remeber the filename of the edited text if any
+        self.tagFilename = None
+        #: Tag member used to remeber the filename of the edited text if any
+        self.tagEncoding = 'utf8'
+        #: Weakref to the editor
+        self.editor = None
+
+        #: dirty flag
+        self.__dirty = False
+        #: our custom context menu
+        self.__context_menu = QMenu()
+        #: The list of active extra-selections (TextDecoration)
+        self.__selections = []
+        self.__numBlocks = -1
+
+        #: Shortcut to the fontMetrics
         self.fm = self.fontMetrics()
 
-        doc = self.document()
-        assert isinstance(doc, QTextDocument)
-        self.textChanged.connect(self._onTextChanged)
-        self.blockCountChanged.connect(self._onBlocksChanged)
-        self.verticalScrollBar().valueChanged.connect(self._onBlocksChanged)
-        self.newTextSet.connect(self._onBlocksChanged)
-        self.cursorPositionChanged.connect(self._onBlocksChanged)
+        self.textChanged.connect(self.__onTextChanged)
+        self.blockCountChanged.connect(self.__onBlocksChanged)
+        self.verticalScrollBar().valueChanged.connect(self.__onBlocksChanged)
+        self.newTextSet.connect(self.__onBlocksChanged)
+        self.cursorPositionChanged.connect(self.__onBlocksChanged)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
-        self.numBlocks = -1
-
-        #: Shortcuts for sharing the filename currently edited.
-        #  This is only set when using the openFileInEditor function.
-        self.filename = None
-        self.updateStyling()
-
-        #: weakref to the editor
-        self.editor = None
+        self._onStyleChanged()
 
     def addAction(self, action):
         """
         Adds an action to the text edit context menu
+
         :param action: QAction
         """
         QTextEdit.addAction(self, action)
-        self._context_menu.addAction(action)
+        self.__context_menu.addAction(action)
 
     def addSeparator(self):
         """
-        Adds a seperator to the context menu
+        Adds a separator to the context menu
         """
-        self._context_menu.addSeparator()
+        self.__context_menu.addSeparator()
 
     def addDecoration(self, decoration):
         """
         Add a text decoration
-        :param decoration: pcef.base.TextDecoration
+
+        :param decoration: Text decoration
+        :type decoration: pcef.core.TextDecoration
         """
-        self.selections.append(decoration)
-        self.setExtraSelections(self.selections)
+        self.__selections.append(decoration)
+        self.setExtraSelections(self.__selections)
 
     def removeDecoration(self, decoration):
         """
         Remove text decoration.
+
         :param decoration: The decoration to remove
+        :type decoration: pcef.core.TextDecoration
         """
         try:
-            self.selections.remove(decoration)
-            self.setExtraSelections(self.selections)
+            self.__selections.remove(decoration)
+            self.setExtraSelections(self.__selections)
         except ValueError:
             pass
 
     def setShowWhitespaces(self, show):
         """
         Shows/Hides whitespaces.
+
         :param show: True to show whitespaces, False to hide them
+        :type show: bool
         """
         doc = self.document()
         options = doc.defaultTextOption()
@@ -190,12 +208,14 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             options.setFlags(options.flags() & ~QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
-    def indent(self, nbSpaces):
+    def indent(self, size):
         """
         Indent current line or selection
+
+        :param size: indent size in spaces
+        :type size: int
         """
         cursor = self.textCursor()
-        assert isinstance(cursor, QTextCursor)
         cursor.beginEditBlock()
         sel_start = cursor.selectionStart()
         sel_end = cursor.selectionEnd()
@@ -207,19 +227,19 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         cursor.setPosition(cursor.selectionStart())
         for i in range(nb_lines):
             cursor.movePosition(QTextCursor.StartOfLine)
-            cursor.insertText(" " * nbSpaces)
+            cursor.insertText(" " * size)
             cursor.movePosition(QTextCursor.EndOfLine)
             cursor.setPosition(cursor.position() + 1)
-        cursor.setPosition(sel_start + nbSpaces)
+        cursor.setPosition(sel_start + size)
         if has_selection:
-            cursor.setPosition(sel_end + (nb_lines * nbSpaces),
+            cursor.setPosition(sel_end + (nb_lines * size),
                                QTextCursor.KeepAnchor)
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def unIndent(self, nbSpaces):
+    def unIndent(self, size):
         """
-        Unindent current line or selection by tab_size
+        Un-indent current line or selection by tab_size
         """
         cursor = self.textCursor()
         assert isinstance(cursor, QTextCursor)
@@ -236,10 +256,10 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         cpt = 0
         for i in range(nb_lines):
             cursor.select(QTextCursor.LineUnderCursor)
-            if cursor.selectedText().startswith(" " * nbSpaces):
+            if cursor.selectedText().startswith(" " * size):
                 cursor.movePosition(QTextCursor.StartOfLine)
-                [cursor.deleteChar() for _ in range(nbSpaces)]
-                pos = pos - nbSpaces
+                [cursor.deleteChar() for _ in range(size)]
+                pos = pos - size
                 cpt += 1
             else:
                 cursor.clearSelection()
@@ -247,18 +267,18 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             cursor.movePosition(QTextCursor.EndOfLine)
             cursor.setPosition(cursor.position() + 1)
         if cpt:
-            cursor.setPosition(sel_start - nbSpaces)
+            cursor.setPosition(sel_start - size)
         else:
             cursor.setPosition(sel_start)
         if has_selection:
-            cursor.setPosition(sel_end - (cpt * nbSpaces),
+            cursor.setPosition(sel_end - (cpt * size),
                                QTextCursor.KeepAnchor)
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
-    def updateStyling(self):
+    def _onStyleChanged(self):
         """
-        Update widget style when the global style changed.
+        Updates widget style when style changed.
         """
         self.setFont(QFont(self.currentStyle.fontName,
                            self.currentStyle.fontSize))
@@ -274,6 +294,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     def paintEvent(self, event):
         """
         Emits prePainting and postPainting signals
+
         :param event: QPaintEvent
         """
         self.prePainting.emit(event)
@@ -283,6 +304,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     def keyPressEvent(self, event):
         """
         Performs indentation if tab key presed, else emits the keyPressed signal
+
         :param event: QKeyEvent
         """
         assert isinstance(event, QKeyEvent)
@@ -303,9 +325,32 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
             event.setAccepted(True)
             QPlainTextEdit.keyPressEvent(self, event)
 
+    def keyReleaseEvent(self, event):
+        """
+        Performs indentation if tab key pressed, else emits the keyPressed signal
+
+        :param event: QKeyEvent
+        """
+        assert isinstance(event, QKeyEvent)
+        event.setAccepted(False)
+        self.keyReleased.emit(event)
+        if not event.isAccepted():
+            event.setAccepted(True)
+            QPlainTextEdit.keyReleaseEvent(self, event)
+
+    def focusInEvent(self, event):
+        """
+        Emits the focusedIn signal
+        :param event:
+        :return:
+        """
+        self.focusedIn.emit(event)
+        QPlainTextEdit.focusInEvent(self, event)
+
     def mousePressEvent(self, event):
         """
-        Emits mousePressed signal.
+        Emits mousePressed signal
+
         :param event: QMouseEvent
         """
         event.setAccepted(False)
@@ -317,6 +362,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     def mouseReleaseEvent(self, event):
         """
         Emits mouseReleased signal.
+
         :param event: QMouseEvent
         """
         event.setAccepted(False)
@@ -328,6 +374,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
     def wheelEvent(self, event):
         """
         Emits the mouseWheelActivated signal.
+
         :param event: QMouseEvent
         """
         event.setAccepted(False)
@@ -338,14 +385,14 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
 
     def contextMenuEvent(self, event):
         """ Shows our own context menu """
-        self._context_menu.exec_(event.globalPos())
+        self.__context_menu.exec_(event.globalPos())
 
     def resizeEvent(self, event):
         """ Updates visible blocks on resize """
-        self._onBlocksChanged()
+        self.__onBlocksChanged()
         QPlainTextEdit.resizeEvent(self, event)
 
-    def _onTextChanged(self):
+    def __onTextChanged(self):
         """ Sets dirty to true """
         self.dirty = True
 
@@ -356,7 +403,7 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         QPlainTextEdit.setPlainText(self, txt)
         self.newTextSet.emit()
 
-    def _onBlocksChanged(self):
+    def __onBlocksChanged(self):
         """
         Updates the list of visible blocks and emits visibleBlocksChanged
         signal.
@@ -395,5 +442,4 @@ class QPlainCodeEdit(QPlainTextEdit, StyledObject):
         for i in range(start + 1, end):
             self.document().findBlockByNumber(i).setVisible(not fold)
             self.update()
-        self._onBlocksChanged()
-
+        self.__onBlocksChanged()

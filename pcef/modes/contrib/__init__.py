@@ -9,5 +9,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains all official pcef modes
+This package contains contains contrib modes
 """

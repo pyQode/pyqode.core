@@ -1,22 +1,13 @@
-#! /usr/bin/env python2.7
-# coding: latin-1
-#-------------------------------------------------------------------------------
-# Copyright 2012,
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version.
+# PCEF - PySide Code Editing framework
+# Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
-#  This library is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#  Lesser General Public License for more details.
+# This software is released under the LGPLv3 license.
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#-------------------------------------------------------------------------------
 """An easy to use and easy to customise full featured code editor for PySide
 applications.
 
@@ -49,32 +40,45 @@ def openFileInEditor(editor, filename, encoding='utf8',
                      replaceTabsBySpaces=True):
     """
     Open a file in an editor
+
     :param editor: Editor instance where the file content will be displayed
+
     :param filename: Filename of the file to open
+
     :param encoding: Encoding to use to load the file
+
+    :param replaceTabsBySpaces: True to replace tabs by spaces
     """
-    f = open(filename, 'r')
-    content = unicode(f.read().decode(encoding))
+    with open(filename, 'r') as f:
+        content = unicode(f.read().decode(encoding))
     if replaceTabsBySpaces:
         content = content.replace("\t", " " * editor.TAB_SIZE)
-    editor.textEdit.setPlainText(content)
-    editor.textEdit.filename = filename
-    # todo change highlighter lexer here
-    editor.ui.textEdit.dirty = False
+    editor.codeEdit.filename = filename
+    editor.codeEdit.encoding = encoding
+    editor.syntaxHighlightingMode.setLexerFromFilename(filename)
+    editor.codeEdit.setPlainText(content)
+    editor.ui.codeEdit.dirty = False
     module_logger.info("File opened: {0}".format(filename))
 
 
-def saveFileFromEditor(editor, filename, encoding='utf8'):
+def saveFileFromEditor(editor, filename=None, encoding=None):
     """
     Save the editor content to a file
+
     :param editor: Editor instance
-    :param filename: The filename to save
+
+    :param filename: The filename to save. If none the editor filename attribute is used.
+
     :param encoding: The save encoding
     """
-    content = unicode(editor.textEdit.toPlainText())
-    f = open(filename, "w")
-    f.write(content.encode(encoding))
-    f.close()
-    editor.textEdit.dirty = False
-    editor.filename = filename
+    if filename is None:
+        filename = editor.codeEdit.filename
+    if encoding is None:
+        encoding = editor.codeEdit.encoding
+    content = unicode(editor.codeEdit.toPlainText()).encode(encoding)
+    with open(filename, "w") as f:
+        f.write(content)
+    editor.codeEdit.dirty = False
+    editor.codeEdit.filename = filename
+    editor.codeEdit.encoding = encoding
     module_logger.info("File saved: {0}".format(filename))

@@ -446,6 +446,9 @@
    <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionActionSearchAndReplace">
    <property name="icon">
@@ -453,13 +456,16 @@
      <normaloff>:/icons/rc/edit-find-replace.png</normaloff>:/icons/rc/edit-find-replace.png</iconset>
    </property>
    <property name="text">
-    <string>actionSearchAndReplace</string>
+    <string>Search and replace</string>
    </property>
    <property name="toolTip">
     <string>Show the search and replace panel</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionFindNext">
@@ -476,6 +482,9 @@
    <property name="shortcut">
     <string>F3</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionFindPrevious">
    <property name="icon">
@@ -490,6 +499,9 @@
    </property>
    <property name="shortcut">
     <string>Shift+F3</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

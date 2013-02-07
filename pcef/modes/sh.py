@@ -9,13 +9,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the highlighter classes used in the application:
-
- - QMacroHighlighter: highlights macros in a QTextDocument
- - QPygmentsHighlighter: highlights python code using pygments
+This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
-from PySide import QtGui
 from PySide.QtCore import Qt
+from pcef.core import Mode
+from PySide import QtGui
+from pygments.lexers.compiled import CLexer, CppLexer
 from PySide.QtCore import QRegExp
 from PySide.QtGui import QSyntaxHighlighter
 from PySide.QtGui import QTextCharFormat
@@ -28,7 +27,7 @@ from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name
-from pygments.token import Whitespace
+from pygments.token import Whitespace, Comment
 from pygments.util import ClassNotFound
 
 
@@ -92,6 +91,33 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
 RegexLexer.get_tokens_unprocessed = get_tokens_unprocessed
 
 
+# Even with the above monkey patch to store state, multiline comments do not
+# work since they are stateless (Pygments uses a single multiline regex for
+# these comments, but Qt lexes by line). So we need to add a state for comments
+# to the C and C++ lexers. This means that nested multiline comments will appear
+# to be valid C/C++, but this is better than the alternative for now.
+
+def replace_pattern(tokens, new_pattern):
+    """ Given a RegexLexer token dictionary 'tokens', replace all patterns that
+        match the token specified in 'new_pattern' with 'new_pattern'.
+    """
+    for state in tokens.values():
+        for index, pattern in enumerate(state):
+            if isinstance(pattern, tuple) and pattern[1] == new_pattern[1]:
+                state[index] = new_pattern
+
+# More monkeypatching!
+comment_start = (r'/\*', Comment.Multiline, 'comment')
+comment_state = [(r'[^*/]', Comment.Multiline),
+                 (r'/\*', Comment.Multiline, '#push'),
+                 (r'\*/', Comment.Multiline, '#pop'),
+                 (r'[*/]', Comment.Multiline)]
+replace_pattern(CLexer.tokens, comment_start)
+replace_pattern(CppLexer.tokens, comment_start)
+CLexer.tokens['comment'] = comment_state
+CppLexer.tokens['comment'] = comment_state
+
+
 class PygmentsBlockUserData(QtGui.QTextBlockUserData):
     """ Storage for the user data associated with each line.
     """
@@ -105,8 +131,7 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
 
     def __repr__(self):
         attrs = ['syntax_stack']
-        kwds = ', '.join([ '%s=%r' % (attr, getattr(self, attr))
-                           for attr in attrs ])
+        kwds = ', '.join(['%s=%r' % (attr, getattr(self, attr)) for attr in attrs])
         return 'PygmentsBlockUserData(%s)' % kwds
 
 
@@ -124,16 +149,23 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
         self.style = "default"
+        self.enabled = True
 
     def setLexerFromFilename(self, filename):
+        """
+        Change the lexer based on the filename (actually only the extension is needed)
+
+        :param filename: Filename or extension
+        """
         try:
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
             self._lexer = PythonLexer()
 
     def highlightBlock(self, text):
-        """ Highlight a block of text.
-        """
+        """ Highlight a block of text """
+        if self.enabled is False:
+            return
         text = unicode(text)
         original_text = text
         prev_data = self.currentBlock().previous().userData()
@@ -184,7 +216,8 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     def __set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
-        if isinstance(style, str):
+        if (isinstance(style, str) or
+                isinstance(style, unicode)):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()
@@ -283,3 +316,78 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
                       int(color[2:4], base=16),
                       int(color[4:6], base=16))
         return qcolor
+
+
+class SyntaxHighlighterMode(Mode):
+    """
+    This mode enable syntax highlighting (using the QPygmentsHighlighter)
+    """
+    #: Mode identifier
+    IDENTIFIER = "Syntax highlighter"
+    #: Mode description
+    DESCRIPTION = "Apply syntax highlighting to the editor using "
+
+    def __init__(self):
+        self.highlighter = None
+        super(SyntaxHighlighterMode, self).__init__(
+            self.IDENTIFIER, self.DESCRIPTION)
+        self.triggers = ["*", '"', "'", "/"]
+
+    def install(self, editor):
+        """
+        :type editor: pcef.editors.QGenericEditor
+        """
+        self.highlighter = QPygmentsHighlighter(editor.codeEdit.document())
+        self.prev_txt = ""
+        super(SyntaxHighlighterMode, self).install(editor)
+
+    def _onStateChanged(self, state):
+        self.highlighter.enabled = state
+        if state is True:
+            self.editor.codeEdit.keyReleased.connect(self.__onKeyReleased)
+        else:
+            self.editor.codeEdit.keyReleased.disconnect(self.__onKeyReleased)
+        self.highlighter.rehighlight()
+
+    def __onKeyReleased(self, event):
+        txt = self.editor.codeEdit.textCursor().block().text()
+        if event.key() == Qt.Key_Backspace:
+            for trigger in self.triggers:
+                if trigger in txt or trigger in self.prev_txt:
+                    self.highlighter.rehighlight()
+                    break
+        # Search for a triggering key
+        else:
+            try:
+                txt = chr(event.key())
+                for trigger in self.triggers:
+                    if trigger in txt:
+                        self.highlighter.rehighlight()
+                        break
+            except ValueError:
+                pass  # probably a function key (arrow,...)
+        self.prev_txt = txt
+
+    def _onStyleChanged(self):
+        """ Updates the pygments style """
+        if self.highlighter is not None:
+            self.highlighter.style = self.currentStyle.pygmentsStyle
+            self.highlighter.rehighlight()
+
+    def setLexerFromFilename(self, fn="file.py"):
+        """
+        Change the highlighter lexer on the fly by supplying the filename
+        to highlight
+
+        .. note::
+            Actually only the file extension is needed
+
+        .. note::
+            The default lexer is the Python lexer
+
+        :param fn: Filename or extension
+        :type fn: str
+        """
+        assert self.highlighter is not None, "SyntaxHighlightingMode not "\
+                                             "installed"
+        self.highlighter.setLexerFromFilename(fn)

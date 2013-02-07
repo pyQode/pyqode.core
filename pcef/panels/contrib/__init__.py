@@ -9,5 +9,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This packages contains modules related to the editor configuration (style)
+This package contains contains contrib panels
 """
