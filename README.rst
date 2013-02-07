@@ -48,7 +48,7 @@ You can also clone the repository or download the source archive and install the
 
 To run the examples run the one of the following scripts (you don't need to install pcef to run the examples):
 
-    - run_generic_example.py
+- run_generic_example.py
 
 Resources
 ------------
