@@ -8,7 +8,9 @@ It provides an editor widget ready to be used in any PySide applications.
 The widget can be customised with custom/pre-made panels and modes.
 
 
-Here are some [screenshots](https://www.dropbox.com/sh/f0xpcu5zapciuma/Ef10GaBnhD)
+Here are some screenshots:
+    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/white_style
+    .. image:: https://github.com/ColinDuquesnoy/PCEF/tree/develop/doc/source/_static/dark_style
 
 
 Features
@@ -50,33 +52,33 @@ Usage
 
 Here is a simple example:
 
-```python
-#!/usr/bin/env python2  # python 2 only at the moment
-import sys
+.. code-block::python
 
-from PySide.QtGui import QApplication
-from PySide.QtGui import QMainWindow
+    #!/usr/bin/env python2  # python 2 only at the moment
+    import sys
 
-from pcef import openFileInEditor
-from pcef.editors import QGenericEditor
+    from PySide.QtGui import QApplication
+    from PySide.QtGui import QMainWindow
 
-
-def main():
-    """ Application entry point """
-    # create qt objects (app, window and our editor)
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    editor = QGenericEditor()
-    window.setCentralWidget(editor)
-
-    # open a file
-    openFileInEditor(editor, __file__)
-
-    # run
-    window.show()
-    sys.exit(app.exec_())
+    from pcef import openFileInEditor
+    from pcef.editors import QGenericEditor
 
 
-if __name__ == "__main__":
-    main()
-```
+    def main():
+        """ Application entry point """
+        # create qt objects (app, window and our editor)
+        app = QApplication(sys.argv)
+        window = QMainWindow()
+        editor = QGenericEditor()
+        window.setCentralWidget(editor)
+
+        # open a file
+        openFileInEditor(editor, __file__)
+
+        # run
+        window.show()
+        sys.exit(app.exec_())
+
+
+    if __name__ == "__main__":
+        main()
