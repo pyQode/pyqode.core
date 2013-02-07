@@ -1,29 +1,28 @@
 PySide Code Editing Framework
 =====================================
 
-A flexible framework to develop code editing tools with PySide/Qt.
+PCEF is code editing framework for PySide applications. It provides a flexible code editor ready to use in any PySide
+applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
 
-It provides an editor widget ready to be used in any PySide applications.
+At the moment, the framework only provides a generic code editor (language independent) but plans are to at least
+provides full support for python and maybe c++.
 
-The widget can be customised with custom/pre-made panels and modes.
+Here are the core features:
 
-Features
------------
-
-
-Here is the features list:
-
- * syntax highlighting mode (using pygments)
- * line number panel
- * code folding panel
- * markers panel (to add breakpoints, bookmarks, errors,...)
+ * **syntax highlighting mode** (using pygments)
+ * **code completion** (static word list, from document words)
+ * line number Panel
+ * **code folding** Panel
+ * markers Panel (to add breakpoints, bookmarks, errors,...)
  * right margin indicator mode
  * active line highlighting mode
- * find and replace panel
- * text decorations (squiggle, box)
+ * **editor zoom** mode
+ * find and replace Panel
+ * **text decorations** (squiggle, box)
  * unicode support (specify encoding when you load your file)
- * styling (builtin white and dark styles + possibility to customize)
- * flexible framework to add custom panels/modes
+ * **easy styling** (built-in white and dark styles + possibility to customize using **JSON style schemes**)
+ * **flexible framework** to add custom panels/modes
+ * auto indent mode(indentation level is based on the previous line indent)
 
 Plans are to to add code completion and python support (using rope, pylint,...)
 
