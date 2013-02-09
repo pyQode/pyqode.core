@@ -196,10 +196,12 @@ class CodeCompletionMode(Mode):
         """
         if state is True:
             self.editor.codeEdit.keyPressed.connect(self._onKeyPressed)
+            self.editor.codeEdit.postKeyPressed.connect(self._onKeyReleased)
             self.editor.codeEdit.textChanged.connect(self._onTextChanged)
             self.editor.codeEdit.focusedIn.connect(self._onFocusIn)
         else:
             self.editor.codeEdit.keyPressed.disconnect(self._onKeyPressed)
+            self.editor.codeEdit.postKeyPressed.disconnect(self._onKeyReleased)
             self.editor.codeEdit.textChanged.disconnect(self._onTextChanged)
             self.editor.codeEdit.focusedIn.disconnect(self._onFocusIn)
 
@@ -243,6 +245,12 @@ class CodeCompletionMode(Mode):
         cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
         c.complete(cr)  # popup it up!
 
+    def _onKeyReleased(self, event):
+        word = self._textUnderCursor()
+        isShortcut = (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey
+        if isShortcut is False and  (word.isspace() or word == ""):
+            self.__completer.popup().hide()
+
     def _onKeyPressed(self, event):
         """
         Trigger the completion with ctrl+triggerKey and handle completion events ourselves (insert completion and hide
@@ -250,7 +258,6 @@ class CodeCompletionMode(Mode):
 
         :param event: QKeyEvent
         """
-        # Handle completer events ourselves (insert completion or hide completer)
         if self.__completer.popup().isVisible():
             # complete
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
@@ -271,6 +278,7 @@ class CodeCompletionMode(Mode):
             cr = self.editor.codeEdit.cursorRect()
             cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
             c.complete(cr)  # popup it up!
+            # Handle completer events ourselves (insert completion or hide completer)
 
     def _textUnderCursor(self):
         """

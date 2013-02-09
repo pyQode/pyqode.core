@@ -12,6 +12,7 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
+from PyQt4.QtGui import QKeyEvent
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
@@ -96,6 +97,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     prePainting = Signal(QPaintEvent)
     #: Signal emitted after painting the core widget
     postPainting = Signal(QPaintEvent)
+    #: Signal emitted at the end of the keyPressed event
+    postKeyPressed = Signal(QKeyEvent)
     #: Signal emitted when the list of visible blocks changed
     visibleBlocksChanged = Signal()
     #: Signal emitted when setPlainText is invoked
@@ -324,6 +327,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         if not event.isAccepted():
             event.setAccepted(True)
             QPlainTextEdit.keyPressEvent(self, event)
+        self.postKeyPressed.emit(event)
 
     def keyReleaseEvent(self, event):
         """
