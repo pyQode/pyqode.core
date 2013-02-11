@@ -335,7 +335,7 @@ class SyntaxHighlighterMode(Mode):
 
     def install(self, editor):
         """
-        :type editor: pcef.editors.QGenericEditor
+        :type editor: pcef.editors.GenericEditor
         """
         self.highlighter = QPygmentsHighlighter(editor.codeEdit.document())
         self.prev_txt = ""

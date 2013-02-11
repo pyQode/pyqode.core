@@ -23,10 +23,9 @@ from pcef import saveFileFromEditor
 from pcef import styles
 from pcef.panels.misc import UserMarkersPanel
 
-from examples.ui import simple_editor_ui
+from examples.ui import simple_python_editor_ui
 
-
-class SimpleEditor(QMainWindow):
+class GenericPythonEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
 
@@ -38,9 +37,9 @@ class SimpleEditor(QMainWindow):
         QMainWindow.__init__(self)
         # setup ui (the pcef GenericEditor is created there using
         # the promoted widgets system)
-        self.ui = simple_editor_ui.Ui_MainWindow()
+        self.ui = simple_python_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("PCEF - Generic Example")
+        self.setWindowTitle("PCEF - Python Editor Example")
         editor = self.ui.genericEditor
 
         # open this file
@@ -52,7 +51,6 @@ class SimpleEditor(QMainWindow):
         editor.installPanel(p, editor.PANEL_ZONE_LEFT)
 
         # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(136, 141)
 
         # add styles actions
         allStyles = styles.getAllStyles()
@@ -90,6 +88,7 @@ class SimpleEditor(QMainWindow):
             self.ui.menuModes.addAction(action)
             self.modes_actions.append(action)
             action.triggered.connect(self.onModeActionTriggered)
+            m = UserMarkersPanel()
 
     def onModeActionTriggered(self):
         """ Enables/Disables a mode """
@@ -132,7 +131,7 @@ class SimpleEditor(QMainWindow):
 def main():
     """ Application entry point """
     app = QApplication(sys.argv)
-    window = SimpleEditor()
+    window = GenericPythonEditor()
     window.show()
     app.exec_()
 

@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icons">
+    <file>rc/module.png</file>
+    <file>rc/import.png</file>
+    <file>rc/class.png</file>
+    <file>rc/method.png</file>
+    <file>rc/var.png</file>
     <file>rc/text-generic.png</file>
     <file>rc/close.png</file>
     <file>rc/bookmark.png</file>

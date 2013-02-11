@@ -14,5 +14,5 @@ This page contains documentation about the available pre-configured editor widge
 
 Generic editor
 -----------------
-.. autoclass:: pcef.editors.QGenericEditor
+.. autoclass:: pcef.editors.GenericEditor
     :members:

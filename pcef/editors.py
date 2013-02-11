@@ -13,20 +13,20 @@ Contains a series of pre-configured editors classes ready to be used in your
 PySide application
 """
 from PySide.QtCore import Slot
-
 from pcef.core import CodeEditorWidget
 from pcef.modes.indent import AutoIndentMode
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
+from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.sh import SyntaxHighlighterMode
 from pcef.modes.zoom import EditorZoomMode
-from pcef.modes.code_completion import CodeCompletionMode
-from pcef.panels.line_numbers import LineNumberPanel
+from pcef.modes.cc import CodeCompletionMode
+from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
-from pcef.panels.search_and_replace import QSearchPanel
+from pcef.panels.search import QSearchPanel
 
 
-class QGenericEditor(CodeEditorWidget):
+class GenericEditor(CodeEditorWidget):
     """
     A generic (language independent) pre-configured code editor widget.
 
@@ -96,7 +96,7 @@ class QGenericEditor(CodeEditorWidget):
     def codeCompletionMode(self):
         """
         :returns: the code completion mode.
-        :rtype: pcef.modes.code_completion.CodeCompletionMode
+        :rtype: pcef.modes.cc.CodeCompletionMode
         """
         return self.mode(CodeCompletionMode.IDENTIFIER)
 
@@ -214,3 +214,9 @@ class QGenericEditor(CodeEditorWidget):
     @Slot()
     def on_actionSelectAll_triggered(self):
         self.codeEdit.selectAll()
+
+
+class PythonEditor(GenericEditor):
+    def __init__(self, parent=None):
+        super(PythonEditor, self).__init__(parent)
+        self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))

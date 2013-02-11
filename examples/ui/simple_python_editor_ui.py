@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'simple_editor.ui'
+# Form implementation generated from reading ui file 'simple_python_editor.ui'
 #
 # Created: Mon Feb 11 20:51:08 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
@@ -12,19 +12,19 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1078, 831)
+        MainWindow.resize(751, 484)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout.setContentsMargins(1, 1, 1, 1)
         self.gridLayout.setSpacing(1)
         self.gridLayout.setObjectName("gridLayout")
-        self.genericEditor = GenericEditor(self.centralwidget)
+        self.genericEditor = PythonEditor(self.centralwidget)
         self.genericEditor.setObjectName("genericEditor")
         self.gridLayout.addWidget(self.genericEditor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1078, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 751, 25))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -104,5 +104,5 @@ class Ui_MainWindow(object):
         self.actionPanel.setText(QtGui.QApplication.translate("MainWindow", "Panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionModes_2.setText(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
 
-from pcef.editors import GenericEditor
+from pcef.editors import PythonEditor
 import examples_rc

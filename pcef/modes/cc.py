@@ -20,11 +20,13 @@ class Suggestion(object):
         - display: suggestion text (display role)
         - decoration: an optional decoration icon (decoration role)
     """
-    def __init__(self, txt, icon=None):
+    def __init__(self, txt, icon=None, description=None):
         #: Displayed text.
         self.display = txt
         #: QIcon used for the decoration role.
         self.decoration = icon
+        # optional description
+        self.description = description
 
 
 class CompletionModel(object):
@@ -166,6 +168,10 @@ class CodeCompletionMode(Mode):
         #: List of completion models
         self._models = [DocumentWordsCompletionModel()]
 
+
+    def addModel(self, model):
+        self._models.append(model)
+
     def install(self, editor):
         """
         Setup the completer with the CodeEdit.
@@ -233,7 +239,7 @@ class CodeCompletionMode(Mode):
         completionPrefix = self._textUnderCursor()
         eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
         # hide popup if completion prefix len < 3 or end of word
-        if not self.__completer.popup().isVisible and \
+        if not self.__completer.popup().isVisible() and \
                 len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
             self.__completer.popup().hide()
             return
@@ -305,6 +311,7 @@ class CodeCompletionMode(Mode):
         encoding = self.editor.codeEdit.tagEncoding
         # build the completion model
         cc_model = QStandardItemModel()
+        cc_model.clear()
         cptSuggestion = 0
         for model in sorted_models:
             # update the current model
@@ -313,11 +320,18 @@ class CodeCompletionMode(Mode):
             for s in model.suggestions:
                 # skip redundant completion
                 if s.display != completionPrefix:
+                    items = []
                     item = QStandardItem()
+                    items.append(item)
                     item.setData(s.display, Qt.DisplayRole)
+                    if s.description is not None:
+                        item_desc = QStandardItem()
+                        item_desc.setData(s.description, Qt.DisplayRole)
+                        items.append(item_desc)
                     if s.decoration is not None:
                         item.setData(s.decoration, Qt.DecorationRole)
-                    cc_model.appendRow(item)
+                    # print len(items)
+                    cc_model.appendRow(items)
                     cptSuggestion += 1
             # do we need to use more completion model?
             if cptSuggestion >= self.minSuggestions:

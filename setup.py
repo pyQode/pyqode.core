@@ -35,6 +35,6 @@ setup(
     author_email='colin.duquesnoy@gmail.com',
     description='PySide Code Editing Framework (P.C.E.F.)',
     long_description=long_desc,
-    requires=['pygments', 'PySide'],
+    requires=['pygments', 'PySide', 'jedi'],
     entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main']}
 )

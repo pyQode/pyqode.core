@@ -54,7 +54,7 @@ Using a pre-made editor
 The pcef.editors modules contains a series of pre-made editors.
 
 A pre-made editor is an editor widget with a set of installed modes and panels.
-At the moment, there is only one editor: QGenericEditor.
+At the moment, there is only one editor: GenericEditor.
 
 Here is a minimal example code:
 
@@ -65,7 +65,7 @@ Here is a minimal example code:
     from PySide.QtGui import QApplication
     from PySide.QtGui import QMainWindow
     from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pcef.editors import QGenericEditor  # a language independent editor
+    from pcef.editors import GenericEditor  # a language independent editor
 
 
     def main():
@@ -73,7 +73,7 @@ Here is a minimal example code:
         # create qt objects (app, window and our editor)
         app = QApplication(sys.argv)
         window = QMainWindow()
-        editor = QGenericEditor()
+        editor = GenericEditor()
         window.setCentralWidget(editor)
 
         # open a file
