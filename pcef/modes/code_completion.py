@@ -196,10 +196,12 @@ class CodeCompletionMode(Mode):
         """
         if state is True:
             self.editor.codeEdit.keyPressed.connect(self._onKeyPressed)
+            self.editor.codeEdit.postKeyPressed.connect(self._onKeyReleased)
             self.editor.codeEdit.textChanged.connect(self._onTextChanged)
             self.editor.codeEdit.focusedIn.connect(self._onFocusIn)
         else:
             self.editor.codeEdit.keyPressed.disconnect(self._onKeyPressed)
+            self.editor.codeEdit.postKeyPressed.disconnect(self._onKeyReleased)
             self.editor.codeEdit.textChanged.disconnect(self._onTextChanged)
             self.editor.codeEdit.focusedIn.disconnect(self._onFocusIn)
 
@@ -231,7 +233,8 @@ class CodeCompletionMode(Mode):
         completionPrefix = self._textUnderCursor()
         eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
         # hide popup if completion prefix len < 3 or end of word
-        if len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
+        if not self.__completer.popup().isVisible and \
+                len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
             self.__completer.popup().hide()
             return
         if completionPrefix != self.__completer.completionPrefix():
@@ -243,6 +246,12 @@ class CodeCompletionMode(Mode):
         cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
         c.complete(cr)  # popup it up!
 
+    def _onKeyReleased(self, event):
+        word = self._textUnderCursor()
+        isShortcut = (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey
+        if isShortcut is False and event.modifiers() == 0 and (word.isspace() or word == ""):
+            self.__completer.popup().hide()
+
     def _onKeyPressed(self, event):
         """
         Trigger the completion with ctrl+triggerKey and handle completion events ourselves (insert completion and hide
@@ -250,7 +259,6 @@ class CodeCompletionMode(Mode):
 
         :param event: QKeyEvent
         """
-        # Handle completer events ourselves (insert completion or hide completer)
         if self.__completer.popup().isVisible():
             # complete
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
@@ -293,8 +301,8 @@ class CodeCompletionMode(Mode):
         tc = self.editor.codeEdit.textCursor()
         line = tc.blockNumber() + 1
         col = tc.columnNumber()
-        fn = self.editor.codeEdit.filename
-        encoding = self.editor.codeEdit.encoding
+        fn = self.editor.codeEdit.tagFilename
+        encoding = self.editor.codeEdit.tagEncoding
         # build the completion model
         cc_model = QStandardItemModel()
         cptSuggestion = 0

@@ -7,12 +7,10 @@ include MANIFEST.in
 include setup.py
 include run_generic_example.py
 include COPYING
-include INSTALL
-include README.md
+include README.rst
 include doc/*
 include doc/source/*
 include doc/source/_static/*
-include doc/source/_templates/*
 include doc/source/api/*
 include pcef/ui/*
 include pcef/ui/rc/*
