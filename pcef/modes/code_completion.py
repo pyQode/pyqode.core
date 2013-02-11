@@ -301,8 +301,8 @@ class CodeCompletionMode(Mode):
         tc = self.editor.codeEdit.textCursor()
         line = tc.blockNumber() + 1
         col = tc.columnNumber()
-        fn = self.editor.codeEdit.filename
-        encoding = self.editor.codeEdit.encoding
+        fn = self.editor.codeEdit.tagFilename
+        encoding = self.editor.codeEdit.tagEncoding
         # build the completion model
         cc_model = QStandardItemModel()
         cptSuggestion = 0
