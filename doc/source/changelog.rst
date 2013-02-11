@@ -12,7 +12,14 @@ Change Log
 
     These lists are not exhaustive.
 
-0.1
+0.1.1
+======
+
+Bug fixes release:
+    - better code completion popup show/hide
+
+
+0.1.0
 ======
 
 First release. Brings the following features:
