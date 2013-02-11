@@ -233,7 +233,8 @@ class CodeCompletionMode(Mode):
         completionPrefix = self._textUnderCursor()
         eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
         # hide popup if completion prefix len < 3 or end of word
-        if len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
+        if not self.__completer.popup().isVisible and \
+                len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
             self.__completer.popup().hide()
             return
         if completionPrefix != self.__completer.completionPrefix():
@@ -248,7 +249,7 @@ class CodeCompletionMode(Mode):
     def _onKeyReleased(self, event):
         word = self._textUnderCursor()
         isShortcut = (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey
-        if isShortcut is False and  (word.isspace() or word == ""):
+        if isShortcut is False and event.modifiers() == 0 and (word.isspace() or word == ""):
             self.__completer.popup().hide()
 
     def _onKeyPressed(self, event):
@@ -278,7 +279,6 @@ class CodeCompletionMode(Mode):
             cr = self.editor.codeEdit.cursorRect()
             cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
             c.complete(cr)  # popup it up!
-            # Handle completer events ourselves (insert completion or hide completer)
 
     def _textUnderCursor(self):
         """
