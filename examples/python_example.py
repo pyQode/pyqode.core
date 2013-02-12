@@ -21,9 +21,12 @@ from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
 from pcef import saveFileFromEditor
 from pcef import styles
+from pcef.editors import PythonEditor
+from pcef.modes.cc import CodeCompletionMode
 from pcef.panels.misc import UserMarkersPanel
 
 from examples.ui import simple_python_editor_ui
+
 
 class GenericPythonEditor(QMainWindow):
     """
@@ -35,7 +38,7 @@ class GenericPythonEditor(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        # setup ui (the pcef GenericEditor is created there using
+        # setup ui (the pcef PythonEditor is created in the Ui_MainWindow using
         # the promoted widgets system)
         self.ui = simple_python_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
@@ -45,12 +48,6 @@ class GenericPythonEditor(QMainWindow):
         # open this file
         if __name__ == "__main__":
             openFileInEditor(self.ui.genericEditor, __file__)
-
-        # install Panel where user can add its own markers
-        p = UserMarkersPanel()
-        editor.installPanel(p, editor.PANEL_ZONE_LEFT)
-
-        # add a fold indicator around our class and the main
 
         # add styles actions
         allStyles = styles.getAllStyles()
@@ -62,8 +59,8 @@ class GenericPythonEditor(QMainWindow):
             action.setChecked(style == "Default")
             self.styleActionGroup.addAction(action)
             self.ui.menuStyle.addAction(action)
-        self.styleActionGroup.triggered.connect(
-            self.on_styleActionGroup_triggered)
+            self.styleActionGroup.triggered.connect(
+                self.on_styleActionGroup_triggered)
 
         # add panels actions
         allPanels = self.ui.genericEditor.panels()
@@ -107,6 +104,11 @@ class GenericPythonEditor(QMainWindow):
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
+        editor = self.ui.genericEditor
+        assert isinstance(editor, PythonEditor)
+        m = editor.codeCompletionMode
+        assert isinstance(m, CodeCompletionMode)
+        
 
     @Slot()
     def on_actionSave_triggered(self):
@@ -123,7 +125,7 @@ class GenericPythonEditor(QMainWindow):
     @Slot()
     def on_actionOpen_triggered(self):
         """ Open a new file in the editor """
-        filename = QFileDialog.getOpenFileName(self)[0]
+        filename = QFileDialog.getOpenFileName(self, "Choose a python script", "", "Python script (*.py)")[0]
         if filename != "":
             openFileInEditor(self.ui.genericEditor, filename)
 

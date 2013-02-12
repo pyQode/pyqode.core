@@ -8,7 +8,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QRunnable, Signal, QObject, QThreadPool, Slot
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QIcon
 
 from pcef.core import Mode
@@ -156,18 +156,20 @@ class CodeCompletionMode(Mode):
         #: Trigger key (automatically associated with the control modifier)
         self.triggerKey = Qt.Key_Space
         #: Number of chars needed to trigger the code completion
-        self.nbTriggerChars = 3
-
+        self.nbTriggerChars = 1
+        #: Tells if the completion should be triggered automatically (when len(wordUnderCursor) > nbTriggerChars )
+        #  Default is True. Turning this option off might enhance performances and usability
+        self.autoTrigger = True
         self.__caseSensitivity = Qt.CaseSensitive
 
         #: The internal QCompleter
         self.__completer = QCompleter()
-        self.__completer.activated.connect(self._insertCompletion)
+        # self.__completer.activated.connect(self._insertCompletion)
         self.__completer.highlighted.connect(self._onHighlighted)
+        self.__preventUpdate = False
 
         #: List of completion models
         self._models = [DocumentWordsCompletionModel()]
-
 
     def addModel(self, model):
         self._models.append(model)
@@ -232,31 +234,41 @@ class CodeCompletionMode(Mode):
         """
         self.currentCompletion = completion
 
+    @Slot()
     def _onTextChanged(self):
         """
         Update completion prefix if the word's len is > self.nbTriggerChars
         """
         completionPrefix = self._textUnderCursor()
-        eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-= "
+        eow = "~!@#$%^&*()+{}|:\"<>?,./;'[]\\-= "
         # hide popup if completion prefix len < 3 or end of word
-        if not self.__completer.popup().isVisible() and \
-                len(completionPrefix) < self.nbTriggerChars or self.containsAny(completionPrefix, eow):
+        containsEow = self.containsAny(completionPrefix, eow)
+        tooShort = len(completionPrefix) < self.nbTriggerChars
+        if not self.__completer.popup().isVisible() and (tooShort or containsEow):
             self.__completer.popup().hide()
             return
-        if completionPrefix != self.__completer.completionPrefix():
-            self._updateModels(completionPrefix)
-            self.__completer.setCompletionPrefix(completionPrefix)
-            self.__completer.popup().setCurrentIndex(self.__completer.completionModel().index(0, 0))
-        c = self.__completer
-        cr = self.editor.codeEdit.cursorRect()
-        cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
-        c.complete(cr)  # popup it up!
+        if completionPrefix != self.__completer.completionPrefix() and self.__preventUpdate is False:
+            if self.autoTrigger is True:
+                self._updateModels(completionPrefix)
+                self.__completer.setCompletionPrefix(completionPrefix)
+                self.__completer.popup().setCurrentIndex(self.__completer.completionModel().index(0, 0))
+                c = self.__completer
+                cr = self.editor.codeEdit.cursorRect()
+                charWidth = self.editor.codeEdit.fm.width('A')
+                cr.setX(cr.x() - len(completionPrefix) * charWidth)
+                cr.setWidth(400)
+                c.complete(cr)
+            else:
+                self.__completer.setCompletionPrefix(completionPrefix)
+                self.__completer.popup().setCurrentIndex(self.__completer.completionModel().index(0, 0))
 
     def _onKeyReleased(self, event):
         word = self._textUnderCursor()
         isShortcut = (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey
         if isShortcut is False and event.modifiers() == 0 and (word.isspace() or word == ""):
             self.__completer.popup().hide()
+        elif event.key() == Qt.Key_Backspace or event.key() == Qt.Key_Delete or event.modifiers() != 0:
+            self.__preventUpdate = False
 
     def _onKeyPressed(self, event):
         """
@@ -265,6 +277,8 @@ class CodeCompletionMode(Mode):
 
         :param event: QKeyEvent
         """
+        isShortcut = (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey
+        completionPrefix = self._textUnderCursor()
         if self.__completer.popup().isVisible():
             # complete
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
@@ -275,16 +289,21 @@ class CodeCompletionMode(Mode):
             elif event.key() == Qt.Key_Escape or event.key() == Qt.Key_Backtab:
                 self.__completer.popup().hide()
                 event.setAccepted(True)
-        # if is shortcut
-        elif (event.modifiers() & Qt.ControlModifier > 0) and event.key() == self.triggerKey:
-            completionPrefix = self._textUnderCursor()
+        elif isShortcut is True:
+            self.__preventUpdate = False
             self._updateModels(completionPrefix)
             c = self.__completer
             c.setCompletionPrefix(completionPrefix)
             c.popup().setCurrentIndex(self.__completer.completionModel().index(0, 0))
             cr = self.editor.codeEdit.cursorRect()
-            cr.setWidth(c.popup().sizeHintForColumn(0) + c.popup().verticalScrollBar().sizeHint().width())
+            charWidth = self.editor.codeEdit.fm.width('A')
+            cr.setX(cr.x() - len(completionPrefix) * charWidth)
+            cr.setWidth(400)
             c.complete(cr)  # popup it up!
+        # prevent updating models when deleting text
+        elif ((not completionPrefix.isspace() and completionPrefix != "") and
+              (event.key() == Qt.Key_Backspace or event.key() == Qt.Key_Delete or event.modifiers() != 0)):
+            self.__preventUpdate = True
 
     def _textUnderCursor(self):
         """
@@ -292,7 +311,8 @@ class CodeCompletionMode(Mode):
         """
         tc = self.editor.codeEdit.textCursor()
         tc.movePosition(QTextCursor.StartOfWord, QTextCursor.KeepAnchor)
-        return tc.selectedText()
+        tokens = tc.selectedText().split('.')
+        return tokens[len(tokens) - 1]
 
     def _updateModels(self, completionPrefix):
         """
@@ -309,13 +329,14 @@ class CodeCompletionMode(Mode):
         col = tc.columnNumber()
         fn = self.editor.codeEdit.tagFilename
         encoding = self.editor.codeEdit.tagEncoding
+        source = self.editor.codeEdit.toPlainText()
         # build the completion model
         cc_model = QStandardItemModel()
         cc_model.clear()
         cptSuggestion = 0
         for model in sorted_models:
             # update the current model
-            model.update(self.editor.codeEdit.toPlainText(), line, col, fn, encoding)
+            model.update(source, line, col, fn, encoding)
             # add suggestion as an standard item to the final completion model
             for s in model.suggestions:
                 # skip redundant completion
@@ -345,6 +366,8 @@ class CodeCompletionMode(Mode):
         :param completion: the completion text to insert
         """
         tc = self.editor.codeEdit.textCursor()
+        tc.setPosition(tc.position() - 1)
         tc.select(QTextCursor.WordUnderCursor)
+        print tc.selectedText()
         tc.insertText(completion)
         self.editor.codeEdit.setTextCursor(tc)

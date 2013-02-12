@@ -74,7 +74,9 @@ class GenericEditor(CodeEditorWidget):
         :returns: the highlight active line mode instance.
         :rtype: pcef.modes.clh.HighlightLineMode
         """
-        return self.mode(HighlightLineMode.IDENTIFIER)
+        m = self.mode(HighlightLineMode.IDENTIFIER)
+        assert isinstance(m, HighlightLineMode)
+        return m
 
     @property
     def zoomMode(self):

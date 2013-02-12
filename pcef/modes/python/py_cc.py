@@ -21,24 +21,28 @@ from pcef.modes.cc import Suggestion
 Icons = {'Class': ':/icons/rc/class.png',
          'Import': ':/icons/rc/import.png',
          'Statement': ':/icons/rc/var.png',
-         'Module': '',
+         'Module': ':/icons/rc/module.png',
          'Function': ':/icons/rc/method.png'}
 
 
 class PythonCompletionModel(CompletionModel):
     def update(self, source_code, line, col, filename, encoding):
-        script = Script(source_code, line, col, filename, encoding)
-        completions = script.complete()
-        call = script.get_in_function_call()
-        print "----------------------------"
-        if call is not None:
-            for p in call.params:
-                print p
-        self._suggestions[:] = []
-        for completion in completions:
-            desc = completion.description
-            ctype = desc.split(':')[0]
-            icon = None
-            if ctype in Icons:
-                icon = QIcon(Icons[ctype])
-            self._suggestions.append(Suggestion(completion.word, icon=icon, description=desc.split(':')[1]))
+        # complete with jedi
+        try:
+            script = Script(source_code, line, col, filename, encoding)
+            completions = script.complete()
+            # clean suggestion list
+            self._suggestions[:] = []
+            for completion in completions:
+                # get type from description
+                desc = completion.description
+                suggestionType = desc.split(':')[0]
+                # get the associated icon if any
+                icon = None
+                if suggestionType in Icons:
+                    icon = QIcon(Icons[suggestionType])
+                # add the suggestion to the list
+                self._suggestions.append(Suggestion(completion.word, icon=icon,
+                    description=desc.split(':')[1]))
+        except :
+            pass
