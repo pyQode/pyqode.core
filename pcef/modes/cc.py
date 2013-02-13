@@ -300,6 +300,7 @@ class CodeCompletionMode(Mode):
             cr.setX(cr.x() - len(completionPrefix) * charWidth)
             cr.setWidth(400)
             c.complete(cr)  # popup it up!
+            event.setAccepted(True)
         # prevent updating models when deleting text
         elif ((not completionPrefix.isspace() and completionPrefix != "") and
               (event.key() == Qt.Key_Backspace or event.key() == Qt.Key_Delete or event.modifiers() != 0)):
