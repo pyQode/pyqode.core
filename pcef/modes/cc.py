@@ -352,7 +352,6 @@ class CodeCompletionMode(Mode):
                         items.append(item_desc)
                     if s.decoration is not None:
                         item.setData(s.decoration, Qt.DecorationRole)
-                    # print len(items)
                     cc_model.appendRow(items)
                     cptSuggestion += 1
             # do we need to use more completion model?
@@ -366,9 +365,11 @@ class CodeCompletionMode(Mode):
 
         :param completion: the completion text to insert
         """
+        offset = 0
+        if len(self._textUnderCursor()) > 1:
+            offset = 1
         tc = self.editor.codeEdit.textCursor()
-        tc.setPosition(tc.position() - 1)
+        tc.setPosition(tc.position() - offset)
         tc.select(QTextCursor.WordUnderCursor)
-        print tc.selectedText()
         tc.insertText(completion)
         self.editor.codeEdit.setTextCursor(tc)
