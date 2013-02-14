@@ -8,7 +8,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from PySide.QtCore import Qt, QRunnable, Signal, QObject, QThreadPool, Slot
+from PySide.QtCore import Qt, Slot
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, QTextCursor, QIcon
 
 from pcef.core import Mode
