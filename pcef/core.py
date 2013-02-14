@@ -153,6 +153,27 @@ class Panel(QWidget, EditorExtension):
             self.hide()
 
 
+def cursorForPosition(codeEdit, line, column, selectEndOfLine=False, selection=None, selectWordUnderCursor=False):
+    """
+    Return a QTextCursor set to line and column with the specified selection
+    :param line:
+    :param column:
+    """
+    tc = codeEdit.textCursor()
+    assert isinstance(tc, QTextCursor)
+    tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
+    tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
+    tc.setPosition(tc.position() + column - 1)
+    if selectEndOfLine is True:
+        tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+    elif isinstance(selection, int):
+        tc.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, selection)
+    elif selectWordUnderCursor is True:
+        tc.select(QTextCursor.WordUnderCursor)
+    codeEdit.setTextCursor(tc)
+    return tc
+
+
 class TextDecoration(QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration.
