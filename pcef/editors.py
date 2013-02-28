@@ -22,6 +22,7 @@ from pcef.modes.zoom import EditorZoomMode
 from pcef.modes.cc import CodeCompletionMode
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
+from pcef.modes.python.checkers import Pep8CheckerMode
 from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
 from pcef.panels.search import QSearchPanel
@@ -224,3 +225,4 @@ class PythonEditor(GenericEditor):
         super(PythonEditor, self).__init__(parent)
         self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
         self.installMode(PythonCalltipMode())
+        self.installMode(Pep8CheckerMode())

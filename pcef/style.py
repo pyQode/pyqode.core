@@ -56,6 +56,10 @@ class Style(object):
         self.searchColor = ''
         #: Search results background
         self.searchBackgroundColor = ''
+        #: Warning color
+        self.warningColor = ""
+        #: Error color
+        self.errorColor = ""
         #: A default font size
         self.fontSize = 10
         # Show whitespaces
@@ -79,6 +83,8 @@ class Style(object):
         self.fontSize = DEFAULT_FONT_SIZE
         self.searchColor = '#000000'
         self.searchBackgroundColor = '#FFFF00'
+        self.warningColor = "#8080FF"
+        self.errorColor = "#CC4040"
 
     @property
     def backgroundColor(self):

@@ -246,9 +246,10 @@ class CodeCompletionMode(Mode):
         tooShort = len(completionPrefix) < self.nbTriggerChars
         if not self.__completer.popup().isVisible() and (tooShort or containsEow):
             self.__completer.popup().hide()
+            self.__completer.setCompletionPrefix("")
             return
-        if completionPrefix != self.__completer.completionPrefix() and self.__preventUpdate is False:
-            if self.autoTrigger is True:
+        if not self.__preventUpdate:
+            if self.autoTrigger and not completionPrefix in self.__completer.completionPrefix():
                 self._updateModels(completionPrefix)
                 self.__completer.setCompletionPrefix(completionPrefix)
                 self.__completer.popup().setCurrentIndex(self.__completer.completionModel().index(0, 0))
@@ -284,10 +285,12 @@ class CodeCompletionMode(Mode):
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
                 self._insertCompletion(self.currentCompletion)
                 self.__completer.popup().hide()
+                self.__completer.setCompletionPrefix("")
                 event.setAccepted(True)
             # hide
             elif event.key() == Qt.Key_Escape or event.key() == Qt.Key_Backtab:
                 self.__completer.popup().hide()
+                self.__completer.setCompletionPrefix("")
                 event.setAccepted(True)
         elif isShortcut is True:
             self.__preventUpdate = False
@@ -357,7 +360,11 @@ class CodeCompletionMode(Mode):
             # do we need to use more completion model?
             if cptSuggestion >= self.minSuggestions:
                 break  # enough suggestions
-        self.__completer.setModel(cc_model)
+        if cptSuggestion:
+            self.__completer.setModel(cc_model)
+        else:
+            self.__completer.popup().hide()
+            self.__completer.setCompletionPrefix("")
 
     def _insertCompletion(self, completion):
         """

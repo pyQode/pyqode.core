@@ -105,6 +105,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     newTextSet = Signal()
     #: Signal emitted when focusInEvent is is called
     focusedIn = Signal(QFocusEvent)
+    #: Signal emitted when the text is saved with pcef.saveFileFromEditor. The signal is emitted with the complete
+    #  file path
+    textSaved = Signal(str)
 
     #---------------------------------------------------------------------------
     # Properties
@@ -181,6 +184,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :type decoration: pcef.core.TextDecoration
         """
         self.__selections.append(decoration)
+        self.__selections = sorted(self.__selections, key=lambda sel: sel.draw_order)
         self.setExtraSelections(self.__selections)
 
     def removeDecoration(self, decoration):

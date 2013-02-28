@@ -58,3 +58,5 @@ class DarkStyle(Style):
         self.fontSize = DEFAULT_FONT_SIZE
         self.searchColor = '#000000'
         self.searchBackgroundColor = '#FFFF00'
+        self.warningColor = "#CCCC20"
+        self.errorColor = "#CC4040"

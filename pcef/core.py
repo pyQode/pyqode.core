@@ -179,7 +179,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
     Helper class to quickly create a text decoration.
     """
 
-    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None):
+    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None, draw_order=0):
         """
         Creates a text decoration
 
@@ -192,6 +192,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
+        self.draw_order = draw_order
         QTextEdit.ExtraSelection.__init__(self)
         cursor = QTextCursor(cursorOrBlockOrDoc)
         if startPos is not None:
