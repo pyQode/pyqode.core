@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>rc/param.png</file>
     <file>rc/module.png</file>
     <file>rc/import.png</file>
     <file>rc/class.png</file>
