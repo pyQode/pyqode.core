@@ -26,7 +26,7 @@ class RightMarginMode(Mode):
         Mode.__init__(self, self.IDENTIFIER, "Draw the right margin on the "
                                              "document")
         #: Defines the margin position. 80 is the default
-        self.marginPos = 120
+        self.marginPos = 80
 
     def _onStyleChanged(self):
         """ Updates the margin pen color """
