@@ -27,8 +27,8 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QColor
 from PySide.QtGui import QTextCharFormat
 from PySide.QtGui import QTextFormat
-from pcef.style import StyledObject
 from pcef.ui import editor_ui
+from pcef.styled_object import StyledObject
 
 
 class EditorExtension(StyledObject):

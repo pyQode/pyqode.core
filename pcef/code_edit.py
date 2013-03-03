@@ -12,14 +12,13 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
-from PyQt4.QtGui import QKeyEvent
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
+from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextEdit, QFocusEvent
 from PySide.QtGui import QTextOption
 from PySide.QtGui import QFont
-from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextCursor
 from PySide.QtGui import QMenu
 from PySide.QtGui import QPaintEvent
@@ -27,7 +26,7 @@ from PySide.QtGui import QMouseEvent
 from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
-from pcef.style import StyledObject
+from pcef.styled_object import StyledObject
 
 
 class VisibleBlock(object):
@@ -314,7 +313,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QKeyEvent
         """
-        assert isinstance(event, QKeyEvent)
+        # assert isinstance(event, QKeyEvent)
         event.setAccepted(False)
         # replace tabs by space
         if event.key() == Qt.Key_Tab:

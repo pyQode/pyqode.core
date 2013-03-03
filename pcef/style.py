@@ -70,7 +70,7 @@ class Style(object):
         """
         Reset the style to the default white style.
         """
-        self.pygmentsStyle = 'friendly'
+        self.pygmentsStyle = 'default'
         self.marginColor = '#FF0000'
         self.marginPos = 120
         self.activeLineColor = '#E4EDF8'
@@ -139,35 +139,3 @@ def fromJSON(filename):
     with open(filename, "r") as jsonFile:
         style.__dict__ = json.load(jsonFile)
     return style
-
-
-class StyledObject(object):
-    """ Base class for objects that needs a style instance.
-
-    Provides a property to get/set the object currentStyle. The property call an abstract
-    method to force children to update their brushes, pens, colors,... (updateStyling)
-    """
-
-    def __init__(self):
-        global __styleChanged
-        self._style = Style("Default")
-
-    def __get_style(self):
-        return self._style
-
-    def __set_style(self, style):
-        assert isinstance(style, Style)
-        self._style = style
-        self._onStyleChanged()
-
-    #: Current style
-    currentStyle = property(__get_style, __set_style)
-
-    def _onStyleChanged(self):
-        """
-        Raises not ImplementError.
-
-        Subclasses must overrides this method to update themselves whenever the
-        style changed
-        """
-        raise NotImplementedError

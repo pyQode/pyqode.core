@@ -12,6 +12,7 @@
 This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
 from PySide.QtCore import Qt
+from pcef import styles
 from pcef.core import Mode
 from PySide import QtGui
 from pygments.lexers.compiled import CLexer, CppLexer
@@ -148,7 +149,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self.style = "default"
+        self.style = styles.getStyle("Default").pygmentsStyle
         self.enabled = True
 
     def setLexerFromFilename(self, filename):
