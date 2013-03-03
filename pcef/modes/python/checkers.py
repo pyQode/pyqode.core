@@ -27,35 +27,41 @@ class CheckerThread(QThread):
     def __init__(self):
         QThread.__init__(self)
         self.__cmd_queue = deque()
+        self.is_running = False
 
     def execute(self, command_line):
         self.__cmd_queue.appendleft(command_line)
 
     def run(self, *args, **kwargs):
-        while True:
+        self.is_running = True
+        while self.is_running:
             if len(self.__cmd_queue):
                 cmd = self.__cmd_queue.pop()
                 p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
                 output = p.stdout.read()
                 self.outputAvailable.emit(output)
-            self.msleep(100)
+            self.msleep(1)
 
 
-class Pep8CheckerMode(Mode):
+class Pep8CheckerMode(Mode, CheckerThread):
+
     def __init__(self):
         super(Pep8CheckerMode, self).__init__("PEP8", "Check for PEP8 violation on the fly")
-        self.__checker_thread = CheckerThread()
-        self.__checker_thread.outputAvailable.connect(self.__apply_results)
-        self.__checker_thread.start()
+        CheckerThread.__init__(self)
         self.__decorations = []
 
     def _onStateChanged(self, state):
         if state:
             self.editor.codeEdit.textSaved.connect(self.__run_pep8)
             self.editor.codeEdit.newTextSet.connect(self.__run_pep8)
+            self.outputAvailable.connect(self.__apply_results)
+            self.start()
         else:
             self.editor.codeEdit.textSaved.disconnect(self.__run_pep8)
-            self.editor.codeEdit.newTextSet.connect(self.__run_pep8)
+            self.editor.codeEdit.newTextSet.disconnect(self.__run_pep8)
+            self.outputAvailable.disconnect(self.__apply_results)
+            self.is_running = False
+            self.wait()
 
     def __clear_decorations(self):
         for deco in self.__decorations:
@@ -72,6 +78,8 @@ class Pep8CheckerMode(Mode):
         self.__clear_decorations()
         lines = raw_results.splitlines()
         current_cursor = self.editor.codeEdit.textCursor()
+        hbar_pos = self.editor.codeEdit.horizontalScrollBar().sliderPosition()
+        vbar_pos = self.editor.codeEdit.verticalScrollBar().sliderPosition()
         for line in lines:
             tokens = line.split(':')
             line_nr = int(tokens[1])
@@ -83,9 +91,11 @@ class Pep8CheckerMode(Mode):
             self.__decorations.append(deco)
             self.editor.codeEdit.addDecoration(deco)
         self.editor.codeEdit.setTextCursor(current_cursor)
+        self.editor.codeEdit.horizontalScrollBar().setSliderPosition(hbar_pos)
+        self.editor.codeEdit.verticalScrollBar().setSliderPosition(vbar_pos)
 
     def __run_pep8(self):
-        self.__checker_thread.execute("pep8 %s" % self.editor.codeEdit.tagFilename)
+        self.execute("pep8 %s" % self.editor.codeEdit.tagFilename)
 
     def _onStyleChanged(self):
         self.color = QColor(self.editor.currentStyle.warningColor)
