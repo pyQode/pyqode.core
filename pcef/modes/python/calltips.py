@@ -43,7 +43,10 @@ class PythonCalltipMode(Mode):
             encoding = self.editor.codeEdit.tagEncoding
             source = self.editor.codeEdit.toPlainText()
             script = Script(source, line, col, fn, encoding)
-            call = script.get_in_function_call()
+            try:
+                call = script.get_in_function_call()
+            except:
+                call = None
             # QToolTip.hideText()
             if call is not None:
                 # create a formatted calltip (current index appear in bold)

@@ -359,8 +359,11 @@ class CodeCompletionMode(Mode, QThread):
         self.mutex.lock()
         try:
             for model in self._models:
-                # update the current model
-                model.update(request.source_code, request.line, request.col, request.filename, request.encoding)
+                try:
+                    # update the current model
+                    model.update(request.source_code, request.line, request.col, request.filename, request.encoding)
+                except :
+                    pass
         finally:
             self.mutex.unlock()
 
