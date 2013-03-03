@@ -9,9 +9,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from collections import deque
+import os
 from PySide.QtGui import QColor
 from subprocess import Popen, PIPE, STDOUT
 from PySide.QtCore import QThread, Signal
+import sys
 from pcef.core import Mode, TextDecoration, cursorForPosition
 
 
@@ -37,7 +39,7 @@ class CheckerThread(QThread):
         while self.is_running:
             if len(self.__cmd_queue):
                 cmd = self.__cmd_queue.pop()
-                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
                 output = p.stdout.read()
                 self.outputAvailable.emit(output)
             self.msleep(1)
@@ -81,21 +83,28 @@ class Pep8CheckerMode(Mode, CheckerThread):
         hbar_pos = self.editor.codeEdit.horizontalScrollBar().sliderPosition()
         vbar_pos = self.editor.codeEdit.verticalScrollBar().sliderPosition()
         for line in lines:
-            tokens = line.split(':')
-            line_nr = int(tokens[1])
-            col_nr = int(tokens[2])
-            message = tokens[3]
-            c = cursorForPosition(self.editor.codeEdit, line_nr, col_nr, selectEndOfLine=True)
-            deco = TextDecoration(c, draw_order=1)
-            deco.setSpellchecking(color=self.color)
-            self.__decorations.append(deco)
-            self.editor.codeEdit.addDecoration(deco)
+            try:
+                offset = 0
+                if sys.platform == "win32":
+                    offset = 1
+                tokens = line.split(':')
+                line_nr = int(tokens[1 + offset])
+                col_nr = int(tokens[2 + offset])
+                message = tokens[3 + offset]
+                c = cursorForPosition(self.editor.codeEdit, line_nr, col_nr, selectEndOfLine=True)
+                deco = TextDecoration(c, draw_order=1)
+                deco.setSpellchecking(color=self.color)
+                self.__decorations.append(deco)
+                self.editor.codeEdit.addDecoration(deco)
+            except:
+                pass
         self.editor.codeEdit.setTextCursor(current_cursor)
         self.editor.codeEdit.horizontalScrollBar().setSliderPosition(hbar_pos)
         self.editor.codeEdit.verticalScrollBar().setSliderPosition(vbar_pos)
 
     def __run_pep8(self):
-        self.execute("pep8 %s" % self.editor.codeEdit.tagFilename)
+        cmd = "pep8 %s" % self.editor.codeEdit.tagFilename
+        self.execute(cmd)
 
     def _onStyleChanged(self):
         self.color = QColor(self.editor.currentStyle.warningColor)

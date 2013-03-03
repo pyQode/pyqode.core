@@ -335,6 +335,8 @@ class CodeCompletionMode(Mode, QThread):
         # user completion request: update models and show completions
         elif isShortcut:
             self.__request_completion(completionPrefix)
+            if event.key() == self.triggerKey:
+                event.setAccepted(True)
 
     def _textUnderCursor(self):
         """
