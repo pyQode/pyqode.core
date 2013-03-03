@@ -108,7 +108,6 @@ class GenericPythonEditor(QMainWindow):
         assert isinstance(editor, PythonEditor)
         m = editor.codeCompletionMode
         assert isinstance(m, CodeCompletionMode)
-        
 
     @Slot()
     def on_actionSave_triggered(self):
