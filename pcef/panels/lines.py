@@ -89,7 +89,6 @@ class LineNumberPanel(Panel):
         for vb in self.editor.codeEdit.visible_blocks:
             row = vb.row
             if row == active + 1:
-                print "bold", row
                 painter.setFont(bold_font)
             else:
                 painter.setFont(normal_font)
