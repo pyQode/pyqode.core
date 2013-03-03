@@ -42,6 +42,17 @@ class EditorExtension(StyledObject):
     An editor extension is also an object that can be enabled/disabled. Its provides an enable property that
     automatically call the abstract method onStateChanged.
     """
+    @property
+    def editor(self):
+        """
+        Provides easy access to the CodeEditorWidget weakref
+
+        :return: pcef.core.CodeEditorWidget
+        """
+        if self.__editor is not None:
+            return self.__editor()
+        else:
+            return None
 
     def __init__(self, name, description):
         """
@@ -60,7 +71,7 @@ class EditorExtension(StyledObject):
         # disable any actions)
         self.__enabled = False
         #: Editor instance
-        self.editor = None
+        self.__editor = None
 
     def __str__(self):
         return self.name
@@ -79,8 +90,12 @@ class EditorExtension(StyledObject):
         :param editor: editor widget instance
         :type editor: pcef.core.CodeEditorWidget
         """
-        self.editor = editor
+        self.__editor = weakref.ref(editor)
         self._onStyleChanged()
+
+    def uninstall(self):
+        self._onStateChanged(False)
+        self.__editor = None
 
     def _onStateChanged(self, state):
         """
@@ -159,8 +174,7 @@ def cursorForPosition(codeEdit, line, column, selectEndOfLine=False, selection=N
     :param line:
     :param column:
     """
-    tc = codeEdit.textCursor()
-    assert isinstance(tc, QTextCursor)
+    tc = QTextCursor(codeEdit.document())
     tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
     tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
     tc.setPosition(tc.position() + column - 1)
@@ -371,6 +385,22 @@ class CodeEditorWidget(QWidget, StyledObject):
 
         self.__logger = logging.getLogger(
             __name__ + "." + self.__class__.__name__)
+
+    def __del__(self):
+        self.clearModes()
+        self.clearPanels()
+
+    def clearModes(self):
+        keys = self.__modes.keys()
+        for k in keys:
+            self.__modes[k].uninstall()
+        self.__modes.clear()
+
+    def clearPanels(self):
+        keys = self.__panels.keys()
+        for k in keys:
+            self.__panels[k].uninstall()
+        self.__panels.clear()
 
     def installMode(self, mode):
         """ Installs a mode on the widget.
