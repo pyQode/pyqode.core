@@ -124,7 +124,8 @@ class GenericPythonEditor(QMainWindow):
     @Slot()
     def on_actionOpen_triggered(self):
         """ Open a new file in the editor """
-        filename = QFileDialog.getOpenFileName(self, "Choose a python script", "", "Python script (*.py)")[0]
+        filename = QFileDialog.getOpenFileName(
+            self, "Choose a python script", "", "Python script (*.py)")[0]
         if filename != "":
             openFileInEditor(self.ui.genericEditor, filename)
 
