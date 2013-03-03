@@ -81,12 +81,15 @@ class LineNumberPanel(Panel):
         painter_drawText = painter.drawText
         align_right = Qt.AlignRight
         normal_font = painter.font()
+        normal_font.setBold(False)
         bold_font = QFont(normal_font)
         bold_font.setBold(True)
+        bold_font.setItalic(True)
         active = self.editor.codeEdit.textCursor().blockNumber()
         for vb in self.editor.codeEdit.visible_blocks:
             row = vb.row
             if row == active + 1:
+                print "bold", row
                 painter.setFont(bold_font)
             else:
                 painter.setFont(normal_font)
