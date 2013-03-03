@@ -166,7 +166,7 @@ class CodeCompletionMode(Mode, QThread):
         super(CodeCompletionMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
         QThread.__init__(self)
         self.__cc_request_queue = deque()
-        self.mutex = QMutex()
+        # self.mutex = QMutex()
         #: Defines the min number of suggestions. This is used to know we should avoid using lower priority models.
         #  If there is at least minSuggestions in the suggestions list, we won't use other completion model.
         self.minSuggestions = 50
@@ -277,17 +277,26 @@ class CodeCompletionMode(Mode, QThread):
         completionPrefix = self._textUnderCursor()
         eow = "~!@#$%^&*()+{}|:\"<>?,/;'[]\\-= "
         # hide popup if completion prefix len < 3 or end of word
+        prefixLen = len(completionPrefix)
+        prevPrefixLen = len(self.__completer.completionPrefix())
         containsEow = self.containsAny(completionPrefix, eow)
         tooShort = len(completionPrefix) < self.nbTriggerChars and not "." in completionPrefix
-        shorcut = self.lastCharOfLine() == "."
+        shortcut = self.lastCharOfLine() == "." or (prefixLen == self.nbTriggerChars and
+                                                    prevPrefixLen == self.nbTriggerChars - 1)
         # close popup if not enough characters or on an end of word
-        if not self.__completer.popup().isVisible() and (tooShort or containsEow) and not shorcut:
+        if not self.__completer.popup().isVisible() and (tooShort or containsEow) and not shortcut:
             self.__hideCompletions()
             return
-        emptyPrefix = self.__completer.completionPrefix() == "" or completionPrefix == ""
-        prevPrefix = self.__completer.completionPrefix()
-        alreadySearched = not emptyPrefix and (prevPrefix in completionPrefix or completionPrefix in prevPrefix)
-        self.__request_completion(completionPrefix, onlyAdapt=not(self.autoTrigger and not alreadySearched))
+
+        # emptyPrefix = self.__completer.completionPrefix() == "" or completionPrefix == ""
+        # prevPrefix = self.__completer.completionPrefix()
+        # alreadySearched = not emptyPrefix and (prevPrefix in completionPrefix or completionPrefix in prevPrefix)
+        if not shortcut:
+            if self.__completer.popup().isVisible():
+                self.__request_completion(completionPrefix, onlyAdapt=True)
+        else:
+            if not self.__completer.popup().isVisible():
+                self.__request_completion(completionPrefix, onlyAdapt=False)
 
     def _onKeyReleased(self, event):
         # closes popup if word under cursor is space or empty
@@ -324,7 +333,7 @@ class CodeCompletionMode(Mode, QThread):
                 self.__completer.setCompletionPrefix("")
                 event.setAccepted(True)
         # user completion request: update models and show completions
-        elif isShortcut is True:
+        elif isShortcut:
             self.__request_completion(completionPrefix)
 
     def _textUnderCursor(self):
@@ -356,16 +365,17 @@ class CodeCompletionMode(Mode, QThread):
                                  completionPrefix=completionPrefix)
 
     def __exec_request(self, request):
-        self.mutex.lock()
-        try:
-            for model in self._models:
-                try:
-                    # update the current model
-                    model.update(request.source_code, request.line, request.col, request.filename, request.encoding)
-                except :
-                    pass
-        finally:
-            self.mutex.unlock()
+        # self.mutex.lock()
+        # try:
+        for model in self._models:
+            try:
+                # update the current model
+                model.update(request.source_code, request.line, request.col, request.filename, request.encoding)
+            except :
+                pass
+        # except
+        # finally:
+        #     self.mutex.unlock()
 
     def __createCompleterModel(self, completionPrefix):
         # build the completion model
@@ -423,9 +433,9 @@ class CodeCompletionMode(Mode, QThread):
         if self.__preventUpdate:
             return
         if not request.onlyAdapt:
-            self.mutex.lock()
+            # self.mutex.lock()
             cc_model, cptSuggestion = self.__createCompleterModel(request.completionPrefix)
-            self.mutex.unlock()
+            # self.mutex.unlock()
             if cptSuggestion > 1:
                 self.__completer.setModel(cc_model)
                 self.__showCompletions(request.completionPrefix)
