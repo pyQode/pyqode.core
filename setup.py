@@ -15,10 +15,12 @@ This is the setup script, install it as any python package.
 
 .. note:: You will need to install PySide on your own
 """
-from IPython.core.release import long_description
 from setuptools import setup, find_packages
+
+# properly get pcef version
 execfile('pcef/version.py')
 
+# get long description
 with open('README.rst', 'r') as readme:
     long_desc = readme.read()
 
