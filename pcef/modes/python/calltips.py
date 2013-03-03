@@ -39,12 +39,12 @@ class PythonCalltipMode(Mode, QThread):
 
     def _onStateChanged(self, state):
         if state is True:
-            self.editor.codeEdit.keyReleased.connect(self.__onTextChanged)
+            self.editor.codeEdit.keyReleased.connect(self.__onKeyReleased)
             self.__callResultsAvailable.connect(self.__apply_results)
             self.__callResultsCollectFailed.connect(self.__apply_results)
             self.start()
         else:
-            self.editor.codeEdit.keyReleased.disconnect(self.__onTextChanged)
+            self.editor.codeEdit.keyReleased.disconnect(self.__onKeyReleased)
             self.__callResultsAvailable.disconnect(self.__apply_results)
             self.__callResultsCollectFailed.disconnect(self.__apply_results)
             self.__is_running = False
@@ -58,10 +58,8 @@ class PythonCalltipMode(Mode, QThread):
                 self.__exec_request(request)
             self.msleep(1)
 
-    def __onTextChanged(self, event):
-        if event.key() == Qt.Key_Space:
-            return
-        if event.key() == Qt.Key_ParenLeft or event.key() == Qt.Key_Comma:
+    def __onKeyReleased(self, event):
+        if event.key() == Qt.Key_ParenLeft or event.key() == Qt.Key_Comma or event.key() == Qt.Key_Space:
             tc = self.editor.codeEdit.textCursor()
             line = tc.blockNumber() + 1
             col = tc.columnNumber()
@@ -77,7 +75,10 @@ class PythonCalltipMode(Mode, QThread):
         script = Script(request.source_code, request.line, request.col, request.filename, request.encoding)
         try:
             call = script.get_in_function_call()
-            self.__callResultsAvailable.emit(call, request)
+            if call:
+                self.__callResultsAvailable.emit(call, request)
+            else:
+                self.__callResultsCollectFailed.emit()
         except:
             self.__callResultsCollectFailed.emit()
 
