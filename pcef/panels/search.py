@@ -189,7 +189,7 @@ class QSearchPanel(Panel):
             self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
         else:
             self.editor.codeEdit.cursorPositionChanged.disconnect(self.__onCursorMoved)
-            self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
+            self.editor.codeEdit.textChanged.disconnect(self.updateSearchResults)
 
     def __installActions(self):
         """ Installs actions on the editor context menu """
