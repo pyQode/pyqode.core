@@ -104,8 +104,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     newTextSet = Signal()
     #: Signal emitted when focusInEvent is is called
     focusedIn = Signal(QFocusEvent)
-    #: Signal emitted when the text is saved with pcef.saveFileFromEditor. The signal is emitted with the complete
-    #  file path
+    #: Signal emitted when the text is saved with pcef.saveFileFromEditor.
+    #  The signal is emitted with the complete file path
     textSaved = Signal(str)
 
     #---------------------------------------------------------------------------
