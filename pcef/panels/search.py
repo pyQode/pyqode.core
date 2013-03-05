@@ -27,7 +27,7 @@ from pcef.code_edit import CodeEdit
 from pcef.ui import search_panel_ui
 
 
-class QSearchPanel(Panel):
+class SearchPanel(Panel):
     """
     Search (& replace) Panel. Allow the user to search for content in the editor
 
