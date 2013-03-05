@@ -10,10 +10,11 @@
 #
 from collections import deque
 import os
-from PySide.QtGui import QColor
+from PySide.QtGui import QColor, QIcon
 from subprocess import Popen, PIPE, STDOUT
 from PySide.QtCore import QThread, Signal
 import sys
+from pcef.panels.marker import Marker
 from pcef.core import Mode, TextDecoration, cursorForPosition
 
 
@@ -51,17 +52,23 @@ class Pep8CheckerMode(Mode, CheckerThread):
         super(Pep8CheckerMode, self).__init__("PEP8", "Check for PEP8 violation on the fly")
         CheckerThread.__init__(self)
         self.__decorations = []
+        self.__markers = []
+        self.checkers_panel = None
 
     def _onStateChanged(self, state):
         if state:
             self.editor.codeEdit.textSaved.connect(self.__run_pep8)
             self.editor.codeEdit.newTextSet.connect(self.__run_pep8)
             self.outputAvailable.connect(self.__apply_results)
+            if hasattr(self.editor, "checkers_panel"):
+                self.checkers_panel = self.editor.checkers_panel
+                print "Found checkers panel"
             self.start()
         else:
             self.editor.codeEdit.textSaved.disconnect(self.__run_pep8)
             self.editor.codeEdit.newTextSet.disconnect(self.__run_pep8)
             self.outputAvailable.disconnect(self.__apply_results)
+            self.checkers_panel = None
             self.is_running = False
             self.wait()
 
@@ -69,6 +76,15 @@ class Pep8CheckerMode(Mode, CheckerThread):
         for deco in self.__decorations:
             self.editor.codeEdit.removeDecoration(deco)
         self.__decorations[:] = []
+
+    def __clear_markers(self):
+        for marker in self.__markers:
+            if self.checkers_panel:
+                try:
+                    self.checkers_panel.removeMarker(marker)
+                except ValueError:
+                    pass
+        self.__markers[:] = []
 
     def __apply_results(self, raw_results):
         """
@@ -78,6 +94,7 @@ class Pep8CheckerMode(Mode, CheckerThread):
         :type raw_results: str
         """
         self.__clear_decorations()
+        self.__clear_markers()
         lines = raw_results.splitlines()
         current_cursor = self.editor.codeEdit.textCursor()
         hbar_pos = self.editor.codeEdit.horizontalScrollBar().sliderPosition()
@@ -96,6 +113,11 @@ class Pep8CheckerMode(Mode, CheckerThread):
                 deco.setSpellchecking(color=self.color)
                 self.__decorations.append(deco)
                 self.editor.codeEdit.addDecoration(deco)
+
+                if self.checkers_panel:
+                    marker = Marker(line_nr, icon=QIcon(":/icons/rc/marker_warning.png"), tooltip="PEP8: %s" % message)
+                    self.__markers.append(marker)
+                    self.checkers_panel.addMarker(marker)
             except:
                 pass
         self.editor.codeEdit.setTextCursor(current_cursor)
@@ -103,8 +125,10 @@ class Pep8CheckerMode(Mode, CheckerThread):
         self.editor.codeEdit.verticalScrollBar().setSliderPosition(vbar_pos)
 
     def __run_pep8(self):
-        cmd = "pep8 %s" % self.editor.codeEdit.tagFilename
-        self.execute(cmd)
+        filename = self.editor.codeEdit.tagFilename
+        if filename:
+            cmd = "pep8 %s" % self.editor.codeEdit.tagFilename
+            self.execute(cmd)
 
     def _onStyleChanged(self):
         self.color = QColor(self.editor.currentStyle.warningColor)

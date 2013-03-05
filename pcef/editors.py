@@ -25,7 +25,8 @@ from pcef.modes.python.calltips import PythonCalltipMode
 from pcef.modes.python.checkers import Pep8CheckerMode
 from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
-from pcef.panels.search import QSearchPanel
+from pcef.panels.search import SearchPanel
+from pcef.panels.marker import MarkersPanel
 
 
 class GenericEditor(CodeEditorWidget):
@@ -45,7 +46,7 @@ class GenericEditor(CodeEditorWidget):
 
         * :class:`pcef.panels.line_numbers.LineNumberPanel`
         * :class:`pcef.panels.folding.FoldPanel`
-        * :class:`pcef.panels.search_and_replace.QSearchPanel`
+        * :class:`pcef.panels.search_and_replace.SearchPanel`
 
     It also populates the text edit context menu with a set of default actions.
     (some modes might also add their own menu entry or sub-menus).
@@ -125,9 +126,9 @@ class GenericEditor(CodeEditorWidget):
         """
         :returns: the search and replace panel instance
 
-        :return: pcef.panels.search_and_replace.QSearchPanel
+        :return: pcef.panels.search_and_replace.SearchPanel
         """
-        return self.panel(QSearchPanel.IDENTIFIER)
+        return self.panel(SearchPanel.IDENTIFIER)
 
     #---------------------------------------------------------------------------
     # Methods
@@ -141,7 +142,7 @@ class GenericEditor(CodeEditorWidget):
         # Install panels
         self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
+        self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
 
         # Install modes
         self.installMode(CodeCompletionMode())
@@ -221,8 +222,14 @@ class GenericEditor(CodeEditorWidget):
 
 
 class PythonEditor(GenericEditor):
+
+    @property
+    def checkers_panel(self):
+        return self.panel("Checkers panel")
+
     def __init__(self, parent=None):
         super(PythonEditor, self).__init__(parent)
         self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
         self.installMode(PythonCalltipMode())
+        self.installPanel(MarkersPanel("Checkers panel", markersReadOnly=True), self.PANEL_ZONE_LEFT)
         self.installMode(Pep8CheckerMode())
