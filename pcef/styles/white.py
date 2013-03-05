@@ -52,7 +52,7 @@ class WhiteStyle(Style):
         self.selectionBackgroundColor = '#3465a4'
         self.selectionTextColor = '#ffffff'
         self.lineNbrColor = '#888a85'
-        self.panelSeparatorColor = '#babdb6'
+        self.panelSeparatorColor = '#dddddd'
         self.panelsBackgroundColor = '#eeeeec'
         self.fontName = DEFAULT_FONT
         self.fontSize = DEFAULT_FONT_SIZE
