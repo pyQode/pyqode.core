@@ -398,6 +398,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         for sel in self.__selections:
             if sel.containsCursor(c) and sel.tooltip:
                 QToolTip.showText(self.mapToGlobal(event.pos()), sel.tooltip, self)
+                break
+        QPlainTextEdit.mouseMoveEvent(self, event)
 
     def contextMenuEvent(self, event):
         """ Shows our own context menu """
