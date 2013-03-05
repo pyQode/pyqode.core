@@ -193,7 +193,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
     Helper class to quickly create a text decoration.
     """
 
-    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None, draw_order=0):
+    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None, draw_order=0, tooltip=None):
         """
         Creates a text decoration
 
@@ -207,6 +207,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
         self.draw_order = draw_order
+        self.tooltip = tooltip
         QTextEdit.ExtraSelection.__init__(self)
         cursor = QTextCursor(cursorOrBlockOrDoc)
         if startPos is not None:
@@ -214,6 +215,10 @@ class TextDecoration(QTextEdit.ExtraSelection):
         if endPos is not None:
             cursor.setPosition(endPos, QTextCursor.KeepAnchor)
         self.cursor = cursor
+
+    def containsCursor(self, textCursor):
+        assert  isinstance(textCursor, QTextCursor)
+        return self.cursor.selectionStart() <= textCursor.position() <= self.cursor.selectionEnd()
 
     def setBold(self):
         """ Uses bold text """

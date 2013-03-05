@@ -12,6 +12,7 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
+from PySide.QtGui import QToolTip
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
@@ -157,6 +158,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         self.newTextSet.connect(self.__onBlocksChanged)
         self.cursorPositionChanged.connect(self.__onBlocksChanged)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.setMouseTracking(True)
 
         self._onStyleChanged()
 
@@ -389,6 +391,13 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         if not event.isAccepted():
             event.setAccepted(True)
             QPlainTextEdit.wheelEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        assert isinstance(event, QMouseEvent)
+        c = self.cursorForPosition(event.pos())
+        for sel in self.__selections:
+            if sel.containsCursor(c) and sel.tooltip:
+                QToolTip.showText(self.mapToGlobal(event.pos()), sel.tooltip, self)
 
     def contextMenuEvent(self, event):
         """ Shows our own context menu """

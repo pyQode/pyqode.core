@@ -92,7 +92,7 @@ class Pep8CheckerMode(Mode, CheckerThread):
                 col_nr = int(tokens[2 + offset])
                 message = tokens[3 + offset]
                 c = cursorForPosition(self.editor.codeEdit, line_nr, col_nr, selectEndOfLine=True)
-                deco = TextDecoration(c, draw_order=1)
+                deco = TextDecoration(c, draw_order=1, tooltip="PEP8: %s" % message)
                 deco.setSpellchecking(color=self.color)
                 self.__decorations.append(deco)
                 self.editor.codeEdit.addDecoration(deco)
@@ -109,3 +109,9 @@ class Pep8CheckerMode(Mode, CheckerThread):
     def _onStyleChanged(self):
         self.color = QColor(self.editor.currentStyle.warningColor)
         self.__run_pep8()
+
+
+# mouse move
+# get cursor for position
+# check if any cursor extra selection contains the mouse cursor
+# if yes, show a tooltip
