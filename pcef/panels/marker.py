@@ -65,14 +65,14 @@ class MarkersPanel(Panel):
     """
 
     #: Stylesheet
-    QSS = """QToolTip {
-         background-color: %(back)s;
-         color: %(color)s;
-         border: 1px solid %(color)s;
-         padding: 2px;
-         opacity: 220;
-    }
-    """
+    # QSS = """QToolTip {
+    #      background-color: %(back)s;
+    #      color: %(color)s;
+    #      border: 1px solid %(color)s;
+    #      padding: 2px;
+    #      opacity: 220;
+    # }
+    # """
 
     #: Signal emitted with the line number where the marker must be added
     addMarkerRequested = Signal(Panel, int)
@@ -140,9 +140,9 @@ class MarkersPanel(Panel):
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
         self.separator_pen = QPen(QColor(style.panelSeparatorColor))
-        qss = self.QSS % {"back": style.activeLineColor,
-                          "color": style.tokenColor(Text)}
-        self.setStyleSheet(qss)
+        # qss = self.QSS % {"back": style.activeLineColor,
+        #                   "color": style.tokenColor(Text)}
+        # self.setStyleSheet(qss)
         self.updateGeometry()
 
     def sizeHint(self):
