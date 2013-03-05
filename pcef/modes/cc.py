@@ -362,7 +362,6 @@ class CodeCompletionMode(Mode, QThread):
                 return
         # user completion request: update models and show completions
         if isShortcut:
-            print "Shortcut"
             self._requestCompletion(completionPrefix, onlyAdapt=False)
             if event.key() == self.triggerKey:
                 event.setAccepted(True)
