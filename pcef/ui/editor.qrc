@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>rc/marker_error.png</file>
+    <file>rc/marker_style.png</file>
+    <file>rc/marker_warning.png</file>
     <file>rc/param.png</file>
     <file>rc/module.png</file>
     <file>rc/import.png</file>
