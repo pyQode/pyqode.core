@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from collections import deque
-from PySide.QtCore import Qt, Slot, QThread, Signal
+from PySide.QtCore import Qt, Slot, QThread, Signal, QObject
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, \
     QTextCursor, QIcon, QToolTip
 
@@ -147,7 +147,8 @@ class CompletionRequest(object):
         self.onlyAdapt = onlyAdapt
 
 
-class CodeCompletionMode(Mode, QThread):
+# class CodeCompletionMode(Mode, QThread):
+class CodeCompletionMode(Mode, QObject):
     """
     This mode provides code completion to the CodeEdit widget.
 
@@ -180,7 +181,8 @@ class CodeCompletionMode(Mode, QThread):
     def __init__(self):
         super(CodeCompletionMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
-        QThread.__init__(self)
+        # QThread.__init__(self)
+        QObject.__init__(self)
         self.__cc_request_queue = deque()
         # self.mutex = QMutex()
         #: Defines the min number of suggestions. This is used to know we should
@@ -210,19 +212,19 @@ class CodeCompletionMode(Mode, QThread):
         self._models = [DocumentWordsCompletionModel()]
         self.__tooltips = {}
 
-    def run(self, *args, **kwargs):
-        """
-        Run the background thead while is_running is True
-        """
-        self.is_running = True
-        while self.is_running:
-            if len(self.__cc_request_queue):
-                request = self.__cc_request_queue.pop()
-                if not request.onlyAdapt:
-                    self._execRequest(request)
-                else:
-                    self._completionResultsAvailable.emit(request)
-            self.msleep(1)
+    # def run(self, *args, **kwargs):
+    #     """
+    #     Run the background thread while is_running is True
+    #     """
+    #     self.is_running = True
+    #     while self.is_running:
+    #         if len(self.__cc_request_queue):
+    #             request = self.__cc_request_queue.pop()
+    #             if not request.onlyAdapt:
+    #                 self._execRequest(request)
+    #             else:
+    #                 self._completionResultsAvailable.emit(request)
+    #         self.msleep(1)
 
     def addModel(self, model):
         """
@@ -269,7 +271,7 @@ class CodeCompletionMode(Mode, QThread):
             self.__completer.highlighted.connect(
                 self._displayHighlightedTooltip)
             self._completionResultsAvailable.connect(self._applyRequestResults)
-            self.start()
+            # self.start()
         else:
             self.editor.codeEdit.keyPressed.disconnect(self._onKeyPressed)
             self.editor.codeEdit.postKeyPressed.disconnect(self._onKeyReleased)
@@ -278,8 +280,8 @@ class CodeCompletionMode(Mode, QThread):
                 self._displayHighlightedTooltip)
             self._completionResultsAvailable.disconnect(
                 self._applyRequestResults)
-            self.is_running = False
-            self.wait()
+            # self.is_running = False
+            # self.wait()
 
     def _onFocusIn(self, event):
         """
@@ -311,7 +313,8 @@ class CodeCompletionMode(Mode, QThread):
         tooShort = len(word) < self.nbTriggerChars
         # closes popup if completion prefix is empty and we are not removing
         # some text
-        if (event.key() == Qt.Key_Backspace or event.key() == Qt.Key_Delete) or\
+        if (not self.__completer.popup().isVisible() and
+                event.key() == Qt.Key_Backspace or event.key() == Qt.Key_Delete) or\
                 (not isShortcut and event.modifiers() == 0 and (
                 word.isspace() or word == "")):
             self._hideCompletions()
@@ -491,11 +494,12 @@ class CodeCompletionMode(Mode, QThread):
         self.__preventUpdate = False
         # cancel prev running request
         if not onlyAdapt:
-            self.__cc_request_queue.append(self._getCCRequest(completionPrefix))
+            request = self._getCCRequest(completionPrefix)
         else:
-            self.__cc_request_queue.append(
-                CompletionRequest(completionPrefix=completionPrefix,
-                                  onlyAdapt=True))
+            request = CompletionRequest(completionPrefix=completionPrefix,
+                                        onlyAdapt=True)
+        self._execRequest(request)
+
 
     def _applyRequestResults(self, request):
         """
