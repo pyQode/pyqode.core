@@ -218,7 +218,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
 
     def containsCursor(self, textCursor):
         assert  isinstance(textCursor, QTextCursor)
-        return self.cursor.selectionStart() <= textCursor.position() <= self.cursor.selectionEnd()
+        return self.cursor.selectionStart() <= textCursor.position() < self.cursor.selectionEnd()
 
     def setBold(self):
         """ Uses bold text """
