@@ -8,7 +8,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ PCEF generic editor demo """
-import os
 import sys
 
 from PySide.QtCore import Slot
@@ -58,7 +57,7 @@ class SimpleEditor(QMainWindow):
         allStyles = styles.getAllStyles()
         allStyles.sort()
         self.styleActionGroup = QActionGroup(self)
-        for i, style in enumerate(allStyles):
+        for style in allStyles:
             action = QAction(unicode(style), self.ui.menuStyle)
             action.setCheckable(True)
             action.setChecked(style == "Default")
@@ -71,7 +70,7 @@ class SimpleEditor(QMainWindow):
         allPanels = self.ui.genericEditor.panels()
         allPanels.sort()
         self.panels_actions = []
-        for i, panel in enumerate(allPanels):
+        for panel in enumerate(allPanels):
             action = QAction(unicode(panel), self.ui.menuPanels)
             action.setCheckable(True)
             action.setChecked(panel.enabled)
@@ -83,7 +82,7 @@ class SimpleEditor(QMainWindow):
         allModes = self.ui.genericEditor.modes()
         allModes.sort()
         self.modes_actions = []
-        for i, mode in enumerate(allModes):
+        for mode in allModes:
             action = QAction(unicode(mode), self.ui.menuModes)
             action.setCheckable(True)
             action.setChecked(mode.enabled)

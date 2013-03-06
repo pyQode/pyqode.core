@@ -8,7 +8,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ PCEF generic editor demo """
-import os
 import sys
 
 from PySide.QtCore import Slot
@@ -23,8 +22,6 @@ from pcef import saveFileFromEditor
 from pcef import styles
 from pcef.editors import PythonEditor
 from pcef.modes.cc import CodeCompletionMode
-from pcef.panels.misc import UserMarkersPanel
-
 from examples.ui import simple_python_editor_ui
 
 
@@ -43,7 +40,6 @@ class GenericPythonEditor(QMainWindow):
         self.ui = simple_python_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("PCEF - Python Editor Example")
-        editor = self.ui.genericEditor
 
         # open this file
         if __name__ == "__main__":
@@ -53,7 +49,7 @@ class GenericPythonEditor(QMainWindow):
         allStyles = styles.getAllStyles()
         allStyles.sort()
         self.styleActionGroup = QActionGroup(self)
-        for i, style in enumerate(allStyles):
+        for style in allStyles:
             action = QAction(unicode(style), self.ui.menuStyle)
             action.setCheckable(True)
             action.setChecked(style == "Default")
@@ -66,7 +62,7 @@ class GenericPythonEditor(QMainWindow):
         allPanels = self.ui.genericEditor.panels()
         allPanels.sort()
         self.panels_actions = []
-        for i, panel in enumerate(allPanels):
+        for panel in allPanels:
             action = QAction(unicode(panel), self.ui.menuPanels)
             action.setCheckable(True)
             action.setChecked(panel.enabled)
@@ -78,14 +74,13 @@ class GenericPythonEditor(QMainWindow):
         allModes = self.ui.genericEditor.modes()
         allModes.sort()
         self.modes_actions = []
-        for i, mode in enumerate(allModes):
+        for mode in allModes:
             action = QAction(unicode(mode), self.ui.menuModes)
             action.setCheckable(True)
             action.setChecked(mode.enabled)
             self.ui.menuModes.addAction(action)
             self.modes_actions.append(action)
             action.triggered.connect(self.onModeActionTriggered)
-            m = UserMarkersPanel()
 
     def onModeActionTriggered(self):
         """ Enables/Disables a mode """

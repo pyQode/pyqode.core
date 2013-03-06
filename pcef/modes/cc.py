@@ -500,7 +500,6 @@ class CodeCompletionMode(Mode, QObject):
                                         onlyAdapt=True)
         self._execRequest(request)
 
-
     def _applyRequestResults(self, request):
         """
         Updates the completer model and show the popup
