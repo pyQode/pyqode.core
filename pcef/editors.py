@@ -22,7 +22,9 @@ from pcef.modes.zoom import EditorZoomMode
 from pcef.modes.cc import CodeCompletionMode
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
-from pcef.modes.python.checkers import Pep8CheckerMode
+from pcef.modes.python.checkers import PEP8CheckerMode
+from pcef.modes.python.checkers import PyFlakesCheckerMode
+from pcef.modes.python.checkers import PyLintCheckerMode
 from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
 from pcef.panels.search import SearchPanel
@@ -231,5 +233,8 @@ class PythonEditor(GenericEditor):
         super(PythonEditor, self).__init__(parent)
         self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
         self.installMode(PythonCalltipMode())
+        # todo: add a dedicated marker panel that is able to show more than 1 error message
         self.installPanel(MarkersPanel("Checkers panel", markersReadOnly=True), self.PANEL_ZONE_LEFT)
-        self.installMode(Pep8CheckerMode())
+        self.installMode(PEP8CheckerMode())
+        self.installMode(PyFlakesCheckerMode())
+        self.installMode(PyLintCheckerMode())
