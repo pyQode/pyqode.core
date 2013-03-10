@@ -28,7 +28,7 @@ from pcef.modes.python.checkers import PyLintCheckerMode
 from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
 from pcef.panels.search import SearchPanel
-from pcef.panels.marker import MarkersPanel
+from pcef.panels.misc import CheckersMarkerPanel
 
 
 class GenericEditor(CodeEditorWidget):
@@ -227,14 +227,14 @@ class PythonEditor(GenericEditor):
 
     @property
     def checkers_panel(self):
-        return self.panel("Checkers panel")
+        return self.panel("Checkers marker panel")
 
     def __init__(self, parent=None):
         super(PythonEditor, self).__init__(parent)
         self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
         self.installMode(PythonCalltipMode())
         # todo: add a dedicated marker panel that is able to show more than 1 error message
-        self.installPanel(MarkersPanel("Checkers panel", markersReadOnly=True), self.PANEL_ZONE_LEFT)
+        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_LEFT)
         self.installMode(PEP8CheckerMode())
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())

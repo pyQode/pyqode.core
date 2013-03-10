@@ -68,8 +68,6 @@ class CheckerMode(Mode, CheckerThread):
         self.__markers = []
         self.base_cmd = base_cmd
         self.checkers_panel = None
-        self.icons = {ERROR_TYPE_WARNING: ":/icons/rc/marker_warning.png",
-                      ERROR_TYPE_SYNTAX: ":/icons/rc/marker_error.png"}
         self.colors = {ERROR_TYPE_WARNING: "#FF0000", ERROR_TYPE_SYNTAX: "#FFFF00"}
 
     def _onStateChanged(self, state):
@@ -111,9 +109,8 @@ class CheckerMode(Mode, CheckerThread):
         self.__decorations.append(deco)
         self.editor.codeEdit.addDecoration(deco)
         if self.checkers_panel:
-            marker = Marker(line, icon=QIcon(self.icons[error_type]), tooltip=message)
-            self.__markers.append(marker)
-            self.checkers_panel.addMarker(marker)
+            self.__markers.append(
+                self.checkers_panel.addCheckerMarker(error_type, line, message))
 
     def __apply_results(self, raw_results):
         """
@@ -215,7 +212,6 @@ class PyLintCheckerMode(CheckerMode):
         for line in lines:
             try:
                 tokens = line.split(':')
-                print tokens
                 nb_tokens = len(tokens)
                 line_nr = int(tokens[nb_tokens - 2])
                 message = "PyLint: %s" % tokens[nb_tokens - 1]
