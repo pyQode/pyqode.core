@@ -31,12 +31,12 @@ setup(
     packages=find_packages(),
     package_data={'pcef.ui': ['rc/*'], 'examples.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
-    url='https://launchpad.net/qce/',
+    url='https://github.com/ColinDuquesnoy/PCEF',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='PySide Code Editing Framework (P.C.E.F.)',
     long_description=long_desc,
-    requires=['pygments', 'PySide', 'jedi', 'pep8'],
+    requires=['pygments', 'PySide', 'jedi', 'pep8', 'qdarkstyle'],
     entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main']}
 )
