@@ -70,7 +70,7 @@ class SimpleEditor(QMainWindow):
         allPanels = self.ui.genericEditor.panels()
         allPanels.sort()
         self.panels_actions = []
-        for panel in enumerate(allPanels):
+        for panel in allPanels:
             action = QAction(unicode(panel), self.ui.menuPanels)
             action.setCheckable(True)
             action.setChecked(panel.enabled)
@@ -107,6 +107,14 @@ class SimpleEditor(QMainWindow):
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
+        stylesheet = ""
+        if action.text() == "Dark":
+            try:
+                import qdarkstyle
+                stylesheet = qdarkstyle.load_stylesheet()
+            except ImportError:
+                print "Failed to use the qdarkstyle. Please execute <pip install qdarkstyle> to fully use this theme."
+        QApplication.instance().setStyleSheet(stylesheet)
 
     @Slot()
     def on_actionSave_triggered(self):

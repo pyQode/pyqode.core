@@ -75,6 +75,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         color: %(t)s;
         selection-background-color: %(bs)s;
         selection-color: %(ts)s;
+        border: none;
+        border-radius: 0px;
     }
     """
 

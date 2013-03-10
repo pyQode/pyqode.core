@@ -20,8 +20,6 @@ from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
 from pcef import saveFileFromEditor
 from pcef import styles
-from pcef.editors import PythonEditor
-from pcef.modes.cc import CodeCompletionMode
 from examples.ui import simple_python_editor_ui
 
 
@@ -99,10 +97,16 @@ class GenericPythonEditor(QMainWindow):
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
-        editor = self.ui.genericEditor
-        assert isinstance(editor, PythonEditor)
-        m = editor.codeCompletionMode
-        assert isinstance(m, CodeCompletionMode)
+        stylesheet = ""
+        if action.text() == "Dark":
+            try:
+                import qdarkstyle
+                stylesheet = qdarkstyle.load_stylesheet()
+            except ImportError:
+                print("Failed to use the qdarkstyle. "
+                      "Please execute <pip install qdarkstyle> to fully use "
+                      "this theme.")
+        QApplication.instance().setStyleSheet(stylesheet)
 
     @Slot()
     def on_actionSave_triggered(self):
