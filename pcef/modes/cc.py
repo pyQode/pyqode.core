@@ -327,7 +327,8 @@ class CodeCompletionMode(Mode, QObject):
         if self.__completer.popup().isVisible():
             self._requestCompletion(completionPrefix=word, onlyAdapt=True)
         # run cc if word is long enough and auto trigger is on
-        elif not tooShort and self.autoTrigger and event.text() != "":
+        elif not tooShort and self.autoTrigger and event.text() != "" \
+                and event.modifiers() == 0:
             self._requestCompletion(completionPrefix=word, onlyAdapt=False)
 
     def _isShortcut(self, event):
