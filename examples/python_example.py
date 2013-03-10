@@ -40,8 +40,10 @@ class GenericPythonEditor(QMainWindow):
         self.setWindowTitle("PCEF - Python Editor Example")
 
         # open this file
-        if __name__ == "__main__":
+        try:
             openFileInEditor(self.ui.genericEditor, __file__)
+        except:
+            pass
 
         # add styles actions
         allStyles = styles.getAllStyles()
