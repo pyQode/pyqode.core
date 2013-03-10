@@ -20,11 +20,11 @@ class PygmentsDarkStyle(PygmentsStyle):
     """
     Pygments theme inspired by the darcula theme (Pycharm)
     """
-    background_color = '#202020'
+    background_color = '#252525'
     styles = {
         Token:                  "noinherit #A9B7C6",
         Text:                   'noinherit #A9B7C6',
-        Whitespace:             'noinherit #3A3A3A',
+        Whitespace:             'noinherit #2a2a2a',
         Error:                  'noinherit #CC0000 underline',
         Keyword:                'noinherit #CC7832',
         Name.Function:          'noinherit #A9B7C6 bold',
@@ -48,7 +48,7 @@ class DarkStyle(Style):
         super(DarkStyle, self).__init__("Dark")
         self.pygmentsStyle = PygmentsDarkStyle
         self.marginColor = '#FF0000'
-        self.activeLineColor = '#323232'
+        self.activeLineColor = '#2d2d2d'
         self.selectionBackgroundColor = '#78879b'
         self.selectionTextColor = '#ffffff'
         self.lineNbrColor = '#808080'
