@@ -40,16 +40,17 @@ class UserMarkersPanel(MarkersPanel):
 class CheckersMarkerPanel(MarkersPanel):
     """ A marker panel dedicated to the checkers modes. It allow to add several messages on the same
     marker.
-
     """
-    def __init__(self, parent=None):
-        MarkersPanel.__init__(self, "Checkers marker panel", True, parent)
+    def __init__(self, markersReadOnly=True, parent=None):
+        MarkersPanel.__init__(self, "Checkers marker panel",
+                              markersReadOnly=markersReadOnly, parent)
         self.icons = {0: ":/icons/rc/marker_warning.png",
                       1: ":/icons/rc/marker_error.png"}
 
     def addCheckerMarker(self, error_type, line, message):
         """
-        Add a checker marker to the panel
+        Adds a checker marker to the panel. This is a wrapper over the addMarker method used
+        for better consistency and convenience.
 
         :param error_type: error type
 
@@ -72,4 +73,3 @@ class CheckersMarkerPanel(MarkersPanel):
         marker.error_type = error_type
         self.addMarker(marker)
         return marker
-
