@@ -9,47 +9,43 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
-
-from collections import deque
 from subprocess import Popen, PIPE, STDOUT
+
 from PySide.QtGui import QColor
-from PySide.QtCore import QThread, Signal
+from PySide.QtCore import Signal, QRunnable, QObject, QThreadPool
 from pcef.core import Mode
 from pcef.code_edit import TextDecoration, cursorForPosition
 
 
-class CheckerThread(QThread):
-    """
-    A checker thread launch a process and retrieve its output.
-    A signal is emitted anytime a new output is available.
+class ResultsEvent(QObject):
+    signal = Signal(str)
 
-    The execute method takes a command line to run.
-    """
-    #: Signal emitted when the result of the command line is available.
-    #  The signal is emitted with the output string.
-    outputAvailable = Signal(str)
+
+class RunnableChecker(QRunnable):
+    # outputAvailable = Signal(str)
 
     def __init__(self):
-        QThread.__init__(self)
-        self.__cmd_queue = deque()
-        self.is_running = False
+        super(RunnableChecker, self).__init__()
+        self.cmd = ""
+        self.event = ResultsEvent()
 
-    def execute(self, command_line):
-        self.__cmd_queue.appendleft(command_line)
+    def __del__(self):
+        self.event = None
+
+    def connect(self, resultsHandler):
+        self.event.signal.connect(resultsHandler)
+
+    def disconnect(self, resultsHandler):
+        self.event.signal.disconnect(resultsHandler)
 
     def run(self, *args, **kwargs):
-        self.is_running = True
-        while self.is_running:
-            if len(self.__cmd_queue):
-                cmd = self.__cmd_queue.pop()
-                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
-                          stderr=STDOUT)
-                try:
-                    output = p.stdout.read()
-                    self.outputAvailable.emit(output)
-                except IOError:
-                    pass
-            self.msleep(1)
+        p = Popen(self.cmd, shell=True, stdin=PIPE, stdout=PIPE,
+                  stderr=STDOUT)
+        try:
+            output = p.stdout.read()
+            self.event.signal.emit(output)
+        except IOError:
+            pass
 
 
 #: Checker warning error type (pep8,...)
@@ -58,11 +54,11 @@ ERROR_TYPE_WARNING = 0
 ERROR_TYPE_SYNTAX = 1
 
 
-class CheckerMode(Mode, CheckerThread):
+class CheckerMode(Mode):
 
     def __init__(self, name, description, base_cmd):
         super(CheckerMode, self).__init__(name, description)
-        CheckerThread.__init__(self)
+        self.__thread_pool = QThreadPool()
         self.__decorations = []
         self.__markers = []
         self.base_cmd = base_cmd
@@ -70,21 +66,19 @@ class CheckerMode(Mode, CheckerThread):
         self.colors = {ERROR_TYPE_WARNING: "#FF0000",
                        ERROR_TYPE_SYNTAX: "#FFFF00"}
 
+    def __del__(self):
+        self.__thread_pool = None
+
     def _onStateChanged(self, state):
         if state:
             self.editor.codeEdit.textSaved.connect(self.__run_cmd)
             self.editor.codeEdit.newTextSet.connect(self.__run_cmd)
-            self.outputAvailable.connect(self.__apply_results)
             if hasattr(self.editor, "checkers_panel"):
                 self.checkers_panel = self.editor.checkers_panel
-            self.start()
         else:
             self.editor.codeEdit.textSaved.disconnect(self.__run_cmd)
             self.editor.codeEdit.newTextSet.disconnect(self.__run_cmd)
-            self.outputAvailable.disconnect(self.__apply_results)
             self.checkers_panel = None
-            self.is_running = False
-            self.wait()
 
     def __clear_decorations(self):
         for deco in self.__decorations:
@@ -140,7 +134,10 @@ class CheckerMode(Mode, CheckerThread):
         if filename:
             cmd = "{0} {1}".format(
                 self.base_cmd, self.editor.codeEdit.tagFilename)
-            self.execute(cmd)
+            runner = RunnableChecker()
+            runner.connect(self.__apply_results)
+            runner.cmd = cmd
+            self.__thread_pool.start(runner)
 
     def _onStyleChanged(self):
         self.colors[ERROR_TYPE_WARNING] = QColor(

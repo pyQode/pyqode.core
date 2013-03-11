@@ -138,8 +138,8 @@ class GenericEditor(CodeEditorWidget):
         self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
-
-        # Install modes
+        #
+        # # Install modes
         self.installMode(CodeCompletionMode())
         self.installMode(RightMarginMode())
         self.installMode(SyntaxHighlighterMode())

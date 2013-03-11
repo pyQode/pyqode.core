@@ -11,7 +11,8 @@
 """
 This modules contains the python specific code completion model.
 
-Python code completion is achieved by the use of the awesome **jedi** library (https://github.com/davidhalter/jedi)
+Python code completion is achieved by the use of the awesome **jedi** library
+(https://github.com/davidhalter/jedi)
 """
 from jedi import Script
 
@@ -29,7 +30,6 @@ Icons = {'Class': ':/icons/rc/class.png',
 class PythonCompletionModel(CompletionModel):
     def update(self, source_code, line, col, filename, encoding):
         # complete with jedi
-
         try:
             script = Script(source_code, line, col, filename, encoding)
             completions = script.complete()
@@ -44,6 +44,8 @@ class PythonCompletionModel(CompletionModel):
                 if suggestionType in Icons:
                     icon = Icons[suggestionType]
                 # add the suggestion to the list
-                self._suggestions.append(Suggestion(completion.word, icon=icon, description=desc.split(':')[1]))
+                self._suggestions.append(
+                    Suggestion(completion.word, icon=icon,
+                               description=desc.split(':')[1]))
         except :
             pass

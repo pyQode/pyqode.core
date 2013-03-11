@@ -9,9 +9,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from collections import deque
-from PySide.QtCore import Qt, Slot, QThread, Signal, QObject
+from PySide.QtCore import Qt, Slot, QThread, Signal, QObject, QRunnable, QThreadPool, QMutex, QTimer
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, \
     QTextCursor, QIcon, QToolTip
+import time
 
 from pcef.core import Mode
 
@@ -42,7 +43,8 @@ class CompletionModel(object):
     """
     @property
     def suggestions(self):
-        return self._suggestions
+        ret_val = self._suggestions
+        return ret_val
 
     def __init__(self, words=None, priority=0):
         """
@@ -63,7 +65,8 @@ class CompletionModel(object):
 
     def update(self, source_code, line, col, filename, encoding):
         """
-        Non-static completion model should overrides this method to update their suggestion list.
+        Non-static completion model should overrides this method to update their
+        suggestion list.
 
         This method is called by the completion mode whenever the completion prefix changed.
         """
@@ -147,8 +150,38 @@ class CompletionRequest(object):
         self.onlyAdapt = onlyAdapt
 
 
-# class CodeCompletionMode(Mode, QThread):
-class CodeCompletionMode(Mode, QObject):
+class CompletionEvent(QObject):
+    signal = Signal(CompletionRequest)
+
+
+class RunnableCompleter(QRunnable):
+
+    def __init__(self, models, request):
+        super(RunnableCompleter, self).__init__()
+        self.event = CompletionEvent()
+        self._models = models
+        self._request = request
+
+    def connect(self, handler):
+        self.event.signal.connect(handler)
+
+    def disconnect(self, handler):
+        self.event.signal.disconnect(handler)
+
+    def run(self, *args, **kwargs):
+        for model in self._models:
+            try:
+                # update the current model
+                model.update(
+                    self._request.source_code, self._request.line,
+                    self._request.col, self._request.filename,
+                    self._request.encoding)
+            except :
+                pass
+        self.event.signal.emit(self._request)
+
+
+class CodeCompletionMode(Mode):
     """
     This mode provides code completion to the CodeEdit widget.
 
@@ -174,33 +207,37 @@ class CodeCompletionMode(Mode, QObject):
     #: Mode description
     DESCRIPTION = "Provides code completion though completion models"
 
-    #: internal signal used to know when a CompletionRequest's results are
-    #  available
-    _completionResultsAvailable = Signal(CompletionRequest)
-
     def __init__(self):
         super(CodeCompletionMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
-        # QThread.__init__(self)
-        QObject.__init__(self)
-        self.__cc_request_queue = deque()
-        # self.mutex = QMutex()
+        self.thread_pool = QThreadPool()
+        self.thread_pool.setMaxThreadCount(1)
+        self.__cached_request = None
+        self.__active_thread_count = 0
+        self.__updating_models = False
+        self.__timer = QTimer()
+
         #: Defines the min number of suggestions. This is used to know we should
         #  avoid using lower priority models.
         #  If there is at least minSuggestions in the suggestions list, we won't
         #  use other completion model.
         self.minSuggestions = 50
+
         #: Trigger key (automatically associated with the control modifier)
         self.triggerKey = Qt.Key_Space
+
         #: Number of chars needed to trigger the code completion
         self.nbTriggerChars = 1
+
         #: Tells if the completion should be triggered automatically (when
         #  len(wordUnderCursor) > nbTriggerChars )
         #  Default is True. Turning this option off might enhance performances
         #  and usability
         self.autoTrigger = True
+
         #: Show/Hide current suggestion tooltip
         self.displayTooltips = True
+
         self.__caseSensitivity = Qt.CaseSensitive
         #: The internal QCompleter
         self.__completer = QCompleter()
@@ -212,19 +249,9 @@ class CodeCompletionMode(Mode, QObject):
         self._models = [DocumentWordsCompletionModel()]
         self.__tooltips = {}
 
-    # def run(self, *args, **kwargs):
-    #     """
-    #     Run the background thread while is_running is True
-    #     """
-    #     self.is_running = True
-    #     while self.is_running:
-    #         if len(self.__cc_request_queue):
-    #             request = self.__cc_request_queue.pop()
-    #             if not request.onlyAdapt:
-    #                 self._execRequest(request)
-    #             else:
-    #                 self._completionResultsAvailable.emit(request)
-    #         self.msleep(1)
+    def __del__(self):
+        self.__completer.setWidget(None)
+        self.__completer = None
 
     def addModel(self, model):
         """
@@ -270,18 +297,12 @@ class CodeCompletionMode(Mode, QObject):
             self.editor.codeEdit.focusedIn.connect(self._onFocusIn)
             self.__completer.highlighted.connect(
                 self._displayHighlightedTooltip)
-            self._completionResultsAvailable.connect(self._applyRequestResults)
-            # self.start()
         else:
             self.editor.codeEdit.keyPressed.disconnect(self._onKeyPressed)
             self.editor.codeEdit.postKeyPressed.disconnect(self._onKeyReleased)
             self.editor.codeEdit.focusedIn.disconnect(self._onFocusIn)
             self.__completer.highlighted.disconnect(
                 self._displayHighlightedTooltip)
-            self._completionResultsAvailable.disconnect(
-                self._applyRequestResults)
-            # self.is_running = False
-            # self.wait()
 
     def _onFocusIn(self, event):
         """
@@ -416,14 +437,7 @@ class CodeCompletionMode(Mode, QObject):
 
         :param request: The CodeCompletionRequest to execute.
         """
-        for model in self._models:
-            try:
-                # update the current model
-                model.update(request.source_code, request.line, request.col,
-                             request.filename, request.encoding)
-            except :
-                pass
-        self._completionResultsAvailable.emit(request)
+        pass
 
     def _createCompleterModel(self, completionPrefix):
         """
@@ -499,19 +513,28 @@ class CodeCompletionMode(Mode, QObject):
         else:
             request = CompletionRequest(completionPrefix=completionPrefix,
                                         onlyAdapt=True)
-        self._execRequest(request)
+        # only one at a time
+        if self.__active_thread_count == 0:
+            if self.__cached_request:
+                self.__cached_request, request = request, self.__cached_request
+            self.__active_thread_count += 1
+            runnable = RunnableCompleter(self._models, request)
+            runnable.connect(self._applyRequestResults)
+            self.thread_pool.start(runnable)
+        # cache last request
+        else:
+            self.__cached_request = request
 
     def _applyRequestResults(self, request):
         """
         Updates the completer model and show the popup
         """
+        self.__active_thread_count -= 1
         if self.__preventUpdate:
             return
         if not request.onlyAdapt:
-            # self.mutex.lock()
             cc_model, cptSuggestion = self._createCompleterModel(
                 request.completionPrefix)
-            # self.mutex.unlock()
             if cptSuggestion > 1:
                 self.__completer.setModel(cc_model)
                 self._showCompletions(request.completionPrefix)
@@ -526,6 +549,17 @@ class CodeCompletionMode(Mode, QObject):
                     self.__completer.currentCompletion() == \
                     request.completionPrefix:
                 self._hideCompletions()
+        # relaunch last cached request
+        if self.__cached_request and self.__active_thread_count == 0:
+            self.__timer.singleShot(0.1, self.__apply_cached_request)
+
+    def __apply_cached_request(self):
+        request = self.__cached_request
+        self.__active_thread_count += 1
+        runnable = RunnableCompleter(self._models, request)
+        runnable.connect(self._applyRequestResults)
+        self.__cached_request = None
+        self.thread_pool.start(runnable)
 
     @Slot(unicode)
     def _displayHighlightedTooltip(self, txt):
