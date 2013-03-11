@@ -11,7 +11,9 @@
 """
 This modules contains the python specific code completion model.
 
-Python code completion is achieved by the use of the awesome **jedi** library (https://github.com/davidhalter/jedi)
+Python code completion is achieved by the use of the awesome **jedi** library
+(https://github.com/davidhalter/jedi)
+
 """
 from collections import deque
 from PySide.QtCore import QPoint, Qt, QThread, Signal
@@ -59,7 +61,9 @@ class PythonCalltipMode(Mode, QThread):
             self.msleep(1)
 
     def __onKeyReleased(self, event):
-        if event.key() == Qt.Key_ParenLeft or event.key() == Qt.Key_Comma or event.key() == Qt.Key_Space:
+        if event.key() == Qt.Key_ParenLeft or \
+                event.key() == Qt.Key_Comma or \
+                event.key() == Qt.Key_Space:
             tc = self.editor.codeEdit.textCursor()
             line = tc.blockNumber() + 1
             col = tc.columnNumber()
@@ -67,12 +71,14 @@ class PythonCalltipMode(Mode, QThread):
             encoding = self.editor.codeEdit.tagEncoding
             source = self.editor.codeEdit.toPlainText()
             self.__request_queue.append(
-                CalltipRequest(source_code=source, line=line, col=col, filename=fn, encoding=encoding))
+                CalltipRequest(source_code=source, line=line, col=col,
+                               filename=fn, encoding=encoding))
         else:
             QToolTip.hideText()
 
     def __exec_request(self, request):
-        script = Script(request.source_code, request.line, request.col, request.filename, request.encoding)
+        script = Script(request.source_code, request.line, request.col,
+                        request.filename, request.encoding)
         try:
             call = script.get_in_function_call()
             if call:
@@ -86,7 +92,8 @@ class PythonCalltipMode(Mode, QThread):
             # QToolTip.hideText()
             if call:
                 # create a formatted calltip (current index appear in bold)
-                calltip = "<nobr>{0}.{1}(".format(call.module.name, call.call_name)
+                calltip = "<nobr>{0}.{1}(".format(
+                    call.module.name, call.call_name)
                 for i, param in enumerate(call.params):
                     if i != 0:
                         calltip += ", "
@@ -99,8 +106,9 @@ class PythonCalltipMode(Mode, QThread):
                 # set tool tip position at the start of the bracket
                 charWidth = self.editor.codeEdit.fm.width('A')
                 w_offset = (request.col - call.bracket_start[1]) * charWidth
-                position = QPoint(self.editor.codeEdit.cursorRect().x() - w_offset,
-                                  self.editor.codeEdit.cursorRect().y())
+                position = QPoint(
+                    self.editor.codeEdit.cursorRect().x() - w_offset,
+                    self.editor.codeEdit.cursorRect().y())
                 position = self.editor.codeEdit.mapToGlobal(position)
                 # show tooltip
                 QToolTip.showText(position, calltip, self.editor.codeEdit)
@@ -108,7 +116,8 @@ class PythonCalltipMode(Mode, QThread):
                 QToolTip.hideText()
 
     def __init__(self):
-        super(PythonCalltipMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
+        super(PythonCalltipMode, self).__init__(
+            self.IDENTIFIER, self.DESCRIPTION)
         QThread.__init__(self)
         self.__request_queue = deque()
         self.__is_running = False
