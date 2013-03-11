@@ -163,7 +163,7 @@
   <customwidget>
    <class>PythonEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef/editors.h</header>
+   <header>pcef/editors/python.h</header>
   </customwidget>
  </customwidgets>
  <resources>

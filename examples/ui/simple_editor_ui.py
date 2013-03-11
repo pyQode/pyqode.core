@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Mon Feb 11 20:51:08 2013
-#      by: pyside-uic 0.2.14 running on PySide 1.1.2
+# Created: Mon Mar 11 22:06:48 2013
+#      by: pyside-uic 0.2.13 running on PySide 1.1.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -104,5 +104,5 @@ class Ui_MainWindow(object):
         self.actionPanel.setText(QtGui.QApplication.translate("MainWindow", "Panel", None, QtGui.QApplication.UnicodeUTF8))
         self.actionModes_2.setText(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
 
-from pcef.editors import GenericEditor
+from pcef.editors.generic import GenericEditor
 import examples_rc

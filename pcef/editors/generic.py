@@ -9,8 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains a series of pre-configured editors classes ready to be used in your
-PySide application
+Contains a pre-configured generic editor (language independent)
 """
 from PySide.QtCore import Slot
 from pcef.core import CodeEditorWidget
@@ -20,15 +19,9 @@ from pcef.modes.margin import RightMarginMode
 from pcef.modes.sh import SyntaxHighlighterMode
 from pcef.modes.zoom import EditorZoomMode
 from pcef.modes.cc import CodeCompletionMode
-from pcef.modes.python.py_cc import PythonCompletionModel
-from pcef.modes.python.calltips import PythonCalltipMode
-from pcef.modes.python.checkers import PEP8CheckerMode
-from pcef.modes.python.checkers import PyFlakesCheckerMode
-from pcef.modes.python.checkers import PyLintCheckerMode
 from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
 from pcef.panels.search import SearchPanel
-from pcef.panels.misc import CheckersMarkerPanel
 
 
 class GenericEditor(CodeEditorWidget):
@@ -221,20 +214,3 @@ class GenericEditor(CodeEditorWidget):
     @Slot()
     def on_actionSelectAll_triggered(self):
         self.codeEdit.selectAll()
-
-
-class PythonEditor(GenericEditor):
-
-    @property
-    def checkers_panel(self):
-        return self.panel("Checkers marker panel")
-
-    def __init__(self, parent=None):
-        super(PythonEditor, self).__init__(parent)
-        self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
-        self.installMode(PythonCalltipMode())
-        # todo: add a dedicated marker panel that is able to show more than 1 error message
-        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_LEFT)
-        self.installMode(PEP8CheckerMode())
-        self.installMode(PyFlakesCheckerMode())
-        self.installMode(PyLintCheckerMode())

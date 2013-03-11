@@ -163,7 +163,7 @@
   <customwidget>
    <class>GenericEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef/editors.h</header>
+   <header>pcef/editors/generic.h</header>
   </customwidget>
  </customwidgets>
  <resources>

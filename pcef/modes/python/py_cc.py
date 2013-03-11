@@ -13,8 +13,8 @@ This modules contains the python specific code completion model.
 
 Python code completion is achieved by the use of the awesome **jedi** library (https://github.com/davidhalter/jedi)
 """
-from PySide.QtGui import QIcon
 from jedi import Script
+
 from pcef.modes.cc import CompletionModel
 from pcef.modes.cc import Suggestion
 
