@@ -22,8 +22,7 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QTextDocument
 from pygments.token import Text
 from pcef.core import Panel
-from pcef.core import TextDecoration
-from pcef.code_edit import CodeEdit
+from pcef.code_edit import CodeEdit, TextDecoration
 from pcef.ui import search_panel_ui
 
 

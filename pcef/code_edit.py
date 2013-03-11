@@ -16,6 +16,9 @@ from PySide.QtGui import QToolTip
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
+from PySide.QtGui import QColor
+from PySide.QtGui import QTextCharFormat
+from PySide.QtGui import QTextFormat
 from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextEdit, QFocusEvent
 from PySide.QtGui import QTextOption
@@ -28,6 +31,114 @@ from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
 from pcef.styled_object import StyledObject
+
+
+def cursorForPosition(codeEdit, line, column, selectEndOfLine=False,
+                      selection=None, selectWordUnderCursor=False):
+    """
+    Return a QTextCursor set to line and column with the specified selection
+    :param line:
+    :param column:
+    """
+    tc = QTextCursor(codeEdit.document())
+    tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
+    tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
+    tc.setPosition(tc.position() + column - 1)
+    if selectEndOfLine is True:
+        tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+    elif isinstance(selection, int):
+        tc.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, selection)
+    elif selectWordUnderCursor is True:
+        tc.select(QTextCursor.WordUnderCursor)
+    codeEdit.setTextCursor(tc)
+    return tc
+
+
+class TextDecoration(QTextEdit.ExtraSelection):
+    """
+    Helper class to quickly create a text decoration.
+    """
+
+    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
+                 draw_order=0, tooltip=None):
+        """
+        Creates a text decoration
+
+        :param cursorOrBlockOrDoc: Selection
+        :type cursorOrBlockOrDoc: QTextCursor or QTextBlock or QTextDocument
+
+        :param startPos: Selection start pos
+
+        :param endPos: Selection end pos
+
+        .. note:: Use the cursor selection if startPos and endPos are none.
+        """
+        self.draw_order = draw_order
+        self.tooltip = tooltip
+        QTextEdit.ExtraSelection.__init__(self)
+        cursor = QTextCursor(cursorOrBlockOrDoc)
+        if startPos is not None:
+            cursor.setPosition(startPos)
+        if endPos is not None:
+            cursor.setPosition(endPos, QTextCursor.KeepAnchor)
+        self.cursor = cursor
+
+    def containsCursor(self, textCursor):
+        assert  isinstance(textCursor, QTextCursor)
+        return self.cursor.selectionStart() <= textCursor.position() < \
+            self.cursor.selectionEnd()
+
+    def setBold(self):
+        """ Uses bold text """
+        self.format.setFontWeight(QFont.Bold)
+
+    def setForeground(self, color):
+        """ Sets the foreground color.
+        :param color: QColor """
+        self.format.setForeground(color)
+
+    def setBackground(self, brush):
+        """ Sets the background color
+
+        :param brush: QBrush
+        """
+        self.format.setBackground(brush)
+
+    def setFullWidth(self, flag=True):
+        """ Sets full width selection
+
+        :param flag: True to use full width selection.
+        """
+        self.cursor.clearSelection()
+        self.format.setProperty(QTextFormat.FullWidthSelection, flag)
+
+    def setSpellchecking(self, color=Qt.blue):
+        """ Underlines text as a spellcheck error.
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
+
+    def setError(self, color=Qt.red):
+        """ Highlights text as a syntax error
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
+
+    def setWarning(self, color=QColor("orange")):
+        """
+        Highlights text as a syntax warning
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
 
 
 class VisibleBlock(object):

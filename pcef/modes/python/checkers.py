@@ -12,21 +12,21 @@ import sys
 
 from collections import deque
 from subprocess import Popen, PIPE, STDOUT
-
-from PySide.QtGui import QColor, QIcon
+from PySide.QtGui import QColor
 from PySide.QtCore import QThread, Signal
-
-from pcef.panels.marker import Marker
-from pcef.core import Mode, TextDecoration, cursorForPosition
+from pcef.core import Mode
+from pcef.code_edit import TextDecoration, cursorForPosition
 
 
 class CheckerThread(QThread):
     """
-    A checker thread launch a process and retrieve its output. A signal is emitted anytime a new output is available.
+    A checker thread launch a process and retrieve its output.
+    A signal is emitted anytime a new output is available.
 
     The execute method takes a command line to run.
     """
-    #: Signal emitted when the result of the command line is available. The signal is emitted with the output string.
+    #: Signal emitted when the result of the command line is available.
+    #  The signal is emitted with the output string.
     outputAvailable = Signal(str)
 
     def __init__(self):
@@ -42,7 +42,8 @@ class CheckerThread(QThread):
         while self.is_running:
             if len(self.__cmd_queue):
                 cmd = self.__cmd_queue.pop()
-                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE,
+                          stderr=STDOUT)
                 try:
                     output = p.stdout.read()
                     self.outputAvailable.emit(output)
@@ -50,8 +51,6 @@ class CheckerThread(QThread):
                     pass
             self.msleep(1)
 
-
-# "PEP8", "Check for PEP8 violation on the fly"
 
 #: Checker warning error type (pep8,...)
 ERROR_TYPE_WARNING = 0
@@ -68,7 +67,8 @@ class CheckerMode(Mode, CheckerThread):
         self.__markers = []
         self.base_cmd = base_cmd
         self.checkers_panel = None
-        self.colors = {ERROR_TYPE_WARNING: "#FF0000", ERROR_TYPE_SYNTAX: "#FFFF00"}
+        self.colors = {ERROR_TYPE_WARNING: "#FF0000",
+                       ERROR_TYPE_SYNTAX: "#FFFF00"}
 
     def _onStateChanged(self, state):
         if state:
@@ -100,10 +100,12 @@ class CheckerMode(Mode, CheckerThread):
                     pass
         self.__markers[:] = []
 
-    def addError(self, error_type, line, column=1, message=None, selectLine=True):
+    def addError(self, error_type, line, column=1, message=None,
+                 selectLine=True):
         assert error_type in self.colors and self.colors[error_type] is not None
         selectLine = selectLine or not column
-        c = cursorForPosition(self.editor.codeEdit, line, column, selectEndOfLine=selectLine)
+        c = cursorForPosition(self.editor.codeEdit, line, column,
+                              selectEndOfLine=selectLine)
         deco = TextDecoration(c, draw_order=error_type + 1, tooltip=message)
         deco.setSpellchecking(color=QColor(self.colors[error_type]))
         self.__decorations.append(deco)
@@ -130,17 +132,21 @@ class CheckerMode(Mode, CheckerThread):
         self.editor.codeEdit.verticalScrollBar().setSliderPosition(vbar_pos)
 
     def onResultsAvailable(self, raw_results):
-        raise NotImplementedError("The checker mode %s does not implement onResultsAvailable" % self.name)
+        raise NotImplementedError("The checker mode %s does not implement "
+                                  "onResultsAvailable" % self.name)
 
     def __run_cmd(self):
         filename = self.editor.codeEdit.tagFilename
         if filename:
-            cmd = "{0} {1}".format(self.base_cmd, self.editor.codeEdit.tagFilename)
+            cmd = "{0} {1}".format(
+                self.base_cmd, self.editor.codeEdit.tagFilename)
             self.execute(cmd)
 
     def _onStyleChanged(self):
-        self.colors[ERROR_TYPE_WARNING] = QColor(self.editor.currentStyle.warningColor)
-        self.colors[ERROR_TYPE_SYNTAX] = QColor(self.editor.currentStyle.errorColor)
+        self.colors[ERROR_TYPE_WARNING] = QColor(
+            self.editor.currentStyle.warningColor)
+        self.colors[ERROR_TYPE_SYNTAX] = QColor(
+            self.editor.currentStyle.errorColor)
         self.__run_cmd()
 
 
@@ -162,13 +168,15 @@ class PEP8CheckerMode(CheckerMode):
                 line_nr = int(tokens[1 + offset])
                 col_nr = int(tokens[2 + offset])
                 message = "PEP8: %s" % tokens[3 + offset]
-                self.addError(ERROR_TYPE_WARNING, line_nr, col_nr, message, True)
+                self.addError(
+                    ERROR_TYPE_WARNING, line_nr, col_nr, message, True)
             except:
                 pass
 
     def __init__(self):
         super(PEP8CheckerMode, self).__init__(
-            "PEP8 Checker", "Check python code style using pep8.py", base_cmd="pep8")
+            "PEP8 Checker", "Check python code style using pep8.py",
+            base_cmd="pep8")
 
 
 class PyFlakesCheckerMode(CheckerMode):
@@ -190,7 +198,8 @@ class PyFlakesCheckerMode(CheckerMode):
                 # todo properly separate error messages from warning messages
                 if "used" in message:
                     error_type = ERROR_TYPE_WARNING
-                self.addError(error_type, line_nr, column=1, message=message, selectLine=True)
+                self.addError(error_type, line_nr, column=1, message=message,
+                              selectLine=True)
             except ValueError:
                 pass
 
@@ -218,7 +227,8 @@ class PyLintCheckerMode(CheckerMode):
                 error_type = ERROR_TYPE_SYNTAX
                 if "[W" in message:
                     error_type = ERROR_TYPE_WARNING
-                self.addError(error_type, line_nr, column=1, message=message, selectLine=True)
+                self.addError(error_type, line_nr, column=1, message=message,
+                              selectLine=True)
             except ValueError:
                 pass
 

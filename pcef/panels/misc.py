@@ -43,7 +43,7 @@ class CheckersMarkerPanel(MarkersPanel):
     """
     def __init__(self, markersReadOnly=True, parent=None):
         MarkersPanel.__init__(self, "Checkers marker panel",
-                              markersReadOnly=markersReadOnly, parent)
+                              markersReadOnly, parent)
         self.icons = {0: ":/icons/rc/marker_warning.png",
                       1: ":/icons/rc/marker_error.png"}
 
