@@ -66,9 +66,6 @@ class CheckerMode(Mode):
         self.colors = {ERROR_TYPE_WARNING: "#FF0000",
                        ERROR_TYPE_SYNTAX: "#FFFF00"}
 
-    def __del__(self):
-        self.__thread_pool = None
-
     def _onStateChanged(self, state):
         if state:
             self.editor.codeEdit.textSaved.connect(self.__run_cmd)
@@ -131,7 +128,7 @@ class CheckerMode(Mode):
 
     def __run_cmd(self):
         filename = self.editor.codeEdit.tagFilename
-        if filename:
+        if filename and self.__thread_pool.maxThreadCount() == 0:
             cmd = "{0} {1}".format(
                 self.base_cmd, self.editor.codeEdit.tagFilename)
             runner = RunnableChecker()
