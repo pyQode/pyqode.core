@@ -169,15 +169,16 @@ class RunnableCompleter(QRunnable):
         self.event.signal.disconnect(handler)
 
     def run(self, *args, **kwargs):
-        for model in self._models:
-            try:
-                # update the current model
-                model.update(
-                    self._request.source_code, self._request.line,
-                    self._request.col, self._request.filename,
-                    self._request.encoding)
-            except :
-                pass
+        if not self._request.onlyAdapt:
+            for model in self._models:
+                try:
+                    # update the current model
+                    model.update(
+                        self._request.source_code, self._request.line,
+                        self._request.col, self._request.filename,
+                        self._request.encoding)
+                except :
+                    pass
         self.event.signal.emit(self._request)
 
 
