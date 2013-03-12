@@ -16,8 +16,8 @@ Python code completion is achieved by the use of the awesome **jedi** library
 
 """
 from collections import deque
-from PySide.QtCore import QPoint, Qt, QThread, Signal
-from PySide.QtGui import QToolTip, QTextCursor
+from PySide.QtCore import QPoint, Qt, Signal, QRunnable, QObject, QThreadPool
+from PySide.QtGui import QToolTip
 from jedi.api_classes import CallDef
 from jedi import Script
 from pcef.core import Mode
@@ -32,33 +32,45 @@ class CalltipRequest(object):
         self.encoding = encoding
 
 
-class PythonCalltipMode(Mode, QThread):
+class CalltipEvent(QObject):
+    signal = Signal(CallDef, CalltipRequest)
+
+
+class CalltipFailedEvent(QObject):
+    signal = Signal()
+
+
+class RunnableCalltip(QRunnable):
+
+    def __init__(self, request):
+        super(RunnableCalltip, self).__init__()
+        self.__request = request
+        self.resultsAvailable = CalltipEvent()
+        self.failedEvent = CalltipFailedEvent()
+
+    def run(self, *args, **kwargs):
+        request = self.__request
+        script = Script(request.source_code, request.line, request.col,
+                        request.filename, request.encoding)
+        try:
+            call = script.get_in_function_call()
+            if call:
+                self.resultsAvailable.signal.emit(call, request)
+            else:
+                self.failedEvent.signal.emit()
+        except:
+            self.failedEvent.signal.emit()
+
+
+class PythonCalltipMode(Mode):
     IDENTIFIER = "Python calltips mode"
     DESCRIPTION = "Provides call tips in python function/methods calls"
-
-    __callResultsAvailable = Signal(CallDef, CalltipRequest)
-    __callResultsCollectFailed = Signal()
 
     def _onStateChanged(self, state):
         if state is True:
             self.editor.codeEdit.keyReleased.connect(self.__onKeyReleased)
-            self.__callResultsAvailable.connect(self.__apply_results)
-            self.__callResultsCollectFailed.connect(self.__apply_results)
-            self.start()
         else:
             self.editor.codeEdit.keyReleased.disconnect(self.__onKeyReleased)
-            self.__callResultsAvailable.disconnect(self.__apply_results)
-            self.__callResultsCollectFailed.disconnect(self.__apply_results)
-            self.__is_running = False
-            self.wait()
-
-    def run(self, *args, **kwargs):
-        self.__is_running = True
-        while self.__is_running:
-            if len(self.__request_queue):
-                request = self.__request_queue.pop()
-                self.__exec_request(request)
-            self.msleep(1)
 
     def __onKeyReleased(self, event):
         if event.key() == Qt.Key_ParenLeft or \
@@ -70,23 +82,15 @@ class PythonCalltipMode(Mode, QThread):
             fn = self.editor.codeEdit.tagFilename
             encoding = self.editor.codeEdit.tagEncoding
             source = self.editor.codeEdit.toPlainText()
-            self.__request_queue.append(
+
+            runnable = RunnableCalltip(
                 CalltipRequest(source_code=source, line=line, col=col,
                                filename=fn, encoding=encoding))
+            runnable.failedEvent.signal.connect(self.__apply_results)
+            runnable.resultsAvailable.signal.connect(self.__apply_results)
+            self.__threadPool.start(runnable)
         else:
             QToolTip.hideText()
-
-    def __exec_request(self, request):
-        script = Script(request.source_code, request.line, request.col,
-                        request.filename, request.encoding)
-        try:
-            call = script.get_in_function_call()
-            if call:
-                self.__callResultsAvailable.emit(call, request)
-            else:
-                self.__callResultsCollectFailed.emit()
-        except:
-            self.__callResultsCollectFailed.emit()
 
     def __apply_results(self, call=None, request=None):
             # QToolTip.hideText()
@@ -118,6 +122,6 @@ class PythonCalltipMode(Mode, QThread):
     def __init__(self):
         super(PythonCalltipMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
-        QThread.__init__(self)
         self.__request_queue = deque()
         self.__is_running = False
+        self.__threadPool = QThreadPool()
