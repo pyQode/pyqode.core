@@ -18,7 +18,7 @@ from pygments.styles import get_style_by_name
 #: Default editor font (monospace on GNU/Linux, Courier New on windows)
 DEFAULT_FONT = "monospace"
 if sys.platform == "win32":
-    DEFAULT_FONT = "Courier New"
+    DEFAULT_FONT = "Consolas"
 #: Default editor font size
 DEFAULT_FONT_SIZE = 10
 
