@@ -55,8 +55,8 @@ class GenericPythonEditor(QMainWindow):
             action.setChecked(style == "Default")
             self.styleActionGroup.addAction(action)
             self.ui.menuStyle.addAction(action)
-            self.styleActionGroup.triggered.connect(
-                self.on_styleActionGroup_triggered)
+        self.styleActionGroup.triggered.connect(
+            self.on_styleActionGroup_triggered)
 
         # add panels actions
         allPanels = self.ui.genericEditor.panels()
@@ -99,6 +99,7 @@ class GenericPythonEditor(QMainWindow):
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
+        print "change style"
         stylesheet = ""
         if action.text() == "Dark":
             try:
