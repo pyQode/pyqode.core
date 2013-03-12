@@ -14,10 +14,12 @@ This modules contains the python specific code completion model.
 Python code completion is achieved by the use of the awesome **jedi** library
 (https://github.com/davidhalter/jedi)
 """
-from jedi import Script
+import os
 
+from jedi import Script
 from pcef.modes.cc import CompletionModel
 from pcef.modes.cc import Suggestion
+
 
 Icons = {'Class': ':/icons/rc/class.png',
          'Import': ':/icons/rc/import.png',
@@ -31,6 +33,7 @@ class PythonCompletionModel(CompletionModel):
     def update(self, source_code, line, col, filename, encoding):
         # complete with jedi
         try:
+            os.system("echo '{0} - {1} - {2}' >> log".format(filename, line, col))
             script = Script(source_code, line, col, filename, encoding)
             completions = script.complete()
             # clean suggestion list
@@ -47,5 +50,5 @@ class PythonCompletionModel(CompletionModel):
                 self._suggestions.append(
                     Suggestion(completion.word, icon=icon,
                                description=desc.split(':')[1]))
-        except :
+        except:
             pass
