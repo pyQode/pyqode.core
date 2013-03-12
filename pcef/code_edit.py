@@ -262,6 +262,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         self.__selections = []
         self.__numBlocks = -1
 
+        self.visible_blocks = []
+
         #: Shortcut to the fontMetrics
         self.fm = self.fontMetrics()
 

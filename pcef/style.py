@@ -19,7 +19,8 @@ from pygments.styles import get_style_by_name
 DEFAULT_FONT = "monospace"
 if sys.platform == "win32":
     DEFAULT_FONT = "Consolas"
-# todo add mac default font... Monaco?
+elif sys.platform == "darwin":
+    DEFAULT_FONT = "Monaco"
 #: Default editor font size
 DEFAULT_FONT_SIZE = 10
 
