@@ -507,7 +507,6 @@ class CodeCompletionMode(Mode):
         :param onlyAdapt:
         :return:
         """
-        self.__preventUpdate = False
         # cancel prev running request
         if not onlyAdapt:
             request = self._getCCRequest(completionPrefix)
@@ -531,26 +530,27 @@ class CodeCompletionMode(Mode):
         Updates the completer model and show the popup
         """
         self.__active_thread_count -= 1
-        if self.__preventUpdate:
-            return
-        if not request.onlyAdapt:
-            cc_model, cptSuggestion = self._createCompleterModel(
-                request.completionPrefix)
-            if cptSuggestion > 1:
-                self.__completer.setModel(cc_model)
-                self._showCompletions(request.completionPrefix)
+        # is the request still up to date ?
+        if request.completionPrefix == self._textUnderCursor():
+            if not request.onlyAdapt:
+                # update completion model and show completer
+                cc_model, cptSuggestion = self._createCompleterModel(
+                    request.completionPrefix)
+                if cptSuggestion > 1:
+                    self.__completer.setModel(cc_model)
+                    self._showCompletions(request.completionPrefix)
+                else:
+                    self._hideCompletions()
             else:
-                self._hideCompletions()
-        else:
-            self.__completer.setCompletionPrefix(request.completionPrefix)
-            self.__completer.popup().updateGeometries()
-            self.__completer.popup().setCurrentIndex(
-                self.__completer.completionModel().index(0, 0))
-            if self.__completer.currentCompletion() == "" or \
-                    self.__completer.currentCompletion() == \
-                    request.completionPrefix:
-                self._hideCompletions()
-        # relaunch last cached request
+                # only adapt completion prefix, the completer is already visible
+                self.__completer.setCompletionPrefix(request.completionPrefix)
+                self.__completer.popup().setCurrentIndex(
+                    self.__completer.completionModel().index(0, 0))
+                if self.__completer.currentCompletion() == "" or \
+                        self.__completer.currentCompletion() == \
+                        request.completionPrefix:
+                    self._hideCompletions()
+        # do we have any cached requests?
         if self.__cached_request and self.__active_thread_count == 0:
             self.__timer.singleShot(0.1, self.__apply_cached_request)
 
