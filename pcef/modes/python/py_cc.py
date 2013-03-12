@@ -24,6 +24,7 @@ from pcef.modes.cc import Suggestion
 Icons = {'Class': ':/icons/rc/class.png',
          'Import': ':/icons/rc/import.png',
          'Statement': ':/icons/rc/var.png',
+         'ForFlow': ':/icons/rc/var.png',
          'Module': ':/icons/rc/module.png',
          'Param': ':/icons/rc/param.png',
          'Function': ':/icons/rc/method.png'}
@@ -33,7 +34,6 @@ class PythonCompletionModel(CompletionModel):
     def update(self, source_code, line, col, filename, encoding):
         # complete with jedi
         try:
-            os.system("echo '{0} - {1} - {2}' >> log".format(filename, line, col))
             script = Script(source_code, line, col, filename, encoding)
             completions = script.complete()
             # clean suggestion list
@@ -46,6 +46,9 @@ class PythonCompletionModel(CompletionModel):
                 icon = None
                 if suggestionType in Icons:
                     icon = Icons[suggestionType]
+                else:
+                    print "PCEF WARNING: Unimplemented suggestion type: %s" % \
+                          suggestionType
                 # add the suggestion to the list
                 self._suggestions.append(
                     Suggestion(completion.word, icon=icon,
