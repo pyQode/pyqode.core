@@ -39,7 +39,7 @@ class PythonEditor(GenericEditor):
         super(PythonEditor, self).__init__(parent)
         self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
         self.installMode(PythonCalltipMode())
-        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_RIGHT)
         self.installMode(PEP8CheckerMode())
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())
