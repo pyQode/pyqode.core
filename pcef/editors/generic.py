@@ -13,6 +13,7 @@ Contains a pre-configured generic editor (language independent)
 """
 from PySide.QtCore import Slot
 from pcef.core import CodeEditorWidget
+from pcef.modes.autosave import AutoSaveMode
 from pcef.modes.indent import AutoIndentMode
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
@@ -146,6 +147,7 @@ class GenericEditor(CodeEditorWidget):
         self.installMode(HighlightLineMode())
         self.installMode(EditorZoomMode())
         self.installMode(AutoIndentMode())
+        self.installMode(AutoSaveMode())
 
         self.on_codeEdit_redoAvailable(False)
         self.on_codeEdit_undoAvailable(False)
