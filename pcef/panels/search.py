@@ -67,6 +67,8 @@ class SearchPanel(Panel):
     QPushButton
     {
         background-color: transparent;
+        padding: 5px;
+        border: none;
     }
 
     QPushButton:hover
@@ -77,17 +79,19 @@ class SearchPanel(Panel):
         color: %(color)s;
     }
 
-    QPushButton:pressed
+    QPushButton:pressed, QCheckBox:pressed
     {
-        background-color: %(highlight)s;
-        border: 2px black;
-        border-radius: 5px;
-        color: %(color)s;
+        border: 1px solid %(bck)s;
     }
 
     QPushButton:disabled
     {
         color: %(highlight)s;
+    }
+
+    QCheckBox
+    {
+        padding: 4px;
     }
 
     QCheckBox:hover
