@@ -190,18 +190,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 
-        # macros: $(txt)
-        myClassFormat = QTextCharFormat()
-        myClassFormat.setFontWeight(QFont.Bold)
-        myClassFormat.setForeground(Qt.red)
-        pattern = "\\$\\(\\S*\\)"
-        expression = QRegExp(pattern)
-        index = expression.indexIn(original_text)
-        while index >= 0:
-            length = expression.matchedLength()
-            self.setFormat(index, length, myClassFormat)
-            index = expression.indexIn(original_text, index + length)
-
         #Spaces
         expression = QRegExp('\s+')
         index = expression.indexIn(original_text, 0)
