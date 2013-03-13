@@ -76,13 +76,16 @@ class PythonCalltipMode(Mode):
         if event.key() == Qt.Key_ParenLeft or \
                 event.key() == Qt.Key_Comma or \
                 event.key() == Qt.Key_Space:
+            print self.__thread_counter
+            if self.__thread_counter >= 1:
+                return
+            self.__thread_counter += 1
             tc = self.editor.codeEdit.textCursor()
             line = tc.blockNumber() + 1
             col = tc.columnNumber()
             fn = self.editor.codeEdit.tagFilename
             encoding = self.editor.codeEdit.tagEncoding
             source = self.editor.codeEdit.toPlainText()
-
             runnable = RunnableCalltip(
                 CalltipRequest(source_code=source, line=line, col=col,
                                filename=fn, encoding=encoding))
@@ -94,6 +97,7 @@ class PythonCalltipMode(Mode):
 
     def __apply_results(self, call=None, request=None):
             # QToolTip.hideText()
+            self.__thread_counter -= 1
             if call:
                 # create a formatted calltip (current index appear in bold)
                 calltip = "<nobr>{0}.{1}(".format(
@@ -125,3 +129,5 @@ class PythonCalltipMode(Mode):
         self.__request_queue = deque()
         self.__is_running = False
         self.__threadPool = QThreadPool()
+        self.__threadPool.setMaxThreadCount(1)
+        self.__thread_counter = 0

@@ -212,7 +212,7 @@ class CodeCompletionMode(Mode):
         super(CodeCompletionMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
         self.thread_pool = QThreadPool()
-        self.thread_pool.setMaxThreadCount(1)
+        self.thread_pool.setMaxThreadCount(2)
         self.__cached_request = None
         self.__active_thread_count = 0
         self.__updating_models = False
@@ -515,14 +515,18 @@ class CodeCompletionMode(Mode):
                                         onlyAdapt=True)
         # only one at a time
         if self.__active_thread_count == 0:
+            self.__timer.stop()
             if self.__cached_request:
                 self.__cached_request, request = request, self.__cached_request
+            print "launchaaaaaaaaaa"
             self.__active_thread_count += 1
             runnable = RunnableCompleter(self._models, request)
             runnable.connect(self._applyRequestResults)
             self.thread_pool.start(runnable)
         # cache last request
         else:
+            print "cache"
+            self.__timer.stop()
             self.__cached_request = request
 
     def _applyRequestResults(self, request):
@@ -552,14 +556,16 @@ class CodeCompletionMode(Mode):
                     self._hideCompletions()
         # do we have any cached requests?
         if self.__cached_request and self.__active_thread_count == 0:
-            self.__timer.singleShot(0.1, self.__apply_cached_request)
+            print "relaunch"
+            self.__active_thread_count += 1  # prevent normal start immediately
+            self.__timer.singleShot(0.000001, self.__start_cached_request)
 
-    def __apply_cached_request(self):
+    def __start_cached_request(self):
+        print "relaunched"
         request = self.__cached_request
-        self.__active_thread_count += 1
+        self.__cached_request = None
         runnable = RunnableCompleter(self._models, request)
         runnable.connect(self._applyRequestResults)
-        self.__cached_request = None
         self.thread_pool.start(runnable)
 
     @Slot(unicode)
