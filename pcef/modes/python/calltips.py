@@ -76,7 +76,6 @@ class PythonCalltipMode(Mode):
         if event.key() == Qt.Key_ParenLeft or \
                 event.key() == Qt.Key_Comma or \
                 event.key() == Qt.Key_Space:
-            print self.__thread_counter
             if self.__thread_counter >= 1:
                 return
             self.__thread_counter += 1

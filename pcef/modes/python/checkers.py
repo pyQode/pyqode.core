@@ -12,7 +12,7 @@ import sys
 from subprocess import Popen, PIPE, STDOUT
 
 from PySide.QtGui import QColor
-from PySide.QtCore import Signal, QRunnable, QObject, QThreadPool
+from PySide.QtCore import Signal, QRunnable, QObject, QThreadPool, QTimer
 from pcef.core import Mode
 from pcef.code_edit import TextDecoration, cursorForPosition
 
@@ -59,8 +59,14 @@ class CheckerMode(Mode):
     def __init__(self, name, description, base_cmd):
         super(CheckerMode, self).__init__(name, description)
         self.__thread_pool = QThreadPool()
+        self.__thread_pool.setMaxThreadCount(1)
+        self.__thread_counter = 0
+        self.__timer = QTimer()
+        self.__timer.timeout.connect(self.__runCmd)
+        self.__timer.setInterval(500)
         self.__decorations = []
         self.__markers = []
+        self.__canceled = False
         self.base_cmd = base_cmd
         self.checkers_panel = None
         self.colors = {ERROR_TYPE_WARNING: "#FF0000",
@@ -68,13 +74,13 @@ class CheckerMode(Mode):
 
     def _onStateChanged(self, state):
         if state:
-            self.editor.codeEdit.textSaved.connect(self.__run_cmd)
-            self.editor.codeEdit.newTextSet.connect(self.__run_cmd)
+            self.editor.codeEdit.textSaved.connect(self.__onTextChanged)
+            self.editor.codeEdit.newTextSet.connect(self.__onTextChanged)
             if hasattr(self.editor, "checkers_panel"):
                 self.checkers_panel = self.editor.checkers_panel
         else:
-            self.editor.codeEdit.textSaved.disconnect(self.__run_cmd)
-            self.editor.codeEdit.newTextSet.disconnect(self.__run_cmd)
+            self.editor.codeEdit.textSaved.disconnect(self.__onTextChanged)
+            self.editor.codeEdit.newTextSet.disconnect(self.__onTextChanged)
             self.checkers_panel = None
 
     def __clear_decorations(self):
@@ -112,36 +118,46 @@ class CheckerMode(Mode):
         :param raw_results: raw results from pep8.py
         :type raw_results: str
         """
+        # prepare context
         self.__clear_decorations()
         self.__clear_markers()
         current_cursor = self.editor.codeEdit.textCursor()
         hbar_pos = self.editor.codeEdit.horizontalScrollBar().sliderPosition()
         vbar_pos = self.editor.codeEdit.verticalScrollBar().sliderPosition()
+        # let specific checkers do the main job
         self.onResultsAvailable(raw_results)
+        # restore context
         self.editor.codeEdit.setTextCursor(current_cursor)
         self.editor.codeEdit.horizontalScrollBar().setSliderPosition(hbar_pos)
         self.editor.codeEdit.verticalScrollBar().setSliderPosition(vbar_pos)
+        self.__thread_counter -= 1
 
     def onResultsAvailable(self, raw_results):
         raise NotImplementedError("The checker mode %s does not implement "
                                   "onResultsAvailable" % self.name)
 
-    def __run_cmd(self):
+    def __runCmd(self):
+        self.__timer.stop()
+        cmd = "{0} {1}".format(
+            self.base_cmd, self.editor.codeEdit.tagFilename)
+        runner = RunnableChecker()
+        runner.connect(self.__apply_results)
+        runner.cmd = cmd
+        self.__thread_counter += 1
+        self.__thread_pool.start(runner)
+
+    def __onTextChanged(self):
         filename = self.editor.codeEdit.tagFilename
-        if filename and self.__thread_pool.maxThreadCount() == 0:
-            cmd = "{0} {1}".format(
-                self.base_cmd, self.editor.codeEdit.tagFilename)
-            runner = RunnableChecker()
-            runner.connect(self.__apply_results)
-            runner.cmd = cmd
-            self.__thread_pool.start(runner)
+        if filename and self.__thread_counter == 0:
+            self.__timer.stop()
+            self.__timer.start()
 
     def _onStyleChanged(self):
         self.colors[ERROR_TYPE_WARNING] = QColor(
             self.editor.currentStyle.warningColor)
         self.colors[ERROR_TYPE_SYNTAX] = QColor(
             self.editor.currentStyle.errorColor)
-        self.__run_cmd()
+        self.__onTextChanged()
 
 
 class PEP8CheckerMode(CheckerMode):

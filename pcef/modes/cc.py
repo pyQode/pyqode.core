@@ -515,18 +515,14 @@ class CodeCompletionMode(Mode):
                                         onlyAdapt=True)
         # only one at a time
         if self.__active_thread_count == 0:
-            self.__timer.stop()
             if self.__cached_request:
                 self.__cached_request, request = request, self.__cached_request
-            print "launchaaaaaaaaaa"
             self.__active_thread_count += 1
             runnable = RunnableCompleter(self._models, request)
             runnable.connect(self._applyRequestResults)
             self.thread_pool.start(runnable)
         # cache last request
         else:
-            print "cache"
-            self.__timer.stop()
             self.__cached_request = request
 
     def _applyRequestResults(self, request):
@@ -556,12 +552,10 @@ class CodeCompletionMode(Mode):
                     self._hideCompletions()
         # do we have any cached requests?
         if self.__cached_request and self.__active_thread_count == 0:
-            print "relaunch"
             self.__active_thread_count += 1  # prevent normal start immediately
-            self.__timer.singleShot(0.000001, self.__start_cached_request)
+            self.__timer.singleShot(10, self.__start_cached_request)
 
     def __start_cached_request(self):
-        print "relaunched"
         request = self.__cached_request
         self.__cached_request = None
         runnable = RunnableCompleter(self._models, request)
