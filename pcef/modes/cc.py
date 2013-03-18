@@ -235,6 +235,7 @@ class CodeCompletionMode(Mode):
         #  Default is True. Turning this option off might enhance performances
         #  and usability
         self.autoTrigger = True
+        self.periodIsTrigger = True
 
         #: Show/Hide current suggestion tooltip
         self.displayTooltips = True
@@ -342,7 +343,8 @@ class CodeCompletionMode(Mode):
             self._hideCompletions()
             return
         # . is an auto-trigger
-        if event.key() == Qt.Key_Period and self.autoTrigger:
+        if self.periodIsTrigger and \
+                (event.key() == Qt.Key_Period and self.autoTrigger):
             self._requestCompletion(completionPrefix=word, onlyAdapt=False)
             return
         # adapt completion prefix
@@ -350,7 +352,8 @@ class CodeCompletionMode(Mode):
             self._requestCompletion(completionPrefix=word, onlyAdapt=True)
         # run cc if word is long enough and auto trigger is on
         elif not tooShort and self.autoTrigger and event.text() != "" \
-                and event.modifiers() == 0:
+                and (event.modifiers() == 0 or
+                             event.modifiers() & Qt.ShiftModifier):
             self._requestCompletion(completionPrefix=word, onlyAdapt=False)
 
     def _isShortcut(self, event):

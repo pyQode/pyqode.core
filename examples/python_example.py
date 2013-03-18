@@ -38,6 +38,7 @@ class GenericPythonEditor(QMainWindow):
         self.ui = simple_python_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("PCEF - Python Editor Example")
+        self.acceptDrops()
 
         # open this file
         try:

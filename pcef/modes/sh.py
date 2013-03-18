@@ -11,7 +11,7 @@
 """
 This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, Signal
 from pcef import styles
 from pcef.core import Mode
 from PySide import QtGui
@@ -139,6 +139,8 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
 class QPygmentsHighlighter(QSyntaxHighlighter):
     """ Syntax highlighter that uses Pygments for parsing. """
 
+    hilighlightingBlock = Signal(unicode, QSyntaxHighlighter)
+
     #---------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface
     #---------------------------------------------------------------------------
@@ -198,6 +200,16 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             length = len(expression.cap(0))
             self.setFormat(index, length, self._get_format(Whitespace))
             index = expression.indexIn(original_text, index + length)
+
+        self.hilighlightingBlock.emit(original_text, self)
+
+        # expression = QRegExp('\s+')
+        # index = expression.indexIn(original_text, 0)
+        # while index >= 0:
+        #     index = expression.pos(0)
+        #     length = len(expression.cap(0))
+        #     self.setFormat(index, length, self._get_format(Whitespace))
+        #     index = expression.indexIn(original_text, index + length)
 
     #---------------------------------------------------------------------------
     # 'PygmentsHighlighter' interface
@@ -320,7 +332,7 @@ class SyntaxHighlighterMode(Mode):
         self.highlighter = None
         super(SyntaxHighlighterMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
-        self.triggers = ["*", '"', "'", "/"]
+        self.triggers = ["*", '**', '"', "'", "/"]
 
     def install(self, editor):
         """

@@ -55,6 +55,7 @@ def openFileInEditor(editor, filename, encoding='utf8',
         content = content.replace("\t", " " * editor.TAB_SIZE)
     editor.codeEdit.tagFilename = filename
     editor.codeEdit.tagEncoding = encoding
+
     editor.syntaxHighlightingMode.setLexerFromFilename(filename)
     editor.codeEdit.setPlainText(content)
     editor.ui.codeEdit.dirty = False

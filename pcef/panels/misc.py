@@ -41,8 +41,9 @@ class CheckersMarkerPanel(MarkersPanel):
     """ A marker panel dedicated to the checkers modes. It allow to add several messages on the same
     marker.
     """
+    IDENTIFIER = "Checkers marker panel"
     def __init__(self, markersReadOnly=True, parent=None):
-        MarkersPanel.__init__(self, "Checkers marker panel",
+        MarkersPanel.__init__(self, self.IDENTIFIER,
                               markersReadOnly, parent)
         self.icons = {0: ":/icons/rc/marker_warning.png",
                       1: ":/icons/rc/marker_error.png"}
