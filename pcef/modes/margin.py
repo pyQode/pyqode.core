@@ -41,7 +41,7 @@ class RightMarginMode(Mode):
     def __paintMargin(self, event):
         """ Paints the right margin as postPainting step. """
         rect = event.rect()
-        font = QFont(self.currentStyle.fontName, self.currentStyle.fontSize)
+        font = self.editor.codeEdit.currentCharFormat().font()
         fm = QFontMetricsF(font)
         pos = self.marginPos
         offset = self.editor.codeEdit.contentOffset().x() + \
