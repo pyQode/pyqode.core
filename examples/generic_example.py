@@ -8,6 +8,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ PCEF generic editor demo """
+import logging
+logging.basicConfig()
 import sys
 
 from PySide.QtCore import Slot
