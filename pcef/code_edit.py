@@ -233,6 +233,10 @@ class CodeEdit(QPlainTextEdit, StyledObject):
             self.__dirty = dirty
             self.dirtyChanged.emit(dirty)
 
+    @property
+    def contextMenu(self):
+        return self.__context_menu
+
     #: Tells whether the editor is dirty(changes have been made to the document)
     dirty = property(__get_dirty, __set_dirty)
 
