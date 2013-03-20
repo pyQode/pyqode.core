@@ -10,7 +10,7 @@
 #
 """ Contains the right margin mode
 """
-from PySide.QtGui import QPainter
+from PySide.QtGui import QPainter, QFontMetricsF
 from PySide.QtGui import QPen
 from pcef.core import Mode
 
@@ -41,7 +41,8 @@ class RightMarginMode(Mode):
     def __paintMargin(self, event):
         """ Paints the right margin as postPainting step. """
         rect = event.rect()
-        fm = self.editor.codeEdit.fm
+        font = self.editor.codeEdit.currentCharFormat().font()
+        fm = QFontMetricsF(font)
         pos = self.marginPos
         offset = self.editor.codeEdit.contentOffset().x() + self.editor.codeEdit.document().documentMargin()
         x80 = round(fm.averageCharWidth() * pos) + offset
