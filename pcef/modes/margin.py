@@ -43,7 +43,7 @@ class RightMarginMode(Mode):
         rect = event.rect()
         font = QFont(self.currentStyle.fontName, self.currentStyle.fontSize)
         fm = QFontMetricsF(font)
-        pos = 80.0
+        pos = self.marginPos
         offset = self.editor.codeEdit.contentOffset().x() + \
                  self.editor.codeEdit.document().documentMargin()
         x80 = round(fm.width(' ') * pos) + offset
