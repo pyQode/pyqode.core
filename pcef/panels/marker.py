@@ -149,6 +149,8 @@ class MarkersPanel(Panel):
         """ Returns the widget size hint (based on the editor font size) """
         fm = QFontMetricsF(self.editor.codeEdit.font())
         self.size_hint = QSize(fm.height(), fm.height())
+        if self.size_hint.width() > 16:
+            self.size_hint.setWidth(16)
         return self.size_hint
 
     def __onNewTextSet(self):

@@ -55,7 +55,7 @@ class EditorZoomMode(Mode):
                 event.modifiers() & Qt.ControlModifier > 0):
             style = copy.copy(self.currentStyle)
             style.fontSize = self.default_font_size
-            event.setAccepted(True)
+            event.stop = True
             self.editor.currentStyle = style
 
     def __onWheelEvent(self, event):
@@ -75,5 +75,5 @@ class EditorZoomMode(Mode):
                 style.fontSize += increment
             if style.fontSize <= 0:
                 style.fontSize = increment
-            event.setAccepted(True)
+            event.stop = True
             self.editor.currentStyle = style

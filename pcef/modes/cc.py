@@ -382,18 +382,18 @@ class CodeCompletionMode(Mode):
             if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
                 self._insertCompletion(self.currentCompletion)
                 self.__completer.popup().hide()
-                event.setAccepted(True)
+                event.stop = True
                 return
             # hide
             elif event.key() == Qt.Key_Escape or event.key() == Qt.Key_Backtab:
                 self.__completer.popup().hide()
-                event.setAccepted(True)
+                event.stop = True
                 return
         # user completion request: update models and show completions
         if isShortcut:
             self._requestCompletion(completionPrefix, onlyAdapt=False)
             if event.key() == self.triggerKey:
-                event.setAccepted(True)
+                event.stop = True
 
     def _textUnderCursor(self):
         """

@@ -431,7 +431,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param event: QKeyEvent
         """
         # assert isinstance(event, QKeyEvent)
-        event.setAccepted(False)
+        event.stop = False
         # replace tabs by space
         if event.key() == Qt.Key_Tab:
             cursor = self.textCursor()
@@ -442,10 +442,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
             else:
                 # indent whole selection
                 self.indent(self.editor().TAB_SIZE)
-            event.setAccepted(True)
+            event.stop = True
         self.keyPressed.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.keyPressEvent(self, event)
         self.postKeyPressed.emit(event)
 
@@ -456,10 +455,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param event: QKeyEvent
         """
         assert isinstance(event, QKeyEvent)
-        event.setAccepted(False)
+        event.stop = False
         self.keyReleased.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.keyReleaseEvent(self, event)
 
     def focusInEvent(self, event):
@@ -477,10 +475,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mousePressed.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -489,10 +486,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mouseReleased.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
@@ -501,10 +497,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mouseWheelActivated.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.wheelEvent(self, event)
 
     def mouseMoveEvent(self, event):

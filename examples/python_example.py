@@ -11,7 +11,6 @@
 import logging
 logging.basicConfig()
 import sys
-
 from PySide.QtCore import Slot
 from PySide.QtGui import QAction
 from PySide.QtGui import QActionGroup
