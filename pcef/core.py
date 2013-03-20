@@ -18,15 +18,8 @@ Contains the bases classes of the project:
 """
 import logging
 import weakref
-from PySide.QtCore import Qt
 from PySide.QtGui import QWidget
 from PySide.QtGui import QBoxLayout
-from PySide.QtGui import QTextEdit
-from PySide.QtGui import QFont
-from PySide.QtGui import QTextCursor
-from PySide.QtGui import QColor
-from PySide.QtGui import QTextCharFormat
-from PySide.QtGui import QTextFormat
 from pcef.ui import editor_ui
 from pcef.styled_object import StyledObject
 
