@@ -26,6 +26,7 @@ Here are the core features (used in the generic editor):
 * auto indent mode(indentation level is based on the previous line indent)
 
 Here are the python specific features:
+
 * accurate code completion using **Jedi**
 * calltips (using Jedi too)
 * on the fly syntax checking (pylint + pyflakes + pep8)
