@@ -1,13 +1,14 @@
 PySide Code Editing Framework
 =====================================
 
-PCEF is code editing framework for PySide applications. It provides a flexible code editor ready to use in any PySide
+PCEF is code editing framework for PySide applications. It provides a flexible code editor that you can just drop in any PySide
 applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
 
-At the moment, the framework only provides a generic code editor (language independent) but plans are to at least
-provides full support for python and maybe c++.
+The framework also provides two pre-configurededitors:
+* a generic (langage independent) editor widget
+* a python editor widget
 
-Here are the core features:
+Here are the core features (used in the generic editor):
 
 * **syntax highlighting mode** (using pygments)
 * **code completion** (static word list, from document words)
@@ -24,7 +25,11 @@ Here are the core features:
 * **flexible framework** to add custom panels/modes
 * auto indent mode(indentation level is based on the previous line indent)
 
-Plans are to to add code completion and python support (using rope, pylint,...)
+Here are the python specific features:
+* accurate code completion using **Jedi**
+* calltips (using Jedi too)
+* on the fly syntax checking (pylint + pyflakes + pep8)
+
 
 License
 ---------
