@@ -147,7 +147,6 @@ class GenericEditor(CodeEditorWidget):
         self.installMode(HighlightLineMode())
         self.installMode(EditorZoomMode())
         self.installMode(AutoIndentMode())
-        self.installMode(AutoSaveMode())
 
         self.on_codeEdit_redoAvailable(False)
         self.on_codeEdit_undoAvailable(False)
