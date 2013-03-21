@@ -81,6 +81,7 @@ class LineNumberPanel(Panel):
         painter_drawText = painter.drawText
         align_right = Qt.AlignRight
         normal_font = painter.font()
+        normal_font.setBold(False)
         bold_font = QFont(normal_font)
         bold_font.setBold(True)
         active = self.editor.codeEdit.textCursor().blockNumber()

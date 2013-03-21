@@ -61,7 +61,7 @@ class AutoIndentMode(Mode):
         :param keyEvent: the key event
         """
         assert isinstance(keyEvent, QKeyEvent)
-        if keyEvent.isAccepted():
+        if hasattr(keyEvent, "stop") and keyEvent.stop:
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             # go next line
@@ -70,4 +70,4 @@ class AutoIndentMode(Mode):
             indent = self._getIndent(tc)
             tc.insertText(indent)
             tc.movePosition(QTextCursor.EndOfLine)
-            keyEvent.setAccepted(True)
+            keyEvent.stop = True

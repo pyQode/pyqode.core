@@ -15,10 +15,12 @@ This is the setup script, install it as any python package.
 
 .. note:: You will need to install PySide on your own
 """
-from IPython.core.release import long_description
 from setuptools import setup, find_packages
+
+# properly get pcef version
 execfile('pcef/version.py')
 
+# get long description
 with open('README.rst', 'r') as readme:
     long_desc = readme.read()
 
@@ -29,12 +31,12 @@ setup(
     packages=find_packages(),
     package_data={'pcef.ui': ['rc/*'], 'examples.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
-    url='https://launchpad.net/qce/',
+    url='https://github.com/ColinDuquesnoy/PCEF',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='PySide Code Editing Framework (P.C.E.F.)',
     long_description=long_desc,
-    requires=['pygments', 'PySide'],
-    entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main']}
+    requires=['pygments', 'PySide', 'jedi', 'pep8', 'qdarkstyle'],
+    entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main', 'pcef_python_example = examples.python_example:main']}
 )

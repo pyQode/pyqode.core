@@ -12,7 +12,7 @@
 from PySide.QtCore import Slot
 from PySide.QtGui import QBrush
 from PySide.QtGui import QColor
-from pcef.core import TextDecoration
+from pcef.code_edit import TextDecoration
 from pcef.core import Mode
 
 

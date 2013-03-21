@@ -9,11 +9,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from pcef.styles.dark import DarkStyle
-from pcef.style import Style
+from pcef.styles.white import WhiteStyle
 
 
 #: Styles map
-__STYLES = {'Default': Style("Default"),
+__STYLES = {'Default': WhiteStyle(),
             'Dark': DarkStyle()}
 
 

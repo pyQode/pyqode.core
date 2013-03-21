@@ -11,7 +11,8 @@
 """
 This module contains Syntax Highlighting mode and the QSyntaxHighlighter based on pygments
 """
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, Signal
+from pcef import styles
 from pcef.core import Mode
 from PySide import QtGui
 from pygments.lexers.compiled import CLexer, CppLexer
@@ -138,6 +139,8 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
 class QPygmentsHighlighter(QSyntaxHighlighter):
     """ Syntax highlighter that uses Pygments for parsing. """
 
+    hilighlightingBlock = Signal(unicode, QSyntaxHighlighter)
+
     #---------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface
     #---------------------------------------------------------------------------
@@ -148,7 +151,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self.style = "default"
+        self.style = styles.getStyle("Default").pygmentsStyle
         self.enabled = True
 
     def setLexerFromFilename(self, filename):
@@ -189,18 +192,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 
-        # macros: $(txt)
-        myClassFormat = QTextCharFormat()
-        myClassFormat.setFontWeight(QFont.Bold)
-        myClassFormat.setForeground(Qt.red)
-        pattern = "\\$\\(\\S*\\)"
-        expression = QRegExp(pattern)
-        index = expression.indexIn(original_text)
-        while index >= 0:
-            length = expression.matchedLength()
-            self.setFormat(index, length, myClassFormat)
-            index = expression.indexIn(original_text, index + length)
-
         #Spaces
         expression = QRegExp('\s+')
         index = expression.indexIn(original_text, 0)
@@ -209,6 +200,16 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             length = len(expression.cap(0))
             self.setFormat(index, length, self._get_format(Whitespace))
             index = expression.indexIn(original_text, index + length)
+
+        self.hilighlightingBlock.emit(original_text, self)
+
+        # expression = QRegExp('\s+')
+        # index = expression.indexIn(original_text, 0)
+        # while index >= 0:
+        #     index = expression.pos(0)
+        #     length = len(expression.cap(0))
+        #     self.setFormat(index, length, self._get_format(Whitespace))
+        #     index = expression.indexIn(original_text, index + length)
 
     #---------------------------------------------------------------------------
     # 'PygmentsHighlighter' interface
@@ -331,11 +332,11 @@ class SyntaxHighlighterMode(Mode):
         self.highlighter = None
         super(SyntaxHighlighterMode, self).__init__(
             self.IDENTIFIER, self.DESCRIPTION)
-        self.triggers = ["*", '"', "'", "/"]
+        self.triggers = ["*", '**', '"', "'", "/"]
 
     def install(self, editor):
         """
-        :type editor: pcef.editors.QGenericEditor
+        :type editor: pcef.editors.GenericEditor
         """
         self.highlighter = QPygmentsHighlighter(editor.codeEdit.document())
         self.prev_txt = ""

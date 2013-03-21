@@ -12,14 +12,17 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
-from PyQt4.QtGui import QKeyEvent
+from PySide.QtGui import QToolTip
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
+from PySide.QtGui import QColor
+from PySide.QtGui import QTextCharFormat
+from PySide.QtGui import QTextFormat
+from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextEdit, QFocusEvent
 from PySide.QtGui import QTextOption
 from PySide.QtGui import QFont
-from PySide.QtGui import QKeyEvent
 from PySide.QtGui import QTextCursor
 from PySide.QtGui import QMenu
 from PySide.QtGui import QPaintEvent
@@ -27,7 +30,115 @@ from PySide.QtGui import QMouseEvent
 from PySide.QtGui import QPlainTextEdit
 from PySide.QtGui import QWheelEvent
 from pygments.token import Token
-from pcef.style import StyledObject
+from pcef.styled_object import StyledObject
+
+
+def cursorForPosition(codeEdit, line, column, selectEndOfLine=False,
+                      selection=None, selectWordUnderCursor=False):
+    """
+    Return a QTextCursor set to line and column with the specified selection
+    :param line:
+    :param column:
+    """
+    tc = QTextCursor(codeEdit.document())
+    tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
+    tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
+    tc.setPosition(tc.position() + column - 1)
+    if selectEndOfLine is True:
+        tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+    elif isinstance(selection, int):
+        tc.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, selection)
+    elif selectWordUnderCursor is True:
+        tc.select(QTextCursor.WordUnderCursor)
+    codeEdit.setTextCursor(tc)
+    return tc
+
+
+class TextDecoration(QTextEdit.ExtraSelection):
+    """
+    Helper class to quickly create a text decoration.
+    """
+
+    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
+                 draw_order=0, tooltip=None):
+        """
+        Creates a text decoration
+
+        :param cursorOrBlockOrDoc: Selection
+        :type cursorOrBlockOrDoc: QTextCursor or QTextBlock or QTextDocument
+
+        :param startPos: Selection start pos
+
+        :param endPos: Selection end pos
+
+        .. note:: Use the cursor selection if startPos and endPos are none.
+        """
+        self.draw_order = draw_order
+        self.tooltip = tooltip
+        QTextEdit.ExtraSelection.__init__(self)
+        cursor = QTextCursor(cursorOrBlockOrDoc)
+        if startPos is not None:
+            cursor.setPosition(startPos)
+        if endPos is not None:
+            cursor.setPosition(endPos, QTextCursor.KeepAnchor)
+        self.cursor = cursor
+
+    def containsCursor(self, textCursor):
+        assert  isinstance(textCursor, QTextCursor)
+        return self.cursor.selectionStart() <= textCursor.position() < \
+            self.cursor.selectionEnd()
+
+    def setBold(self):
+        """ Uses bold text """
+        self.format.setFontWeight(QFont.Bold)
+
+    def setForeground(self, color):
+        """ Sets the foreground color.
+        :param color: QColor """
+        self.format.setForeground(color)
+
+    def setBackground(self, brush):
+        """ Sets the background color
+
+        :param brush: QBrush
+        """
+        self.format.setBackground(brush)
+
+    def setFullWidth(self, flag=True):
+        """ Sets full width selection
+
+        :param flag: True to use full width selection.
+        """
+        self.cursor.clearSelection()
+        self.format.setProperty(QTextFormat.FullWidthSelection, flag)
+
+    def setSpellchecking(self, color=Qt.blue):
+        """ Underlines text as a spellcheck error.
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
+
+    def setError(self, color=Qt.red):
+        """ Highlights text as a syntax error
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
+
+    def setWarning(self, color=QColor("orange")):
+        """
+        Highlights text as a syntax warning
+
+        :param color: color
+        :type color: QColor
+        """
+        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        self.format.setUnderlineColor(color)
 
 
 class VisibleBlock(object):
@@ -75,6 +186,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         color: %(t)s;
         selection-background-color: %(bs)s;
         selection-color: %(ts)s;
+        border: none;
+        border-radius: 0px;
     }
     """
 
@@ -105,6 +218,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     newTextSet = Signal()
     #: Signal emitted when focusInEvent is is called
     focusedIn = Signal(QFocusEvent)
+    #: Signal emitted when the text is saved with pcef.saveFileFromEditor.
+    #  The signal is emitted with the complete file path
+    textSaved = Signal(str)
 
     #---------------------------------------------------------------------------
     # Properties
@@ -116,6 +232,10 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         if dirty != self.__dirty:
             self.__dirty = dirty
             self.dirtyChanged.emit(dirty)
+
+    @property
+    def contextMenu(self):
+        return self.__context_menu
 
     #: Tells whether the editor is dirty(changes have been made to the document)
     dirty = property(__get_dirty, __set_dirty)
@@ -146,6 +266,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         self.__selections = []
         self.__numBlocks = -1
 
+        self.visible_blocks = []
+
         #: Shortcut to the fontMetrics
         self.fm = self.fontMetrics()
 
@@ -155,6 +277,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         self.newTextSet.connect(self.__onBlocksChanged)
         self.cursorPositionChanged.connect(self.__onBlocksChanged)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.setMouseTracking(True)
 
         self._onStyleChanged()
 
@@ -181,6 +304,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :type decoration: pcef.core.TextDecoration
         """
         self.__selections.append(decoration)
+        self.__selections = sorted(self.__selections, key=lambda sel: sel.draw_order)
         self.setExtraSelections(self.__selections)
 
     def removeDecoration(self, decoration):
@@ -310,8 +434,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QKeyEvent
         """
-        assert isinstance(event, QKeyEvent)
-        event.setAccepted(False)
+        # assert isinstance(event, QKeyEvent)
+        event.stop = False
         # replace tabs by space
         if event.key() == Qt.Key_Tab:
             cursor = self.textCursor()
@@ -322,10 +446,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
             else:
                 # indent whole selection
                 self.indent(self.editor().TAB_SIZE)
-            event.setAccepted(True)
+            event.stop = True
         self.keyPressed.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.keyPressEvent(self, event)
         self.postKeyPressed.emit(event)
 
@@ -336,10 +459,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param event: QKeyEvent
         """
         assert isinstance(event, QKeyEvent)
-        event.setAccepted(False)
+        event.stop = False
         self.keyReleased.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.keyReleaseEvent(self, event)
 
     def focusInEvent(self, event):
@@ -357,10 +479,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mousePressed.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -369,10 +490,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mouseReleased.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
@@ -381,11 +501,19 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
         :param event: QMouseEvent
         """
-        event.setAccepted(False)
+        event.stop = False
         self.mouseWheelActivated.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(True)
+        if not event.stop:
             QPlainTextEdit.wheelEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        assert isinstance(event, QMouseEvent)
+        c = self.cursorForPosition(event.pos())
+        for sel in self.__selections:
+            if sel.containsCursor(c) and sel.tooltip:
+                QToolTip.showText(self.mapToGlobal(event.pos()), sel.tooltip, self)
+                break
+        QPlainTextEdit.mouseMoveEvent(self, event)
 
     def contextMenuEvent(self, event):
         """ Shows our own context menu """

@@ -13,30 +13,27 @@ applications.
 
 This module contains helper functions for the end user.
 """
+import sys
 import logging
 from version import __version__ as pcef_version
 
 # create logger with 'spam_application'
 module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.DEBUG)
-# create file handler which logs even debug messages
-fh = logging.FileHandler('pcef.log')
-fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
-ch = logging.StreamHandler()
+ch = logging.StreamHandler("")
+ch.name = "pcef"
 ch.setLevel(logging.ERROR)
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(levelname)s <%(name)s>: %(message)s')
-fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 # add the handlers to the logger
-module_logger.addHandler(fh)
 module_logger.info("#" * 80)
 module_logger.info("PCEF v{0}".format(pcef_version))
 module_logger.addHandler(ch)
 
 
-def openFileInEditor(editor, filename, encoding='utf8',
+def openFileInEditor(editor, filename, encoding=sys.getfilesystemencoding(),
                      replaceTabsBySpaces=True):
     """
     Open a file in an editor
@@ -53,15 +50,17 @@ def openFileInEditor(editor, filename, encoding='utf8',
         content = unicode(f.read().decode(encoding))
     if replaceTabsBySpaces:
         content = content.replace("\t", " " * editor.TAB_SIZE)
-    editor.codeEdit.filename = filename
-    editor.codeEdit.encoding = encoding
+    editor.codeEdit.tagFilename = filename
+    editor.codeEdit.tagEncoding = encoding
+
     editor.syntaxHighlightingMode.setLexerFromFilename(filename)
     editor.codeEdit.setPlainText(content)
     editor.ui.codeEdit.dirty = False
     module_logger.info("File opened: {0}".format(filename))
 
 
-def saveFileFromEditor(editor, filename=None, encoding=None):
+def saveFileFromEditor(editor, filename=None,
+                       encoding=sys.getfilesystemencoding()):
     """
     Save the editor content to a file
 
@@ -72,13 +71,14 @@ def saveFileFromEditor(editor, filename=None, encoding=None):
     :param encoding: The save encoding
     """
     if filename is None:
-        filename = editor.codeEdit.filename
+        filename = editor.codeEdit.tagFilename
     if encoding is None:
-        encoding = editor.codeEdit.encoding
+        encoding = editor.codeEdit.tagEncoding
     content = unicode(editor.codeEdit.toPlainText()).encode(encoding)
     with open(filename, "w") as f:
         f.write(content)
     editor.codeEdit.dirty = False
-    editor.codeEdit.filename = filename
-    editor.codeEdit.encoding = encoding
+    editor.codeEdit.tagFilename = filename
+    editor.codeEdit.tagEncoding = encoding
+    editor.codeEdit.textSaved.emit(filename)
     module_logger.info("File saved: {0}".format(filename))

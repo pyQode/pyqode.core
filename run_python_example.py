@@ -9,14 +9,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This script allow to execute the generic example without actually installing it.
+This script allow to execute the generic example without actually installing it
 """
-from examples import generic_example
+from examples import python_example
 
 
 def main():
-    generic_example.main()
-
+    python_example.main()
 
 if __name__ == "__main__":
     main()

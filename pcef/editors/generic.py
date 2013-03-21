@@ -9,24 +9,23 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains a series of pre-configured editors classes ready to be used in your
-PySide application
+Contains a pre-configured generic editor (language independent)
 """
 from PySide.QtCore import Slot
-
 from pcef.core import CodeEditorWidget
+from pcef.modes.autosave import AutoSaveMode
 from pcef.modes.indent import AutoIndentMode
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
 from pcef.modes.sh import SyntaxHighlighterMode
 from pcef.modes.zoom import EditorZoomMode
-from pcef.modes.code_completion import CodeCompletionMode
-from pcef.panels.line_numbers import LineNumberPanel
+from pcef.modes.cc import CodeCompletionMode
+from pcef.panels.lines import LineNumberPanel
 from pcef.panels.folding import FoldPanel
-from pcef.panels.search_and_replace import QSearchPanel
+from pcef.panels.search import SearchPanel
 
 
-class QGenericEditor(CodeEditorWidget):
+class GenericEditor(CodeEditorWidget):
     """
     A generic (language independent) pre-configured code editor widget.
 
@@ -43,7 +42,7 @@ class QGenericEditor(CodeEditorWidget):
 
         * :class:`pcef.panels.line_numbers.LineNumberPanel`
         * :class:`pcef.panels.folding.FoldPanel`
-        * :class:`pcef.panels.search_and_replace.QSearchPanel`
+        * :class:`pcef.panels.search_and_replace.SearchPanel`
 
     It also populates the text edit context menu with a set of default actions.
     (some modes might also add their own menu entry or sub-menus).
@@ -74,7 +73,9 @@ class QGenericEditor(CodeEditorWidget):
         :returns: the highlight active line mode instance.
         :rtype: pcef.modes.clh.HighlightLineMode
         """
-        return self.mode(HighlightLineMode.IDENTIFIER)
+        m = self.mode(HighlightLineMode.IDENTIFIER)
+        assert isinstance(m, HighlightLineMode)
+        return m
 
     @property
     def zoomMode(self):
@@ -96,7 +97,7 @@ class QGenericEditor(CodeEditorWidget):
     def codeCompletionMode(self):
         """
         :returns: the code completion mode.
-        :rtype: pcef.modes.code_completion.CodeCompletionMode
+        :rtype: pcef.modes.cc.CodeCompletionMode
         """
         return self.mode(CodeCompletionMode.IDENTIFIER)
 
@@ -121,9 +122,9 @@ class QGenericEditor(CodeEditorWidget):
         """
         :returns: the search and replace panel instance
 
-        :return: pcef.panels.search_and_replace.QSearchPanel
+        :return: pcef.panels.search_and_replace.SearchPanel
         """
-        return self.panel(QSearchPanel.IDENTIFIER)
+        return self.panel(SearchPanel.IDENTIFIER)
 
     #---------------------------------------------------------------------------
     # Methods
@@ -137,9 +138,9 @@ class QGenericEditor(CodeEditorWidget):
         # Install panels
         self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(QSearchPanel(), self.PANEL_ZONE_BOTTOM)
-
-        # Install modes
+        self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
+        #
+        # # Install modes
         self.installMode(CodeCompletionMode())
         self.installMode(RightMarginMode())
         self.installMode(SyntaxHighlighterMode())

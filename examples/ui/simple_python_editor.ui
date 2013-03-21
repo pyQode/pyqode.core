@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1078</width>
-    <height>831</height>
+    <width>751</width>
+    <height>484</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="GenericEditor" name="genericEditor"/>
+     <widget class="PythonEditor" name="genericEditor"/>
     </item>
    </layout>
   </widget>
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1078</width>
+     <width>751</width>
      <height>25</height>
     </rect>
    </property>
@@ -161,9 +161,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GenericEditor</class>
+   <class>PythonEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef/editors/generic.h</header>
+   <header>pcef/editors/python.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -72,7 +72,7 @@ Here is a simple example::
     from PySide.QtGui import QMainWindow
 
     from pcef import openFileInEditor
-    from pcef.editors import QGenericEditor
+    from pcef.editors import GenericEditor
 
 
     def main():
@@ -80,7 +80,7 @@ Here is a simple example::
         # create qt objects (app, window and our editor)
         app = QApplication(sys.argv)
         window = QMainWindow()
-        editor = QGenericEditor()
+        editor = GenericEditor()
         window.setCentralWidget(editor)
 
         # open a file

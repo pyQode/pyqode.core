@@ -22,12 +22,11 @@ from PySide.QtGui import QTextCursor
 from PySide.QtGui import QTextDocument
 from pygments.token import Text
 from pcef.core import Panel
-from pcef.core import TextDecoration
-from pcef.code_edit import CodeEdit
+from pcef.code_edit import CodeEdit, TextDecoration
 from pcef.ui import search_panel_ui
 
 
-class QSearchPanel(Panel):
+class SearchPanel(Panel):
     """
     Search (& replace) Panel. Allow the user to search for content in the editor
 
@@ -68,6 +67,8 @@ class QSearchPanel(Panel):
     QPushButton
     {
         background-color: transparent;
+        padding: 5px;
+        border: none;
     }
 
     QPushButton:hover
@@ -78,17 +79,19 @@ class QSearchPanel(Panel):
         color: %(color)s;
     }
 
-    QPushButton:pressed
+    QPushButton:pressed, QCheckBox:pressed
     {
-        background-color: %(highlight)s;
-        border: 2px black;
-        border-radius: 5px;
-        color: %(color)s;
+        border: 1px solid %(bck)s;
     }
 
     QPushButton:disabled
     {
         color: %(highlight)s;
+    }
+
+    QCheckBox
+    {
+        padding: 4px;
     }
 
     QCheckBox:hover
@@ -189,7 +192,7 @@ class QSearchPanel(Panel):
             self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
         else:
             self.editor.codeEdit.cursorPositionChanged.disconnect(self.__onCursorMoved)
-            self.editor.codeEdit.textChanged.connect(self.updateSearchResults)
+            self.editor.codeEdit.textChanged.disconnect(self.updateSearchResults)
 
     def __installActions(self):
         """ Installs actions on the editor context menu """

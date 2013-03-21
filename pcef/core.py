@@ -18,17 +18,10 @@ Contains the bases classes of the project:
 """
 import logging
 import weakref
-from PySide.QtCore import Qt
 from PySide.QtGui import QWidget
 from PySide.QtGui import QBoxLayout
-from PySide.QtGui import QTextEdit
-from PySide.QtGui import QFont
-from PySide.QtGui import QTextCursor
-from PySide.QtGui import QColor
-from PySide.QtGui import QTextCharFormat
-from PySide.QtGui import QTextFormat
-from pcef.style import StyledObject
 from pcef.ui import editor_ui
+from pcef.styled_object import StyledObject
 
 
 class EditorExtension(StyledObject):
@@ -42,6 +35,17 @@ class EditorExtension(StyledObject):
     An editor extension is also an object that can be enabled/disabled. Its provides an enable property that
     automatically call the abstract method onStateChanged.
     """
+    @property
+    def editor(self):
+        """
+        Provides easy access to the CodeEditorWidget weakref
+
+        :return: pcef.core.CodeEditorWidget
+        """
+        if self.__editor is not None:
+            return self.__editor()
+        else:
+            return None
 
     def __init__(self, name, description):
         """
@@ -60,7 +64,7 @@ class EditorExtension(StyledObject):
         # disable any actions)
         self.__enabled = False
         #: Editor instance
-        self.editor = None
+        self.__editor = None
 
     def __str__(self):
         return self.name
@@ -79,8 +83,12 @@ class EditorExtension(StyledObject):
         :param editor: editor widget instance
         :type editor: pcef.core.CodeEditorWidget
         """
-        self.editor = editor
+        self.__editor = weakref.ref(editor)
         self._onStyleChanged()
+
+    def uninstall(self):
+        self.enabled = False
+        self.__editor = None
 
     def _onStateChanged(self, state):
         """
@@ -151,85 +159,6 @@ class Panel(QWidget, EditorExtension):
             self.show()
         else:
             self.hide()
-
-
-class TextDecoration(QTextEdit.ExtraSelection):
-    """
-    Helper class to quickly create a text decoration.
-    """
-
-    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None):
-        """
-        Creates a text decoration
-
-        :param cursorOrBlockOrDoc: Selection
-        :type cursorOrBlockOrDoc: QTextCursor or QTextBlock or QTextDocument
-
-        :param startPos: Selection start pos
-
-        :param endPos: Selection end pos
-
-        .. note:: Use the cursor selection if startPos and endPos are none.
-        """
-        QTextEdit.ExtraSelection.__init__(self)
-        cursor = QTextCursor(cursorOrBlockOrDoc)
-        if startPos is not None:
-            cursor.setPosition(startPos)
-        if endPos is not None:
-            cursor.setPosition(endPos, QTextCursor.KeepAnchor)
-        self.cursor = cursor
-
-    def setBold(self):
-        """ Uses bold text """
-        self.format.setFontWeight(QFont.Bold)
-
-    def setForeground(self, color):
-        """ Sets the foreground color.
-        :param color: QColor """
-        self.format.setForeground(color)
-
-    def setBackground(self, brush):
-        """ Sets the background color
-
-        :param brush: QBrush
-        """
-        self.format.setBackground(brush)
-
-    def setFullWidth(self, flag=True):
-        """ Sets full width selection
-
-        :param flag: True to use full width selection.
-        """
-        self.cursor.clearSelection()
-        self.format.setProperty(QTextFormat.FullWidthSelection, flag)
-
-    def setSpellchecking(self, color=Qt.blue):
-        """ Underlines text as a spellcheck error.
-
-        :param color: color
-        :type color: QColor
-        """
-        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
-        self.format.setUnderlineColor(color)
-
-    def setError(self, color=Qt.red):
-        """ Highlights text as a syntax error
-
-        :param color: color
-        :type color: QColor
-        """
-        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
-        self.format.setUnderlineColor(color)
-
-    def setWarning(self, color=QColor("orange")):
-        """
-        Highlights text as a syntax warning
-
-        :param color: color
-        :type color: QColor
-        """
-        self.format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
-        self.format.setUnderlineColor(color)
 
 
 class CodeEditorWidget(QWidget, StyledObject):
@@ -349,6 +278,22 @@ class CodeEditorWidget(QWidget, StyledObject):
 
         self.__logger = logging.getLogger(
             __name__ + "." + self.__class__.__name__)
+
+    def __del__(self):
+        self.clearModes()
+        self.clearPanels()
+
+    def clearModes(self):
+        keys = self.__modes.keys()
+        for k in keys:
+            self.__modes[k].uninstall()
+        self.__modes.clear()
+
+    def clearPanels(self):
+        keys = self.__panels.keys()
+        for k in keys:
+            self.__panels[k].uninstall()
+        self.__panels.clear()
 
     def installMode(self, mode):
         """ Installs a mode on the widget.

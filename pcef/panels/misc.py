@@ -35,3 +35,42 @@ class UserMarkersPanel(MarkersPanel):
         :param lineNbr: where to put the marker
         """
         panel.addMarker(Marker(lineNbr, QIcon(self._icon), None))
+
+
+class CheckersMarkerPanel(MarkersPanel):
+    """ A marker panel dedicated to the checkers modes. It allow to add several messages on the same
+    marker.
+    """
+    IDENTIFIER = "Checkers marker panel"
+    def __init__(self, markersReadOnly=True, parent=None):
+        MarkersPanel.__init__(self, self.IDENTIFIER,
+                              markersReadOnly, parent)
+        self.icons = {0: ":/icons/rc/marker_warning.png",
+                      1: ":/icons/rc/marker_error.png"}
+
+    def addCheckerMarker(self, error_type, line, message):
+        """
+        Adds a checker marker to the panel. This is a wrapper over the addMarker method used
+        for better consistency and convenience.
+
+        :param error_type: error type
+
+        :param line: marker line
+
+        :param message: marker message
+        """
+        for marker in self.markers:
+            # combine messages
+            if marker.position == line:
+                # change icon/message to show the highest priority icon/message
+                if marker.error_type < error_type:
+                    marker.tooltip = "{0}\n{1}".format(message, marker.tooltip)
+                    marker.icon = QIcon(self.icons[error_type])
+                # just append message
+                else:
+                    marker.tooltip += "\n %s" % message
+                return marker
+        marker = Marker(line, icon=QIcon(self.icons[error_type]), tooltip=message)
+        marker.error_type = error_type
+        self.addMarker(marker)
+        return marker

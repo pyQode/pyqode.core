@@ -9,14 +9,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This script allow to execute the generic example without actually installing it.
+This package contains python related modes:
+ - py_cc: python code completion
+ - py_indent: python smart indent
+ - py_check: syntax checking + pep8 checking
+ - py_folding: python folding
 """
-from examples import generic_example
 
-
-def main():
-    generic_example.main()
-
-
-if __name__ == "__main__":
-    main()

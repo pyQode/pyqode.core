@@ -18,7 +18,9 @@ from pygments.styles import get_style_by_name
 #: Default editor font (monospace on GNU/Linux, Courier New on windows)
 DEFAULT_FONT = "monospace"
 if sys.platform == "win32":
-    DEFAULT_FONT = "Courier New"
+    DEFAULT_FONT = "Consolas"
+elif sys.platform == "darwin":
+    DEFAULT_FONT = "Monaco"
 #: Default editor font size
 DEFAULT_FONT_SIZE = 10
 
@@ -56,6 +58,10 @@ class Style(object):
         self.searchColor = ''
         #: Search results background
         self.searchBackgroundColor = ''
+        #: Warning color
+        self.warningColor = ""
+        #: Error color
+        self.errorColor = ""
         #: A default font size
         self.fontSize = 10
         # Show whitespaces
@@ -66,7 +72,7 @@ class Style(object):
         """
         Reset the style to the default white style.
         """
-        self.pygmentsStyle = 'friendly'
+        self.pygmentsStyle = 'default'
         self.marginColor = '#FF0000'
         self.marginPos = 120
         self.activeLineColor = '#E4EDF8'
@@ -79,6 +85,8 @@ class Style(object):
         self.fontSize = DEFAULT_FONT_SIZE
         self.searchColor = '#000000'
         self.searchBackgroundColor = '#FFFF00'
+        self.warningColor = "#8080FF"
+        self.errorColor = "#CC4040"
 
     @property
     def backgroundColor(self):
@@ -133,35 +141,3 @@ def fromJSON(filename):
     with open(filename, "r") as jsonFile:
         style.__dict__ = json.load(jsonFile)
     return style
-
-
-class StyledObject(object):
-    """ Base class for objects that needs a style instance.
-
-    Provides a property to get/set the object currentStyle. The property call an abstract
-    method to force children to update their brushes, pens, colors,... (updateStyling)
-    """
-
-    def __init__(self):
-        global __styleChanged
-        self._style = Style("Default")
-
-    def __get_style(self):
-        return self._style
-
-    def __set_style(self, style):
-        assert isinstance(style, Style)
-        self._style = style
-        self._onStyleChanged()
-
-    #: Current style
-    currentStyle = property(__get_style, __set_style)
-
-    def _onStyleChanged(self):
-        """
-        Raises not ImplementError.
-
-        Subclasses must overrides this method to update themselves whenever the
-        style changed
-        """
-        raise NotImplementedError
