@@ -29,6 +29,7 @@ setup(
     name='PCEF',
     version=__version__,
     packages=find_packages(),
+    keywords=["QCodeEditor", "PySide code editor"],
     package_data={'pcef.ui': ['rc/*'], 'examples.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
     url='https://github.com/ColinDuquesnoy/PCEF',
@@ -38,5 +39,8 @@ setup(
     description='PySide Code Editing Framework (P.C.E.F.)',
     long_description=long_desc,
     requires=['pygments', 'PySide', 'jedi', 'pep8', 'qdarkstyle'],
-    entry_points={'gui_scripts': ['pcef_generic_example = examples.generic_example:main', 'pcef_python_example = examples.python_example:main']}
+    entry_points={'gui_scripts':
+                  ['pcef_generic_example = examples.generic_example:main',
+                   'pcef_python_example = examples.python_example:main']}
+
 )
