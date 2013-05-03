@@ -13,7 +13,6 @@ Contains a pre-configured python editor class ready to be used in your
 PySide application.
 """
 from pcef.editors.generic import GenericEditor
-from pcef.modes.autosave import AutoSaveMode
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
 from pcef.modes.python.checkers import PEP8CheckerMode
@@ -44,4 +43,3 @@ class PythonEditor(GenericEditor):
         self.installMode(PEP8CheckerMode())
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())
-        self.installMode(AutoSaveMode())
