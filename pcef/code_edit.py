@@ -12,7 +12,7 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
-from PySide.QtGui import QToolTip
+from PySide.QtGui import QToolTip, QTextDocument, QTextBlock
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
@@ -571,7 +571,14 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param end: End folding line.
         :param fold: True to fold, False to unfold
         """
+        doc = self.document()
+        assert isinstance(doc, QTextDocument)
         for i in range(start + 1, end):
-            self.document().findBlockByNumber(i).setVisible(not fold)
-            self.update()
+            block = self.document().findBlockByNumber(i)
+            assert isinstance(block, QTextBlock)
+            block.setVisible(not fold)
+            doc.markContentsDirty(block.position(), block.length())
+        print "dirty"
+        # self.update()
+        # self.viewport().repaint()
         self.__onBlocksChanged()
