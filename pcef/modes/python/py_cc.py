@@ -22,12 +22,19 @@ from pcef.modes.cc import Suggestion
 
 
 Icons = {'Class': ':/icons/rc/class.png',
+         'class': ':/icons/rc/class.png',
          'Import': ':/icons/rc/import.png',
+         'import': ':/icons/rc/import.png',
          'Statement': ':/icons/rc/var.png',
+         'statement': ':/icons/rc/var.png',
          'ForFlow': ':/icons/rc/var.png',
+         'forflow': ':/icons/rc/var.png',
          'Module': ':/icons/rc/module.png',
+         'module': ':/icons/rc/module.png',
          'Param': ':/icons/rc/param.png',
-         'Function': ':/icons/rc/method.png'}
+         'param': ':/icons/rc/param.png',
+         'Function': ':/icons/rc/method.png',
+         'function': ':/icons/rc/method.png'}
 
 
 class PythonCompletionModel(CompletionModel):
