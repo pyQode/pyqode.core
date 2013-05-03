@@ -77,6 +77,7 @@ def saveFileFromEditor(editor, filename=None,
     content = unicode(editor.codeEdit.toPlainText()).encode(encoding)
     with open(filename, "w") as f:
         f.write(content)
+    editor.codeEdit.updateOriginalText()
     editor.codeEdit.dirty = False
     editor.codeEdit.tagFilename = filename
     editor.codeEdit.tagEncoding = encoding

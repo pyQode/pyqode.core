@@ -258,6 +258,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         #: Weakref to the editor
         self.editor = None
 
+        self.__originalText = ""
+
         #: dirty flag
         self.__dirty = False
         #: our custom context menu
@@ -403,6 +405,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
+    def updateOriginalText(self):
+        self.__originalText = self.toPlainText()
+
     def _onStyleChanged(self):
         """
         Updates widget style when style changed.
@@ -526,12 +531,17 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
     def __onTextChanged(self):
         """ Sets dirty to true """
-        self.dirty = True
+        if self.toPlainText() != self.__originalText:
+            self.__originalText = self.toPlainText()
+            self.dirty = True
+        else:
+            self.dirty = False
 
     def setPlainText(self, txt):
         """ Sets the text edit content and emits newTextSet signal.
         :param txt: New text to display
         """
+        self.__originalText = txt
         QPlainTextEdit.setPlainText(self, txt)
         self.newTextSet.emit()
 
