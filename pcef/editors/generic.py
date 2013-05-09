@@ -149,8 +149,8 @@ class GenericEditor(CodeEditorWidget):
 
         # Install panels
         self._installPanels()
-        #
-        # # Install modes
+
+        # Install modes
         self._installModes()
 
         self.on_codeEdit_redoAvailable(False)
