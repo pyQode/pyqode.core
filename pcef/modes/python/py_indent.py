@@ -46,9 +46,11 @@ class PyAutoIndentMode(AutoIndentMode):
             tc.movePosition(QTextCursor.WordLeft)
             tc.select(QTextCursor.WordUnderCursor)
             last_word = tc.selectedText().strip()
+            tc.select(QTextCursor.LineUnderCursor)
+            line = tc.selectedText().strip()
             tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
             last_char = tc.selectedText().strip()
-            if last_char == ":":
+            if line.endswith(":"):
                 indent += 4 * " "
             elif last_word == "return" or (last_char == "" and last_word == ""):
                 indent = indent[4:]
