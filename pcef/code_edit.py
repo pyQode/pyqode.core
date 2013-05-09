@@ -589,6 +589,6 @@ class CodeEdit(QPlainTextEdit, StyledObject):
             block.setVisible(not fold)
             doc.markContentsDirty(block.position(), block.length())
         print "dirty"
-        # self.update()
-        # self.viewport().repaint()
+        self.update()
+        self.viewport().repaint()
         self.__onBlocksChanged()

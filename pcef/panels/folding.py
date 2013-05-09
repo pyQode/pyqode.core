@@ -111,7 +111,7 @@ class FoldPanel(Panel):
         self.font = QFont(self.currentStyle.fontName, 7)
         self.font.setBold(True)
         fm = QFontMetricsF(self.editor.codeEdit.font())
-        self.size_hint = QSize(fm.height(), fm.height())
+        self.size_hint = QSize(16, 16)
         self.back_brush = QBrush(QColor(style.panelsBackgroundColor))
         self.active_line_brush = QBrush(QColor(style.activeLineColor))
         self.separator_pen = QPen(QColor(style.panelSeparatorColor))
