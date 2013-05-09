@@ -421,7 +421,6 @@ class CodeCompletionMode(Mode):
         wuc = tokens[len(tokens) - 1]
         if selectedText == ".":
             wuc = '.'
-        print wuc
         return wuc
 
     def _lastCharOfLine(self):
