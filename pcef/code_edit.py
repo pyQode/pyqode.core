@@ -532,7 +532,7 @@ class CodeEdit(QPlainTextEdit, StyledObject):
     def __onTextChanged(self):
         """ Sets dirty to true """
         if self.toPlainText() != self.__originalText:
-            self.__originalText = self.toPlainText()
+            # self.__originalText = self.toPlainText()
             self.dirty = True
         else:
             self.dirty = False
