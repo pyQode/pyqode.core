@@ -56,7 +56,6 @@ class PyFolderMode(Mode):
         """
         lines = self.editor.codeEdit.toPlainText().splitlines()
         if len(lines) != self.__nbLines:
-            print "Update fold markers"
             try:
                 foldPanel = self.editor.foldPanel
             except KeyError:
@@ -65,6 +64,5 @@ class PyFolderMode(Mode):
             foldPanel.clearIndicators()
             root_node = analyser.parse(self.editor.codeEdit.toPlainText())
             for start, end in get_markers(root_node):
-                print start, end
                 foldPanel.addIndicator(start, end)
 

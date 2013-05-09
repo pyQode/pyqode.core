@@ -57,7 +57,6 @@ class DocumentNode(object):
                 if c.identifier == "on_actionOpen_triggered":
                     pass
                 empty_line = l.isspace() or l == "" or "@" in l
-                print c.end, l, empty_line
                 if c.end <= 0 or not empty_line:
                     finish = True
                 else:

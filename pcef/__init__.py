@@ -15,7 +15,9 @@ This module contains helper functions for the end user.
 """
 import sys
 import logging
-from version import __version__ as pcef_version
+
+# PCEF version
+__version__ = "0.2.0"
 
 # create logger with 'spam_application'
 module_logger = logging.getLogger(__name__)
@@ -29,7 +31,7 @@ formatter = logging.Formatter('%(levelname)s <%(name)s>: %(message)s')
 ch.setFormatter(formatter)
 # add the handlers to the logger
 module_logger.info("#" * 80)
-module_logger.info("PCEF v{0}".format(pcef_version))
+module_logger.info("PCEF v{0}".format(__version__))
 module_logger.addHandler(ch)
 
 
