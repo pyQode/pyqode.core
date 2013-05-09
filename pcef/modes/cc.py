@@ -19,7 +19,7 @@ from pcef.core import Mode
 
 WORD_SEPARATORS = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
                    '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",
-                   ".", "/", ";", '[', ']', '\\', '\n', '\t', '=', '-',' ']
+                   ".", "/", ";", '[', ']', '\\', '\n', '\t', '=', '-', ' ', '']
 
 
 class Suggestion(object):
@@ -402,24 +402,26 @@ class CodeCompletionMode(Mode):
         Returns the word under the cursor
         """
         tc = self.editor.codeEdit.textCursor()
-        pos = tc.position()
+        original_pos = pos = tc.position()
         space_found = False
         how_many = 0
         while not space_found and pos != 0:
             tc.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
             tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
-            if tc.selectedText() in WORD_SEPARATORS:
+            ch = tc.selectedText()[0]
+            if tc.selectedText() in WORD_SEPARATORS or ch.isspace():
                 space_found = True
             how_many += 1
             pos = tc.position()
             tc.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
-        tc.setPosition(pos)
+        tc.setPosition(original_pos)
         tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, how_many)
         selectedText = tc.selectedText()
         tokens = selectedText.split('.')
         wuc = tokens[len(tokens) - 1]
         if selectedText == ".":
             wuc = '.'
+        print wuc
         return wuc
 
     def _lastCharOfLine(self):
