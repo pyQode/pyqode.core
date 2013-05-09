@@ -347,7 +347,7 @@ class SyntaxHighlighterMode(Mode):
         if state is True:
             self.editor.codeEdit.textSaved.connect(self.__onTextSaved)
         else:
-            self.editor.codeEdit.keyReleased.disconnect(self.__onTextSaved)
+            self.editor.codeEdit.textSaved.disconnect(self.__onTextSaved)
         self.highlighter.rehighlight()
 
     def __onTextSaved(self):
