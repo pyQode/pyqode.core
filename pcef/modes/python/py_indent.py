@@ -50,7 +50,8 @@ class PyAutoIndentMode(AutoIndentMode):
             last_char = tc.selectedText().strip()
             if line.endswith(":"):
                 indent += 4 * " "
-            elif last_word == "return" or (last_char == "" and last_word == ""):
+            elif last_word in ["return", "pass"] or \
+                    (last_char == "" and last_word == ""):
                 indent = indent[4:]
             tc.setPosition(pos)
             return indent
