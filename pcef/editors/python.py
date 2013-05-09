@@ -53,7 +53,7 @@ class PythonEditor(GenericEditor):
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())
         self.uninstallMode(AutoIndentMode.IDENTIFIER)
-    #     self.installMode(PyAutoIndentMode())
+        self.installMode(PyAutoIndentMode())
 
     def __init__(self, parent=None):
         super(PythonEditor, self).__init__(parent)
