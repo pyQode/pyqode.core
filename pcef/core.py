@@ -135,7 +135,8 @@ class Mode(EditorExtension):
         EditorExtension.__init__(self, name, description)
 
     def _onStyleChanged(self):
-        pass  # not all modes need styling, don't force them to implement something they don't need
+        pass  # not all modes need styling, don't force them to implement
+              # something they don't need
 
 
 class Panel(QWidget, EditorExtension):
