@@ -24,8 +24,8 @@ class AutoIndentMode(Mode):
     #: Mode identifier
     IDENTIFIER = "Auto indent"
     #: Mode description
-    DESCRIPTION = """ A basic auto indent mode that provides a basic auto indentation based on the previous
-    line indentation.
+    DESCRIPTION = """ A basic auto indent mode that provides a basic auto
+    indentation based on the previous line indentation.
     """
 
     def __init__(self):
