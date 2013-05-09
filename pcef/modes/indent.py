@@ -14,6 +14,10 @@ from PySide.QtCore import Qt
 from PySide.QtGui import QTextCursor, QKeyEvent
 from pcef.core import Mode
 
+_IDENTIFIER = "Auto indent"
+_DESCRIPTION = """ A basic auto indent mode that provides a basic auto
+indentation based on the previous line indentation.
+"""
 
 class AutoIndentMode(Mode):
     """ A basic auto indent mode that provides a basic auto indentation based on the previous
@@ -22,14 +26,12 @@ class AutoIndentMode(Mode):
     This mode can be extended by overriding the _getIndent method.
     """
     #: Mode identifier
-    IDENTIFIER = "Auto indent"
+    IDENTIFIER = _IDENTIFIER
     #: Mode description
-    DESCRIPTION = """ A basic auto indent mode that provides a basic auto
-    indentation based on the previous line indentation.
-    """
+    DESCRIPTION = _DESCRIPTION
 
-    def __init__(self):
-        super(AutoIndentMode, self).__init__(self.IDENTIFIER, self.DESCRIPTION)
+    def __init__(self, identifier=IDENTIFIER, desc=_DESCRIPTION):
+        super(AutoIndentMode, self).__init__(identifier, desc)
 
     def _onStyleChanged(self):
         pass  # style not needed

@@ -12,6 +12,8 @@
 Contains a pre-configured python editor class ready to be used in your
 PySide application.
 """
+from modes.indent import AutoIndentMode
+from modes.python.py_indent import PyAutoIndentMode
 from pcef.editors.generic import GenericEditor
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
@@ -44,13 +46,14 @@ class PythonEditor(GenericEditor):
         self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
         self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
 
-
     def _installModes(self):
         super(PythonEditor, self)._installModes()
         self.installMode(PythonCalltipMode())
         self.installMode(PEP8CheckerMode())
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())
+        self.uninstallMode(AutoIndentMode.IDENTIFIER)
+    #     self.installMode(PyAutoIndentMode())
 
     def __init__(self, parent=None):
         super(PythonEditor, self).__init__(parent)

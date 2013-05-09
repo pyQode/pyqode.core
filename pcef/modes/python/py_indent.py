@@ -41,7 +41,7 @@ class PyAutoIndentMode(AutoIndentMode):
         """
         pos = tc.position()
         if pos != 0:
-            indent = PyAutoIndentMode._getIndent(self, tc)
+            indent = AutoIndentMode._getIndent(self, tc)
             tc.movePosition(QTextCursor.StartOfLine, QTextCursor.MoveAnchor, -1)
             tc.movePosition(QTextCursor.WordLeft)
             tc.select(QTextCursor.WordUnderCursor)
