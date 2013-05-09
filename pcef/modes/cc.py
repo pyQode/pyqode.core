@@ -403,25 +403,24 @@ class CodeCompletionMode(Mode):
         """
         tc = self.editor.codeEdit.textCursor()
         pos = tc.position()
-        if pos:
-            space_found = False
-            how_many = 0
-            while not space_found:
-                tc.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
-                tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
-                if tc.selectedText() in WORD_SEPARATORS:
-                    space_found = True
-                how_many += 1
-                tc.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
-            tc.setPosition(pos)
-            tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, how_many)
-            selectedText = tc.selectedText()
-            tokens = selectedText.split('.')
-            wuc = tokens[len(tokens) - 1]
-            if selectedText == ".":
-                wuc = '.'
-            return wuc
-        return ""
+        space_found = False
+        how_many = 0
+        while not space_found and pos != 0:
+            tc.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
+            tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
+            if tc.selectedText() in WORD_SEPARATORS:
+                space_found = True
+            how_many += 1
+            pos = tc.position()
+            tc.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
+        tc.setPosition(pos)
+        tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, how_many)
+        selectedText = tc.selectedText()
+        tokens = selectedText.split('.')
+        wuc = tokens[len(tokens) - 1]
+        if selectedText == ".":
+            wuc = '.'
+        return wuc
 
     def _lastCharOfLine(self):
         """
