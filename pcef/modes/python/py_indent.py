@@ -9,8 +9,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ Contains smart indent modes """
-import re
-from PySide.QtCore import Qt
 from PySide.QtGui import QTextCursor, QKeyEvent
 from pcef.modes.indent import AutoIndentMode
 
