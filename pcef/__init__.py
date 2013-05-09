@@ -56,7 +56,7 @@ def openFileInEditor(editor, filename, encoding=sys.getfilesystemencoding(),
     editor.syntaxHighlightingMode.setLexerFromFilename(filename)
     editor.codeEdit.setPlainText(content)
     editor.ui.codeEdit.dirty = False
-    module_logger.info("File opened: {0}".format(filename))
+    module_logger.info(u"File opened: {0}".format(filename))
 
 
 def saveFileFromEditor(editor, filename=None,
@@ -82,4 +82,4 @@ def saveFileFromEditor(editor, filename=None,
     editor.codeEdit.tagFilename = filename
     editor.codeEdit.tagEncoding = encoding
     editor.codeEdit.textSaved.emit(filename)
-    module_logger.info("File saved: {0}".format(filename))
+    module_logger.info(u"File saved: {0}".format(filename))
