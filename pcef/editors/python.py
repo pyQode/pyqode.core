@@ -12,9 +12,9 @@
 Contains a pre-configured python editor class ready to be used in your
 PySide application.
 """
-from modes.indent import AutoIndentMode
-from modes.python.folder import PyFolderMode
-from modes.python.py_indent import PyAutoIndentMode
+from pcef.modes.indent import AutoIndentMode
+from pcef.modes.python.folder import PyFolderMode
+from pcef.modes.python.py_indent import PyAutoIndentMode
 from pcef.editors.generic import GenericEditor
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
