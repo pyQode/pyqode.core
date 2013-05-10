@@ -18,7 +18,7 @@ This is the setup script, install it as any python package.
 from setuptools import setup, find_packages
 
 # properly get pcef version
-execfile('pcef/version.py')
+execfile('pcef/__init__.py')
 
 
 # get long description
@@ -61,6 +61,8 @@ Here are the python specific features:
 * code completion (using Jedi)
 * calltips
 * syntax and style checking (using pylint, pyflakes and pep8)
+* code folder
+* smart indent
 """
 
 
