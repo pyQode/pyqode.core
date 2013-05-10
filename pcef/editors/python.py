@@ -12,14 +12,19 @@
 Contains a pre-configured python editor class ready to be used in your
 PySide application.
 """
+from modes.indent import AutoIndentMode
+from modes.python.folder import PyFolderMode
+from modes.python.py_indent import PyAutoIndentMode
 from pcef.editors.generic import GenericEditor
-from pcef.modes.autosave import AutoSaveMode
 from pcef.modes.python.py_cc import PythonCompletionModel
 from pcef.modes.python.calltips import PythonCalltipMode
 from pcef.modes.python.checkers import PEP8CheckerMode
 from pcef.modes.python.checkers import PyFlakesCheckerMode
 from pcef.modes.python.checkers import PyLintCheckerMode
+from pcef.panels.folding import FoldPanel
+from pcef.panels.lines import LineNumberPanel
 from pcef.panels.misc import CheckersMarkerPanel
+from pcef.panels.search import SearchPanel
 
 
 class PythonEditor(GenericEditor):
@@ -36,12 +41,23 @@ class PythonEditor(GenericEditor):
     def checkers_panel(self):
         return self.panel("Checkers marker panel")
 
-    def __init__(self, parent=None):
-        super(PythonEditor, self).__init__(parent)
-        self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
+    def _installPanels(self):
+        self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
+
+    def _installModes(self):
+        super(PythonEditor, self)._installModes()
         self.installMode(PythonCalltipMode())
-        self.installPanel(CheckersMarkerPanel(), self.PANEL_ZONE_RIGHT)
         self.installMode(PEP8CheckerMode())
         self.installMode(PyFlakesCheckerMode())
         self.installMode(PyLintCheckerMode())
-        self.installMode(AutoSaveMode())
+        self.uninstallMode(AutoIndentMode.IDENTIFIER)
+        self.installMode(PyAutoIndentMode())
+        self.installMode(PyFolderMode())
+
+    def __init__(self, parent=None):
+        super(PythonEditor, self).__init__(parent)
+        self.codeCompletionMode.addModel(PythonCompletionModel(priority=2))
+

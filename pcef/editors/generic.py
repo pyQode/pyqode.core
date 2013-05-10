@@ -13,7 +13,6 @@ Contains a pre-configured generic editor (language independent)
 """
 from PySide.QtCore import Slot
 from pcef.core import CodeEditorWidget
-from pcef.modes.autosave import AutoSaveMode
 from pcef.modes.indent import AutoIndentMode
 from pcef.modes.clh import HighlightLineMode
 from pcef.modes.margin import RightMarginMode
@@ -129,6 +128,19 @@ class GenericEditor(CodeEditorWidget):
     #---------------------------------------------------------------------------
     # Methods
     #---------------------------------------------------------------------------
+    def _installPanels(self):
+        self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
+        self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
+
+    def _installModes(self):
+        self.installMode(CodeCompletionMode())
+        self.installMode(RightMarginMode())
+        self.installMode(SyntaxHighlighterMode())
+        self.installMode(HighlightLineMode())
+        self.installMode(EditorZoomMode())
+        self.installMode(AutoIndentMode())
+
     def __init__(self, parent=None):
         CodeEditorWidget.__init__(self, parent)
 
@@ -136,17 +148,10 @@ class GenericEditor(CodeEditorWidget):
         self._installActions()
 
         # Install panels
-        self.installPanel(FoldPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(LineNumberPanel(), self.PANEL_ZONE_LEFT)
-        self.installPanel(SearchPanel(), self.PANEL_ZONE_BOTTOM)
-        #
-        # # Install modes
-        self.installMode(CodeCompletionMode())
-        self.installMode(RightMarginMode())
-        self.installMode(SyntaxHighlighterMode())
-        self.installMode(HighlightLineMode())
-        self.installMode(EditorZoomMode())
-        self.installMode(AutoIndentMode())
+        self._installPanels()
+
+        # Install modes
+        self._installModes()
 
         self.on_codeEdit_redoAvailable(False)
         self.on_codeEdit_undoAvailable(False)

@@ -12,7 +12,7 @@
 Contains the CodeEdit widget (an extension of the CodeEdit used as a promoted widget by the
 :class:`pcef.core.CodeEditorWidget` ui)
 """
-from PySide.QtGui import QToolTip
+from PySide.QtGui import QToolTip, QTextDocument, QTextBlock
 from PySide.QtCore import Qt
 from PySide.QtCore import Signal
 from PySide.QtCore import QRect
@@ -84,7 +84,7 @@ class TextDecoration(QTextEdit.ExtraSelection):
         self.cursor = cursor
 
     def containsCursor(self, textCursor):
-        assert  isinstance(textCursor, QTextCursor)
+        assert isinstance(textCursor, QTextCursor)
         return self.cursor.selectionStart() <= textCursor.position() < \
             self.cursor.selectionEnd()
 
@@ -258,6 +258,8 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         #: Weakref to the editor
         self.editor = None
 
+        self.__originalText = ""
+
         #: dirty flag
         self.__dirty = False
         #: our custom context menu
@@ -403,6 +405,9 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         cursor.endEditBlock()
         self.setTextCursor(cursor)
 
+    def updateOriginalText(self):
+        self.__originalText = self.toPlainText()
+
     def _onStyleChanged(self):
         """
         Updates widget style when style changed.
@@ -526,12 +531,17 @@ class CodeEdit(QPlainTextEdit, StyledObject):
 
     def __onTextChanged(self):
         """ Sets dirty to true """
-        self.dirty = True
+        if self.toPlainText() != self.__originalText:
+            # self.__originalText = self.toPlainText()
+            self.dirty = True
+        else:
+            self.dirty = False
 
     def setPlainText(self, txt):
         """ Sets the text edit content and emits newTextSet signal.
         :param txt: New text to display
         """
+        self.__originalText = txt
         QPlainTextEdit.setPlainText(self, txt)
         self.newTextSet.emit()
 
@@ -571,7 +581,13 @@ class CodeEdit(QPlainTextEdit, StyledObject):
         :param end: End folding line.
         :param fold: True to fold, False to unfold
         """
+        doc = self.document()
+        assert isinstance(doc, QTextDocument)
         for i in range(start + 1, end):
-            self.document().findBlockByNumber(i).setVisible(not fold)
-            self.update()
+            block = self.document().findBlockByNumber(i)
+            assert isinstance(block, QTextBlock)
+            block.setVisible(not fold)
+            doc.markContentsDirty(block.position(), block.length())
+        self.update()
+        self.viewport().repaint()
         self.__onBlocksChanged()

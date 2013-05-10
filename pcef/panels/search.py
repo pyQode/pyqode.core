@@ -134,22 +134,26 @@ class SearchPanel(Panel):
 
     def showSearchPanel(self):
         """ Shows the search Panel """
+        pos = self.editor.codeEdit.textCursor().position()
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.hide()
         selectedText = self.editor.codeEdit.textCursor().selectedText()
         if selectedText != "":
             self.ui.lineEditSearch.setText(selectedText)
+        self.editor.codeEdit.textCursor().setPosition(pos)
         self.ui.lineEditSearch.setFocus()
 
     def showSearchAndReplacePanel(self):
         """ Shows the search and replace Panel """
+        pos = self.editor.codeEdit.textCursor().position()
         self.show()
         self.ui.widgetSearch.show()
         self.ui.widgetReplace.show()
         selectedText = self.editor.codeEdit.textCursor().selectedText()
         if selectedText != "":
             self.ui.lineEditSearch.setText(selectedText)
+        self.editor.codeEdit.textCursor().setPosition(pos)
         self.ui.lineEditReplace.setFocus()
 
     def __updateUi(self):
@@ -246,8 +250,9 @@ class SearchPanel(Panel):
     @Slot()
     def on_pushButtonClose_clicked(self):
         """ Hides the Panel """
+        self.clearDecorations()
         self.hide()
-        self.ui.lineEditSearch.setText("")
+        self.editor.codeEdit.setFocus()
 
     @Slot(int)
     def on_checkBoxCase_stateChanged(self, state):
@@ -302,7 +307,7 @@ class SearchPanel(Panel):
 
     def __onCursorMoved(self):
         """ (Re)highlights occurrences """
-        if self._processing is False:
+        if self.isVisible() and self._processing is False:
             self.highlightOccurrences(self.ui.lineEditSearch.text())
 
     def selectFirst(self):
@@ -344,9 +349,11 @@ class SearchPanel(Panel):
 
     def clearDecorations(self):
         """ Remove all decorations """
+        pos = self.editor.codeEdit.textCursor().position()
         for deco in self._decorations:
             self.editor.codeEdit.removeDecoration(deco)
         self._decorations[:] = []
+        self.editor.codeEdit.textCursor().setPosition(pos)
 
     def getUserSearchFlag(self):
         """ Returns the user search flag """

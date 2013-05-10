@@ -345,29 +345,13 @@ class SyntaxHighlighterMode(Mode):
     def _onStateChanged(self, state):
         self.highlighter.enabled = state
         if state is True:
-            self.editor.codeEdit.keyReleased.connect(self.__onKeyReleased)
+            self.editor.codeEdit.textSaved.connect(self.__onTextSaved)
         else:
-            self.editor.codeEdit.keyReleased.disconnect(self.__onKeyReleased)
+            self.editor.codeEdit.textSaved.disconnect(self.__onTextSaved)
         self.highlighter.rehighlight()
 
-    def __onKeyReleased(self, event):
-        txt = self.editor.codeEdit.textCursor().block().text()
-        if event.key() == Qt.Key_Backspace:
-            for trigger in self.triggers:
-                if trigger in txt or trigger in self.prev_txt:
-                    self.highlighter.rehighlight()
-                    break
-        # Search for a triggering key
-        else:
-            try:
-                txt = chr(event.key())
-                for trigger in self.triggers:
-                    if trigger in txt:
-                        self.highlighter.rehighlight()
-                        break
-            except ValueError:
-                pass  # probably a function key (arrow,...)
-        self.prev_txt = txt
+    def __onTextSaved(self):
+        self.highlighter.rehighlight()
 
     def _onStyleChanged(self):
         """ Updates the pygments style """

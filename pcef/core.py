@@ -135,7 +135,8 @@ class Mode(EditorExtension):
         EditorExtension.__init__(self, name, description)
 
     def _onStyleChanged(self):
-        pass  # not all modes need styling, don't force them to implement something they don't need
+        pass  # not all modes need styling, don't force them to implement
+              # something they don't need
 
 
 class Panel(QWidget, EditorExtension):
@@ -305,6 +306,11 @@ class CodeEditorWidget(QWidget, StyledObject):
         mode.install(self)
         mode.currentStyle = self.currentStyle
         mode.enabled = True
+
+    def uninstallMode(self, id):
+        m = self.__modes[id]
+        self.__modes.pop(id, None)
+        m.uninstall()
 
     def installPanel(self, panel, zone):
         """ Installs a Panel on the widget.

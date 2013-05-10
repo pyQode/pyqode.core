@@ -17,6 +17,11 @@ import time
 from pcef.core import Mode
 
 
+WORD_SEPARATORS = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                   '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",
+                   ".", "/", ";", '[', ']', '\\', '\n', '\t', '=', '-', ' ', '']
+
+
 class Suggestion(object):
     """
     Represent a suggestion in the completion list. A suggestion is made up of
@@ -122,10 +127,7 @@ class DocumentWordsCompletionModel(CompletionModel):
         :param encoding: the document encoding if any
         """
         words = self.split(
-            source_code, ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
-                          '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",
-                          ".", "/", ";", '[', ']', '\\', '\n', '\t', '-', '=',
-                          ' '])
+            source_code, WORD_SEPARATORS)
         self._suggestions[:] = []
         for w in words:
             self._suggestions.append(
@@ -400,7 +402,20 @@ class CodeCompletionMode(Mode):
         Returns the word under the cursor
         """
         tc = self.editor.codeEdit.textCursor()
-        tc.movePosition(QTextCursor.StartOfWord, QTextCursor.KeepAnchor)
+        original_pos = pos = tc.position()
+        space_found = False
+        how_many = 0
+        while not space_found and pos != 0:
+            tc.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
+            tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)
+            ch = tc.selectedText()[0]
+            if tc.selectedText() in WORD_SEPARATORS or ch.isspace():
+                space_found = True
+            how_many += 1
+            pos = tc.position()
+            tc.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
+        tc.setPosition(original_pos)
+        tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, how_many)
         selectedText = tc.selectedText()
         tokens = selectedText.split('.')
         wuc = tokens[len(tokens) - 1]
