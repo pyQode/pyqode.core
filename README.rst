@@ -1,6 +1,8 @@
 PySide Code Editing Framework
 =====================================
 
+*version 0.2.0*
+
 PCEF is code editing framework for PySide applications. It provides a flexible code editor that you can just drop in any PySide
 applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
 
@@ -30,7 +32,8 @@ Here are the python specific features:
 * accurate code completion using **Jedi**
 * calltips (using Jedi too)
 * on the fly syntax checking (pylint + pyflakes + pep8)
-
+* smart indentation mode
+* code folding mode
 
 License
 ---------
@@ -61,7 +64,7 @@ Resources
 
 * Source repository: https://github.com/ColinDuquesnoy/PCEF/
 * Documentation: http://packages.python.org/PCEF
-* Package repository: http://pypi.python.org/pypi/PCEF/0.1.0
+* Package repository: http://pypi.python.org/pypi/PCEF/
 
 
 Usage
@@ -78,7 +81,7 @@ Here is a simple example::
     from PySide.QtGui import QMainWindow
 
     from pcef import openFileInEditor
-    from pcef.editors import GenericEditor
+    from pcef.editors.python import PythonEditor
 
 
     def main():
@@ -86,7 +89,7 @@ Here is a simple example::
         # create qt objects (app, window and our editor)
         app = QApplication(sys.argv)
         window = QMainWindow()
-        editor = GenericEditor()
+        editor = PythonEditor()
         window.setCentralWidget(editor)
 
         # open a file
@@ -94,7 +97,7 @@ Here is a simple example::
 
         # run
         window.show()
-        sys.exit(app.exec_())
+        app.exec_()
 
 
     if __name__ == "__main__":
