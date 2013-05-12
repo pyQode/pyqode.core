@@ -17,7 +17,7 @@ import sys
 import logging
 
 # PCEF version
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # create logger with 'spam_application'
 module_logger = logging.getLogger(__name__)
