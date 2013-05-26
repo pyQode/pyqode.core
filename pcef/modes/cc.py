@@ -551,7 +551,6 @@ class CodeCompletionMode(Mode):
         """
         Updates the completer model and show the popup
         """
-        print request.completionPrefix
         self.__active_thread_count -= 1
         # is the request still up to date ?
         if request.completionPrefix == self._textUnderCursor():
