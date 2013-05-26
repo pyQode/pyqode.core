@@ -8,80 +8,73 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""An easy to use and easy to customise full featured code editor for PySide
-applications.
-
-This module contains helper functions for the end user.
 """
-import sys
-import logging
+PCEF is a code editor framework for python qt applications.
+"""
+import os
 
-# PCEF version
-__version__ = "0.2.2"
-
-# create logger with 'spam_application'
-module_logger = logging.getLogger(__name__)
-module_logger.setLevel(logging.DEBUG)
-# create console handler with a higher log level
-ch = logging.StreamHandler("")
-ch.name = "pcef"
-ch.setLevel(logging.ERROR)
-# create formatter and add it to the handlers
-formatter = logging.Formatter('%(levelname)s <%(name)s>: %(message)s')
-ch.setFormatter(formatter)
-# add the handlers to the logger
-module_logger.info("#" * 80)
-module_logger.info("PCEF v{0}".format(__version__))
-module_logger.addHandler(ch)
+#
+# PCEF VERSION
+#
+__version__ = "0.3.0-dev"
 
 
-def openFileInEditor(editor, filename, encoding=sys.getfilesystemencoding(),
-                     replaceTabsBySpaces=True):
+#
+# configure and exposes qt
+#
+from pcef import qt
+from qt import QtCore
+from qt import QtGui
+qt_api = os.environ["QT_API"]
+print qt_api
+
+
+#
+# Detect features support
+#
+try:
+    from pcef import python
+    python_support = True
+except ImportError:
+    python_support = False
+    pass  # python not supported
+
+
+#
+# Public api
+#
+# -- Core
+from pcef import core
+from core.editor import QCodeEdit
+from core.extension import Extension
+from core.panel import Panel, PanelPosition
+from core.panels import LineNumberPanel
+#from core.panel import Mode
+# -- Python if python if installed
+if python_support:
+    pass
+
+
+#
+# Utility functions to get pre-configured editors
+#
+def genericEditor():
     """
-    Open a file in an editor
+    Gets a pre-configured generic editor.
 
-    :param editor: Editor instance where the file content will be displayed
+    **Panels:**
+        * line number panel
+        * search and replace panel
 
-    :param filename: Filename of the file to open
+    **Modes:**
+        * document word completion
+        * generic syntax highlighter (pygments)
+        *
 
-    :param encoding: Encoding to use to load the file
-
-    :param replaceTabsBySpaces: True to replace tabs by spaces
+    :rtype: pcef.QCodeEdit
     """
-    with open(filename, 'r') as f:
-        content = unicode(f.read().decode(encoding))
-    if replaceTabsBySpaces:
-        content = content.replace("\t", " " * editor.TAB_SIZE)
-    editor.codeEdit.tagFilename = filename
-    editor.codeEdit.tagEncoding = encoding
-
-    editor.syntaxHighlightingMode.setLexerFromFilename(filename)
-    editor.codeEdit.setPlainText(content)
-    editor.ui.codeEdit.dirty = False
-    module_logger.info(u"File opened: {0}".format(filename))
-
-
-def saveFileFromEditor(editor, filename=None,
-                       encoding=sys.getfilesystemencoding()):
-    """
-    Save the editor content to a file
-
-    :param editor: Editor instance
-
-    :param filename: The filename to save. If none the editor filename attribute is used.
-
-    :param encoding: The save encoding
-    """
-    if filename is None:
-        filename = editor.codeEdit.tagFilename
-    if encoding is None:
-        encoding = editor.codeEdit.tagEncoding
-    content = unicode(editor.codeEdit.toPlainText()).encode(encoding)
-    with open(filename, "w") as f:
-        f.write(content)
-    editor.codeEdit.updateOriginalText()
-    editor.codeEdit.dirty = False
-    editor.codeEdit.tagFilename = filename
-    editor.codeEdit.tagEncoding = encoding
-    editor.codeEdit.textSaved.emit(filename)
-    module_logger.info(u"File saved: {0}".format(filename))
+    editor = QCodeEdit()
+    editor.setLineWrapMode(QCodeEdit.NoWrap)
+    editor.setWindowTitle("PCEF - Generic Editor")
+    editor.installPanel(LineNumberPanel(), PanelPosition.LEFT)
+    return editor

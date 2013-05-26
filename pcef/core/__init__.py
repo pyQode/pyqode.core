@@ -9,8 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains the core panels (language independant)
+This package contains the core class of pcef
 """
-from line_number import LineNumberPanel
-
-
+from pcef.core import panels
+from pcef.core import modes
