@@ -11,8 +11,7 @@
 """
 Contains the python code folder mode.
 """
-import weakref
-from modes.python import analyser
+from pcef.modes.python import analyser
 from pcef.core import Mode
 from pcef.panels.folding import FoldPanel
 
@@ -40,11 +39,11 @@ class PyFolderMode(Mode):
         Called when the mode is activated/deactivated
         """
         if state:
-            self.editor.codeEdit.textChanged.connect(
+            self.editor.codeEdit.blockCountChanged.connect(
                 self.__onTextChanged)
             self.editor.codeEdit.newTextSet.connect(self.__onTextChanged)
         else:
-            self.editor.codeEdit.textChanged.disconnect(
+            self.editor.codeEdit.blockCountChanged.disconnect(
                 self.__onTextChanged)
             self.editor.codeEdit.newTextSet.disconnect(self.__onTextChanged)
 
@@ -54,15 +53,13 @@ class PyFolderMode(Mode):
         the PyDocAnalyser
         :return:
         """
-        lines = self.editor.codeEdit.toPlainText().splitlines()
-        if len(lines) != self.__nbLines:
-            try:
-                foldPanel = self.editor.foldPanel
-            except KeyError:
-                return
-            assert isinstance(foldPanel, FoldPanel)
-            foldPanel.clearIndicators()
-            root_node = analyser.parse(self.editor.codeEdit.toPlainText())
-            for start, end in get_markers(root_node):
-                foldPanel.addIndicator(start, end)
+        try:
+            foldPanel = self.editor.foldPanel
+        except KeyError:
+            return
+        assert isinstance(foldPanel, FoldPanel)
+        foldPanel.clearIndicators()
+        root_node = analyser.parse(self.editor.codeEdit.toPlainText())
+        for start, end in get_markers(root_node):
+            foldPanel.addIndicator(start, end)
 

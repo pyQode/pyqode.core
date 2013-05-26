@@ -97,20 +97,23 @@ def parse(source_code):
             node_type = DocumentNodeType.CLASS
             if line.strip().startswith("def"):
                 node_type = DocumentNodeType.FUNCTION
-            n = DocumentNode(line.lstrip().split(" ")[1].split("(")[0],
-                             node_type)
-            n.indentation_level = indent_lvl
-            n.start = i + 1
-            if indent_lvl < prev_indent_level:
-                last_node = last_node.parent
-                if not last_node:
-                    last_node = root
-                last_node.add_child(n)
-            elif indent_lvl > prev_indent_level:
-                last_node = last_node.children[len(last_node.children)-1]
-                last_node.add_child(n)
-            else:
-                last_node.add_child(n)
-            prev_indent_level = indent_lvl
+            try:
+                n = DocumentNode(line.lstrip().split(" ")[1].split("(")[0],
+                                 node_type)
+                n.indentation_level = indent_lvl
+                n.start = i + 1
+                if indent_lvl < prev_indent_level:
+                    last_node = last_node.parent
+                    if not last_node:
+                        last_node = root
+                    last_node.add_child(n)
+                elif indent_lvl > prev_indent_level:
+                    last_node = last_node.children[len(last_node.children)-1]
+                    last_node.add_child(n)
+                else:
+                    last_node.add_child(n)
+                prev_indent_level = indent_lvl
+            except IndexError:
+                pass
     root.finalize(lines)
     return root

@@ -11,7 +11,7 @@
 from collections import deque
 from PySide.QtCore import Qt, Slot, QThread, Signal, QObject, QRunnable, QThreadPool, QMutex, QTimer
 from PySide.QtGui import QStandardItemModel, QStandardItem, QCompleter, \
-    QTextCursor, QIcon, QToolTip
+    QTextCursor, QIcon, QToolTip, QAbstractItemView
 import time
 
 from pcef.core import Mode
@@ -250,7 +250,7 @@ class CodeCompletionMode(Mode):
         self.__completer.activated.connect(self._insertCompletion)
         self.__prev_txt_len = 0
         #: List of completion models
-        self._models = [DocumentWordsCompletionModel()]
+        self._models = []
         self.__tooltips = {}
 
     def __del__(self):
@@ -397,10 +397,7 @@ class CodeCompletionMode(Mode):
             if event.key() == self.triggerKey:
                 event.stop = True
 
-    def _textUnderCursor(self):
-        """
-        Returns the word under the cursor
-        """
+    def selectWordUnderCursor(self):
         tc = self.editor.codeEdit.textCursor()
         original_pos = pos = tc.position()
         space_found = False
@@ -416,6 +413,13 @@ class CodeCompletionMode(Mode):
             tc.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
         tc.setPosition(original_pos)
         tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, how_many)
+        return tc
+
+    def _textUnderCursor(self):
+        """
+        Returns the word under the cursor
+        """
+        tc = self.selectWordUnderCursor()
         selectedText = tc.selectedText()
         tokens = selectedText.split('.')
         wuc = tokens[len(tokens) - 1]
@@ -556,14 +560,15 @@ class CodeCompletionMode(Mode):
                     request.completionPrefix)
                 if cptSuggestion > 1:
                     self.__completer.setModel(cc_model)
+                    self.__cc_model = cc_model
                     self._showCompletions(request.completionPrefix)
                 else:
                     self._hideCompletions()
             else:
                 # only adapt completion prefix, the completer is already visible
                 self.__completer.setCompletionPrefix(request.completionPrefix)
-                self.__completer.popup().setCurrentIndex(
-                    self.__completer.completionModel().index(0, 0))
+                idx = self.__completer.completionModel().index(0, 0)
+                self.__completer.popup().setCurrentIndex(idx)
                 if self.__completer.currentCompletion() == "" or \
                         self.__completer.currentCompletion() == \
                         request.completionPrefix:
@@ -607,8 +612,6 @@ class CodeCompletionMode(Mode):
         offset = 0
         if len(self._textUnderCursor()) > 1:
             offset = 1
-        tc = self.editor.codeEdit.textCursor()
-        tc.setPosition(tc.position() - offset)
-        tc.select(QTextCursor.WordUnderCursor)
+        tc = self.selectWordUnderCursor()
         tc.insertText(completion)
         self.editor.codeEdit.setTextCursor(tc)
