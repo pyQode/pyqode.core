@@ -1,4 +1,4 @@
-.. PCEF - PySide Code Editing framework
+.. PCEF - Python/Qt Code Editing Framework
 .. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 
 .. This document is released under the LGPLv3 license.
