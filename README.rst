@@ -1,7 +1,9 @@
 PySide Code Editing Framework
 =====================================
 
-*version 0.2.0*
+*version 1.0.0-dev*
+
+**WARNING: The library is being massively refactorised/rewritten and is not usable for now**
 
 PCEF is code editing framework for PySide applications. It provides a flexible code editor that you can just drop in any PySide
 applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
