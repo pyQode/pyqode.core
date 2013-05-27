@@ -9,14 +9,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This module contains the definition of the Extension class
+This module contains the definition of the Mode class
 """
 import weakref
 
 
-class Extension(object):
+class Mode(object):
     """
-    Base class for editor extension. An extension is a "thing" that can be
+    Base class for editor extension/mode. An extension is a "thing" that can be
     installed on the QCodeEdit to add new behaviours.
 
     An extension is added to a QCodeEdit by using the addMode or addPanel
@@ -31,7 +31,7 @@ class Extension(object):
         """
         Provides easy access to the CodeEditorWidget weakref
 
-        :return: pcef.QCodeEdit
+        :rtype: pcef.QCodeEdit
         """
         if self.__editor is not None:
             return self.__editor()
@@ -60,15 +60,15 @@ class Extension(object):
         """
         Creates the extension.
 
-        :param name: Extension name (used as an identifier)
+        :param name: Mode name (used as an identifier)
 
         :param description: A description of the extension
         """
-        #: Extension name
+        #: Mode name
         self.name = name
-        #: Extension description
+        #: Mode description
         self.description = description
-        #: Extension enables state (subclasses must implement onStateChanged to
+        #: Mode enables state (subclasses must implement onStateChanged to
         #  disconnect their slots to disable any actions)
         self.__enabled = False
         #: Editor instance
@@ -95,7 +95,7 @@ class Extension(object):
         """
         self.__editor = weakref.ref(editor)
         self.enabled = True
-        self.onStyleChanged()
+        editor.style.propertyChanged.connect(self.onStyleChanged)
 
     def uninstall(self):
         """
@@ -116,8 +116,8 @@ class Extension(object):
         """
         raise NotImplementedError()
 
-    def onStyleChanged(self):
+    def onStyleChanged(self, section, key, value):
         """
-        Called when the editor style changed. Does nothing bty default.
+        Automatically called when a style property changed
         """
         pass
