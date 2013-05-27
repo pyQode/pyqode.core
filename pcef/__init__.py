@@ -46,11 +46,13 @@ except ImportError:
 # -- Core
 from pcef import core
 from core.editor import QCodeEdit
-from core.extension import Extension
-from core.panel import Panel, PanelPosition
+from core.mode import Mode
+from core.panel import Panel
+from core.constants import PanelPosition
 from core.panels import LineNumberPanel
-#from core.panel import Mode
-# -- Python if python if installed
+from core.properties import PropertyRegistry
+from core.utils import findSettingsDirectory
+# -- Python if python is installed
 if python_support:
     pass
 

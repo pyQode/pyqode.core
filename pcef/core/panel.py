@@ -9,37 +9,37 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This module contains the definition of a panel extension
+This module contains the definition of a panel mode
 """
 import pcef
-from pcef.core.extension import Extension
+from pcef.core.mode import Mode
 
 
-class PanelPosition:
+class Panel(pcef.QtGui.QWidget, Mode):
     """
-    Enumerate the possible panel positions
-    """
-    #
-    # Panel positions
-    TOP = 0  # top margin
-    LEFT = 1  # left margin
-    RIGHT = 2  # right margin
-    BOTTOM = 3  # bottom margin
+    Base class for editor panels.
 
+    A panel is a mode and a widget.
 
-class Panel(pcef.QtGui.QWidget, Extension):
+    Panels are drawn in the QCodeEdit viewport margins.
     """
-    Base class for editor Panel widgets.
-
-    A Panel is a QWidget and :class:`pcef.Extension` that can be installed
-    around the text edit widget (in the document margin).
-    """
-    def __init__(self, name, description, parent):
-        pcef.Extension.__init__(self, name, description)
-        pcef.QtGui.QWidget.__init__(self, parent)
+    def __init__(self, name, description):
+        """
+        :param name: Panel name (used as an identifier)
+        :param description: The panel description
+        :return:
+        """
+        pcef.Mode.__init__(self, name, description)
+        pcef.QtGui.QWidget.__init__(self)
 
     def install(self, editor):
-        Extension.install(self, editor)
+        """
+        Extends the Mode.install method to set the editor instance
+        as the parent widget.
+
+        :param editor: QCodeEdit instance
+        """
+        Mode.install(self, editor)
         self.setParent(editor)
 
     def onStateChanged(self, state):
@@ -48,7 +48,6 @@ class Panel(pcef.QtGui.QWidget, Extension):
         :param state: True = enabled, False = disabled
         :type state: bool
         """
-        print "On state changed"
         if state is True:
             self.show()
         else:

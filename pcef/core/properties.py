@@ -33,9 +33,10 @@ class PropertyRegistry(pcef.QtCore.QObject):
     #: Signal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
-    valueChanged = pcef.QtCore.Signal(str, str, str)
+    propertyChanged = pcef.QtCore.Signal(str, str, str)
 
     def __init__(self):
+        pcef.QtCore.QObject.__init__(self)
         self.__dict = {"General": {}}
 
     def addProperty(self, key, value, section="General"):
@@ -93,4 +94,34 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
         :return: str
         """
-        return json.dumps(self.__dict, indent=DEFAULT_TAB_SIZE)
+        return json.dumps(self.__dict, indent=DEFAULT_TAB_SIZE, sort_keys=True)
+
+    def load(self, data):
+        """
+        Loads the registry from a json data buffer.
+
+        :param data: Json data string
+        """
+        self.__dict = json.loads(data)
+
+    def open(self, filepath):
+        """
+        Opens the file and loads its data
+
+        :param filepath: Path to the property registry JSON file.
+        """
+        with open(filepath, 'r') as f:
+            self.load(f.read())
+        for section in self.__dict:
+            for key in self.__dict[section]:
+                self.propertyChanged.emit(
+                    section, key, self.__dict[section][key])
+
+    def save(self, filepath):
+        """
+        Save the registry to a json file.
+
+        :param filepath: Save path
+        """
+        with open(filepath, 'w') as f:
+            f.write(self.dump())

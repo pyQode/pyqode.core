@@ -1,18 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-# PCEF - PySide Code Editing framework
-# Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
-#
-# This software is released under the LGPLv3 license.
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+
 """
 This module contains the definition of the QCodeEdit
 """
 import pcef
-from pcef.core.panel import PanelPosition
+from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
+from pcef.core.constants import DEFAULT_FONT
+from pcef.core.constants import DEFAULT_FONT_SIZE
+from pcef.core.constants import DEFAULT_TAB_SIZE
+from pcef.core.properties import PropertyRegistry
 
 
 class QCodeEdit(pcef.QtGui.QPlainTextEdit):
@@ -38,14 +33,50 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     (more about this topic in the style section)
     """
 
+    @property
+    def cursorPosition(self):
+        """
+        Returns the text cursor position (line, column)
+
+        :return: The cursor position (line, column)
+        :rtype: tuple(int, int)
+        """
+        return (self.textCursor().blockNumber() + 1,
+                self.textCursor().columnNumber())
+
+    @property
+    def filename(self):
+        return self.filename
+
+    @property
+    def encoding(self):
+        return self.__encoding
+
     def __init__(self, parent=None):
         pcef.QtGui.QPlainTextEdit.__init__(self, parent)
         self.__modes = {}
-        self.__panels = {pcef.PanelPosition.TOP: {},
-                         pcef.PanelPosition.LEFT: {},
-                         pcef.PanelPosition.RIGHT: {},
-                         pcef.PanelPosition.BOTTOM: {}}
-        self.__style = {}
+        self.__panels = {PanelPosition.TOP: {},
+                         PanelPosition.LEFT: {},
+                         PanelPosition.RIGHT: {},
+                         PanelPosition.BOTTOM: {}}
+
+        self.settings = PropertyRegistry()
+        self.settings.propertyChanged.connect(self.onSettingsChanged)
+        self.settings.addProperty("showWhiteSpaces", True)
+        self.settings.addProperty("tabSpace", DEFAULT_TAB_SIZE)
+
+        self.style = PropertyRegistry()
+        self.style.propertyChanged.connect(self.onStyleChanged)
+        self.style.addProperty("font", DEFAULT_FONT)
+        self.style.addProperty("fontSize", DEFAULT_FONT_SIZE)
+        self.style.addProperty("background", "#FFFFFF")
+        self.style.addProperty("foreground", "#000000")
+        self.style.addProperty("selectionBackground", "#6182F3")
+        self.style.addProperty("selectionForeground", "#ffffff")
+
+        # setup style
+        self.onStyleChanged("", "", "")
+
         self.__filename = ""
         self.__encoding = ""
 
@@ -79,6 +110,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         Gets a mode by name
 
         :param name: The name of the mode to get
+        :type name: str
 
         :rtype: pcef.Mode or None
         """
@@ -169,3 +201,23 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         for panel in self.__panels[PanelPosition.BOTTOM].values():
             bottom += panel.sizeHint().height()
         self.setViewportMargins(left, top, right, bottom)
+
+    def onStyleChanged(self, section, key, value):
+        """
+        Resets stylesheet.
+
+        :param section:
+        :param key:
+        :param value:
+        """
+        stylesheet = CODE_EDIT_STYLESHEET % {
+            "background": self.style.value("background"),
+            "foreground": self.style.value("foreground"),
+            "selectionBackground": self.style.value("selectionBackground"),
+            "selectionForeground": self.style.value("selectionForeground")}
+        self.setStyleSheet(stylesheet)
+        self.setFont(pcef.QtGui.QFont(self.style.value("font"),
+                                      int(self.style.value("fontSize"))))
+
+    def onSettingsChanged(self, section, key, value):
+        pass

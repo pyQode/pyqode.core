@@ -16,8 +16,25 @@ from pcef.core.panel import Panel
 
 
 class LineNumberPanel(Panel):
-    def __init__(self, parent=None):
-        Panel.__init__(self, "LineNumberPanel", "Display line number", parent)
+    def __init__(self):
+        Panel.__init__(self, "LineNumberPanel", "Display line number")
+
+    def install(self, editor):
+        Panel.install(self, editor)
+        bck = self.editor.style.addProperty("background", "#dddddd",
+                                      "LineNumberArea")
+        fore = self.editor.style.addProperty("foreground", "#888888",
+                                      "LineNumberArea")
+        self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(bck))
+        self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(fore))
+
+    def onStyleChanged(self, section, key, value):
+        if section == "LineNumberArea" and key == "background":
+            self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
+            self.editor.repaint()
+        elif section == "LineNumberArea" and key == "foreground":
+            self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
+            self.editor.repaint()
 
     def onStateChanged(self, state):
         """
@@ -39,7 +56,7 @@ class LineNumberPanel(Panel):
             self.editor.updateViewportMargins()
 
     def sizeHint(self):
-        return pcef.QtCore.QSize(self.lineNumberAreaWidth(), 50)
+        return pcef.QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
 
     def lineNumberAreaWidth(self):
         digits = 1
@@ -52,19 +69,28 @@ class LineNumberPanel(Panel):
 
     def paintEvent(self, event):
         painter = pcef.QtGui.QPainter(self)
-        painter.fillRect(event.rect(), pcef.QtCore.Qt.lightGray)
+        painter.fillRect(event.rect(), self.__brush)
         block = self.editor.firstVisibleBlock()
         blockNumber = block.blockNumber()
         top = int(self.editor.blockBoundingGeometry(block).translated(
             self.editor.contentOffset()).top())
         bottom = top + int(self.editor.blockBoundingRect(block).height())
+        font = self.editor.font()
+        bold_font = pcef.QtGui.QFont(font)
+        bold_font.setBold(True)
+        l, c = self.editor.cursorPosition
+        width = self.width()
+        height = self.editor.fontMetrics().height()
+
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(pcef.QtCore.Qt.black)
-                painter.setFont(self.editor.font())
-                painter.drawText(0, top, self.width(),
-                                 self.editor.fontMetrics().height(),
+                painter.setPen(self.__pen)
+                if blockNumber + 1 == l:
+                    painter.setFont(bold_font)
+                else:
+                    painter.setFont(font)
+                painter.drawText(0, top, width, height,
                                  pcef.QtCore.Qt.AlignRight, number)
             block = block.next()
             top = bottom
