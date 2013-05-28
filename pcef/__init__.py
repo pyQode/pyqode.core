@@ -42,13 +42,14 @@ except ImportError:
 #
 # Public api
 #
+from pcef import exceptions
 # -- Core
 from pcef import core
 from core import genericEditor
 from core.editor import QCodeEdit
 from core.mode import Mode
 from core.panel import Panel
-from core.constants import PanelPosition
+from constants import PanelPosition
 from core.panels import LineNumberPanel
 from core.properties import PropertyRegistry
 from core import utils
