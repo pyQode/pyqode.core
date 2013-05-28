@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Contains the core exceptions classes
+Contains all pcef exceptions
 """
 
 
