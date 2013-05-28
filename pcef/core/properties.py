@@ -13,7 +13,7 @@ This module contains the definition of the QCodeEdit settings
 """
 import json
 import pcef
-from pcef.core.constants import DEFAULT_TAB_SIZE
+from constants import TAB_SIZE
 
 
 class PropertyRegistry(pcef.QtCore.QObject):
@@ -94,7 +94,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
         :return: str
         """
-        return json.dumps(self.__dict, indent=DEFAULT_TAB_SIZE, sort_keys=True)
+        return json.dumps(self.__dict, indent=TAB_SIZE, sort_keys=True)
 
     def load(self, data):
         """

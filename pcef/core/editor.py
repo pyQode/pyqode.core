@@ -3,8 +3,8 @@
 This module contains the definition of the QCodeEdit
 """
 import pcef
-from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
-from pcef.core import constants
+from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
+from pcef import constants
 from pcef.core.properties import PropertyRegistry
 
 
@@ -61,7 +61,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.settings = PropertyRegistry()
         self.settings.valueChanged.connect(self.onSettingsChanged)
         self.settings.addProperty("showWhiteSpaces", True)
-        self.settings.addProperty("tabSpace", constants.DEFAULT_TAB_SIZE)
+        self.settings.addProperty("tabSpace", constants.TAB_SIZE)
 
         self.style = PropertyRegistry()
         self.style.valueChanged.connect(self.onStyleChanged)

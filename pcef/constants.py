@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This module holds most of the PCEF constants (enumerations, defines,...)
+This module holds all the PCEF constants (enumerations, defines,...)
 """
 import sys
 
@@ -47,7 +47,7 @@ LINE_NBR_FOREGROUND = "#888888"
 # Default settings value
 #
 #: Default tab size
-DEFAULT_TAB_SIZE = 4
+TAB_SIZE = 4
 
 
 #
