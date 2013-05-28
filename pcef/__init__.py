@@ -16,7 +16,7 @@ import os
 #
 # PCEF VERSION
 #
-__version__ = "0.3.0-dev"
+__version__ = "1.0.0-dev"
 
 
 #
@@ -26,7 +26,6 @@ from pcef import qt
 from qt import QtCore
 from qt import QtGui
 qt_api = os.environ["QT_API"]
-print qt_api
 
 
 #
@@ -51,7 +50,7 @@ from core.panel import Panel
 from core.constants import PanelPosition
 from core.panels import LineNumberPanel
 from core.properties import PropertyRegistry
-from core.utils import findSettingsDirectory
+from core import utils
 # -- Python if python is installed
 if python_support:
     pass

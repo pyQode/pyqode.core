@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -9,14 +9,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This script allow to execute the generic example without actually installing it.
+This package examples related to the choice of the underlying qt bindings.
 """
-from examples import generic_example
 
-
-def main():
-    generic_example.main()
-
-
-if __name__ == "__main__":
-    main()

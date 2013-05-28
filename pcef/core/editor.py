@@ -61,12 +61,12 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                          PanelPosition.BOTTOM: {}}
 
         self.settings = PropertyRegistry()
-        self.settings.propertyChanged.connect(self.onSettingsChanged)
+        self.settings.valueChanged.connect(self.onSettingsChanged)
         self.settings.addProperty("showWhiteSpaces", True)
         self.settings.addProperty("tabSpace", DEFAULT_TAB_SIZE)
 
         self.style = PropertyRegistry()
-        self.style.propertyChanged.connect(self.onStyleChanged)
+        self.style.valueChanged.connect(self.onStyleChanged)
         self.style.addProperty("font", DEFAULT_FONT)
         self.style.addProperty("fontSize", DEFAULT_FONT_SIZE)
         self.style.addProperty("background", "#FFFFFF")

@@ -9,6 +9,7 @@
 
 from PySide import QtCore, QtGui
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -105,4 +106,3 @@ class Ui_MainWindow(object):
         self.actionModes_2.setText(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
 
 from pcef.editors.python import PythonEditor
-import examples_rc

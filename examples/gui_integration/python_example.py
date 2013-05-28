@@ -8,10 +8,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ PCEF generic editor demo """
-import logging
-logging.basicConfig()
 import sys
-
+print "OUTDATED"
+sys.exit(-1)
 from PySide.QtCore import Slot
 from PySide.QtGui import QAction
 from PySide.QtGui import QActionGroup
@@ -22,12 +21,10 @@ from PySide.QtGui import QMainWindow
 from pcef import openFileInEditor
 from pcef import saveFileFromEditor
 from pcef import styles
-from pcef.panels.misc import UserMarkersPanel
-
-from examples.ui import simple_editor_ui
+from examples.gui_integration.ui import simple_python_editor_ui
 
 
-class SimpleEditor(QMainWindow):
+class GenericPythonEditor(QMainWindow):
     """
     A simple editor window that can open/save files.
 
@@ -37,25 +34,18 @@ class SimpleEditor(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        # setup ui (the pcef GenericEditor is created there using
+        # setup ui (the pcef PythonEditor is created in the Ui_MainWindow using
         # the promoted widgets system)
-        self.ui = simple_editor_ui.Ui_MainWindow()
+        self.ui = simple_python_editor_ui.Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("PCEF - Generic Example")
-        editor = self.ui.genericEditor
+        self.setWindowTitle("PCEF - Python Editor Example")
+        self.acceptDrops()
 
         # open this file
         try:
             openFileInEditor(self.ui.genericEditor, __file__)
         except:
             pass
-
-        # install Panel where user can add its own markers
-        p = UserMarkersPanel()
-        editor.installPanel(p, editor.PANEL_ZONE_LEFT)
-
-        # add a fold indicator around our class and the main
-        editor.foldPanel.addIndicator(136, 141)
 
         # add styles actions
         allStyles = styles.getAllStyles()
@@ -111,13 +101,16 @@ class SimpleEditor(QMainWindow):
     def on_styleActionGroup_triggered(self, action):
         """ Change current editor style """
         self.ui.genericEditor.currentStyle = styles.getStyle(action.text())
+        print "change style"
         stylesheet = ""
         if action.text() == "Dark":
             try:
                 import qdarkstyle
                 stylesheet = qdarkstyle.load_stylesheet()
             except ImportError:
-                print "Failed to use the qdarkstyle. Please execute <pip install qdarkstyle> to fully use this theme."
+                print("Failed to use the qdarkstyle. "
+                      "Please execute <pip install qdarkstyle> to fully use "
+                      "this theme.")
         QApplication.instance().setStyleSheet(stylesheet)
 
     @Slot()
@@ -135,7 +128,8 @@ class SimpleEditor(QMainWindow):
     @Slot()
     def on_actionOpen_triggered(self):
         """ Open a new file in the editor """
-        filename = QFileDialog.getOpenFileName(self)[0]
+        filename = QFileDialog.getOpenFileName(
+            self, "Choose a python script", "", "Python script (*.py)")[0]
         if filename != "":
             openFileInEditor(self.ui.genericEditor, filename)
 
@@ -143,7 +137,7 @@ class SimpleEditor(QMainWindow):
 def main():
     """ Application entry point """
     app = QApplication(sys.argv)
-    window = SimpleEditor()
+    window = GenericPythonEditor()
     window.show()
     app.exec_()
 

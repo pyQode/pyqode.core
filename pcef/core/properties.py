@@ -33,7 +33,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
     #: Signal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
-    propertyChanged = pcef.QtCore.Signal(str, str, str)
+    valueChanged = pcef.QtCore.Signal(str, str, str)
 
     def __init__(self):
         pcef.QtCore.QObject.__init__(self)
@@ -114,7 +114,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
             self.load(f.read())
         for section in self.__dict:
             for key in self.__dict[section]:
-                self.propertyChanged.emit(
+                self.valueChanged.emit(
                     section, key, self.__dict[section][key])
 
     def save(self, filepath):

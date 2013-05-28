@@ -95,7 +95,7 @@ class Mode(object):
         """
         self.__editor = weakref.ref(editor)
         self.enabled = True
-        editor.style.propertyChanged.connect(self.onStyleChanged)
+        editor.style.valueChanged.connect(self.onStyleChanged)
 
     def uninstall(self):
         """
