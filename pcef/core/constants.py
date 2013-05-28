@@ -13,18 +13,17 @@ This module holds most of the PCEF constants (enumerations, defines,...)
 """
 import sys
 
-
 #
 # Default style values
 #
 #: Default editor font (monospace on GNU/Linux, Courier New on windows)
-DEFAULT_FONT = "monospace"
+FONT = "monospace"
 if sys.platform == "win32":
-    DEFAULT_FONT = "Consolas"
+    FONT = "Consolas"
 elif sys.platform == "darwin":
-    DEFAULT_FONT = "Monaco"
+    FONT = "Monaco"
 #: Default editor font size
-DEFAULT_FONT_SIZE = 10
+FONT_SIZE = 10
 #: Editor stylesheet
 CODE_EDIT_STYLESHEET = """QCodeEdit
 {
@@ -36,7 +35,13 @@ CODE_EDIT_STYLESHEET = """QCodeEdit
     border-radius: 0px;
 }
 """
-
+# Colors
+EDITOR_BACKGROUND = "#FFFFFF"
+EDITOR_FOREGROUND = "#000000"
+SELECTION_BACKGROUND = "#6182F3"
+SELECTION_FOREGROUND = "#ffffff"
+LINE_NBR_BACKGROUND = "#dddddd"
+LINE_NBR_FOREGROUND = "#888888"
 
 #
 # Default settings value
@@ -52,10 +57,12 @@ class PanelPosition:
     """
     Enumerate the possible panel positions
     """
-    #
-    # Panel positions
-    TOP = 0  # top margin
-    LEFT = 1  # left margin
-    RIGHT = 2  # right margin
-    BOTTOM = 3  # bottom margin
+    #: top margin
+    TOP = 0
+    # left margin
+    LEFT = 1
+    # right margin
+    RIGHT = 2
+    # bottom margin
+    BOTTOM = 3
 

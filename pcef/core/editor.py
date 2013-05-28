@@ -4,9 +4,7 @@ This module contains the definition of the QCodeEdit
 """
 import pcef
 from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
-from pcef.core.constants import DEFAULT_FONT
-from pcef.core.constants import DEFAULT_FONT_SIZE
-from pcef.core.constants import DEFAULT_TAB_SIZE
+from pcef.core import constants
 from pcef.core.properties import PropertyRegistry
 
 
@@ -63,16 +61,18 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.settings = PropertyRegistry()
         self.settings.valueChanged.connect(self.onSettingsChanged)
         self.settings.addProperty("showWhiteSpaces", True)
-        self.settings.addProperty("tabSpace", DEFAULT_TAB_SIZE)
+        self.settings.addProperty("tabSpace", constants.DEFAULT_TAB_SIZE)
 
         self.style = PropertyRegistry()
         self.style.valueChanged.connect(self.onStyleChanged)
-        self.style.addProperty("font", DEFAULT_FONT)
-        self.style.addProperty("fontSize", DEFAULT_FONT_SIZE)
-        self.style.addProperty("background", "#FFFFFF")
-        self.style.addProperty("foreground", "#000000")
-        self.style.addProperty("selectionBackground", "#6182F3")
-        self.style.addProperty("selectionForeground", "#ffffff")
+        self.style.addProperty("font", constants.FONT)
+        self.style.addProperty("fontSize", constants.FONT_SIZE)
+        self.style.addProperty("background", constants.EDITOR_BACKGROUND)
+        self.style.addProperty("foreground", constants.EDITOR_FOREGROUND)
+        self.style.addProperty("selectionBackground",
+                               constants.SELECTION_BACKGROUND)
+        self.style.addProperty("selectionForeground",
+                               constants.SELECTION_FOREGROUND)
 
         # setup style
         self.onStyleChanged("", "", "")

@@ -12,7 +12,9 @@
 This module contains the line number panel
 """
 import pcef
+from pcef.core import constants
 from pcef.core.panel import Panel
+
 
 
 class LineNumberPanel(Panel):
@@ -21,8 +23,9 @@ class LineNumberPanel(Panel):
 
     def install(self, editor):
         Panel.install(self, editor)
-        bck = self.editor.style.addProperty("background", "#dddddd",
-                                      "LineNumberArea")
+        bck = self.editor.style.addProperty(
+            "background", constants.LINE_NBR_BACKGROUND,
+            "LineNumberArea")
         fore = self.editor.style.addProperty("foreground", "#888888",
                                       "LineNumberArea")
         self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(bck))
