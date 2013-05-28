@@ -44,6 +44,7 @@ except ImportError:
 #
 # -- Core
 from pcef import core
+from core import genericEditor
 from core.editor import QCodeEdit
 from core.mode import Mode
 from core.panel import Panel
@@ -54,28 +55,3 @@ from core import utils
 # -- Python if python is installed
 if python_support:
     pass
-
-
-#
-# Utility functions to get pre-configured editors
-#
-def genericEditor():
-    """
-    Gets a pre-configured generic editor.
-
-    **Panels:**
-        * line number panel
-        * search and replace panel
-
-    **Modes:**
-        * document word completion
-        * generic syntax highlighter (pygments)
-        *
-
-    :rtype: pcef.QCodeEdit
-    """
-    editor = QCodeEdit()
-    editor.setLineWrapMode(QCodeEdit.NoWrap)
-    editor.setWindowTitle("PCEF - Generic Editor")
-    editor.installPanel(LineNumberPanel(), PanelPosition.LEFT)
-    return editor
