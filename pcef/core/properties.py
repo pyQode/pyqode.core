@@ -13,7 +13,7 @@ This module contains the definition of the QCodeEdit settings
 """
 import json
 import pcef
-from constants import TAB_SIZE
+from pcef.constants import TAB_SIZE
 
 
 class PropertyRegistry(pcef.QtCore.QObject):
