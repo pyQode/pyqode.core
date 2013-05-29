@@ -18,8 +18,8 @@ This is the setup script, install it as any python package.
 from setuptools import setup, find_packages
 
 # properly get pcef version
-execfile('pcef/__init__.py')
-
+# execfile('pcef/__init__.py')
+__version__ = "1.0.0-dev"
 
 # get long description
 with open('README.rst', 'r') as readme:
