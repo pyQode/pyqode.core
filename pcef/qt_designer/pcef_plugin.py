@@ -14,8 +14,9 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     """Designer plugin for pcef.QCodeEdit.
     Also serves as base class for other custom widget plugins."""
 
-    _module = 'pcef.core.editor'        # path to the widget's module
+    _module = 'pcef'        # path to the widget's module
     _class = 'QCodeEdit'    # name of the widget class
+    _name = "QCodeEdit"
     _icon = None
 
     def __init__(self, parent=None):
@@ -45,7 +46,7 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
         return self._module
 
     def name(self):
-        return self._class
+        return self._name
 
     def toolTip(self):
         return ''
