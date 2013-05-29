@@ -3,6 +3,7 @@ This file contains all the PCEF QtDesigner plugins
 """
 # This only works with PyQt, PySide does not support the QtDesigner module
 import os
+import PyQt4
 import pcef
 from PyQt4.QtGui import QApplication
 
@@ -58,9 +59,19 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
         return pcef.QCodeEdit(parent)
 
 
+class QGenericCodeEditPlugin(QCodeEditPlugin):
+    _module = 'pcef'        # path to the widget's module
+    _class = 'QGenericCodeEdit'    # name of the widget class
+    _name = "QGenericCodeEdit"
+    _icon = None
+
+    def createWidget(self, parent):
+        return pcef.QGenericCodeEdit(parent)
+
+
 if __name__ == '__main__': # some tests
     app = QApplication([])
-    plugin = QCodeEditPlugin()
+    plugin = QGenericCodeEditPlugin()
     print(plugin)
     print(plugin.includeFile())
     print(plugin.name())

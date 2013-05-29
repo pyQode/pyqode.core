@@ -12,6 +12,6 @@ import sys
 import pcef
 
 app = pcef.QtGui.QApplication(sys.argv)
-editor = pcef.genericEditor()
+editor = pcef.QGenericCodeEdit()
 editor.show()
 app.exec_()

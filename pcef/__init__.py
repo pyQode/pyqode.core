@@ -45,8 +45,8 @@ except ImportError:
 from pcef import exceptions
 # -- Core
 from pcef import core
-from core import genericEditor
 from core.editor import QCodeEdit
+from core import QGenericCodeEdit
 from core.mode import Mode
 from core.panel import Panel
 from constants import PanelPosition

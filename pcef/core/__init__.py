@@ -14,11 +14,12 @@ This package contains the core class of pcef
 from pcef.core import panels
 from pcef.core import modes
 
+from pcef.core.editor import QCodeEdit
+from pcef.core.panels import LineNumberPanel
+from pcef.constants import PanelPosition
 
-#
-# Utility functions to get pre-configured editors
-#
-def genericEditor():
+
+class QGenericCodeEdit(QCodeEdit):
     """
     Gets a pre-configured generic editor.
 
@@ -29,13 +30,9 @@ def genericEditor():
     **Modes:**
         * document word completion
         * generic syntax highlighter (pygments)
-        *
-
-    :rtype: pcef.QCodeEdit
     """
-    import pcef
-    editor = pcef.QCodeEdit()
-    editor.setLineWrapMode(pcef.QCodeEdit.NoWrap)
-    editor.setWindowTitle("PCEF - Generic Editor")
-    editor.installPanel(pcef.LineNumberPanel(), pcef.PanelPosition.LEFT)
-    return editor
+    def __init__(self, parent=None):
+        QCodeEdit.__init__(self, parent)
+        self.setLineWrapMode(self.NoWrap)
+        self.setWindowTitle("PCEF - Generic Editor")
+        self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
