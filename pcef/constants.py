@@ -48,6 +48,7 @@ LINE_NBR_FOREGROUND = "#888888"
 #
 #: Default tab size
 TAB_SIZE = 4
+MARGIN_POS = 80
 
 
 #

@@ -31,6 +31,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     The widget exposes a style property which is a dictionary of properties
     (more about this topic in the style section)
     """
+    #: Paint hook
+    painted = pcef.QtCore.Signal(pcef.QtGui.QPaintEvent)
 
     @property
     def cursorPosition(self):
@@ -278,6 +280,10 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         pcef.QtGui.QPlainTextEdit.resizeEvent(self, e)
         self.resizePanels()
+
+    def paintEvent(self, e):
+        pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
+        self.painted.emit(e)
 
     def updateViewportMargins(self):
         """

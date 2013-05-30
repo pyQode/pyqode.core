@@ -13,5 +13,6 @@ import pcef
 
 app = pcef.QtGui.QApplication(sys.argv)
 editor = pcef.QGenericCodeEdit()
+editor.resize(pcef.QtCore.QSize(800, 600))
 editor.show()
 app.exec_()

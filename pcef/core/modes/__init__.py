@@ -12,3 +12,4 @@
 This package contains the core modes (language independant)
 """
 from pcef.core.modes.caret_line_highlight import CaretLineHighlighterMode
+from pcef.core.modes.right_margin import RightMarginMode
