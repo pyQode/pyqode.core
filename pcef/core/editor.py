@@ -2,6 +2,7 @@
 """
 This module contains the definition of the QCodeEdit
 """
+from PyQt4.QtGui import QTextCursor
 import pcef
 from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
 from pcef import constants
@@ -131,6 +132,17 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__panels[position][panel.name] = panel
         panel.install(self)
         self.updateViewportMargins()
+
+    def selectFullLines(self, start, end):
+        print start, end
+        if start and end:
+            assert end >= start
+            tc = self.textCursor()
+            tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
+            tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, start - 1)
+            tc.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor,
+                            end - start + 1)
+            self.setTextCursor(tc)
 
     def resizePanels(self):
         """

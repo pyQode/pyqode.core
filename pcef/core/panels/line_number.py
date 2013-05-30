@@ -16,10 +16,24 @@ from pcef import constants
 from pcef.core.panel import Panel
 
 
+class Block:
+    def __init__(self, left, top, width, height, line_nbr):
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
+        self.line_nbr = line_nbr
+        self.__selecting = False
+        self.__sel_start = 0
+
+    def __repr__(self):
+        return "{0} - [{1}, {2}]".format(self.line_nbr, self.top, self.height)
+
 
 class LineNumberPanel(Panel):
     def __init__(self):
         Panel.__init__(self, "LineNumberPanel", "Display line number")
+        self.__blocks = []
 
     def install(self, editor):
         Panel.install(self, editor)
@@ -71,7 +85,58 @@ class LineNumberPanel(Panel):
         space = 3 + self.editor.fontMetrics().width(u"9") * digits
         return space
 
+    def linePos(self, line_number):
+        """
+        Gets the line pos on the Y-Axis in pixels (at the center of the line)
+
+        :param line_number: The line number for which we want to know the
+                            position in pixels.
+
+        :rtype int or None
+        """
+        for b in self.__blocks:
+            if b.line_nbr == line_number:
+                return b.top + b.height / 2.0
+        return None
+
+    def checkPos(self, y_pos, top, height):
+        if top <= y_pos <= top + height:
+            return True
+        return False
+
+    def lineNumber(self, y_pos):
+        """
+        Get the line number from the y_pos
+        :param y_pos: Y pos in the QCodeEdit
+        """
+        for b in self.__blocks:
+            if self.checkPos(y_pos, b.top, b.height):
+                return b.line_nbr
+        return None
+
+    def mousePressEvent(self, e):
+        assert isinstance(e, pcef.QtGui.QMouseEvent)
+        self.__selecting = True
+        self.__sel_start = e.pos().y()
+
+    def mouseReleaseEvent(self, e):
+        self.__selecting = False
+        self.__sel_start = -1
+
+    def leaveEvent(self, QEvent):
+        self.__selecting = False
+        self.__sel_start = -1
+
+    def mouseMoveEvent(self, e):
+        if self.__selecting:
+            end_pos = e.pos().y()
+            start_line = self.lineNumber(self.__sel_start)
+            end_line = self.lineNumber(end_pos)
+            self.editor.selectFullLines(start_line, end_line)
+
     def paintEvent(self, event):
+        assert isinstance(event, pcef.QtGui.QPaintEvent)
+        self.__blocks[:] = []
         painter = pcef.QtGui.QPainter(self)
         painter.fillRect(event.rect(), self.__brush)
         block = self.editor.firstVisibleBlock()
@@ -85,9 +150,8 @@ class LineNumberPanel(Panel):
         l, c = self.editor.cursorPosition
         width = self.width()
         height = self.editor.fontMetrics().height()
-
-        while block.isValid() and top <= event.rect().bottom():
-            if block.isVisible() and bottom >= event.rect().top():
+        while block.isValid():
+            if block.isVisible():
                 number = str(blockNumber + 1)
                 painter.setPen(self.__pen)
                 if blockNumber + 1 == l:
@@ -96,6 +160,8 @@ class LineNumberPanel(Panel):
                     painter.setFont(font)
                 painter.drawText(0, top, width, height,
                                  pcef.QtCore.Qt.AlignRight, number)
+                self.__blocks.append(
+                    Block(0, top, width, height, blockNumber+1))
             block = block.next()
             top = bottom
             bottom = top + int(self.editor.blockBoundingRect(block).height())
