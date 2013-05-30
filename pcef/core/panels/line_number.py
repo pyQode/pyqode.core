@@ -115,19 +115,29 @@ class LineNumberPanel(Panel):
         return None
 
     def mousePressEvent(self, e):
+        """
+        Starts selecting
+        """
         assert isinstance(e, pcef.QtGui.QMouseEvent)
         self.__selecting = True
         self.__sel_start = e.pos().y()
 
     def mouseReleaseEvent(self, e):
+        """ Cancels selecting"""
         self.__selecting = False
         self.__sel_start = -1
 
     def leaveEvent(self, QEvent):
+        """
+        Cancels selecting
+        """
         self.__selecting = False
         self.__sel_start = -1
 
     def mouseMoveEvent(self, e):
+        """
+        Updates end of selection if we are currently selecting
+        """
         if self.__selecting:
             end_pos = e.pos().y()
             start_line = self.lineNumber(self.__sel_start)
@@ -135,7 +145,11 @@ class LineNumberPanel(Panel):
             self.editor.selectFullLines(start_line, end_line)
 
     def paintEvent(self, event):
-        assert isinstance(event, pcef.QtGui.QPaintEvent)
+        """
+        Paints the line numbers
+
+        :return:
+        """
         self.__blocks[:] = []
         painter = pcef.QtGui.QPainter(self)
         painter.fillRect(event.rect(), self.__brush)

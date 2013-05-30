@@ -150,9 +150,16 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             tc = self.textCursor()
             tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
             tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, start - 1)
-            tc.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor,
-                            end - start)
-            tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+            if end > start:  # Going down
+                tc.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor,
+                                end - start)
+                tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+            else:  # going up
+                # don't miss end of line !
+                tc.movePosition(QTextCursor.EndOfLine, QTextCursor.MoveAnchor)
+                tc.movePosition(QTextCursor.Up, QTextCursor.KeepAnchor,
+                                start - end)
+                tc.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor)
             if applySelection:
                 self.setTextCursor(tc)
 
