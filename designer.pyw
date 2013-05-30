@@ -37,6 +37,7 @@ from PyQt4 import QtCore, QtGui
 
 
 def main():
+    print "PCEF DESIGNER"
     # path separator are different on windows
     if sys.platform == "win32":
         sep = ';'
@@ -46,11 +47,11 @@ def main():
     # start qt gui system
     app = QtGui.QApplication(sys.argv)
 
-    # ===> read environment variables
+    # read environment variables
     env = os.environ.copy()
 
-    # ===> lef the user try pcef without installing
-    pcef_path = os.path.abspath("pcef")
+    # lef the user try pcef without installing
+    pcef_path = os.getcwd()
     is_installed = False
     if 'PYTHONPATH' in env:
         python_pth = env['PYTHONPATH']
@@ -58,11 +59,10 @@ def main():
             env['PYTHONPATH'] = python_pth + sep+ pcef_path
         else:
             is_installed = True
-            print "Pcef is installed at ", QtCore.QFileInfo(pcef.__file__).dir().path()
     else:
         env['PYTHONPATH'] = pcef_path
 
-    # ===> define plugin path
+    # define plugin path
     if not is_installed:
         plugins_path = os.path.abspath(os.path.join("pcef", "plugins"))
     else:
@@ -74,9 +74,13 @@ def main():
             env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + plugins_path
     else:
         env['PYQTDESIGNERPATH'] = plugins_path
-        print "Plugin path:", plugins_path
 
-    # todo: on windows i will probably have to chdir to the designer binary path
+    # ensure every keys and values are strings
+    if sys.platform == "win32":
+        win_env = {}
+        for key, value in env.iteritems():
+            win_env[str(key)] = str(value)
+        env = win_env
 
     # run designer
     try:
