@@ -11,10 +11,33 @@
 """
 Integrates the generic editor using the pcef qt designer plugin.
 """
-from pcef import QtGui
+import os
+import sys
+
+os.environ.setdefault("QT_API", "pyqt")
+from pcef import QtCore, QtGui
 from ui import simple_editor_ui
 
 
 class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
     def __init__(self):
+        QtGui.QMainWindow.__init__(self)
+        self.setupUi(self)
+
+    @QtCore.Slot()
+    def on_actionOpen_triggered(self):
+        filePath = QtGui.QFileDialog.getOpenFileName(
+            self, "Choose a file", os.path.expanduser("~"))
+        self.genericEditor.openFile(filePath)
+
+
+def main():
+    app = QtGui.QApplication(sys.argv)
+    win = SimpleEditorWindow()
+    win.show()
+    app.exec_()
+
+if __name__ == "__main__":
+    main()
+
 

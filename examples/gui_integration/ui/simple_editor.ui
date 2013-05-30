@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PCEF - Simple Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="QGenericCodeEdit" name="QGenericCodeEdit"/>
+     <widget class="QGenericCodeEdit" name="genericEditor"/>
     </item>
    </layout>
   </widget>
@@ -42,17 +42,11 @@
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
-    <addaction name="actionSave_as"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
-    <widget class="QMenu" name="menuStyle">
-     <property name="title">
-      <string>Style</string>
-     </property>
-    </widget>
     <widget class="QMenu" name="menuPanels">
      <property name="title">
       <string>Panels</string>
@@ -63,7 +57,6 @@
       <string>Modes</string>
      </property>
     </widget>
-    <addaction name="menuStyle"/>
     <addaction name="menuPanels"/>
     <addaction name="menuModes"/>
    </widget>
@@ -82,7 +75,6 @@
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="actionSave_as"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -100,6 +92,9 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="examples.qrc">
      <normaloff>:/example_icons/rc/document-save.png</normaloff>:/example_icons/rc/document-save.png</iconset>
@@ -114,46 +109,12 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionSave_as">
-   <property name="icon">
-    <iconset resource="examples.qrc">
-     <normaloff>:/example_icons/rc/document-save-as.png</normaloff>:/example_icons/rc/document-save-as.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save as</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionWhiteStyle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>White</string>
-   </property>
-  </action>
-  <action name="actionDarkStyle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Dark</string>
-   </property>
-  </action>
   <action name="actionPanel">
    <property name="text">
     <string>Panel</string>
    </property>
   </action>
-  <action name="actionModes_2">
+  <action name="actionModes">
    <property name="text">
     <string>Modes</string>
    </property>
@@ -179,5 +140,38 @@
  <resources>
   <include location="examples.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>genericEditor</sender>
+   <signal>dirtyChanged(bool)</signal>
+   <receiver>actionSave</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>genericEditor</receiver>
+   <slot>saveToFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

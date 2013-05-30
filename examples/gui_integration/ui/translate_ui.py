@@ -17,13 +17,13 @@ import os
 # compile ui files
 for name in glob.glob("*.ui"):
     base = name.split(".")[0]
-    pyside_cmd = "pyside-uic {0} > {1}_ui.py".format(name, base)
+    pyside_cmd = "pyuic4 {0} > {1}_ui.py".format(name, base)
     print pyside_cmd
     os.system(pyside_cmd)
 
 for name in glob.glob("*.qrc"):
     base = name.split(".")[0]
-    pyside_cmd = "pyside-rcc {0} > {1}_rc.py".format(name, base)
+    pyside_cmd = "pyrcc4 {0} > {1}_rc.py".format(name, base)
     print pyside_cmd
     os.system(pyside_cmd)
 
