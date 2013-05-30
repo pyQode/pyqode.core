@@ -28,5 +28,3 @@ def findSettingsDirectory(appName="PCEF"):
     if not os.path.exists(pth):
         os.mkdir(pth)
     return pth
-
-
