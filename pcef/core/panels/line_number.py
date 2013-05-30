@@ -147,14 +147,15 @@ class LineNumberPanel(Panel):
         font = self.editor.font()
         bold_font = pcef.QtGui.QFont(font)
         bold_font.setBold(True)
-        l, c = self.editor.cursorPosition
+        sel_start, sel_end = self.editor.selectedLines()
         width = self.width()
         height = self.editor.fontMetrics().height()
         while block.isValid():
             if block.isVisible():
                 number = str(blockNumber + 1)
                 painter.setPen(self.__pen)
-                if blockNumber + 1 == l:
+                if sel_start <= blockNumber + 1 <= sel_end or \
+                   (sel_start == sel_end and sel_start == blockNumber +1):
                     painter.setFont(bold_font)
                 else:
                     painter.setFont(font)

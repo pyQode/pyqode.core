@@ -133,16 +133,41 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         panel.install(self)
         self.updateViewportMargins()
 
-    def selectFullLines(self, start, end):
-        print start, end
+    def selectFullLines(self, start, end, applySelection=True):
+        """
+        Select entire lines between start and end
+
+        :param start: Start line number (1 based)
+
+        :param end: End line number (1 based)
+
+        :param applySelection: True to apply the selection before returning the
+                               QTextCursor
+
+        :return A QTextCursor that holds the requested selection
+        """
         if start and end:
-            assert end >= start
             tc = self.textCursor()
             tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
             tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, start - 1)
             tc.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor,
-                            end - start + 1)
-            self.setTextCursor(tc)
+                            end - start)
+            tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+            if applySelection:
+                self.setTextCursor(tc)
+
+    def selectedLines(self):
+        """
+        Returns the selected lines boundaries (start line, end line)
+
+        :return: tuple(int, int)
+        """
+        doc = self.document()
+        start = doc.findBlock(
+            self.textCursor().selectionStart()).blockNumber() + 1
+        end = doc.findBlock(
+            self.textCursor().selectionEnd()).blockNumber() + 1
+        return start, end
 
     def resizePanels(self):
         """
