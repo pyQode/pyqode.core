@@ -1,5 +1,23 @@
 """
-This file contains all the PCEF QtDesigner plugins
+This file contains all the PCEF QtDesigner plugins.
+
+Installation:
+==================
+
+Linux:
+------------
+    - install qt4-designer, python-qt and python-qt-dev
+    - in the Qt Designer plugin directory, create a "python" directory
+    - copy the libpcefplugin.py file to the python directory you've just created
+    - run the qt designer, you should see a group named pcef.
+
+On ubuntu, the qt designer plugin directory is located at
+/usr/lib/i386-linux-gnu/qt4/plugins/designer
+
+Windows
+---------
+
+TODO
 """
 # This only works with PyQt, PySide does not support the QtDesigner module
 import os
