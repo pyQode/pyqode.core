@@ -8,11 +8,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import sys
-import pcef
+"""
+Integrates the generic editor using the pcef qt designer plugin.
+"""
+from pcef import QtGui
+from ui import simple_editor_ui
 
-app = pcef.QtGui.QApplication(sys.argv)
-editor = pcef.QGenericCodeEdit()
-editor.resize(pcef.QtCore.QSize(800, 600))
-editor.show()
-app.exec_()
+
+class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
+    def __init__(self):
+
