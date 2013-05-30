@@ -121,6 +121,8 @@ class LineNumberPanel(Panel):
         assert isinstance(e, pcef.QtGui.QMouseEvent)
         self.__selecting = True
         self.__sel_start = e.pos().y()
+        start = end = self.lineNumber(self.__sel_start)
+        self.editor.selectFullLines(start, end)
 
     def mouseReleaseEvent(self, e):
         """ Cancels selecting"""
