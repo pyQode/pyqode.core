@@ -42,17 +42,20 @@ except ImportError:
 #
 # Public api
 #
+# -- all
 from pcef import exceptions
-# -- Core
-from pcef import core
-from core.editor import QCodeEdit
-from core import QGenericCodeEdit
-from core.mode import Mode
-from core.panel import Panel
 from constants import PanelPosition
+# -- core
+from pcef import core
+from core import QGenericCodeEdit
+from core import utils
+from core.decoration import TextDecoration
+from core.editor import QCodeEdit
+from core.mode import Mode
+from core.modes import CaretLineHighlighterMode
+from core.panel import Panel
 from core.panels import LineNumberPanel
 from core.properties import PropertyRegistry
-from core import utils
-# -- Python if python is installed
+# -- python if python is installed
 if python_support:
     pass

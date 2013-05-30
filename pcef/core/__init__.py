@@ -16,12 +16,13 @@ from pcef.core import modes
 
 from pcef.core.editor import QCodeEdit
 from pcef.core.panels import LineNumberPanel
+from pcef.core.modes import CaretLineHighlighterMode
 from pcef.constants import PanelPosition
 
 
 class QGenericCodeEdit(QCodeEdit):
     """
-    Gets a pre-configured generic editor.
+    Extends QCodeEdit with a hardcoded set of modes and panels.
 
     **Panels:**
         * line number panel
@@ -36,3 +37,4 @@ class QGenericCodeEdit(QCodeEdit):
         self.setLineWrapMode(self.NoWrap)
         self.setWindowTitle("PCEF - Generic Editor")
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
+        self.installMode(CaretLineHighlighterMode())

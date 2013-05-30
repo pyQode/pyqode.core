@@ -44,26 +44,47 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 self.textCursor().columnNumber())
 
     @property
-    def filename(self):
-        return self.filename
+    def fileName(self):
+        return pcef.QtCore.QFileInfo(self.filePath).fileName()
 
     @property
-    def encoding(self):
-        return self.__encoding
+    def filePath(self):
+        return self.__filePath
+
+    @property
+    def fileEncoding(self):
+        return self.__fileEncoding
 
     def __init__(self, parent=None):
         pcef.QtGui.QPlainTextEdit.__init__(self, parent)
+        # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
                          PanelPosition.LEFT: {},
                          PanelPosition.RIGHT: {},
                          PanelPosition.BOTTOM: {}}
 
+        #: Path of the current file
+        self.__filePath = ""
+        #: Encoding of the current file
+        self.__fileEncoding = ""
+
+        self.__initSettings()
+        self.__initStyle()
+
+        #: The list of active extra-selections (TextDecoration)
+        self.__selections = []
+
+        # connect slots
+        self.blockCountChanged.connect(self.updateViewportMargins)
+
+    def __initSettings(self):
         self.settings = PropertyRegistry()
         self.settings.valueChanged.connect(self.onSettingsChanged)
         self.settings.addProperty("showWhiteSpaces", True)
         self.settings.addProperty("tabSpace", constants.TAB_SIZE)
 
+    def __initStyle(self):
         self.style = PropertyRegistry()
         self.style.valueChanged.connect(self.onStyleChanged)
         self.style.addProperty("font", constants.FONT)
@@ -74,15 +95,11 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                                constants.SELECTION_BACKGROUND)
         self.style.addProperty("selectionForeground",
                                constants.SELECTION_FOREGROUND)
-
-        # setup style
+        self.style.addProperty(
+            "panelBackground", constants.LINE_NBR_BACKGROUND)
+        self.style.addProperty(
+            "panelForeground", constants.LINE_NBR_FOREGROUND)
         self.onStyleChanged("", "", "")
-
-        self.__filename = ""
-        self.__encoding = ""
-
-        # connect slots
-        self.blockCountChanged.connect(self.updateViewportMargins)
 
     def installMode(self, mode):
         """
@@ -132,6 +149,38 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__panels[position][panel.name] = panel
         panel.install(self)
         self.updateViewportMargins()
+
+    def addDecoration(self, decoration):
+        """
+        Adds a text decoration
+
+        :param decoration: Text decoration
+        :type decoration: pcef.TextDecoration
+        """
+        self.__selections.append(decoration)
+        self.__selections = sorted(self.__selections,
+                                   key=lambda sel: sel.draw_order)
+        self.setExtraSelections(self.__selections)
+
+    def removeDecoration(self, decoration):
+        """
+        Remove text decoration.
+
+        :param decoration: The decoration to remove
+        :type decoration: pcef.TextDecoration
+        """
+        try:
+            self.__selections.remove(decoration)
+            self.setExtraSelections(self.__selections)
+        except ValueError:
+            pass
+
+    def clearDecorations(self):
+        """
+        Clears all text decorations
+        """
+        self.__selections[:] = []
+        self.setExtraSelections(self.__selections)
 
     def selectFullLines(self, start, end, applySelection=True):
         """
@@ -232,7 +281,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
     def updateViewportMargins(self):
         """
-        Update the viewport margins depending on the installed panels
+        Updates the viewport margins depending on the installed panels
         """
         top = 0
         left = 0

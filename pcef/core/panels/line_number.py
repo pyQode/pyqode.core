@@ -46,14 +46,10 @@ class LineNumberPanel(Panel):
         Adds style properties to the editor and setup default brushe/pen
         """
         Panel.install(self, editor)
-        bck = self.editor.style.addProperty(
-            "background", constants.LINE_NBR_BACKGROUND,
-            "LineNumberArea")
-        fore = self.editor.style.addProperty("foreground",
-                                             constants.LINE_NBR_FOREGROUND,
-                                      "LineNumberArea")
-        self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(bck))
-        self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(fore))
+        self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(
+            self.editor.style.value("panelBackground")))
+        self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(
+            self.editor.style.value("panelForeground")))
 
     def onStyleChanged(self, section, key, value):
         """
@@ -63,10 +59,10 @@ class LineNumberPanel(Panel):
         :param key:
         :param value:
         """
-        if section == "LineNumberArea" and key == "background":
+        if key == "panelBackground":
             self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
             self.editor.repaint()
-        elif section == "LineNumberArea" and key == "foreground":
+        elif key == "panelForeground":
             self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
             self.editor.repaint()
 
