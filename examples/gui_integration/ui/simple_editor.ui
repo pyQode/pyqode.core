@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="GenericEditor" name="genericEditor"/>
+     <widget class="QGenericCodeEdit" name="QGenericCodeEdit"/>
     </item>
    </layout>
   </widget>
@@ -158,12 +158,22 @@
     <string>Modes</string>
    </property>
   </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GenericEditor</class>
+   <class>QGenericCodeEdit</class>
+   <extends>QCodeEdit</extends>
+   <header>pcef</header>
+  </customwidget>
+  <customwidget>
+   <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef/editors/generic.h</header>
+   <header>pcef</header>
   </customwidget>
  </customwidgets>
  <resources>
