@@ -23,13 +23,13 @@ class Panel(pcef.QtGui.QWidget, Mode):
 
     Panels are drawn in the QCodeEdit viewport margins.
     """
-    def __init__(self, name, description):
+    def __init__(self):
         """
         :param name: Panel name (used as an identifier)
         :param description: The panel description
         :return:
         """
-        pcef.Mode.__init__(self, name, description)
+        pcef.Mode.__init__(self)
         pcef.QtGui.QWidget.__init__(self)
 
     def install(self, editor):

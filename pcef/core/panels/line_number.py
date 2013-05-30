@@ -31,11 +31,20 @@ class Block:
 
 
 class LineNumberPanel(Panel):
+    """
+    The liner number panel displays the document line numbers.
+    """
+    IDENTIFIER = "LineNumberPanel"
+    _DESCRIPTION = "Display line number"
+
     def __init__(self):
-        Panel.__init__(self, "LineNumberPanel", "Display line number")
+        Panel.__init__(self)
         self.__blocks = []
 
     def install(self, editor):
+        """
+        Adds style properties to the editor and setup default brushe/pen
+        """
         Panel.install(self, editor)
         bck = self.editor.style.addProperty(
             "background", constants.LINE_NBR_BACKGROUND,
@@ -47,6 +56,13 @@ class LineNumberPanel(Panel):
         self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(fore))
 
     def onStyleChanged(self, section, key, value):
+        """
+        Repaints widget if the our style properties changed.
+
+        :param section:
+        :param key:
+        :param value:
+        """
         if section == "LineNumberArea" and key == "background":
             self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
             self.editor.repaint()
@@ -74,9 +90,20 @@ class LineNumberPanel(Panel):
             self.editor.updateViewportMargins()
 
     def sizeHint(self):
+        """
+        Returns the panel size hint (as the panel is on the left, we only need to
+        compute the width
+        :return:
+        """
         return pcef.QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
 
     def lineNumberAreaWidth(self):
+        """
+        Computes the lineNumber area width depending on the number of lines
+        in the document
+
+        :return: Widtg
+        """
         digits = 1
         count = max(1, self.editor.blockCount())
         while count >= 10:
@@ -99,18 +126,13 @@ class LineNumberPanel(Panel):
                 return b.top + b.height / 2.0
         return None
 
-    def checkPos(self, y_pos, top, height):
-        if top <= y_pos <= top + height:
-            return True
-        return False
-
     def lineNumber(self, y_pos):
         """
         Get the line number from the y_pos
         :param y_pos: Y pos in the QCodeEdit
         """
         for b in self.__blocks:
-            if self.checkPos(y_pos, b.top, b.height):
+            if b.top <= y_pos <= b.top + b.height:
                 return b.line_nbr
         return None
 

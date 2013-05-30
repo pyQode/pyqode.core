@@ -26,6 +26,9 @@ class Mode(object):
         - onStateChanged: to connect/disconnect to/from the code edit signals
         - onStyleChanged: to refresh ui colors (mainly used by panels)
     """
+    IDENTIFIER = ""
+    _DESCRIPTION = ""
+
     @property
     def editor(self):
         """
@@ -56,7 +59,7 @@ class Mode(object):
             self.__enabled = enabled
             self.onStateChanged(enabled)
 
-    def __init__(self, name, description):
+    def __init__(self):
         """
         Creates the extension.
 
@@ -65,9 +68,9 @@ class Mode(object):
         :param description: A description of the extension
         """
         #: Mode name
-        self.name = name
+        self.name = self.IDENTIFIER
         #: Mode description
-        self.description = description
+        self.description = self._DESCRIPTION
         #: Mode enables state (subclasses must implement onStateChanged to
         #  disconnect their slots to disable any actions)
         self.__enabled = False
