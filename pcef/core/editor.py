@@ -2,6 +2,7 @@
 """
 This module contains the definition of the QCodeEdit
 """
+import chardet
 from PyQt4.QtGui import QTextCursor
 import pcef
 from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
@@ -33,6 +34,22 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     """
     #: Paint hook
     painted = pcef.QtCore.Signal(pcef.QtGui.QPaintEvent)
+    #: Signal emitted when a new text is set on the widget
+    newTextSet = pcef.QtCore.Signal()
+    #: Signal emitted when the text is saved
+    textSaved = pcef.QtCore.Signal(unicode)
+    #: Signal emitted when the dirty state changed
+    dirtyChanged = pcef.QtCore.Signal(bool)
+
+    @property
+    def dirty(self):
+        return self.__dirty
+
+    @dirty.setter
+    def dirty(self, value):
+        if self.__dirty != value:
+            self.__dirty = value
+            self.dirtyChanged.emit(value)
 
     @property
     def cursorPosition(self):
@@ -59,6 +76,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
     def __init__(self, parent=None):
         pcef.QtGui.QPlainTextEdit.__init__(self, parent)
+
         # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
@@ -67,9 +85,15 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                          PanelPosition.BOTTOM: {}}
 
         #: Path of the current file
-        self.__filePath = ""
+        self.__filePath = None
         #: Encoding of the current file
-        self.__fileEncoding = ""
+        self.__fileEncoding = None
+        #: Original text, used to compute the control flag
+        self.__originalText = ""
+
+        #: Dirty flag; tells if the widget text content is different from the
+        #: file content
+        self.__dirty = False
 
         self.__initSettings()
         self.__initStyle()
@@ -79,6 +103,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
         # connect slots
         self.blockCountChanged.connect(self.updateViewportMargins)
+        self.textChanged.connect(self.__ontextChanged)
 
     def __initSettings(self):
         self.settings = PropertyRegistry()
@@ -102,6 +127,34 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.style.addProperty(
             "panelForeground", constants.LINE_NBR_FOREGROUND)
         self.onStyleChanged("", "", "")
+
+    def openFile(self, filePath, replaceTabsBySpaces=True):
+        with open(filePath, 'r') as f:
+            data = f.read()
+            encoding = chardet.detect(data)['encoding']
+            content = unicode(data.decode(encoding))
+        if replaceTabsBySpaces:
+            content = content.replace(
+                "\t", " " * int(self.settings.value("tabSpace")))
+        self.__filePath = filePath
+        self.__fileEncoding = encoding
+        self.setPlainText(content)
+        self.dirty = False
+
+    @pcef.QtCore.Slot()
+    def saveToFile(self, filePath=None):
+        if not filePath:
+            if self.filePath:
+                filePath = self.filePath
+            else:
+                return
+        content = unicode(self.toPlainText()).encode(self.fileEncoding)
+        with open(filePath, "w") as f:
+            f.write(content)
+        self.newTextSet.emit()
+        self.dirty = False
+        self.__filePath = filePath
+        self.textSaved.emit(filePath)
 
     def installMode(self, mode):
         """
@@ -284,6 +337,15 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     def paintEvent(self, e):
         pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
+
+    def setPlainText(self, txt):
+        pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)
+        self.__originalText = txt
+        self.newTextSet.emit()
+
+    def __ontextChanged(self):
+        txt = self.toPlainText()
+        self.dirty = (txt != self.__originalText)
 
     def updateViewportMargins(self):
         """
