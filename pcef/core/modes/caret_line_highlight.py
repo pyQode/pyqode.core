@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This module contains the care line hilighter mode
+This module contains the care line highlighter mode
 """
 import pcef
 from pcef.core.mode import Mode
