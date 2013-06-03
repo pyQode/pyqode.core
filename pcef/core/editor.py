@@ -74,9 +74,22 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     def fileEncoding(self):
         return self.__fileEncoding
 
+    @property
+    def visibleBlocks(self):
+        """
+        Returns the list of visible blocks/lines
+
+        Each block is a tuple made up of the line top position and the line
+        number (already 1 based)
+
+        :return: A list of tuple. Each tuple(pos, nbr)
+        :rtype List of tuple(int, int)
+        """
+        return self.__blocks
+
     def __init__(self, parent=None):
         pcef.QtGui.QPlainTextEdit.__init__(self, parent)
-
+        self.__blocks = []
         # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
@@ -104,6 +117,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         # connect slots
         self.blockCountChanged.connect(self.updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
+        self.updateRequest.connect(self.__updatePanels)
 
     def __initSettings(self):
         self.settings = PropertyRegistry()
@@ -278,7 +292,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             if applySelection:
                 self.setTextCursor(tc)
 
-    def selectedLines(self):
+    def selectionRange(self):
         """
         Returns the selected lines boundaries (start line, end line)
 
@@ -290,6 +304,32 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         end = doc.findBlock(
             self.textCursor().selectionEnd()).blockNumber() + 1
         return start, end
+
+    def linePos(self, line_number):
+        """
+        Gets the line pos on the Y-Axis in pixels (at the center of the line)
+
+        :param line_number: The line number for which we want to know the
+                            position in pixels.
+
+        :rtype int or None
+        """
+        height = self.fontMetrics().height()
+        for top, l in self.__blocks:
+            if l == line_number:
+                return top + height / 2.0
+        return None
+
+    def lineNumber(self, y_pos):
+        """
+        Get the line number from the y_pos
+        :param y_pos: Y pos in the QCodeEdit
+        """
+        height = self.fontMetrics().height()
+        for top, l in self.__blocks:
+            if top <= y_pos <= top + height:
+                return l
+        return None
 
     def resizePanels(self):
         """
@@ -333,6 +373,17 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                               cr.width(), sh.height())
             top += sh.height()
 
+    def __updatePanels(self, rect, dy):
+        for zones_id, zone in self.__panels.iteritems():
+            for panel_id, panel in zone.iteritems():
+                if dy:
+                    panel.scroll(0, dy)
+                else:
+                    panel.update(0, rect.y(), panel.width(), rect.height())
+        if rect.contains(self.viewport().rect()):
+            self.updateViewportMargins()
+
+
     def resizeEvent(self, e):
         """
         Resize event, lets the QPlainTextEdit handle the resize event than
@@ -344,8 +395,29 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.resizePanels()
 
     def paintEvent(self, e):
+        self._updateVisibleBlocks(e)
         pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
+
+    def _updateVisibleBlocks(self, event):
+        """
+        Update the list of visible blocks/lines position.
+
+        :param event: paint event
+        """
+        self.__blocks[:] = []
+        block = self.firstVisibleBlock()
+        blockNumber = block.blockNumber()
+        top = int(self.blockBoundingGeometry(block).translated(
+            self.contentOffset()).top())
+        bottom = top + int(self.blockBoundingRect(block).height())
+        while block.isValid():
+            if block.isVisible():
+                self.__blocks.append((top, blockNumber+1))
+            block = block.next()
+            top = bottom
+            bottom = top + int(self.blockBoundingRect(block).height())
+            blockNumber = block.blockNumber()
 
     def setPlainText(self, txt):
         pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)

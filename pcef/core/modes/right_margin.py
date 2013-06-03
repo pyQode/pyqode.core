@@ -31,19 +31,36 @@ class RightMarginMode(Mode):
         self.__pen = pcef.QtGui.QPen()
 
     def install(self, editor):
+        """
+        Installs the mode on the editor and setup drawing tools
+
+        :param editor: The editor instance
+        """
         Mode.install(self, editor)
         color = self.editor.style.addProperty("margin", "#FF0000")
         self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(color))
         self.marginPos = int(self.editor.settings.addProperty(
             "marginPos", "80"))
 
-
     def onStyleChanged(self, section, key, value):
+        """
+        Changes the margin color
+
+        :param section:
+        :param key:
+        :param value:
+        """
         if key == "margin":
             self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
+            self.editor.update()
 
     def onStateChanged(self, state):
-        if state is True:
+        """
+        Connects/Disconnects to the painted event of the editor
+
+        :param state: Enable state
+        """
+        if state:
             self.editor.painted.connect(self.__paintMargin)
         else:
             self.editor.painted.disconnect(self.__paintMargin)

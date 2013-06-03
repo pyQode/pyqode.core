@@ -37,10 +37,6 @@ class LineNumberPanel(Panel):
     IDENTIFIER = "LineNumberPanel"
     _DESCRIPTION = "Display line number"
 
-    def __init__(self):
-        Panel.__init__(self)
-        self.__blocks = []
-
     def install(self, editor):
         """
         Adds style properties to the editor and setup default brushe/pen
@@ -68,22 +64,11 @@ class LineNumberPanel(Panel):
 
     def onStateChanged(self, state):
         """
-        Connect/Disconnects to/from editor signals
+        Nothing to do here, we do everything in the widget events.
 
         :param state: Enable state
         """
-        if state:
-            self.editor.updateRequest.connect(self.updateLineNumberArea)
-        else:
-            self.editor.updateRequest.disconnect(self.updateLineNumberArea)
-
-    def updateLineNumberArea(self, rect, dy):
-        if dy:
-            self.scroll(0, dy)
-        else:
-            self.update(0, rect.y(), self.width(), rect.height())
-        if rect.contains(self.editor.viewport().rect()):
-            self.editor.updateViewportMargins()
+        pass
 
     def sizeHint(self):
         """
@@ -108,51 +93,27 @@ class LineNumberPanel(Panel):
         space = 3 + self.editor.fontMetrics().width(u"9") * digits
         return space
 
-    def linePos(self, line_number):
-        """
-        Gets the line pos on the Y-Axis in pixels (at the center of the line)
-
-        :param line_number: The line number for which we want to know the
-                            position in pixels.
-
-        :rtype int or None
-        """
-        for b in self.__blocks:
-            if b.line_nbr == line_number:
-                return b.top + b.height / 2.0
-        return None
-
-    def lineNumber(self, y_pos):
-        """
-        Get the line number from the y_pos
-        :param y_pos: Y pos in the QCodeEdit
-        """
-        for b in self.__blocks:
-            if b.top <= y_pos <= b.top + b.height:
-                return b.line_nbr
-        return None
-
     def mousePressEvent(self, e):
         """
         Starts selecting
         """
         assert isinstance(e, pcef.QtGui.QMouseEvent)
         self.__selecting = True
-        self.__sel_start = e.pos().y()
-        start = end = self.lineNumber(self.__sel_start)
+        self.__selStart = e.pos().y()
+        start = end = self.editor.lineNumber(self.__selStart)
         self.editor.selectFullLines(start, end)
 
     def mouseReleaseEvent(self, e):
         """ Cancels selecting"""
         self.__selecting = False
-        self.__sel_start = -1
+        self.__selStart = -1
 
     def leaveEvent(self, QEvent):
         """
         Cancels selecting
         """
         self.__selecting = False
-        self.__sel_start = -1
+        self.__selStart = -1
 
     def mouseMoveEvent(self, e):
         """
@@ -160,8 +121,8 @@ class LineNumberPanel(Panel):
         """
         if self.__selecting:
             end_pos = e.pos().y()
-            start_line = self.lineNumber(self.__sel_start)
-            end_line = self.lineNumber(end_pos)
+            start_line = self.editor.lineNumber(self.__selStart)
+            end_line = self.editor.lineNumber(end_pos)
             self.editor.selectFullLines(start_line, end_line)
 
     def paintEvent(self, event):
@@ -170,34 +131,24 @@ class LineNumberPanel(Panel):
 
         :return:
         """
-        self.__blocks[:] = []
+        # fill background
         painter = pcef.QtGui.QPainter(self)
         painter.fillRect(event.rect(), self.__brush)
-        block = self.editor.firstVisibleBlock()
-        blockNumber = block.blockNumber()
-        top = int(self.editor.blockBoundingGeometry(block).translated(
-            self.editor.contentOffset()).top())
-        bottom = top + int(self.editor.blockBoundingRect(block).height())
+        # get style options (font, size)
+        width = self.width()
+        height = self.editor.fontMetrics().height()
         font = self.editor.font()
         bold_font = pcef.QtGui.QFont(font)
         bold_font.setBold(True)
-        sel_start, sel_end = self.editor.selectedLines()
-        width = self.width()
-        height = self.editor.fontMetrics().height()
-        while block.isValid():
-            if block.isVisible():
-                number = str(blockNumber + 1)
+        # get selection range
+        sel_start, sel_end = self.editor.selectionRange()
+        # draw every visible blocks
+        for top, blockNumber in self.editor.visibleBlocks:
                 painter.setPen(self.__pen)
-                if sel_start <= blockNumber + 1 <= sel_end or \
+                if sel_start <= blockNumber <= sel_end or \
                    (sel_start == sel_end and sel_start == blockNumber +1):
                     painter.setFont(bold_font)
                 else:
                     painter.setFont(font)
                 painter.drawText(0, top, width, height,
-                                 pcef.QtCore.Qt.AlignRight, number)
-                self.__blocks.append(
-                    Block(0, top, width, height, blockNumber+1))
-            block = block.next()
-            top = bottom
-            bottom = top + int(self.editor.blockBoundingRect(block).height())
-            blockNumber = block.blockNumber()
+                                 pcef.QtCore.Qt.AlignRight, str(blockNumber))

@@ -18,7 +18,7 @@ from pcef.core.decoration import TextDecoration
 
 class CaretLineHighlighterMode(Mode):
     """
-    This mode highlight the caret line (active line)
+    This mode highlights the caret line (active line)
     """
     #: The mode identifier
     IDENTIFIER = "CaretLineHighlighterMode"
@@ -51,10 +51,13 @@ class CaretLineHighlighterMode(Mode):
         self.__updateHighlight()
 
     def onStyleChanged(self, section, key, value):
+        """
+        Changes the highlight brush color and refresh highlighting
+        """
         if key == "caretLineBackground":
             self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
             # force refresh
-            self.__pos = 1
+            self.__pos = -1
             self.__updateHighlight()
 
     def __updateHighlight(self):
