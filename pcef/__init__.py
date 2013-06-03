@@ -48,7 +48,7 @@ from constants import PanelPosition
 # -- core
 from pcef import core
 from core import QGenericCodeEdit
-from core import utils
+from core import system
 from core.decoration import TextDecoration
 from core.editor import QCodeEdit
 from core.mode import Mode
