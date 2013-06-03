@@ -33,12 +33,19 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
                 self.menuPanels.addAction(a)
+        try:
+            self.genericEditor.openFile(__file__)
+        except (OSError, IOError) as e:
+            pass
+        except AttributeError:
+            pass
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):
         filePath = QtGui.QFileDialog.getOpenFileName(
             self, "Choose a file", os.path.expanduser("~"))
-        self.genericEditor.openFile(filePath)
+        if filePath:
+            self.genericEditor.openFile(filePath)
 
 
 def main():
