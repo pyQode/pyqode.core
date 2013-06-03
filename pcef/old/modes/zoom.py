@@ -68,7 +68,7 @@ class EditorZoomMode(Mode):
         delta = event.delta()
         if event.modifiers() & Qt.ControlModifier > 0:
             style = copy.copy(self.currentStyle)
-            increment = 5
+            increment = 1
             if delta < self.prev_delta:
                 style.fontSize -= increment
             else:

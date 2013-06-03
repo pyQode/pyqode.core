@@ -40,13 +40,40 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     textSaved = pcef.QtCore.Signal(unicode)
     #: Signal emitted when the dirty state changed
     dirtyChanged = pcef.QtCore.Signal(bool)
+    #: Signal emitted when a key is pressed
+    keyPressed = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    #: Signal emitted when a key is released
+    keyReleased = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    #: Signal emitted when a mouse button is pressed
+    mousePressed = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
+    #: Signal emitted when a mouse button is released
+    mouseReleased = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
+    #: Signal emitted on a wheel event
+    mouseWheelActivated = pcef.QtCore.Signal(pcef.QtGui.QWheelEvent)
+    #: Signal emitted at the end of the keyPressed event
+    postKeyPressed = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    #: Signal emitted when focusInEvent is is called
+    focusedIn = pcef.QtCore.Signal(pcef.QtGui.QFocusEvent)
+    #: Signal emitted when the mouseMoved
+    mouseMoved = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
 
     @property
     def dirty(self):
+        """
+        Gets the dirty flag
+        """
         return self.__dirty
 
     @dirty.setter
     def dirty(self, value):
+        """
+        Sets the dirty flag,
+
+        .. note: The dirtyChanged signal is emitted if the new value is
+                 different from the current value
+
+        :param value: The new value
+        """
         if self.__dirty != value:
             self.__dirty = value
             self.dirtyChanged.emit(value)
@@ -64,14 +91,23 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
     @property
     def fileName(self):
+        """
+        Returns the file name (see QFileInfo.fileName)
+        """
         return pcef.QtCore.QFileInfo(self.filePath).fileName()
 
     @property
     def filePath(self):
+        """
+        Returns the file path
+        """
         return self.__filePath
 
     @property
     def fileEncoding(self):
+        """
+        Returns last encoding used to open the file
+        """
         return self.__fileEncoding
 
     @property
@@ -88,6 +124,9 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         return self.__blocks
 
     def __init__(self, parent=None):
+        """
+        :param parent: QWidget
+        """
         pcef.QtGui.QPlainTextEdit.__init__(self, parent)
         self.__blocks = []
         # panels and modes
@@ -115,34 +154,19 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__selections = []
 
         # connect slots
-        self.blockCountChanged.connect(self.updateViewportMargins)
+        self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
-    def __initSettings(self):
-        self.settings = PropertyRegistry()
-        self.settings.valueChanged.connect(self.onSettingsChanged)
-        self.settings.addProperty("showWhiteSpaces", True)
-        self.settings.addProperty("tabSpace", constants.TAB_SIZE)
-
-    def __initStyle(self):
-        self.style = PropertyRegistry()
-        self.style.valueChanged.connect(self.onStyleChanged)
-        self.style.addProperty("font", constants.FONT)
-        self.style.addProperty("fontSize", constants.FONT_SIZE)
-        self.style.addProperty("background", constants.EDITOR_BACKGROUND)
-        self.style.addProperty("foreground", constants.EDITOR_FOREGROUND)
-        self.style.addProperty("selectionBackground",
-                               constants.SELECTION_BACKGROUND)
-        self.style.addProperty("selectionForeground",
-                               constants.SELECTION_FOREGROUND)
-        self.style.addProperty(
-            "panelBackground", constants.LINE_NBR_BACKGROUND)
-        self.style.addProperty(
-            "panelForeground", constants.LINE_NBR_FOREGROUND)
-        self.onStyleChanged("", "", "")
-
     def openFile(self, filePath, replaceTabsBySpaces=True):
+        """
+        Helper method to open a file in the editor.
+
+        :param filePath: The file path to open
+
+        :param replaceTabsBySpaces: True to replace tabs by spaces
+               (settings.value("tabSpace") * " ")
+        """
         with open(filePath, 'r') as f:
             data = f.read()
             encoding = chardet.detect(data)['encoding']
@@ -157,11 +181,19 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
     @pcef.QtCore.Slot()
     def saveToFile(self, filePath=None):
+        """
+        Save to file.
+
+        :param filePath: Optional file path. The file path is assumed to exists.
+        It can be None or empty to used the open file name.
+
+        :return: The operation status as a bool (True for success)
+        """
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
             else:
-                return
+                return False
         content = unicode(self.toPlainText()).encode(self.fileEncoding)
         with open(filePath, "w") as f:
             f.write(content)
@@ -169,6 +201,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.dirty = False
         self.__filePath = filePath
         self.textSaved.emit(filePath)
+        return True
 
     def installMode(self, mode):
         """
@@ -207,6 +240,9 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             return None
 
     def modes(self):
+        """
+        Returns the dictionary of modes
+        """
         return self.__modes
 
     def installPanel(self, panel, position=PanelPosition.LEFT):
@@ -220,7 +256,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         self.__panels[position][panel.name] = panel
         panel.install(self)
-        self.updateViewportMargins()
+        self.__updateViewportMargins()
 
     def panels(self):
         """
@@ -331,7 +367,203 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 return l
         return None
 
-    def resizePanels(self):
+    def resetZoom(self):
+        """
+        Resets the zoom value
+        """
+        self.style.setValue("fontSize", constants.FONT_SIZE)
+
+    def zoomIn(self, increment=1):
+        """
+        Zoom in the editor.
+
+        The effect is achieved by increasing the editor font size by the
+        increment value.
+
+        .. note: Panels that needs to be resized depending on the font size
+        should implement onStyleChanged and trigger an update.
+        """
+        self.style.setValue("fontSize",
+                            int(self.style.value("fontSize")) + increment)
+
+    def zoomOut(self, increment=1):
+        """
+        Zoom out the editor.
+
+        The effect is achieved by decreasing the editor font size by the
+        increment value.
+
+        .. note: Panels that needs to be resized depending on the font size
+        should implement onStyleChanged and trigger an update.
+        """
+        value = (int(self.style.value("fontSize")) - increment)
+        if value <= 0:
+            value = increment
+        self.style.setValue("fontSize", value)
+
+    def resizeEvent(self, e):
+        """
+        Resize event, lets the QPlainTextEdit handle the resize event than
+        resizes the panels
+
+        :param e: resize event
+        """
+        pcef.QtGui.QPlainTextEdit.resizeEvent(self, e)
+        self.__resizePanels()
+
+    def paintEvent(self, e):
+        """
+        Overrides paint event to update the list of visible blocks and emit
+        the painted event.
+
+        :param e: paint event
+        """
+        self.__updateVisibleBlocks(e)
+        pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
+        self.painted.emit(e)
+
+    def keyPressEvent(self, event):
+        """
+        Release the keyReleasedEvent. Use the stop properties of the event
+        instance to prevent the event to propagate.
+
+        :param event: QKeyEvent
+        """
+        event.stop = False
+        self.keyPressed.emit(event)
+        if not event.stop:
+            pcef.QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        self.postKeyPressed.emit(event)
+
+    def keyReleaseEvent(self, event):
+        """
+        Release the keyReleasedEvent. Use the stop properties of the event
+        instance to prevent the event to propagate.
+
+        :param event: QKeyEvent
+        """
+        event.stop = False
+        self.keyReleased.emit(event)
+        if not event.stop:
+            pcef.QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
+
+    def focusInEvent(self, event):
+        """
+        Emits the focusedIn signal
+        :param event:
+        :return:
+        """
+        self.focusedIn.emit(event)
+        pcef.QtGui.QPlainTextEdit.focusInEvent(self, event)
+
+    def mousePressEvent(self, event):
+        """
+        Emits mousePressed signal
+
+        :param event: QMouseEvent
+        """
+        event.stop = False
+        self.mousePressed.emit(event)
+        if not event.stop:
+            pcef.QtGui.QPlainTextEdit.mousePressEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        """
+        Emits mouseReleased signal.
+
+        :param event: QMouseEvent
+        """
+        event.stop = False
+        self.mouseReleased.emit(event)
+        if not event.stop:
+            pcef.QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+
+    def wheelEvent(self, event):
+        """
+        Emits the mouseWheelActivated signal.
+
+        :param event: QMouseEvent
+        """
+        event.stop = False
+        self.mouseWheelActivated.emit(event)
+        if not event.stop:
+            pcef.QtGui.QPlainTextEdit.wheelEvent(self, event)
+
+    def mouseMoveEvent(self, event):
+        """
+        Display any decoration tooltip and emits the mouseMoved event.
+        """
+        c = self.cursorForPosition(event.pos())
+        for sel in self.__selections:
+            if sel.containsCursor(c) and sel.tooltip:
+                pcef.QtGui.QToolTip.showText(
+                    self.mapToGlobal(event.pos()), sel.tooltip, self)
+                break
+        self.mouseMoved.emit(event)
+        pcef.QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
+
+    def setPlainText(self, txt):
+        """
+        Overrides the setPlainText method to keep track of the original text.
+        Emits the newTextSet event.
+
+        :param txt: The new text to set.
+        :return:
+        """
+        pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)
+        self.__originalText = txt
+        self.newTextSet.emit()
+
+    def __initSettings(self):
+        """
+        Init the settings PropertyRegistry
+        """
+        self.settings = PropertyRegistry()
+        self.settings.valueChanged.connect(self.__onSettingsChanged)
+        self.settings.addProperty("showWhiteSpaces", True)
+        self.settings.addProperty("tabSpace", constants.TAB_SIZE)
+
+    def __initStyle(self):
+        """
+        Init the style PropertyRegistry
+        """
+        self.style = PropertyRegistry()
+        self.style.valueChanged.connect(self.__resetStyleSheet)
+        self.style.addProperty("font", constants.FONT)
+        self.style.addProperty("fontSize", constants.FONT_SIZE)
+        self.style.addProperty("background", constants.EDITOR_BACKGROUND)
+        self.style.addProperty("foreground", constants.EDITOR_FOREGROUND)
+        self.style.addProperty("selectionBackground",
+                               constants.SELECTION_BACKGROUND)
+        self.style.addProperty("selectionForeground",
+                               constants.SELECTION_FOREGROUND)
+        self.style.addProperty(
+            "panelBackground", constants.LINE_NBR_BACKGROUND)
+        self.style.addProperty(
+            "panelForeground", constants.LINE_NBR_FOREGROUND)
+        self.__resetStyleSheet("", "", "")
+
+    def __updateVisibleBlocks(self, event):
+        """
+        Update the list of visible blocks/lines position.
+
+        :param event: paint event
+        """
+        self.__blocks[:] = []
+        block = self.firstVisibleBlock()
+        blockNumber = block.blockNumber()
+        top = int(self.blockBoundingGeometry(block).translated(
+            self.contentOffset()).top())
+        bottom = top + int(self.blockBoundingRect(block).height())
+        while block.isValid():
+            if block.isVisible():
+                self.__blocks.append((top, blockNumber+1))
+            block = block.next()
+            top = bottom
+            bottom = top + int(self.blockBoundingRect(block).height())
+            blockNumber = block.blockNumber()
+
+    def __resizePanels(self):
         """
         Resizes panels geometries
         """
@@ -374,6 +606,9 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             top += sh.height()
 
     def __updatePanels(self, rect, dy):
+        """
+        Updates the panel on update request. (Scroll, update clipping rect,...)
+        """
         for zones_id, zone in self.__panels.iteritems():
             for panel_id, panel in zone.iteritems():
                 if dy:
@@ -381,54 +616,16 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 else:
                     panel.update(0, rect.y(), panel.width(), rect.height())
         if rect.contains(self.viewport().rect()):
-            self.updateViewportMargins()
-
-
-    def resizeEvent(self, e):
-        """
-        Resize event, lets the QPlainTextEdit handle the resize event than
-        resizes the panels
-
-        :param e: resize event
-        """
-        pcef.QtGui.QPlainTextEdit.resizeEvent(self, e)
-        self.resizePanels()
-
-    def paintEvent(self, e):
-        self._updateVisibleBlocks(e)
-        pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
-        self.painted.emit(e)
-
-    def _updateVisibleBlocks(self, event):
-        """
-        Update the list of visible blocks/lines position.
-
-        :param event: paint event
-        """
-        self.__blocks[:] = []
-        block = self.firstVisibleBlock()
-        blockNumber = block.blockNumber()
-        top = int(self.blockBoundingGeometry(block).translated(
-            self.contentOffset()).top())
-        bottom = top + int(self.blockBoundingRect(block).height())
-        while block.isValid():
-            if block.isVisible():
-                self.__blocks.append((top, blockNumber+1))
-            block = block.next()
-            top = bottom
-            bottom = top + int(self.blockBoundingRect(block).height())
-            blockNumber = block.blockNumber()
-
-    def setPlainText(self, txt):
-        pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)
-        self.__originalText = txt
-        self.newTextSet.emit()
+            self.__updateViewportMargins()
 
     def __ontextChanged(self):
+        """
+        Updates dirty flag on text changed.
+        """
         txt = self.toPlainText()
         self.dirty = (txt != self.__originalText)
 
-    def updateViewportMargins(self):
+    def __updateViewportMargins(self):
         """
         Updates the viewport margins depending on the installed panels
         """
@@ -446,14 +643,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             bottom += panel.sizeHint().height()
         self.setViewportMargins(left, top, right, bottom)
 
-    def onStyleChanged(self, section, key, value):
-        """
-        Resets stylesheet.
-
-        :param section:
-        :param key:
-        :param value:
-        """
+    def __resetStyleSheet(self, section, key, value):
+        """ Resets stylesheet. """
         stylesheet = CODE_EDIT_STYLESHEET % {
             "background": self.style.value("background"),
             "foreground": self.style.value("foreground"),
@@ -463,5 +654,5 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.setFont(pcef.QtGui.QFont(self.style.value("font"),
                                       int(self.style.value("fontSize"))))
 
-    def onSettingsChanged(self, section, key, value):
+    def __onSettingsChanged(self, section, key, value):
         pass

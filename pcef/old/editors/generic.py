@@ -34,7 +34,7 @@ class GenericEditor(CodeEditorWidget):
         * :class:`pcef.modes.margin.RightMarginMode`
         * :class:`pcef.modes.sh.SyntaxHighlighterMode`
         * :class:`pcef.modes.clh.HighlightLineMode`
-        * :class:`pcef.modes.zoom.EditorZoomMode`
+        * :class:`pcef.modes.zoom.ZoomMode`
         * :class:`pcef.modes.indent.AutoIndentMode`
 
     **Installed panels**:

@@ -16,7 +16,11 @@ import pcef
 
 class TextDecoration(pcef.QtGui.QTextEdit.ExtraSelection):
     """
-    Helper class to quickly create a text decoration.
+    Helper class to quickly create a text decoration. The text decoration is an
+    utility class that adds a few utility methods over the Qt ExtraSelection.
+
+    In addition to the helper methods, a tooltip can be added to a decoration.
+    Usefull for errors marks and so on...
     """
 
     def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
