@@ -16,20 +16,6 @@ from pcef import constants
 from pcef.core.panel import Panel
 
 
-class Block:
-    def __init__(self, left, top, width, height, line_nbr):
-        self.left = left
-        self.top = top
-        self.width = width
-        self.height = height
-        self.line_nbr = line_nbr
-        self.__selecting = False
-        self.__sel_start = 0
-
-    def __repr__(self):
-        return "{0} - [{1}, {2}]".format(self.line_nbr, self.top, self.height)
-
-
 class LineNumberPanel(Panel):
     """
     The liner number panel displays the document line numbers.
