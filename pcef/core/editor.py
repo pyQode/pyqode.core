@@ -192,6 +192,9 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         except KeyError:
             return None
 
+    def modes(self):
+        return self.__modes
+
     def installPanel(self, panel, position=PanelPosition.LEFT):
         """
         Install a panel on the QCodeEdit
@@ -204,6 +207,12 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__panels[position][panel.name] = panel
         panel.install(self)
         self.updateViewportMargins()
+
+    def panels(self):
+        """
+        Returns the panels dictionary
+        """
+        return self.__panels
 
     def addDecoration(self, decoration):
         """
