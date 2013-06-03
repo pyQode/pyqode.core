@@ -13,7 +13,6 @@ Integrates the generic editor using the pcef qt designer plugin.
 """
 import os
 import sys
-
 os.environ.setdefault("QT_API", "pyqt")
 from pcef import QtCore, QtGui
 from ui import simple_editor_ui
@@ -23,6 +22,17 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
+        # Add modes to the modes menu
+        for k, v in self.genericEditor.modes().iteritems():
+            a = QtGui.QAction(self.menuModes)
+            a.setText(k)
+            self.menuModes.addAction(a)
+        # Add panels to the panels menu
+        for zones, panel_dic in self.genericEditor.panels().iteritems():
+            for k, v in panel_dic.iteritems():
+                a = QtGui.QAction(self.menuModes)
+                a.setText(k)
+                self.menuPanels.addAction(a)
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):
