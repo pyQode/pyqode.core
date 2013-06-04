@@ -21,7 +21,7 @@ class RightMarginMode(Mode):
     Display the right margin
     """
     #: Mode identifier
-    IDENTIFIER = "Right margin"
+    IDENTIFIER = "RightMargin"
     _DESCRIPTION = "Draw the right margin on the text document"
 
     def __init__(self):
