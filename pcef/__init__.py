@@ -54,6 +54,7 @@ from core.editor import QCodeEdit
 from core.mode import Mode
 from core.modes import CaretLineHighlighterMode
 from core.modes import RightMarginMode
+from core.modes import PygmentSyntaxHighlighterMode
 from core.panel import Panel
 from core.panels import LineNumberPanel
 from core.properties import PropertyRegistry

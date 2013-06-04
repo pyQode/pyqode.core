@@ -197,10 +197,10 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         content = unicode(self.toPlainText()).encode(self.fileEncoding)
         with open(filePath, "w") as f:
             f.write(content)
+        self.textSaved.emit(filePath)
         self.newTextSet.emit()
         self.dirty = False
         self.__filePath = filePath
-        self.textSaved.emit(filePath)
         return True
 
     def installMode(self, mode):
@@ -339,6 +339,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             self.textCursor().selectionStart()).blockNumber() + 1
         end = doc.findBlock(
             self.textCursor().selectionEnd()).blockNumber() + 1
+        if self.textCursor().columnNumber() == 0:
+            end -= 1
         return start, end
 
     def linePos(self, line_number):

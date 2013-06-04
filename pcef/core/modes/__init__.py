@@ -14,3 +14,5 @@ This package contains the core modes (language independant)
 from pcef.core.modes.caret_line_highlight import CaretLineHighlighterMode
 from pcef.core.modes.right_margin import RightMarginMode
 from pcef.core.modes.zoom import ZoomMode
+from pcef.core.modes.pygments_syntax_highlighter import \
+    PygmentSyntaxHighlighterMode
