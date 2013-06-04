@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
-# PCEF - Python/Qt Code Editing Framework
+# PCEF
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
 # This software is released under the LGPLv3 license.
@@ -9,23 +9,25 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains the core class of pcef
+This package contains python specific modes, panels and editors.
 """
-from pcef.core import panels
-from pcef.core import modes
+from pcef.python import panels
+from pcef.python import modes
 
 from pcef.core.editor import QCodeEdit
 from pcef.core.panels import LineNumberPanel
 from pcef.core.modes import CaretLineHighlighterMode
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
-from pcef.core.modes import PygmentsHighlighterMode
+from pcef.python.modes import PythonHighlighterMode
 from pcef.constants import PanelPosition
 
 
-class QGenericCodeEdit(QCodeEdit):
+
+class QPythonCodeEdit(QCodeEdit):
     """
-    Extends QCodeEdit with a hardcoded set of modes and panels.
+    Extends QCodeEdit with a hardcoded set of modes and panels specifics to
+    a python code editor widget
 
     **Panels:**
         * line number panel
@@ -42,5 +44,5 @@ class QGenericCodeEdit(QCodeEdit):
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
-        self.installMode(PygmentsHighlighterMode())
+        self.installMode(PythonHighlighterMode(self.document()))
         self.installMode(ZoomMode())

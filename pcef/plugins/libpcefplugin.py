@@ -87,7 +87,17 @@ class QGenericCodeEditPlugin(QCodeEditPlugin):
         return pcef.QGenericCodeEdit(parent)
 
 
-if __name__ == '__main__': # some tests
+class QPythonCodeEditPlugin(QCodeEditPlugin):
+    _module = 'pcef'        # path to the widget's module
+    _class = 'QPythonCodeEdit'    # name of the widget class
+    _name = "QPythonCodeEdit"
+    _icon = None
+
+    def createWidget(self, parent):
+        return pcef.QPythonCodeEdit(parent)
+
+
+if __name__ == '__main__':  # some tests
     app = QApplication([])
     plugin = QGenericCodeEditPlugin()
     print(plugin)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Thu May 30 23:47:41 2013
+# Created: Tue Jun  4 15:00:13 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,9 +33,9 @@ class Ui_MainWindow(object):
         self.gridLayout.setMargin(1)
         self.gridLayout.setSpacing(1)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.genericEditor = QGenericCodeEdit(self.centralwidget)
-        self.genericEditor.setObjectName(_fromUtf8("genericEditor"))
-        self.gridLayout.addWidget(self.genericEditor, 0, 0, 1, 1)
+        self.editor = QGenericCodeEdit(self.centralwidget)
+        self.editor.setObjectName(_fromUtf8("editor"))
+        self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1078, 25))
@@ -82,8 +82,8 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionSave)
 
         self.retranslateUi(MainWindow)
-        QtCore.QObject.connect(self.genericEditor, QtCore.SIGNAL(_fromUtf8("dirtyChanged(bool)")), self.actionSave.setEnabled)
-        QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL(_fromUtf8("triggered()")), self.genericEditor.saveToFile)
+        QtCore.QObject.connect(self.editor, QtCore.SIGNAL(_fromUtf8("dirtyChanged(bool)")), self.actionSave.setEnabled)
+        QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL(_fromUtf8("triggered()")), self.editor.saveToFile)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

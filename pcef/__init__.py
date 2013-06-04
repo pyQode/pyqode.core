@@ -54,10 +54,13 @@ from core.editor import QCodeEdit
 from core.mode import Mode
 from core.modes import CaretLineHighlighterMode
 from core.modes import RightMarginMode
-from core.modes import PygmentSyntaxHighlighterMode
+from core.modes import PygmentsHighlighterMode
 from core.panel import Panel
 from core.panels import LineNumberPanel
 from core.properties import PropertyRegistry
 # -- python if python is installed
 if python_support:
-    pass
+    from pcef import python
+    from python import QPythonCodeEdit
+    # from python.modes import
+    # from python.panels import

@@ -319,7 +319,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         return qcolor
 
 
-class PygmentSyntaxHighlighterMode(Mode):
+class PygmentsHighlighterMode(Mode):
     """
     This mode enable syntax highlighting (using the QPygmentsHighlighter).
 

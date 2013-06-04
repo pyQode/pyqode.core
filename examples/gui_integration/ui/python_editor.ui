@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>751</width>
-    <height>484</height>
+    <width>1078</width>
+    <height>831</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PCEF - Python Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="PythonEditor" name="genericEditor"/>
+     <widget class="QPythonCodeEdit" name="editor"/>
     </item>
    </layout>
   </widget>
@@ -31,7 +31,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>751</width>
+     <width>1078</width>
      <height>25</height>
     </rect>
    </property>
@@ -42,17 +42,11 @@
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
-    <addaction name="actionSave_as"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
-    <widget class="QMenu" name="menuStyle">
-     <property name="title">
-      <string>Style</string>
-     </property>
-    </widget>
     <widget class="QMenu" name="menuPanels">
      <property name="title">
       <string>Panels</string>
@@ -63,7 +57,6 @@
       <string>Modes</string>
      </property>
     </widget>
-    <addaction name="menuStyle"/>
     <addaction name="menuPanels"/>
     <addaction name="menuModes"/>
    </widget>
@@ -82,7 +75,6 @@
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="actionSave_as"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -100,6 +92,9 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="examples.qrc">
      <normaloff>:/example_icons/rc/document-save.png</normaloff>:/example_icons/rc/document-save.png</iconset>
@@ -114,56 +109,32 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionSave_as">
-   <property name="icon">
-    <iconset resource="examples.qrc">
-     <normaloff>:/example_icons/rc/document-save-as.png</normaloff>:/example_icons/rc/document-save-as.png</iconset>
-   </property>
-   <property name="text">
-    <string>Save as</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionWhiteStyle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>White</string>
-   </property>
-  </action>
-  <action name="actionDarkStyle">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Dark</string>
-   </property>
-  </action>
   <action name="actionPanel">
    <property name="text">
     <string>Panel</string>
    </property>
   </action>
-  <action name="actionModes_2">
+  <action name="actionModes">
    <property name="text">
     <string>Modes</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PythonEditor</class>
+   <class>QPythonCodeEdit</class>
+   <extends>QCodeEdit</extends>
+   <header>pcef</header>
+  </customwidget>
+  <customwidget>
+   <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef/editors/python.h</header>
+   <header>pcef</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="QGenericCodeEdit" name="genericEditor"/>
+     <widget class="QGenericCodeEdit" name="editor"/>
     </item>
    </layout>
   </widget>
@@ -142,7 +142,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>genericEditor</sender>
+   <sender>editor</sender>
    <signal>dirtyChanged(bool)</signal>
    <receiver>actionSave</receiver>
    <slot>setEnabled(bool)</slot>
@@ -160,7 +160,7 @@
   <connection>
    <sender>actionSave</sender>
    <signal>triggered()</signal>
-   <receiver>genericEditor</receiver>
+   <receiver>editor</receiver>
    <slot>saveToFile()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -15,10 +15,10 @@ import os
 import sys
 os.environ.setdefault("QT_API", "pyqt")
 from pcef import QtCore, QtGui
-from ui import simple_editor_ui
+from ui import python_editor_ui
 
 
-class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
+class PythonEditorWindow(QtGui.QMainWindow, python_editor_ui.Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
@@ -39,6 +39,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
             pass
         except AttributeError:
             pass
+        print self.editor.style.dump()
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):
@@ -50,7 +51,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    win = SimpleEditorWindow()
+    win = PythonEditorWindow()
     win.show()
     app.exec_()
 
