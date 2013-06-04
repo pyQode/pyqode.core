@@ -33,13 +33,17 @@ class PythonEditorWindow(QtGui.QMainWindow, python_editor_ui.Ui_MainWindow):
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
                 self.menuPanels.addAction(a)
+        # create action group for styles
+        group = QtGui.QActionGroup(self)
+        group.addAction(self.actionDark)
+        group.addAction(self.actionLight)
+        self.actionLight.setChecked(True)
         try:
             self.editor.openFile(__file__)
         except (OSError, IOError) as e:
             pass
         except AttributeError:
             pass
-        print self.editor.style.dump()
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):

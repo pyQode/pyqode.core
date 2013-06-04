@@ -22,7 +22,11 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="QPythonCodeEdit" name="editor"/>
+     <widget class="QPythonCodeEdit" name="editor">
+      <property name="tabStopWidth">
+       <number>40</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -57,8 +61,16 @@
       <string>Modes</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuStyle">
+     <property name="title">
+      <string>Style</string>
+     </property>
+     <addaction name="actionLight"/>
+     <addaction name="actionDark"/>
+    </widget>
     <addaction name="menuPanels"/>
     <addaction name="menuModes"/>
+    <addaction name="menuStyle"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -124,6 +136,22 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionLight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="actionDark">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Dark</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -140,5 +168,70 @@
  <resources>
   <include location="examples.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>editor</sender>
+   <signal>dirtyChanged(bool)</signal>
+   <receiver>actionSave</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLight</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>editor</receiver>
+   <slot>useLightStyle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDark</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>editor</receiver>
+   <slot>useDarkStyle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>editor</receiver>
+   <slot>saveToFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>538</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

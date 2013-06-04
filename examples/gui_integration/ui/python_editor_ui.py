@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'python_editor.ui'
 #
-# Created: Tue Jun  4 15:00:12 2013
+# Created: Tue Jun  4 23:46:07 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,7 @@ class Ui_MainWindow(object):
         self.gridLayout.setSpacing(1)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.editor = QPythonCodeEdit(self.centralwidget)
+        self.editor.setTabStopWidth(40)
         self.editor.setObjectName(_fromUtf8("editor"))
         self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -48,6 +49,8 @@ class Ui_MainWindow(object):
         self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuModes = QtGui.QMenu(self.menuSettings)
         self.menuModes.setObjectName(_fromUtf8("menuModes"))
+        self.menuStyle = QtGui.QMenu(self.menuSettings)
+        self.menuStyle.setObjectName(_fromUtf8("menuStyle"))
         MainWindow.setMenuBar(self.menubar)
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
@@ -71,17 +74,30 @@ class Ui_MainWindow(object):
         self.actionModes.setObjectName(_fromUtf8("actionModes"))
         self.actionAbout = QtGui.QAction(MainWindow)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+        self.actionLight = QtGui.QAction(MainWindow)
+        self.actionLight.setCheckable(True)
+        self.actionLight.setObjectName(_fromUtf8("actionLight"))
+        self.actionDark = QtGui.QAction(MainWindow)
+        self.actionDark.setCheckable(True)
+        self.actionDark.setObjectName(_fromUtf8("actionDark"))
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
+        self.menuStyle.addAction(self.actionLight)
+        self.menuStyle.addAction(self.actionDark)
         self.menuSettings.addAction(self.menuPanels.menuAction())
         self.menuSettings.addAction(self.menuModes.menuAction())
+        self.menuSettings.addAction(self.menuStyle.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuSettings.menuAction())
         self.toolBar.addAction(self.actionOpen)
         self.toolBar.addAction(self.actionSave)
 
         self.retranslateUi(MainWindow)
+        QtCore.QObject.connect(self.editor, QtCore.SIGNAL(_fromUtf8("dirtyChanged(bool)")), self.actionSave.setEnabled)
+        QtCore.QObject.connect(self.actionLight, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.editor.useLightStyle)
+        QtCore.QObject.connect(self.actionDark, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.editor.useDarkStyle)
+        QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL(_fromUtf8("triggered()")), self.editor.saveToFile)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -90,6 +106,7 @@ class Ui_MainWindow(object):
         self.menuSettings.setTitle(_translate("MainWindow", "Settings", None))
         self.menuPanels.setTitle(_translate("MainWindow", "Panels", None))
         self.menuModes.setTitle(_translate("MainWindow", "Modes", None))
+        self.menuStyle.setTitle(_translate("MainWindow", "Style", None))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
         self.actionOpen.setText(_translate("MainWindow", "Open", None))
         self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O", None))
@@ -98,6 +115,8 @@ class Ui_MainWindow(object):
         self.actionPanel.setText(_translate("MainWindow", "Panel", None))
         self.actionModes.setText(_translate("MainWindow", "Modes", None))
         self.actionAbout.setText(_translate("MainWindow", "About", None))
+        self.actionLight.setText(_translate("MainWindow", "Light", None))
+        self.actionDark.setText(_translate("MainWindow", "Dark", None))
 
 from pcef import QPythonCodeEdit
 import examples_rc

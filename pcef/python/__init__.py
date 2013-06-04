@@ -22,6 +22,8 @@ from pcef.core.modes import ZoomMode
 from pcef.python.modes import PythonHighlighterMode
 from pcef.constants import PanelPosition
 
+from pcef.qt import QtCore
+from pcef import constants
 
 
 class QPythonCodeEdit(QCodeEdit):
@@ -37,6 +39,9 @@ class QPythonCodeEdit(QCodeEdit):
         * document word completion
         * generic syntax highlighter (pygments)
     """
+    DARK_STYLE = 0
+    LIGHT_STYLE = 1
+
     def __init__(self, parent=None):
         QCodeEdit.__init__(self, parent)
         self.setLineWrapMode(self.NoWrap)
@@ -46,3 +51,39 @@ class QPythonCodeEdit(QCodeEdit):
         self.installMode(RightMarginMode())
         self.installMode(PythonHighlighterMode(self.document()))
         self.installMode(ZoomMode())
+
+    @QtCore.Slot()
+    def useDarkStyle(self, use=True):
+        if not use:
+            return
+        for k, v in constants.DEFAULT_DARK_STYLES.iteritems():
+            self.style.setValue(k, v, "Python")
+        self.style.setValue("background", "#252525")
+        self.style.setValue("foreground", "#A9B7C6")
+        self.style.setValue("caretLineBackground", "#2d2d2d")
+        self.style.setValue("selectionBackground",
+                            '#78879b')
+        self.style.setValue("selectionForeground",
+                            "white")
+        self.style.setValue("panelBackground",
+                            '#302F2F')
+        self.style.setValue("panelForeground",
+                            '#808080')
+    @QtCore.Slot()
+    def useLightStyle(self, use=True):
+        if not use:
+            return
+        for k, v in constants.DEFAULT_STYLES.iteritems():
+            self.style.setValue(k, v, "Python")
+        self.style.setValue("background", "white")
+        self.style.setValue("foreground", "black")
+        self.style.setValue("caretLineBackground", "#E4EDF8")
+        self.style.setValue("selectionBackground",
+                            constants.SELECTION_BACKGROUND)
+        self.style.setValue("selectionForeground",
+                            constants.SELECTION_FOREGROUND)
+        self.style.setValue("panelBackground",
+                            constants.LINE_NBR_BACKGROUND)
+        self.style.setValue("panelForeground",
+                            constants.LINE_NBR_FOREGROUND)
+
