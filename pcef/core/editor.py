@@ -339,7 +339,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             self.textCursor().selectionStart()).blockNumber() + 1
         end = doc.findBlock(
             self.textCursor().selectionEnd()).blockNumber() + 1
-        if self.textCursor().columnNumber() == 0:
+        if start != end and self.textCursor().columnNumber() == 0:
             end -= 1
         return start, end
 

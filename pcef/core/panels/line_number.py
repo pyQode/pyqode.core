@@ -128,11 +128,13 @@ class LineNumberPanel(Panel):
         bold_font.setBold(True)
         # get selection range
         sel_start, sel_end = self.editor.selectionRange()
+        has_sel = sel_start != sel_end
+        cl = self.editor.cursorPosition[0]
         # draw every visible blocks
         for top, blockNumber in self.editor.visibleBlocks:
             painter.setPen(self.__pen)
-            if sel_start <= blockNumber <= sel_end or \
-               (sel_start == sel_end and sel_start == blockNumber):
+            if ((has_sel and sel_start <= blockNumber <= sel_end) or
+                    (not has_sel and cl == blockNumber)):
                 painter.setFont(bold_font)
             else:
                 painter.setFont(font)
