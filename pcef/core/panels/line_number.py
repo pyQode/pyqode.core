@@ -130,11 +130,11 @@ class LineNumberPanel(Panel):
         sel_start, sel_end = self.editor.selectionRange()
         # draw every visible blocks
         for top, blockNumber in self.editor.visibleBlocks:
-                painter.setPen(self.__pen)
-                if sel_start <= blockNumber <= sel_end or \
-                   (sel_start == sel_end and sel_start == blockNumber +1):
-                    painter.setFont(bold_font)
-                else:
-                    painter.setFont(font)
-                painter.drawText(0, top, width, height,
-                                 pcef.QtCore.Qt.AlignRight, str(blockNumber))
+            painter.setPen(self.__pen)
+            if sel_start <= blockNumber <= sel_end or \
+               (sel_start == sel_end and sel_start == blockNumber):
+                painter.setFont(bold_font)
+            else:
+                painter.setFont(font)
+            painter.drawText(0, top, width, height,
+                             pcef.QtCore.Qt.AlignRight, str(blockNumber))
