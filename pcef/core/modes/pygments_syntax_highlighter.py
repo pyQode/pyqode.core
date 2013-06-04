@@ -11,6 +11,8 @@
 """
 This module contains Syntax Highlighting mode and the QSyntaxHighlighter based
 on pygments.
+
+.. note: This code is taken and adapted from the IPython project.
 """
 from pcef.qt.QtCore import Qt, Signal
 from pcef.core.mode import Mode
