@@ -159,7 +159,8 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
 
     def setLexerFromFilename(self, filename):
         """
-        Change the lexer based on the filename (actually only the extension is needed)
+        Change the lexer based on the filename (actually only the extension is
+        needed)
 
         :param filename: Filename or extension
         """
