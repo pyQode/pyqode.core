@@ -2,30 +2,15 @@
 from pcef.qt.QtCore import QRegExp
 from pcef.qt.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 from pcef.core.mode import Mode
-
-
-# Python specific styles
-DEFAULT_STYLES = {
-    'keyword': '#204a87 bold',
-    'operator': 'orange',
-    'punctuation': 'darkGray',
-    'decorator': '#204a87',
-    'brace': '#404040',
-    'class': '#5c3566 bold',
-    'function': '#a48000 bold',
-    'string': '#4e9a06',
-    'docstring': '#3e6a01',
-    'comment': '#808080 italic',
-    'self': '#94558D italic',
-    'numbers': '#6897B3',
-    'predefined': 'magenta',
-    'docstringTag': '#1e5a01 bold',
-}
+from pcef import constants
 
 
 class PythonHighlighterMode(QSyntaxHighlighter, Mode):
     """Syntax highlighter for the Python language.
     """
+    IDENTIFIER = "PythonHighlighter"
+    _DESCRIPTION = "Custom QSyntaxHighlighter to highlight python syntax"
+
     # Python keywords
     keywords = [
         'and', 'assert', 'break', 'class', 'continue', 'def',
@@ -50,7 +35,9 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
     ]
 
     docstringTags = [
-        ":param", ":type", ":return", ":rtype"
+        ":param", ":type", ":return", ":rtype", ":raise", ":except",
+        "@param", "@type", "@return", "@rtype", "@raise", "@except",
+        ".. note", ".. warning"
     ]
 
     # Python braces
@@ -113,13 +100,17 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
         self.rules = [(QRegExp(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
+    def onStyleChanged(self, section, key, value):
+        if section == "Python" or key == "background" or key == "foreground":
+            self.rehighlight()
+
     def format(self, style_key):
         """Return a QTextCharFormat with the given attributes.
         """
         value = self.editor.style.value(style_key, "Python")
         tokens = value.split(" ")
         color = tokens[0]
-        style = ""
+        styles = tokens[1:]
         try:
             style = tokens[1]
         except IndexError:
@@ -129,15 +120,17 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
 
         _format = QTextCharFormat()
         _format.setForeground(_color)
-        if 'bold' in style:
+        if 'bold' in styles:
             _format.setFontWeight(QFont.Bold)
-        if 'italic' in style:
+        if 'italic' in styles:
             _format.setFontItalic(True)
+        if 'underlined' in styles:
+            _format.setFontUnderline(True)
         return _format
 
     def install(self, editor):
         Mode.install(self, editor)
-        for k, v in DEFAULT_STYLES.iteritems():
+        for k, v in constants.DEFAULT_STYLES.iteritems():
             self.editor.style.addProperty(k, v, "Python")
 
     def onStateChanged(self, state):
@@ -158,6 +151,28 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
                 index = expression.pos(nth)
                 length = len(expression.cap(nth))
                 self.setFormat(index, length, self.format(fm))
+                index = expression.indexIn(text, index + length)
+
+        # Do string highlighting
+        for expression, nth, fm in self.rules:
+            index = expression.indexIn(text, 0)
+            while index >= 0:
+                if fm == "string":
+                    # We actually want the index of the nth match
+                    index = expression.pos(nth)
+                    length = len(expression.cap(nth))
+                    self.setFormat(index, length, self.format(fm))
+                index = expression.indexIn(text, index + length)
+
+        # Do docstring highlighting
+        for expression, nth, fm in self.rules:
+            index = expression.indexIn(text, 0)
+            while index >= 0:
+                if fm == "docstring":
+                    # We actually want the index of the nth match
+                    index = expression.pos(nth)
+                    length = len(expression.cap(nth))
+                    self.setFormat(index, length, self.format(fm))
                 index = expression.indexIn(text, index + length)
 
         self.setCurrentBlockState(0)

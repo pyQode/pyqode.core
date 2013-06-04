@@ -43,6 +43,42 @@ SELECTION_FOREGROUND = "#ffffff"
 LINE_NBR_BACKGROUND = "#dddddd"
 LINE_NBR_FOREGROUND = "#888888"
 
+# Default highlighter styles values, mostly for the python highlighter but they
+# may be shared between different highlighter/languages
+DEFAULT_STYLES = {
+    'keyword': '#808000 bold',
+    'operator': 'orange',
+    'punctuation': 'darkGray',
+    'decorator': '#808000',
+    'brace': '#404040',
+    'class': '#800080 bold',
+    'function': '#800080',
+    'string': '#008000',
+    'docstring': '#000080',
+    'comment': '#008000 italic',
+    'self': '#94558D italic',
+    'numbers': '#000080',
+    'predefined': 'maroon',
+    'docstringTag': '#0000FF bold underlined',
+}
+
+DEFAULT_DARK_STYLES = {
+    'keyword': '#CC7832 bold',
+    'operator': '#A9B7C6',
+    'punctuation': '#A9B7C6',
+    'decorator': '#BBB529',
+    'brace': '#AAAAAA',
+    'class': '#A9B7C6 bold',
+    'function': '#A9B7C6',
+    'string': '#A5C261',
+    'docstring': '#629755',
+    'comment': '#808080 italic',
+    'self': '#94558D italic',
+    'numbers': '#6897B3',
+    'predefined': '#CC7832',
+    'docstringTag': '#427735 bold underlined'
+}
+
 #
 # Default settings value
 #

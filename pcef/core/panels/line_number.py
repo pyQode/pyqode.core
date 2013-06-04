@@ -114,8 +114,6 @@ class LineNumberPanel(Panel):
     def paintEvent(self, event):
         """
         Paints the line numbers
-
-        :return:
         """
         # fill background
         painter = pcef.QtGui.QPainter(self)
