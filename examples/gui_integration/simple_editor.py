@@ -32,6 +32,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
             for k, v in panel_dic.iteritems():
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
+                a.setCheckable(True)
+                a.setChecked(True)
+                a.changed.connect(self.onPanelCheckStateChanged)
+                a.panel = v
                 self.menuPanels.addAction(a)
         try:
             self.editor.openFile(__file__)
@@ -46,6 +50,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
             self, "Choose a file", os.path.expanduser("~"))
         if filePath:
             self.editor.openFile(filePath)
+
+    def onPanelCheckStateChanged(self):
+        action = self.sender()
+        action.panel.enabled = action.isChecked()
 
 
 def main():
