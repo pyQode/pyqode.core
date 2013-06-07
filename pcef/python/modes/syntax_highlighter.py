@@ -18,8 +18,35 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
         'for', 'from', 'global', 'if', 'import', 'in',
         'is', 'lambda', 'not', 'or', 'pass', 'print',
         'raise', 'return', 'try', 'while', 'yield',
-        'None', 'True', 'False',
+        'None', 'True', 'False', "with"
     ]
+
+    builtins = [
+        "__import__", "abs", "all", "any", "apply", "basestring", "bin", "bool",
+        "buffer", "bytearray", "bytes", "callable", "chr", "classmethod", "cmp",
+        "coerce", "compile", "complex", "delattr", "dict", "dir", "divmod",
+        "enumerate", "eval", "execfile", "exit", "file", "filter", "float",
+        "frozenset", "getattr", "globals", "hasattr", "hash", "hex", "id", "as",
+        "input", "int", "intern", "isinstance", "issubclass", "iter", "len",
+        "list", "locals", "long", "map", "max", "min", "next", "object", "oct",
+        "open", "ord", "pow", "property", "range", "raw_input", "reduce",
+        "reload", "repr", "reversed", "round", "set", "setattr", "slice",
+        "sorted", "staticmethod", "str", "sum", "super", "tuple", "type",
+        "unichr", "unicode", "vars", "xrange", "zip", "None", "Ellipsis",
+        "NotImplemented", "False", "True", "ArithmeticError", "AssertionError",
+        "AttributeError", "BaseException", "DeprecationWarning", "EOFError",
+        "EnvironmentError", "Exception", "FloatingPointError", "FutureWarning",
+        "GeneratorExit", "IOError", "ImportError", "ImportWarning",
+        "IndentationError", "IndexError", "KeyError", "KeyboardInterrupt",
+        "LookupError", "MemoryError", "NameError", "NotImplemented",
+        "NotImplementedError", "OSError", "OverflowError", "OverflowWarning",
+        "PendingDeprecationWarning", "ReferenceError", "RuntimeError",
+        "RuntimeWarning", "StandardError", "StopIteration", "SyntaxError",
+        "SyntaxWarning", "SystemError", "SystemExit", "TabError", "TypeError",
+        "UnboundLocalError", "UnicodeDecodeError", "UnicodeEncodeError",
+        "UnicodeError", "UnicodeTranslateError", "UnicodeWarning",
+        "UserWarning", "ValueError", "VMSError", "Warning", "WindowsError",
+        "ZeroDivisionError"]
 
     # Python operators
     operators = [
@@ -61,6 +88,8 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
         # Keyword, operator, and brace rules
         rules += [(r'\b%s\b' % w, 0, 'keyword')
             for w in PyHighlighterMode.keywords]
+        rules += [(r'\b%s\b' % w, 0, 'builtins')
+            for w in PyHighlighterMode.builtins]
         rules += [(r'%s\b' % w, 0, 'docstringTag')
             for w in PyHighlighterMode.docstringTags]
         rules += [(r'%s' % b, 0, 'brace')

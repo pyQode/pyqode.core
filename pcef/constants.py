@@ -48,7 +48,8 @@ LINE_NBR_FOREGROUND = "#888888"
 # may be shared between different highlighter/languages
 DEFAULT_STYLES = {
     'keyword': '#808000 bold',
-    'operator': 'orange',
+    'builtins': '#808000',
+    'operator': 'darkGray',
     'punctuation': 'darkGray',
     'decorator': '#808000',
     'brace': '#404040',
@@ -59,12 +60,13 @@ DEFAULT_STYLES = {
     'comment': '#008000 italic',
     'self': '#94558D italic',
     'numbers': '#000080',
-    'predefined': 'maroon',
+    'predefined': '#B200B2',
     'docstringTag': '#0000FF bold underlined',
 }
 
 DEFAULT_DARK_STYLES = {
     'keyword': '#CC7832 bold',
+    'builtins': '#CC7832',
     'operator': '#A9B7C6',
     'punctuation': '#A9B7C6',
     'decorator': '#BBB529',
@@ -76,7 +78,7 @@ DEFAULT_DARK_STYLES = {
     'comment': '#808080 italic',
     'self': '#94558D italic',
     'numbers': '#6897B3',
-    'predefined': '#CC7832',
+    'predefined': '#B200B2',
     'docstringTag': '#427735 bold underlined'
 }
 

@@ -71,6 +71,10 @@ class QPythonCodeEdit(QCodeEdit):
                             '#302F2F')
         self.style.setValue("panelForeground",
                             '#808080')
+        self.style.setValue("whiteSpaceForeground",
+                            '#404040')
+        self.pyHighlighter.rehighlight()
+
     @QtCore.Slot()
     def useLightStyle(self, use=True):
         if not use:
@@ -88,4 +92,7 @@ class QPythonCodeEdit(QCodeEdit):
                             constants.LINE_NBR_BACKGROUND)
         self.style.setValue("panelForeground",
                             constants.LINE_NBR_FOREGROUND)
+        self.style.setValue("whiteSpaceForeground",
+                            constants.EDITOR_WS_FOREGROUND)
+        self.pyHighlighter.rehighlight()
 
