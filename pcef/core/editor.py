@@ -424,6 +424,30 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
+    def getLineIndent(self):
+        original_cursor = self.textCursor()
+        cursor = QTextCursor(original_cursor)
+        cursor.movePosition(QTextCursor.StartOfLine)
+        cursor.movePosition(QTextCursor.EndOfLine,
+                            QTextCursor.KeepAnchor)
+        line = cursor.selectedText()
+        indentation = len(line) - len(line.lstrip())
+        self.setTextCursor(original_cursor)
+        return indentation
+
+    def doHomeKey(self, event, select=False):
+        # get nb char to first significative char
+        delta = self.textCursor().positionInBlock() - self.getLineIndent()
+        if delta:
+            tc = self.textCursor()
+            move = QTextCursor.MoveAnchor
+            if select:
+                move = QTextCursor.KeepAnchor
+            tc.movePosition(
+                QTextCursor.Left, move, delta)
+            self.setTextCursor(tc)
+            event.stop = True
+
     def keyPressEvent(self, event):
         """
         Release the keyReleasedEvent. Use the stop properties of the event
@@ -439,6 +463,9 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         elif replace and event.key() == pcef.QtCore.Qt.Key_Backtab:
             self.unIndent()
             event.stop = True
+        elif event.key() == pcef.QtCore.Qt.Key_Home:
+            self.doHomeKey(event, int(event.modifiers()) &
+                                  pcef.QtCore.Qt.ShiftModifier)
         self.keyPressed.emit(event)
         if not event.stop:
             pcef.QtGui.QPlainTextEdit.keyPressEvent(self, event)
@@ -466,10 +493,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             startOffset = 0
             for i in range(nb_lines):
                 cursor.movePosition(QTextCursor.StartOfLine)
-                cursor.movePosition(QTextCursor.EndOfLine,
-                                    QTextCursor.KeepAnchor)
-                line = cursor.selectedText()
-                indentation = len(line) - len(line.lstrip())
+                indentation = self.getLineIndent()
                 nbSpaces = size - (indentation % size)
                 cursor.movePosition(QTextCursor.StartOfLine)
                 cursor.insertText(" " * nbSpaces)
@@ -510,10 +534,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             nbSpacesRemoved = 0
             for i in range(nb_lines):
                 cursor.movePosition(QTextCursor.StartOfLine)
-                cursor.movePosition(QTextCursor.EndOfLine,
-                                    QTextCursor.KeepAnchor)
-                line = cursor.selectedText()
-                indentation = len(line) - len(line.lstrip())
+                indentation = self.getLineIndent()
                 nbSpaces = indentation - (indentation - (indentation % size))
                 if not nbSpaces:
                     nbSpaces = size
