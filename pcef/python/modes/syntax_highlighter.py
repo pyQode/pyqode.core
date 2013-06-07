@@ -8,7 +8,7 @@ from pcef import constants
 class PythonHighlighterMode(QSyntaxHighlighter, Mode):
     """Syntax highlighter for the Python language.
     """
-    IDENTIFIER = "PythonHighlighter"
+    IDENTIFIER = "pythonHighlighter"
     _DESCRIPTION = "Custom QSyntaxHighlighter to highlight python syntax"
 
     # Python keywords

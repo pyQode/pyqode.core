@@ -154,7 +154,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__selections = []
 
         # connect slots
-        self.blockCountChanged.connect(self.__updateViewportMargins)
+        self.blockCountChanged.connect(self.updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
@@ -256,7 +256,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         self.__panels[position][panel.name] = panel
         panel.install(self)
-        self.__updateViewportMargins()
+        self.updateViewportMargins()
 
     def panels(self):
         """
@@ -613,6 +613,10 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.mouseMoved.emit(event)
         pcef.QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
+    def showEvent(self, QShowEvent):
+        pcef.QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
+        self.updateViewportMargins()
+
     def setPlainText(self, txt):
         """
         Overrides the setPlainText method to keep track of the original text.
@@ -729,7 +733,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 else:
                     panel.update(0, rect.y(), panel.width(), rect.height())
         if rect.contains(self.viewport().rect()):
-            self.__updateViewportMargins()
+            self.updateViewportMargins()
 
     def __ontextChanged(self):
         """
@@ -738,7 +742,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         txt = self.toPlainText()
         self.dirty = (txt != self.__originalText)
 
-    def __updateViewportMargins(self):
+    def updateViewportMargins(self):
         """
         Updates the viewport margins depending on the installed panels
         """
@@ -747,13 +751,17 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         right = 0
         bottom = 0
         for panel in self.__panels[PanelPosition.TOP].values():
-            top += panel.sizeHint().height()
+            if panel.isVisible():
+                top += panel.sizeHint().height()
         for panel in self.__panels[PanelPosition.LEFT].values():
-            left += panel.sizeHint().width()
+            if panel.isVisible():
+                left += panel.sizeHint().width()
         for panel in self.__panels[PanelPosition.RIGHT].values():
-            right += panel.sizeHint().width()
+            if panel.isVisible():
+                right += panel.sizeHint().width()
         for panel in self.__panels[PanelPosition.BOTTOM].values():
-            bottom += panel.sizeHint().height()
+            if panel.isVisible():
+                bottom += panel.sizeHint().height()
         self.setViewportMargins(left, top, right, bottom)
 
     def __resetStyleSheet(self, section, key, value):

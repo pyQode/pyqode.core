@@ -21,7 +21,7 @@ class ZoomMode(Mode):
     Zoom in/out mode. (the editor font is increased/decreased)
     """
     #: Mode identifier
-    IDENTIFIER = "Zoom"
+    IDENTIFIER = "editorZoom"
     #: Mode description
     _DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
 

@@ -41,6 +41,7 @@ class Panel(pcef.QtGui.QWidget, Mode):
         """
         Mode.install(self, editor)
         self.setParent(editor)
+        self.editor.updateViewportMargins()
 
     def onStateChanged(self, state):
         """ Shows/Hides the Panel
@@ -50,5 +51,7 @@ class Panel(pcef.QtGui.QWidget, Mode):
         """
         if state is True:
             self.show()
+            self.editor.updateViewportMargins()
         else:
             self.hide()
+            self.editor.updateViewportMargins()

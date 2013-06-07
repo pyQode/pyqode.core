@@ -21,7 +21,7 @@ class CaretLineHighlighterMode(Mode):
     This mode highlights the caret line (active line)
     """
     #: The mode identifier
-    IDENTIFIER = "CaretLineHighlighter"
+    IDENTIFIER = "caretLineHighlighter"
     #: The mode description
     _DESCRIPTION = "This mode highlights the caret line"
 

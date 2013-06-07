@@ -20,7 +20,7 @@ class LineNumberPanel(Panel):
     """
     The liner number panel displays the document line numbers.
     """
-    IDENTIFIER = "LineNumberPanel"
+    IDENTIFIER = "lineNumber"
     _DESCRIPTION = "Display line number"
 
     def install(self, editor):
@@ -48,13 +48,13 @@ class LineNumberPanel(Panel):
             self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
             self.editor.repaint()
 
-    def onStateChanged(self, state):
-        """
-        Nothing to do here, we do everything in the widget events.
-
-        :param state: Enable state
-        """
-        pass
+    # def onStateChanged(self, state):
+    #     """
+    #     Nothing to do here, we do everything in the widget events.
+    #
+    #     :param state: Enable state
+    #     """
+    #     super(LineNumberPanel, self).onStateChanged(state)
 
     def sizeHint(self):
         """
@@ -115,26 +115,27 @@ class LineNumberPanel(Panel):
         """
         Paints the line numbers
         """
-        # fill background
-        painter = pcef.QtGui.QPainter(self)
-        painter.fillRect(event.rect(), self.__brush)
-        # get style options (font, size)
-        width = self.width()
-        height = self.editor.fontMetrics().height()
-        font = self.editor.font()
-        bold_font = pcef.QtGui.QFont(font)
-        bold_font.setBold(True)
-        # get selection range
-        sel_start, sel_end = self.editor.selectionRange()
-        has_sel = sel_start != sel_end
-        cl = self.editor.cursorPosition[0]
-        # draw every visible blocks
-        for top, blockNumber in self.editor.visibleBlocks:
-            painter.setPen(self.__pen)
-            if ((has_sel and sel_start <= blockNumber <= sel_end) or
-                    (not has_sel and cl == blockNumber)):
-                painter.setFont(bold_font)
-            else:
-                painter.setFont(font)
-            painter.drawText(0, top, width, height,
-                             pcef.QtCore.Qt.AlignRight, str(blockNumber))
+        if self.isVisible():
+            # fill background
+            painter = pcef.QtGui.QPainter(self)
+            painter.fillRect(event.rect(), self.__brush)
+            # get style options (font, size)
+            width = self.width()
+            height = self.editor.fontMetrics().height()
+            font = self.editor.font()
+            bold_font = pcef.QtGui.QFont(font)
+            bold_font.setBold(True)
+            # get selection range
+            sel_start, sel_end = self.editor.selectionRange()
+            has_sel = sel_start != sel_end
+            cl = self.editor.cursorPosition[0]
+            # draw every visible blocks
+            for top, blockNumber in self.editor.visibleBlocks:
+                painter.setPen(self.__pen)
+                if ((has_sel and sel_start <= blockNumber <= sel_end) or
+                        (not has_sel and cl == blockNumber)):
+                    painter.setFont(bold_font)
+                else:
+                    painter.setFont(font)
+                painter.drawText(0, top, width, height,
+                                 pcef.QtCore.Qt.AlignRight, str(blockNumber))

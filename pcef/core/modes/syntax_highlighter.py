@@ -328,7 +328,7 @@ class PygmentsHighlighterMode(Mode):
                  The text is automatically rehighlighted on save.
     """
     #: Mode identifier
-    IDENTIFIER = "PygmentsHighlighter"
+    IDENTIFIER = "pygmentsHighlighter"
     #: Mode description
     _DESCRIPTION = "Apply syntax highlighting to the editor using pygments " \
                    "lexer"

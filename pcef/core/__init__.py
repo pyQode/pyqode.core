@@ -20,6 +20,7 @@ from pcef.core.modes import CaretLineHighlighterMode
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
 from pcef.core.modes import PygmentsHighlighterMode
+from pcef.core.modes import AutoIndentMode
 from pcef.constants import PanelPosition
 
 
@@ -44,3 +45,4 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(RightMarginMode())
         self.installMode(PygmentsHighlighterMode())
         self.installMode(ZoomMode())
+        self.installMode(AutoIndentMode())
