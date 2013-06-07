@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'python_editor.ui'
 #
-# Created: Tue Jun  4 23:46:07 2013
+# Created: Thu Jun  6 22:04:24 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,7 +34,6 @@ class Ui_MainWindow(object):
         self.gridLayout.setSpacing(1)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.editor = QPythonCodeEdit(self.centralwidget)
-        self.editor.setTabStopWidth(40)
         self.editor.setObjectName(_fromUtf8("editor"))
         self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)

@@ -3,7 +3,7 @@
 This module contains the definition of the QCodeEdit
 """
 import chardet
-from PyQt4.QtGui import QTextCursor
+from pcef.qt.QtGui import QTextCursor, QKeyEvent
 import pcef
 from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
 from pcef import constants
@@ -173,7 +173,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             content = unicode(data.decode(encoding))
         if replaceTabsBySpaces:
             content = content.replace(
-                "\t", " " * int(self.settings.value("tabSpace")))
+                "\t", " " * int(self.settings.value("tabLength")))
         self.__filePath = filePath
         self.__fileEncoding = encoding
         self.setPlainText(content)
@@ -432,10 +432,119 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :param event: QKeyEvent
         """
         event.stop = False
+        replace = bool(self.settings.value("useSpacesInsteadOfTab"))
+        if replace and event.key() == pcef.QtCore.Qt.Key_Tab:
+            self.indent()
+            event.stop = True
+        elif replace and event.key() == pcef.QtCore.Qt.Key_Backtab:
+            self.unIndent()
+            event.stop = True
         self.keyPressed.emit(event)
         if not event.stop:
             pcef.QtGui.QPlainTextEdit.keyPressEvent(self, event)
         self.postKeyPressed.emit(event)
+
+    def indent(self):
+        """
+        Indent current line or selection (based on settings.value("tabLength"))
+        """
+        if bool(self.settings.value("useSpacesInsteadOfTab")):
+            size = int(self.settings.value("tabLength"))
+            cursor = self.textCursor()
+            cursor.beginEditBlock()
+            sel_start = cursor.selectionStart()
+            sel_end = cursor.selectionEnd()
+            has_selection = True
+            if not cursor.hasSelection():
+                cursor.select(QTextCursor.LineUnderCursor)
+                has_selection = False
+            nb_lines = len(cursor.selection().toPlainText().splitlines())
+            if nb_lines == 0:
+                nb_lines = 1
+            cursor.setPosition(cursor.selectionStart())
+            nbSpacesAdded = 0
+            startOffset = 0
+            for i in range(nb_lines):
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QTextCursor.EndOfLine,
+                                    QTextCursor.KeepAnchor)
+                line = cursor.selectedText()
+                indentation = len(line) - len(line.lstrip())
+                nbSpaces = size - (indentation % size)
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.insertText(" " * nbSpaces)
+                cursor.movePosition(QTextCursor.EndOfLine)
+                cursor.setPosition(cursor.position() + 1)
+                nbSpacesAdded += nbSpaces
+                if not i:
+                    startOffset = nbSpaces
+            cursor.setPosition(sel_start + startOffset)
+            if has_selection:
+                cursor.setPosition(sel_end + nbSpacesAdded,
+                                   QTextCursor.KeepAnchor)
+            cursor.endEditBlock()
+            self.setTextCursor(cursor)
+        else:
+            self.keyPressEvent(
+                QKeyEvent(QKeyEvent.KeyPress, pcef.QtCore.Qt.Key_Tab,
+                          pcef.QtCore.Qt.NoModifier))
+
+    def unIndent(self):
+        """
+        Unindent current line or selection by tabLength
+        """
+        if bool(self.settings.value("useSpacesInsteadOfTab")):
+            size = int(self.settings.value("tabLength"))
+            cursor = self.textCursor()
+            cursor.beginEditBlock()
+            pos = cursor.position()
+            sel_start = cursor.selectionStart()
+            sel_end = cursor.selectionEnd()
+            has_selection = True
+            if not cursor.hasSelection():
+                cursor.select(QTextCursor.LineUnderCursor)
+                has_selection = False
+            nb_lines = len(cursor.selection().toPlainText().splitlines())
+            cursor.setPosition(cursor.selectionStart())
+            cpt = 0
+            nbSpacesRemoved = 0
+            for i in range(nb_lines):
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QTextCursor.EndOfLine,
+                                    QTextCursor.KeepAnchor)
+                line = cursor.selectedText()
+                indentation = len(line) - len(line.lstrip())
+                nbSpaces = indentation - (indentation - (indentation % size))
+                if not nbSpaces:
+                    nbSpaces = size
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.select(QTextCursor.LineUnderCursor)
+                if cursor.selectedText().startswith(" " * nbSpaces):
+                    cursor.movePosition(QTextCursor.StartOfLine)
+                    [cursor.deleteChar() for _ in range(nbSpaces)]
+                    pos -= nbSpaces
+                    nbSpacesRemoved += nbSpaces
+                    if not i:
+                        startOffset = nbSpaces
+                    cpt += 1
+                else:
+                    cursor.clearSelection()
+                # next line
+                cursor.movePosition(QTextCursor.EndOfLine)
+                cursor.setPosition(cursor.position() + 1)
+            if cpt:
+                cursor.setPosition(sel_start - startOffset)
+            else:
+                cursor.setPosition(sel_start)
+            if has_selection:
+                cursor.setPosition(sel_end - nbSpacesRemoved,
+                                   QTextCursor.KeepAnchor)
+            cursor.endEditBlock()
+            self.setTextCursor(cursor)
+        else:
+            self.keyPressEvent(
+                QKeyEvent(QKeyEvent.KeyPress, pcef.QtCore.Qt.Key_Backtab,
+                          pcef.QtCore.Qt.NoModifier))
 
     def keyReleaseEvent(self, event):
         """
@@ -514,6 +623,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
+        self.__onSettingsChanged("", "", "")
         self.newTextSet.emit()
 
     def __initSettings(self):
@@ -523,7 +633,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.settings = PropertyRegistry()
         self.settings.valueChanged.connect(self.__onSettingsChanged)
         self.settings.addProperty("showWhiteSpaces", True)
-        self.settings.addProperty("tabSpace", constants.TAB_SIZE)
+        self.settings.addProperty("tabLength", constants.TAB_SIZE)
+        self.settings.addProperty("useSpacesInsteadOfTab", True)
 
     def __initStyle(self):
         """
@@ -657,4 +768,5 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                                       int(self.style.value("fontSize"))))
 
     def __onSettingsChanged(self, section, key, value):
-        pass
+        self.setTabStopWidth(int(self.settings.value("tabLength")) *
+                             self.fontMetrics().widthChar(" "))

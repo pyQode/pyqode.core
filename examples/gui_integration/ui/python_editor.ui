@@ -22,11 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="QPythonCodeEdit" name="editor">
-      <property name="tabStopWidth">
-       <number>40</number>
-      </property>
-     </widget>
+     <widget class="QPythonCodeEdit" name="editor"/>
     </item>
    </layout>
   </widget>
