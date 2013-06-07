@@ -34,10 +34,11 @@ qt_api = os.environ["QT_API"]
 try:
     from pcef import python
     python_support = True
-except ImportError:
+except ImportError as e:
+    print e.message
     python_support = False
     pass  # python not supported
-
+print "Python support", python_support
 
 #
 # Public api

@@ -9,8 +9,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """ Contains smart indent modes """
-from PySide.QtGui import QTextCursor, QKeyEvent
-from pcef.modes.indent import AutoIndentMode
+from pcef.qt.QtGui import QTextCursor
+from pcef.core.modes.indenter import AutoIndentMode
 
 
 class PyAutoIndentMode(AutoIndentMode):
@@ -20,13 +20,12 @@ class PyAutoIndentMode(AutoIndentMode):
     This mode can be extended by overriding the _getIndent method.
     """
     #: Mode identifier
-    IDENTIFIER = "Python Auto indent"
+    IDENTIFIER = "pyAutoIndent"
     #: Mode description
-    DESCRIPTION = """ This mode provides python specific auto indentation. """
+    _DESCRIPTION = """ This mode provides python specific auto indentation. """
 
     def __init__(self):
-        super(PyAutoIndentMode, self).__init__(
-            self.IDENTIFIER, self.DESCRIPTION)
+        super(PyAutoIndentMode, self).__init__()
 
     def _getIndent(self, tc):
         """

@@ -19,7 +19,8 @@ from pcef.core.panels import LineNumberPanel
 from pcef.core.modes import CaretLineHighlighterMode
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
-from pcef.python.modes import PythonHighlighterMode
+from pcef.python.modes import PyHighlighterMode
+from pcef.python.modes import PyAutoIndentMode
 from pcef.constants import PanelPosition
 
 from pcef.qt import QtCore
@@ -49,8 +50,9 @@ class QPythonCodeEdit(QCodeEdit):
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
-        self.installMode(PythonHighlighterMode(self.document()))
+        self.installMode(PyHighlighterMode(self.document()))
         self.installMode(ZoomMode())
+        self.installMode(PyAutoIndentMode())
 
     @QtCore.Slot()
     def useDarkStyle(self, use=True):

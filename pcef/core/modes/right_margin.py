@@ -62,8 +62,10 @@ class RightMarginMode(Mode):
         """
         if state:
             self.editor.painted.connect(self.__paintMargin)
+            self.editor.update()
         else:
             self.editor.painted.disconnect(self.__paintMargin)
+            self.editor.update()
 
     def __paintMargin(self, event):
         """ Paints the right margin after editor paint event. """

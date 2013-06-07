@@ -37,8 +37,11 @@ class CaretLineHighlighterMode(Mode):
         """
         if state:
             self.editor.cursorPositionChanged.connect(self.__updateHighlight)
+            self.editor.newTextSet.connect(self.__updateHighlight)
         else:
             self.editor.cursorPositionChanged.disconnect(self.__updateHighlight)
+            self.editor.newTextSet.disconnect(self.__updateHighlight)
+            self.clearDeco()
 
     def install(self, editor):
         """
@@ -56,20 +59,18 @@ class CaretLineHighlighterMode(Mode):
         """
         if key == "caretLineBackground":
             self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
-            # force refresh
-            self.__pos = -1
             self.__updateHighlight()
+
+    def clearDeco(self):
+        if self.__decoration:
+            self.editor.removeDecoration(self.__decoration)
 
     def __updateHighlight(self):
         """
         Updates the current line decoration
         """
-        l, c = self.editor.cursorPosition
-        if l != self.__pos:
-            self.__pos = l
-            if self.__decoration:
-                self.editor.removeDecoration(self.__decoration)
-            self.__decoration = TextDecoration(self.editor.textCursor())
-            self.__decoration.setBackground(self.__brush)
-            self.__decoration.setFullWidth()
-            self.editor.addDecoration(self.__decoration)
+        self.clearDeco()
+        self.__decoration = TextDecoration(self.editor.textCursor())
+        self.__decoration.setBackground(self.__brush)
+        self.__decoration.setFullWidth()
+        self.editor.addDecoration(self.__decoration)

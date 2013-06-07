@@ -5,7 +5,7 @@ from pcef.core.mode import Mode
 from pcef import constants
 
 
-class PythonHighlighterMode(QSyntaxHighlighter, Mode):
+class PyHighlighterMode(QSyntaxHighlighter, Mode):
     """Syntax highlighter for the Python language.
     """
     IDENTIFIER = "pythonHighlighter"
@@ -60,13 +60,13 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
 
         # Keyword, operator, and brace rules
         rules += [(r'\b%s\b' % w, 0, 'keyword')
-            for w in PythonHighlighterMode.keywords]
+            for w in PyHighlighterMode.keywords]
         rules += [(r'%s\b' % w, 0, 'docstringTag')
-            for w in PythonHighlighterMode.docstringTags]
+            for w in PyHighlighterMode.docstringTags]
         rules += [(r'%s' % b, 0, 'brace')
-            for b in PythonHighlighterMode.braces]
+            for b in PyHighlighterMode.braces]
         rules += [(r'%s' % b, 0, 'punctuation')
-            for b in PythonHighlighterMode.punctuations]
+            for b in PyHighlighterMode.punctuations]
 
         # All other rules
         rules += [
@@ -89,7 +89,7 @@ class PythonHighlighterMode(QSyntaxHighlighter, Mode):
             (r'\bself\b', 0, 'self'),
         ]
         rules += [(r'%s' % o, 0, 'operator')
-            for o in PythonHighlighterMode.operators]
+            for o in PyHighlighterMode.operators]
 
         rules += [(r'#[^\n]*', 0, 'comment')]
 
