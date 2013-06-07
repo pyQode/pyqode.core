@@ -1,4 +1,3 @@
-
 """
 This module contains the definition of the QCodeEdit
 """
@@ -211,6 +210,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         self.__modes[mode.name] = mode
         mode.install(self)
+        setattr(self, mode.name, mode)
 
     def uninstallMode(self, name):
         """
@@ -224,6 +224,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         if m:
             m.uninstall()
             self.__panels.pop(name, None)
+        self.__dict__.pop(name, None)
 
     def mode(self, name):
         """
@@ -257,6 +258,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.__panels[position][panel.name] = panel
         panel.install(self)
         self.updateViewportMargins()
+        setattr(self, panel.name, panel)
 
     def panels(self):
         """
@@ -447,6 +449,23 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 QTextCursor.Left, move, delta)
             self.setTextCursor(tc)
             event.stop = True
+
+    def setShowWhitespaces(self, show):
+        """
+        Shows/Hides whitespaces.
+
+        :param show: True to show whitespaces, False to hide them
+        :type show: bool
+        """
+        doc = self.document()
+        options = doc.defaultTextOption()
+        if show:
+            options.setFlags(options.flags() |
+                             pcef.QtGui.QTextOption.ShowTabsAndSpaces)
+        else:
+            options.setFlags(options.flags() &
+                             ~pcef.QtGui.QTextOption.ShowTabsAndSpaces)
+        doc.setDefaultTextOption(options)
 
     def keyPressEvent(self, event):
         """
@@ -671,6 +690,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.style.addProperty("fontSize", constants.FONT_SIZE)
         self.style.addProperty("background", constants.EDITOR_BACKGROUND)
         self.style.addProperty("foreground", constants.EDITOR_FOREGROUND)
+        self.style.addProperty("whiteSpaceForeground",
+                               constants.EDITOR_WS_FOREGROUND)
         self.style.addProperty("selectionBackground",
                                constants.SELECTION_BACKGROUND)
         self.style.addProperty("selectionForeground",
@@ -799,3 +820,4 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     def __onSettingsChanged(self, section, key, value):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
                              self.fontMetrics().widthChar(" "))
+        self.setShowWhitespaces(bool(self.settings.value("showWhiteSpaces")))

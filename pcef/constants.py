@@ -38,6 +38,7 @@ CODE_EDIT_STYLESHEET = """QCodeEdit
 # Colors
 EDITOR_BACKGROUND = "#FFFFFF"
 EDITOR_FOREGROUND = "#000000"
+EDITOR_WS_FOREGROUND = "#dddddd"
 SELECTION_BACKGROUND = "#6182F3"
 SELECTION_FOREGROUND = "#ffffff"
 LINE_NBR_BACKGROUND = "#dddddd"
@@ -69,7 +70,7 @@ DEFAULT_DARK_STYLES = {
     'decorator': '#BBB529',
     'brace': '#AAAAAA',
     'class': '#A9B7C6 bold',
-    'function': '#A9B7C6',
+    'function': '#A9B7C6 bold',
     'string': '#A5C261',
     'docstring': '#629755',
     'comment': '#808080 italic',
