@@ -26,6 +26,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
         for k, v in self.editor.modes().iteritems():
             a = QtGui.QAction(self.menuModes)
             a.setText(k)
+            a.setCheckable(True)
+            a.setChecked(True)
+            a.changed.connect(self.onModeCheckStateChanged)
+            a.mode = v
             self.menuModes.addAction(a)
         # Add panels to the panels menu
         for zones, panel_dic in self.editor.panels().iteritems():
@@ -54,6 +58,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
     def onPanelCheckStateChanged(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
+
+    def onModeCheckStateChanged(self):
+        action = self.sender()
+        action.mode.enabled = action.isChecked()
 
 
 def main():
