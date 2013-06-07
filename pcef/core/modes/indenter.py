@@ -51,19 +51,22 @@ class AutoIndentMode(Mode):
         :param tc: QTextCursor
         """
         pos = tc.position()
+        # tc.movePosition(QTextCursor.StartOfLine)
+        # tc.setPosition(tc.position() - 1)
         tc.movePosition(QTextCursor.StartOfLine)
         tc.setPosition(tc.position() - 1)
         tc.select(QTextCursor.LineUnderCursor)
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
+        print len(indent)
         tc.setPosition(pos)
         return indent
 
     def onStateChanged(self, state):
         if state is True:
-            self.editor.keyPressed.connect(self.__onKeyPressed)
+            self.editor.postKeyPressed.connect(self.__onKeyPressed)
         else:
-            self.editor.keyPressed.disconnect(self.__onKeyPressed)
+            self.editor.postKeyPressed.disconnect(self.__onKeyPressed)
 
     def __onKeyPressed(self, keyEvent):
         """
@@ -74,10 +77,6 @@ class AutoIndentMode(Mode):
         if hasattr(keyEvent, "stop") and keyEvent.stop:
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
-            # go next line
             tc = self.editor.textCursor()
-            tc.insertText("\n")
             indent = self._getIndent(tc)
             tc.insertText(indent)
-            tc.movePosition(QTextCursor.EndOfLine)
-            keyEvent.stop = True
