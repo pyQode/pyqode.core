@@ -20,7 +20,7 @@ class LineNumberPanel(Panel):
     """
     The liner number panel displays the document line numbers.
     """
-    IDENTIFIER = "lineNumber"
+    IDENTIFIER = "lineNumberArea"
     _DESCRIPTION = "Display line number"
 
     def install(self, editor):

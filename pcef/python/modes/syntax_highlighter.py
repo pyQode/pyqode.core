@@ -8,7 +8,7 @@ from pcef import constants
 class PyHighlighterMode(QSyntaxHighlighter, Mode):
     """Syntax highlighter for the Python language.
     """
-    IDENTIFIER = "pythonHighlighter"
+    IDENTIFIER = "pyHighlighter"
     _DESCRIPTION = "Custom QSyntaxHighlighter to highlight python syntax"
 
     # Python keywords
@@ -100,14 +100,18 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
         self.rules = [(QRegExp(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
-    def onStyleChanged(self, section, key, value):
-        if section == "Python" or key == "background" or key == "foreground":
-            self.rehighlight()
+    # def onStyleChanged(self, section, key, value):
+    #     if section == "Python" or key == "background" or key == "foreground" or\
+    #             key == "whiteSpaceForeground":
+    #         print key, "regilight"
+    #         self.rehighlight()
 
     def format(self, style_key):
         """Return a QTextCharFormat with the given attributes.
         """
         value = self.editor.style.value(style_key, "Python")
+        if value == "":
+            value = style_key
         tokens = value.split(" ")
         color = tokens[0]
         styles = tokens[1:]
@@ -142,6 +146,7 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
     def highlightBlock(self, text):
         """Apply syntax highlighting to the given block of text.
         """
+        original_txt = text
         # Do other syntax formatting
         for expression, nth, fm in self.rules:
             index = expression.indexIn(text, 0)
@@ -192,6 +197,16 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
                     length = len(expression.cap(nth))
                     self.setFormat(index, length, self.format(fm))
                 index = expression.indexIn(text, index + length)
+
+        #Spaces
+        expression = QRegExp('\s+')
+        index = expression.indexIn(original_txt , 0)
+        while index >= 0:
+            index = expression.pos(0)
+            length = len(expression.cap(0))
+            self.setFormat(index, length, self.format(
+                self.editor.style.value("whiteSpaceForeground")))
+            index = expression.indexIn(original_txt , index + length)
 
     def match_multiline(self, text, delimiter, in_state, style):
         """Do highlighting of multi-line strings. ``delimiter`` should be a
