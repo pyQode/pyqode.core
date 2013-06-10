@@ -58,7 +58,7 @@ class QPythonCodeEdit(QCodeEdit):
     def useDarkStyle(self, use=True):
         if not use:
             return
-        for k, v in constants.DEFAULT_DARK_STYLES.iteritems():
+        for k, v in constants.DEFAULT_DARK_STYLES.items():
             self.style.setValue(k, v, "Python")
         self.style.setValue("background", "#252525")
         self.style.setValue("foreground", "#A9B7C6")
@@ -79,7 +79,7 @@ class QPythonCodeEdit(QCodeEdit):
     def useLightStyle(self, use=True):
         if not use:
             return
-        for k, v in constants.DEFAULT_STYLES.iteritems():
+        for k, v in constants.DEFAULT_STYLES.items():
             self.style.setValue(k, v, "Python")
         self.style.setValue("background", "white")
         self.style.setValue("foreground", "black")

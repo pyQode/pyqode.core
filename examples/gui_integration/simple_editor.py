@@ -15,15 +15,19 @@ import os
 import sys
 os.environ.setdefault("QT_API", "pyqt")
 from pcef import QtCore, QtGui
-from ui import simple_editor_ui
+import pcef
+if pcef.python3:
+    from ui.simple_editor_ui3 import Ui_MainWindow
+else:
+    from ui.simple_editor_ui import Ui_MainWindow
 
 
-class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
+class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
         # Add modes to the modes menu
-        for k, v in self.editor.modes().iteritems():
+        for k, v in self.editor.modes().items():
             a = QtGui.QAction(self.menuModes)
             a.setText(k)
             a.setCheckable(True)
@@ -32,8 +36,8 @@ class SimpleEditorWindow(QtGui.QMainWindow, simple_editor_ui.Ui_MainWindow):
             a.mode = v
             self.menuModes.addAction(a)
         # Add panels to the panels menu
-        for zones, panel_dic in self.editor.panels().iteritems():
-            for k, v in panel_dic.iteritems():
+        for zones, panel_dic in self.editor.panels().items():
+            for k, v in panel_dic.items():
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
                 a.setCheckable(True)

@@ -163,7 +163,7 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
 
     def install(self, editor):
         Mode.install(self, editor)
-        for k, v in constants.DEFAULT_STYLES.iteritems():
+        for k, v in constants.DEFAULT_STYLES.items():
             self.editor.style.addProperty(k, v, "Python")
 
     def onStateChanged(self, state):

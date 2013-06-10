@@ -140,7 +140,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     """ Syntax highlighter that uses Pygments for parsing.
     """
 
-    hilighlightingBlock = Signal(unicode, QSyntaxHighlighter)
+    hilighlightingBlock = Signal(str, QSyntaxHighlighter)
 
     #---------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface
@@ -173,7 +173,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
         """ Highlight a block of text """
         if self.enabled is False:
             return
-        text = unicode(text)
         original_text = text
         line_nbr = self.currentBlock().previous().blockNumber()
         prev_data = None
@@ -311,7 +310,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     def _get_color(self, color):
         """ Returns a QColor built from a Pygments color string.
         """
-        color = unicode(color).replace("#", "")
+        color = str(color).replace("#", "")
         qcolor = QtGui.QColor()
         qcolor.setRgb(int(color[:2], base=16),
                       int(color[2:4], base=16),

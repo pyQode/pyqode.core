@@ -37,7 +37,7 @@ from PyQt4 import QtCore, QtGui
 
 
 def main():
-    print "PCEF DESIGNER"
+    print("PCEF DESIGNER")
     # path separator are different on windows
     if sys.platform == "win32":
         sep = ';'
@@ -78,7 +78,7 @@ def main():
     # ensure every keys and values are strings
     if sys.platform == "win32":
         win_env = {}
-        for key, value in env.iteritems():
+        for key, value in env.items():
             win_env[str(key)] = str(value)
         env = win_env
 
@@ -92,7 +92,7 @@ def main():
             try:
                 p = subprocess.Popen(["designer-qt4"], env=env)
             except OSError:
-                print "Failed to start Qt Designer"
+                print("Failed to start Qt Designer")
     if p:
         return p.wait()
     return -1

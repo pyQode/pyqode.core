@@ -11,6 +11,6 @@
 """
 This package contains the core panels (language independant)
 """
-from line_number import LineNumberPanel
+from pcef.core.panels.line_number import LineNumberPanel
 
 

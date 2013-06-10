@@ -36,7 +36,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     #: Signal emitted when a new text is set on the widget
     newTextSet = pcef.QtCore.Signal()
     #: Signal emitted when the text is saved
-    textSaved = pcef.QtCore.Signal(unicode)
+    textSaved = pcef.QtCore.Signal(str)
     #: Signal emitted when the dirty state changed
     dirtyChanged = pcef.QtCore.Signal(bool)
     #: Signal emitted when a key is pressed
@@ -166,10 +166,10 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :param replaceTabsBySpaces: True to replace tabs by spaces
                (settings.value("tabSpace") * " ")
         """
-        with open(filePath, 'r') as f:
+        with open(filePath, 'rb') as f:
             data = f.read()
-            encoding = chardet.detect(data)['encoding']
-            content = unicode(data.decode(encoding))
+            encoding = chardet.detect(bytes(data))['encoding']
+            content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
                 "\t", " " * int(self.settings.value("tabLength")))
@@ -768,8 +768,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         Updates the panel on update request. (Scroll, update clipping rect,...)
         """
-        for zones_id, zone in self.__panels.iteritems():
-            for panel_id, panel in zone.iteritems():
+        for zones_id, zone in self.__panels.items():
+            for panel_id, panel in zone.items():
                 if dy:
                     panel.scroll(0, dy)
                 else:

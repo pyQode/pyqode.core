@@ -87,8 +87,8 @@ else:
             # Fatal error, no qt bindings found
             logging.critical("PCEF: PyQt4 and PySide not found, exiting with "
                              "return code -1")
-            print "PCEF: Nore PyQt4 and nore PySide not found, exiting with " \
-                  "return code -1"
+            print("PCEF: Nore PyQt4 and nore PySide not found, exiting with " \
+                  "return code -1")
             os.environ.setdefault("QT_API", None)
             sys.exit(-1)
         else:
@@ -98,7 +98,7 @@ else:
     logging.warning("PCEF: will use %s" % os.environ["QT_API"])
 logging.info("PCEF: using %s" % os.environ["QT_API"])
 # setup pyqt api to version 2
-if os.environ["QT_API"] == "pyqt":
+if os.environ["QT_API"] == "pyqt" and sys.version_info[0] == 2:
     import sip
     try:
         sip.setapi("QString", 2)

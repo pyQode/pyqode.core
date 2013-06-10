@@ -58,7 +58,6 @@ class AutoIndentMode(Mode):
         tc.select(QTextCursor.LineUnderCursor)
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
-        print len(indent)
         tc.setPosition(pos)
         return indent
 

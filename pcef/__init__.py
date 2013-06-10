@@ -12,11 +12,19 @@
 PCEF is a code editor framework for python qt applications.
 """
 import os
+import sys
 
 #
 # PCEF VERSION
 #
 __version__ = "1.0.0-dev"
+
+# Detect python3
+if sys.version_info[0] == 3:
+    python3 = True
+else:
+    python3 = False
+print("Python3: ", python3)
 
 
 #
@@ -27,7 +35,6 @@ from qt import QtCore
 from qt import QtGui
 qt_api = os.environ["QT_API"]
 
-
 #
 # Detect features support
 #
@@ -35,10 +42,13 @@ try:
     from pcef import python
     python_support = True
 except ImportError as e:
-    print e.message
+    try:
+        print(e.msg)
+    except AttributeError:
+        print(e.message)
     python_support = False
     pass  # python not supported
-print "Python support", python_support
+print("Python support", python_support)
 
 #
 # Public api
