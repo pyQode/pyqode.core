@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Thu Jun  6 22:04:24 2013
+# Created: Mon Jun 10 09:31:41 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
