@@ -79,8 +79,8 @@ setup(
     author_email='colin.duquesnoy@gmail.com',
     description='PySide Code Editing Framework (P.C.E.F.)',
     long_description=long_desc,
-    install_requires=['pygments', 'jedi', 'pep8', 'qdarkstyle', 'pylint',
-                      'pyflakes'],
+    # install_requires=['pygments', 'jedi', 'pep8', 'qdarkstyle', 'pylint',
+    #                   'pyflakes'],
     entry_points={'gui_scripts':
                   ['pcef_generic_example = examples.generic_example:main',
                    'pcef_python_example = examples.python_example:main']},
