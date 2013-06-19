@@ -59,6 +59,7 @@ Qt classes by pcef.QtGui. ::
     app.exec_()
 """
 import logging
+__logger = logging.getLogger("pcef")
 import os
 import sys
 argv = []
@@ -66,6 +67,7 @@ try:
     argv = sys.argv
 except:
     pass
+
 # check if a qt bindings has already been imported
 try:
     from_env = os.environ["QT_API"]
@@ -76,7 +78,7 @@ if "PyQt4" in sys.modules or "--pyqt" in argv or from_env == "pyqt":
 elif "PySide" in sys.modules or "--pyside" in argv or from_env == "pyside":
     os.environ.setdefault("QT_API", "pyside")
 else:
-    logging.warning("PCEF: no qt bindings were already imported...")
+    __logger.warning("PCEF: no qt bindings were already imported...")
     try:
         import PyQt4
     except ImportError:
@@ -85,7 +87,7 @@ else:
             import PySide
         except ImportError:
             # Fatal error, no qt bindings found
-            logging.critical("PCEF: PyQt4 and PySide not found, exiting with "
+            __logger.critical("PCEF: PyQt4 and PySide not found, exiting with "
                              "return code -1")
             print("PCEF: Nore PyQt4 and nore PySide not found, exiting with " \
                   "return code -1")
@@ -95,8 +97,8 @@ else:
             os.environ.setdefault("QT_API", "pyside")
     else:
         os.environ.setdefault("QT_API", "pyqt")
-    logging.warning("PCEF: will use %s" % os.environ["QT_API"])
-logging.info("PCEF: using %s" % os.environ["QT_API"])
+    __logger.warning("PCEF: will use %s" % os.environ["QT_API"])
+__logger.info("PCEF: using %s" % os.environ["QT_API"])
 # setup pyqt api to version 2
 if os.environ["QT_API"] == "pyqt" and sys.version_info[0] == 2:
     import sip
@@ -104,7 +106,7 @@ if os.environ["QT_API"] == "pyqt" and sys.version_info[0] == 2:
         sip.setapi("QString", 2)
         sip.setapi("QVariant", 2)
     except:
-        logging.critical("PCEF: failed to set pyqt api to version 2"
-                         "\nTo solve this problem, import "
-                         "pcef before any other PyQt modules "
-                         "in your main script...")
+        __logger.critical("PCEF: failed to set pyqt api to version 2"
+                        "\nTo solve this problem, import "
+                        "pcef before any other PyQt modules "
+                        "in your main script...")

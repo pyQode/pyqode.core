@@ -11,6 +11,9 @@
 """
 PCEF is a code editor framework for python qt applications.
 """
+import logging
+__logger = logging.getLogger("pcef")
+__logger.warning("YQGUYg")
 import os
 import sys
 
@@ -24,15 +27,12 @@ if sys.version_info[0] == 3:
     python3 = True
 else:
     python3 = False
-print("Python3: ", python3)
-
 
 #
 # configure and exposes qt
 #
-from pcef import qt
-from qt import QtCore
-from qt import QtGui
+from pcef.qt import QtCore
+from pcef.qt import QtGui
 qt_api = os.environ["QT_API"]
 
 #
@@ -48,30 +48,29 @@ except ImportError as e:
         print(e.message)
     python_support = False
     pass  # python not supported
-print("Python support", python_support)
+__logger.info("Python support %s" % python_support)
+
 
 #
 # Public api
 #
 # -- all
 from pcef import exceptions
-from constants import PanelPosition
+from pcef.constants import PanelPosition
 # -- core
-from pcef import core
-from core import QGenericCodeEdit
-from core import system
-from core.decoration import TextDecoration
-from core.editor import QCodeEdit
-from core.mode import Mode
-from core.modes import CaretLineHighlighterMode
-from core.modes import RightMarginMode
-from core.modes import PygmentsHighlighterMode
-from core.panel import Panel
-from core.panels import LineNumberPanel
-from core.properties import PropertyRegistry
+from pcef.core import QGenericCodeEdit
+from pcef.core import system
+from pcef.core.decoration import TextDecoration
+from pcef.core.editor import QCodeEdit
+from pcef.core.mode import Mode
+from pcef.core.modes import CaretLineHighlighterMode
+from pcef.core.modes import RightMarginMode
+from pcef.core.modes import PygmentsHighlighterMode
+from pcef.core.panel import Panel
+from pcef.core.panels import LineNumberPanel
+from pcef.core.properties import PropertyRegistry
 # -- python if python is installed
 if python_support:
-    from pcef import python
-    from python import QPythonCodeEdit
+    from pcef.python import QPythonCodeEdit
     # from python.modes import
     # from python.panels import
