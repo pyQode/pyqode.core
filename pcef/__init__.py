@@ -13,7 +13,6 @@ PCEF is a code editor framework for python qt applications.
 """
 import logging
 __logger = logging.getLogger("pcef")
-__logger.warning("YQGUYg")
 import os
 import sys
 
