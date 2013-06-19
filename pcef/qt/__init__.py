@@ -78,8 +78,8 @@ if "PyQt4" in sys.modules or "--PyQt" in argv or from_env == "PyQt":
 elif "PySide" in sys.modules or "--PySide" in argv or from_env == "PySide":
     os.environ.setdefault("QT_API", "PySide")
 else:
-    __logger.warning("No qt bindings already imported, pcef will pick up one on "
-                     "its own")
+    __logger.warning("No qt bindings specified, pcef will pick up one on its "
+                     "own...")
     try:
         import PyQt4
     except ImportError:
@@ -97,7 +97,7 @@ else:
             os.environ.setdefault("QT_API", "PySide")
     else:
         os.environ.setdefault("QT_API", "PyQt")
-    __logger.warning("The chosen qt binding is: %s" % os.environ["QT_API"].capitalize())
+    __logger.warning("The chosen qt binding is %s" % os.environ["QT_API"])
 __logger.info("Using %s" % os.environ["QT_API"])
 # setup PyQt api to version 2
 if os.environ["QT_API"] == "PyQt" and sys.version_info[0] == 2:
