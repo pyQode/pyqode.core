@@ -13,7 +13,7 @@ import PyQt4
 import pcef
 from PyQt4.QtGui import QApplication
 
-os.environ.setdefault("QT_API", "pyqt")
+os.environ.setdefault("QT_API", "PyQt")
 from PyQt4 import QtDesigner
 
 

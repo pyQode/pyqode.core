@@ -24,11 +24,11 @@ import sys
 # we could force PyQt by setting up the QT_API env var or by import PyQt4 only
 # befor pcef::
 #   import os
-#   os.environ.setdefault("QT_API", "pyqt")
+#   os.environ.setdefault("QT_API", "PyQt")
 # or::
 #   import PyQt4
 import pcef
-# then use pyqt as usually
+# then use PyQt as usually
 from PyQt4.QtGui import QApplication
 
 

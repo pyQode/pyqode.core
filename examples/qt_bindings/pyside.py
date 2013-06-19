@@ -16,7 +16,7 @@ When using PySide the easiest way is just to import any PySide module/package
 before pcef
 """
 import sys
-# first something from pyside, here the mandatory QApplication
+# first something from PySide, here the mandatory QApplication
 from PySide.QtGui import QApplication
 # then import pcef
 import pcef

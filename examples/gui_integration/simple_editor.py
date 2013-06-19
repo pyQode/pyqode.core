@@ -13,7 +13,7 @@ Integrates the generic editor using the pcef qt designer plugin.
 """
 import os
 import sys
-os.environ.setdefault("QT_API", "pyqt")
+os.environ.setdefault("QT_API", "PyQt")
 from pcef import QtCore, QtGui
 import pcef
 if pcef.python3:

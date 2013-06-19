@@ -12,7 +12,7 @@
 Bindings independant QtGui module
 """
 import os
-if os.environ['QT_API'] == 'pyqt':
+if os.environ['QT_API'] == 'PyQt':
     from PyQt4.QtGui import *
 else:
     from PySide.QtGui import *

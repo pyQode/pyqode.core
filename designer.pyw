@@ -31,7 +31,7 @@ windows or in a standard bin folder on linux. Open a terminal and run
 import os
 import subprocess
 import sys
-os.environ.setdefault("QT_API", "pyqt")
+os.environ.setdefault("QT_API", "PyQt")
 import pcef
 from PyQt4 import QtCore, QtGui
 

@@ -47,7 +47,7 @@ except ImportError as e:
         print(e.message)
     python_support = False
     pass  # python not supported
-__logger.info("Python support %s" % python_support)
+__logger.debug("Python support %s" % python_support)
 
 
 #

@@ -11,17 +11,19 @@
 """
 Integrates the generic editor using the pcef qt designer plugin.
 """
+import logging
+logging.basicConfig(level=logging.INFO)
 import os
 import sys
-os.environ.setdefault("QT_API", "pyqt")
+os.environ.setdefault("QT_API", "PyQt")
 from pcef import QtCore, QtGui
 import pcef
 if pcef.python3:
     from ui.python_editor_ui3 import Ui_MainWindow
-    print("Using python3")
+    logging.info("Using python3")
 else:
     from ui.python_editor_ui import Ui_MainWindow
-    print("Using python2")
+    logging.info("Using python2")
 
 
 class PythonEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
