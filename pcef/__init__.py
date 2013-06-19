@@ -68,6 +68,7 @@ from pcef.core.modes import PygmentsHighlighterMode
 from pcef.core.panel import Panel
 from pcef.core.panels import LineNumberPanel
 from pcef.core.properties import PropertyRegistry
+from pcef.core.system import TextStyle
 # -- python if python is installed
 if python_support:
     from pcef.python import QPythonCodeEdit
