@@ -62,51 +62,119 @@ import logging
 __logger = logging.getLogger("pcef")
 import os
 import sys
-argv = []
-try:
-    argv = sys.argv
-except:
-    pass
 
-# check if a qt bindings has already been imported
-try:
-    from_env = os.environ["QT_API"]
-except KeyError:
-    from_env = ""
-if "PyQt4" in sys.modules or "--PyQt" in argv or from_env == "PyQt":
-    os.environ.setdefault("QT_API", "PyQt")
-elif "PySide" in sys.modules or "--PySide" in argv or from_env == "PySide":
-    os.environ.setdefault("QT_API", "PySide")
-else:
-    __logger.warning("No qt bindings specified, pcef will pick up one on its "
-                     "own...")
+
+def read_args():
+    """
+    Safely read command line args
+
+    :return: sys.argv or empty list
+    """
+    try:
+        argv = sys.argv
+    except:
+        argv = []
+    return argv
+
+
+def read_env():
+    """
+    Safely read QT_API env var
+
+    :return: QT_API value
+    """
+    try:
+        from_env = os.environ["QT_API"]
+    except KeyError:
+        from_env = ""
+    return from_env
+
+
+def try_pyside():
+    """
+    Tries to import pyside.
+
+    :return: Return True if pyside can be used
+    """
+    try:
+        import PySide
+    except ImportError:
+        # Fatal error, no qt bindings found
+        __logger.critical("PySide not found!")
+        return False
+    else:
+        os.environ.setdefault("QT_API", "PySide")
+        return True
+
+
+def setup_apiv2():
+    """
+    Setup apiv2 on the chose binding.
+    """
+    # setup PyQt api to version 2
+    if sys.version_info[0] == 2:
+        import sip
+        try:
+            sip.setapi("QString", 2)
+            sip.setapi("QVariant", 2)
+        except:
+            __logger.critical("PCEF: failed to set PyQt api to version 2"
+                              "\nTo solve this problem, import "
+                              "pcef before any other PyQt modules "
+                              "in your main script...")
+
+
+def try_pyqt():
+    """
+    Tries to import pyqt and setup sip api v2 in case of success
+
+    :return: Return True if pyqt can be used
+    """
     try:
         import PyQt4
     except ImportError:
-        # try PyQt
-        try:
-            import PySide
-        except ImportError:
-            # Fatal error, no qt bindings found
-            __logger.critical("PyQt4 and PySide not found, exiting with "
-                              "return code -1")
-            print("PyQt4 and PySide not found, exiting with return code -1")
-            os.environ.setdefault("QT_API", None)
-            sys.exit(-1)
-        else:
-            os.environ.setdefault("QT_API", "PySide")
+        # Fatal error, no qt bindings found
+        __logger.critical("PySide not found, exiting with return code -1")
+        print("PyQt4 and PySide not found, exiting with return code -1")
+        os.environ.setdefault("QT_API", None)
+        return False
     else:
         os.environ.setdefault("QT_API", "PyQt")
-    __logger.warning("The chosen qt binding is %s" % os.environ["QT_API"])
+        setup_apiv2()
+        return True
+
+
+def select():
+    """
+    Selects a qt bindings. The selected qt bindings is set to the
+    QT_API environment variable.
+
+    :return: True if a binding could be selected.
+    """
+    argv = read_args()
+    env = read_env()
+    if "PyQt4" in sys.modules or "--PyQt" in argv or env == "PyQt":
+        os.environ.setdefault("QT_API", "PyQt")
+        return try_pyqt()
+    elif "PySide" in sys.modules or "--PySide" in argv or env == "PySide":
+        os.environ.setdefault("QT_API", "PySide")
+        return try_pyside()
+    else:
+        __logger.warning("No qt bindings specified, pcef will try to pick one "
+                         "on its own")
+        if not try_pyqt():
+            __logger.warning("Cannot use PyQt, will try PySide")
+            return try_pyside()
+        __logger.warning("The chosen qt binding is %s" % os.environ["QT_API"])
+        return True
+
+
+#
+# Select a qt binding
+#
+if not select():
+    __logger.critical("Failed to find a qt bindings, please install "
+                      "PyQt or PySide to user pcef. Returning with "
+                      "error code -1")
+    sys.exit(-1)
 __logger.info("Using %s" % os.environ["QT_API"])
-# setup PyQt api to version 2
-if os.environ["QT_API"] == "PyQt" and sys.version_info[0] == 2:
-    import sip
-    try:
-        sip.setapi("QString", 2)
-        sip.setapi("QVariant", 2)
-    except:
-        __logger.critical("PCEF: failed to set PyQt api to version 2"
-                        "\nTo solve this problem, import "
-                        "pcef before any other PyQt modules "
-                        "in your main script...")

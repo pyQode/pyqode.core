@@ -20,9 +20,9 @@ module (PyQt is automatically selected by default).
 """
 import sys
 # first import pcef, this will choose PyQt by default and setup the correct sip
-# API
-# we could force PyQt by setting up the QT_API env var or by import PyQt4 only
-# befor pcef::
+# API.
+# We could force PyQt by setting up the QT_API env var or by importing PyQt4
+# only before pcef::
 #   import os
 #   os.environ.setdefault("QT_API", "PyQt")
 # or::
