@@ -12,8 +12,11 @@
 This module contains the definition of the QCodeEdit settings
 """
 import json
+import re
 import pcef
 from pcef.constants import TAB_SIZE
+from pcef.core.system import TextStyle
+from pcef import python3
 
 
 class PropertyRegistry(pcef.QtCore.QObject):
@@ -22,12 +25,22 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
     Each property is described by:
         - a key: string - name of the property
-        - a value: string - value of the property as a string
+        - a value: string - value of the property that is stored as a string
         - a section:
 
     For a better organisation, properties are grouped by sections.
 
     When a property value is changed, the valueChanged signal is emitted.
+
+    .. note:: Even if the value is stored as a string, the class will try its
+              best to "cast" the value string to its original type.
+              Supported types are:
+                - int
+                - float
+                - bool
+                - QColor
+                - pcef.core.system.TextStyle
+                - string
     """
 
     #: Signal emitted when the value of a property changed. The first parameter
@@ -41,56 +54,109 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
     def addProperty(self, key, value, section="General"):
         """
-        Adds a property with a default value. If the property already exists in
-        the given section,
-        the default value is not used and the current property value is returned
-        instead.
+        Adds a property with a default value.
+
+        .. remark:: If the property already exists in the given section,
+                    the original value is kept and returned as a result.
 
         :param key: The name/key of the property
-        :param value: The value string.
 
-        :return: The value string. Because this might be the old property value
-        that is used if the property already exists
+        :param value: The value of the property.
+        :type value: int or float or bool or string or QColor or TextStyle
+
+        :return The original value if the property does not already exists,
+                else it return the exisiting property value.
+                (Use setValue to change the value of a property).
         """
+        value = self.__value_to_str(value)
         if section in self.__dict:
             if key in self.__dict[section]:
-                value = self.__dict[section][key]
+                value = self.value(key, section)
             else:
-                self.__dict[section][key] = str(value)
+                self.__dict[section][key] = value
         else:
             self.__dict[section] = {key: value}
         return value
 
     def setValue(self, key, value, section="General"):
         """
-        Sets a property value
-        :param key:
-        :param value:
-        :return:
+        Sets the value of a property
+
+        :param key: The name/key of the property
+
+        :param value: The value of the property.
+        :type value: int or float or bool or string or QColor or TextStyle
+
+        :return: The value string. Because this might be the old property value
+        that is used if the property already exists
         """
-        value = str(value)
+        value = self.__value_to_str(value)
         if self.__dict[section][key] != value:
             self.__dict[section][key] = value
             self.valueChanged.emit(section, key, value)
 
     def value(self, key, section="General", default=""):
         """
-        Gets the value of a property. The default value as the return value if
-        the property does not exists.
+        Gets the value of a property. This method will try to cast the value
+        automatically to the proper builtin type. If the value string is not
+        detected as a python builtin type, the string is simply returned.
 
         :param key: The property's key
+
         :param default: The property's default value, used if the property does
                         not exists
+
         :return: The property's value
+        :rtype int or float or bool or string or QColor or TextStyle
         """
         if section in self.__dict:
             if key in self.__dict[section]:
-                return self.__dict[section][key]
+                return self.__value_from_str(self.__dict[section][key])
         return default
+
+    def __value_to_str(self, value):
+        """
+        Convert a value to a string
+
+        :param value: Value (int, float, bool, string, QColor)
+
+        :return: The value as a string
+        """
+        if isinstance(value, pcef.QtGui.QColor):
+            return value.name()
+        else:
+            return str(value)
+
+    def __value_from_str(self, value_str):
+        """
+        Get a value from a string, try to cast the value_str to the proper type.
+
+        :param value_str: Value string to convert
+
+        :rtype int or float or bool or string or QColor or TextStyle
+        """
+        if not python3:
+            value_str = unicode(value_str)
+        else:
+            value_str = str(value_str)
+        # color or format
+        if value_str.isnumeric():
+            if value_str.isdecimal() and ("." in value_str or "," in value_str):
+                return float(value_str)
+            else:
+                return int(value_str)
+        elif "TRUE" in value_str.upper() or "FALSE" in value_str.upper():
+            return bool(value_str)
+        elif re.match("#......\\Z", value_str.rstrip()):
+            return pcef.QtGui.QColor(value_str)
+        elif value_str.startswith('#'):
+            return TextStyle(value_str)
+        else:
+            return value_str
 
     def dump(self):
         """
-        Dumps the settings dictionary to a json string.
+        Dumps the settings dictionary to a json **string**.
 
         :return: str
         """
@@ -98,7 +164,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
     def load(self, data):
         """
-        Loads the registry from a json data buffer.
+        Loads the registry from a json **string**.
 
         :param data: Json data string
         """
@@ -106,7 +172,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
     def open(self, filepath):
         """
-        Opens the file and loads its data
+        Loads the registry from a json **file**
 
         :param filepath: Path to the property registry JSON file.
         """
@@ -119,7 +185,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
     def save(self, filepath):
         """
-        Save the registry to a json file.
+        Save the registry to a json **file**
 
         :param filepath: Save path
         """

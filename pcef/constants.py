@@ -12,6 +12,8 @@
 This module holds all the PCEF constants (enumerations, defines,...)
 """
 import sys
+from pcef.core.system import TextStyle
+from pcef.qt.QtGui import QColor
 
 #
 # Default style values
@@ -36,50 +38,50 @@ CODE_EDIT_STYLESHEET = """QCodeEdit
 }
 """
 # Colors
-EDITOR_BACKGROUND = "#FFFFFF"
-EDITOR_FOREGROUND = "#000000"
-EDITOR_WS_FOREGROUND = "#dddddd"
-SELECTION_BACKGROUND = "#6182F3"
-SELECTION_FOREGROUND = "#ffffff"
-LINE_NBR_BACKGROUND = "#dddddd"
-LINE_NBR_FOREGROUND = "#888888"
+EDITOR_BACKGROUND = QColor("#FFFFFF")
+EDITOR_FOREGROUND = QColor("#000000")
+EDITOR_WS_FOREGROUND = QColor("#dddddd")
+SELECTION_BACKGROUND = QColor("#6182F3")
+SELECTION_FOREGROUND = QColor("#ffffff")
+LINE_NBR_BACKGROUND = QColor("#dddddd")
+LINE_NBR_FOREGROUND = QColor("#888888")
 
 # Default highlighter styles values, mostly for the python highlighter but they
 # may be shared between different highlighter/languages
 DEFAULT_STYLES = {
-    'keyword': '#808000 bold',
-    'builtins': '#808000',
-    'operator': 'darkGray',
-    'punctuation': 'darkGray',
-    'decorator': '#808000',
-    'brace': '#404040',
-    'class': '#800080 bold',
-    'function': '#800080',
-    'string': '#008000',
-    'docstring': '#000080',
-    'comment': '#008000 italic',
-    'self': '#94558D italic',
-    'numbers': '#000080',
-    'predefined': '#B200B2',
-    'docstringTag': '#0000FF bold underlined',
+    'keyword': TextStyle('#808000 bold nitalic nunderlined'),
+    'builtins': TextStyle('#808000 nbold nitalic nunderlined'),
+    'operator': TextStyle('darkGray nbold nitalic nunderlined'),
+    'punctuation': TextStyle('darkGray nbold nitalic nunderlined'),
+    'decorator': TextStyle('#808000 nbold nitalic nunderlined'),
+    'brace': TextStyle('#404040 nbold nitalic nunderlined'),
+    'class': TextStyle('#800080 bold nitalic nunderlined'),
+    'function': TextStyle('#800080 nbold nitalic nunderlined'),
+    'string': TextStyle('#008000 nbold nitalic nunderlined'),
+    'docstring': TextStyle('#000080 nbold nitalic nunderlined'),
+    'comment': TextStyle('#008000 nbold italic nunderlined'),
+    'self': TextStyle('#94558D nbold italic nunderlined'),
+    'numbers': TextStyle('#000080 nbold nitalic nunderlined'),
+    'predefined': TextStyle('#B200B2 nbold nitalic nunderlined'),
+    'docstringTag': TextStyle('#0000FF bold nitalic underlined'),
 }
 
 DEFAULT_DARK_STYLES = {
-    'keyword': '#CC7832 bold',
-    'builtins': '#CC7832',
-    'operator': '#A9B7C6',
-    'punctuation': '#A9B7C6',
-    'decorator': '#BBB529',
-    'brace': '#AAAAAA',
-    'class': '#A9B7C6 bold',
-    'function': '#A9B7C6 bold',
-    'string': '#A5C261',
-    'docstring': '#629755',
-    'comment': '#808080 italic',
-    'self': '#94558D italic',
-    'numbers': '#6897B3',
-    'predefined': '#B200B2',
-    'docstringTag': '#427735 bold underlined'
+    'keyword': TextStyle('#CC7832 bold nitalic nunderlined'),
+    'builtins': TextStyle('#CC7832 nbold nitalic nunderlined'),
+    'operator': TextStyle('#A9B7C6 nbold nitalic nunderlined'),
+    'punctuation': TextStyle('#A9B7C6 nbold nitalic nunderlined'),
+    'decorator': TextStyle('#BBB529 nbold nitalic nunderlined'),
+    'brace': TextStyle('#AAAAAA nbold nitalic nunderlined'),
+    'class': TextStyle('#A9B7C6 bold nitalic nunderlined'),
+    'function': TextStyle('#A9B7C6 bold nitalic nunderlined'),
+    'string': TextStyle('#A5C261 nbold nitalic nunderlined'),
+    'docstring': TextStyle('#629755 nbold nitalic nunderlined'),
+    'comment': TextStyle('#808080 nbold italic nunderlined'),
+    'self': TextStyle('#94558D nbold italic nunderlined'),
+    'numbers': TextStyle('#6897B3 nbold nitalic nunderlined'),
+    'predefined': TextStyle('#B200B2 nbold nitalic nunderlined'),
+    'docstringTag': TextStyle('#427735 bold nitalic underlined')
 }
 
 #

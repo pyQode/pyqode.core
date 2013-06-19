@@ -13,6 +13,7 @@ Contains utility functions
 """
 import os
 import sys
+import pcef
 
 
 def findSettingsDirectory(appName="PCEF"):
@@ -28,3 +29,53 @@ def findSettingsDirectory(appName="PCEF"):
     if not os.path.exists(pth):
         os.mkdir(pth)
     return pth
+
+
+class TextStyle(object):
+    """
+    Defines a text style: a color associated with text style options (bold,
+    italic and underline).
+
+    This class has methods to set the text style from a string and to easily
+    be created from a string.
+    """
+
+    def __init__(self, style=None):
+        """
+        :param style: The style string ("#rrggbb [bold] [italic] [underlined])
+        """
+        self.color = pcef.QtGui.QColor()
+        self.bold = False
+        self.italic = False
+        self.underlined = False
+        if style:
+            self.from_string(style)
+
+    def __str__(self):
+        color = self.color.name()
+        bold = "nbold"
+        if self.bold:
+            bold = "bold"
+        italic = "nitalic"
+        if self.italic:
+            italic = "italic"
+        underlined = "nunderlined"
+        if self.underlined:
+            underlined = "underlined"
+        return " ".join([color, bold, italic, underlined])
+
+    def from_string(self, string):
+        tokens = string.split(" ")
+        assert len(tokens) == 4
+        self.color = pcef.QtGui.QColor(tokens[0])
+        self.bold = False
+        if bool(tokens[1]) == "bold":
+            self.bold = True
+        self.italic = False
+        if bool(tokens[2]) == "italic":
+            self.italic = True
+        self.underlined = False
+        if bool(tokens[1]) == "underlined":
+            self.underlined = True
+
+

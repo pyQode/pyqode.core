@@ -172,7 +172,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
-                "\t", " " * int(self.settings.value("tabLength")))
+                "\t", " " * self.settings.value("tabLength"))
         self.__filePath = filePath
         self.__fileEncoding = encoding
         self.setPlainText(content)
@@ -388,7 +388,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         should implement onStyleChanged and trigger an update.
         """
         self.style.setValue("fontSize",
-                            int(self.style.value("fontSize")) + increment)
+                            self.style.value("fontSize") + increment)
 
     def zoomOut(self, increment=1):
         """
@@ -400,7 +400,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         .. note: Panels that needs to be resized depending on the font size
         should implement onStyleChanged and trigger an update.
         """
-        value = (int(self.style.value("fontSize")) - increment)
+        value = self.style.value("fontSize") - increment
         if value <= 0:
             value = increment
         self.style.setValue("fontSize", value)
@@ -475,7 +475,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :param event: QKeyEvent
         """
         event.stop = False
-        replace = bool(self.settings.value("useSpacesInsteadOfTab"))
+        replace = self.settings.value("useSpacesInsteadOfTab")
         if replace and event.key() == pcef.QtCore.Qt.Key_Tab:
             self.indent()
             event.stop = True
@@ -494,8 +494,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         Indent current line or selection (based on settings.value("tabLength"))
         """
-        if bool(self.settings.value("useSpacesInsteadOfTab")):
-            size = int(self.settings.value("tabLength"))
+        if self.settings.value("useSpacesInsteadOfTab"):
+            size = self.settings.value("tabLength")
             cursor = self.textCursor()
             cursor.beginEditBlock()
             sel_start = cursor.selectionStart()
@@ -536,8 +536,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         Unindent current line or selection by tabLength
         """
-        if bool(self.settings.value("useSpacesInsteadOfTab")):
-            size = int(self.settings.value("tabLength"))
+        if self.settings.value("useSpacesInsteadOfTab"):
+            size = self.settings.value("tabLength")
             cursor = self.textCursor()
             cursor.beginEditBlock()
             pos = cursor.position()
@@ -809,15 +809,17 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     def __resetStyleSheet(self, section, key, value):
         """ Resets stylesheet. """
         stylesheet = CODE_EDIT_STYLESHEET % {
-            "background": self.style.value("background"),
-            "foreground": self.style.value("foreground"),
-            "selectionBackground": self.style.value("selectionBackground"),
-            "selectionForeground": self.style.value("selectionForeground")}
+            "background": self.style.value("background").name(),
+            "foreground": self.style.value("foreground").name(),
+            "selectionBackground": self.style.value(
+                "selectionBackground").name(),
+            "selectionForeground": self.style.value(
+                "selectionForeground").name()}
         self.setStyleSheet(stylesheet)
         self.setFont(pcef.QtGui.QFont(self.style.value("font"),
-                                      int(self.style.value("fontSize"))))
+                                      self.style.value("fontSize")))
 
     def __onSettingsChanged(self, section, key, value):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
                              self.fontMetrics().widthChar(" "))
-        self.setShowWhitespaces(bool(self.settings.value("showWhiteSpaces")))
+        self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))

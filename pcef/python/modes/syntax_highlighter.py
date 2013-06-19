@@ -129,36 +129,27 @@ class PyHighlighterMode(QSyntaxHighlighter, Mode):
         self.rules = [(QRegExp(pat), index, fmt)
             for (pat, index, fmt) in rules]
 
-    # def onStyleChanged(self, section, key, value):
-    #     if section == "Python" or key == "background" or key == "foreground" or\
-    #             key == "whiteSpaceForeground":
-    #         print key, "regilight"
-    #         self.rehighlight()
-
     def format(self, style_key):
         """Return a QTextCharFormat with the given attributes.
         """
-        value = self.editor.style.value(style_key, "Python")
-        if value == "":
+        if isinstance(style_key, QColor):
             value = style_key
-        tokens = value.split(" ")
-        color = tokens[0]
-        styles = tokens[1:]
-        try:
-            style = tokens[1]
-        except IndexError:
-            pass
-        _color = QColor()
-        _color.setNamedColor(color)
-
-        _format = QTextCharFormat()
-        _format.setForeground(_color)
-        if 'bold' in styles:
-            _format.setFontWeight(QFont.Bold)
-        if 'italic' in styles:
-            _format.setFontItalic(True)
-        if 'underlined' in styles:
-            _format.setFontUnderline(True)
+        else:
+            value = self.editor.style.value(style_key, "Python")
+        if isinstance(value, QColor):
+            _color = value
+            _format = QTextCharFormat()
+            _format.setForeground(_color)
+            return _format
+        else:
+            _format = QTextCharFormat()
+            _format.setForeground(value.color)
+            if value.bold:
+                _format.setFontWeight(QFont.Bold)
+            if value.italic:
+                _format.setFontItalic(True)
+            if value.underlined:
+                _format.setFontUnderline(True)
         return _format
 
     def install(self, editor):

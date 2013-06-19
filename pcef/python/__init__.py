@@ -66,7 +66,7 @@ class QPythonCodeEdit(QCodeEdit):
         self.style.setValue("selectionBackground",
                             '#78879b')
         self.style.setValue("selectionForeground",
-                            "white")
+                            "#FFFFFF")
         self.style.setValue("panelBackground",
                             '#302F2F')
         self.style.setValue("panelForeground",
@@ -81,8 +81,8 @@ class QPythonCodeEdit(QCodeEdit):
             return
         for k, v in constants.DEFAULT_STYLES.items():
             self.style.setValue(k, v, "Python")
-        self.style.setValue("background", "white")
-        self.style.setValue("foreground", "black")
+        self.style.setValue("background", "#FFFFFF")
+        self.style.setValue("foreground", "#000000")
         self.style.setValue("caretLineBackground", "#E4EDF8")
         self.style.setValue("selectionBackground",
                             constants.SELECTION_BACKGROUND)
