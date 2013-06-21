@@ -36,7 +36,7 @@ def main():
     editor_01.style.setValue("background", "#222222")
     editor_01.style.setValue("foreground", "#888888")
     editor_01.style.save(file_path)
-    print editor_01.style.dump()
+    print(editor_01.style.dump())
     editor_01.show()
 
     # Editor 02: style loaded from the file we just saved

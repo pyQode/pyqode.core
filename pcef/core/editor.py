@@ -1,7 +1,7 @@
 """
 This module contains the definition of the QCodeEdit
 """
-import chardet
+import logging
 from pcef.qt.QtGui import QTextCursor, QKeyEvent
 import pcef
 from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
@@ -157,7 +157,21 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
-    def openFile(self, filePath, replaceTabsBySpaces=True):
+    def getEncoding(self, data):
+        try:
+            import chardet
+            if pcef.python3:
+                encoding = chardet.detect(bytes(data))['encoding']
+            else:
+                encoding = chardet.detect(data)['encoding']
+        except ImportError:
+            logging.getLogger("pcef").warning("chardet not available, "
+                                                 "using utf8 by default")
+            encoding = "utf-8"
+        print(encoding)
+        return encoding
+
+    def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):
         """
         Helper method to open a file in the editor.
 
@@ -168,7 +182,8 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         with open(filePath, 'rb') as f:
             data = f.read()
-            encoding = chardet.detect(bytes(data))['encoding']
+            if not encoding:
+                encoding = self.getEncoding(data)
             content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
@@ -179,7 +194,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.dirty = False
 
     @pcef.QtCore.Slot()
-    def saveToFile(self, filePath=None):
+    def saveToFile(self, filePath=None, encoding=None):
         """
         Save to file.
 
@@ -193,8 +208,15 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 filePath = self.filePath
             else:
                 return False
-        content = unicode(self.toPlainText()).encode(self.fileEncoding)
-        with open(filePath, "w") as f:
+        if encoding:
+            self.__fileEncoding = encoding
+        else:
+            self.__fileEncoding = self.getEncoding(self.toPlainText())
+        if pcef.python3:
+            content = bytes(self.toPlainText().encode(self.fileEncoding))
+        else:
+            content = unicode(self.toPlainText()).encode(self.fileEncoding)
+        with open(filePath, "wb") as f:
             f.write(content)
         self.textSaved.emit(filePath)
         self.newTextSet.emit()
