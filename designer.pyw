@@ -32,56 +32,63 @@ import os
 import subprocess
 import sys
 os.environ.setdefault("QT_API", "PyQt")
-import pcef
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 
-def main():
-    print("PCEF DESIGNER")
-    # path separator are different on windows
+def get_pth_sep():
+    """
+    Gets platform dependand path separator
+    """
     if sys.platform == "win32":
         sep = ';'
     else:
         sep = ':'
+    return sep
 
-    # start qt gui system
-    app = QtGui.QApplication(sys.argv)
 
-    # read environment variables
-    env = os.environ.copy()
+def get_pcef_path(env, sep):
+    """
+    Gets pcef path and add it to the python path if pcef has not been installed
+    yet.
 
-    # let the user try pcef without installing
+    :param env: os.environ
+
+    :param sep: path separator
+
+    :return: pcef path
+    """
     import pcef
-
     dir = QtCore.QFileInfo(pcef.__file__).dir()
     dir.cdUp()
-    pcef_path = dir.path()
+    pcef_path = os.path.normpath(dir.path())
     if 'PYTHONPATH' in env:
         python_pth = env['PYTHONPATH']
         if pcef_path not in python_pth.split(sep):
             env['PYTHONPATH'] = python_pth + sep + pcef_path
     else:
         env['PYTHONPATH'] = pcef_path
-    print(pcef_path)
+    print("PCEF path: %s" % pcef_path)
+    return pcef_path
 
-    # define plugin path
-    plugins_path = os.path.join(pcef_path, "pcef", "plugins")
+
+def set_plugins_path(env, pcef_path, sep):
+    """
+    Sets PYQTDESIGNERPATH
+    """
+    plugins_path = os.path.normpath(os.path.join(pcef_path, "pcef", "plugins"))
     if 'PYQTDESIGNERPATH' in env:
         pyqt_designer_path = env['PYQTDESIGNERPATH']
         if plugins_path not in pyqt_designer_path.split(sep):
             env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + plugins_path
     else:
         env['PYQTDESIGNERPATH'] = plugins_path
-    print(plugins_path)
+    print("PCEF plugin path: %s" % plugins_path)
 
-    # ensure every keys and values are strings
-    if sys.platform == "win32":
-        win_env = {}
-        for key, value in env.items():
-            win_env[str(key)] = str(value)
-        env = win_env
 
-    # run designer
+def run(env):
+    """
+    Runs qt designer with our customised environment.
+    """
     try:
         p = subprocess.Popen(["designer"], env=env)
     except OSError:
@@ -96,6 +103,32 @@ def main():
         return p.wait()
     return -1
 
+
+def check_env(env):
+    """
+    Ensures all key and values are strings on windows.
+    """
+    if sys.platform == "win32":
+        win_env = {}
+        for key, value in env.items():
+            win_env[str(key)] = str(value)
+        env = win_env
+    return env
+
+
+def main():
+    """
+    Runs the Qt Designer with the correct plugin path.
+    """
+    sep = get_pth_sep()
+    env = os.environ.copy()
+    # get path
+    pcef_path = get_pcef_path(env, sep)
+    set_plugins_path(env, pcef_path, sep)
+    # ensure env dict only contains strings on windows
+    env = check_env(env)
+    return run(env)
+
+
 if __name__ == "__main__":
     sys.exit(main())
-
