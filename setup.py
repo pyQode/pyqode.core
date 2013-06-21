@@ -16,72 +16,47 @@ This is the setup script, install it as any python package.
 .. note:: You will need to install PySide on your own
 """
 from setuptools import setup, find_packages
+import sys
 
-# properly get pcef version
-# execfile('pcef/__init__.py')
-__version__ = "1.0.0-dev"
+def read_version():
+    with open("pcef/__init__.py") as f:
+        lines = f.read().splitlines()
+        for l in lines:
+            if "__version__" in l:
+                return l.split("=")[1].strip()
 
-# get long description
-with open('README.rst', 'r') as readme:
-    long_desc = readme.read()
+def readme():
+    return str(open('README.rst').read())
 
-
-long_desc = """
-PySide Code Editing Framework
-=====================================
-
-PCEF is code editing framework for PySide applications.
-
-It provides a flexible code editor ready to use in any PySide
-applications. Flexibility is achieved through a system of editor extensions
-(custom panels and modes).
-
-In addition to the base widget, some preconfigured editors are available
-(a generic code editor and a python editor).
-
-Here are the core features:
-
-* **flexible framework** to add custom panels/modes
-* **syntax highlighting mode** (using pygments)
-* **code completion**
-* line number Panel
-* **code folding** Panel
-* markers Panel (to add breakpoints, bookmarks, errors,...)
-* right margin indicator mode
-* active line highlighting mode
-* **editor zoom** mode
-* find and replace Panel
-* **text decorations** (squiggle, box)
-* **easy styling** (built-in white and dark styles + possibility to customize
-  using **JSON style schemes**)
-* auto indent mode(indentation level is based on the previous line indent)
-
-Here are the python specific features:
-
-* code completion (using Jedi)
-* calltips
-* syntax and style checking (using pylint, pyflakes and pep8)
-* code folder
-* smart indent
-"""
-
+# get requirements
+requirements = ['pygments']
+# use chardet 2 with python3
+if sys.version_info[0] == 3:
+    requirements += ["chardet2"]
+else:
+    requirements += ["chardet"]
+# python editor requirements
+if not '--no-python' in sys.argv:
+    requirements += ['jedi', 'pep8', 'pyflakes']
+    # todo check pylint with python3 on ubuntue, this does not works on win32
+    # if sys.platform != "win32":
+    #     requirements += ["pylint"]
 
 setup(
     name='PCEF',
-    version=__version__,
+    version=read_version(),
     packages=find_packages(),
     keywords=["QCodeEditor", "PySide code editor"],
-    package_data={'pcef.ui': ['rc/*'], 'examples.ui': ['rc/*']},
+    package_data={'pcef.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
     url='https://github.com/ColinDuquesnoy/PCEF',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
-    description='PySide Code Editing Framework (P.C.E.F.)',
-    long_description=long_desc,
-    # install_requires=['pygments', 'jedi', 'pep8', 'qdarkstyle', 'pylint',
-    #                   'pyflakes'],
+    description='Python Qt Code Editing Framework (P.C.E.F.)',
+    long_description=readme(),
+    install_requires=requirements,
     entry_points={'gui_scripts':
-                  ['pcef_generic_example = examples.generic_example:main',
-                   'pcef_python_example = examples.python_example:main']},
+                  ['pcef_designer = designer:main',]},
+    zip_safe=False
 )
