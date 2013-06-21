@@ -50,30 +50,29 @@ def main():
     # read environment variables
     env = os.environ.copy()
 
-    # lef the user try pcef without installing
-    pcef_path = os.getcwd()
-    is_installed = False
+    # let the user try pcef without installing
+    import pcef
+
+    dir = QtCore.QFileInfo(pcef.__file__).dir()
+    dir.cdUp()
+    pcef_path = dir.path()
     if 'PYTHONPATH' in env:
         python_pth = env['PYTHONPATH']
         if pcef_path not in python_pth.split(sep):
-            env['PYTHONPATH'] = python_pth + sep+ pcef_path
-        else:
-            is_installed = True
+            env['PYTHONPATH'] = python_pth + sep + pcef_path
     else:
         env['PYTHONPATH'] = pcef_path
+    print(pcef_path)
 
     # define plugin path
-    if not is_installed:
-        plugins_path = os.path.abspath(os.path.join("pcef", "plugins"))
-    else:
-        from pcef import plugins
-        plugins_path = QtCore.QFileInfo(plugins.__file__).dir().path()
+    plugins_path = os.path.join(pcef_path, "pcef", "plugins")
     if 'PYQTDESIGNERPATH' in env:
         pyqt_designer_path = env['PYQTDESIGNERPATH']
         if plugins_path not in pyqt_designer_path.split(sep):
             env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + plugins_path
     else:
         env['PYQTDESIGNERPATH'] = plugins_path
+    print(plugins_path)
 
     # ensure every keys and values are strings
     if sys.platform == "win32":
