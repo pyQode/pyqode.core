@@ -22,11 +22,11 @@ Usage
 -----
 
 You can try the pcef qt designer plugin without installing pcef, just run
-designer.py from the source package.
+designer.pyw from the source package.
 
 If pcef is installed, this script is installed into the Scripts folder on
 windows or in a standard bin folder on linux. Open a terminal and run
-**pcef_designer**
+**pcef_designer**.
 """
 import os
 import subprocess
