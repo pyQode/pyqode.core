@@ -1,5 +1,4 @@
 *.py[cod]
-
 # C extensions
 *.so
 # Packages
@@ -33,3 +32,4 @@ nosetests.xml
 # logs
 pcef.log
 /*.json
+__pycache__
