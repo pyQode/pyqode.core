@@ -15,6 +15,7 @@ code editor widget
 #
 # exposes public core api
 #
+from pcef.core.plugins import QCodeEditPlugin
 from pcef.core import panels
 from pcef.core import modes
 from pcef.core import constants
@@ -31,6 +32,9 @@ from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.properties import PropertyRegistry
 from pcef.core.system import TextStyle
+
+#: pcef-core version
+__version__ = "1.0.0-dev"
 
 
 #

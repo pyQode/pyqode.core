@@ -31,6 +31,8 @@ windows or in a standard bin folder on linux. Open a terminal and run
 import os
 import subprocess
 import sys
+from importlib._bootstrap import FileFinder
+
 os.environ.setdefault("QT_API", "PyQt")
 from PyQt4 import QtCore
 
@@ -75,7 +77,7 @@ def set_plugins_path(env, pcef_path, sep):
     """
     Sets PYQTDESIGNERPATH
     """
-    plugins_path = os.path.normpath(os.path.join(pcef_path, "pcef", "plugins"))
+    plugins_path = os.path.normpath(os.path.join(pcef_path, "pcef"))
     if 'PYQTDESIGNERPATH' in env:
         pyqt_designer_path = env['PYQTDESIGNERPATH']
         if plugins_path not in pyqt_designer_path.split(sep):
@@ -131,4 +133,5 @@ def main():
 
 
 if __name__ == "__main__":
+    # import pcef
     sys.exit(main())

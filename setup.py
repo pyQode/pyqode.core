@@ -9,17 +9,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-PCEF is code editor framework for PySide applications
-
-This is the setup script, install it as any python package.
-
-.. note:: You will need to install PySide on your own
+This setup script packages the core package of PCEF: pcef-core
 """
 from setuptools import setup, find_packages
 import sys
 
 def read_version():
-    with open("pcef/__init__.py") as f:
+    with open("pcef/core/__init__.py") as f:
         lines = f.read().splitlines()
         for l in lines:
             if "__version__" in l:
@@ -53,5 +49,6 @@ setup(
     long_description=readme(),
     install_requires=requirements,
     entry_points={'gui_scripts':
-                  ['pcef_designer = designer:main']}
+                  ['pcef_designer = designer:main']},
+    zip_safe=False
 )

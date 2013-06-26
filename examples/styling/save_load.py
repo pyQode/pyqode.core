@@ -21,7 +21,7 @@ terminate.
 """
 import os
 import sys
-import pcef
+import pcef.core
 
 
 def main():

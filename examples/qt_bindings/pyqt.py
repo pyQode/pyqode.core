@@ -27,7 +27,7 @@ import sys
 #   os.environ.setdefault("QT_API", "PyQt")
 # or::
 #   import PyQt4
-import pcef
+import pcef.core
 # then use PyQt as usually
 from PyQt4.QtGui import QApplication
 

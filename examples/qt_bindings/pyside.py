@@ -19,7 +19,7 @@ import sys
 # first something from PySide, here the mandatory QApplication
 from PySide.QtGui import QApplication
 # then import pcef
-import pcef
+import pcef.core
 
 
 def main():

@@ -11,6 +11,7 @@
 """
 Contains utility functions
 """
+import glob
 import os
 import sys
 import pcef
@@ -79,3 +80,19 @@ class TextStyle(object):
             self.underlined = True
 
 
+def inheritors(klass):
+    subclasses = set()
+    work = [klass]
+    while work:
+        parent = work.pop()
+        for child in parent.__subclasses__():
+            if child not in subclasses:
+                subclasses.add(child)
+                work.append(child)
+    return subclasses
+
+
+def find_subpackages(pkgpath):
+    import pkgutil
+    for itm in pkgutil.iter_modules([pkgpath]):
+        print(itm)
