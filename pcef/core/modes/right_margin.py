@@ -11,7 +11,7 @@
 """
 This module contains the right margin mode.
 """
-import pcef
+from pcef.qt import QtGui
 from pcef.core import constants
 from pcef.core.mode import Mode
 
@@ -28,7 +28,7 @@ class RightMarginMode(Mode):
         Mode.__init__(self)
         #: Defines the margin position. 80 is the default
         self.marginPos = constants.MARGIN_POS
-        self.__pen = pcef.QtGui.QPen()
+        self.__pen = QtGui.QPen()
 
     def install(self, editor):
         """
@@ -38,7 +38,7 @@ class RightMarginMode(Mode):
         """
         Mode.install(self, editor)
         color = self.editor.style.addProperty("margin", "#FF0000")
-        self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(color))
+        self.__pen = QtGui.QPen(QtGui.QColor(color))
         self.marginPos = int(self.editor.settings.addProperty(
             "marginPos", "80"))
 
@@ -51,7 +51,7 @@ class RightMarginMode(Mode):
         :param value:
         """
         if key == "margin":
-            self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
+            self.__pen = QtGui.QPen(QtGui.QColor(value))
             self.editor.update()
 
     def onStateChanged(self, state):
@@ -71,12 +71,12 @@ class RightMarginMode(Mode):
         """ Paints the right margin after editor paint event. """
         rect = event.rect()
         font = self.editor.currentCharFormat().font()
-        fm = pcef.QtGui.QFontMetricsF(font)
+        fm = QtGui.QFontMetricsF(font)
         pos = self.marginPos
         offset = self.editor.contentOffset().x() + \
             self.editor.document().documentMargin()
         x80 = round(fm.width(' ') * pos) + offset
-        p = pcef.QtGui.QPainter(self.editor.viewport())
+        p = QtGui.QPainter(self.editor.viewport())
         p.setPen(self.__pen)
         p.drawLine(x80, rect.top(), x80, rect.bottom())
 

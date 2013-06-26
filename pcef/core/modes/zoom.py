@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -11,7 +11,7 @@
 """
 Contains the mode that control the editor zoom.
 """
-from pcef import QtCore
+from pcef.qt import QtCore
 from pcef.core import constants
 from pcef.core.mode import Mode
 

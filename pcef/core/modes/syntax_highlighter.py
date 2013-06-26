@@ -14,9 +14,8 @@ on pygments.
 
 .. note: This code is taken and adapted from the IPython project.
 """
-from pcef.qt.QtCore import Qt, Signal
+from pcef.qt import QtGui, QtCore
 from pcef.core.mode import Mode
-from pcef import QtGui
 from pygments.lexers.compiled import CLexer, CppLexer
 from pcef.qt.QtCore import QRegExp
 from pcef.qt.QtGui import QSyntaxHighlighter
@@ -140,7 +139,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     """ Syntax highlighter that uses Pygments for parsing.
     """
 
-    hilighlightingBlock = Signal(str, QSyntaxHighlighter)
+    hilighlightingBlock = QtCore.Signal(str, QSyntaxHighlighter)
 
     #---------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface

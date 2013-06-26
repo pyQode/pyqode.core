@@ -11,24 +11,5 @@
 """
 PCEF is a code editor framework for python qt applications.
 """
-import logging
-__logger = logging.getLogger("pcef")
-import os
-import sys
-
-# Detect python3
-if sys.version_info[0] == 3:
-    python3 = True
-else:
-    python3 = False
-
-#
-# configure and exposes qt
-#
-from pcef.qt import QtCore
-from pcef.qt import QtGui
-qt_api = os.environ["QT_API"]
-
-
 import pkg_resources
 pkg_resources.declare_namespace(__name__)

@@ -76,7 +76,7 @@ Usage
 
 Here is a simple example::
 
-    #!/usr/bin/env python2  # python 2 only at the moment
+    #!/usr/bin/env python
     import sys
 
     from PySide.QtGui import QApplication

@@ -13,13 +13,13 @@ This module contains the definition of the QCodeEdit settings
 """
 import json
 import re
-import pcef
+import sys
+from pcef.qt import QtCore, QtGui
 from pcef.core.constants import TAB_SIZE
 from pcef.core.system import TextStyle
-from pcef import python3
 
 
-class PropertyRegistry(pcef.QtCore.QObject):
+class PropertyRegistry(QtCore.QObject):
     """
     PropertyRegistry is a class that manage a registry/dictionary of properties.
 
@@ -46,10 +46,10 @@ class PropertyRegistry(pcef.QtCore.QObject):
     #: Signal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
-    valueChanged = pcef.QtCore.Signal(str, str, str)
+    valueChanged = QtCore.Signal(str, str, str)
 
     def __init__(self):
-        pcef.QtCore.QObject.__init__(self)
+        QtCore.QObject.__init__(self)
         self.__dict = {"General": {}}
 
     def addProperty(self, key, value, section="General"):
@@ -122,7 +122,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
         :return: The value as a string
         """
-        if isinstance(value, pcef.QtGui.QColor):
+        if isinstance(value, QtGui.QColor):
             return value.name()
         else:
             return str(value)
@@ -135,7 +135,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
 
         :rtype int or float or bool or string or QColor or TextStyle
         """
-        if not python3:
+        if sys.version_info[0] == 2:
             value_str = unicode(value_str)
         else:
             value_str = str(value_str)
@@ -148,7 +148,7 @@ class PropertyRegistry(pcef.QtCore.QObject):
         elif "TRUE" in value_str.upper() or "FALSE" in value_str.upper():
             return bool(value_str)
         elif re.match("#......\\Z", value_str.rstrip()):
-            return pcef.QtGui.QColor(value_str)
+            return QtGui.QColor(value_str)
         elif value_str.startswith('#'):
             return TextStyle(value_str)
         else:

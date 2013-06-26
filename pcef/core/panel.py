@@ -12,10 +12,11 @@
 This module contains the definition of a panel mode
 """
 import pcef
+from pcef.qt import QtGui
 from pcef.core.mode import Mode
 
 
-class Panel(pcef.QtGui.QWidget, Mode):
+class Panel(QtGui.QWidget, Mode):
     """
     Base class for editor panels.
 
@@ -30,7 +31,7 @@ class Panel(pcef.QtGui.QWidget, Mode):
         :return:
         """
         pcef.core.mode.Mode.__init__(self)
-        pcef.QtGui.QWidget.__init__(self)
+        QtGui.QWidget.__init__(self)
 
     def install(self, editor):
         """

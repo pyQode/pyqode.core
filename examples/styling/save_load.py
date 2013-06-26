@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -25,7 +25,7 @@ import pcef.core
 
 
 def main():
-    app = pcef.QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
 
     # this is the path the file that will contains our modified style.
     file_path = os.path.join(os.path.expanduser("~"), "dark_style.json")

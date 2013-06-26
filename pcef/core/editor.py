@@ -2,14 +2,15 @@
 This module contains the definition of the QCodeEdit
 """
 import logging
+import sys
 import pcef
-from pcef.qt.QtGui import QTextCursor, QKeyEvent
+from pcef.qt import QtGui, QtCore
 from pcef.core import constants
 from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
 
 
-class QCodeEdit(pcef.QtGui.QPlainTextEdit):
+class QCodeEdit(QtGui.QPlainTextEdit):
     """
     This is the core code editor widget which inherits from a QPlainTextEdit
 
@@ -32,29 +33,29 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
     (more about this topic in the style section)
     """
     #: Paint hook
-    painted = pcef.QtCore.Signal(pcef.QtGui.QPaintEvent)
+    painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
-    newTextSet = pcef.QtCore.Signal()
+    newTextSet = QtCore.Signal()
     #: Signal emitted when the text is saved
-    textSaved = pcef.QtCore.Signal(str)
+    textSaved = QtCore.Signal(str)
     #: Signal emitted when the dirty state changed
-    dirtyChanged = pcef.QtCore.Signal(bool)
+    dirtyChanged = QtCore.Signal(bool)
     #: Signal emitted when a key is pressed
-    keyPressed = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    keyPressed = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when a key is released
-    keyReleased = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    keyReleased = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when a mouse button is pressed
-    mousePressed = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
+    mousePressed = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted when a mouse button is released
-    mouseReleased = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
+    mouseReleased = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted on a wheel event
-    mouseWheelActivated = pcef.QtCore.Signal(pcef.QtGui.QWheelEvent)
+    mouseWheelActivated = QtCore.Signal(QtGui.QWheelEvent)
     #: Signal emitted at the end of the keyPressed event
-    postKeyPressed = pcef.QtCore.Signal(pcef.QtGui.QKeyEvent)
+    postKeyPressed = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when focusInEvent is is called
-    focusedIn = pcef.QtCore.Signal(pcef.QtGui.QFocusEvent)
+    focusedIn = QtCore.Signal(QtGui.QFocusEvent)
     #: Signal emitted when the mouseMoved
-    mouseMoved = pcef.QtCore.Signal(pcef.QtGui.QMouseEvent)
+    mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
 
     @property
     def dirty(self):
@@ -93,7 +94,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         Returns the file name (see QFileInfo.fileName)
         """
-        return pcef.QtCore.QFileInfo(self.filePath).fileName()
+        return QtCore.QFileInfo(self.filePath).fileName()
 
     @property
     def filePath(self):
@@ -126,7 +127,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         :param parent: QWidget
         """
-        pcef.QtGui.QPlainTextEdit.__init__(self, parent)
+        QtGui.QPlainTextEdit.__init__(self, parent)
         self.__blocks = []
         # panels and modes
         self.__modes = {}
@@ -157,18 +158,30 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
-    def getEncoding(self, data):
+    def detectEncoding(self, data):
+        """
+        Try to use chardet to detect encoding.
+
+        :param data: Data from which we want to detect the encoding.
+        :type str/bytes
+
+        :return The detected encoding. Return the getDefaultEncoding if chardet
+        is not available.
+        """
         try:
             import chardet
-            if pcef.python3:
+            if sys.version_info[0] == 3:
                 encoding = chardet.detect(bytes(data))['encoding']
             else:
                 encoding = chardet.detect(data)['encoding']
         except ImportError:
             logging.getLogger("pcef").warning("chardet not available, "
                                                  "using utf8 by default")
-            encoding = "utf-8"
+            encoding = self.getDefaultEncoding()
         return encoding
+
+    def getDefaultEncoding(self):
+        return sys.getfilesystemencoding()
 
     def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):
         """
@@ -182,7 +195,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         with open(filePath, 'rb') as f:
             data = f.read()
             if not encoding:
-                encoding = self.getEncoding(data)
+                encoding = self.detectEncoding(data)
             content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
@@ -192,7 +205,14 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         self.setPlainText(content)
         self.dirty = False
 
-    @pcef.QtCore.Slot()
+    def __encodePlainText(self, encoding):
+        if sys.version_info[0] == 3:
+            content = bytes(self.toPlainText().encode(encoding))
+        else:
+            content = unicode(self.toPlainText()).encode(encoding)
+        return content
+
+    @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
         """
         Save to file.
@@ -208,13 +228,11 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             else:
                 return False
         if encoding:
-            self.__fileEncoding = encoding
-        else:
-            self.__fileEncoding = self.getEncoding(self.toPlainText())
-        if pcef.python3:
-            content = bytes(self.toPlainText().encode(self.fileEncoding))
-        else:
-            content = unicode(self.toPlainText()).encode(self.fileEncoding)
+            self.fileEncoding = encoding
+        try:
+            content = self.__encodePlainText(self.fileEncoding)
+        except UnicodeEncodeError:
+            content = self.__encodePlainText(self.getDefaultEncoding())
         with open(filePath, "wb") as f:
             f.write(content)
         self.textSaved.emit(filePath)
@@ -334,20 +352,28 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         if start and end:
             tc = self.textCursor()
-            tc.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)
-            tc.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, start - 1)
+            tc.movePosition(QtGui.QTextCursor.Start,
+                            QtGui.QTextCursor.MoveAnchor)
+            tc.movePosition(QtGui.QTextCursor.Down,
+                            QtGui.QTextCursor.MoveAnchor, start - 1)
             if end > start:  # Going down
-                tc.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor,
+                tc.movePosition(QtGui.QTextCursor.Down,
+                                QtGui.QTextCursor.KeepAnchor,
                                 end - start)
-                tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.EndOfLine,
+                                QtGui.QTextCursor.KeepAnchor)
             elif end < start:  # going up
                 # don't miss end of line !
-                tc.movePosition(QTextCursor.EndOfLine, QTextCursor.MoveAnchor)
-                tc.movePosition(QTextCursor.Up, QTextCursor.KeepAnchor,
+                tc.movePosition(QtGui.QTextCursor.EndOfLine,
+                                QtGui.QTextCursor.MoveAnchor)
+                tc.movePosition(QtGui.QTextCursor.Up,
+                                QtGui.QTextCursor.KeepAnchor,
                                 start - end)
-                tc.movePosition(QTextCursor.StartOfLine, QTextCursor.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.StartOfLine,
+                                QtGui.QTextCursor.KeepAnchor)
             else:
-                tc.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.EndOfLine,
+                                QtGui.QTextCursor.KeepAnchor)
             if applySelection:
                 self.setTextCursor(tc)
 
@@ -433,7 +459,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
 
         :param e: resize event
         """
-        pcef.QtGui.QPlainTextEdit.resizeEvent(self, e)
+        QtGui.QPlainTextEdit.resizeEvent(self, e)
         self.__resizePanels()
 
     def paintEvent(self, e):
@@ -444,15 +470,15 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :param e: paint event
         """
         self.__updateVisibleBlocks(e)
-        pcef.QtGui.QPlainTextEdit.paintEvent(self, e)
+        QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
     def getLineIndent(self):
         original_cursor = self.textCursor()
-        cursor = QTextCursor(original_cursor)
-        cursor.movePosition(QTextCursor.StartOfLine)
-        cursor.movePosition(QTextCursor.EndOfLine,
-                            QTextCursor.KeepAnchor)
+        cursor = QtGui.QTextCursor(original_cursor)
+        cursor.movePosition(QtGui.QTextCursor.StartOfLine)
+        cursor.movePosition(QtGui.QTextCursor.EndOfLine,
+                            QtGui.QTextCursor.KeepAnchor)
         line = cursor.selectedText()
         indentation = len(line) - len(line.lstrip())
         self.setTextCursor(original_cursor)
@@ -463,11 +489,11 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         delta = self.textCursor().positionInBlock() - self.getLineIndent()
         if delta:
             tc = self.textCursor()
-            move = QTextCursor.MoveAnchor
+            move = QtGui.QTextCursor.MoveAnchor
             if select:
-                move = QTextCursor.KeepAnchor
+                move = QtGui.QTextCursor.KeepAnchor
             tc.movePosition(
-                QTextCursor.Left, move, delta)
+                QtGui.QTextCursor.Left, move, delta)
             self.setTextCursor(tc)
             event.stop = True
 
@@ -482,10 +508,10 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         options = doc.defaultTextOption()
         if show:
             options.setFlags(options.flags() |
-                             pcef.QtGui.QTextOption.ShowTabsAndSpaces)
+                             QtGui.QTextOption.ShowTabsAndSpaces)
         else:
             options.setFlags(options.flags() &
-                             ~pcef.QtGui.QTextOption.ShowTabsAndSpaces)
+                             ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
     def keyPressEvent(self, event):
@@ -497,18 +523,18 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         """
         event.stop = False
         replace = self.settings.value("useSpacesInsteadOfTab")
-        if replace and event.key() == pcef.QtCore.Qt.Key_Tab:
+        if replace and event.key() == QtCore.Qt.Key_Tab:
             self.indent()
             event.stop = True
-        elif replace and event.key() == pcef.QtCore.Qt.Key_Backtab:
+        elif replace and event.key() == QtCore.Qt.Key_Backtab:
             self.unIndent()
             event.stop = True
-        elif event.key() == pcef.QtCore.Qt.Key_Home:
-            self.doHomeKey(event, int(event.modifiers()) &
-                                  pcef.QtCore.Qt.ShiftModifier)
+        elif event.key() == QtCore.Qt.Key_Home:
+            self.doHomeKey(
+                event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
         self.keyPressed.emit(event)
         if not event.stop:
-            pcef.QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
         self.postKeyPressed.emit(event)
 
     def indent(self):
@@ -523,7 +549,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             sel_end = cursor.selectionEnd()
             has_selection = True
             if not cursor.hasSelection():
-                cursor.select(QTextCursor.LineUnderCursor)
+                cursor.select(QtGui.QTextCursor.LineUnderCursor)
                 has_selection = False
             nb_lines = len(cursor.selection().toPlainText().splitlines())
             if nb_lines == 0:
@@ -532,12 +558,12 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             nbSpacesAdded = 0
             startOffset = 0
             for i in range(nb_lines):
-                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QtGui.QTextCursor.StartOfLine)
                 indentation = self.getLineIndent()
                 nbSpaces = size - (indentation % size)
-                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QtGui.QTextCursor.StartOfLine)
                 cursor.insertText(" " * nbSpaces)
-                cursor.movePosition(QTextCursor.EndOfLine)
+                cursor.movePosition(QtGui.QTextCursor.EndOfLine)
                 cursor.setPosition(cursor.position() + 1)
                 nbSpacesAdded += nbSpaces
                 if not i:
@@ -545,13 +571,13 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             cursor.setPosition(sel_start + startOffset)
             if has_selection:
                 cursor.setPosition(sel_end + nbSpacesAdded,
-                                   QTextCursor.KeepAnchor)
+                                   QtGui.QTextCursor.KeepAnchor)
             cursor.endEditBlock()
             self.setTextCursor(cursor)
         else:
             self.keyPressEvent(
-                QKeyEvent(QKeyEvent.KeyPress, pcef.QtCore.Qt.Key_Tab,
-                          pcef.QtCore.Qt.NoModifier))
+                QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Tab,
+                                QtCore.Qt.NoModifier))
 
     def unIndent(self):
         """
@@ -566,22 +592,22 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             sel_end = cursor.selectionEnd()
             has_selection = True
             if not cursor.hasSelection():
-                cursor.select(QTextCursor.LineUnderCursor)
+                cursor.select(QtGui.QTextCursor.LineUnderCursor)
                 has_selection = False
             nb_lines = len(cursor.selection().toPlainText().splitlines())
             cursor.setPosition(cursor.selectionStart())
             cpt = 0
             nbSpacesRemoved = 0
             for i in range(nb_lines):
-                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QtGui.QTextCursor.StartOfLine)
                 indentation = self.getLineIndent()
                 nbSpaces = indentation - (indentation - (indentation % size))
                 if not nbSpaces:
                     nbSpaces = size
-                cursor.movePosition(QTextCursor.StartOfLine)
-                cursor.select(QTextCursor.LineUnderCursor)
+                cursor.movePosition(QtGui.QTextCursor.StartOfLine)
+                cursor.select(QtGui.QTextCursor.LineUnderCursor)
                 if cursor.selectedText().startswith(" " * nbSpaces):
-                    cursor.movePosition(QTextCursor.StartOfLine)
+                    cursor.movePosition(QtGui.QTextCursor.StartOfLine)
                     [cursor.deleteChar() for _ in range(nbSpaces)]
                     pos -= nbSpaces
                     nbSpacesRemoved += nbSpaces
@@ -591,7 +617,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 else:
                     cursor.clearSelection()
                 # next line
-                cursor.movePosition(QTextCursor.EndOfLine)
+                cursor.movePosition(QtGui.QTextCursor.EndOfLine)
                 cursor.setPosition(cursor.position() + 1)
             if cpt:
                 cursor.setPosition(sel_start - startOffset)
@@ -599,13 +625,13 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
                 cursor.setPosition(sel_start)
             if has_selection:
                 cursor.setPosition(sel_end - nbSpacesRemoved,
-                                   QTextCursor.KeepAnchor)
+                                   QtGui.QTextCursor.KeepAnchor)
             cursor.endEditBlock()
             self.setTextCursor(cursor)
         else:
             self.keyPressEvent(
-                QKeyEvent(QKeyEvent.KeyPress, pcef.QtCore.Qt.Key_Backtab,
-                          pcef.QtCore.Qt.NoModifier))
+                QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Backtab,
+                          QtCore.Qt.NoModifier))
 
     def keyReleaseEvent(self, event):
         """
@@ -617,7 +643,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         event.stop = False
         self.keyReleased.emit(event)
         if not event.stop:
-            pcef.QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
+            QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
     def focusInEvent(self, event):
         """
@@ -626,7 +652,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :return:
         """
         self.focusedIn.emit(event)
-        pcef.QtGui.QPlainTextEdit.focusInEvent(self, event)
+        QtGui.QPlainTextEdit.focusInEvent(self, event)
 
     def mousePressEvent(self, event):
         """
@@ -637,7 +663,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         event.stop = False
         self.mousePressed.emit(event)
         if not event.stop:
-            pcef.QtGui.QPlainTextEdit.mousePressEvent(self, event)
+            QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         """
@@ -648,7 +674,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         event.stop = False
         self.mouseReleased.emit(event)
         if not event.stop:
-            pcef.QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
         """
@@ -659,7 +685,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         event.stop = False
         self.mouseWheelActivated.emit(event)
         if not event.stop:
-            pcef.QtGui.QPlainTextEdit.wheelEvent(self, event)
+            QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mouseMoveEvent(self, event):
         """
@@ -668,14 +694,14 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         c = self.cursorForPosition(event.pos())
         for sel in self.__selections:
             if sel.containsCursor(c) and sel.tooltip:
-                pcef.QtGui.QToolTip.showText(
+                QtGui.QToolTip.showText(
                     self.mapToGlobal(event.pos()), sel.tooltip, self)
                 break
         self.mouseMoved.emit(event)
-        pcef.QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
+        QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
     def showEvent(self, QShowEvent):
-        pcef.QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
+        QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
         self.updateViewportMargins()
 
     def setPlainText(self, txt):
@@ -686,7 +712,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
         :param txt: The new text to set.
         :return:
         """
-        pcef.QtGui.QPlainTextEdit.setPlainText(self, txt)
+        QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
         self.__onSettingsChanged("", "", "")
         self.newTextSet.emit()
@@ -837,7 +863,7 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             "selectionForeground": self.style.value(
                 "selectionForeground").name()}
         self.setStyleSheet(stylesheet)
-        self.setFont(pcef.QtGui.QFont(self.style.value("font"),
+        self.setFont(QtGui.QFont(self.style.value("font"),
                                       self.style.value("fontSize")))
 
     def __onSettingsChanged(self, section, key, value):

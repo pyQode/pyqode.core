@@ -11,10 +11,10 @@
 """
 This module defines text edit decorations
 """
-import pcef
+from pcef.qt import QtCore, QtGui
 
 
-class TextDecoration(pcef.QtGui.QTextEdit.ExtraSelection):
+class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
     utility class that adds a few utility methods over the Qt ExtraSelection.
@@ -39,22 +39,22 @@ class TextDecoration(pcef.QtGui.QTextEdit.ExtraSelection):
         """
         self.draw_order = draw_order
         self.tooltip = tooltip
-        pcef.QtGui.QTextEdit.ExtraSelection.__init__(self)
-        cursor = pcef.QtGui.QTextCursor(cursorOrBlockOrDoc)
+        QtGui.QTextEdit.ExtraSelection.__init__(self)
+        cursor = QtGui.QTextCursor(cursorOrBlockOrDoc)
         if startPos is not None:
             cursor.setPosition(startPos)
         if endPos is not None:
-            cursor.setPosition(endPos, pcef.QtGui.QTextCursor.KeepAnchor)
+            cursor.setPosition(endPos, QtGui.QTextCursor.KeepAnchor)
         self.cursor = cursor
 
     def containsCursor(self, textCursor):
-        assert isinstance(textCursor, pcef.QtGui.QTextCursor)
+        assert isinstance(textCursor, QtGui.QTextCursor)
         return self.cursor.selectionStart() <= textCursor.position() < \
             self.cursor.selectionEnd()
 
     def setBold(self):
         """ Uses bold text """
-        self.format.setFontWeight(pcef.QtGui.QFont.Bold)
+        self.format.setFontWeight(QtGui.QFont.Bold)
 
     def setForeground(self, color):
         """ Sets the foreground color.
@@ -74,29 +74,29 @@ class TextDecoration(pcef.QtGui.QTextEdit.ExtraSelection):
         :param flag: True to use full width selection.
         """
         self.cursor.clearSelection()
-        self.format.setProperty(pcef.QtGui.QTextFormat.FullWidthSelection, flag)
+        self.format.setProperty(QtGui.QTextFormat.FullWidthSelection, flag)
 
-    def setSpellchecking(self, color=pcef.QtCore.Qt.blue):
+    def setSpellchecking(self, color=QtCore.Qt.blue):
         """ Underlines text as a spellcheck error.
 
         :param color: color
         :type color: QColor
         """
         self.format.setUnderlineStyle(
-            pcef.QtGui.QTextCharFormat.SpellCheckUnderline)
+            QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
-    def setError(self, color=pcef.QtCore.Qt.red):
+    def setError(self, color=QtCore.Qt.red):
         """ Highlights text as a syntax error
 
         :param color: color
         :type color: QColor
         """
         self.format.setUnderlineStyle(
-            pcef.QtGui.QTextCharFormat.SpellCheckUnderline)
+            QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
-    def setWarning(self, color=pcef.QtGui.QColor("orange")):
+    def setWarning(self, color=QtGui.QColor("orange")):
         """
         Highlights text as a syntax warning
 
@@ -104,5 +104,5 @@ class TextDecoration(pcef.QtGui.QTextEdit.ExtraSelection):
         :type color: QColor
         """
         self.format.setUnderlineStyle(
-            pcef.QtGui.QTextCharFormat.SpellCheckUnderline)
+            QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)

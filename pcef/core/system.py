@@ -15,6 +15,7 @@ import glob
 import os
 import sys
 import pcef
+from pcef.qt import QtCore, QtGui
 
 
 def findSettingsDirectory(appName="PCEF"):
@@ -45,7 +46,7 @@ class TextStyle(object):
         """
         :param style: The style string ("#rrggbb [bold] [italic] [underlined])
         """
-        self.color = pcef.QtGui.QColor()
+        self.color = QtGui.QColor()
         self.bold = False
         self.italic = False
         self.underlined = False
@@ -68,7 +69,7 @@ class TextStyle(object):
     def from_string(self, string):
         tokens = string.split(" ")
         assert len(tokens) == 4
-        self.color = pcef.QtGui.QColor(tokens[0])
+        self.color = QtGui.QColor(tokens[0])
         self.bold = False
         if bool(tokens[1]) == "bold":
             self.bold = True

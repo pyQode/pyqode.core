@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -15,10 +15,11 @@ of PyQt4 which is the default.
 When using PySide the easiest way is just to import any PySide module/package
 before pcef
 """
+import os
 import sys
-# first something from PySide, here the mandatory QApplication
+# first import something from PySide
 from PySide.QtGui import QApplication
-# then import pcef
+# then import any pcef package
 import pcef.core
 
 
@@ -27,7 +28,7 @@ def main():
     editor = pcef.core.QCodeEdit()
     editor.show()
     # show the api pcef is currently using
-    editor.setPlainText("PCEF using the %s qt bindings" % pcef.qt_api)
+    editor.setPlainText("PCEF using the %s qt bindings" % os.environ["QT_API"])
     app.exec_()
 
 if __name__ == "__main__":

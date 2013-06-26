@@ -11,7 +11,7 @@
 """
 This module contains the care line highlighter mode
 """
-import pcef
+from pcef.qt import QtCore, QtGui
 from pcef.core.mode import Mode
 from pcef.core.decoration import TextDecoration
 
@@ -50,7 +50,7 @@ class CaretLineHighlighterMode(Mode):
         """
         Mode.install(self, editor)
         color = self.editor.style.addProperty("caretLineBackground", "#E4EDF8")
-        self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(color))
+        self.__brush = QtGui.QBrush(QtGui.QColor(color))
         self.__updateHighlight()
 
     def onStyleChanged(self, section, key, value):
@@ -58,7 +58,7 @@ class CaretLineHighlighterMode(Mode):
         Changes the highlight brush color and refresh highlighting
         """
         if key == "caretLineBackground":
-            self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
+            self.__brush = QtGui.QBrush(QtGui.QColor(value))
             self.__updateHighlight()
 
     def clearDeco(self):

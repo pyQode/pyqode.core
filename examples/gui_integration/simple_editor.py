@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -14,9 +14,8 @@ Integrates the generic editor using the pcef qt designer plugin.
 import os
 import sys
 os.environ.setdefault("QT_API", "PyQt")
-from pcef import QtCore, QtGui
-import pcef
-if pcef.python3:
+from pcef.qt import QtCore, QtGui
+if sys.version_info[0] == 3:
     from ui.simple_editor_ui3 import Ui_MainWindow
 else:
     from ui.simple_editor_ui import Ui_MainWindow

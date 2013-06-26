@@ -15,6 +15,7 @@ code editor widget
 #
 # exposes public core api
 #
+import pcef.qt
 from pcef.core.plugins import QCodeEditPlugin
 from pcef.core import panels
 from pcef.core import modes

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -27,11 +27,6 @@ def readme():
 
 # get requirements
 requirements = ['pygments']
-# use chardet 2 with python3
-if sys.version_info[0] == 3:
-    requirements += ["chardet2"]
-else:
-    requirements += ["chardet"]
 
 setup(
     name='pcef-core',

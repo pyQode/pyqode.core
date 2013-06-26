@@ -11,7 +11,7 @@
 """
 This module contains the line number panel
 """
-import pcef
+from pcef.qt import QtCore, QtGui
 from pcef.core import constants
 from pcef.core.panel import Panel
 
@@ -28,9 +28,9 @@ class LineNumberPanel(Panel):
         Adds style properties to the editor and setup default brushe/pen
         """
         Panel.install(self, editor)
-        self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(
+        self.__brush = QtGui.QBrush(QtGui.QColor(
             self.editor.style.value("panelBackground")))
-        self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(
+        self.__pen = QtGui.QPen(QtGui.QColor(
             self.editor.style.value("panelForeground")))
 
     def onStyleChanged(self, section, key, value):
@@ -42,10 +42,10 @@ class LineNumberPanel(Panel):
         :param value:
         """
         if key == "panelBackground":
-            self.__brush = pcef.QtGui.QBrush(pcef.QtGui.QColor(value))
+            self.__brush = QtGui.QBrush(QtGui.QColor(value))
             self.editor.repaint()
         elif key == "panelForeground":
-            self.__pen = pcef.QtGui.QPen(pcef.QtGui.QColor(value))
+            self.__pen = QtGui.QPen(QtGui.QColor(value))
             self.editor.repaint()
 
     # def onStateChanged(self, state):
@@ -62,7 +62,7 @@ class LineNumberPanel(Panel):
         compute the width
         :return:
         """
-        return pcef.QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
+        return QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
 
     def lineNumberAreaWidth(self):
         """
@@ -83,7 +83,7 @@ class LineNumberPanel(Panel):
         """
         Starts selecting
         """
-        assert isinstance(e, pcef.QtGui.QMouseEvent)
+        assert isinstance(e, QtGui.QMouseEvent)
         self.__selecting = True
         self.__selStart = e.pos().y()
         start = end = self.editor.lineNumber(self.__selStart)
@@ -117,13 +117,13 @@ class LineNumberPanel(Panel):
         """
         if self.isVisible():
             # fill background
-            painter = pcef.QtGui.QPainter(self)
+            painter = QtGui.QPainter(self)
             painter.fillRect(event.rect(), self.__brush)
             # get style options (font, size)
             width = self.width()
             height = self.editor.fontMetrics().height()
             font = self.editor.font()
-            bold_font = pcef.QtGui.QFont(font)
+            bold_font = QtGui.QFont(font)
             bold_font.setBold(True)
             # get selection range
             sel_start, sel_end = self.editor.selectionRange()
@@ -138,4 +138,4 @@ class LineNumberPanel(Panel):
                 else:
                     painter.setFont(font)
                 painter.drawText(0, top, width, height,
-                                 pcef.QtCore.Qt.AlignRight, str(blockNumber))
+                                 QtCore.Qt.AlignRight, str(blockNumber))

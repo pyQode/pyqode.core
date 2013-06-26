@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -13,23 +13,31 @@ This example show how to use pcef with the PyQt bindings.
 
 For PyQt the most important thing is that you must use the sip API version 2 for
 QString and QVariant. You can import some PyQt modules as long as you use the
-correct API version.
+correct API version::
 
-The best way to use pcef with PyQt is simply to import pcef before any PyQt
+    import sip
+    sip.setapi("QString", 2)
+    sip.setapi("QVariant", 2)
+
+The easiest way to use pcef with PyQt is simply to import pcef before any PyQt
 module (PyQt is automatically selected by default).
+
+**This is only needed for python 2,** python3 bindings already use the new sip
+API. With python3 you're free to import any modules in the order you want**
 """
+import os
 import sys
-# first import pcef, this will choose PyQt by default and setup the correct sip
-# API.
-# We could force PyQt by setting up the QT_API env var or by importing PyQt4
-# only before pcef::
-#   import os
-#   os.environ.setdefault("QT_API", "PyQt")
-# or::
-#   import PyQt4
-import pcef.core
-# then use PyQt as usually
-from PyQt4.QtGui import QApplication
+if sys.version_info[0] == 2:
+    # With python 2, the order of import matters!
+    # Import a pcef package or class before PyQt to force the SIP API to version
+    #  2 automatically
+    import pcef.core
+    # then use PyQt as usually
+    from PyQt4.QtGui import QApplication
+else:
+    # With python3, do as you want :)
+    from PyQt4.QtGui import QApplication
+    import pcef.core
 
 
 def main():
@@ -37,7 +45,7 @@ def main():
     editor = pcef.core.QCodeEdit()
     editor.show()
     # show the api pcef is currently using
-    editor.setPlainText("PCEF using the %s qt bindings" % pcef.qt_api)
+    editor.setPlainText("PCEF using the %s qt bindings" % os.environ["QT_API"])
     app.exec_()
 
 if __name__ == "__main__":

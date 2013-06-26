@@ -44,14 +44,14 @@ and a meaningful log message in the terminal
 Usage
 ------------------------
 To access the Qt bindings you just need to import pcef and prefix your
-Qt classes by pcef.QtGui. ::
+Qt classes by QtGui. ::
 
     import os
     import sys
     import pcef
 
 
-    app = pcef.QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     editor = pcef.QCodeEdit()
     # show the QT api in the window title
     editor.setWindowTitle(os.environ["QT_API"])
@@ -178,3 +178,5 @@ if not select():
                       "error code -1")
     sys.exit(-1)
 __logger.info("Using %s" % os.environ["QT_API"])
+
+from pcef.qt import QtCore, QtGui
