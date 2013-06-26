@@ -29,7 +29,7 @@ class Panel(pcef.QtGui.QWidget, Mode):
         :param description: The panel description
         :return:
         """
-        pcef.Mode.__init__(self)
+        pcef.core.mode.Mode.__init__(self)
         pcef.QtGui.QWidget.__init__(self)
 
     def install(self, editor):

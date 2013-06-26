@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="example_icons">
+    <file>rc/document-save-as.png</file>
+    <file>rc/document-save.png</file>
+    <file>rc/folder.png</file>
+  </qresource>
+</RCC>

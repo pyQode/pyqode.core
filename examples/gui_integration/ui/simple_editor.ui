@@ -129,49 +129,16 @@
   <customwidget>
    <class>QGenericCodeEdit</class>
    <extends>QCodeEdit</extends>
-   <header>pcef</header>
+   <header>pcef.core</header>
   </customwidget>
   <customwidget>
    <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef</header>
+   <header>pcef.core.editor</header>
   </customwidget>
  </customwidgets>
  <resources>
   <include location="examples.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>editor</sender>
-   <signal>dirtyChanged(bool)</signal>
-   <receiver>actionSave</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>538</x>
-     <y>447</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSave</sender>
-   <signal>triggered()</signal>
-   <receiver>editor</receiver>
-   <slot>saveToFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>538</x>
-     <y>447</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

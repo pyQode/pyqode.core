@@ -31,7 +31,7 @@ def main():
     file_path = os.path.join(os.path.expanduser("~"), "dark_style.json")
 
     # Editor 01: change its style than save it to a file
-    editor_01 = pcef.QCodeEdit()
+    editor_01 = pcef.core.QCodeEdit()
     editor_01.setWindowTitle("Editor 01")
     editor_01.style.setValue("background", "#222222")
     editor_01.style.setValue("foreground", "#888888")
@@ -40,7 +40,7 @@ def main():
     editor_01.show()
 
     # Editor 02: style loaded from the file we just saved
-    editor_02 = pcef.QCodeEdit()
+    editor_02 = pcef.core.QCodeEdit()
     editor_02.setWindowTitle("Editor 02")
     editor_02.style.open(file_path)
     editor_02.show()

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Mon Jun 10 09:31:41 2013
+# Created: Wed Jun 26 14:15:13 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -82,8 +82,6 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionSave)
 
         self.retranslateUi(MainWindow)
-        QtCore.QObject.connect(self.editor, QtCore.SIGNAL(_fromUtf8("dirtyChanged(bool)")), self.actionSave.setEnabled)
-        QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL(_fromUtf8("triggered()")), self.editor.saveToFile)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -101,5 +99,5 @@ class Ui_MainWindow(object):
         self.actionModes.setText(_translate("MainWindow", "Modes", None))
         self.actionAbout.setText(_translate("MainWindow", "About", None))
 
-from pcef import QGenericCodeEdit
+from pcef.core import QGenericCodeEdit
 import examples_rc

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'python_editor.ui'
 #
-# Created: Mon Jun 10 09:31:41 2013
+# Created: Wed Jun 26 14:15:13 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,3 +119,10 @@ class Ui_MainWindow(object):
 
 from pcef import QPythonCodeEdit
 import examples_rc
+
+class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
+        QtGui.QMainWindow.__init__(self, parent, f)
+
+        self.setupUi(self)
+

@@ -14,7 +14,7 @@ This module contains the definition of the QCodeEdit settings
 import json
 import re
 import pcef
-from pcef.constants import TAB_SIZE
+from pcef.core.constants import TAB_SIZE
 from pcef.core.system import TextStyle
 from pcef import python3
 

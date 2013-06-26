@@ -11,6 +11,8 @@
 """
 PCEF is a code editor framework for python qt applications.
 """
+__import__('pkg_resources').declare_namespace(__name__)
+
 import logging
 __logger = logging.getLogger("pcef")
 import os
@@ -34,43 +36,24 @@ from pcef.qt import QtCore
 from pcef.qt import QtGui
 qt_api = os.environ["QT_API"]
 
-#
-# Detect features support
-#
-try:
-    from pcef import python
-    python_support = True
-except ImportError as e:
-    try:
-        print(e.msg)
-    except AttributeError:
-        print(e.message)
-    python_support = False
-    pass  # python not supported
-__logger.debug("Python support %s" % python_support)
-
+from pcef import core
 
 #
 # Public api
 #
-# -- all
-from pcef import exceptions
-from pcef.constants import PanelPosition
-# -- core
-from pcef.core import QGenericCodeEdit
-from pcef.core import system
-from pcef.core.decoration import TextDecoration
-from pcef.core.editor import QCodeEdit
-from pcef.core.mode import Mode
-from pcef.core.modes import CaretLineHighlighterMode
-from pcef.core.modes import RightMarginMode
-from pcef.core.modes import PygmentsHighlighterMode
-from pcef.core.panel import Panel
-from pcef.core.panels import LineNumberPanel
-from pcef.core.properties import PropertyRegistry
-from pcef.core.system import TextStyle
-# -- python if python is installed
-if python_support:
-    from pcef.python import QPythonCodeEdit
-    # from python.modes import
-    # from python.panels import
+# # -- all
+# from pcef import exceptions
+# from pcef.constants import PanelPosition
+# # -- core
+# from pcef.core import QGenericCodeEdit
+# from pcef.core import system
+# from pcef.core.decoration import TextDecoration
+# from pcef.core.editor import QCodeEdit
+# from pcef.core.mode import Mode
+# from pcef.core.modes import CaretLineHighlighterMode
+# from pcef.core.modes import RightMarginMode
+# from pcef.core.modes import PygmentsHighlighterMode
+# from pcef.core.panel import Panel
+# from pcef.core.panels import LineNumberPanel
+# from pcef.core.properties import PropertyRegistry
+# from pcef.core.system import TextStyle

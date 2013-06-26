@@ -21,7 +21,7 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     """Designer plugin for pcef.QCodeEdit.
     Also serves as base class for other custom widget plugins."""
 
-    _module = 'pcef'        # path to the widget's module
+    _module = 'pcef.core.editor'        # path to the widget's module
     _class = 'QCodeEdit'    # name of the widget class
     _name = "QCodeEdit"
     _icon = None
@@ -62,27 +62,27 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
         return ''
 
     def createWidget(self, parent):
-        return pcef.QCodeEdit(parent)
+        return pcef.core.QCodeEdit(parent)
 
 
 class QGenericCodeEditPlugin(QCodeEditPlugin):
-    _module = 'pcef'        # path to the widget's module
+    _module = 'pcef.core'        # path to the widget's module
     _class = 'QGenericCodeEdit'    # name of the widget class
     _name = "QGenericCodeEdit"
     _icon = None
 
     def createWidget(self, parent):
-        return pcef.QGenericCodeEdit(parent)
+        return pcef.core.QGenericCodeEdit(parent)
 
 
-class QPythonCodeEditPlugin(QCodeEditPlugin):
-    _module = 'pcef'        # path to the widget's module
-    _class = 'QPythonCodeEdit'    # name of the widget class
-    _name = "QPythonCodeEdit"
-    _icon = None
-
-    def createWidget(self, parent):
-        return pcef.QPythonCodeEdit(parent)
+# class QPythonCodeEditPlugin(QCodeEditPlugin):
+#     _module = 'pcef'        # path to the widget's module
+#     _class = 'QPythonCodeEdit'    # name of the widget class
+#     _name = "QPythonCodeEdit"
+#     _icon = None
+#
+#     def createWidget(self, parent):
+#         return pcef.QPythonCodeEdit(parent)
 
 
 if __name__ == '__main__':  # some tests

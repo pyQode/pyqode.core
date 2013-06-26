@@ -25,6 +25,7 @@ def read_version():
             if "__version__" in l:
                 return l.split("=")[1].strip()
 
+
 def readme():
     return str(open('README.rst').read())
 
@@ -35,28 +36,22 @@ if sys.version_info[0] == 3:
     requirements += ["chardet2"]
 else:
     requirements += ["chardet"]
-# python editor requirements
-if not '--no-python' in sys.argv:
-    requirements += ['jedi', 'pep8', 'pyflakes']
-    # todo check pylint with python3 on ubuntue, this does not works on win32
-    # if sys.platform != "win32":
-    #     requirements += ["pylint"]
 
 setup(
-    name='PCEF',
+    name='pcef-core',
+    namespace_packages=['pcef'],
     version=read_version(),
     packages=find_packages(),
-    keywords=["QCodeEditor", "PySide code editor"],
-    package_data={'pcef.ui': ['rc/*']},
+    keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
+    # package_data={'pcef.ui': ['rc/*']},
     package_dir={'pcef': 'pcef'},
     url='https://github.com/ColinDuquesnoy/PCEF',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
-    description='Python Qt Code Editing Framework (P.C.E.F.)',
+    description='Python-Qt Code Editing Framework (P.C.E.F.)',
     long_description=readme(),
     install_requires=requirements,
     entry_points={'gui_scripts':
-                  ['pcef_designer = designer:main',]},
-    zip_safe=False
+                  ['pcef_designer = designer:main']}
 )

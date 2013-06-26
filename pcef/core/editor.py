@@ -2,10 +2,10 @@
 This module contains the definition of the QCodeEdit
 """
 import logging
-from pcef.qt.QtGui import QTextCursor, QKeyEvent
 import pcef
-from pcef.constants import PanelPosition, CODE_EDIT_STYLESHEET
-from pcef import constants
+from pcef.qt.QtGui import QTextCursor, QKeyEvent
+from pcef.core import constants
+from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
 
 
@@ -168,7 +168,6 @@ class QCodeEdit(pcef.QtGui.QPlainTextEdit):
             logging.getLogger("pcef").warning("chardet not available, "
                                                  "using utf8 by default")
             encoding = "utf-8"
-        print(encoding)
         return encoding
 
     def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):

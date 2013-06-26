@@ -12,7 +12,7 @@
 This module contains the line number panel
 """
 import pcef
-from pcef import constants
+from pcef.core import constants
 from pcef.core.panel import Panel
 
 

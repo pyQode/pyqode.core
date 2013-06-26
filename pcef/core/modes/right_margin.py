@@ -12,8 +12,8 @@
 This module contains the right margin mode.
 """
 import pcef
+from pcef.core import constants
 from pcef.core.mode import Mode
-from pcef import constants
 
 
 class RightMarginMode(Mode):

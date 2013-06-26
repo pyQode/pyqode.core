@@ -9,11 +9,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This package contains the core class of pcef
+This package contains the core classes of pcef and an example of a generic
+code editor widget
 """
+#
+# exposes public core api
+#
 from pcef.core import panels
 from pcef.core import modes
-
+from pcef.core import constants
+from pcef.core.mode import Mode
+from pcef.core.panel import Panel
 from pcef.core.editor import QCodeEdit
 from pcef.core.panels import LineNumberPanel
 from pcef.core.modes import CaretLineHighlighterMode
@@ -21,9 +27,15 @@ from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
 from pcef.core.modes import PygmentsHighlighterMode
 from pcef.core.modes import AutoIndentMode
-from pcef.constants import PanelPosition
+from pcef.core.constants import PanelPosition
+from pcef.core.decoration import TextDecoration
+from pcef.core.properties import PropertyRegistry
+from pcef.core.system import TextStyle
 
 
+#
+# Example of a generic code editor widgey
+#
 class QGenericCodeEdit(QCodeEdit):
     """
     Extends QCodeEdit with a hardcoded set of modes and panels.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -8,7 +8,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-"""
-This package examples related to the choice of the underlying qt bindings.
-"""
-

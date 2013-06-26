@@ -1,8 +1,8 @@
 # syntax.py
+from core import constants
 from pcef.qt.QtCore import QRegExp
 from pcef.qt.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 from pcef.core.mode import Mode
-from pcef import constants
 
 
 class PyHighlighterMode(QSyntaxHighlighter, Mode):

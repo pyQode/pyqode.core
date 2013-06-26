@@ -24,7 +24,7 @@ import pcef
 
 def main():
     app = QApplication(sys.argv)
-    editor = pcef.QCodeEdit()
+    editor = pcef.core.QCodeEdit()
     editor.show()
     # show the api pcef is currently using
     editor.setPlainText("PCEF using the %s qt bindings" % pcef.qt_api)
