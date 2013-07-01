@@ -29,11 +29,10 @@ windows or in a standard bin folder on linux. Open a terminal and run
 **pcef_designer**.
 """
 import os
+os.environ.setdefault("QT_API", "PyQt")
+import pkg_resources
 import subprocess
 import sys
-from importlib._bootstrap import FileFinder
-
-os.environ.setdefault("QT_API", "PyQt")
 from PyQt4 import QtCore
 
 
@@ -48,43 +47,49 @@ def get_pth_sep():
     return sep
 
 
-def get_pcef_path(env, sep):
-    """
-    Gets pcef path and add it to the python path if pcef has not been installed
-    yet.
+# def get_pcef_path(env, sep):
+#     """
+#     Gets pcef path and add it to the python path if pcef has not been installed
+#     yet.
+#
+#     :param env: os.environ
+#
+#     :param sep: path separator
+#
+#     :return: pcef path
+#     """
+#     import pcef
+#     dir = QtCore.QFileInfo(pcef.__file__).dir()
+#     dir.cdUp()
+#     pcef_path = os.path.normpath(dir.path())
+#     if 'PYTHONPATH' in env:
+#         python_pth = env['PYTHONPATH']
+#         if pcef_path not in python_pth.split(sep):
+#             env['PYTHONPATH'] = python_pth + sep + pcef_path
+#     else:
+#         env['PYTHONPATH'] = pcef_path
+#     print("PCEF path: %s" % pcef_path)
+#     return pcef_path
 
-    :param env: os.environ
 
-    :param sep: path separator
-
-    :return: pcef path
-    """
-    import pcef
-    dir = QtCore.QFileInfo(pcef.__file__).dir()
-    dir.cdUp()
-    pcef_path = os.path.normpath(dir.path())
-    if 'PYTHONPATH' in env:
-        python_pth = env['PYTHONPATH']
-        if pcef_path not in python_pth.split(sep):
-            env['PYTHONPATH'] = python_pth + sep + pcef_path
-    else:
-        env['PYTHONPATH'] = pcef_path
-    print("PCEF path: %s" % pcef_path)
-    return pcef_path
-
-
-def set_plugins_path(env, pcef_path, sep):
+def set_plugins_path(env, sep):
     """
     Sets PYQTDESIGNERPATH
     """
-    plugins_path = os.path.normpath(os.path.join(pcef_path, "pcef"))
+    paths = ""
+    dict = {}
+    for entrypoint in pkg_resources.iter_entry_points("pcef_plugins"):
+        plugin = entrypoint.load()
+        pth = os.path.dirname(plugin.__file__)
+        if not pth in dict:
+            paths += pth + sep
+            dict[pth] = None
     if 'PYQTDESIGNERPATH' in env:
         pyqt_designer_path = env['PYQTDESIGNERPATH']
-        if plugins_path not in pyqt_designer_path.split(sep):
-            env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + plugins_path
+        env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + paths
     else:
-        env['PYQTDESIGNERPATH'] = plugins_path
-    print("PCEF plugin path: %s" % plugins_path)
+        env['PYQTDESIGNERPATH'] = paths
+    print("PCEF plugins paths: %s" % env["PYQTDESIGNERPATH"])
 
 
 def run(env):
@@ -124,10 +129,7 @@ def main():
     """
     sep = get_pth_sep()
     env = os.environ.copy()
-    # get path
-    pcef_path = get_pcef_path(env, sep)
-    set_plugins_path(env, pcef_path, sep)
-    # ensure env dict only contains strings on windows
+    set_plugins_path(env, sep)
     env = check_env(env)
     return run(env)
 

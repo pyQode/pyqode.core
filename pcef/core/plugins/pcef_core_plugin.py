@@ -9,11 +9,8 @@ in your path on Windows)
 """
 # This only works with PyQt, PySide does not support the QtDesigner module
 import os
-import PyQt4
-import pcef
-from PyQt4.QtGui import QApplication
-
 os.environ.setdefault("QT_API", "PyQt")
+import pcef.core
 from PyQt4 import QtDesigner
 
 
@@ -21,7 +18,7 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     """Designer plugin for pcef.QCodeEdit.
     Also serves as base class for other custom widget plugins."""
 
-    _module = 'pcef.core.editor'        # path to the widget's module
+    _module = 'pcef.core'        # path to the widget's module
     _class = 'QCodeEdit'    # name of the widget class
     _name = "QCodeEdit"
     _icon = None

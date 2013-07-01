@@ -44,6 +44,8 @@ setup(
     long_description=readme(),
     install_requires=requirements,
     entry_points={'gui_scripts':
-                  ['pcef_designer = designer:main']},
+                  ['pcef_designer = designer:main'],
+                  'pcef_plugins':
+                  ['pcef_core = pcef.core.plugins.pcef_core_plugin']},
     zip_safe=False
 )
