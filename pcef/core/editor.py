@@ -56,7 +56,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     focusedIn = QtCore.Signal(QtGui.QFocusEvent)
     #: Signal emitted when the mouseMoved
     mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
-    #: Signal emitted when the visible blocks changed
+    #: Signal emitted when the list of visible blocks has been updated, even if
+    #: there is no changes
     visibleBlocksChanged = QtCore.Signal()
 
     @property
@@ -159,10 +160,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
-        self.blockCountChanged.connect(self.__onBlocksChanged)
-        self.verticalScrollBar().valueChanged.connect(self.__onBlocksChanged)
-        self.newTextSet.connect(self.__onBlocksChanged)
-        self.cursorPositionChanged.connect(self.__onBlocksChanged)
 
     def detectEncoding(self, data):
         """
@@ -475,6 +472,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param e: paint event
         """
+        print("Paint")
         self.__updateVisibleBlocks(e)
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
@@ -774,6 +772,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber = block.blockNumber()
+        self.visibleBlocksChanged.emit()
 
     def __resizePanels(self):
         """
@@ -876,7 +875,3 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
                              self.fontMetrics().widthChar(" "))
         self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))
-
-    def __onBlocksChanged(self):
-        self.__updateVisibleBlocks(None)
-        self.visibleBlocksChanged.emit()
