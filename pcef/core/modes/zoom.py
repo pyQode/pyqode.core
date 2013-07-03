@@ -53,13 +53,13 @@ class ZoomMode(Mode):
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if event.key() == QtCore.Qt.Key_0:
                 self.editor.resetZoom()
-                event.stop = True
+                event.accept()
             if event.key() == QtCore.Qt.Key_Plus:
                 self.editor.zoomIn()
-                event.stop = True
+                event.accept()
             if event.key() == QtCore.Qt.Key_Minus:
                 self.editor.zoomOut()
-                event.stop = True
+                event.accept()
 
     def __onWheelEvent(self, event):
         """
@@ -73,7 +73,7 @@ class ZoomMode(Mode):
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if delta < self.prev_delta:
                 self.editor.zoomOut()
-                event.stop = True
+                event.accept()
             else:
                 self.editor.zoomIn()
-                event.stop = True
+                event.accept()

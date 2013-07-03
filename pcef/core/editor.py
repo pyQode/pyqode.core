@@ -498,7 +498,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             tc.movePosition(
                 QtGui.QTextCursor.Left, move, delta)
             self.setTextCursor(tc)
-            event.stop = True
+            event.accept()
 
     def setShowWhitespaces(self, show):
         """
@@ -519,24 +519,26 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyPressEvent(self, event):
         """
-        Release the keyReleasedEvent. Use the stop properties of the event
+        Release the keyReleasedEvent. Use the accept method of the event
         instance to prevent the event to propagate.
 
         :param event: QKeyEvent
         """
-        event.stop = False
+        initialState = event.isAccepted()
+        event.ignore()
         replace = self.settings.value("useSpacesInsteadOfTab")
         if replace and event.key() == QtCore.Qt.Key_Tab:
             self.indent()
-            event.stop = True
+            event.accept()
         elif replace and event.key() == QtCore.Qt.Key_Backtab:
             self.unIndent()
-            event.stop = True
+            event.accept()
         elif event.key() == QtCore.Qt.Key_Home:
             self.doHomeKey(
                 event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
         self.keyPressed.emit(event)
-        if not event.stop:
+        if not event.isAccepted():
+            event.setAccepted(initialState)
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
         self.postKeyPressed.emit(event)
 
@@ -643,9 +645,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param event: QKeyEvent
         """
-        event.stop = False
+        initialState = event.isAccepted()
+        event.ignore()
         self.keyReleased.emit(event)
-        if not event.stop:
+        if not event.isAccepted():
+            event.setAccepted(initialState)
             QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
     def focusInEvent(self, event):
@@ -663,9 +667,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param event: QMouseEvent
         """
-        event.stop = False
+        initialState = event.isAccepted()
+        event.ignore()
         self.mousePressed.emit(event)
-        if not event.stop:
+        if not event.isAccepted():
+            event.setAccepted(initialState)
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -674,9 +680,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param event: QMouseEvent
         """
-        event.stop = False
+        initialState = event.isAccepted()
+        event.ignore()
         self.mouseReleased.emit(event)
-        if not event.stop:
+        if not event.isAccepted():
+            event.setAccepted(initialState)
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
@@ -685,9 +693,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param event: QMouseEvent
         """
-        event.stop = False
+        initialState = event.isAccepted()
+        event.ignore()
         self.mouseWheelActivated.emit(event)
-        if not event.stop:
+        if not event.isAccepted():
+            event.setAccepted(initialState)
             QtGui.QPlainTextEdit.wheelEvent(self, event)
 
     def mouseMoveEvent(self, event):
