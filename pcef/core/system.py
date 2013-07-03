@@ -71,13 +71,13 @@ class TextStyle(object):
         assert len(tokens) == 4
         self.color = QtGui.QColor(tokens[0])
         self.bold = False
-        if bool(tokens[1]) == "bold":
+        if tokens[1] == "bold":
             self.bold = True
         self.italic = False
-        if bool(tokens[2]) == "italic":
+        if tokens[2] == "italic":
             self.italic = True
         self.underlined = False
-        if bool(tokens[1]) == "underlined":
+        if tokens[1] == "underlined":
             self.underlined = True
 
 
