@@ -472,7 +472,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param e: paint event
         """
-        print("Paint")
         self.__updateVisibleBlocks(e)
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
