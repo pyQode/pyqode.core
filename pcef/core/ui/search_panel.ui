@@ -518,7 +518,6 @@
  </tabstops>
  <resources>
   <include location="pcef_icons.qrc"/>
-  <include location="editor.qrc"/>
  </resources>
  <connections/>
 </ui>
