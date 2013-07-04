@@ -56,17 +56,19 @@ class LineNumberPanel(Panel):
         start = end = self.editor.lineNumber(self.__selStart)
         self.editor.selectFullLines(start, end)
 
-    def mouseReleaseEvent(self, e):
-        """ Cancels selecting"""
+    def cancelSelection(self):
         self.__selecting = False
         self.__selStart = -1
 
+    def mouseReleaseEvent(self, e):
+        """ Cancels selection """
+        self.cancelSelection()
+
     def leaveEvent(self, QEvent):
         """
-        Cancels selecting
+        Cancels selection
         """
-        self.__selecting = False
-        self.__selStart = -1
+        self.cancelSelection()
 
     def mouseMoveEvent(self, e):
         """
