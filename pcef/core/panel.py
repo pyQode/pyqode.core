@@ -32,17 +32,29 @@ class Panel(QtGui.QWidget, Mode):
         """
         pcef.core.mode.Mode.__init__(self)
         QtGui.QWidget.__init__(self)
+        #: The background brush (automatically updated when panelBackground
+        #: change)
+        self.backgroundBrush = None
+        #: The foreground pen (automatically updated when panelForeground
+        #: changed)
+        self.foregroundPen = None
 
     def install(self, editor):
         """
         Extends the Mode.install method to set the editor instance
         as the parent widget.
 
+        Also adds the panelBackground and panel foreground.
+
         :param editor: QCodeEdit instance
         """
         Mode.install(self, editor)
         self.setParent(editor)
         self.editor.updateViewportMargins()
+        self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
+            self.editor.style.value("panelBackground")))
+        self.foregroundPen = QtGui.QPen(QtGui.QColor(
+            self.editor.style.value("panelForeground")))
 
     def onStateChanged(self, state):
         """ Shows/Hides the Panel
@@ -52,7 +64,29 @@ class Panel(QtGui.QWidget, Mode):
         """
         if state is True:
             self.show()
-            self.editor.updateViewportMargins()
         else:
             self.hide()
-            self.editor.updateViewportMargins()
+        self.editor.resizePanels()
+        self.editor.updateViewportMargins()
+        self.editor.update()
+
+    def onStyleChanged(self, section, key, value):
+        """
+        Repaints widget if the panel background color changed.
+
+        :param section:
+        :param key:
+        :param value:
+        """
+        if key == "panelBackground":
+            self.backgroundBrush = QtGui.QBrush(QtGui.QColor(value))
+            self.editor.repaint()
+        elif key == "panelForeground":
+            self.foregroundPen = QtGui.QPen(QtGui.QColor(value))
+            self.editor.repaint()
+
+    def paintEvent(self, event):
+        if self.isVisible():
+            # fill background
+            painter = QtGui.QPainter(self)
+            painter.fillRect(event.rect(), self.backgroundBrush)
