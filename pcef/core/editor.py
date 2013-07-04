@@ -463,7 +463,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param e: resize event
         """
         QtGui.QPlainTextEdit.resizeEvent(self, e)
-        self.__resizePanels()
+        self.resizePanels()
 
     def paintEvent(self, e):
         """
@@ -783,11 +783,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             blockNumber = block.blockNumber()
         self.visibleBlocksChanged.emit()
 
-    def __resizePanels(self):
-        """
-        Resizes panels geometries
-        """
-        cr = self.contentsRect()
+    def computePanelsSizes(self):
         # takes scrolll bar into account
         vscroll_width = 0
         if self.verticalScrollBar().isVisible():
@@ -795,41 +791,93 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
+        # Left panels
+        left = 0
+        for panel in self.__panels[PanelPosition.LEFT].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            left += sh.width()
+        # Right panels
+        right = vscroll_width
+        for panel in self.__panels[PanelPosition.RIGHT].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            right += sh.width()
         # Top panels
         top = 0
         for panel in self.__panels[PanelPosition.TOP].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            top += sh.height()
+        # Bottom panels
+        bottom = hscroll_height
+        for panel in self.__panels[PanelPosition.BOTTOM].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            bottom += sh.height()
+
+        return bottom, left, right, top
+
+    def resizePanels(self):
+        """
+        Resizes panels geometries
+        """
+        cr = self.contentsRect()
+        s_bottom, s_left, s_right, s_top = self.computePanelsSizes()
+        # takes scrolll bar into account
+        vscroll_width = 0
+        if self.verticalScrollBar().isVisible():
+            vscroll_width = self.verticalScrollBar().width()
+        hscroll_height = 0
+        if self.horizontalScrollBar().isVisible():
+            hscroll_height = self.horizontalScrollBar().height()
+        left = 0
+        for panel in self.__panels[PanelPosition.LEFT].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            panel.setGeometry(cr.left() + left, cr.top() + s_top,
+                              sh.width(),
+                              cr.height() - s_bottom - s_top)
+            left += sh.width()
+        right = vscroll_width
+        for panel in self.__panels[PanelPosition.RIGHT].values():
+            if not panel.isVisible():
+                continue
+            sh = panel.sizeHint()
+            panel.setGeometry(cr.right() - right - sh.width(),
+                              cr.top(), sh.width(), cr.height())
+            right += sh.width()
+        top = 0
+        for panel in self.__panels[PanelPosition.TOP].values():
+            if not panel.isVisible():
+                continue
             sh = panel.sizeHint()
             panel.setGeometry(cr.left(), cr.top() + top,
                               cr.width() - vscroll_width,
                               sh.height())
             top += sh.height()
-        # Left panels
-        left = 0
-        for panel in self.__panels[PanelPosition.LEFT].values():
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.left() + left, cr.top(),
-                              sh.width(), cr.height() - hscroll_height)
-            left += sh.width()
-        # Right panels
-        right = vscroll_width
-        for panel in self.__panels[PanelPosition.RIGHT].values():
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.right() - right - sh.width(),
-                              cr.top(), sh.width(), cr.height())
-            right += sh.width()
-        # Bottom panels
         bottom = hscroll_height
         for panel in self.__panels[PanelPosition.BOTTOM].values():
+            if not panel.isVisible():
+                continue
             sh = panel.sizeHint()
-            panel.setGeometry(cr.left(), cr.bottom() - bottom - sh.height(),
-                              cr.width(), sh.height())
-            top += sh.height()
+            panel.setGeometry(cr.left(),
+                              cr.bottom() - bottom - sh.height(),
+                              cr.width() - vscroll_width, sh.height())
+            bottom += sh.height()
 
     def __updatePanels(self, rect, dy):
         """
         Updates the panel on update request. (Scroll, update clipping rect,...)
         """
         for zones_id, zone in self.__panels.items():
+            if zones_id == PanelPosition.TOP or zones_id == PanelPosition.BOTTOM:
+                continue
             for panel_id, panel in zone.items():
                 if dy:
                     panel.scroll(0, dy)
@@ -853,15 +901,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         left = 0
         right = 0
         bottom = 0
-        for panel in self.__panels[PanelPosition.TOP].values():
-            if panel.isVisible():
-                top += panel.sizeHint().height()
         for panel in self.__panels[PanelPosition.LEFT].values():
             if panel.isVisible():
                 left += panel.sizeHint().width()
         for panel in self.__panels[PanelPosition.RIGHT].values():
             if panel.isVisible():
                 right += panel.sizeHint().width()
+        for panel in self.__panels[PanelPosition.TOP].values():
+            if panel.isVisible():
+                top += panel.sizeHint().height()
         for panel in self.__panels[PanelPosition.BOTTOM].values():
             if panel.isVisible():
                 bottom += panel.sizeHint().height()

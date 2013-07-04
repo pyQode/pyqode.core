@@ -23,39 +23,6 @@ class LineNumberPanel(Panel):
     IDENTIFIER = "lineNumberArea"
     DESCRIPTION = "Display line number"
 
-    def install(self, editor):
-        """
-        Adds style properties to the editor and setup default brushe/pen
-        """
-        Panel.install(self, editor)
-        self.__brush = QtGui.QBrush(QtGui.QColor(
-            self.editor.style.value("panelBackground")))
-        self.__pen = QtGui.QPen(QtGui.QColor(
-            self.editor.style.value("panelForeground")))
-
-    def onStyleChanged(self, section, key, value):
-        """
-        Repaints widget if the our style properties changed.
-
-        :param section:
-        :param key:
-        :param value:
-        """
-        if key == "panelBackground":
-            self.__brush = QtGui.QBrush(QtGui.QColor(value))
-            self.editor.repaint()
-        elif key == "panelForeground":
-            self.__pen = QtGui.QPen(QtGui.QColor(value))
-            self.editor.repaint()
-
-    # def onStateChanged(self, state):
-    #     """
-    #     Nothing to do here, we do everything in the widget events.
-    #
-    #     :param state: Enable state
-    #     """
-    #     super(LineNumberPanel, self).onStateChanged(state)
-
     def sizeHint(self):
         """
         Returns the panel size hint (as the panel is on the left, we only need to
@@ -115,10 +82,9 @@ class LineNumberPanel(Panel):
         """
         Paints the line numbers
         """
+        Panel.paintEvent(self, event)
         if self.isVisible():
-            # fill background
             painter = QtGui.QPainter(self)
-            painter.fillRect(event.rect(), self.__brush)
             # get style options (font, size)
             width = self.width()
             height = self.editor.fontMetrics().height()
@@ -131,7 +97,7 @@ class LineNumberPanel(Panel):
             cl = self.editor.cursorPosition[0]
             # draw every visible blocks
             for top, blockNumber in self.editor.visibleBlocks:
-                painter.setPen(self.__pen)
+                painter.setPen(self.foregroundPen)
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):
                     painter.setFont(bold_font)
