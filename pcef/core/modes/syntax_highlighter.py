@@ -328,7 +328,7 @@ class PygmentsHighlighterMode(Mode):
     #: Mode identifier
     IDENTIFIER = "pygmentsHighlighter"
     #: Mode description
-    _DESCRIPTION = "Apply syntax highlighting to the editor using pygments " \
+    DESCRIPTION = "Apply syntax highlighting to the editor using pygments " \
                    "lexer"
 
     def install(self, editor):

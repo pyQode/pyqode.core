@@ -27,7 +27,7 @@ class Mode(object):
         - onStyleChanged: to refresh ui colors (mainly used by panels)
     """
     IDENTIFIER = ""
-    _DESCRIPTION = ""
+    DESCRIPTION = ""
 
     @property
     def editor(self):
@@ -70,7 +70,7 @@ class Mode(object):
         #: Mode name
         self.name = self.IDENTIFIER
         #: Mode description
-        self.description = self._DESCRIPTION
+        self.description = self.DESCRIPTION
         #: Mode enables state (subclasses must implement onStateChanged to
         #  disconnect their slots to disable any actions)
         self.__enabled = False

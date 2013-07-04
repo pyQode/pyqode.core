@@ -22,7 +22,7 @@ class RightMarginMode(Mode):
     """
     #: Mode identifier
     IDENTIFIER = "rightMargin"
-    _DESCRIPTION = "Draw the right margin on the text document"
+    DESCRIPTION = "Draw the right margin on the text document"
 
     def __init__(self):
         Mode.__init__(self)

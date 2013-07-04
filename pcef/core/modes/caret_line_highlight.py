@@ -23,7 +23,7 @@ class CaretLineHighlighterMode(Mode):
     #: The mode identifier
     IDENTIFIER = "caretLineHighlighter"
     #: The mode description
-    _DESCRIPTION = "This mode highlights the caret line"
+    DESCRIPTION = "This mode highlights the caret line"
 
     def __init__(self):
         Mode.__init__(self)

@@ -23,7 +23,7 @@ class ZoomMode(Mode):
     #: Mode identifier
     IDENTIFIER = "editorZoom"
     #: Mode description
-    _DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
+    DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
 
     def __init__(self):
         super(ZoomMode, self).__init__()

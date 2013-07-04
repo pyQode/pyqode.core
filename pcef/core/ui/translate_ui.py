@@ -17,14 +17,24 @@ import os
 # compile ui files
 for name in glob.glob("*.ui"):
     base = name.split(".")[0]
-    pyside_cmd = "PyQt-uic {0} > {1}_ui.py".format(name, base)
-    print pyside_cmd
-    os.system(pyside_cmd)
+    # python 3
+    cmd = "pyuic4 -w {0} > {1}_ui3.py ".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    # python 2
+    cmd = "pyuic4 {0} > {1}_ui.py ".format(name, base)
+    print(cmd)
+    os.system(cmd)
 
 for name in glob.glob("*.qrc"):
     base = name.split(".")[0]
-    pyside_cmd = "PyQt-rcc {0} > {1}_rc.py".format(name, base)
-    print pyside_cmd
-    os.system(pyside_cmd)
+    # python 3
+    cmd = "pyrcc4 -py3 {0} > {1}_rc3.py".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    # python 2
+    cmd = "pyrcc4 {0} > {1}_rc.py".format(name, base)
+    print(cmd)
+    os.system(cmd)
 
 

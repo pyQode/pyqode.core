@@ -34,7 +34,7 @@ class AutoIndentMode(Mode):
     """
     #: Mode identifier
     IDENTIFIER = "autoIndent"
-    _DESCRIPTION = """ A basic auto indent mode that provides a basic auto
+    DESCRIPTION = """ A basic auto indent mode that provides a basic auto
     indentation based on the previous line indentation.
     """
 
