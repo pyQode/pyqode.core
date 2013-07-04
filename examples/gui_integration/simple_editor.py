@@ -7,7 +7,7 @@
 # This software is released under the LGPLv3 license.
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+# 
 """
 Integrates the generic editor using the pcef qt designer plugin.
 """
@@ -25,6 +25,8 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         self.setupUi(self)
+        self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
+        self.actionSave.triggered.connect(self.editor.saveToFile)
         # Add modes to the modes menu
         for k, v in self.editor.modes().items():
             a = QtGui.QAction(self.menuModes)
