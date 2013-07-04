@@ -12,5 +12,6 @@
 This package contains the core panels (language independant)
 """
 from pcef.core.panels.line_number import LineNumberPanel
+from pcef.core.panels.search_and_replace import SearchAndReplacePanel
 
 
