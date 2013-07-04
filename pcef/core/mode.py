@@ -26,7 +26,9 @@ class Mode(object):
         - onStateChanged: to connect/disconnect to/from the code edit signals
         - onStyleChanged: to refresh ui colors (mainly used by panels)
     """
+    #: The mode identifier, must redefined for every subclasses
     IDENTIFIER = ""
+    #: The mode description, must redefined for every subclasses
     DESCRIPTION = ""
 
     @property
