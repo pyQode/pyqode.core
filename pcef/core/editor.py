@@ -56,9 +56,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     focusedIn = QtCore.Signal(QtGui.QFocusEvent)
     #: Signal emitted when the mouseMoved
     mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
-    #: Signal emitted when the list of visible blocks has been updated, even if
-    #: there is no changes
-    visibleBlocksChanged = QtCore.Signal()
 
     @property
     def dirty(self):
@@ -121,7 +118,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Each block is a tuple made up of the line top position and the line
         number (already 1 based)
 
-        :return: A list of tuple. Each tuple(pos, nbr)
+        :return: A list of tuple(top position, line number)
         :rtype List of tuple(int, int)
         """
         return self.__blocks
@@ -157,7 +154,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__selections = []
 
         # connect slots
-        self.blockCountChanged.connect(self.updateViewportMargins)
+        self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
@@ -207,13 +204,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__fileEncoding = encoding
         self.setPlainText(content)
         self.dirty = False
-
-    def __encodePlainText(self, encoding):
-        if sys.version_info[0] == 3:
-            content = bytes(self.toPlainText().encode(encoding))
-        else:
-            content = unicode(self.toPlainText()).encode(encoding)
-        return content
 
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
@@ -299,7 +289,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.__panels[position][panel.name] = panel
         panel.install(self)
-        self.updateViewportMargins()
+        self.__updateViewportMargins()
         setattr(self, panel.name, panel)
 
     def panels(self):
@@ -455,27 +445,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             value = increment
         self.style.setValue("fontSize", value)
 
-    def resizeEvent(self, e):
-        """
-        Resize event, lets the QPlainTextEdit handle the resize event than
-        resizes the panels
-
-        :param e: resize event
-        """
-        QtGui.QPlainTextEdit.resizeEvent(self, e)
-        self.resizePanels()
-
-    def paintEvent(self, e):
-        """
-        Overrides paint event to update the list of visible blocks and emit
-        the painted event.
-
-        :param e: paint event
-        """
-        self.__updateVisibleBlocks(e)
-        QtGui.QPlainTextEdit.paintEvent(self, e)
-        self.painted.emit(e)
-
     def getLineIndent(self):
         original_cursor = self.textCursor()
         cursor = QtGui.QTextCursor(original_cursor)
@@ -486,19 +455,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         indentation = len(line) - len(line.lstrip())
         self.setTextCursor(original_cursor)
         return indentation
-
-    def doHomeKey(self, event, select=False):
-        # get nb char to first significative char
-        delta = self.textCursor().positionInBlock() - self.getLineIndent()
-        if delta:
-            tc = self.textCursor()
-            move = QtGui.QTextCursor.MoveAnchor
-            if select:
-                move = QtGui.QTextCursor.KeepAnchor
-            tc.movePosition(
-                QtGui.QTextCursor.Left, move, delta)
-            self.setTextCursor(tc)
-            event.accept()
 
     def setShowWhitespaces(self, show):
         """
@@ -516,31 +472,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             options.setFlags(options.flags() &
                              ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
-
-    def keyPressEvent(self, event):
-        """
-        Release the keyReleasedEvent. Use the accept method of the event
-        instance to prevent the event to propagate.
-
-        :param event: QKeyEvent
-        """
-        initialState = event.isAccepted()
-        event.ignore()
-        replace = self.settings.value("useSpacesInsteadOfTab")
-        if replace and event.key() == QtCore.Qt.Key_Tab:
-            self.indent()
-            event.accept()
-        elif replace and event.key() == QtCore.Qt.Key_Backtab:
-            self.unIndent()
-            event.accept()
-        elif event.key() == QtCore.Qt.Key_Home:
-            self.doHomeKey(
-                event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
-        self.keyPressed.emit(event)
-        if not event.isAccepted():
-            event.setAccepted(initialState)
-            QtGui.QPlainTextEdit.keyPressEvent(self, event)
-        self.postKeyPressed.emit(event)
 
     def indent(self):
         """
@@ -638,6 +569,57 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Backtab,
                           QtCore.Qt.NoModifier))
 
+    def refreshPanels(self):
+        self.__resizePanels()
+        self.__updateViewportMargins()
+        self.update()
+
+    def resizeEvent(self, e):
+        """
+        Resize event, lets the QPlainTextEdit handle the resize event than
+        resizes the panels
+
+        :param e: resize event
+        """
+        QtGui.QPlainTextEdit.resizeEvent(self, e)
+        self.__resizePanels()
+
+    def paintEvent(self, e):
+        """
+        Overrides paint event to update the list of visible blocks and emit
+        the painted event.
+
+        :param e: paint event
+        """
+        self.__updateVisibleBlocks(e)
+        QtGui.QPlainTextEdit.paintEvent(self, e)
+        self.painted.emit(e)
+
+    def keyPressEvent(self, event):
+        """
+        Release the keyReleasedEvent. Use the accept method of the event
+        instance to prevent the event to propagate.
+
+        :param event: QKeyEvent
+        """
+        initialState = event.isAccepted()
+        event.ignore()
+        replace = self.settings.value("useSpacesInsteadOfTab")
+        if replace and event.key() == QtCore.Qt.Key_Tab:
+            self.indent()
+            event.accept()
+        elif replace and event.key() == QtCore.Qt.Key_Backtab:
+            self.unIndent()
+            event.accept()
+        elif event.key() == QtCore.Qt.Key_Home:
+            self.__doHomeKey(
+                event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
+        self.keyPressed.emit(event)
+        if not event.isAccepted():
+            event.setAccepted(initialState)
+            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        self.postKeyPressed.emit(event)
+
     def keyReleaseEvent(self, event):
         """
         Release the keyReleasedEvent. Use the stop properties of the event
@@ -715,7 +697,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def showEvent(self, QShowEvent):
         QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
-        self.updateViewportMargins()
+        self.__updateViewportMargins()
 
     def setPlainText(self, txt):
         """
@@ -762,6 +744,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             "panelForeground", constants.LINE_NBR_FOREGROUND)
         self.__resetStyleSheet("", "", "")
 
+    def __encodePlainText(self, encoding):
+        if sys.version_info[0] == 3:
+            content = bytes(self.toPlainText().encode(encoding))
+        else:
+            content = unicode(self.toPlainText()).encode(encoding)
+        return content
+
     def __updateVisibleBlocks(self, event):
         """
         Update the list of visible blocks/lines position.
@@ -781,9 +770,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber = block.blockNumber()
-        self.visibleBlocksChanged.emit()
 
-    def computePanelsSizes(self):
+    def __computePanelsSizes(self):
         # takes scrolll bar into account
         vscroll_width = 0
         if self.verticalScrollBar().isVisible():
@@ -822,12 +810,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         return bottom, left, right, top
 
-    def resizePanels(self):
+    def __resizePanels(self):
         """
         Resizes panels geometries
         """
         cr = self.contentsRect()
-        s_bottom, s_left, s_right, s_top = self.computePanelsSizes()
+        s_bottom, s_left, s_right, s_top = self.__computePanelsSizes()
         # takes scrolll bar into account
         vscroll_width = 0
         if self.verticalScrollBar().isVisible():
@@ -884,7 +872,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 else:
                     panel.update(0, rect.y(), panel.width(), rect.height())
         if rect.contains(self.viewport().rect()):
-            self.updateViewportMargins()
+            self.__updateViewportMargins()
 
     def __ontextChanged(self):
         """
@@ -893,7 +881,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         txt = self.toPlainText()
         self.dirty = (txt != self.__originalText)
 
-    def updateViewportMargins(self):
+    def __updateViewportMargins(self):
         """
         Updates the viewport margins depending on the installed panels
         """
@@ -932,3 +920,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
                              self.fontMetrics().widthChar(" "))
         self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))
+
+    def __doHomeKey(self, event, select=False):
+        # get nb char to first significative char
+        delta = self.textCursor().positionInBlock() - self.getLineIndent()
+        if delta:
+            tc = self.textCursor()
+            move = QtGui.QTextCursor.MoveAnchor
+            if select:
+                move = QtGui.QTextCursor.KeepAnchor
+            tc.movePosition(
+                QtGui.QTextCursor.Left, move, delta)
+            self.setTextCursor(tc)
+            event.accept()

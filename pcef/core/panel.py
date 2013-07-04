@@ -50,7 +50,7 @@ class Panel(QtGui.QWidget, Mode):
         """
         Mode.install(self, editor)
         self.setParent(editor)
-        self.editor.updateViewportMargins()
+        self.editor.refreshPanels()
         self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
             self.editor.style.value("panelBackground")))
         self.foregroundPen = QtGui.QPen(QtGui.QColor(
@@ -66,9 +66,7 @@ class Panel(QtGui.QWidget, Mode):
             self.show()
         else:
             self.hide()
-        self.editor.resizePanels()
-        self.editor.updateViewportMargins()
-        self.editor.update()
+        self.editor.refreshPanels()
 
     def onStyleChanged(self, section, key, value):
         """
