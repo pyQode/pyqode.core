@@ -195,7 +195,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         with open(filePath, 'rb') as f:
             data = f.read()
             if not encoding:
-                encoding = self.detectEncoding(data)
+                try:
+                    encoding = self.detectEncoding(data)
+                except UnicodeEncodeError:
+                    QtGui.QMessageBox.warning(self, "Failed to open file",
+                                              "Failed to open file, encoding "
+                                              "could not be detected properly")
+                    return
             content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
