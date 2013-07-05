@@ -718,7 +718,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.settings = PropertyRegistry()
         self.settings.valueChanged.connect(self.__onSettingsChanged)
-        self.settings.addProperty("showWhiteSpaces", True)
+        self.settings.addProperty("showWhiteSpaces", False)
         self.settings.addProperty("tabLength", constants.TAB_SIZE)
         self.settings.addProperty("useSpacesInsteadOfTab", True)
 
