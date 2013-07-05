@@ -29,7 +29,7 @@ from pcef.core.modes import AutoIndentMode
 from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.properties import PropertyRegistry
-from pcef.core.system import TextStyle
+from pcef.core.system import TextStyle, JobRunner
 
 #: pcef-core version
 __version__ = "1.0.0-dev"
@@ -67,4 +67,4 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
            "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
             "TextDecoration", "PropertyRegistry", "TextStyle",
-            "QGenericCodeEdit"]
+            "QGenericCodeEdit", "JobRunner"]
