@@ -24,14 +24,25 @@ class Panel(QtGui.QWidget, Mode):
 
     Panels are drawn in the QCodeEdit viewport margins.
     """
+
+    @property
+    def scrollable(self):
+        """
+        A scrollable panel will follow the editor's scrollbars. Left and right
+        panels follow the vertical scrollbar. Top and bottom panels follow the
+        horizontal scrollbar.
+        """
+        return self.__scrollable
+
+    @scrollable.setter
+    def scrollable(self, value):
+        """ Sets the scrollable flag. """
+        self.__scrollable = value
+
     def __init__(self):
-        """
-        :param name: Panel name (used as an identifier)
-        :param description: The panel description
-        :return:
-        """
         pcef.core.mode.Mode.__init__(self)
         QtGui.QWidget.__init__(self)
+        self.__scrollable = False
         #: The background brush (automatically updated when panelBackground
         #: change)
         self.backgroundBrush = None

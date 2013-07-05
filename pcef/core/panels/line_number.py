@@ -23,6 +23,10 @@ class LineNumberPanel(Panel):
     IDENTIFIER = "lineNumberArea"
     DESCRIPTION = "Display line number"
 
+    def __init__(self):
+        Panel.__init__(self)
+        self.scrollable = True
+
     def sizeHint(self):
         """
         Returns the panel size hint (as the panel is on the left, we only need to

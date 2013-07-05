@@ -867,6 +867,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if zones_id == PanelPosition.TOP or zones_id == PanelPosition.BOTTOM:
                 continue
             for panel_id, panel in zone.items():
+                if not panel.scrollable:
+                    continue
                 if dy:
                     panel.scroll(0, dy)
                 else:
