@@ -166,30 +166,6 @@ class JobThread(QtCore.QThread):
         else:
             raise Exception("Executing not callable statement")
 
-    @property
-    def jobResults(self):
-        return self.__jobResults
-
-    @jobResults.setter
-    def jobResults(self, value):
-        self.__jobResults = value
-
-    @jobResults.deleter
-    def jobResults(self, value):
-        self.__jobResults = value
-
-
-def singleton(class_):
-    ''' Class implemented to have a unique instance of a JobRunner. 
-    TODO: test in Python 2.X '''
-    instances = {}
-    def getinstance(*args, **kwargs):
-        if class_ not in instances:
-            instances[class_] = class_(*args, **kwargs)
-            instances[class_].__instances = instances
-        return instances[class_]
-    return getinstance
-
 
 class JobRunner:
     '''Class JobRunner, created to do a job and stop at anytime.
