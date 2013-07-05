@@ -211,37 +211,41 @@ class JobRunner:
             JobThread.stopJobThreadInstance(self.caller, self.__jobqueue[0].stopRun)
 
 
-
-
 if __name__ == '__main__':
     import time
-    class ventana(QtGui.QWidget):
+    from pcef.core import QGenericCodeEdit, TextDecoration
+
+    class Example(QGenericCodeEdit):
 
         def __init__(self):
-            QtGui.QWidget.__init__(self,parent=None)
-            self.btn = QtGui.QPushButton(self)
-            self.btn.setText("Stop Me!!!")
-            QtCore.QObject.connect( self.btn, QtCore.SIGNAL( "clicked()" ), self.hola)
-            ############################################
-            self.hilo = JobRunner(self)
-            self.hilo.startJob(self.xxx ,False, 'Stop')
-            self.hilo.startJob(self.xxx ,False, 'Repeat')
-            ############################################
+            QGenericCodeEdit.__init__(self, parent=None)
+            self.openFile(__file__)
+            self.resize(QtCore.QSize(1000, 600))
 
-        def xxx(self, action):
-            while 1:
-                self.btn.setText(":O")
-                time.sleep(1)
-                self.btn.setText("{} Me!!!".format(action))
-                time.sleep(1)
-        def hola(self):
-            self.hilo.stopJob()
-            self.btn.setText("Thanks!!!")
+        def showEvent(self, QShowEvent):
+            QGenericCodeEdit.showEvent(self, QShowEvent)
+            self.jobRunner = JobRunner(self)
+            self.jobRunner.startJob(self.xxx, False, "#FF0000", 0)
+            self.jobRunner.startJob(self.xxx, False, "#00FF00", 10)
+            self.jobRunner.startJob(self.xxx, False, "#0000FF", 20)
 
+        def xxx(self, color, offset):
+            for i in range(10):
+                print(color)
+                tc = self.textCursor()
+                tc.setPosition(0)
+                tc.movePosition(QtGui.QTextCursor.Down,
+                                QtGui.QTextCursor.MoveAnchor,
+                                i + offset)
+                d = TextDecoration(tc)
+                d.setError(QtGui.QColor(color))
+                d.setFullWidth(True)
+                self.addDecoration(d)
+                time.sleep(0.1)
+            print("Finished")
 
     import sys
     app = QtGui.QApplication(sys.argv)
-    v = ventana()
-    v.show()
+    e = Example()
+    e.show()
     sys.exit(app.exec_())
-
