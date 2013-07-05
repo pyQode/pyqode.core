@@ -82,6 +82,14 @@ class TextStyle(object):
 
 
 def inheritors(klass):
+    """
+    Returns all the class that inherits from klass (all the classes that
+    were already imported)
+
+    :param klass: class type
+
+    :return: list of subclasses
+    """
     subclasses = set()
     work = [klass]
     while work:
@@ -111,8 +119,8 @@ class Invoker(QtCore.QObject):
 
 class JobThread(QtCore.QThread):
     """
-    Class for implement a thread, can be used and stoppen in any moment.
-        * extend and override the run method and if you want onFinish
+    Runs a callable into a QThread. The thread may be stopped at anytime using
+    the stopJobThreadInstance static method.
     """
 
     __name = "JobThread({}{}{})"
@@ -164,15 +172,31 @@ class JobThread(QtCore.QThread):
 
 class JobRunner:
     """
-    Class JobRunner, created to do a job and stop at anytime.
-    If user Force=True the actual JobRunner is stopped 
-    and the new JobRunner is created.
+    Utility class to easily run an asynchroneous job. A job is a simple callable
+    (method) that will be run in a background thread.
+
+    JobRunner implements a job queue to ensure there is only one job running per
+    JobRunner instance. If a job is already running, the new job will wait for
+    the current job to finish unless you want to force its execution. It that
+    case the current job will be terminated.
+
+    Additional parameters can be supplied to the job using *args and
+    **kwargs.
+
+    Usage
+    ------------
+    self.jobRunner = JobRunner(self)
+    self.jobRunner(self.aJobMethod)
     """
 
     __jobQueue = []
     __jobRunning = False
 
     def __init__(self, caller):
+        """
+        :param caller: The object that will ask for a job to be run. This must
+        be a subclass of QObject.
+        """
         self.caller = caller
 
     def __repr__(self):
@@ -180,7 +204,17 @@ class JobRunner:
 
     def startJob(self, job, force, *args, **kwargs):
         """
-        function startJob, created to start a JobRunner.
+        Starts a job in a background thread.
+
+        :param job: job.
+        :type job: callable
+
+        :param force: Specify if we must force the job execution by stopping the
+        job that is currently running (if any).
+        :type force: bool
+
+        :param args: *args
+        :param kwargs: **kwargs
         """
         thread = JobThread()
         thread.setMethods(job, self.executeNext)
@@ -206,7 +240,7 @@ class JobRunner:
 
     def stopJob(self):
         """
-        function stopJob, created to stop a JobRunner at anytime.
+        Stops the current job
         """
         if len(self.__jobQueue) > 0:
             JobThread.stopJobThreadInstance(
