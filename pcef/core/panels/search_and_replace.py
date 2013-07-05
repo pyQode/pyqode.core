@@ -101,6 +101,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             border-radius: 5px;
     }
     """
+    _KEYS = ["panelBackground", "background", "foreground",
+                "panelHighlight"]
+
 
     def __init__(self):
         Panel.__init__(self)
@@ -109,12 +112,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def install(self, editor):
         Panel.install(self, editor)
-        # self.enabled = False
+        self.resetStylesheet()
+
+    def resetStylesheet(self):
+        stylesheet = self.STYLESHEET % {
+            "bck": self.editor.style.value(self._KEYS[0]).name(),
+            "txt_bck": self.editor.style.value(self._KEYS[1]).name(),
+            "color": self.editor.style.value(self._KEYS[2]).name(),
+            "highlight": self.editor.style.value(self._KEYS[3]).name()}
+        self.setStyleSheet(stylesheet)
 
     def onStyleChanged(self, section, key, value):
-        stylesheet = self.STYLESHEET % {
-            "bck": self.editor.style.value("panelBackground").name(),
-            "txt_bck": self.editor.style.value("background").name(),
-            "color": self.editor.style.value("foreground").name(),
-            "highlight": self.editor.style.value("panelHighlight").name()}
-        self.setStyleSheet(stylesheet)
+        if key in self._KEYS:
+            self.resetStylesheet()
