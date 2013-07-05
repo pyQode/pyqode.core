@@ -101,23 +101,23 @@ def inheritors(klass):
     return subclasses
 
 
-class InvokeEvent(QtCore.QEvent):
+class _InvokeEvent(QtCore.QEvent):
     EVENT_TYPE = QtCore.QEvent.Type(QtCore.QEvent.registerEventType())
 
     def __init__(self, fn, *args, **kwargs):
-        QtCore.QEvent.__init__(self, InvokeEvent.EVENT_TYPE)
+        QtCore.QEvent.__init__(self, _InvokeEvent.EVENT_TYPE)
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
 
 
-class Invoker(QtCore.QObject):
+class _Invoker(QtCore.QObject):
     def event(self, event):
         event.fn(*event.args, **event.kwargs)
         return True
 
 
-class JobThread(QtCore.QThread):
+class _JobThread(QtCore.QThread):
     """
     Runs a callable into a QThread. The thread may be stopped at anytime using
     the stopJobThreadInstance static method.
@@ -133,8 +133,8 @@ class JobThread(QtCore.QThread):
 
     @staticmethod
     def stopJobThreadInstance(caller, method, *args, **kwargs):
-        caller.invoker = Invoker()
-        caller.invokeEvent = InvokeEvent(method, *args, **kwargs)
+        caller.invoker = _Invoker()
+        caller.invokeEvent = _InvokeEvent(method, *args, **kwargs)
         QtCore.QCoreApplication.postEvent(caller.invoker, caller.invokeEvent)
 
     def __repr__(self):
@@ -216,8 +216,8 @@ class JobRunner:
         :param args: *args
         :param kwargs: **kwargs
         """
-        thread = JobThread()
-        thread.setMethods(job, self.executeNext)
+        thread = _JobThread()
+        thread.setMethods(job, self.__executeNext)
         thread.setParameters(*args, **kwargs)
         if force:
             self.__jobQueue.append(thread)
@@ -225,12 +225,12 @@ class JobRunner:
         else:
             self.__jobQueue.append(thread)
         if not self.__jobRunning:
-            self.__jobQueue[0].setMethods(job, self.executeNext)
+            self.__jobQueue[0].setMethods(job, self.__executeNext)
             self.__jobQueue[0].setParameters(*args, **kwargs)
             self.__jobQueue[0].start()
             self.__jobRunning = True
 
-    def executeNext(self):
+    def __executeNext(self):
         self.__jobRunning = False
         if len(self.__jobQueue) > 0:
             self.__jobQueue.pop(0)
@@ -243,7 +243,7 @@ class JobRunner:
         Stops the current job
         """
         if len(self.__jobQueue) > 0:
-            JobThread.stopJobThreadInstance(
+            _JobThread.stopJobThreadInstance(
                 self.caller, self.__jobQueue[0].stopRun)
 
 
