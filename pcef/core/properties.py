@@ -145,8 +145,10 @@ class PropertyRegistry(QtCore.QObject):
                 return float(value_str)
             else:
                 return int(value_str)
-        elif "TRUE" in value_str.upper() or "FALSE" in value_str.upper():
-            return bool(value_str)
+        elif "TRUE" in value_str.upper():
+            return True
+        elif "FALSE" in value_str.upper():
+            return False
         elif re.match("#......\\Z", value_str.rstrip()):
             return QtGui.QColor(value_str)
         elif value_str.startswith('#'):
