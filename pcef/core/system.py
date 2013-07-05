@@ -162,6 +162,7 @@ class JobThread(QtCore.QThread):
     def run(self):
         if hasattr(self,"executeOnRun") and self.executeOnRun and hasattr(self.executeOnRun, '__call__'):
             self.executeOnRun( *self.args, **self.kwargs )
+            self.onFinish()
         else:
             raise Exception("Executing not callable statement")
 
@@ -248,7 +249,7 @@ if __name__ == '__main__':
             ############################################
             self.hilo = JobRunner(self)
             self.hilo.startJob(self.xxx ,False, 'Stop')
-            self.hilo.startJob(self.xxx ,True, 'Repeat')
+            self.hilo.startJob(self.xxx ,False, 'Repeat')
             ############################################
 
         def xxx(self, action):
