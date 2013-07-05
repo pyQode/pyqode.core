@@ -16,3 +16,5 @@ from pcef.core.modes.right_margin import RightMarginMode
 from pcef.core.modes.zoom import ZoomMode
 from pcef.core.modes.syntax_highlighter import PygmentsHighlighterMode
 from pcef.core.modes.indenter import AutoIndentMode
+__all__ = ["CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
+           "PygmentsHighlighterMode", "AutoIndentMode"]

@@ -15,8 +15,6 @@ code editor widget
 #
 # exposes public core api
 #
-from pcef.core import panels
-from pcef.core import modes
 from pcef.core import constants
 from pcef.core.mode import Mode
 from pcef.core.panel import Panel
@@ -63,3 +61,10 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(PygmentsHighlighterMode())
         self.installMode(ZoomMode())
         self.installMode(AutoIndentMode())
+
+__all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
+           "LineNumberPanel", "SearchAndReplacePanel",
+           "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
+           "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
+            "TextDecoration", "PropertyRegistry", "TextStyle",
+            "QGenericCodeEdit"]
