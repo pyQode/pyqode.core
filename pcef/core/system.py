@@ -93,12 +93,6 @@ def inheritors(klass):
     return subclasses
 
 
-def find_subpackages(pkgpath):
-    import pkgutil
-    for itm in pkgutil.iter_modules([pkgpath]):
-        print(itm)
-
-
 class InvokeEvent(QtCore.QEvent):
     EVENT_TYPE = QtCore.QEvent.Type(QtCore.QEvent.registerEventType())
 
