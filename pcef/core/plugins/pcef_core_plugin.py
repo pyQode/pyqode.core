@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# PCEF - Python/Qt Code Editing Framework
+# Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+#
+# This software is released under the LGPLv3 license.
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
 """
 This file contains all the PCEF QtDesigner plugins.
 
@@ -5,7 +15,7 @@ Installation:
 ==================
 
 run designer.pyw (Qt Designer must be installed on your system and must be
-in your path on Windows)
+in your path on Windows, pcef-core must be installed)
 """
 # This only works with PyQt, PySide does not support the QtDesigner module
 import os
