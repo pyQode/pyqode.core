@@ -43,8 +43,10 @@ EDITOR_FOREGROUND = QColor("#000000")
 EDITOR_WS_FOREGROUND = QColor("#dddddd")
 SELECTION_BACKGROUND = QColor("#6182F3")
 SELECTION_FOREGROUND = QColor("#ffffff")
-LINE_NBR_BACKGROUND = QColor("#dddddd")
-LINE_NBR_FOREGROUND = QColor("#888888")
+PANEL_BACKGROUND = QColor("#dddddd")
+PANEL_FOREGROUND = QColor("#888888")
+PANEL_HIGHLIGHT = QColor("#cccccc")
+CARET_LINE_BACKGROUND = QColor("#E4EDF8")
 
 # Default highlighter styles values, mostly for the python highlighter but they
 # may be shared between different highlighter/languages

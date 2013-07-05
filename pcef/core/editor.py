@@ -739,9 +739,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.style.addProperty("selectionForeground",
                                constants.SELECTION_FOREGROUND)
         self.style.addProperty(
-            "panelBackground", constants.LINE_NBR_BACKGROUND)
+            "panelBackground", constants.PANEL_BACKGROUND)
         self.style.addProperty(
-            "panelForeground", constants.LINE_NBR_FOREGROUND)
+            "panelForeground", constants.PANEL_FOREGROUND)
+        self.style.addProperty(
+            "panelHighlight", constants.PANEL_HIGHLIGHT)
         self.__resetStyleSheet("", "", "")
 
     def __encodePlainText(self, encoding):
