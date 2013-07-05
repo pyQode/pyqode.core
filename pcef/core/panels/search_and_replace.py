@@ -44,9 +44,77 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     IDENTIFIER = "searchAndReplacePanel"
     DESCRIPTION = "Search and replace text in the editor"
 
+    #: Stylesheet
+    STYLESHEET = """QWidget
+    {
+        background-color: %(bck)s;
+        color: %(color)s;
+    }
+
+    QLineEdit
+    {
+        background-color: %(txt_bck)s;
+        border: 1px solid %(highlight)s;
+        border-radius: 3px;
+    }
+
+    QLineEdit:hover, QLineEdit:focus
+    {
+        border: 1px solid %(color)s;
+        border-radius: 3px;
+    }
+
+    QPushButton
+    {
+        background-color: transparent;
+        padding: 5px;
+        border: none;
+    }
+
+    QPushButton:hover
+    {
+        background-color: %(highlight)s;
+        border: none;
+        border-radius: 5px;
+        color: %(color)s;
+    }
+
+    QPushButton:pressed, QCheckBox:pressed
+    {
+        border: 1px solid %(bck)s;
+    }
+
+    QPushButton:disabled
+    {
+        color: %(highlight)s;
+    }
+
+    QCheckBox
+    {
+        padding: 4px;
+    }
+
+    QCheckBox:hover
+    {
+            background-color: %(highlight)s;
+            color: %(color)s;
+            border-radius: 5px;
+    }
+    """
+
     def __init__(self):
         Panel.__init__(self)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
 
+    def install(self, editor):
+        Panel.install(self, editor)
+        # self.enabled = False
 
+    def onStyleChanged(self, section, key, value):
+        stylesheet = self.STYLESHEET % {
+            "bck": self.editor.style.value("panelBackground").name(),
+            "txt_bck": self.editor.style.value("background").name(),
+            "color": self.editor.style.value("foreground").name(),
+            "highlight": self.editor.style.value("panelHighlight").name()}
+        self.setStyleSheet(stylesheet)
