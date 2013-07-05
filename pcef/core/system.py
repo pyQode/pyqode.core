@@ -122,6 +122,8 @@ class JobThread(QtCore.QThread):
         * extend and override the run method and if you want onFinish
     '''
 
+    __name = "JobThread({}{}{})"
+
     def __init__(self):
         QtCore.QThread.__init__(self)
         self.__jobResults = None
@@ -133,6 +135,13 @@ class JobThread(QtCore.QThread):
         caller.invoker = Invoker()
         caller.invokeEvent = InvokeEvent(method, *args, **kwargs)
         QtCore.QCoreApplication.postEvent(caller.invoker, caller.invokeEvent)
+
+    def __repr__(self):
+        if hasattr(self,"executeOnRun"):
+            name = self.executeOnRun.__name__
+        else:
+            name = hex(id(self))
+        return self.__name.format(name,self.args,self.kwargs)
 
     def stopRun(self):
         self.onFinish()
@@ -186,24 +195,43 @@ class JobRunner:
     If user Force=True the actual JobRunner is stopped 
     and the new JobRunner is created.'''
 
+    __jobqueue = []
+    __jobRunning = False
+
     def __init__(self, caller):
-        self.thread = JobThread()
         self.caller = caller
+
+    def __repr__(self):
+        return repr(self.__jobqueue[0] if len(self.__jobqueue)>0 else "None")
 
     def startJob(self, callable, force, *args, **kwargs):
         '''function startJob, created to start a JobRunner.'''
+        thread = JobThread()
+        thread.setMethods(callable, self.executeNext)
+        thread.setParameters(*args, **kwargs)
         if force:
-            self.thread.stopJob(self)
-            del(self.thread)
-            self.thread = JobThread()
-        self.thread.setMethods(callable, None) # TODO: verify if onFinish is useful
-        self.thread.setParameters(*args, **kwargs)
-        self.thread
-        self.thread.start()
+            self.__jobqueue.append( thread )
+            self.stopJob()
+        else:
+            self.__jobqueue.append( thread )
+        if not self.__jobRunning:
+            self.__jobqueue[0].setMethods(callable, self.executeNext)
+            self.__jobqueue[0].setParameters(*args, **kwargs)
+            self.__jobqueue[0].start()
+            self.__jobRunning = True
+
+    def executeNext(self):
+        self.__jobRunning = False
+        if len(self.__jobqueue)>0:
+            self.__jobqueue.pop(0)
+        if len(self.__jobqueue)>0:
+            self.__jobqueue[0].start()
+            self.__jobRunning = True            
 
     def stopJob(self):
         '''function stopJob, created to stop a JobRunner at anytime.'''
-        JobThread.stopJobThreadInstance(self.caller, self.thread.stopRun)
+        if len(self.__jobqueue)>0:
+            JobThread.stopJobThreadInstance(self.caller, self.__jobqueue[0].stopRun)
 
 
 
@@ -220,6 +248,7 @@ if __name__ == '__main__':
             ############################################
             self.hilo = JobRunner(self)
             self.hilo.startJob(self.xxx ,False, 'Stop')
+            self.hilo.startJob(self.xxx ,True, 'Repeat')
             ############################################
 
         def xxx(self, action):
@@ -228,7 +257,6 @@ if __name__ == '__main__':
                 time.sleep(1)
                 self.btn.setText("{} Me!!!".format(action))
                 time.sleep(1)
-
         def hola(self):
             self.hilo.stopJob()
             self.btn.setText("Thanks!!!")
