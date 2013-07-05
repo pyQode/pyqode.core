@@ -21,6 +21,7 @@ terminate.
 """
 import os
 import sys
+from pcef.qt import QtGui
 import pcef.core
 
 
