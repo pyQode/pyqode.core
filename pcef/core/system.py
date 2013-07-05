@@ -97,3 +97,175 @@ def find_subpackages(pkgpath):
     import pkgutil
     for itm in pkgutil.iter_modules([pkgpath]):
         print(itm)
+
+
+
+
+
+class InvokeEvent(QtCore.QEvent):
+    EVENT_TYPE = QtCore.QEvent.Type(QtCore.QEvent.registerEventType())
+    def __init__(self, fn, *args, **kwargs):
+        QtCore.QEvent.__init__(self, InvokeEvent.EVENT_TYPE)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+class Invoker(QtCore.QObject):
+    def event(self, event):
+        event.fn(*event.args, **event.kwargs)
+        return True
+
+
+
+class JobThread(QtCore.QThread):
+    '''Class for implement a thread, can be used and stoppen in any moment.
+        * extend and override the run method and if you want onFinish
+    '''
+
+    __name = "JobThread({}{}{})"
+
+    def __init__(self):
+        QtCore.QThread.__init__(self)
+        self.__jobResults = None
+        self.args = ()
+        self.kwargs = {}
+
+    @staticmethod
+    def stopJobThreadInstance(caller, method, *args, **kwargs):
+        caller.invoker = Invoker()
+        caller.invokeEvent = InvokeEvent(method, *args, **kwargs)
+        QtCore.QCoreApplication.postEvent(caller.invoker, caller.invokeEvent)
+
+    def __repr__(self):
+        if hasattr(self,"executeOnRun"):
+            name = self.executeOnRun.__name__
+        else:
+            name = hex(id(self))
+        return self.__name.format(name,self.args,self.kwargs)
+
+    def stopRun(self):
+        self.onFinish()
+        self.terminate()
+
+    def setMethods(self, onRun, onFinish):
+        self.executeOnRun = onRun
+        self.executeOnFinish = onFinish
+
+    def setParameters(self, *a, **kw):
+        self.args = a
+        self.kwargs = kw
+
+    def onFinish(self):
+        if hasattr(self,"executeOnFinish") and self.executeOnFinish and hasattr(self.executeOnFinish, '__call__'):
+            self.executeOnFinish()
+
+    def run(self):
+        if hasattr(self,"executeOnRun") and self.executeOnRun and hasattr(self.executeOnRun, '__call__'):
+            self.executeOnRun( *self.args, **self.kwargs )
+            self.onFinish()
+        else:
+            raise Exception("Executing not callable statement")
+
+    @property
+    def jobResults(self):
+        return self.__jobResults
+
+    @jobResults.setter
+    def jobResults(self, value):
+        self.__jobResults = value
+
+    @jobResults.deleter
+    def jobResults(self, value):
+        self.__jobResults = value
+
+
+def singleton(class_):
+    ''' Class implemented to have a unique instance of a JobRunner. 
+    TODO: test in Python 2.X '''
+    instances = {}
+    def getinstance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+            instances[class_].__instances = instances
+        return instances[class_]
+    return getinstance
+
+
+class JobRunner:
+    '''Class JobRunner, created to do a job and stop at anytime.
+    If user Force=True the actual JobRunner is stopped 
+    and the new JobRunner is created.'''
+
+    __jobqueue = []
+    __jobRunning = False
+
+    def __init__(self, caller):
+        self.caller = caller
+
+    def __repr__(self):
+        return repr(self.__jobqueue[0] if len(self.__jobqueue)>0 else "None")
+
+    def startJob(self, callable, force, *args, **kwargs):
+        '''function startJob, created to start a JobRunner.'''
+        thread = JobThread()
+        thread.setMethods(callable, self.executeNext)
+        thread.setParameters(*args, **kwargs)
+        if force:
+            self.__jobqueue.append( thread )
+            self.stopJob()
+        else:
+            self.__jobqueue.append( thread )
+        if not self.__jobRunning:
+            self.__jobqueue[0].setMethods(callable, self.executeNext)
+            self.__jobqueue[0].setParameters(*args, **kwargs)
+            self.__jobqueue[0].start()
+            self.__jobRunning = True
+
+    def executeNext(self):
+        self.__jobRunning = False
+        if len(self.__jobqueue)>0:
+            self.__jobqueue.pop(0)
+        if len(self.__jobqueue)>0:
+            self.__jobqueue[0].start()
+            self.__jobRunning = True            
+
+    def stopJob(self):
+        '''function stopJob, created to stop a JobRunner at anytime.'''
+        if len(self.__jobqueue)>0:
+            JobThread.stopJobThreadInstance(self.caller, self.__jobqueue[0].stopRun)
+
+
+
+
+if __name__ == '__main__':
+    import time
+    class ventana(QtGui.QWidget):
+
+        def __init__(self):
+            QtGui.QWidget.__init__(self,parent=None)
+            self.btn = QtGui.QPushButton(self)
+            self.btn.setText("Stop Me!!!")
+            QtCore.QObject.connect( self.btn, QtCore.SIGNAL( "clicked()" ), self.hola)
+            ############################################
+            self.hilo = JobRunner(self)
+            self.hilo.startJob(self.xxx ,False, 'Stop')
+            self.hilo.startJob(self.xxx ,False, 'Repeat')
+            ############################################
+
+        def xxx(self, action):
+            while 1:
+                self.btn.setText(":O")
+                time.sleep(1)
+                self.btn.setText("{} Me!!!".format(action))
+                time.sleep(1)
+        def hola(self):
+            self.hilo.stopJob()
+            self.btn.setText("Thanks!!!")
+
+
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    v = ventana()
+    v.show()
+    sys.exit(app.exec_())
+
