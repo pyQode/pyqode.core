@@ -818,11 +818,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         s_bottom, s_left, s_right, s_top = self.__computePanelsSizes()
         # takes scrolll bar into account
         vscroll_width = 0
-        if self.verticalScrollBar().isVisible():
-            vscroll_width = self.verticalScrollBar().width()
+        # if self.verticalScrollBar().isVisible():
+        #     vscroll_width = self.verticalScrollBar().width()
         hscroll_height = 0
-        if self.horizontalScrollBar().isVisible():
-            hscroll_height = self.horizontalScrollBar().height()
+        # if self.horizontalScrollBar().isVisible():
+        #     hscroll_height = self.horizontalScrollBar().height()
         left = 0
         for panel in self.__panels[PanelPosition.LEFT].values():
             if not panel.isVisible():
