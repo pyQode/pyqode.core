@@ -133,7 +133,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         #: The custom context menu
         self.contextMenu = QtGui.QMenu()
-        # a.setIconVisibleInMenu(True)
+        self.contextMenu.setTitle("Edit")
 
         a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Undo", self)
         a.setShortcut(constants.ICON_UNDO[1])
