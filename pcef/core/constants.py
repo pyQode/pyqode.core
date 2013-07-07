@@ -13,6 +13,7 @@ This module holds all the PCEF constants (enumerations, defines,...)
 """
 import sys
 from pcef.core.system import TextStyle
+from pcef.qt import QtGui
 from pcef.qt.QtGui import QColor
 
 #
@@ -93,6 +94,30 @@ DEFAULT_DARK_STYLES = {
 TAB_SIZE = 4
 MARGIN_POS = 80
 
+#
+# Icons
+#
+ICONS = []
+ICON_UNDO = (":/pcef-icons/rc/edit-undo.png", "Ctrl+Z")
+ICONS.append(ICON_UNDO)
+ICON_REDO = (":/pcef-icons/rc/edit-redo.png", "Ctrl+Y")
+ICONS.append(ICON_REDO)
+ICON_COPY = (":/pcef-icons/rc/edit-copy.png", "Ctrl+C")
+ICONS.append(ICON_COPY)
+ICON_CUT  = (":/pcef-icons/rc/edit-cut.png", "Ctrl+X")
+ICONS.append(ICON_CUT)
+ICON_PASTE = (":/pcef-icons/rc/edit-paste.png", "Ctrl+V")
+ICONS.append(ICON_PASTE)
+ICON_DELETE = (":/pcef-icons/rc/edit-delete.png", "Delete")
+ICONS.append(ICON_DELETE)
+ICON_SELECT_ALL = (":/pcef-icons/rc/edit-select-all.png", "Ctrl+A")
+ICONS.append(ICON_SELECT_ALL)
+ICON_INDENT = (":/pcef-icons/rc/format-indent-more.png", "Tab")
+ICONS.append(ICON_INDENT)
+ICON_UNINDENT = (":/pcef-icons/rc/format-indent-less.png", "Shift+Tab")
+ICONS.append(ICON_UNINDENT)
+ICON_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
+ICONS.append(ICON_GOTO_LINE)
 
 #
 # Enumerations
