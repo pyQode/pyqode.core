@@ -68,7 +68,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="pcef_icons.qrc">:/icons/rc/edit-find.png</pixmap>
+            <pixmap>:/icons/rc/edit-find.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -97,7 +97,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pcef_icons.qrc">
+            <iconset>
              <normaloff>:/icons/rc/go-up.png</normaloff>:/icons/rc/go-up.png</iconset>
            </property>
           </widget>
@@ -108,7 +108,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pcef_icons.qrc">
+            <iconset>
              <normaloff>:/icons/rc/go-down.png</normaloff>:/icons/rc/go-down.png</iconset>
            </property>
           </widget>
@@ -338,7 +338,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pcef_icons.qrc">
+            <iconset>
              <normaloff>:/icons/rc/close.png</normaloff>:/icons/rc/close.png</iconset>
            </property>
            <property name="iconSize">
@@ -370,7 +370,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="pcef_icons.qrc">:/icons/rc/edit-find-replace.png</pixmap>
+            <pixmap>:/icons/rc/edit-find-replace.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -434,7 +434,7 @@
   </layout>
   <action name="actionSearch">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset>
      <normaloff>:/icons/rc/edit-find.png</normaloff>:/icons/rc/edit-find.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +452,7 @@
   </action>
   <action name="actionActionSearchAndReplace">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset>
      <normaloff>:/icons/rc/edit-find-replace.png</normaloff>:/icons/rc/edit-find-replace.png</iconset>
    </property>
    <property name="text">
@@ -470,7 +470,7 @@
   </action>
   <action name="actionFindNext">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset>
      <normaloff>:/icons/rc/go-down.png</normaloff>:/icons/rc/go-down.png</iconset>
    </property>
    <property name="text">
@@ -488,7 +488,7 @@
   </action>
   <action name="actionFindPrevious">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset>
      <normaloff>:/icons/rc/go-up.png</normaloff>:/icons/rc/go-up.png</iconset>
    </property>
    <property name="text">

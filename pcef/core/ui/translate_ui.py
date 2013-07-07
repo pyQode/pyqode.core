@@ -26,7 +26,6 @@ def replace_rc_imports(filename):
             replacement = "pcef.core.ui.{0}3".format(to_replace)
             l = l.replace(to_replace, replacement)
         new_content += "%s\n" % l
-    print(new_content)
     with open(filename, "w") as f:
         f.write(new_content)
 
