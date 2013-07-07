@@ -99,3 +99,6 @@ class Panel(QtGui.QWidget, Mode):
             # fill background
             painter = QtGui.QPainter(self)
             painter.fillRect(event.rect(), self.backgroundBrush)
+
+    def showEvent(self, *args, **kwargs):
+        self.editor.refreshPanels()
