@@ -101,18 +101,18 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             border-radius: 5px;
     }
     """
-    _KEYS = ["panelBackground", "background", "foreground",
-                "panelHighlight"]
-
+    _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
 
     def __init__(self):
         Panel.__init__(self)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
+        self.separator = None
 
     def install(self, editor):
         Panel.install(self, editor)
         self.resetStylesheet()
+        self.hide()
 
     def resetStylesheet(self):
         stylesheet = self.STYLESHEET % {
@@ -125,3 +125,45 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     def onStyleChanged(self, section, key, value):
         if key in self._KEYS:
             self.resetStylesheet()
+
+    def onStateChanged(self, state):
+        if state:
+            self.separator = self.editor.contextMenu.addSeparator()
+            self.editor.contextMenu.addAction(self.actionSearch)
+            self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
+        else:
+            if self.separator:
+                self.editor.contextMenu.removeAction(self.separator)
+            self.editor.contextMenu.removeAction(self.actionSearch)
+            self.editor.contextMenu.removeAction(
+                self.actionActionSearchAndReplace)
+
+    @QtCore.Slot()
+    def on_pushButtonClose_clicked(self):
+        self.hide()
+
+    @QtCore.Slot()
+    def on_actionSearch_triggered(self):
+        self.widgetSearch.show()
+        self.widgetReplace.hide()
+        self.show()
+        self.lineEditSearch.setText(self.editor.selectedText())
+        self.lineEditSearch.selectAll()
+        self.lineEditSearch.setFocus()
+
+    @QtCore.Slot()
+    def on_actionActionSearchAndReplace_triggered(self):
+        self.widgetSearch.show()
+        self.widgetReplace.show()
+        self.show()
+        self.lineEditSearch.setText(self.editor.selectedText())
+        self.lineEditReplace.setText(self.editor.selectedText())
+        self.lineEditReplace.selectAll()
+        self.lineEditReplace.setFocus()
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Enter:
+            event.accept()
+            pass  # go next
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.hide()
