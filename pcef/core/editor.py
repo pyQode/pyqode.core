@@ -200,12 +200,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         a.triggered.connect(self.unIndent)
         self.contextMenu.addAction(a)
 
-        # None,
-        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Indent", self),
-        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO), "Un-indent", self),
-        # None,
-        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO), "Goto line", self)
-
         # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
@@ -238,6 +232,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def delete(self):
         self.textCursor().removeSelectedText()
+
+    def selectedText(self):
+        return self.textCursor().selectedText()
 
     def detectEncoding(self, data):
         """
@@ -923,6 +920,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         for panel in self.__panels[PanelPosition.LEFT].values():
             if not panel.isVisible():
                 continue
+            panel.adjustSize()
             sh = panel.sizeHint()
             panel.setGeometry(cr.left() + left, cr.top() + s_top,
                               sh.width(),
