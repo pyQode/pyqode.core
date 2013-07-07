@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Sun Jul  7 21:10:45 2013
+# Created: Sun Jul  7 21:21:29 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,7 +54,7 @@ class Ui_SearchPanel(object):
         self.label.setMinimumSize(QtCore.QSize(0, 0))
         self.label.setMaximumSize(QtCore.QSize(18, 18))
         self.label.setText(_fromUtf8(""))
-        self.label.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/edit-find.png")))
+        self.label.setPixmap(QtGui.QPixmap(_fromUtf8(":/pcef-icons/rc/edit-find.png")))
         self.label.setScaledContents(True)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
@@ -70,14 +70,14 @@ class Ui_SearchPanel(object):
         self.pushButtonUp = QtGui.QPushButton(self.widgetSearch)
         self.pushButtonUp.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/pcef-icons/rc/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonUp.setIcon(icon)
         self.pushButtonUp.setObjectName(_fromUtf8("pushButtonUp"))
         self.horizontalLayout.addWidget(self.pushButtonUp)
         self.pushButtonDown = QtGui.QPushButton(self.widgetSearch)
         self.pushButtonDown.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/go-down.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/pcef-icons/rc/go-down.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonDown.setIcon(icon1)
         self.pushButtonDown.setObjectName(_fromUtf8("pushButtonDown"))
         self.horizontalLayout.addWidget(self.pushButtonDown)
@@ -154,7 +154,7 @@ class Ui_SearchPanel(object):
         self.pushButtonClose = QtGui.QPushButton(self.widgetSearch)
         self.pushButtonClose.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/pcef-icons/rc/close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonClose.setIcon(icon2)
         self.pushButtonClose.setIconSize(QtCore.QSize(12, 12))
         self.pushButtonClose.setObjectName(_fromUtf8("pushButtonClose"))
@@ -168,7 +168,7 @@ class Ui_SearchPanel(object):
         self.label_2 = QtGui.QLabel(self.widgetReplace)
         self.label_2.setMaximumSize(QtCore.QSize(18, 18))
         self.label_2.setText(_fromUtf8(""))
-        self.label_2.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/edit-find-replace.png")))
+        self.label_2.setPixmap(QtGui.QPixmap(_fromUtf8(":/pcef-icons/rc/edit-find-replace.png")))
         self.label_2.setScaledContents(True)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.horizontalLayout_2.addWidget(self.label_2)
@@ -204,11 +204,15 @@ class Ui_SearchPanel(object):
         self.actionActionSearchAndReplace.setIconVisibleInMenu(True)
         self.actionActionSearchAndReplace.setObjectName(_fromUtf8("actionActionSearchAndReplace"))
         self.actionFindNext = QtGui.QAction(SearchPanel)
-        self.actionFindNext.setIcon(icon1)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/go-down.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionFindNext.setIcon(icon5)
         self.actionFindNext.setIconVisibleInMenu(True)
         self.actionFindNext.setObjectName(_fromUtf8("actionFindNext"))
         self.actionFindPrevious = QtGui.QAction(SearchPanel)
-        self.actionFindPrevious.setIcon(icon)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/rc/go-up.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionFindPrevious.setIcon(icon6)
         self.actionFindPrevious.setIconVisibleInMenu(True)
         self.actionFindPrevious.setObjectName(_fromUtf8("actionFindPrevious"))
 
