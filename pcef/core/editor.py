@@ -128,7 +128,84 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param parent: QWidget
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        #: The list of visible blocks, update every paintEvent
         self.__blocks = []
+
+        #: The custom context menu
+        self.contextMenu = QtGui.QMenu()
+        # a.setIconVisibleInMenu(True)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Undo", self)
+        a.setShortcut(constants.ICON_UNDO[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.undo)
+        self.undoAvailable.connect(a.setEnabled)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_REDO[0]), "Redo", self)
+        a.setShortcut(constants.ICON_REDO[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.redo)
+        self.redoAvailable.connect(a.setEnabled)
+        self.contextMenu.addAction(a)
+
+        self.contextMenu.addSeparator()
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_COPY[0]), "Copy", self)
+        a.setShortcut(constants.ICON_COPY[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.copy)
+        self.copyAvailable.connect(a.setEnabled)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_CUT[0]), "Cut", self)
+        a.setShortcut(constants.ICON_CUT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.cut)
+        self.copyAvailable.connect(a.setEnabled)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_PASTE[0]), "Paste", self)
+        a.setShortcut(constants.ICON_PASTE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.paste)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_DELETE[0]), "Delete", self)
+        a.setShortcut(constants.ICON_DELETE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.delete)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_SELECT_ALL[0]),
+                          "Select all", self)
+        a.setShortcut(constants.ICON_SELECT_ALL[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.selectAll)
+        self.contextMenu.addAction(a)
+
+        self.contextMenu.addSeparator()
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_INDENT[0]),
+                          "Indent", self)
+        a.setShortcut(constants.ICON_INDENT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.indent)
+        self.contextMenu.addAction(a)
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNINDENT[0]),
+                          "Un-indent", self)
+        a.setShortcut(constants.ICON_UNINDENT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.unIndent)
+        self.contextMenu.addAction(a)
+
+        # None,
+        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Indent", self),
+        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO), "Un-indent", self),
+        # None,
+        # QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO), "Goto line", self)
+
         # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
@@ -157,6 +234,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
+
+    @QtCore.Slot()
+    def delete(self):
+        self.textCursor().removeSelectedText()
 
     def detectEncoding(self, data):
         """
@@ -479,6 +560,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                              ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
+    @QtCore.Slot()
     def indent(self):
         """
         Indent current line or selection (based on settings.value("tabLength"))
@@ -521,6 +603,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Tab,
                                 QtCore.Qt.NoModifier))
 
+    @QtCore.Slot()
     def unIndent(self):
         """
         Unindent current line or selection by tabLength
@@ -579,6 +662,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__resizePanels()
         self.__updateViewportMargins()
         self.update()
+
+    def contextMenuEvent(self, event):
+        self.contextMenu.exec_(event.globalPos())
 
     def resizeEvent(self, e):
         """
@@ -717,6 +803,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__originalText = txt
         self.__onSettingsChanged("", "", "")
         self.newTextSet.emit()
+        self.redoAvailable.emit(False)
+        self.undoAvailable.emit(False)
 
     def __initSettings(self):
         """
