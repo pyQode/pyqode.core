@@ -66,5 +66,5 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "LineNumberPanel", "SearchAndReplacePanel",
            "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
            "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
-            "TextDecoration", "PropertyRegistry", "TextStyle",
-            "QGenericCodeEdit", "JobRunner"]
+           "TextDecoration", "PropertyRegistry", "TextStyle",
+           "QGenericCodeEdit", "JobRunner", "DelayJobRunner"]

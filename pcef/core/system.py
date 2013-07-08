@@ -177,7 +177,8 @@ class _JobThread(QtCore.QThread):
             self.used = False
             self.setMethods(None, None)
         else:
-            raise Exception("Executing not callable statement")
+            logging.warning("Executing not callable statement: %s" %
+                            self.executeOnRun)
 
 
 class JobRunner:
@@ -196,7 +197,7 @@ class JobRunner:
     Usage
     ------------
     self.jobRunner = JobRunner(self)
-    self.jobRunner(self.aJobMethod)
+    self.jobRunner.startJob(self.aJobMethod)
     """
     @property
     def caller(self):
@@ -238,6 +239,7 @@ class JobRunner:
         :type force: bool
 
         :param args: *args
+
         :param kwargs: **kwargs
         """
         thread = self.findUnusedThread()
@@ -277,6 +279,55 @@ class JobRunner:
         if len(self.__jobQueue) > 0:
             _JobThread.stopJobThreadInstance(
                 self.caller, self.__jobQueue[0].stopRun)
+
+
+class DelayJobRunner(JobRunner):
+    """
+    Extends the JobRunner to be able to introduce a delay between the job
+    request and the job execution. If a new job is requested the timer is
+    stopped (discarding a possible waiting job).
+
+    This is made so that jobs that are run when the editor textChanged signal
+    is emitted does not actually run (when the user types too fast).
+    """
+    def __init__(self, caller, nbThreadsMax=3, delay=500):
+        JobRunner.__init__(self, caller, nbThreadsMax=nbThreadsMax)
+        self.__timer = QtCore.QTimer()
+        self.__interval = delay
+        self.__timer.timeout.connect(self.__execRequestedJob)
+
+    def requestJob(self, job, *args, **kwargs):
+        """
+        Request a job execution. The job will be executed after the delay
+        specified in the DelayJobRunner contructor elapsed if no other job is
+        requested until then.
+
+        :param job: job.
+        :type job: callable
+
+        :param force: Specify if we must force the job execution by stopping the
+        job that is currently running (if any).
+        :type force: bool
+
+        :param args: *args
+
+        :param kwargs: **kwargs
+        """
+        self.__timer.stop()
+        self.__job = job
+        self.__args = args
+        self.__kwargs = kwargs
+        self.__timer.start(self.__interval)
+
+    def __execRequestedJob(self):
+        """
+        Execute the requested job after the timer has timeout.
+        """
+        self.startJob(self.__job, False, *self.__args, **self.__kwargs)
+        self.__timer.stop()
+        self.__job = None
+        self.__args = None
+        self.__kwargs = None
 
 
 if __name__ == '__main__':
