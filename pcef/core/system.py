@@ -14,6 +14,8 @@ Contains utility functions
 import glob
 import os
 import sys
+import logging
+import weakref
 import pcef
 from pcef.qt import QtCore, QtGui
 
@@ -128,8 +130,12 @@ class _JobThread(QtCore.QThread):
     def __init__(self):
         QtCore.QThread.__init__(self)
         self.__jobResults = None
+        self.used = False
         self.args = ()
         self.kwargs = {}
+
+    def __del__(self):
+        print("_JobThread deleted")
 
     @staticmethod
     def stopJobThreadInstance(caller, method, *args, **kwargs):
@@ -147,6 +153,8 @@ class _JobThread(QtCore.QThread):
     def stopRun(self):
         self.onFinish()
         self.terminate()
+        self.used = False
+        self.setMethods(None, None)
 
     def setMethods(self, onRun, onFinish):
         self.executeOnRun = onRun
@@ -166,6 +174,8 @@ class _JobThread(QtCore.QThread):
                 and hasattr(self.executeOnRun, '__call__')):
             self.executeOnRun(*self.args, **self.kwargs)
             self.onFinish()
+            self.used = False
+            self.setMethods(None, None)
         else:
             raise Exception("Executing not callable statement")
 
@@ -188,19 +198,33 @@ class JobRunner:
     self.jobRunner = JobRunner(self)
     self.jobRunner(self.aJobMethod)
     """
+    @property
+    def caller(self):
+        return self.__caller()
 
-    __jobQueue = []
-    __jobRunning = False
-
-    def __init__(self, caller):
+    def __init__(self, caller, nbThreadsMax=3):
         """
         :param caller: The object that will ask for a job to be run. This must
         be a subclass of QObject.
         """
-        self.caller = caller
+        self.__caller = weakref.ref(caller)
+        self.__jobQueue = []
+        self.__threads = []
+        self.__jobRunning = False
+        for i in range(nbThreadsMax):
+            self.__threads.append(_JobThread())
+
+    def __del__(self):
+        print("JobRunner del")
 
     def __repr__(self):
         return repr(self.__jobQueue[0] if len(self.__jobQueue) > 0 else "None")
+
+    def findUnusedThread(self):
+        for thread in self.__threads:
+            if not thread.used:
+                return thread
+        return None
 
     def startJob(self, job, force, *args, **kwargs):
         """
@@ -216,19 +240,26 @@ class JobRunner:
         :param args: *args
         :param kwargs: **kwargs
         """
-        thread = _JobThread()
-        thread.setMethods(job, self.__executeNext)
-        thread.setParameters(*args, **kwargs)
-        if force:
-            self.__jobQueue.append(thread)
-            self.stopJob()
+        thread = self.findUnusedThread()
+        if thread:
+            thread.setMethods(job, self.__executeNext)
+            thread.setParameters(*args, **kwargs)
+            thread.used = True
+            if force:
+                self.__jobQueue.append(thread)
+                self.stopJob()
+            else:
+                self.__jobQueue.append(thread)
+            if not self.__jobRunning:
+                self.__jobQueue[0].setMethods(job, self.__executeNext)
+                self.__jobQueue[0].setParameters(*args, **kwargs)
+                self.__jobRunning = True
+                self.__jobQueue[0].start()
+            return True
         else:
-            self.__jobQueue.append(thread)
-        if not self.__jobRunning:
-            self.__jobQueue[0].setMethods(job, self.__executeNext)
-            self.__jobQueue[0].setParameters(*args, **kwargs)
-            self.__jobQueue[0].start()
-            self.__jobRunning = True
+            logging.getLogger("pcef").debug(
+                "Failed to queue job. All threads are used")
+            return False
 
     def __executeNext(self):
         self.__jobRunning = False
@@ -236,7 +267,7 @@ class JobRunner:
             self.__jobQueue.pop(0)
         if len(self.__jobQueue) > 0:
             self.__jobQueue[0].start()
-            self.__jobRunning = True            
+            self.__jobQueue[0].used = True
 
     def stopJob(self):
         """
@@ -258,9 +289,12 @@ if __name__ == '__main__':
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
 
+        def __del__(self):
+            print("Editor del")
+
         def showEvent(self, QShowEvent):
             QGenericCodeEdit.showEvent(self, QShowEvent)
-            self.jobRunner = JobRunner(self)
+            self.jobRunner = JobRunner(self, nbThreadsMax=3)
             self.jobRunner.startJob(self.xxx, False, "#FF0000", 0)
             self.jobRunner.startJob(self.xxx, False, "#00FF00", 10)
             self.jobRunner.startJob(self.xxx, False, "#0000FF", 20)
@@ -278,6 +312,8 @@ if __name__ == '__main__':
                 d.setFullWidth(True)
                 self.addDecoration(d)
                 time.sleep(0.1)
+            if offset == 10:
+                self.jobRunner.startJob(self.xxx, False, "#FF00FF", 30)
             print("Finished")
 
     import sys
