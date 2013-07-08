@@ -17,6 +17,7 @@ usePyQt4 = os.environ['QT_API'] == "PyQt"
 usePySide = os.environ['QT_API'] == "PySide"
 from pcef.qt import QtCore, QtGui
 from pcef.core import constants
+from pcef.core.system import DelayJobRunner
 from pcef.core.panel import Panel
 
 
@@ -32,7 +33,7 @@ else:
         from pcef.core.ui.search_panel_ui_pyside import Ui_SearchPanel
 
 
-class SearchAndReplacePanel(Panel, Ui_SearchPanel):
+class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
     Search (& replace) Panel. Allow the user to search for content in the editor
 
@@ -115,9 +116,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def __init__(self):
         Panel.__init__(self)
+        DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
-        self.separator = None
+        self.__separator = None
 
     def install(self, editor):
         Panel.install(self, editor)
@@ -138,12 +140,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def onStateChanged(self, state):
         if state:
-            self.separator = self.editor.contextMenu.addSeparator()
+            self.__separator = self.editor.contextMenu.addSeparator()
             self.editor.contextMenu.addAction(self.actionSearch)
             self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
         else:
-            if self.separator:
-                self.editor.contextMenu.removeAction(self.separator)
+            if self.__separator:
+                self.editor.contextMenu.removeAction(self.__separator)
             self.editor.contextMenu.removeAction(self.actionSearch)
             self.editor.contextMenu.removeAction(
                 self.actionActionSearchAndReplace)
@@ -171,9 +173,17 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditReplace.selectAll()
         self.lineEditReplace.setFocus()
 
+    @QtCore.Slot(str)
+    def on_lineEditSearch_textChanged(self, txt):
+        if txt:
+            self.requestJob(self.search, text=txt)
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Enter:
             event.accept()
             pass  # go next
         if event.key() == QtCore.Qt.Key_Escape:
             self.hide()
+
+    def search(self, text=""):
+        print("Searching for %s" % text)
