@@ -17,6 +17,7 @@ usePyQt4 = os.environ['QT_API'] == "PyQt"
 usePySide = os.environ['QT_API'] == "PySide"
 from pcef.qt import QtCore, QtGui
 from pcef.core import constants
+from pcef.core.decoration import TextDecoration
 from pcef.core.system import DelayJobRunner
 from pcef.core.panel import Panel
 
@@ -114,12 +115,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
     _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
 
+    __updateLabeMatchesRequested = QtCore.Signal(int)
+
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
         self.__separator = None
+        self._decorations = []
+        self.__updateLabeMatchesRequested.connect(self.__updateLabelMatches)
 
     def install(self, editor):
         Panel.install(self, editor)
@@ -143,12 +148,20 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.__separator = self.editor.contextMenu.addSeparator()
             self.editor.contextMenu.addAction(self.actionSearch)
             self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
+            self.editor.textChanged.connect(self.requestSearch)
+            self.lineEditSearch.textChanged.connect(self.requestSearch)
+            self.checkBoxCase.stateChanged.connect(self.requestSearch)
+            self.checkBoxWholeWords.stateChanged.connect(self.requestSearch)
         else:
             if self.__separator:
                 self.editor.contextMenu.removeAction(self.__separator)
             self.editor.contextMenu.removeAction(self.actionSearch)
             self.editor.contextMenu.removeAction(
                 self.actionActionSearchAndReplace)
+            self.editor.textChanged.disconnect(self.requestSearch)
+            self.lineEditSearch.textChanged.disconnect(self.requestSearch)
+            self.checkBoxCase.stateChanged.disconnect(self.requestSearch)
+            self.checkBoxWholeWords.stateChanged.disconnect(self.requestSearch)
 
     @QtCore.Slot()
     def on_pushButtonClose_clicked(self):
@@ -174,9 +187,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.lineEditReplace.setFocus()
 
     @QtCore.Slot(str)
-    def on_lineEditSearch_textChanged(self, txt):
-        if txt:
-            self.requestJob(self.search, text=txt)
+    def requestSearch(self, txt=""):
+        self.requestJob(self.search, text=self.lineEditSearch.text())
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Enter:
@@ -185,5 +197,52 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         if event.key() == QtCore.Qt.Key_Escape:
             self.hide()
 
+    def getUserSearchFlag(self):
+        """ Returns the user search flag """
+        searchFlag = QtGui.QTextDocument.FindFlags(0)
+        if self.checkBoxCase.isChecked():
+            searchFlag |= QtGui.QTextDocument.FindCaseSensitively
+        if self.checkBoxWholeWords.isChecked():
+            searchFlag |= QtGui.QTextDocument.FindWholeWords
+        return searchFlag
+
+    def __createDecoration(self, tc):
+        """ Creates the text occurences decoration """
+        deco = TextDecoration(tc)
+        deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
+        deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
+        return deco
+
+    def clearDecorations(self):
+        """ Remove all decorations """
+        pos = self.editor.textCursor().position()
+        for deco in self._decorations:
+            self.editor.removeDecoration(deco)
+        self._decorations[:] = []
+        self.editor.textCursor().setPosition(pos)
+
     def search(self, text=""):
-        print("Searching for %s" % text)
+        self.clearDecorations()
+        if text:
+            searchFlag = self.getUserSearchFlag()
+            tc = self.editor.textCursor()
+            doc = self.editor.document()
+            tc.movePosition(QtGui.QTextCursor.Start)
+            cptMatches = 0
+            tc = doc.find(text, tc, searchFlag)
+            while not tc.isNull():
+                deco = self.__createDecoration(tc)
+                self._decorations.append(deco)
+                self.editor.addDecoration(deco)
+                tc.setPosition(tc.position() + 1)
+                tc = doc.find(text, tc, searchFlag)
+                cptMatches += 1
+            self.__updateLabeMatchesRequested.emit(cptMatches)
+
+    def __updateLabelMatches(self, cptMatches):
+        self.labelMatches.setText("{0} matches".format(cptMatches))
+        color = "#DD0000"
+        if cptMatches:
+            color = "#00DD00"
+        self.labelMatches.setStyleSheet("color: %s" % color)
+
