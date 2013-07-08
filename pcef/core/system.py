@@ -186,7 +186,7 @@ class JobRunner:
     Usage
     ------------
     self.jobRunner = JobRunner(self)
-    self.jobRunner(self.aJobMethod)
+    self.jobRunner.startJob(self.aJobMethod, False, arg1, ... , arg1=kwarg1 , ...)
     """
 
     __jobQueue = []
