@@ -267,6 +267,7 @@ class JobRunner:
             self.__jobQueue.pop(0)
         if len(self.__jobQueue) > 0:
             self.__jobQueue[0].start()
+            self.__jobRunning = True
             self.__jobQueue[0].used = True
 
     def stopJob(self):
