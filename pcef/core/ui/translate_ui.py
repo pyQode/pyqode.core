@@ -15,7 +15,7 @@ import glob
 import os
 
 
-def replace_rc_imports(filename):
+def replace_rc_imports(filename, suffix="_pyqt"):
     with open(filename, "r") as f:
         content = f.read()
     new_content = ""
@@ -23,36 +23,80 @@ def replace_rc_imports(filename):
     for l in lines:
         if l.startswith("import"):
             to_replace = l.split(" ")[1]
-            replacement = "pcef.core.ui.{0}3".format(to_replace)
+            replacement = "pcef.core.ui.{0}{1}".format(to_replace, suffix)
             l = l.replace(to_replace, replacement)
         new_content += "%s\n" % l
     with open(filename, "w") as f:
         f.write(new_content)
 
 
-# compile ui files
-for name in glob.glob("*.ui"):
-    base = name.split(".")[0]
+def compile_pyqt_ui(base, name):
     # python 3
-    cmd = "pyuic4 -w {0} > {1}_ui3.py ".format(name, base)
+    cmd = "pyuic4 -w {0} > {1}_ui3_pyqt.py ".format(name, base)
     print(cmd)
     os.system(cmd)
-    replace_rc_imports("{0}_ui3.py".format(base))
+    replace_rc_imports("{0}_ui3_pyqt.py".format(base), suffix="3_pyqt")
     # replace import *_rc by pcef.core.ui.*_rc3
     # python 2
-    cmd = "pyuic4 {0} > {1}_ui.py ".format(name, base)
+    cmd = "pyuic4 {0} > {1}_ui_pyqt.py ".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    replace_rc_imports("{0}_ui_pyqt.py".format(base), suffix="_pyqt")
+
+
+def compile_pyside_ui(base, name):
+    # python 3
+    cmd = "pyside-uic {0} > {1}_ui3_pyside.py ".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    replace_rc_imports("{0}_ui3_pyside.py".format(base), suffix="3_pyside")
+    # replace import *_rc by pcef.core.ui.*_rc3
+    # python 2
+    cmd = "pyside-uic {0} > {1}_ui_pyside.py ".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    replace_rc_imports("{0}_ui_pyside.py".format(base), suffix="_pyside")
+
+
+def compile_pyqt_rc(base, name):
+    # python 3
+    cmd = "pyrcc4 -py3 {0} > {1}_rc3_pyqt.py".format(name, base)
+    print(cmd)
+    os.system(cmd)
+    # python 2
+    cmd = "pyrcc4 {0} > {1}_rc_pyqt.py".format(name, base)
     print(cmd)
     os.system(cmd)
 
-for name in glob.glob("*.qrc"):
-    base = name.split(".")[0]
+
+def compile_pyside_rc(base, name):
     # python 3
-    cmd = "pyrcc4 -py3 {0} > {1}_rc3.py".format(name, base)
+    cmd = "pyside-rcc -py3 {0} > {1}_rc3_pyside.py".format(name, base)
     print(cmd)
     os.system(cmd)
     # python 2
-    cmd = "pyrcc4 {0} > {1}_rc.py".format(name, base)
+    cmd = "pyside-rcc {0} > {1}_rc_pyside.py".format(name, base)
     print(cmd)
     os.system(cmd)
+
+
+def compile_ui():
+    for name in glob.glob("*.ui"):
+        base = name.split(".")[0]
+        compile_pyqt_ui(base, name)
+        compile_pyside_ui(base, name)
+
+
+def compile_rc():
+    for name in glob.glob("*.qrc"):
+        base = name.split(".")[0]
+        compile_pyqt_rc(base, name)
+        compile_pyside_rc(base, name)
+
+
+if __name__ == "__main__":
+    compile_ui()
+    compile_rc()
+
 
 

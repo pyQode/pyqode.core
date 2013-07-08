@@ -134,9 +134,7 @@ def try_pyqt():
         import PyQt4
     except ImportError:
         # Fatal error, no qt bindings found
-        __logger.critical("PySide not found, exiting with return code -1")
-        print("PyQt4 and PySide not found, exiting with return code -1")
-        os.environ.setdefault("QT_API", None)
+        __logger.critical("PyQt not found!")
         return False
     else:
         os.environ.setdefault("QT_API", "PyQt")

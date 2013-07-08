@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Wed Jun 26 14:15:13 2013
+# Created: Mon Jul  8 15:08:57 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -100,4 +100,4 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About", None))
 
 from pcef.core import QGenericCodeEdit
-import examples_rc
+import ui.examples_rc_pyqt
