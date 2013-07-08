@@ -12,14 +12,24 @@
 This module contains the search and replace panel
 """
 import sys
+import os
+usePyQt4 = os.environ['QT_API'] == "PyQt"
+usePySide = os.environ['QT_API'] == "PySide"
 from pcef.qt import QtCore, QtGui
 from pcef.core import constants
 from pcef.core.panel import Panel
 
+
 if sys.version_info[0] == 3:
-    from pcef.core.ui.search_panel_ui3 import Ui_SearchPanel
+    if usePyQt4:
+        from pcef.core.ui.search_panel_ui3_pyqt import Ui_SearchPanel
+    elif usePySide:
+        from pcef.core.ui.search_panel_ui3_pyside import Ui_SearchPanel
 else:
-    from pcef.core.ui.search_panel_ui import Ui_SearchPanel
+    if usePyQt4:
+        from pcef.core.ui.search_panel_ui_pyqt import Ui_SearchPanel
+    elif usePySide:
+        from pcef.core.ui.search_panel_ui_pyside import Ui_SearchPanel
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
