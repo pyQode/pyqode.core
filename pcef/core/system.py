@@ -319,6 +319,9 @@ class DelayJobRunner(JobRunner):
         self.__kwargs = kwargs
         self.__timer.start(self.__interval)
 
+    def cancelRequests(self):
+        self.__timer.stop()
+
     def __execRequestedJob(self):
         """
         Execute the requested job after the timer has timeout.
