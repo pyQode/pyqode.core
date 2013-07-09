@@ -146,6 +146,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.__separator = self.editor.contextMenu.addSeparator()
             self.editor.contextMenu.addAction(self.actionSearch)
             self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
+            self.editor.contextMenu.addAction(self.actionFindNext)
+            self.editor.contextMenu.addAction(self.actionFindPrevious)
 
             self.editor.textChanged.connect(self.requestSearch)
             self.lineEditSearch.textChanged.connect(self.requestSearch)
@@ -161,6 +163,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.editor.contextMenu.removeAction(self.actionSearch)
             self.editor.contextMenu.removeAction(
                 self.actionActionSearchAndReplace)
+            self.editor.contextMenu.removeAction(self.actionFindNext)
+            self.editor.contextMenu.removeAction(self.actionFindPrevious)
 
             self.editor.textChanged.disconnect(self.requestSearch)
             self.lineEditSearch.textChanged.disconnect(self.requestSearch)
