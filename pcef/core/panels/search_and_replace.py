@@ -115,7 +115,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
     _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
 
-    __updateLabeMatchesRequested = QtCore.Signal(int)
+    searchFinished = QtCore.Signal()
 
     def __init__(self):
         Panel.__init__(self)
@@ -124,7 +124,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.setupUi(self)
         self.__separator = None
         self._decorations = []
-        self.__updateLabeMatchesRequested.connect(self.__updateLabelMatches)
+        self.searchFinished.connect(self.__onSearchFinished)
+        self.mutex = QtCore.QMutex()
+        self.__occurences = []
+        self.cptMatches = 0
 
     def install(self, editor):
         Panel.install(self, editor)
@@ -142,6 +145,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     def onStyleChanged(self, section, key, value):
         if key in self._KEYS:
             self.resetStylesheet()
+
+    def getOccurences(self):
+        self.mutex.lock()
+        retval = []
+        for start, stop in self.__occurences:
+            retval.append((start, stop))
+        self.mutex.unlock()
+        return retval
 
     def onStateChanged(self, state):
         if state:
@@ -186,9 +197,23 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.lineEditReplace.selectAll()
         self.lineEditReplace.setFocus()
 
+    def clearOccurences(self):
+        self.mutex.lock()
+        self.__occurences[:] = []
+        self.mutex.unlock()
+
     @QtCore.Slot(str)
     def requestSearch(self, txt=""):
-        self.requestJob(self.search, text=self.lineEditSearch.text())
+        if txt == "" or isinstance(txt, int):
+            txt = self.lineEditSearch.text()
+        if txt:
+            self.requestJob(self.search, txt, self.editor.document().clone(),
+                            self.getUserSearchFlag())
+        else:
+            self.cancelRequests()
+            self.stopJob()
+            self.clearOccurences()
+            self.__onSearchFinished()
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Enter:
@@ -206,43 +231,49 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             searchFlag |= QtGui.QTextDocument.FindWholeWords
         return searchFlag
 
-    def __createDecoration(self, tc):
+    def __createDecoration(self, selection_start, selection_end):
         """ Creates the text occurences decoration """
-        deco = TextDecoration(tc)
+        deco = TextDecoration(self.editor.document(), selection_start,
+                              selection_end)
         deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
         deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
         return deco
 
     def clearDecorations(self):
         """ Remove all decorations """
-        pos = self.editor.textCursor().position()
         for deco in self._decorations:
             self.editor.removeDecoration(deco)
         self._decorations[:] = []
-        self.editor.textCursor().setPosition(pos)
 
-    def search(self, text=""):
-        self.clearDecorations()
+    def search(self, text, doc, flags):
+        self.mutex.lock()
+        self.__occurences[:] = []
         if text:
-            searchFlag = self.getUserSearchFlag()
-            tc = self.editor.textCursor()
-            doc = self.editor.document()
-            tc.movePosition(QtGui.QTextCursor.Start)
             cptMatches = 0
-            tc = doc.find(text, tc, searchFlag)
-            while not tc.isNull():
-                deco = self.__createDecoration(tc)
-                self._decorations.append(deco)
-                self.editor.addDecoration(deco)
-                tc.setPosition(tc.position() + 1)
-                tc = doc.find(text, tc, searchFlag)
+            cursor = doc.find(text, 0, flags)
+            while not cursor.isNull():
+                self.__occurences.append((cursor.selectionStart(),
+                                          cursor.selectionEnd()))
+                cursor.setPosition(cursor.position() + 1)
+                cursor = doc.find(text, cursor, flags)
                 cptMatches += 1
-            self.__updateLabeMatchesRequested.emit(cptMatches)
+        self.mutex.unlock()
+        self.searchFinished.emit()
 
-    def __updateLabelMatches(self, cptMatches):
-        self.labelMatches.setText("{0} matches".format(cptMatches))
+    def __updateLabels(self):
+        self.labelMatches.setText("{0} matches".format(self.cptMatches))
         color = "#DD0000"
-        if cptMatches:
+        if self.cptMatches:
             color = "#00DD00"
         self.labelMatches.setStyleSheet("color: %s" % color)
+
+    def __onSearchFinished(self):
+        self.clearDecorations()
+        occurences = self.getOccurences()
+        for occurence in occurences:
+            deco = self.__createDecoration(occurence[0], occurence[1])
+            self._decorations.append(deco)
+            self.editor.addDecoration(deco)
+        self.cptMatches = len(occurences)
+        self.__updateLabels()
 
