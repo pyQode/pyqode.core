@@ -126,7 +126,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self._decorations = []
         self.__searchFinished.connect(self.__onSearchFinished)
         self.mutex = QtCore.QMutex()
-        self.__occurences = []
+        self.__occurrences = []
         self.cptMatches = 0
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -193,7 +193,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         else:
             self.cancelRequests()
             self.stopJob()
-            self.__clearOccurences()
+            self.__clearOccurrences()
             self.__onSearchFinished()
 
     def eventFilter(self, obj, event):
@@ -223,12 +223,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
 
     def __execSearch(self, text, doc, flags):
         self.mutex.lock()
-        self.__occurences[:] = []
+        self.__occurrences[:] = []
         if text:
             cptMatches = 0
             cursor = doc.find(text, 0, flags)
             while not cursor.isNull():
-                self.__occurences.append((cursor.selectionStart(),
+                self.__occurrences.append((cursor.selectionStart(),
                                           cursor.selectionEnd()))
                 cursor.setPosition(cursor.position() + 1)
                 cursor = doc.find(text, cursor, flags)
@@ -245,12 +245,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
 
     def __onSearchFinished(self):
         self.__clearDecorations()
-        occurences = self.__getOccurences()
-        for occurence in occurences:
-            deco = self.__createDecoration(occurence[0], occurence[1])
+        occurrences = self.__getOccurrences()
+        for occurrence in occurrences:
+            deco = self.__createDecoration(occurrence[0], occurrence[1])
             self._decorations.append(deco)
             self.editor.addDecoration(deco)
-        self.cptMatches = len(occurences)
+        self.cptMatches = len(occurrences)
         self.__updateLabels()
 
     def __resetStylesheet(self):
@@ -261,17 +261,17 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             "highlight": self.editor.style.value(self._KEYS[3]).name()}
         self.setStyleSheet(stylesheet)
 
-    def __getOccurences(self):
+    def __getOccurrences(self):
         self.mutex.lock()
         retval = []
-        for start, stop in self.__occurences:
+        for start, stop in self.__occurrences:
             retval.append((start, stop))
         self.mutex.unlock()
         return retval
 
-    def __clearOccurences(self):
+    def __clearOccurrences(self):
         self.mutex.lock()
-        self.__occurences[:] = []
+        self.__occurrences[:] = []
         self.mutex.unlock()
 
     def __createDecoration(self, selection_start, selection_end):
