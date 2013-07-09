@@ -115,7 +115,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
     _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
 
-    searchFinished = QtCore.Signal()
+    __searchFinished = QtCore.Signal()
 
     def __init__(self):
         Panel.__init__(self)
@@ -124,35 +124,21 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.setupUi(self)
         self.__separator = None
         self._decorations = []
-        self.searchFinished.connect(self.__onSearchFinished)
+        self.__searchFinished.connect(self.__onSearchFinished)
         self.mutex = QtCore.QMutex()
         self.__occurences = []
         self.cptMatches = 0
+        self.lineEditSearch.installEventFilter(self)
+        self.lineEditReplace.installEventFilter(self)
 
     def install(self, editor):
         Panel.install(self, editor)
-        self.resetStylesheet()
+        self.__resetStylesheet()
         self.hide()
-
-    def resetStylesheet(self):
-        stylesheet = self.STYLESHEET % {
-            "bck": self.editor.style.value(self._KEYS[0]).name(),
-            "txt_bck": self.editor.style.value(self._KEYS[1]).name(),
-            "color": self.editor.style.value(self._KEYS[2]).name(),
-            "highlight": self.editor.style.value(self._KEYS[3]).name()}
-        self.setStyleSheet(stylesheet)
 
     def onStyleChanged(self, section, key, value):
         if key in self._KEYS:
-            self.resetStylesheet()
-
-    def getOccurences(self):
-        self.mutex.lock()
-        retval = []
-        for start, stop in self.__occurences:
-            retval.append((start, stop))
-        self.mutex.unlock()
-        return retval
+            self.__resetStylesheet()
 
     def onStateChanged(self, state):
         if state:
@@ -197,32 +183,36 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.lineEditReplace.selectAll()
         self.lineEditReplace.setFocus()
 
-    def clearOccurences(self):
-        self.mutex.lock()
-        self.__occurences[:] = []
-        self.mutex.unlock()
-
     @QtCore.Slot(str)
     def requestSearch(self, txt=""):
         if txt == "" or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
-            self.requestJob(self.search, txt, self.editor.document().clone(),
-                            self.getUserSearchFlag())
+            self.requestJob(self.__execSearch, txt, self.editor.document().clone(),
+                            self.__getUserSearchFlag())
         else:
             self.cancelRequests()
             self.stopJob()
-            self.clearOccurences()
+            self.__clearOccurences()
             self.__onSearchFinished()
 
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Enter:
-            event.accept()
-            pass  # go next
-        if event.key() == QtCore.Qt.Key_Escape:
-            self.hide()
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            if (event.key() == QtCore.Qt.Key_Tab or
+                    event.key() == QtCore.Qt.Key_Backtab):
+                return True
+            elif (event.key() == QtCore.Qt.Key_Return or
+                    event.key() == QtCore.Qt.Key_Enter):
+                if obj == self.lineEditReplace:
+                    print("Replace current selection")
+                elif obj == self.lineEditSearch:
+                    print("Search next")
+                return True
+            elif event.key() == QtCore.Qt.Key_Escape:
+                self.on_pushButtonClose_clicked()
+        return Panel.eventFilter(self, obj, event)
 
-    def getUserSearchFlag(self):
+    def __getUserSearchFlag(self):
         """ Returns the user search flag """
         searchFlag = QtGui.QTextDocument.FindFlags(0)
         if self.checkBoxCase.isChecked():
@@ -231,21 +221,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             searchFlag |= QtGui.QTextDocument.FindWholeWords
         return searchFlag
 
-    def __createDecoration(self, selection_start, selection_end):
-        """ Creates the text occurences decoration """
-        deco = TextDecoration(self.editor.document(), selection_start,
-                              selection_end)
-        deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
-        deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
-        return deco
-
-    def clearDecorations(self):
-        """ Remove all decorations """
-        for deco in self._decorations:
-            self.editor.removeDecoration(deco)
-        self._decorations[:] = []
-
-    def search(self, text, doc, flags):
+    def __execSearch(self, text, doc, flags):
         self.mutex.lock()
         self.__occurences[:] = []
         if text:
@@ -258,7 +234,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                 cursor = doc.find(text, cursor, flags)
                 cptMatches += 1
         self.mutex.unlock()
-        self.searchFinished.emit()
+        self.__searchFinished.emit()
 
     def __updateLabels(self):
         self.labelMatches.setText("{0} matches".format(self.cptMatches))
@@ -268,8 +244,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.labelMatches.setStyleSheet("color: %s" % color)
 
     def __onSearchFinished(self):
-        self.clearDecorations()
-        occurences = self.getOccurences()
+        self.__clearDecorations()
+        occurences = self.__getOccurences()
         for occurence in occurences:
             deco = self.__createDecoration(occurence[0], occurence[1])
             self._decorations.append(deco)
@@ -277,3 +253,37 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.cptMatches = len(occurences)
         self.__updateLabels()
 
+    def __resetStylesheet(self):
+        stylesheet = self.STYLESHEET % {
+            "bck": self.editor.style.value(self._KEYS[0]).name(),
+            "txt_bck": self.editor.style.value(self._KEYS[1]).name(),
+            "color": self.editor.style.value(self._KEYS[2]).name(),
+            "highlight": self.editor.style.value(self._KEYS[3]).name()}
+        self.setStyleSheet(stylesheet)
+
+    def __getOccurences(self):
+        self.mutex.lock()
+        retval = []
+        for start, stop in self.__occurences:
+            retval.append((start, stop))
+        self.mutex.unlock()
+        return retval
+
+    def __clearOccurences(self):
+        self.mutex.lock()
+        self.__occurences[:] = []
+        self.mutex.unlock()
+
+    def __createDecoration(self, selection_start, selection_end):
+        """ Creates the text occurences decoration """
+        deco = TextDecoration(self.editor.document(), selection_start,
+                              selection_end)
+        deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
+        deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
+        return deco
+
+    def __clearDecorations(self):
+        """ Remove all decorations """
+        for deco in self._decorations:
+            self.editor.removeDecoration(deco)
+        self._decorations[:] = []
