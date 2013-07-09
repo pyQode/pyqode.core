@@ -118,8 +118,6 @@ ACTION_UNINDENT = (":/pcef-icons/rc/format-indent-less.png", "Shift+Tab")
 ICONS.append(ACTION_UNINDENT)
 ACTION_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
 ICONS.append(ACTION_GOTO_LINE)
-ACTION_NEXT = (":/pcef-icons/rc/go-down.png", "F3")
-ACTION_PREVIOUS = (":/pcef-icons/rc/go-up.png", "Shift+F3")
 
 
 #
