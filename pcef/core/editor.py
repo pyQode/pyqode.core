@@ -135,15 +135,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.contextMenu = QtGui.QMenu()
         self.contextMenu.setTitle("Edit")
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Undo", self)
-        a.setShortcut(constants.ICON_UNDO[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_UNDO[0]), "Undo", self)
+        a.setShortcut(constants.ACTION_UNDO[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.undo)
         self.undoAvailable.connect(a.setEnabled)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_REDO[0]), "Redo", self)
-        a.setShortcut(constants.ICON_REDO[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_REDO[0]), "Redo", self)
+        a.setShortcut(constants.ACTION_REDO[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.redo)
         self.redoAvailable.connect(a.setEnabled)
@@ -151,51 +151,51 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.contextMenu.addSeparator()
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_COPY[0]), "Copy", self)
-        a.setShortcut(constants.ICON_COPY[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_COPY[0]), "Copy", self)
+        a.setShortcut(constants.ACTION_COPY[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.copy)
         self.copyAvailable.connect(a.setEnabled)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_CUT[0]), "Cut", self)
-        a.setShortcut(constants.ICON_CUT[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_CUT[0]), "Cut", self)
+        a.setShortcut(constants.ACTION_CUT[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.cut)
         self.copyAvailable.connect(a.setEnabled)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_PASTE[0]), "Paste", self)
-        a.setShortcut(constants.ICON_PASTE[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_PASTE[0]), "Paste", self)
+        a.setShortcut(constants.ACTION_PASTE[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.paste)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_DELETE[0]), "Delete", self)
-        a.setShortcut(constants.ICON_DELETE[1])
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_DELETE[0]), "Delete", self)
+        a.setShortcut(constants.ACTION_DELETE[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.delete)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_SELECT_ALL[0]),
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_SELECT_ALL[0]),
                           "Select all", self)
-        a.setShortcut(constants.ICON_SELECT_ALL[1])
+        a.setShortcut(constants.ACTION_SELECT_ALL[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.selectAll)
         self.contextMenu.addAction(a)
 
         self.contextMenu.addSeparator()
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_INDENT[0]),
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_INDENT[0]),
                           "Indent", self)
-        a.setShortcut(constants.ICON_INDENT[1])
+        a.setShortcut(constants.ACTION_INDENT[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.indent)
         self.contextMenu.addAction(a)
 
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNINDENT[0]),
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_UNINDENT[0]),
                           "Un-indent", self)
-        a.setShortcut(constants.ICON_UNINDENT[1])
+        a.setShortcut(constants.ACTION_UNINDENT[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.unIndent)
         self.contextMenu.addAction(a)
