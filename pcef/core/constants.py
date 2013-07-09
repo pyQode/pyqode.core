@@ -119,10 +119,11 @@ ICONS.append(ICON_UNINDENT)
 ICON_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
 ICONS.append(ICON_GOTO_LINE)
 
+
 #
 # Enumerations
 #
-class PanelPosition:
+class PanelPosition(object):
     """
     Enumerate the possible panel positions
     """
