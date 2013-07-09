@@ -181,7 +181,7 @@ class _JobThread(QtCore.QThread):
                             self.executeOnRun)
 
 
-class JobRunner:
+class JobRunner(object):
     """
     Utility class to easily run an asynchroneous job. A job is a simple callable
     (method) that will be run in a background thread.
