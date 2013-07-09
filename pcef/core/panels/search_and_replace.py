@@ -127,6 +127,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.__searchFinished.connect(self.__onSearchFinished)
         self.mutex = QtCore.QMutex()
         self.__occurrences = []
+        self.__current_occurrence = -1
         self.cptMatches = 0
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -145,20 +146,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.__separator = self.editor.contextMenu.addSeparator()
             self.editor.contextMenu.addAction(self.actionSearch)
             self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
+
             self.editor.textChanged.connect(self.requestSearch)
             self.lineEditSearch.textChanged.connect(self.requestSearch)
             self.checkBoxCase.stateChanged.connect(self.requestSearch)
             self.checkBoxWholeWords.stateChanged.connect(self.requestSearch)
+            self.pushButtonNext.clicked.connect(self.highlightNext)
+            self.actionFindNext.triggered.connect(self.highlightNext)
+            self.pushButtonPrevious.clicked.connect(self.highlightPrevious)
+            self.actionFindPrevious.triggered.connect(self.highlightPrevious)
         else:
             if self.__separator:
                 self.editor.contextMenu.removeAction(self.__separator)
             self.editor.contextMenu.removeAction(self.actionSearch)
             self.editor.contextMenu.removeAction(
                 self.actionActionSearchAndReplace)
+
             self.editor.textChanged.disconnect(self.requestSearch)
             self.lineEditSearch.textChanged.disconnect(self.requestSearch)
             self.checkBoxCase.stateChanged.disconnect(self.requestSearch)
             self.checkBoxWholeWords.stateChanged.disconnect(self.requestSearch)
+            self.pushButtonNext.clicked.disconnect(self.highlightNext)
+            self.pushButtonPrevious.clicked.disconnect(self.highlightPrevious)
 
     @QtCore.Slot()
     def on_pushButtonClose_clicked(self):
@@ -183,18 +192,59 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.lineEditReplace.selectAll()
         self.lineEditReplace.setFocus()
 
-    @QtCore.Slot(str)
     def requestSearch(self, txt=""):
         if txt == "" or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
-            self.requestJob(self.__execSearch, txt, self.editor.document().clone(),
+            self.requestJob(self.__execSearch, txt,
+                            self.editor.document().clone(),
+                            self.editor.textCursor(),
                             self.__getUserSearchFlag())
         else:
             self.cancelRequests()
             self.stopJob()
             self.__clearOccurrences()
             self.__onSearchFinished()
+
+    def highlightNext(self):
+        cr = self.__getCurrentOccurence()
+        occurrences = self.__getOccurrences()
+        if (cr == -1 or
+                cr == len(occurrences) - 1):
+            cr = 0
+        else:
+            cr += 1
+        self.__setCurrentOccurrence(cr)
+        try:
+            occ = occurrences[cr]
+            tc = self.editor.textCursor()
+            assert isinstance(tc, QtGui.QTextCursor)
+            tc.setPosition(occ[0])
+            tc.setPosition(occ[1], tc.KeepAnchor)
+            self.editor.setTextCursor(tc)
+            return True
+        except IndexError:
+            return False
+
+    def highlightPrevious(self):
+        cr = self.__getCurrentOccurence()
+        occurrences = self.__getOccurrences()
+        if (cr == -1 or
+                cr == 0):
+            cr = len(occurrences) - 1
+        else:
+            cr -= 1
+        self.__setCurrentOccurrence(cr)
+        try:
+            occ = occurrences[cr]
+            tc = self.editor.textCursor()
+            assert isinstance(tc, QtGui.QTextCursor)
+            tc.setPosition(occ[0])
+            tc.setPosition(occ[1], tc.KeepAnchor)
+            self.editor.setTextCursor(tc)
+            return True
+        except IndexError:
+            return False
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -206,7 +256,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                 if obj == self.lineEditReplace:
                     print("Replace current selection")
                 elif obj == self.lineEditSearch:
-                    print("Search next")
+                    self.highlightNext()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
                 self.on_pushButtonClose_clicked()
@@ -221,13 +271,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             searchFlag |= QtGui.QTextDocument.FindWholeWords
         return searchFlag
 
-    def __execSearch(self, text, doc, flags):
+    def __execSearch(self, text, doc, originalCursor, flags):
         self.mutex.lock()
         self.__occurrences[:] = []
+        self.__current_occurrence = -1
         if text:
             cptMatches = 0
             cursor = doc.find(text, 0, flags)
             while not cursor.isNull():
+                if self.__compareCursors(cursor, originalCursor):
+                    self.__current_occurrence = cptMatches
                 self.__occurrences.append((cursor.selectionStart(),
                                           cursor.selectionEnd()))
                 cursor.setPosition(cursor.position() + 1)
@@ -251,6 +304,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self._decorations.append(deco)
             self.editor.addDecoration(deco)
         self.cptMatches = len(occurrences)
+        if not self.cptMatches:
+            self.__current_occurrence = -1
+        elif self.__getCurrentOccurence() == -1:
+            self.highlightNext()
         self.__updateLabels()
 
     def __resetStylesheet(self):
@@ -269,6 +326,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.mutex.unlock()
         return retval
 
+    def __getCurrentOccurence(self):
+        self.mutex.lock()
+        retVal = self.__current_occurrence
+        self.mutex.unlock()
+        return retVal
+
     def __clearOccurrences(self):
         self.mutex.lock()
         self.__occurrences[:] = []
@@ -280,6 +343,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                               selection_end)
         deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
         deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
+        deco.draw_order = 1
         return deco
 
     def __clearDecorations(self):
@@ -287,3 +351,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         for deco in self._decorations:
             self.editor.removeDecoration(deco)
         self._decorations[:] = []
+
+    def __setCurrentOccurrence(self, cr):
+        self.mutex.lock()
+        self.__current_occurrence = cr
+        self.mutex.unlock()
+
+    def __compareCursors(self, a, b):
+        assert isinstance(a, QtGui.QTextCursor)
+        assert isinstance(b, QtGui.QTextCursor)
+        return (a.selectionStart() == b.selectionStart() and
+                a.selectionEnd() == b.selectionEnd())
