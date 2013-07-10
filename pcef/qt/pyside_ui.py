@@ -14,17 +14,19 @@ Loads ui dynamically from ui file for PySide applications
 This code is taken from: https://github.com/lunaryorn/snippets/blob/master/qt4/designer/pyside_dynamic.py
 """
 import inspect
-import os
+import pkg_resources
 from PySide.QtCore import QMetaObject
 from PySide.QtUiTools import QUiLoader
-import pkg_resources
 
+
+# collect possible custom objects from pcef plugins.
 CUSTOM_OBJECTS = {}
 for entrypoint in pkg_resources.iter_entry_points("pcef_plugins"):
     plugin = entrypoint.load()
     for name, obj in inspect.getmembers(plugin):
         if inspect.isclass(obj):
             CUSTOM_OBJECTS[obj._name] = obj._type
+
 
 class UiLoader(QUiLoader):
     """
