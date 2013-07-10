@@ -14,26 +14,13 @@ Integrates the generic editor using the pcef qt designer plugin.
 import os
 import sys
 from pcef.qt import QtCore, QtGui
-usePyQt4 = os.environ['QT_API'] == "PyQt"
-usePySide = os.environ['QT_API'] == "PySide"
-if sys.version_info[0] == 3:
-    if usePyQt4:
-        from ui.simple_editor_ui3_pyqt import Ui_MainWindow
-    elif usePySide:
-        from ui.simple_editor_ui3_pyside import Ui_MainWindow
-else:
-    if usePyQt4:
-        from ui.simple_editor_ui_pyqt import Ui_MainWindow
-    elif usePySide:
-        from ui.simple_editor_ui_pyside import Ui_MainWindow
-print(os.environ["QT_API"])
-print("Python {}".format(sys.version_info[0]))
+from ui import loadUi
 
 
-class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
+class SimpleEditorWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        self.setupUi(self)
+        loadUi("simple_editor.ui", self, rcFilename="simple_editor.qrc")
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         # edit menu
@@ -85,6 +72,12 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
 def main():
+    try:
+        import faulthandler
+        faulthandler.enable()
+    except ImportError:
+        pass
+
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
     win.show()

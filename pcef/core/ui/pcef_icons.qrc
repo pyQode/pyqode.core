@@ -18,4 +18,7 @@
     <file>rc/go-down.png</file>
     <file>rc/go-up.png</file>
   </qresource>
+  <qresource prefix="pcef-ui">
+    <file>search_panel.ui</file>
+  </qresource>
 </RCC>

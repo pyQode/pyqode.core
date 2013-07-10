@@ -32,6 +32,7 @@ class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     _class = 'QCodeEdit'    # name of the widget class
     _name = "QCodeEdit"
     _icon = None
+    _type = pcef.core.QCodeEdit
 
     def __init__(self, parent=None):
         QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self)
@@ -77,6 +78,7 @@ class QGenericCodeEditPlugin(QCodeEditPlugin):
     _class = 'QGenericCodeEdit'    # name of the widget class
     _name = "QGenericCodeEdit"
     _icon = None
+    _type = pcef.core.QGenericCodeEdit
 
     def createWidget(self, parent):
         return pcef.core.QGenericCodeEdit(parent)

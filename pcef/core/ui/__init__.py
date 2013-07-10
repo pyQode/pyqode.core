@@ -21,3 +21,25 @@
 Contains the ui needed by the various widgets. (Resources/Icons are stored in
 the rc subdirectory.
 """
+import os
+import pcef.qt
+
+
+def loadUi(uiFileName, baseInstance, rcFilename=None):
+    """
+    Loads an ui file from the ui package and load the specified qrc (must
+    already be compiled)
+
+    :param uiFileName: The ui file name (without path)
+
+    :param baseInstance: The baseInstance on which the ui is built
+
+    :param rcFilename: The optional qrc file to load
+    """
+    uiFile = os.path.join(os.path.abspath(os.path.join(__file__, "..")),
+                          uiFileName)
+    if rcFilename:
+        rcFile = os.path.join(os.path.abspath(os.path.join(__file__, "..")),
+                              rcFilename)
+        pcef.qt.importRc(rcFile)
+    pcef.qt.loadUi(uiFile, baseInstance)

@@ -178,4 +178,5 @@ if not select():
 __logger.info("Using %s" % os.environ["QT_API"])
 
 from pcef.qt import QtCore, QtGui
-__all__ = ["QtCore", "QtGui"]
+from pcef.qt.ui import loadUi, importRc
+__all__ = ["QtCore", "QtGui", "loadUi", "importRc"]

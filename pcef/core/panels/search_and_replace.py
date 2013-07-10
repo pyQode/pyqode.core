@@ -17,23 +17,12 @@ from pcef.qt import QtCore, QtGui
 from pcef.core.decoration import TextDecoration
 from pcef.core.system import DelayJobRunner
 from pcef.core.panel import Panel
-# select the correct ui script depending on the python version and the
-# qt bindings in use
-usePyQt4 = os.environ['QT_API'] == "PyQt"
-usePySide = os.environ['QT_API'] == "PySide"
-if sys.version_info[0] == 3:
-    if usePyQt4:
-        from pcef.core.ui.search_panel_ui3_pyqt import Ui_SearchPanel
-    elif usePySide:
-        from pcef.core.ui.search_panel_ui3_pyside import Ui_SearchPanel
-else:
-    if usePyQt4:
-        from pcef.core.ui.search_panel_ui_pyqt import Ui_SearchPanel
-    elif usePySide:
-        from pcef.core.ui.search_panel_ui_pyside import Ui_SearchPanel
+
+from pcef.core.ui import loadUi
 
 
-class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
+
+class SearchAndReplacePanel(Panel, DelayJobRunner):
     """
     This panel allow the user to search and replace some text in the current
     editor.
@@ -117,7 +106,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
-        Ui_SearchPanel.__init__(self)
+        loadUi("search_panel.ui", self)
+        # ui.loadUi()
+        # Ui_SearchPanel.__init__(self)
         #: Occurrences counter
         self.cptOccurrences = 0
         self.__separator = None
@@ -125,7 +116,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.__mutex = QtCore.QMutex()
         self.__occurrences = []
         self.__current_occurrence = -1
-        self.setupUi(self)
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)

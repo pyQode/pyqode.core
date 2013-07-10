@@ -15,6 +15,7 @@ code editor widget
 #
 # exposes public core api
 #
+import os
 from pcef.core import constants
 from pcef.core.mode import Mode
 from pcef.core.panel import Panel
@@ -33,6 +34,18 @@ from pcef.core.system import TextStyle, JobRunner
 
 #: pcef-core version
 __version__ = "1.0.0-dev"
+
+
+def getUiDirectory():
+    return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui")
+
+
+def getRcDirectory():
+    return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui",
+                        "rc")
+
+from pcef.qt.ui import importRc
+importRc(os.path.join(getUiDirectory(), "pcef_icons.qrc"))
 
 
 #
