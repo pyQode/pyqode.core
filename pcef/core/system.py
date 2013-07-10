@@ -132,9 +132,6 @@ class _JobThread(QtCore.QThread):
         self.args = ()
         self.kwargs = {}
 
-    def __del__(self):
-        print("_JobThread deleted")
-
     @staticmethod
     def stopJobThreadInstance(caller, method, *args, **kwargs):
         caller.invoker = _Invoker()
@@ -212,9 +209,6 @@ class JobRunner(object):
         self.__jobRunning = False
         for i in range(nbThreadsMax):
             self.__threads.append(_JobThread())
-
-    def __del__(self):
-        print("JobRunner del")
 
     def __repr__(self):
         return repr(self.__jobQueue[0] if len(self.__jobQueue) > 0 else "None")
@@ -330,7 +324,6 @@ class DelayJobRunner(JobRunner):
         """
         self.__timer.stop()
         if self.__async:
-            print("async")
             self.startJob(self.__job, False, *self.__args, **self.__kwargs)
         else:
             self.__job(*self.__args, **self.__kwargs)
