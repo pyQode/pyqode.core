@@ -13,14 +13,14 @@ This module contains the search and replace panel
 """
 import sys
 import os
-usePyQt4 = os.environ['QT_API'] == "PyQt"
-usePySide = os.environ['QT_API'] == "PySide"
 from pcef.qt import QtCore, QtGui
 from pcef.core.decoration import TextDecoration
 from pcef.core.system import DelayJobRunner
 from pcef.core.panel import Panel
-
-
+# select the correct ui script depending on the python version and the
+# qt bindings in use
+usePyQt4 = os.environ['QT_API'] == "PyQt"
+usePySide = os.environ['QT_API'] == "PySide"
 if sys.version_info[0] == 3:
     if usePyQt4:
         from pcef.core.ui.search_panel_ui3_pyqt import Ui_SearchPanel
@@ -35,24 +35,21 @@ else:
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
-    Search (& replace) Panel. Allow the user to search for content in the editor
+    This panel allow the user to search and replace some text in the current
+    editor.
 
-    All occurrences are highlighted using text decorations.
+    It uses the QTextDocument API to search for some text. Search operation is
+    performed in a background thread.
 
-    The occurrence under the cursor is selected using the find method of the
-    plain text edit. User can go backward and forward.
-
-    The Panel add a few actions to the editor menu(search, replace, next,
-    previous, replace, replace all)
-
-    The Panel is shown with ctrl-f for a search, ctrl-r for a search and
-    replace.
-
-    The Panel is hidden with ESC or by using the close button (white cross).
-
-    .. note:: The widget use a custom ui designed in Qt Designer
+    The search panel can also be used pragmatically. To do that, the client code
+    must first request a search (**requestSearch**) and connect to the
+    searchFinished signal. The results of the search can then be retrieved using
+    the cptOccurrences attribute and the getOccurrences method. The client code
+    may now navigates through occurrences (**selectNext**/**selectionPrevious**)
+    or replace the occurences with their own text (
+    **replaceOccurrence**/**replaceAll**).
     """
-    IDENTIFIER = "searchAndReplacePanel"
+    IDENTIFIER = "searchPanel"
     DESCRIPTION = "Search and replace text in the editor"
 
     #: Stylesheet
@@ -114,20 +111,21 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     """
     _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
 
-    __searchFinished = QtCore.Signal()
+    #: Signal emitted when a search operation finished
+    searchFinished = QtCore.Signal()
 
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
         Ui_SearchPanel.__init__(self)
-        self.setupUi(self)
+        #: Occurrences counter
+        self.cptOccurrences = 0
         self.__separator = None
-        self._decorations = []
-        self.__searchFinished.connect(self.__onSearchFinished)
-        self.mutex = QtCore.QMutex()
+        self.__decorations = []
+        self.__mutex = QtCore.QMutex()
         self.__occurrences = []
         self.__current_occurrence = -1
-        self.cptMatches = 0
+        self.setupUi(self)
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -135,7 +133,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
     def install(self, editor):
         Panel.install(self, editor)
         self.__resetStylesheet()
-        self.hide()
+        self.on_pushButtonClose_clicked()
 
     def onStyleChanged(self, section, key, value):
         if key in self._KEYS:
@@ -143,28 +141,30 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
 
     def onStateChanged(self, state):
         if state:
+            # add menus
             self.__separator = self.editor.contextMenu.addSeparator()
             self.editor.contextMenu.addAction(self.actionSearch)
             self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
             self.editor.contextMenu.addAction(self.actionFindNext)
             self.editor.contextMenu.addAction(self.actionFindPrevious)
-
+            # requestSearch slot
             self.editor.textChanged.connect(self.requestSearch)
-
             self.lineEditSearch.textChanged.connect(self.requestSearch)
-
             self.checkBoxCase.stateChanged.connect(self.requestSearch)
             self.checkBoxWholeWords.stateChanged.connect(self.requestSearch)
-
+            # navigation slots
             self.pushButtonNext.clicked.connect(self.selectNext)
             self.actionFindNext.triggered.connect(self.selectNext)
             self.pushButtonPrevious.clicked.connect(self.selectPrevious)
             self.actionFindPrevious.triggered.connect(self.selectPrevious)
+            # replace slots
             self.pushButtonReplace.clicked.connect(self.replaceCurrent)
             self.pushButtonReplaceAll.clicked.connect(self.replaceAll)
-
+            # internal updates slots
             self.lineEditReplace.textChanged.connect(self.__updateButtons)
+            self.searchFinished.connect(self.__onSearchFinished)
         else:
+            # remove menus
             if self.__separator:
                 self.editor.contextMenu.removeAction(self.__separator)
             self.editor.contextMenu.removeAction(self.actionSearch)
@@ -172,34 +172,38 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                 self.actionActionSearchAndReplace)
             self.editor.contextMenu.removeAction(self.actionFindNext)
             self.editor.contextMenu.removeAction(self.actionFindPrevious)
-
+            # requestSearch slot
             self.editor.textChanged.disconnect(self.requestSearch)
             self.lineEditSearch.textChanged.disconnect(self.requestSearch)
             self.checkBoxCase.stateChanged.disconnect(self.requestSearch)
             self.checkBoxWholeWords.stateChanged.disconnect(self.requestSearch)
-
+            # navigation slots
             self.pushButtonNext.clicked.disconnect(self.selectNext)
             self.actionFindNext.triggered.disconnect(self.selectNext)
             self.pushButtonPrevious.clicked.disconnect(self.selectPrevious)
+            # replace slots
             self.pushButtonReplace.clicked.disconnect(self.replaceCurrent)
             self.pushButtonReplaceAll.clicked.disconnect(self.replaceAll)
-
+            # internal updates slots
             self.lineEditReplace.textChanged.disconnect(self.__updateButtons)
+            self.searchFinished.connect(self.__onSearchFinished)
 
     @QtCore.Slot()
     def on_pushButtonClose_clicked(self):
+        """
+        Closes the panel
+        :return:
+        """
         self.hide()
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
     def on_actionSearch_triggered(self):
-        # self.widgetSearch.show()
-        # self.widgetReplace.hide()
-        # self.show()
-        # self.lineEditSearch.setText(self.editor.selectedText())
-        # self.lineEditSearch.selectAll()
-        # self.lineEditSearch.setFocus()
+        """
+        Executes the search action using the selected text of the editor
+        (Ctrl+F).
+        """
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -214,6 +218,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
+        """
+        Executes the search and replace action using the selected text of the
+        editor (ctrl+r)
+        """
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -227,12 +235,19 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.requestSearch(newText)
 
     def focusOutEvent(self, event):
+        """ Cancel jobs when leaving the widget """
         self.stopJob()
         self.cancelRequests()
         Panel.focusOutEvent(self, event)
 
-    def requestSearch(self, txt=""):
-        if txt == "" or isinstance(txt, int):
+    def requestSearch(self, txt=None):
+        """
+        Request a search operation.
+
+        :param txt: The text to replace. If None, the content of lineEditSearch
+        is used instead.
+        """
+        if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
             self.requestJob(self.__execSearch, True,
@@ -245,9 +260,30 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             self.__clearOccurrences()
             self.__onSearchFinished()
 
+    def getOccurrences(self):
+        """
+        Returns the list of text occurrences.
+
+        An occurrence is a tuple that contains start and end positions.
+
+        :return: List of tuple(int, int)
+        """
+        self.__mutex.lock()
+        retval = []
+        for occ in self.__occurrences:
+            retval.append(occ)
+        self.__mutex.unlock()
+        return retval
+
     def selectNext(self):
+        """
+        Selects the next occurrence.
+
+        :return: True in case of success, false if no occurrence could be
+        selected.
+        """
         cr = self.__getCurrentOccurrence()
-        occurrences = self.__getOccurrences()
+        occurrences = self.getOccurrences()
         if (cr == -1 or
                 cr == len(occurrences) - 1):
             cr = 0
@@ -264,8 +300,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             return False
 
     def selectPrevious(self):
+        """
+        Selects previous occurrence.
+
+        :return: True in case of success, false if no occurrence could be
+        selected.
+        """
         cr = self.__getCurrentOccurrence()
-        occurrences = self.__getOccurrences()
+        occurrences = self.getOccurrences()
         if (cr == -1 or
                 cr == 0):
             cr = len(occurrences) - 1
@@ -274,12 +316,66 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         self.__setCurrentOccurrence(cr)
         try:
             tc = self.editor.textCursor()
-            tc.setPosition(occurrences[0])
-            tc.setPosition(occurrences[1], tc.KeepAnchor)
+            tc.setPosition(occurrences[cr][0])
+            tc.setPosition(occurrences[cr][1], tc.KeepAnchor)
             self.editor.setTextCursor(tc)
             return True
         except IndexError:
             return False
+
+    def replaceCurrent(self, text=None):
+        """
+        Replaces the selected occurrence.
+
+        :param text: The replacement text. If it is None, the lineEditReplace's
+        text is used instead.
+
+        :return True if the text could be replace properly, False if there is
+        no more occurrences to replace.
+        """
+        if text is None or isinstance(text, bool):
+            text = self.lineEditReplace.text()
+        cr = self.__getCurrentOccurrence()
+        occurrences = self.getOccurrences()
+        if cr == -1:
+            self.selectNext()
+        try:
+            try:
+                self.editor.textChanged.disconnect(self.requestSearch)
+            except RuntimeError:
+                pass
+            occ = occurrences[cr]
+            tc = self.editor.textCursor()
+            tc.setPosition(occ[0])
+            tc.setPosition(occ[1], tc.KeepAnchor)
+            len_to_replace = len(tc.selectedText())
+            len_replacement = len(text)
+            offset = len_replacement - len_to_replace
+            tc.insertText(text)
+            self.editor.setTextCursor(tc)
+            self.editor.textChanged.connect(self.requestSearch)
+            # prevent search request due to editor textChanged
+            self.__removeOccurrence(cr, offset)
+            cr -= 1
+            self.__setCurrentOccurrence(cr)
+            self.selectNext()
+            self.cptOccurrences = len(self.getOccurrences())
+            self.__updateLabels()
+            self.__updateButtons()
+            return True
+        except IndexError:
+            return False
+
+    def replaceAll(self, text=None):
+        """
+        Replaces all occurrences in the editor's document.
+
+        :param text: The replacement text. If None, the content of the lineEdit
+                     replace will be used instead
+        """
+        remains = self.replaceCurrent(text=text)
+        while remains:
+            remains = self.replaceCurrent(text=text)
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -310,7 +406,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
         return searchFlag
 
     def __execSearch(self, text, doc, originalCursor, flags):
-        self.mutex.lock()
+        self.__mutex.lock()
         self.__occurrences[:] = []
         self.__current_occurrence = -1
         if text:
@@ -324,26 +420,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                 cursor.setPosition(cursor.position() + 1)
                 cursor = doc.find(text, cursor, flags)
                 cptMatches += 1
-        self.mutex.unlock()
-        self.__searchFinished.emit()
+        self.__mutex.unlock()
+        self.searchFinished.emit()
 
     def __updateLabels(self):
-        self.labelMatches.setText("{0} matches".format(self.cptMatches))
+        self.labelMatches.setText("{0} matches".format(self.cptOccurrences))
         color = "#DD0000"
-        if self.cptMatches:
+        if self.cptOccurrences:
             color = "#00DD00"
         self.labelMatches.setStyleSheet("color: %s" % color)
+        if self.lineEditSearch.text() == "":
+            self.labelMatches.clear()
 
     def __onSearchFinished(self):
         self.__clearDecorations()
-        occurrences = self.__getOccurrences()
+        occurrences = self.getOccurrences()
         for occurrence in occurrences:
             deco = self.__createDecoration(occurrence[0],
                                            occurrence[1])
-            self._decorations.append(deco)
+            self.__decorations.append(deco)
             self.editor.addDecoration(deco)
-        self.cptMatches = len(occurrences)
-        if not self.cptMatches:
+        self.cptOccurrences = len(occurrences)
+        if not self.cptOccurrences:
             self.__current_occurrence = -1
         elif self.__getCurrentOccurrence() == -1:
             self.selectNext()
@@ -358,24 +456,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
             "highlight": self.editor.style.value(self._KEYS[3]).name()}
         self.setStyleSheet(stylesheet)
 
-    def __getOccurrences(self):
-        self.mutex.lock()
-        retval = []
-        for occ in self.__occurrences:
-            retval.append(occ)
-        self.mutex.unlock()
-        return retval
-
     def __getCurrentOccurrence(self):
-        self.mutex.lock()
+        self.__mutex.lock()
         retVal = self.__current_occurrence
-        self.mutex.unlock()
+        self.__mutex.unlock()
         return retVal
 
     def __clearOccurrences(self):
-        self.mutex.lock()
+        self.__mutex.lock()
         self.__occurrences[:] = []
-        self.mutex.unlock()
+        self.__mutex.unlock()
 
     def __createDecoration(self, selection_start, selection_end):
         """ Creates the text occurences decoration """
@@ -388,14 +478,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
 
     def __clearDecorations(self):
         """ Remove all decorations """
-        for deco in self._decorations:
+        for deco in self.__decorations:
             self.editor.removeDecoration(deco)
-        self._decorations[:] = []
+        self.__decorations[:] = []
 
     def __setCurrentOccurrence(self, cr):
-        self.mutex.lock()
+        self.__mutex.lock()
         self.__current_occurrence = cr
-        self.mutex.unlock()
+        self.__mutex.unlock()
 
     def __compareCursors(self, a, b):
         assert isinstance(a, QtGui.QTextCursor)
@@ -404,62 +494,25 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel, DelayJobRunner):
                 a.selectionEnd() == b.selectionEnd())
 
     def __removeOccurrence(self, i, offset=0):
-        self.mutex.lock()
+        self.__mutex.lock()
         self.__occurrences.pop(i)
         if offset:
             updated_occurences = []
-            for occ in self.__occurrences:
-                updated_occurences.append((occ[0] + offset, occ[1] + offset))
+            for j, occ in enumerate(self.__occurrences):
+                if j >= i:
+                    updated_occurences.append(
+                        (occ[0] + offset, occ[1] + offset))
+                else:
+                    updated_occurences.append((occ[0], occ[1]))
             self.__occurrences = updated_occurences
-        self.mutex.unlock()
-
-    def replaceCurrent(self, text=None):
-        """
-        Replaces the selected occurrence by text. µ
-
-        If text is None or bool then the content of lineEditReplace is used.
-        """
-        if text is None or isinstance(text, bool):
-            text = self.lineEditReplace.text()
-        cr = self.__getCurrentOccurrence()
-        occurrences = self.__getOccurrences()
-        if cr == -1:
-            self.selectNext()
-        try:
-            self.editor.textChanged.disconnect(self.requestSearch)
-            occ = occurrences[cr]
-            tc = self.editor.textCursor()
-            tc.setPosition(occ[0])
-            tc.setPosition(occ[1], tc.KeepAnchor)
-            len_to_replace = len(tc.selectedText())
-            len_replacement = len(text)
-            offset = len_replacement - len_to_replace
-            tc.insertText(text)
-            self.editor.setTextCursor(tc)
-            self.editor.textChanged.connect(self.requestSearch)
-            # prevent search request due to editor textChanged
-            self.__removeOccurrence(cr, offset)
-            cr -= 1
-            self.__setCurrentOccurrence(cr)
-            self.selectNext()
-            self.cptMatches = len(self.__getOccurrences())
-            self.__updateLabels()
-            self.__updateButtons()
-            return True
-        except IndexError:
-            return False
-
-    def replaceAll(self):
-        remains = self.replaceCurrent()
-        while remains:
-            remains = self.replaceCurrent()
+        self.__mutex.unlock()
 
     def __updateButtons(self, txt=""):
-        enable = self.cptMatches > 1
+        enable = self.cptOccurrences > 1
         self.pushButtonNext.setEnabled(enable)
         self.pushButtonPrevious.setEnabled(enable)
         self.actionFindNext.setEnabled(enable)
         self.actionFindPrevious.setEnabled(enable)
-        enable = txt != self.lineEditSearch.text() and bool(self.cptMatches)
+        enable = txt != self.lineEditSearch.text() and bool(self.cptOccurrences)
         self.pushButtonReplace.setEnabled(enable)
         self.pushButtonReplaceAll.setEnabled(enable)
