@@ -193,6 +193,9 @@ class JobRunner(object):
     ------------
     self.jobRunner = JobRunner(self)
     self.jobRunner.startJob(self.aJobMethod)
+
+    .. warning:: Do not manipulate QWidgets from your job method. Use
+                 signal/slots to propagate changes to the ui
     """
     @property
     def caller(self):
@@ -339,13 +342,13 @@ if __name__ == '__main__':
 
     class Example(QGenericCodeEdit):
 
+        addDecorationRequested = QtCore.Signal(str, int)
+
         def __init__(self):
             QGenericCodeEdit.__init__(self, parent=None)
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
-
-        def __del__(self):
-            print("Editor del")
+            self.addDecorationRequested.connect(self.decorateLine)
 
         def showEvent(self, QShowEvent):
             QGenericCodeEdit.showEvent(self, QShowEvent)
@@ -354,18 +357,23 @@ if __name__ == '__main__':
             self.jobRunner.startJob(self.xxx, False, "#00FF00", 10)
             self.jobRunner.startJob(self.xxx, False, "#0000FF", 20)
 
+        def decorateLine(self, color, line):
+            tc = self.textCursor()
+            tc.setPosition(0)
+            tc.movePosition(QtGui.QTextCursor.Down,
+                            QtGui.QTextCursor.MoveAnchor,
+                            line)
+            d = TextDecoration(tc)
+            d.setError(QtGui.QColor(color))
+            d.setFullWidth(True)
+            self.addDecoration(d)
+
         def xxx(self, color, offset):
             for i in range(10):
-                print(color)
-                tc = self.textCursor()
-                tc.setPosition(0)
-                tc.movePosition(QtGui.QTextCursor.Down,
-                                QtGui.QTextCursor.MoveAnchor,
-                                i + offset)
-                d = TextDecoration(tc)
-                d.setError(QtGui.QColor(color))
-                d.setFullWidth(True)
-                self.addDecoration(d)
+                line = i + offset
+                print("Decorate line {0} with color {1} from a background "
+                      "thread".format(line, color))
+                self.addDecorationRequested.emit(color, line)
                 time.sleep(0.1)
             if offset == 10:
                 self.jobRunner.startJob(self.xxx, False, "#FF00FF", 30)
