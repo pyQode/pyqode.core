@@ -11,12 +11,10 @@
 """
 Contains utility functions
 """
-import glob
 import os
 import sys
 import logging
 import weakref
-import pcef
 from pcef.qt import QtCore, QtGui
 
 
@@ -296,7 +294,7 @@ class DelayJobRunner(JobRunner):
         self.__interval = delay
         self.__timer.timeout.connect(self.__execRequestedJob)
 
-    def requestJob(self, job, *args, **kwargs):
+    def requestJob(self, job, async, *args, **kwargs):
         """
         Request a job execution. The job will be executed after the delay
         specified in the DelayJobRunner contructor elapsed if no other job is
@@ -304,6 +302,9 @@ class DelayJobRunner(JobRunner):
 
         :param job: job.
         :type job: callable
+
+        :param async: Specify if the job should be run asynchronously
+        :type async: bool
 
         :param force: Specify if we must force the job execution by stopping the
         job that is currently running (if any).
@@ -317,6 +318,7 @@ class DelayJobRunner(JobRunner):
         self.__job = job
         self.__args = args
         self.__kwargs = kwargs
+        self.__async = async
         self.__timer.start(self.__interval)
 
     def cancelRequests(self):
@@ -326,11 +328,16 @@ class DelayJobRunner(JobRunner):
         """
         Execute the requested job after the timer has timeout.
         """
-        self.startJob(self.__job, False, *self.__args, **self.__kwargs)
         self.__timer.stop()
+        if self.__async:
+            print("async")
+            self.startJob(self.__job, False, *self.__args, **self.__kwargs)
+        else:
+            self.__job(*self.__args, **self.__kwargs)
         self.__job = None
         self.__args = None
         self.__kwargs = None
+        self.__async = None
 
 
 if __name__ == '__main__':
