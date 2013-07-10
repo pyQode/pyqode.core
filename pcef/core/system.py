@@ -158,6 +158,7 @@ class _JobThread(QtCore.QThread):
         self.terminate()
         self.used = False
         self.setMethods(None, None)
+        self.wait()
 
     def setMethods(self, onRun, onFinish):
         self.executeOnRun = onRun
