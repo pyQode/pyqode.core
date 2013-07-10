@@ -34,7 +34,7 @@ class ZoomMode(Mode):
         """
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """
-        if state is True:
+        if state:
             self.editor.mouseWheelActivated.connect(
                 self.__onWheelEvent)
             self.editor.keyPressed.connect(self.__onKeyPressed)
