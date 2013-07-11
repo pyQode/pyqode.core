@@ -1027,9 +1027,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 continue
             panels = list(zone.values())
             for panel in panels:
-                from pcef.core.panels.marker import MarkerPanel
-                if isinstance(panel, MarkerPanel):
-                    print("Marker panel draw order:" % panel.zoneOrder)
                 if not panel.scrollable:
                     continue
                 if dy:
