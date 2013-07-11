@@ -32,7 +32,7 @@ class LineNumberPanel(Panel):
         compute the width
         :return:
         """
-        return QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
+        return QtCore.QSize(self.lineNumberAreaWidth(), 50)
 
     def lineNumberAreaWidth(self):
         """
