@@ -11,15 +11,12 @@
 """
 This module contains the search and replace panel
 """
-import sys
-import os
 from pcef.qt import QtCore, QtGui
+from pcef.core import constants
 from pcef.core.decoration import TextDecoration
-from pcef.core.system import DelayJobRunner
 from pcef.core.panel import Panel
-
+from pcef.core.system import DelayJobRunner
 from pcef.core.ui import loadUi
-
 
 
 class SearchAndReplacePanel(Panel, DelayJobRunner):
@@ -103,6 +100,14 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     #: Signal emitted when a search operation finished
     searchFinished = QtCore.Signal()
 
+    @property
+    def background(self):
+        return self.editor.style.value("searchOccurrenceBackground")
+
+    @property
+    def foreground(self):
+        return self.editor.style.value("searchOccurrenceForeground")
+
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
@@ -124,6 +129,10 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         Panel.install(self, editor)
         self.__resetStylesheet()
         self.on_pushButtonClose_clicked()
+        self.editor.style.addProperty("searchOccurrenceBackground",
+                                      constants.SEARCH_OCCURRENCES_BACKGROUND)
+        self.editor.style.addProperty("searchOccurrenceForeground",
+                                      constants.SEARCH_OCCURRENCES_FOREGROUND)
 
     def onStyleChanged(self, section, key, value):
         if key in self._KEYS:
@@ -461,8 +470,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         """ Creates the text occurences decoration """
         deco = TextDecoration(self.editor.document(), selection_start,
                               selection_end)
-        deco.setBackground(QtGui.QBrush(QtGui.QColor("#FFFF00")))
-        deco.setForeground(QtGui.QBrush(QtGui.QColor("#000000")))
+        deco.setBackground(QtGui.QBrush(self.background))
+        deco.setForeground(QtGui.QBrush(self.foreground))
         deco.draw_order = 1
         return deco
 

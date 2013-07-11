@@ -48,6 +48,8 @@ PANEL_BACKGROUND = QColor("#dddddd")
 PANEL_FOREGROUND = QColor("#888888")
 PANEL_HIGHLIGHT = QColor("#cccccc")
 CARET_LINE_BACKGROUND = QColor("#E4EDF8")
+SEARCH_OCCURRENCES_BACKGROUND = QColor("#FFFF00")
+SEARCH_OCCURRENCES_FOREGROUND = QColor("#000000")
 
 # Default highlighter styles values, mostly for the python highlighter but they
 # may be shared between different highlighter/languages
