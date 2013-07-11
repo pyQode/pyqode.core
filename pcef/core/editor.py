@@ -200,6 +200,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         a.triggered.connect(self.unIndent)
         self.contextMenu.addAction(a)
 
+        self.contextMenu.addSeparator()
+
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_GOTO_LINE[0]),
+                          "Go to line", self)
+        a.setShortcut(constants.ACTION_GOTO_LINE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.gotoLine)
+        self.contextMenu.addAction(a)
+
         # panels and modes
         self.__modes = {}
         self.__panels = {PanelPosition.TOP: {},
@@ -232,6 +241,35 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def delete(self):
         self.textCursor().removeSelectedText()
+
+    def gotoLine(self, line=None, move=True):
+        """
+        Moves the text cursor to the specifed line.
+
+        If line is None, a QInputDialog will pop up to ask the line number to
+        the user.
+
+        :param line: The line number to go (1 based)
+
+        :param move: True to move the cursor. False will return the cursor
+                     without setting it on the editor.
+
+        :return The new text cursor
+        """
+        if line is None or isinstance(line, bool):
+            line, result = QtGui.QInputDialog.getInt(
+                self, "Go to line", "Line number:")
+            if not result:
+                return
+            if not line:
+                line = 1
+        tc = self.textCursor()
+        assert isinstance(tc, QtGui.QTextCursor)
+        tc.movePosition(tc.Start, tc.MoveAnchor)
+        tc.movePosition(tc.Down, tc.MoveAnchor, line-1)
+        if move:
+            self.setTextCursor(tc)
+        return tc
 
     def selectedText(self):
         return self.textCursor().selectedText()
