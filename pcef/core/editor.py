@@ -126,7 +126,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def __init__(self, parent=None, contextMenuTitle="Edit",
                  createDefaultActions=True):
         """
-        :param parent: QWidget
+        :param parent: Parent widget
+
+        :param contextMenuTitle: Specify the title of the custom context menu.
+                                 Default is "Edit".
+
+        :param createDefaultActions: Specify if the default actions (copy,
+                                     paste, ...) must be created.
+                                     Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
         #: The list of visible blocks, update every paintEvent
@@ -169,9 +176,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @QtCore.Slot()
     def delete(self):
+        """ Deletes the selected text """
         self.textCursor().removeSelectedText()
 
     def lineCount(self):
+        """ Returns the document line count """
         return self.document().lineCount()
 
     def gotoLine(self, line=None, move=True):
@@ -204,17 +213,20 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         return tc
 
     def selectedText(self):
+        """ Returns the selected text. """
         return self.textCursor().selectedText()
 
     def detectEncoding(self, data):
         """
-        Try to use chardet to detect encoding.
+        Detects file encoding.
+
+        This implementation tries to use chardet to detect encoding.
 
         :param data: Data from which we want to detect the encoding.
-        :type str/bytes
+        :type data: bytes
 
-        :return The detected encoding. Return the getDefaultEncoding if chardet
-        is not available.
+        :return The detected encoding. Return the result of getDefaultEncoding
+        if chardet is not available.
         """
         try:
             import chardet
@@ -224,11 +236,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 encoding = chardet.detect(data)['encoding']
         except ImportError:
             logging.getLogger("pcef").warning("chardet not available, "
-                                                 "using utf8 by default")
+                                              "using utf8 by default")
             encoding = self.getDefaultEncoding()
         return encoding
 
     def getDefaultEncoding(self):
+        """ Returns the system's default encoding """
         return sys.getfilesystemencoding()
 
     def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):
@@ -262,10 +275,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
         """
-        Save to file.
+        Saves the plain text to a file.
 
-        :param filePath: Optional file path. The file path is assumed to exists.
-        It can be None or empty to used the open file name.
+        :param filePath: Optional file path. If None, we use the current file
+                         path (set by openFile).
 
         :return: The operation status as a bool (True for success)
         """
@@ -283,7 +296,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         with open(filePath, "wb") as f:
             f.write(content)
         self.textSaved.emit(filePath)
-        self.newTextSet.emit()
         self.dirty = False
         self.__filePath = filePath
         return True
@@ -456,7 +468,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def lineNumber(self, y_pos):
         """
-        Get the line number from the y_pos
+        Returns the line number from the y_pos
+
         :param y_pos: Y pos in the QCodeEdit
         """
         height = self.fontMetrics().height()
@@ -473,7 +486,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def zoomIn(self, increment=1):
         """
-        Zoom in the editor.
+        Zooms in the editor.
 
         The effect is achieved by increasing the editor font size by the
         increment value.
@@ -486,13 +499,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def zoomOut(self, increment=1):
         """
-        Zoom out the editor.
+        Zooms out the editor.
 
         The effect is achieved by decreasing the editor font size by the
         increment value.
 
         .. note: Panels that needs to be resized depending on the font size
-        should implement onStyleChanged and trigger an update.
+                 should implement onStyleChanged and trigger an update.
         """
         value = self.style.value("fontSize") - increment
         if value <= 0:
@@ -500,6 +513,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.style.setValue("fontSize", value)
 
     def getLineIndent(self):
+        """
+        Returns the current line indentation
+
+        :return: Number of spaces that makes the indentation level of the
+                 current line
+        """
         original_cursor = self.textCursor()
         cursor = QtGui.QTextCursor(original_cursor)
         cursor.movePosition(QtGui.QTextCursor.StartOfLine)
@@ -573,7 +592,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def unIndent(self):
         """
-        Unindent current line or selection by tabLength
+        Un-indents current line or selection by tabLength
         """
         if self.settings.value("useSpacesInsteadOfTab"):
             size = self.settings.value("tabLength")
@@ -626,17 +645,18 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                           QtCore.Qt.NoModifier))
 
     def refreshPanels(self):
+        """ Refreshes the editor panels. """
         self.__resizePanels()
         self.__updateViewportMargins()
         self.update()
 
     def contextMenuEvent(self, event):
+        """ Executes our contextMenu """
         self.contextMenu.exec_(event.globalPos())
 
     def resizeEvent(self, e):
         """
-        Resize event, lets the QPlainTextEdit handle the resize event than
-        resizes the panels
+        Overrides resize event to resize the editor's panels.
 
         :param e: resize event
         """
@@ -656,8 +676,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyPressEvent(self, event):
         """
-        Release the keyReleasedEvent. Use the accept method of the event
-        instance to prevent the event to propagate.
+        Overrides the keyPressEvent to emit the keyPressed signal.
+
+        Also takes care of indenting and handling smarter home key.
 
         :param event: QKeyEvent
         """
@@ -681,8 +702,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyReleaseEvent(self, event):
         """
-        Release the keyReleasedEvent. Use the stop properties of the event
-        instance to prevent the event to propagate.
+        Overrides keyReleaseEvent to emit the keyReleased signal.
 
         :param event: QKeyEvent
         """
@@ -695,16 +715,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def focusInEvent(self, event):
         """
-        Emits the focusedIn signal
-        :param event:
-        :return:
+        Overrides focusInEvent to emits the focusedIn signal
+
+        :param event: QFocusEvent
         """
         self.focusedIn.emit(event)
         QtGui.QPlainTextEdit.focusInEvent(self, event)
 
     def mousePressEvent(self, event):
         """
-        Emits mousePressed signal
+        Overrides mousePressEvent to emits mousePressed signal
 
         :param event: QMouseEvent
         """
@@ -743,7 +763,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def mouseMoveEvent(self, event):
         """
-        Display any decoration tooltip and emits the mouseMoved event.
+        Overrides mouseMovedEvent to display any decoration tooltip and emits
+        the mouseMoved event.
         """
         c = self.cursorForPosition(event.pos())
         for sel in self.__selections:
@@ -755,16 +776,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
     def showEvent(self, QShowEvent):
+        """ Overrides showEvent to update the viewport margins """
         QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
         self.__updateViewportMargins()
 
     def setPlainText(self, txt):
         """
         Overrides the setPlainText method to keep track of the original text.
-        Emits the newTextSet event.
+
+        Emits the newTextSet signal.
 
         :param txt: The new text to set.
-        :return:
         """
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
