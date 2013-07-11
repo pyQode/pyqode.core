@@ -174,6 +174,8 @@ if __name__ == '__main__':
             QtCore.QTimer.singleShot(5000, self.addOtherMarker)
 
         def addOtherMarker(self):
+            m = self.markerPanel.getMarkerForLine(5)
+            m.position = 7
             marker = Marker(15, icon=constants.ACTION_PASTE[0],
                             description="Second marker")
             self.markerPanel.addMarker(marker)
