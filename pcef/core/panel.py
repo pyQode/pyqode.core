@@ -41,6 +41,10 @@ class Panel(QtGui.QWidget, Mode):
     def __init__(self):
         Mode.__init__(self)
         QtGui.QWidget.__init__(self)
+        #: Panel order into the zone it is installed. This value is
+        #: automatically set when installing the panel but it can be changed
+        #: later (negative values can also be used).
+        self.zoneOrder = -1
         self.__scrollable = False
         #: The background brush (automatically updated when panelBackground
         #: change)
