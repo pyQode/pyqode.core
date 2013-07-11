@@ -187,7 +187,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if line is None or isinstance(line, bool):
             line, result = QtGui.QInputDialog.getInt(
-                self, "Go to line", "Line number:")
+                self, "Go to line", "Line number:", 1)
             if not result:
                 return
             if not line:
