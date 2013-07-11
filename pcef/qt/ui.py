@@ -44,7 +44,7 @@ def importRc(rcFile):
     :param rcFile: The qrc filename to import.
     """
     import imp
-    base = rcFile.split(".")[0]
+    base = os.path.splitext(rcFile)[0]
     if os.environ["QT_API"] == "PySide":
         filePath = base + "_pyside_rc.py"
     else:
