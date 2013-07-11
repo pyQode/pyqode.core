@@ -24,7 +24,9 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         # edit menu
-        self.menubar.addMenu(self.editor.contextMenu)
+        mnu = QtGui.QMenu("Edit", self.menubar)
+        mnu.addActions(self.editor.actions())
+        self.menubar.addMenu(mnu)
         # Add modes to the modes menu
         for k, v in self.editor.modes().items():
             a = QtGui.QAction(self.menuModes)
