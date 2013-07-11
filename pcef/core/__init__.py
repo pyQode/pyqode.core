@@ -28,6 +28,7 @@ from pcef.core.modes import PygmentsHighlighterMode
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
 from pcef.core.panels import LineNumberPanel
+from pcef.core.panels import MarkerPanel
 from pcef.core.panels import SearchAndReplacePanel
 from pcef.core.properties import PropertyRegistry
 from pcef.core.system import TextStyle
@@ -85,7 +86,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(AutoIndentMode())
 
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
-           "LineNumberPanel", "SearchAndReplacePanel",
+           "LineNumberPanel", "MarkerPanel", "SearchAndReplacePanel",
            "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
            "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
            "TextDecoration", "PropertyRegistry", "TextStyle",
