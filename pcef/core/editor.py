@@ -123,13 +123,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self.__blocks
 
-    def __init__(self, parent=None, contextMenuTitle="Edit",
-                 createDefaultActions=True):
+    def __init__(self, parent=None, createDefaultActions=True):
         """
         :param parent: Parent widget
-
-        :param contextMenuTitle: Specify the title of the custom context menu.
-                                 Default is "Edit".
 
         :param createDefaultActions: Specify if the default actions (copy,
                                      paste, ...) must be created.
@@ -822,6 +818,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def removeAction(self, action):
         assert isinstance(action, QtGui.QAction)
+
+    def actions(self):
+        return self.__actions
 
     def addSeparator(self):
         action = QtGui.QAction(self)
