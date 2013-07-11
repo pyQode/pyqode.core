@@ -139,11 +139,11 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     def onStateChanged(self, state):
         if state:
             # add menus
-            self.__separator = self.editor.contextMenu.addSeparator()
-            self.editor.contextMenu.addAction(self.actionSearch)
-            self.editor.contextMenu.addAction(self.actionActionSearchAndReplace)
-            self.editor.contextMenu.addAction(self.actionFindNext)
-            self.editor.contextMenu.addAction(self.actionFindPrevious)
+            self.__separator = self.editor.addSeparator()
+            self.editor.addAction(self.actionSearch)
+            self.editor.addAction(self.actionActionSearchAndReplace)
+            self.editor.addAction(self.actionFindNext)
+            self.editor.addAction(self.actionFindPrevious)
             # requestSearch slot
             self.editor.textChanged.connect(self.requestSearch)
             self.lineEditSearch.textChanged.connect(self.requestSearch)
@@ -162,13 +162,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
             self.searchFinished.connect(self.__onSearchFinished)
         else:
             # remove menus
-            if self.__separator:
-                self.editor.contextMenu.removeAction(self.__separator)
-            self.editor.contextMenu.removeAction(self.actionSearch)
-            self.editor.contextMenu.removeAction(
+            if self.__separator is not None:
+                self.editor.removeSeparator(self.__separator)
+            self.editor.removeAction(self.actionSearch)
+            self.editor.removeAction(
                 self.actionActionSearchAndReplace)
-            self.editor.contextMenu.removeAction(self.actionFindNext)
-            self.editor.contextMenu.removeAction(self.actionFindPrevious)
+            self.editor.removeAction(self.actionFindNext)
+            self.editor.removeAction(self.actionFindPrevious)
             # requestSearch slot
             self.editor.textChanged.disconnect(self.requestSearch)
             self.lineEditSearch.textChanged.disconnect(self.requestSearch)
