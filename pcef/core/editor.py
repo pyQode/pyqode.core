@@ -554,6 +554,19 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         doc.setDefaultTextOption(options)
 
     @QtCore.Slot()
+    def duplicateLine(self):
+        print("Duplicate line")
+        tc = self.textCursor()
+        tc.select(tc.LineUnderCursor)
+        line = tc.selectedText()
+        tc.movePosition(tc.Down, tc.MoveAnchor)
+        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
+        tc.insertText(line + "\n")
+        tc.movePosition(tc.Left, tc.MoveAnchor)
+        self.setTextCursor(tc)
+        self.__doHomeKey()
+
+    @QtCore.Slot()
     def indent(self):
         """
         Indent current line or selection (based on settings.value("tabLength"))
@@ -657,10 +670,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__updateViewportMargins()
         self.update()
 
-    # def contextMenuEvent(self, event):
-    #     """ Executes our contextMenu """
-    #     self.contextMenu.exec_(event.globalPos())
-
     def resizeEvent(self, e):
         """
         Overrides resize event to resize the editor's panels.
@@ -701,6 +710,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         elif event.key() == QtCore.Qt.Key_Home:
             self.__doHomeKey(
                 event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
+        elif (event.key() == QtCore.Qt.Key_D and
+                      event.modifiers() & QtCore.Qt.ControlModifier):
+            self.duplicateLine()
+            event.accept()
         self.keyPressed.emit(event)
         if not event.isAccepted():
             event.setAccepted(initialState)
@@ -1106,7 +1119,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                              self.fontMetrics().widthChar(" "))
         self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))
 
-    def __doHomeKey(self, event, select=False):
+    def __doHomeKey(self, event=None, select=False):
         # get nb char to first significative char
         delta = self.textCursor().positionInBlock() - self.getLineIndent()
         if delta:
@@ -1117,4 +1130,5 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             tc.movePosition(
                 QtGui.QTextCursor.Left, move, delta)
             self.setTextCursor(tc)
-            event.accept()
+            if event:
+                event.accept()
