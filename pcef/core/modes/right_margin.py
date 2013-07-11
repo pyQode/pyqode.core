@@ -11,9 +11,9 @@
 """
 This module contains the right margin mode.
 """
-from pcef.qt import QtGui
 from pcef.core import constants
 from pcef.core.mode import Mode
+from pcef.qt import QtGui
 
 
 class RightMarginMode(Mode):
@@ -79,4 +79,3 @@ class RightMarginMode(Mode):
         p = QtGui.QPainter(self.editor.viewport())
         p.setPen(self.__pen)
         p.drawLine(x80, rect.top(), x80, rect.bottom())
-

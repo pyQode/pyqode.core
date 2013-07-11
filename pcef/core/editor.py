@@ -3,11 +3,11 @@ This module contains the definition of the QCodeEdit
 """
 import logging
 import sys
-import pcef
-from pcef.qt import QtGui, QtCore
 from pcef.core import constants
-from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
+from pcef.core.constants import PanelPosition
+from pcef.core.constants import CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
+from pcef.qt import QtGui, QtCore
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):

@@ -112,8 +112,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
         loadUi("search_panel.ui", self)
-        # ui.loadUi()
-        # Ui_SearchPanel.__init__(self)
         #: Occurrences counter
         self.cptOccurrences = 0
         self.__separator = None

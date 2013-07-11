@@ -11,10 +11,9 @@
 """
 Contains the mode that control the editor zoom.
 """
-from pcef.qt import QtCore
 from pcef.core import constants
 from pcef.core.mode import Mode
-
+from pcef.qt import QtCore
 
 class ZoomMode(Mode):
     """

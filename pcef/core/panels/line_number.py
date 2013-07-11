@@ -11,9 +11,8 @@
 """
 This module contains the line number panel
 """
-from pcef.qt import QtCore, QtGui
-from pcef.core import constants
 from pcef.core.panel import Panel
+from pcef.qt import QtCore, QtGui
 
 
 class LineNumberPanel(Panel):

@@ -13,7 +13,6 @@ This module holds all the PCEF constants (enumerations, defines,...)
 """
 import sys
 from pcef.core.system import TextStyle
-from pcef.qt import QtGui
 from pcef.qt.QtGui import QColor
 
 #

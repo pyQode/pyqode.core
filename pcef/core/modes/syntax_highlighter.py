@@ -14,16 +14,17 @@ on pygments.
 
 .. note: This code is taken and adapted from the IPython project.
 """
-from pcef.qt import QtGui, QtCore
 from pcef.core.mode import Mode
-from pygments.lexers.compiled import CLexer, CppLexer
+from pcef.qt import QtGui, QtCore
 from pcef.qt.QtCore import QRegExp
 from pcef.qt.QtGui import QSyntaxHighlighter
+
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
+from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers import get_lexer_for_filename
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name

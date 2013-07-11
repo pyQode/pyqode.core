@@ -14,9 +14,9 @@ This module contains the definition of the QCodeEdit settings
 import json
 import re
 import sys
-from pcef.qt import QtCore, QtGui
 from pcef.core.constants import TAB_SIZE
 from pcef.core.system import TextStyle
+from pcef.qt import QtCore, QtGui
 
 
 class PropertyRegistry(QtCore.QObject):

@@ -12,8 +12,8 @@
 Contains utility functions
 """
 import os
-import sys
 import logging
+import sys
 import weakref
 from pcef.qt import QtCore, QtGui
 

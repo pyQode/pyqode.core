@@ -17,34 +17,43 @@ code editor widget
 #
 import os
 from pcef.core import constants
-from pcef.core.mode import Mode
-from pcef.core.panel import Panel
-from pcef.core.editor import QCodeEdit
-from pcef.core.panels import LineNumberPanel
-from pcef.core.panels import SearchAndReplacePanel
-from pcef.core.modes import CaretLineHighlighterMode
-from pcef.core.modes import RightMarginMode
-from pcef.core.modes import ZoomMode
-from pcef.core.modes import PygmentsHighlighterMode
-from pcef.core.modes import AutoIndentMode
 from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
+from pcef.core.editor import QCodeEdit
+from pcef.core.mode import Mode
+from pcef.core.modes import AutoIndentMode
+from pcef.core.modes import CaretLineHighlighterMode
+from pcef.core.panel import Panel
+from pcef.core.modes import PygmentsHighlighterMode
+from pcef.core.modes import RightMarginMode
+from pcef.core.modes import ZoomMode
+from pcef.core.panels import LineNumberPanel
+from pcef.core.panels import SearchAndReplacePanel
 from pcef.core.properties import PropertyRegistry
-from pcef.core.system import TextStyle, JobRunner
+from pcef.core.system import TextStyle
+from pcef.core.system import JobRunner
+from pcef.core.system import DelayJobRunner
+from pcef.qt.ui import importRc
 
 #: pcef-core version
 __version__ = "1.0.0-dev"
 
 
 def getUiDirectory():
+    """
+    Gets the pcef-core ui directory
+    """
     return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui")
 
 
 def getRcDirectory():
+    """
+    Gets the pcef-core rc directory
+    """
     return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui",
                         "rc")
 
-from pcef.qt.ui import importRc
+# import the core rc modules
 importRc(os.path.join(getUiDirectory(), "pcef_icons.qrc"))
 
 
@@ -80,4 +89,5 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
            "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
            "TextDecoration", "PropertyRegistry", "TextStyle",
-           "QGenericCodeEdit", "JobRunner", "DelayJobRunner"]
+           "QGenericCodeEdit", "JobRunner", "DelayJobRunner",
+           "getUiDirectory", "getRcDirectory"]

@@ -20,10 +20,9 @@
 #
 """ Contains the automatic generic indenter """
 import re
+from pcef.core.mode import Mode
 from pcef.qt.QtCore import Qt
 from pcef.qt.QtGui import QTextCursor, QKeyEvent
-from pcef.core.mode import Mode
-
 
 
 class AutoIndentMode(Mode):
