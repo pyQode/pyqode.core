@@ -171,6 +171,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def delete(self):
         self.textCursor().removeSelectedText()
 
+    def lineCount(self):
+        return self.document().lineCount()
+
     def gotoLine(self, line=None, move=True):
         """
         Moves the text cursor to the specifed line.
@@ -187,7 +190,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if line is None or isinstance(line, bool):
             line, result = QtGui.QInputDialog.getInt(
-                self, "Go to line", "Line number:", 1)
+                self, "Go to line", "Line number:", 1, 1, self.lineCount())
             if not result:
                 return
             if not line:
