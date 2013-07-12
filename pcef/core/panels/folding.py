@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+                  #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -12,7 +12,9 @@
 This module contains the marker panel
 """
 from pcef.qt import QtCore, QtGui
+from pcef.core import constants
 from pcef.core.panel import Panel
+
 
 
 class FoldingIndicator(object):
@@ -35,6 +37,8 @@ class FoldingPanel(Panel):
         self.scrollable = True
         self.setMouseTracking(True)
         self.__mouseOveredIndic = None
+        self.__rightArrowIcon = QtGui.QIcon(constants.ICON_ARROW_RIGHT)
+        self.__downArrowIcon = QtGui.QIcon(constants.ICON_ARROW_DOWN)
 
     def addIndicator(self, indicator):
         """
@@ -74,8 +78,6 @@ class FoldingPanel(Panel):
         return None
 
     def getNearestIndicator(self, line):
-        if line == 28:
-            print("Break")
         for indic in reversed(self.__indicators):
             if indic.start <= line <= indic.end:
                 return indic
@@ -89,28 +91,21 @@ class FoldingPanel(Panel):
             if indic:
                 arrowRect = QtCore.QRect(
                     0, top, self.sizeHint().width(), self.sizeHint().height())
-                # if indic.state == FoldingIndicator.UNFOLDED:
-
                 if indic.state == FoldingIndicator.UNFOLDED:
                     h = self.sizeHint().height() * (indic.end - indic.start + 1)
                 else:
                     h = self.sizeHint().height()
-                print(h)
                 foldZoneRect = QtCore.QRect(
                     0, top, self.sizeHint().width(), h)
                 # Draw Foldable zone rect
-                opt = QtGui.QStyleOption()
                 if indic == self.__mouseOveredIndic:
-                    opt.rect = foldZoneRect
-                    opt.state = QtGui.QStyle.State_HasFocus
-                    self.style().drawPrimitive(QtGui.QStyle.PE_FrameFocusRect,
-                                               opt, painter, self)
-                # draw arrow
-                opt.rect = QtCore.QRect(arrowRect)
-                elem = QtGui.QStyle.PE_IndicatorArrowDown
-                if indic.state == FoldingIndicator.FOLDED:
-                    elem = QtGui.QStyle.PE_IndicatorArrowRight
-                self.style().drawPrimitive(elem, opt, painter, self)
+                    painter.setBrush(QtCore.Qt.red)
+                    painter.fillRect(foldZoneRect, self.editor.style.value("panelHighlight"))
+                if indic.state == FoldingIndicator.UNFOLDED:
+                    self.__downArrowIcon.paint(painter, arrowRect)
+                else:
+                    self.__rightArrowIcon.paint(painter, arrowRect)
+
 
     def mouseMoveEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
