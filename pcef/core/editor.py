@@ -551,7 +551,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @QtCore.Slot()
     def duplicateLine(self):
-        print("Duplicate line")
         tc = self.textCursor()
         tc.select(tc.LineUnderCursor)
         line = tc.selectedText()
