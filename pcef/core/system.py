@@ -33,6 +33,20 @@ def findSettingsDirectory(appName="PCEF"):
     return pth
 
 
+def mergedColors(colorA, colorB, factor):
+    maxFactor = 100
+    colorA = QtGui.QColor(colorA)
+    colorB = QtGui.QColor(colorB)
+    tmp = colorA
+    tmp.setRed((tmp.red() * factor) / maxFactor +
+               (colorB.red() * (maxFactor - factor)) / maxFactor)
+    tmp.setGreen((tmp.green() * factor) / maxFactor +
+                 (colorB.green() * (maxFactor - factor)) / maxFactor)
+    tmp.setBlue((tmp.blue() * factor) / maxFactor +
+                (colorB.blue() * (maxFactor - factor)) / maxFactor)
+    return tmp
+
+
 class TextStyle(object):
     """
     Defines a text style: a color associated with text style options (bold,
