@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="pcef-icons">
+    <file>rc/triangle_hor.png</file>
+    <file>rc/triangle_vert.png</file>
     <file>rc/goto-line.png</file>
     <file>rc/document-save-as.png</file>
     <file>rc/document-save.png</file>
