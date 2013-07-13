@@ -12,10 +12,9 @@
 This module contains the care line highlighter mode
 """
 from pcef.core import constants
-from pcef.qt import QtCore, QtGui
 from pcef.core.mode import Mode
 from pcef.core.decoration import TextDecoration
-
+from pcef.qt import QtGui
 
 class CaretLineHighlighterMode(Mode):
     """

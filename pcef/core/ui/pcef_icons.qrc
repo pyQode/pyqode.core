@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="pcef-icons">
+    <file>rc/triangle_hor.png</file>
+    <file>rc/triangle_vert.png</file>
     <file>rc/goto-line.png</file>
     <file>rc/document-save-as.png</file>
     <file>rc/document-save.png</file>
@@ -17,5 +19,8 @@
     <file>rc/format-indent-more.png</file>
     <file>rc/go-down.png</file>
     <file>rc/go-up.png</file>
+  </qresource>
+  <qresource prefix="pcef-ui">
+    <file>search_panel.ui</file>
   </qresource>
 </RCC>

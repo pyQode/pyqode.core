@@ -3,11 +3,11 @@ This module contains the definition of the QCodeEdit
 """
 import logging
 import sys
-import pcef
-from pcef.qt import QtGui, QtCore
 from pcef.core import constants
-from pcef.core.constants import PanelPosition, CODE_EDIT_STYLESHEET
+from pcef.core.constants import PanelPosition
+from pcef.core.constants import CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
+from pcef.qt import QtGui, QtCore
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -123,82 +123,24 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self.__blocks
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, createDefaultActions=True):
         """
-        :param parent: QWidget
+        :param parent: Parent widget
+
+        :param createDefaultActions: Specify if the default actions (copy,
+                                     paste, ...) must be created.
+                                     Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
-        #: The custom context menu
-        self.contextMenu = QtGui.QMenu()
-        self.contextMenu.setTitle("Edit")
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNDO[0]), "Undo", self)
-        a.setShortcut(constants.ICON_UNDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.undo)
-        self.undoAvailable.connect(a.setEnabled)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_REDO[0]), "Redo", self)
-        a.setShortcut(constants.ICON_REDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.redo)
-        self.redoAvailable.connect(a.setEnabled)
-        self.contextMenu.addAction(a)
-
-        self.contextMenu.addSeparator()
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_COPY[0]), "Copy", self)
-        a.setShortcut(constants.ICON_COPY[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.copy)
-        self.copyAvailable.connect(a.setEnabled)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_CUT[0]), "Cut", self)
-        a.setShortcut(constants.ICON_CUT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.cut)
-        self.copyAvailable.connect(a.setEnabled)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_PASTE[0]), "Paste", self)
-        a.setShortcut(constants.ICON_PASTE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.paste)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_DELETE[0]), "Delete", self)
-        a.setShortcut(constants.ICON_DELETE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.delete)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_SELECT_ALL[0]),
-                          "Select all", self)
-        a.setShortcut(constants.ICON_SELECT_ALL[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.selectAll)
-        self.contextMenu.addAction(a)
-
-        self.contextMenu.addSeparator()
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_INDENT[0]),
-                          "Indent", self)
-        a.setShortcut(constants.ICON_INDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.indent)
-        self.contextMenu.addAction(a)
-
-        a = QtGui.QAction(QtGui.QIcon(constants.ICON_UNINDENT[0]),
-                          "Un-indent", self)
-        a.setShortcut(constants.ICON_UNINDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.unIndent)
-        self.contextMenu.addAction(a)
+        #: The list of actions, (none is a separator)
+        self.__actions = []
+        if createDefaultActions:
+            self.__createDefaultActions()
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
 
         # panels and modes
         self.__modes = {}
@@ -229,22 +171,64 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
 
+    def showContextMenu(self, pt):
+        mnu = QtGui.QMenu(self)
+        mnu.addActions(self.__actions)
+        mnu.exec_(self.mapToGlobal(pt))
+
     @QtCore.Slot()
     def delete(self):
+        """ Deletes the selected text """
         self.textCursor().removeSelectedText()
 
+    def lineCount(self):
+        """ Returns the document line count """
+        return self.document().lineCount()
+
+    def gotoLine(self, line=None, move=True):
+        """
+        Moves the text cursor to the specifed line.
+
+        If line is None, a QInputDialog will pop up to ask the line number to
+        the user.
+
+        :param line: The line number to go (1 based)
+
+        :param move: True to move the cursor. False will return the cursor
+                     without setting it on the editor.
+
+        :return The new text cursor
+        """
+        if line is None or isinstance(line, bool):
+            line, result = QtGui.QInputDialog.getInt(
+                self, "Go to line", "Line number:", 1, 1, self.lineCount())
+            if not result:
+                return
+            if not line:
+                line = 1
+        tc = self.textCursor()
+        assert isinstance(tc, QtGui.QTextCursor)
+        tc.movePosition(tc.Start, tc.MoveAnchor)
+        tc.movePosition(tc.Down, tc.MoveAnchor, line-1)
+        if move:
+            self.setTextCursor(tc)
+        return tc
+
     def selectedText(self):
+        """ Returns the selected text. """
         return self.textCursor().selectedText()
 
     def detectEncoding(self, data):
         """
-        Try to use chardet to detect encoding.
+        Detects file encoding.
+
+        This implementation tries to use chardet to detect encoding.
 
         :param data: Data from which we want to detect the encoding.
-        :type str/bytes
+        :type data: bytes
 
-        :return The detected encoding. Return the getDefaultEncoding if chardet
-        is not available.
+        :return The detected encoding. Return the result of getDefaultEncoding
+        if chardet is not available.
         """
         try:
             import chardet
@@ -254,11 +238,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 encoding = chardet.detect(data)['encoding']
         except ImportError:
             logging.getLogger("pcef").warning("chardet not available, "
-                                                 "using utf8 by default")
+                                              "using utf8 by default")
             encoding = self.getDefaultEncoding()
         return encoding
 
     def getDefaultEncoding(self):
+        """ Returns the system's default encoding """
         return sys.getfilesystemencoding()
 
     def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):
@@ -292,10 +277,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
         """
-        Save to file.
+        Saves the plain text to a file.
 
-        :param filePath: Optional file path. The file path is assumed to exists.
-        It can be None or empty to used the open file name.
+        :param filePath: Optional file path. If None, we use the current file
+                         path (set by openFile).
 
         :return: The operation status as a bool (True for success)
         """
@@ -313,7 +298,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         with open(filePath, "wb") as f:
             f.write(content)
         self.textSaved.emit(filePath)
-        self.newTextSet.emit()
         self.dirty = False
         self.__filePath = filePath
         return True
@@ -371,6 +355,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param position: The panel position
 
         """
+        panel.zoneOrder = len(self.__panels[position])
         self.__panels[position][panel.name] = panel
         panel.install(self)
         self.__updateViewportMargins()
@@ -486,7 +471,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def lineNumber(self, y_pos):
         """
-        Get the line number from the y_pos
+        Returns the line number from the y_pos
+
         :param y_pos: Y pos in the QCodeEdit
         """
         height = self.fontMetrics().height()
@@ -503,7 +489,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def zoomIn(self, increment=1):
         """
-        Zoom in the editor.
+        Zooms in the editor.
 
         The effect is achieved by increasing the editor font size by the
         increment value.
@@ -516,13 +502,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def zoomOut(self, increment=1):
         """
-        Zoom out the editor.
+        Zooms out the editor.
 
         The effect is achieved by decreasing the editor font size by the
         increment value.
 
         .. note: Panels that needs to be resized depending on the font size
-        should implement onStyleChanged and trigger an update.
+                 should implement onStyleChanged and trigger an update.
         """
         value = self.style.value("fontSize") - increment
         if value <= 0:
@@ -530,6 +516,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.style.setValue("fontSize", value)
 
     def getLineIndent(self):
+        """
+        Returns the current line indentation
+
+        :return: Number of spaces that makes the indentation level of the
+                 current line
+        """
         original_cursor = self.textCursor()
         cursor = QtGui.QTextCursor(original_cursor)
         cursor.movePosition(QtGui.QTextCursor.StartOfLine)
@@ -556,6 +548,18 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             options.setFlags(options.flags() &
                              ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
+
+    @QtCore.Slot()
+    def duplicateLine(self):
+        tc = self.textCursor()
+        tc.select(tc.LineUnderCursor)
+        line = tc.selectedText()
+        tc.movePosition(tc.Down, tc.MoveAnchor)
+        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
+        tc.insertText(line + "\n")
+        tc.movePosition(tc.Left, tc.MoveAnchor)
+        self.setTextCursor(tc)
+        self.__doHomeKey()
 
     @QtCore.Slot()
     def indent(self):
@@ -603,7 +607,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.Slot()
     def unIndent(self):
         """
-        Unindent current line or selection by tabLength
+        Un-indents current line or selection by tabLength
         """
         if self.settings.value("useSpacesInsteadOfTab"):
             size = self.settings.value("tabLength")
@@ -656,17 +660,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                           QtCore.Qt.NoModifier))
 
     def refreshPanels(self):
+        """ Refreshes the editor panels. """
         self.__resizePanels()
         self.__updateViewportMargins()
         self.update()
 
-    def contextMenuEvent(self, event):
-        self.contextMenu.exec_(event.globalPos())
-
     def resizeEvent(self, e):
         """
-        Resize event, lets the QPlainTextEdit handle the resize event than
-        resizes the panels
+        Overrides resize event to resize the editor's panels.
 
         :param e: resize event
         """
@@ -686,8 +687,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyPressEvent(self, event):
         """
-        Release the keyReleasedEvent. Use the accept method of the event
-        instance to prevent the event to propagate.
+        Overrides the keyPressEvent to emit the keyPressed signal.
+
+        Also takes care of indenting and handling smarter home key.
 
         :param event: QKeyEvent
         """
@@ -703,6 +705,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         elif event.key() == QtCore.Qt.Key_Home:
             self.__doHomeKey(
                 event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
+        elif (event.key() == QtCore.Qt.Key_D and
+                      event.modifiers() & QtCore.Qt.ControlModifier):
+            self.duplicateLine()
+            event.accept()
         self.keyPressed.emit(event)
         if not event.isAccepted():
             event.setAccepted(initialState)
@@ -711,8 +717,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyReleaseEvent(self, event):
         """
-        Release the keyReleasedEvent. Use the stop properties of the event
-        instance to prevent the event to propagate.
+        Overrides keyReleaseEvent to emit the keyReleased signal.
 
         :param event: QKeyEvent
         """
@@ -725,16 +730,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def focusInEvent(self, event):
         """
-        Emits the focusedIn signal
-        :param event:
-        :return:
+        Overrides focusInEvent to emits the focusedIn signal
+
+        :param event: QFocusEvent
         """
         self.focusedIn.emit(event)
         QtGui.QPlainTextEdit.focusInEvent(self, event)
 
     def mousePressEvent(self, event):
         """
-        Emits mousePressed signal
+        Overrides mousePressEvent to emits mousePressed signal
 
         :param event: QMouseEvent
         """
@@ -773,7 +778,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def mouseMoveEvent(self, event):
         """
-        Display any decoration tooltip and emits the mouseMoved event.
+        Overrides mouseMovedEvent to display any decoration tooltip and emits
+        the mouseMoved event.
         """
         c = self.cursorForPosition(event.pos())
         for sel in self.__selections:
@@ -785,16 +791,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
     def showEvent(self, QShowEvent):
+        """ Overrides showEvent to update the viewport margins """
         QtGui.QPlainTextEdit.showEvent(self, QShowEvent)
         self.__updateViewportMargins()
 
     def setPlainText(self, txt):
         """
         Overrides the setPlainText method to keep track of the original text.
-        Emits the newTextSet event.
+
+        Emits the newTextSet signal.
 
         :param txt: The new text to set.
-        :return:
         """
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
@@ -802,6 +809,90 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.newTextSet.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
+
+    def addAction(self, action):
+        assert isinstance(action, QtGui.QAction)
+        self.__actions.append(action)
+        QtGui.QPlainTextEdit.addAction(self, action)
+
+    def removeAction(self, action):
+        assert isinstance(action, QtGui.QAction)
+
+    def actions(self):
+        return self.__actions
+
+    def addSeparator(self):
+        action = QtGui.QAction(self)
+        action.setSeparator(True)
+        self.__actions.append(action)
+        return action
+
+    def removeAction(self, action):
+        self.__actions.remove(action)
+
+    def __createDefaultActions(self):
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_UNDO[0]), "Undo", self)
+        a.setShortcut(constants.ACTION_UNDO[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.undo)
+        self.undoAvailable.connect(a.setEnabled)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_REDO[0]), "Redo", self)
+        a.setShortcut(constants.ACTION_REDO[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.redo)
+        self.redoAvailable.connect(a.setEnabled)
+        self.addAction(a)
+        self.addSeparator()
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_COPY[0]), "Copy", self)
+        a.setShortcut(constants.ACTION_COPY[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.copy)
+        self.copyAvailable.connect(a.setEnabled)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_CUT[0]), "Cut", self)
+        a.setShortcut(constants.ACTION_CUT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.cut)
+        self.copyAvailable.connect(a.setEnabled)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_PASTE[0]), "Paste", self)
+        a.setShortcut(constants.ACTION_PASTE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.paste)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_DELETE[0]), "Delete",
+                          self)
+        a.setShortcut(constants.ACTION_DELETE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.delete)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_SELECT_ALL[0]),
+                          "Select all", self)
+        a.setShortcut(constants.ACTION_SELECT_ALL[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.selectAll)
+        self.addAction(a)
+        self.addSeparator()
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_INDENT[0]),
+                          "Indent", self)
+        a.setShortcut(constants.ACTION_INDENT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.indent)
+        self.addAction(a)
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_UNINDENT[0]),
+                          "Un-indent", self)
+        a.setShortcut(constants.ACTION_UNINDENT[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.unIndent)
+        self.addAction(a)
+        self.addSeparator()
+        a = QtGui.QAction(QtGui.QIcon(constants.ACTION_GOTO_LINE[0]),
+                          "Go to line", self)
+        a.setShortcut(constants.ACTION_GOTO_LINE[1])
+        a.setIconVisibleInMenu(True)
+        a.triggered.connect(self.gotoLine)
+        self.addAction(a)
 
     def __initSettings(self):
         """
@@ -864,7 +955,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             bottom = top + int(self.blockBoundingRect(block).height())
             blockNumber = block.blockNumber()
 
-    def __computePanelsSizes(self):
+    def __computeZonesSizes(self):
         # takes scrolll bar into account
         vscroll_width = 0
         if self.verticalScrollBar().isVisible():
@@ -908,7 +999,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Resizes panels geometries
         """
         cr = self.contentsRect()
-        s_bottom, s_left, s_right, s_top = self.__computePanelsSizes()
+        s_bottom, s_left, s_right, s_top = self.__computeZonesSizes()
         # takes scrolll bar into account
         vscroll_width = 0
         if self.verticalScrollBar().isVisible():
@@ -917,7 +1008,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
         left = 0
-        for panel in self.__panels[PanelPosition.LEFT].values():
+        panels = list(self.__panels[PanelPosition.LEFT].values())
+        panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
+        for panel in panels:
             if not panel.isVisible():
                 continue
             panel.adjustSize()
@@ -927,7 +1020,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.height() - s_bottom - s_top)
             left += sh.width()
         right = vscroll_width
-        for panel in self.__panels[PanelPosition.RIGHT].values():
+        panels = list(self.__panels[PanelPosition.RIGHT].values())
+        panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
+        for panel in panels:
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
@@ -935,7 +1030,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.top(), sh.width(), cr.height())
             right += sh.width()
         top = 0
-        for panel in self.__panels[PanelPosition.TOP].values():
+        panels = list(self.__panels[PanelPosition.TOP].values())
+        panels.sort(key=lambda panel: panel.zoneOrder)
+        for panel in panels:
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
@@ -944,7 +1041,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               sh.height())
             top += sh.height()
         bottom = hscroll_height
-        for panel in self.__panels[PanelPosition.BOTTOM].values():
+        panels = list(self.__panels[PanelPosition.BOTTOM].values())
+        panels.sort(key=lambda panel: panel.zoneOrder)
+        for panel in panels:
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
@@ -960,7 +1059,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         for zones_id, zone in self.__panels.items():
             if zones_id == PanelPosition.TOP or zones_id == PanelPosition.BOTTOM:
                 continue
-            for panel_id, panel in zone.items():
+            panels = list(zone.values())
+            for panel in panels:
                 if not panel.scrollable:
                     continue
                 if dy:
@@ -1017,7 +1117,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                              self.fontMetrics().widthChar(" "))
         self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))
 
-    def __doHomeKey(self, event, select=False):
+    def __doHomeKey(self, event=None, select=False):
         # get nb char to first significative char
         delta = self.textCursor().positionInBlock() - self.getLineIndent()
         if delta:
@@ -1028,4 +1128,5 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             tc.movePosition(
                 QtGui.QTextCursor.Left, move, delta)
             self.setTextCursor(tc)
-            event.accept()
+            if event:
+                event.accept()

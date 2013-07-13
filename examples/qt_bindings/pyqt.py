@@ -42,7 +42,7 @@ else:
 
 def main():
     app = QApplication(sys.argv)
-    editor = pcef.core.QCodeEdit()
+    editor = pcef.core.QGenericCodeEdit()
     editor.show()
     # show the api pcef is currently using
     editor.setPlainText("PCEF using the %s qt bindings" % os.environ["QT_API"])

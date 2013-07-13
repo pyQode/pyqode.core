@@ -11,9 +11,8 @@
 """
 This module contains the line number panel
 """
-from pcef.qt import QtCore, QtGui
-from pcef.core import constants
 from pcef.core.panel import Panel
+from pcef.qt import QtCore, QtGui
 
 
 class LineNumberPanel(Panel):
@@ -33,7 +32,7 @@ class LineNumberPanel(Panel):
         compute the width
         :return:
         """
-        return QtCore.QSize(self.lineNumberAreaWidth() + 5, 50)
+        return QtCore.QSize(self.lineNumberAreaWidth(), 50)
 
     def lineNumberAreaWidth(self):
         """

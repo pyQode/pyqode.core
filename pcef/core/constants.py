@@ -13,7 +13,6 @@ This module holds all the PCEF constants (enumerations, defines,...)
 """
 import sys
 from pcef.core.system import TextStyle
-from pcef.qt import QtGui
 from pcef.qt.QtGui import QColor
 
 #
@@ -44,10 +43,12 @@ EDITOR_FOREGROUND = QColor("#000000")
 EDITOR_WS_FOREGROUND = QColor("#dddddd")
 SELECTION_BACKGROUND = QColor("#6182F3")
 SELECTION_FOREGROUND = QColor("#ffffff")
-PANEL_BACKGROUND = QColor("#dddddd")
+PANEL_BACKGROUND = QColor("#F2F1F0")
 PANEL_FOREGROUND = QColor("#888888")
-PANEL_HIGHLIGHT = QColor("#cccccc")
+PANEL_HIGHLIGHT = QColor("#dddddd")
 CARET_LINE_BACKGROUND = QColor("#E4EDF8")
+SEARCH_OCCURRENCES_BACKGROUND = QColor("#FFFF00")
+SEARCH_OCCURRENCES_FOREGROUND = QColor("#000000")
 
 # Default highlighter styles values, mostly for the python highlighter but they
 # may be shared between different highlighter/languages
@@ -98,26 +99,29 @@ MARGIN_POS = 80
 # Icons
 #
 ICONS = []
-ICON_UNDO = (":/pcef-icons/rc/edit-undo.png", "Ctrl+Z")
-ICONS.append(ICON_UNDO)
-ICON_REDO = (":/pcef-icons/rc/edit-redo.png", "Ctrl+Y")
-ICONS.append(ICON_REDO)
-ICON_COPY = (":/pcef-icons/rc/edit-copy.png", "Ctrl+C")
-ICONS.append(ICON_COPY)
-ICON_CUT  = (":/pcef-icons/rc/edit-cut.png", "Ctrl+X")
-ICONS.append(ICON_CUT)
-ICON_PASTE = (":/pcef-icons/rc/edit-paste.png", "Ctrl+V")
-ICONS.append(ICON_PASTE)
-ICON_DELETE = (":/pcef-icons/rc/edit-delete.png", "Delete")
-ICONS.append(ICON_DELETE)
-ICON_SELECT_ALL = (":/pcef-icons/rc/edit-select-all.png", "Ctrl+A")
-ICONS.append(ICON_SELECT_ALL)
-ICON_INDENT = (":/pcef-icons/rc/format-indent-more.png", "Tab")
-ICONS.append(ICON_INDENT)
-ICON_UNINDENT = (":/pcef-icons/rc/format-indent-less.png", "Shift+Tab")
-ICONS.append(ICON_UNINDENT)
-ICON_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
-ICONS.append(ICON_GOTO_LINE)
+ACTION_UNDO = (":/pcef-icons/rc/edit-undo.png", "Ctrl+Z")
+ICONS.append(ACTION_UNDO)
+ACTION_REDO = (":/pcef-icons/rc/edit-redo.png", "Ctrl+Y")
+ICONS.append(ACTION_REDO)
+ACTION_COPY = (":/pcef-icons/rc/edit-copy.png", "Ctrl+C")
+ICONS.append(ACTION_COPY)
+ACTION_CUT = (":/pcef-icons/rc/edit-cut.png", "Ctrl+X")
+ICONS.append(ACTION_CUT)
+ACTION_PASTE = (":/pcef-icons/rc/edit-paste.png", "Ctrl+V")
+ICONS.append(ACTION_PASTE)
+ACTION_DELETE = (":/pcef-icons/rc/edit-delete.png", "Delete")
+ICONS.append(ACTION_DELETE)
+ACTION_SELECT_ALL = (":/pcef-icons/rc/edit-select-all.png", "Ctrl+A")
+ICONS.append(ACTION_SELECT_ALL)
+ACTION_INDENT = (":/pcef-icons/rc/format-indent-more.png", "Tab")
+ICONS.append(ACTION_INDENT)
+ACTION_UNINDENT = (":/pcef-icons/rc/format-indent-less.png", "Shift+Tab")
+ICONS.append(ACTION_UNINDENT)
+ACTION_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
+ICONS.append(ACTION_GOTO_LINE)
+
+ICON_ARROW_RIGHT = ":/pcef-icons/rc/triangle_hor.png"
+ICON_ARROW_DOWN = ":/pcef-icons/rc/triangle_vert.png"
 
 
 #

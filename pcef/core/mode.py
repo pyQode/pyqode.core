@@ -63,11 +63,9 @@ class Mode(object):
 
     def __init__(self):
         """
-        Creates the extension.
-
-        :param name: Mode name (used as an identifier)
-
-        :param description: A description of the extension
+        Creates the extension. Uses self.IDENTIFIER and self.DESCRIPTION to
+        setup sefl.name and self.description (you can override them after
+        calling this constructor if you need it).
         """
         #: Mode name
         self.name = self.IDENTIFIER

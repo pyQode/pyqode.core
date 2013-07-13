@@ -11,10 +11,9 @@
 """
 Contains the mode that control the editor zoom.
 """
-from pcef.qt import QtCore
 from pcef.core import constants
 from pcef.core.mode import Mode
-
+from pcef.qt import QtCore
 
 class ZoomMode(Mode):
     """
@@ -34,7 +33,7 @@ class ZoomMode(Mode):
         """
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """
-        if state is True:
+        if state:
             self.editor.mouseWheelActivated.connect(
                 self.__onWheelEvent)
             self.editor.keyPressed.connect(self.__onKeyPressed)

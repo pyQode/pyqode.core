@@ -11,12 +11,10 @@
 """
 Contains utility functions
 """
-import glob
 import os
-import sys
 import logging
+import sys
 import weakref
-import pcef
 from pcef.qt import QtCore, QtGui
 
 
@@ -33,6 +31,20 @@ def findSettingsDirectory(appName="PCEF"):
     if not os.path.exists(pth):
         os.mkdir(pth)
     return pth
+
+
+def mergedColors(colorA, colorB, factor):
+    maxFactor = 100
+    colorA = QtGui.QColor(colorA)
+    colorB = QtGui.QColor(colorB)
+    tmp = colorA
+    tmp.setRed((tmp.red() * factor) / maxFactor +
+               (colorB.red() * (maxFactor - factor)) / maxFactor)
+    tmp.setGreen((tmp.green() * factor) / maxFactor +
+                 (colorB.green() * (maxFactor - factor)) / maxFactor)
+    tmp.setBlue((tmp.blue() * factor) / maxFactor +
+                (colorB.blue() * (maxFactor - factor)) / maxFactor)
+    return tmp
 
 
 class TextStyle(object):
@@ -137,9 +149,6 @@ class _JobThread(QtCore.QThread):
         self.args = ()
         self.kwargs = {}
 
-    def __del__(self):
-        print("_JobThread deleted")
-
     @staticmethod
     def stopJobThreadInstance(caller, method, *args, **kwargs):
         caller.invoker = _Invoker()
@@ -203,6 +212,9 @@ class JobRunner(object):
     ------------
     self.jobRunner = JobRunner(self)
     self.jobRunner.startJob(self.aJobMethod)
+
+    .. warning:: Do not manipulate QWidgets from your job method. Use
+                 signal/slots to propagate changes to the ui
     """
     @property
     def caller(self):
@@ -219,9 +231,6 @@ class JobRunner(object):
         self.__jobRunning = False
         for i in range(nbThreadsMax):
             self.__threads.append(_JobThread())
-
-    def __del__(self):
-        print("JobRunner del")
 
     def __repr__(self):
         return repr(self.__jobQueue[0] if len(self.__jobQueue) > 0 else "None")
@@ -303,7 +312,7 @@ class DelayJobRunner(JobRunner):
         self.__interval = delay
         self.__timer.timeout.connect(self.__execRequestedJob)
 
-    def requestJob(self, job, *args, **kwargs):
+    def requestJob(self, job, async, *args, **kwargs):
         """
         Request a job execution. The job will be executed after the delay
         specified in the DelayJobRunner contructor elapsed if no other job is
@@ -311,6 +320,9 @@ class DelayJobRunner(JobRunner):
 
         :param job: job.
         :type job: callable
+
+        :param async: Specify if the job should be run asynchronously
+        :type async: bool
 
         :param force: Specify if we must force the job execution by stopping the
         job that is currently running (if any).
@@ -324,17 +336,25 @@ class DelayJobRunner(JobRunner):
         self.__job = job
         self.__args = args
         self.__kwargs = kwargs
+        self.__async = async
         self.__timer.start(self.__interval)
+
+    def cancelRequests(self):
+        self.__timer.stop()
 
     def __execRequestedJob(self):
         """
         Execute the requested job after the timer has timeout.
         """
-        self.startJob(self.__job, False, *self.__args, **self.__kwargs)
         self.__timer.stop()
+        if self.__async:
+            self.startJob(self.__job, False, *self.__args, **self.__kwargs)
+        else:
+            self.__job(*self.__args, **self.__kwargs)
         self.__job = None
         self.__args = None
         self.__kwargs = None
+        self.__async = None
 
 
 if __name__ == '__main__':
@@ -343,13 +363,13 @@ if __name__ == '__main__':
 
     class Example(QGenericCodeEdit):
 
+        addDecorationRequested = QtCore.Signal(str, int)
+
         def __init__(self):
             QGenericCodeEdit.__init__(self, parent=None)
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
-
-        def __del__(self):
-            print("Editor del")
+            self.addDecorationRequested.connect(self.decorateLine)
 
         def showEvent(self, QShowEvent):
             QGenericCodeEdit.showEvent(self, QShowEvent)
@@ -358,18 +378,23 @@ if __name__ == '__main__':
             self.jobRunner.startJob(self.xxx, False, "#00FF00", 10)
             self.jobRunner.startJob(self.xxx, False, "#0000FF", 20)
 
+        def decorateLine(self, color, line):
+            tc = self.textCursor()
+            tc.setPosition(0)
+            tc.movePosition(QtGui.QTextCursor.Down,
+                            QtGui.QTextCursor.MoveAnchor,
+                            line)
+            d = TextDecoration(tc)
+            d.setError(QtGui.QColor(color))
+            d.setFullWidth(True)
+            self.addDecoration(d)
+
         def xxx(self, color, offset):
             for i in range(10):
-                print(color)
-                tc = self.textCursor()
-                tc.setPosition(0)
-                tc.movePosition(QtGui.QTextCursor.Down,
-                                QtGui.QTextCursor.MoveAnchor,
-                                i + offset)
-                d = TextDecoration(tc)
-                d.setError(QtGui.QColor(color))
-                d.setFullWidth(True)
-                self.addDecoration(d)
+                line = i + offset
+                print("Decorate line {0} with color {1} from a background "
+                      "thread".format(line, color))
+                self.addDecorationRequested.emit(color, line)
                 time.sleep(0.1)
             if offset == 10:
                 self.jobRunner.startJob(self.xxx, False, "#FF00FF", 30)
