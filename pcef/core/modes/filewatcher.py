@@ -35,27 +35,38 @@ class FileWatcher(Mode):
     def __init__(self):
         super(FileWatcher, self).__init__()
         self.__filesystemwatcher = QtCore.QFileSystemWatcher()
-        self.__notify = True
+        self.__flgNotify = False
+        self.__changeWaiting = False
         self.__filesystemwatcher.fileChanged.connect(self.__onFileChanged)
 
+    def __notifyChange(self):
+        self.__flgNotify = True
+        ret = QtGui.QMessageBox.question(
+            self.editor, "File changed",
+            "The file <i>%s</i> has has changed externally.\n"
+            "Do you want reload it?" % os.path.basename(
+                self.editor.filePath),
+            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        if ret == QtGui.QMessageBox.Yes:
+            self.editor.openFile(self.editor.filePath)
+        self.__changeWaiting = False
+        self.__flgNotify = False
+
     def __onFileChanged(self):
-        if self.__notify:
-            self.__notify = False
-            ret = QtGui.QMessageBox.question(
-                self.editor, "File changed",
-                "The file <i>%s</i> has has changed externally.\n"
-                "Do you want reload it?" % os.path.basename(
-                    self.editor.filePath),
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            if ret == QtGui.QMessageBox.Yes:
-                self.editor.openFile(self.editor.filePath)
-            self.__notify = True
+        self.__changeWaiting = True
+        if self.editor.hasFocus() and self.__flgNotify:
+            self.__notifyChange()
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
         path = self.editor.filePath
         if path not in self.__filesystemwatcher.files():
             self.__filesystemwatcher.addPath(path)
+
+    @QtCore.Slot()
+    def __onEditorFocusIn(self):
+        if self.__changeWaiting:
+            self.__notifyChange()
 
     def onStateChanged(self, state):
         """
@@ -64,9 +75,11 @@ class FileWatcher(Mode):
         if state is True:
             self.editor.textSaved.connect(self.__onEditorFilePathChanged)
             self.editor.newTextSet.connect(self.__onEditorFilePathChanged)
+            self.editor.focusedIn.connect(self.__onEditorFocusIn)
         else:
             self.editor.textSaved.disconnect(self.__onEditorFilePathChanged)
             self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
+            self.editor.focusedIn.disconnect(self.__onEditorFocusIn)
             self.__filesystemwatcher.removePath(self.editor.filePath)
 
 
