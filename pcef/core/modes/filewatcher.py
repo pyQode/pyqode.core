@@ -36,9 +36,9 @@ class FileWatcher(Mode):
         super(FileWatcher, self).__init__()
         self.__filesystemwatcher = QtCore.QFileSystemWatcher()
         self.__notify = True
-        self.__filesystemwatcher.fileChanged.connect(self.onFileChange)
+        self.__filesystemwatcher.fileChanged.connect(self.__onFileChanged)
 
-    def onFileChange(self):
+    def __onFileChanged(self):
         if self.__notify:
             self.__notify = False
             ret = QtGui.QMessageBox.question(
@@ -52,7 +52,7 @@ class FileWatcher(Mode):
             self.__notify = True
 
     @QtCore.Slot()
-    def __onEditorFileChanged(self):
+    def __onEditorFilePathChanged(self):
         path = self.editor.filePath
         if path not in self.__filesystemwatcher.files():
             self.__filesystemwatcher.addPath(path)
@@ -62,11 +62,11 @@ class FileWatcher(Mode):
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """
         if state is True:
-            self.editor.textSaved.connect(self.__onEditorFileChanged)
-            self.editor.newTextSet.connect(self.__onEditorFileChanged)
+            self.editor.textSaved.connect(self.__onEditorFilePathChanged)
+            self.editor.newTextSet.connect(self.__onEditorFilePathChanged)
         else:
-            self.editor.textSaved.disconnect(self.__onEditorFileChanged)
-            self.editor.newTextSet.disconnect(self.__onEditorFileChanged)
+            self.editor.textSaved.disconnect(self.__onEditorFilePathChanged)
+            self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
             self.__filesystemwatcher.removePath(self.editor.filePath)
 
 
