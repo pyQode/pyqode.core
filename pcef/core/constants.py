@@ -120,8 +120,10 @@ ICONS.append(ACTION_UNINDENT)
 ACTION_GOTO_LINE = (":/pcef-icons/rc/goto-line.png", "Ctrl+G")
 ICONS.append(ACTION_GOTO_LINE)
 
-ICON_ARROW_RIGHT = ":/pcef-icons/rc/triangle_hor.png"
-ICON_ARROW_DOWN = ":/pcef-icons/rc/triangle_vert.png"
+ICON_ARROW_RIGHT = (":/pcef-icons/rc/arrow_right_off.png",
+                    ":/pcef-icons/rc/arrow_right_on.png")
+ICON_ARROW_DOWN = (":/pcef-icons/rc/arrow_down_off.png",
+                   ":/pcef-icons/rc/arrow_down_on.png")
 
 
 #

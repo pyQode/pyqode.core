@@ -1,12 +1,14 @@
 <RCC>
   <qresource prefix="pcef-icons">
-    <file>rc/triangle_hor.png</file>
-    <file>rc/triangle_vert.png</file>
     <file>rc/goto-line.png</file>
     <file>rc/document-save-as.png</file>
     <file>rc/document-save.png</file>
     <file>rc/close.png</file>
     <file>rc/edit-copy.png</file>
+    <file>rc/arrow_down_off.png</file>
+    <file>rc/arrow_down_on.png</file>
+    <file>rc/arrow_right_off.png</file>
+    <file>rc/arrow_right_on.png</file>
     <file>rc/edit-cut.png</file>
     <file>rc/edit-delete.png</file>
     <file>rc/edit-find-replace.png</file>
