@@ -41,17 +41,19 @@ class FileWatcher(Mode):
 
     def onFileChange(self):
         # TODO: put i18n for this method
-        self.__notify = False
-        msgBox = QtGui.QMessageBox(self.editor)
-        msgBox.setText("The document has been modified")
-        msgBox.setInformativeText("Do you want reload it?")
-        msgBox.setStandardButtons(
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        msgBox.setDefaultButton(QtGui.QMessageBox.No)
-        ret = msgBox.exec_()
-        if ret == QtGui.QMessageBox.Yes:
-            self.editor.openFile(self.editor.filePath)
-        self.__notify = True
+        if self.__notify:
+            self.__notify = False
+            msgBox = QtGui.QMessageBox(self.editor)
+            msgBox.setWindowTitle("Message")
+            msgBox.setText("The document has been modified")
+            msgBox.setInformativeText("Do you want reload it?")
+            msgBox.setStandardButtons(
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            msgBox.setDefaultButton(QtGui.QMessageBox.No)
+            ret = msgBox.exec_()
+            if ret == QtGui.QMessageBox.Yes:
+                self.editor.openFile(self.editor.filePath)
+            self.__notify = True
 
     @QtCore.Slot()
     def __setOriginalTextSum(self):
