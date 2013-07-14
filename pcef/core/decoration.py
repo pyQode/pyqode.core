@@ -24,7 +24,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     """
 
     def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
-                 draw_order=0, tooltip=None):
+                 startLine=None, endLine=None, draw_order=0, tooltip=None):
         """
         Creates a text decoration
 
@@ -45,6 +45,12 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             cursor.setPosition(startPos)
         if endPos is not None:
             cursor.setPosition(endPos, QtGui.QTextCursor.KeepAnchor)
+        if startLine is not None:
+            cursor.movePosition(cursor.Start, cursor.MoveAnchor)
+            cursor.movePosition(cursor.Down, cursor.MoveAnchor, startLine - 1)
+        if endLine is not None:
+            cursor.movePosition(cursor.Down, cursor.KeepAnchor,
+                                endLine - startLine)
         self.cursor = cursor
 
     def containsCursor(self, textCursor):
@@ -67,6 +73,9 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         :param brush: QBrush
         """
         self.format.setBackground(brush)
+
+    def setOutline(self, color):
+        self.format.setProperty(QtGui.QTextFormat.OutlinePen, QtGui.QPen(color))
 
     def setFullWidth(self, flag=True, clear=True):
         """ Sets full width selection
