@@ -23,6 +23,7 @@ from pcef.core.editor import QCodeEdit
 from pcef.core.mode import Mode
 from pcef.core.modes import AutoIndentMode
 from pcef.core.modes import CaretLineHighlighterMode
+from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
 from pcef.core.modes import PygmentsHighlighterMode
 from pcef.core.modes import RightMarginMode
@@ -80,17 +81,19 @@ class QGenericCodeEdit(QCodeEdit):
         self.setWindowTitle("PCEF - Generic Editor")
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
+        self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
         self.installMode(PygmentsHighlighterMode())
         self.installMode(ZoomMode())
         self.installMode(AutoIndentMode())
 
+
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
            "FoldingIndicator", "SearchAndReplacePanel",
-           "CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
-           "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
-           "TextDecoration", "PropertyRegistry", "TextStyle",
-           "QGenericCodeEdit", "JobRunner", "DelayJobRunner",
-           "getUiDirectory", "getRcDirectory"]
+           "CaretLineHighlighterMode", "FileWatcherMode", "RightMarginMode",
+           "ZoomMode", "PygmentsHighlighterMode", "AutoIndentMode",
+           "PanelPosition", "TextDecoration", "PropertyRegistry", "TextStyle",
+           "QGenericCodeEdit", "JobRunner", "DelayJobRunner", "getUiDirectory",
+           "getRcDirectory"]

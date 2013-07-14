@@ -12,9 +12,13 @@
 This package contains the core modes (language independant)
 """
 from pcef.core.modes.caret_line_highlight import CaretLineHighlighterMode
+from pcef.core.modes.filewatcher import FileWatcherMode
 from pcef.core.modes.right_margin import RightMarginMode
 from pcef.core.modes.zoom import ZoomMode
 from pcef.core.modes.syntax_highlighter import PygmentsHighlighterMode
 from pcef.core.modes.indenter import AutoIndentMode
-__all__ = ["CaretLineHighlighterMode", "RightMarginMode", "ZoomMode",
-           "PygmentsHighlighterMode", "AutoIndentMode"]
+
+
+__all__ = ["CaretLineHighlighterMode", "FileWatcherMode",
+           "RightMarginMode", "ZoomMode", "PygmentsHighlighterMode",
+           "AutoIndentMode"]
