@@ -76,7 +76,7 @@ class PropertyRegistry(QtCore.QObject):
                 self.__dict[section][key] = value
         else:
             self.__dict[section] = {key: value}
-        return value
+        return self.__value_from_str(value)
 
     def setValue(self, key, value, section="General"):
         """
