@@ -76,7 +76,7 @@ class PropertyRegistry(QtCore.QObject):
                 self.__dict[section][key] = value
         else:
             self.__dict[section] = {key: value}
-        return self.__value_from_str(value)
+        return self.value_from_str(value)
 
     def setValue(self, key, value, section="General"):
         """
@@ -111,7 +111,7 @@ class PropertyRegistry(QtCore.QObject):
         """
         if section in self.__dict:
             if key in self.__dict[section]:
-                return self.__value_from_str(self.__dict[section][key])
+                return self.value_from_str(self.__dict[section][key])
         return default
 
     def __value_to_str(self, value):
@@ -127,7 +127,7 @@ class PropertyRegistry(QtCore.QObject):
         else:
             return str(value)
 
-    def __value_from_str(self, value_str):
+    def value_from_str(self, value_str):
         """
         Get a value from a string, try to cast the value_str to the proper type.
 
