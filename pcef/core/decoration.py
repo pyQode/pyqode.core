@@ -68,12 +68,13 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         """
         self.format.setBackground(brush)
 
-    def setFullWidth(self, flag=True):
+    def setFullWidth(self, flag=True, clear=True):
         """ Sets full width selection
 
         :param flag: True to use full width selection.
         """
-        self.cursor.clearSelection()
+        if clear:
+            self.cursor.clearSelection()
         self.format.setProperty(QtGui.QTextFormat.FullWidthSelection, flag)
 
     def setSpellchecking(self, color=QtCore.Qt.blue):

@@ -59,9 +59,9 @@ def driftColor(baseColor):
     :return A lighter or darker color.
     """
     if baseColor.lightness() > 128:
-        return baseColor.darker(130)
+        return baseColor.darker(100)
     else:
-        return baseColor.lighter(140)
+        return baseColor.lighter(100)
 
 
 class TextStyle(object):
