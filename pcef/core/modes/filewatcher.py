@@ -65,6 +65,8 @@ class FileWatcher(Mode):
             self.editor.newTextSet.connect(self.__onEditorFileChanged)
             Mode.install(self, self.editor)
         else:
+            self.editor.textSaved.disconnect(self.__onEditorFileChanged)
+            self.editor.newTextSet.disconnect(self.__onEditorFileChanged)
             self.__filesystemwatcher.removePath(self.editor.filePath)
 
 
