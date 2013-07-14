@@ -26,6 +26,24 @@ class LineNumberPanel(Panel):
         Panel.__init__(self)
         self.scrollable = True
 
+    def install(self, editor):
+        Panel.install(self, editor)
+        self._lineColorU = self.editor.style.addProperty(
+            "lineForeground", self.palette().color(QtGui.QPalette.Disabled,
+                                                  QtGui.QPalette.WindowText))
+        self._lineColorS = self.editor.style.addProperty(
+            "lineForegroundSel", self.palette().color(QtGui.QPalette.Normal,
+                                                  QtGui.QPalette.WindowText))
+        print(self._lineColorU.name())
+        print(self._lineColorS.name())
+
+    def onStyleChanged(self, section, key, value):
+        Panel.onStyleChanged(self, section, key, value)
+        if key == "lineForeground":
+            self._lineColorU = self.editor.style.value_from_str(value)
+        elif key == "lineForegroundSel":
+            self._lineColorS = self.editor.style.value_from_str(value)
+
     def sizeHint(self):
         """
         Returns the panel size hint (as the panel is on the left, we only need to
@@ -94,8 +112,11 @@ class LineNumberPanel(Panel):
             width = self.width()
             height = self.editor.fontMetrics().height()
             font = self.editor.font()
-            bold_font = QtGui.QFont(font)
+            bold_font = self.editor.font()
             bold_font.setBold(True)
+            pen = QtGui.QPen(self._lineColorU)
+            penSelected = QtGui.QPen(self._lineColorS)
+            painter.setFont(font)
             # get selection range
             sel_start, sel_end = self.editor.selectionRange()
             has_sel = sel_start != sel_end
@@ -105,8 +126,10 @@ class LineNumberPanel(Panel):
                 painter.setPen(self.foregroundPen)
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):
+                    painter.setPen(penSelected)
                     painter.setFont(bold_font)
                 else:
+                    painter.setPen(pen)
                     painter.setFont(font)
                 painter.drawText(0, top, width, height,
                                  QtCore.Qt.AlignRight, str(blockNumber))
