@@ -34,8 +34,6 @@ class LineNumberPanel(Panel):
         self._lineColorS = self.editor.style.addProperty(
             "lineForegroundSel", self.palette().color(QtGui.QPalette.Normal,
                                                   QtGui.QPalette.WindowText))
-        print(self._lineColorU.name())
-        print(self._lineColorS.name())
 
     def onStyleChanged(self, section, key, value):
         Panel.onStyleChanged(self, section, key, value)
