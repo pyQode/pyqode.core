@@ -7,6 +7,7 @@ from pcef.core import constants
 from pcef.core.constants import PanelPosition
 from pcef.core.constants import CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
+from pcef.core.system import DelayJobRunner
 from pcef.qt import QtGui, QtCore
 
 
@@ -135,6 +136,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
+        self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=800)
+        self.__previousTooltipBlockNumber = -1
+
         #: The list of actions, (none is a separator)
         self.__actions = []
         if createDefaultActions:
@@ -170,6 +174,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
+
+        self.setMouseTracking(True)
 
     def showContextMenu(self, pt):
         mnu = QtGui.QMenu(self)
@@ -374,6 +380,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param decoration: Text decoration
         :type decoration: pcef.TextDecoration
         """
+        if decoration.tooltip:
+            print(decoration.tooltip)
         if decoration not in self.__selections:
             self.__selections.append(decoration)
             self.__selections = sorted(self.__selections,
@@ -783,13 +791,25 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         the mouseMoved event.
         """
         c = self.cursorForPosition(event.pos())
+        blockFound = False
         for sel in self.__selections:
-            if sel.containsCursor(c) and sel.tooltip:
-                QtGui.QToolTip.showText(
-                    self.mapToGlobal(event.pos()), sel.tooltip, self)
+            if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
+                if self.__previousTooltipBlockNumber != c.blockNumber():
+                    self.__tooltipRunner.requestJob(
+                        self.showTooltip, False,
+                        self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
+                self.__previousTooltipBlockNumber = c.blockNumber()
+                blockFound = True
                 break
+        if not blockFound:
+            self.__previousTooltipBlockNumber = -1
+            self.__tooltipRunner.cancelRequests()
         self.mouseMoved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
+
+    def showTooltip(self, pos, tooltip):
+        QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
+        self.__previousTooltipBlockNumber = -1
 
     def showEvent(self, QShowEvent):
         """ Overrides showEvent to update the viewport margins """
