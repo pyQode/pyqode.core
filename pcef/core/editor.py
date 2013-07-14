@@ -917,13 +917,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.style.addProperty("whiteSpaceForeground",
                                constants.EDITOR_WS_FOREGROUND)
         self.style.addProperty("selectionBackground",
-                               constants.SELECTION_BACKGROUND)
+                               self.palette().highlight().color())
         self.style.addProperty("selectionForeground",
-                               constants.SELECTION_FOREGROUND)
+                               self.palette().highlightedText().color())
         self.style.addProperty(
-            "panelBackground", constants.PANEL_BACKGROUND)
+            "panelBackground", self.palette().window().color())
         self.style.addProperty(
-            "panelForeground", constants.PANEL_FOREGROUND)
+            "panelForeground", self.palette().windowText().color())
         self.style.addProperty(
             "panelHighlight", constants.PANEL_HIGHLIGHT)
         self.__resetStyleSheet("", "", "")
