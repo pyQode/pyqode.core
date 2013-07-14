@@ -12,14 +12,9 @@
 """
 Contains the mode that control the external changes of file.
 """
-import hashlib
 import os
-import subprocess
-import time
-from pcef.core.system import JobRunner
-from pcef.qt import QtCore, QtGui
-from pcef.core import constants
 from pcef.core.mode import Mode
+from pcef.qt import QtCore, QtGui
 
 
 class FileWatcher(Mode):
