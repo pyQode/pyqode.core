@@ -183,7 +183,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def lineCount(self):
         """ Returns the document line count """
-        return self.document().lineCount()
+        return self.document().blockCount()
 
     def gotoLine(self, line=None, move=True):
         """
@@ -374,10 +374,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param decoration: Text decoration
         :type decoration: pcef.TextDecoration
         """
-        self.__selections.append(decoration)
-        self.__selections = sorted(self.__selections,
-                                   key=lambda sel: sel.draw_order)
-        self.setExtraSelections(self.__selections)
+        if decoration not in self.__selections:
+            self.__selections.append(decoration)
+            self.__selections = sorted(self.__selections,
+                                       key=lambda sel: sel.draw_order)
+            self.setExtraSelections(self.__selections)
 
     def removeDecoration(self, decoration):
         """
