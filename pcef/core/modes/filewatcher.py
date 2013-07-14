@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
@@ -18,7 +17,6 @@ from pcef.qt import QtCore, QtGui
 
 
 class FileWatcherMode(Mode):
-
     """
     FileWatcher mode. (Verify the external changes from opened file)
     """
@@ -96,10 +94,6 @@ if __name__ == '__main__':
             self.installMode(FileWatcherMode())
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
-
-        def closeEvent(self, evt):
-            print("closing")
-            self.uninstallMode(FileWatcherMode)
 
     import sys
     app = QtGui.QApplication(sys.argv)
