@@ -463,10 +463,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :rtype int or None
         """
-        height = self.fontMetrics().height()
-        for top, l in self.__blocks:
-            if l == line_number:
-                return top + height / 2.0
+        block = self.document().findBlockByNumber(line_number)
+        if block:
+            return int(self.blockBoundingGeometry(block).translated(
+                self.contentOffset()).top())
         return None
 
     def lineNumber(self, y_pos):
