@@ -40,17 +40,13 @@ class FileWatcher(Mode):
         self.__filesystemwatcher.fileChanged.connect(self.onFileChange)
 
     def onFileChange(self):
-        # TODO: put i18n for this method
+        # TODO: put i18n for this method.
         if self.__notify:
             self.__notify = False
-            msgBox = QtGui.QMessageBox(self.editor)
-            msgBox.setWindowTitle("Message")
-            msgBox.setText("The document has been modified")
-            msgBox.setInformativeText("Do you want reload it?")
-            msgBox.setStandardButtons(
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            msgBox.setDefaultButton(QtGui.QMessageBox.No)
-            ret = msgBox.exec_()
+            ret = QtGui.QMessageBox.question(self.editor,
+                "Message",
+                "The document has been modified, Do you want reload it?",
+                QtGui.QMessageBox.Yes|QtGui.QMessageBox.No)
             if ret == QtGui.QMessageBox.Yes:
                 self.editor.openFile(self.editor.filePath)
             self.__notify = True

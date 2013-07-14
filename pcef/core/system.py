@@ -47,8 +47,24 @@ def mergedColors(colorA, colorB, factor):
     return tmp
 
 
-class TextStyle(object):
+def driftColor(baseColor, factor=100):
+    """
+    Return a near color that is lighter or darker than the base color.
 
+    If baseColor.lightness is higher than 128 than darker is used else lighter
+    is used.
+
+    :param baseColor: The base color to drift.
+
+    :return A lighter or darker color.
+    """
+    if baseColor.lightness() > 128:
+        return baseColor.darker(factor)
+    else:
+        return baseColor.lighter(factor)
+
+
+class TextStyle(object):
     """
     Defines a text style: a color associated with text style options (bold,
     italic and underline).
@@ -127,14 +143,12 @@ class _InvokeEvent(QtCore.QEvent):
 
 
 class _Invoker(QtCore.QObject):
-
     def event(self, event):
         event.fn(*event.args, **event.kwargs)
         return True
 
 
 class _JobThread(QtCore.QThread):
-
     """
     Runs a callable into a QThread. The thread may be stopped at anytime using
     the stopJobThreadInstance static method.
@@ -167,7 +181,6 @@ class _JobThread(QtCore.QThread):
         self.terminate()
         self.used = False
         self.setMethods(None, None)
-        self.wait()
 
     def setMethods(self, onRun, onFinish):
         self.executeOnRun = onRun
@@ -195,7 +208,6 @@ class _JobThread(QtCore.QThread):
 
 
 class JobRunner(object):
-
     """
     Utility class to easily run an asynchroneous job. A job is a simple callable
     (method) that will be run in a background thread.
@@ -296,7 +308,6 @@ class JobRunner(object):
 
 
 class DelayJobRunner(JobRunner):
-
     """
     Extends the JobRunner to be able to introduce a delay between the job
     request and the job execution. If a new job is requested the timer is
@@ -305,7 +316,6 @@ class DelayJobRunner(JobRunner):
     This is made so that jobs that are run when the editor textChanged signal
     is emitted does not actually run (when the user types too fast).
     """
-
     def __init__(self, caller, nbThreadsMax=3, delay=500):
         JobRunner.__init__(self, caller, nbThreadsMax=nbThreadsMax)
         self.__timer = QtCore.QTimer()
