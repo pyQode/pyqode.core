@@ -63,7 +63,6 @@ class FileWatcher(Mode):
         if state is True:
             self.editor.textSaved.connect(self.__onEditorFileChanged)
             self.editor.newTextSet.connect(self.__onEditorFileChanged)
-            Mode.install(self, self.editor)
         else:
             self.editor.textSaved.disconnect(self.__onEditorFileChanged)
             self.editor.newTextSet.disconnect(self.__onEditorFileChanged)
