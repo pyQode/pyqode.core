@@ -39,13 +39,14 @@ class FileWatcher(Mode):
         self.__filesystemwatcher.fileChanged.connect(self.onFileChange)
 
     def onFileChange(self):
-        # TODO: put i18n for this method.
         if self.__notify:
             self.__notify = False
-            ret = QtGui.QMessageBox.question(self.editor,
-                "Message",
-                "The document has been modified, Do you want reload it?",
-                QtGui.QMessageBox.Yes|QtGui.QMessageBox.No)
+            ret = QtGui.QMessageBox.question(
+                self.editor, "File changed",
+                "The file <i>%s</i> has has changed externally.\n"
+                "Do you want reload it?" % os.path.basename(
+                    self.editor.filePath),
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             if ret == QtGui.QMessageBox.Yes:
                 self.editor.openFile(self.editor.filePath)
             self.__notify = True
