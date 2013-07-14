@@ -163,6 +163,10 @@ class FoldingPanel(Panel):
         self.__fold(foldingIndicator.start, foldingIndicator.end, fold=True)
         foldingIndicator._deco = TextDecoration(
             self.editor.textCursor(), startLine=foldingIndicator.start)
+        d = TextDecoration(self.editor.textCursor(),
+                           startLine=foldingIndicator.start+1,
+                           endLine=foldingIndicator.end)
+        foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
         foldingIndicator._deco.setOutline(self.__decoColor)
         foldingIndicator._deco.setFullWidth(True)
         self.editor.addDecoration(foldingIndicator._deco)
@@ -203,7 +207,6 @@ class FoldingPanel(Panel):
 
         :param fold: True to fold, False to unfold
         """
-        print(fold)
         doc = self.editor.document()
         for i in range(start, end):
             block = self.editor.document().findBlockByNumber(i)
@@ -278,7 +281,6 @@ class FoldingPanel(Panel):
         d.setBackground(self.__decoColor)
         self.editor.addDecoration(d)
         self.__decorations.append(d)
-        print(self.editor.lineCount())
         d = TextDecoration(tc, startLine=indic.end+1,
                            endLine=self.editor.lineCount())
         d.setFullWidth(True, clear=False)
@@ -322,6 +324,7 @@ class FoldingPanel(Panel):
         return size_hint
 
     def mouseMoveEvent(self, event):
+        Panel.mouseMoveEvent(self, event)
         line = self.editor.lineNumber(event.pos().y())
         if not line:
             self.__mouseOveredIndic = None
@@ -333,7 +336,6 @@ class FoldingPanel(Panel):
                 self.repaint()
                 return
             else:
-                print("Mouse over")
                 self.__addDecorationsForIndic(indic)
                 self.repaint()
 
