@@ -17,22 +17,22 @@ from pcef.core.mode import Mode
 from pcef.qt import QtCore, QtGui
 
 
-class FileWatcher(Mode):
+class FileWatcherMode(Mode):
 
     """
     FileWatcher mode. (Verify the external changes from opened file)
     """
     #: Mode identifier
-    IDENTIFIER = "FileWatcher"
+    IDENTIFIER = "fileWatcherMode"
     #: Mode description
-    DESCRIPTION = "Verify if file is modified externally."
+    DESCRIPTION = "Watch the editor's file and take care of the reloading."
 
     def __init__(self):
-        super(FileWatcher, self).__init__()
-        self.__filesystemwatcher = QtCore.QFileSystemWatcher()
+        super(FileWatcherMode, self).__init__()
+        self.__fileSystemWatcher = QtCore.QFileSystemWatcher()
         self.__flgNotify = False
         self.__changeWaiting = False
-        self.__filesystemwatcher.fileChanged.connect(self.__onFileChanged)
+        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     def __notifyChange(self):
         self.__flgNotify = True
@@ -56,8 +56,8 @@ class FileWatcher(Mode):
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
         path = self.editor.filePath
-        if path not in self.__filesystemwatcher.files():
-            self.__filesystemwatcher.addPath(path)
+        if path not in self.__fileSystemWatcher.files():
+            self.__fileSystemWatcher.addPath(path)
 
     @QtCore.Slot()
     def __onEditorFocusIn(self):
@@ -65,6 +65,9 @@ class FileWatcher(Mode):
             self.__notifyChange()
 
     def install(self, editor):
+        """
+        Adds autoReloadChangedFiles settings on install.
+        """
         Mode.install(self, editor)
         self.editor.settings.addProperty("autoReloadChangedFiles", False)
 
@@ -80,23 +83,23 @@ class FileWatcher(Mode):
             self.editor.textSaved.disconnect(self.__onEditorFilePathChanged)
             self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
             self.editor.focusedIn.disconnect(self.__onEditorFocusIn)
-            self.__filesystemwatcher.removePath(self.editor.filePath)
+            self.__fileSystemWatcher.removePath(self.editor.filePath)
 
 
 if __name__ == '__main__':
-    from pcef.core import QGenericCodeEdit, TextDecoration
+    from pcef.core import QGenericCodeEdit
 
     class Example(QGenericCodeEdit):
 
         def __init__(self):
             QGenericCodeEdit.__init__(self, parent=None)
-            self.installMode(FileWatcher())
+            self.installMode(FileWatcherMode())
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
 
         def closeEvent(self, evt):
             print("closing")
-            self.uninstallMode(FileWatcher)
+            self.uninstallMode(FileWatcherMode)
 
     import sys
     app = QtGui.QApplication(sys.argv)
