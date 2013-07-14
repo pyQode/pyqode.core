@@ -47,6 +47,23 @@ def mergedColors(colorA, colorB, factor):
     return tmp
 
 
+def driftColor(baseColor):
+    """
+    Return a near color that is lighter or darker than the base color.
+
+    If baseColor.lightness is higher than 128 than darker is used else lighter
+    is used.
+
+    :param baseColor: The base color to drift.
+
+    :return A lighter or darker color.
+    """
+    if baseColor.lightness() > 128:
+        return baseColor.darker(130)
+    else:
+        return baseColor.lighter(140)
+
+
 class TextStyle(object):
     """
     Defines a text style: a color associated with text style options (bold,
