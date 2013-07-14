@@ -94,14 +94,6 @@ class FoldingPanel(Panel):
         self.__indicators[:] = []
         self.repaint()
 
-    def sizeHint(self):
-        """ Returns the widget size hint (based on the editor font size) """
-        fm = QtGui.QFontMetricsF(self.editor.font())
-        size_hint = QtCore.QSize(fm.height(), fm.height())
-        if size_hint.width() > 16:
-            size_hint.setWidth(16)
-        return size_hint
-
     def getIndicatorForLine(self, line):
         for indic in self.__indicators:
             if indic.start == line:
@@ -114,7 +106,45 @@ class FoldingPanel(Panel):
                 return indic
         return None
 
-    def drawArrow(self, arrowRect, active, expanded, painter):
+    def __foldRemaings(self, foldingIndicator):
+        found = False
+        for indic in self.__indicators:
+            if indic == foldingIndicator:
+                found = True
+                continue
+            if found:
+                self.__fold(indic.start, indic.end,
+                            indic.state == FoldingIndicator.FOLDED)
+
+    def fold(self, foldingIndicator):
+        self.__fold(foldingIndicator.start, foldingIndicator.end, fold=True)
+        foldingIndicator.state = FoldingIndicator.FOLDED
+        self.__foldRemaings(foldingIndicator)
+
+    def unfold(self, foldingIndicator):
+        self.__fold(foldingIndicator.start, foldingIndicator.end, fold=False)
+        foldingIndicator.state = FoldingIndicator.UNFOLDED
+        self.__foldRemaings(foldingIndicator)
+
+    def __fold(self, start, end, fold=True):
+        """ Folds/Unfolds a block of text delimitted by start/end line numbers
+
+        :param start: Start folding line (this line is not fold, only the next
+        ones)
+
+        :param end: End folding line.
+
+        :param fold: True to fold, False to unfold
+        """
+        print(fold)
+        doc = self.editor.document()
+        for i in range(start, end):
+            block = self.editor.document().findBlockByNumber(i)
+            block.setVisible(not fold)
+            doc.markContentsDirty(block.position(), block.length())
+        self.editor.refreshPanels()
+
+    def __drawArrow(self, arrowRect, active, expanded, painter):
         if self.__native:
             opt = QtGui.QStyleOptionViewItemV2()
             opt.rect = arrowRect
@@ -167,27 +197,6 @@ class FoldingPanel(Panel):
                          foldZoneRect.bottomLeft() -
                          QtCore.QPoint(0, 1))
 
-    def paintEvent(self, event):
-        Panel.paintEvent(self, event)
-        painter = QtGui.QPainter(self)
-        for top, blockNumber in self.editor.visibleBlocks:
-            indic = self.getIndicatorForLine(blockNumber)
-            if indic:
-                # compute rectangles
-                arrowRect = QtCore.QRect(
-                    0, top, self.sizeHint().width(), self.sizeHint().height())
-                if indic.state == FoldingIndicator.UNFOLDED:
-                    h = self.sizeHint().height() * (indic.end - indic.start + 1)
-                else:
-                    h = self.sizeHint().height()
-                foldZoneRect = QtCore.QRect(
-                    0, top, self.sizeHint().width(), h)
-                expanded = indic.state == FoldingIndicator.UNFOLDED
-                active = indic == self.__mouseOveredIndic
-                if active:
-                    self.__drawBackgroundRect(foldZoneRect, painter)
-                self.drawArrow(arrowRect, active, expanded, painter)
-
     def __clearDecorations(self):
         for d in self.__decorations:
             self.editor.removeDecoration(d)
@@ -213,6 +222,39 @@ class FoldingPanel(Panel):
         self.editor.addDecoration(d)
         self.__decorations.append(d)
 
+    def paintEvent(self, event):
+        Panel.paintEvent(self, event)
+        painter = QtGui.QPainter(self)
+        for top, blockNumber in self.editor.visibleBlocks:
+            indic = self.getIndicatorForLine(blockNumber)
+            if indic:
+                # compute rectangles
+                arrowRect = QtCore.QRect(
+                    0, top, self.sizeHint().width(), self.sizeHint().height())
+                if indic.state == FoldingIndicator.UNFOLDED:
+                    h = 0
+                    for i in range(indic.start, indic.end + 1):
+                        block = self.editor.document().findBlockByNumber(i)
+                        if block.isVisible():
+                            h += self.sizeHint().height()
+                else:
+                    h = self.sizeHint().height()
+                foldZoneRect = QtCore.QRect(
+                    0, top, self.sizeHint().width(), h)
+                expanded = indic.state == FoldingIndicator.UNFOLDED
+                active = indic == self.__mouseOveredIndic
+                if active:
+                    self.__drawBackgroundRect(foldZoneRect, painter)
+                self.__drawArrow(arrowRect, active, expanded, painter)
+
+    def sizeHint(self):
+        """ Returns the widget size hint (based on the editor font size) """
+        fm = QtGui.QFontMetricsF(self.editor.font())
+        size_hint = QtCore.QSize(fm.height(), fm.height())
+        if size_hint.width() > 16:
+            size_hint.setWidth(16)
+        return size_hint
+
     def mouseMoveEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
         if not line:
@@ -226,6 +268,13 @@ class FoldingPanel(Panel):
                 return
             self.__addDecorationsForIndic(indic)
             self.repaint()
+
+    def mousePressEvent(self, event):
+        if self.__mouseOveredIndic:
+            if self.__mouseOveredIndic.state == FoldingIndicator.UNFOLDED:
+                self.fold(self.__mouseOveredIndic)
+            else:
+                self.unfold(self.__mouseOveredIndic)
 
     def leaveEvent(self, e):
         self.__mouseOveredIndic = None
@@ -245,9 +294,9 @@ if __name__ == '__main__':
             self.installPanel(FoldingPanel())
             self.foldingPanel.addIndicator(FoldingIndicator(21, 28))
             self.foldingPanel.addIndicator(FoldingIndicator(25, 28))
-            fi = FoldingIndicator(30, 45)
-            fi.state = fi.FOLDED
+            fi = FoldingIndicator(35, 50)
             self.foldingPanel.addIndicator(fi)
+            self.foldingPanel.fold(fi)
             self.foldingPanel.zoneOrder = -1
 
     import sys
