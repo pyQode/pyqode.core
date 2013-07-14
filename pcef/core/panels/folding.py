@@ -1,4 +1,4 @@
-                  #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # PCEF - Python/Qt Code Editing Framework
@@ -55,19 +55,21 @@ class FoldingPanel(Panel):
                                                       True)
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
                                                      self.__systemColor)
-        self.__decoColor = driftColor(self.editor.style.value("panelBackground"))
+        self.__decoColor = driftColor(
+            self.editor.style.value("panelBackground"))
 
     def onStyleChanged(self, section, key, value):
         Panel.onStyleChanged(self, section, key, value)
         if key == "nativeFoldingIndicator":
-            self.__native = value
+            self.__native = self.editor.style.value_from_str(value)
         elif key == "foldIndicatorBackground":
             self.__color = QtGui.QColor(value)
         elif key == "panelBackground":
             self.__decoColor = driftColor(QtGui.QColor(value))
 
     def resetScopeColor(self):
-        self.editor.style.setValue("foldIndicatorBackground", self.__systemColor)
+        self.editor.style.setValue(
+            "foldIndicatorBackground", self.__systemColor)
 
     def addIndicator(self, indicator):
         """
@@ -241,8 +243,8 @@ if __name__ == '__main__':
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
             self.installPanel(FoldingPanel())
-            self.foldingPanel.addIndicator(FoldingIndicator(20, 29))
-            self.foldingPanel.addIndicator(FoldingIndicator(24, 27))
+            self.foldingPanel.addIndicator(FoldingIndicator(21, 28))
+            self.foldingPanel.addIndicator(FoldingIndicator(25, 28))
             fi = FoldingIndicator(30, 45)
             fi.state = fi.FOLDED
             self.foldingPanel.addIndicator(fi)
