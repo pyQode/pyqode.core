@@ -14,7 +14,7 @@ This module contains the marker panel
 from pcef.qt import QtCore, QtGui
 from pcef.core import constants
 from pcef.core.panel import Panel
-from pcef.core.system import mergedColors
+from pcef.core.system import mergedColors, driftColor
 
 
 class FoldingIndicator(object):
@@ -37,8 +37,33 @@ class FoldingPanel(Panel):
         self.scrollable = True
         self.setMouseTracking(True)
         self.__mouseOveredIndic = None
-        self.__rightArrowIcon = QtGui.QIcon(constants.ICON_ARROW_RIGHT)
-        self.__downArrowIcon = QtGui.QIcon(constants.ICON_ARROW_DOWN)
+        self.__rightArrowIcon = (QtGui.QIcon(constants.ICON_ARROW_RIGHT[0]),
+                                 QtGui.QIcon(constants.ICON_ARROW_RIGHT[1]))
+        self.__downArrowIcon = (QtGui.QIcon(constants.ICON_ARROW_DOWN[0]),
+                                QtGui.QIcon(constants.ICON_ARROW_DOWN[1]))
+        # get the native fold scope color
+        pal = self.palette()
+        b = pal.base().color()
+        h = pal.highlight().color()
+        self.__systemColor = mergedColors(b, h, 50)
+        self.__decorations = []
+
+    def install(self, editor):
+        Panel.install(self, editor)
+        self.__native = self.editor.style.addProperty("nativeFoldingIndicator",
+                                                      True)
+        self.__color = self.editor.style.addProperty("foldScopeBackground",
+                                                     self.__systemColor)
+
+    def onStyleChanged(self, section, key, value):
+        Panel.onStyleChanged(self, section, key, value)
+        if key == "nativeFoldingIndicator":
+            self.__native = value
+        elif key == "foldScopeBackground":
+            self.__color = QtGui.QColor(value)
+
+    def resetScopeColor(self):
+        self.editor.style.setValue("foldScopeBackground", self.__systemColor)
 
     def addIndicator(self, indicator):
         """
@@ -84,22 +109,31 @@ class FoldingPanel(Panel):
         return None
 
     def drawArrow(self, arrowRect, active, expanded, painter):
-        opt = QtGui.QStyleOptionViewItemV2()
-        opt.rect = arrowRect
-        opt.state = (QtGui.QStyle.State_Active |
-                     QtGui.QStyle.State_Item |
-                     QtGui.QStyle.State_Children)
-        if expanded:
-            opt.state |= QtGui.QStyle.State_Open
-        if active:
-            opt.state |= (QtGui.QStyle.State_MouseOver |
-                          QtGui.QStyle.State_Enabled |
-                          QtGui.QStyle.State_Selected)
-            opt.palette.setBrush(QtGui.QPalette.Window,
-                                 self.palette().highlight())
-        opt.rect.translate(-2, 0)
-        self.style().drawPrimitive(QtGui.QStyle.PE_IndicatorBranch,
-                                   opt, painter, self)
+        if self.__native:
+            opt = QtGui.QStyleOptionViewItemV2()
+            opt.rect = arrowRect
+            opt.state = (QtGui.QStyle.State_Active |
+                         QtGui.QStyle.State_Item |
+                         QtGui.QStyle.State_Children)
+            if expanded:
+                opt.state |= QtGui.QStyle.State_Open
+            if active:
+                opt.state |= (QtGui.QStyle.State_MouseOver |
+                              QtGui.QStyle.State_Enabled |
+                              QtGui.QStyle.State_Selected)
+                opt.palette.setBrush(QtGui.QPalette.Window,
+                                     self.palette().highlight())
+            opt.rect.translate(-2, 0)
+            self.style().drawPrimitive(QtGui.QStyle.PE_IndicatorBranch,
+                                       opt, painter, self)
+        else:
+            index = 0
+            if active:
+                index = 1
+            if expanded:
+                self.__downArrowIcon[index].paint(painter, arrowRect)
+            else:
+                self.__rightArrowIcon[index].paint(painter, arrowRect)
 
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
@@ -121,17 +155,11 @@ class FoldingPanel(Panel):
                 expanded = indic.state == FoldingIndicator.UNFOLDED
                 if indic == self.__mouseOveredIndic:
                     active = True
-                    pal = self.palette()
-                    b = pal.base().color()
-                    h = pal.highlight().color()
-                    b.setAlpha(180)
-                    h.setAlpha(180)
-                    c = mergedColors(b, h, 50)  # ubuntu value = #f7bba2
-
+                    c = self.__color
                     grad = QtGui.QLinearGradient(foldZoneRect.topLeft(),
                                                  foldZoneRect.topRight())
-                    grad.setColorAt(0, c.lighter(100))
-                    grad.setColorAt(1, c.lighter(110))
+                    grad.setColorAt(0, c.lighter(110))
+                    grad.setColorAt(1, c.lighter(130))
                     outline = c
                     painter.fillRect(foldZoneRect, grad)
                     painter.setPen(QtGui.QPen(outline))
@@ -155,6 +183,12 @@ class FoldingPanel(Panel):
                 # draw arrow
                 self.drawArrow(arrowRect, active, expanded, painter)
 
+    def __clearDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+        self.__decorations[:] = []
+        return
+
     def mouseMoveEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
         if not line:
@@ -163,7 +197,6 @@ class FoldingPanel(Panel):
         indic = self.getNearestIndicator(line)
         if indic != self.__mouseOveredIndic:
             self.__mouseOveredIndic = indic
-            print("Mouse over")
             self.repaint()
 
     def leaveEvent(self, e):
