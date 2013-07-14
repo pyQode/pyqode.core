@@ -36,13 +36,14 @@ class FileWatcher(Mode):
 
     def __notifyChange(self):
         self.__flgNotify = True
-        ret = QtGui.QMessageBox.question(
-            self.editor, "File changed",
-            "The file <i>%s</i> has has changed externally.\n"
-            "Do you want reload it?" % os.path.basename(
-                self.editor.filePath),
-            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-        if ret == QtGui.QMessageBox.Yes:
+        auto = self.editor.settings.value("autoReloadChangedFiles")
+        if (auto or QtGui.QMessageBox.question(
+                self.editor, "File changed",
+                "The file <i>%s</i> has has changed externally.\n"
+                "Do you want reload it?" % os.path.basename(
+                        self.editor.filePath),
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No) ==
+                QtGui.QMessageBox.Yes):
             self.editor.openFile(self.editor.filePath)
         self.__changeWaiting = False
         self.__flgNotify = False
@@ -62,6 +63,10 @@ class FileWatcher(Mode):
     def __onEditorFocusIn(self):
         if self.__changeWaiting:
             self.__notifyChange()
+
+    def install(self, editor):
+        Mode.install(self, editor)
+        self.editor.settings.addProperty("autoReloadChangedFiles", False)
 
     def onStateChanged(self, state):
         """
