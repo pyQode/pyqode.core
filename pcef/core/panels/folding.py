@@ -164,7 +164,6 @@ class FoldingPanel(Panel):
         foldingIndicator._deco = TextDecoration(
             self.editor.textCursor(), startLine=foldingIndicator.start)
         foldingIndicator._deco.setOutline(self.__decoColor)
-        foldingIndicator._deco.setBackground(QtGui.QColor("#DDFFDD"))
         foldingIndicator._deco.setFullWidth(True)
         self.editor.addDecoration(foldingIndicator._deco)
         foldingIndicator.state = FoldingIndicator.FOLDED
