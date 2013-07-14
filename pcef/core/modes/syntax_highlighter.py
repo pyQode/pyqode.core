@@ -194,8 +194,6 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
             data = PygmentsBlockUserData(
                 syntax_stack=self._lexer._saved_state_stack)
             self.user_datas[self.currentBlock().blockNumber()] = data
-            # self.currentBlock().setUserData(data)
-            # print type(data)
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 

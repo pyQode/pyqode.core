@@ -380,8 +380,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param decoration: Text decoration
         :type decoration: pcef.TextDecoration
         """
-        if decoration.tooltip:
-            print(decoration.tooltip)
         if decoration not in self.__selections:
             self.__selections.append(decoration)
             self.__selections = sorted(self.__selections,
