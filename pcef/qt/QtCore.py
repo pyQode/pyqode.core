@@ -13,8 +13,10 @@ Bindings independant QtCore module
 """
 import os
 if os.environ['QT_API'] == 'PyQt':
-    from PyQt4.Qt import Qt
+    from PyQt4 import QtCore
+    print(QtCore)
     from PyQt4.QtCore import *
+    from PyQt4.Qt import Qt
     from PyQt4.QtCore import pyqtSignal as Signal
     from PyQt4.QtCore import pyqtSlot as Slot
     from PyQt4.QtCore import pyqtProperty as Property
