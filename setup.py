@@ -34,7 +34,7 @@ setup(
     version=read_version(),
     packages=find_packages(),
     keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
-    # package_data={'pcef.ui': ['rc/*']},
+    package_data={'pcef.core.ui': ['*.ui', 'rc/*']},
     package_dir={'pcef': 'pcef'},
     url='https://github.com/ColinDuquesnoy/PCEF',
     license='GNU LGPL v3',
