@@ -62,7 +62,7 @@ class LineNumberPanel(Panel):
         while count >= 10:
             count /= 10
             digits += 1
-        space = 3 + self.editor.fontMetrics().width(u"9") * digits
+        space = 3 + self.editor.fontMetrics().width("9") * digits
         return space
 
     def mousePressEvent(self, e):
