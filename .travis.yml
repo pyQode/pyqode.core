@@ -2,6 +2,8 @@ language: python
 python:
   - "2.7"
   - "3.3"
+virtualenv:
+  system_site_packages: true
 before_install:
  - sudo apt-get install -qq python-pyside
  - sudo apt-get install -qq python-qt4
