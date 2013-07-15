@@ -8,9 +8,14 @@ It runs a QApplication and shows a QGenericCodeEdit for 500ms.
 import sys
 import os
 if sys.version_info[0] == 3:
-    sys.path.insert(0, "/usr/lib/python3.3/dist-packages/")
+    sys.path.append("/usr/lib/python3.3/dist-packages")
+    sys.path.append("/usr/local/lib/python3.3/dist-packages")
+    sys.path.append("/usr/lib/python3/dist-packages")
 elif sys.version_info[0] == 2:
-    sys.path.insert(0, "/usr/lib/python2.7/dist-packages/")
+    sys.path.append("/usr/lib/python2.7/dist-packages")
+    sys.path.append("/usr/local/lib/python2.7/dist-packages")
+    sys.path.append("/usr/lib/python2/dist-packages")
+print(sys.path)
 from pcef.qt import QtCore, QtGui
 from pcef.core import QGenericCodeEdit
 
