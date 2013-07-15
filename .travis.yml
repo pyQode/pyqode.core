@@ -7,10 +7,8 @@ before_install:
  - sudo apt-get install -qq python-qt4
  - sudo apt-get install -qq python3-pyside
  - sudo apt-get install -qq python3-pyqt4
- - sudo pip-2.7 install pygments
- - sudo pip-3.3 install pygments
+ - sudo pip install pygments
  - export PYTHONPATH="$PYTHONPATH:/usr/lib/python2.7/dist-packages/:/usr/lib/python3.3/dist-packages/"
- - sudo python setup.py install
  - "export DISPLAY=:99.0"
  - "sh -e /etc/init.d/xvfb start"
 script:
