@@ -7,10 +7,9 @@ It runs a QApplication and shows a QGenericCodeEdit for 500ms.
 """
 import sys
 # import os
-# if sys.version_info[0] == 3:
-#     sys.path.append("/usr/lib/python3.3/dist-packages")
-#     sys.path.append("/usr/local/lib/python3.3/dist-packages")
-#     sys.path.append("/usr/lib/python3/dist-packages")
+if sys.version_info[0] == 3:
+    sys.path.append('/usr/lib/python3.3/plat-i386-linux-gnu')
+    sys.path.append('/usr/lib/python3.3/lib-dynload')
 # elif sys.version_info[0] == 2:
 #     sys.path.append("/usr/lib/python2.7/dist-packages")
 #     sys.path.append("/usr/local/lib/python2.7/dist-packages")
