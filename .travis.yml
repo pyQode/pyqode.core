@@ -10,6 +10,8 @@ before_install:
  - sudo apt-get install -qq python-qt4
  - sudo apt-get install -qq python3-pyside
  - sudo apt-get install -qq python3-pyqt4
+ - sudo apt-get install -qq python-pygments
+ - sudo apt-get install -qq python3-pygments
  - sudo pip install pygments
  - "export DISPLAY=:99.0"
  - "sh -e /etc/init.d/xvfb start"
