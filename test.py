@@ -15,6 +15,8 @@ import sys
 #     sys.path.append("/usr/local/lib/python2.7/dist-packages")
 #     sys.path.append("/usr/lib/python2/dist-packages")
 print(sys.path)
+import pygments
+print(pygments)
 if "--PyQt" in sys.argv:
     import PyQt4
     print(PyQt4)
