@@ -14,6 +14,9 @@ This module defines text edit decorations
 from pcef.qt import QtCore, QtGui
 
 
+class TextDecorationSignals(QtCore.QObject):
+    clicked = QtCore.Signal(object)
+
 class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
@@ -37,9 +40,10 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
+        QtGui.QTextEdit.ExtraSelection.__init__(self)
+        self.signals = TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip
-        QtGui.QTextEdit.ExtraSelection.__init__(self)
         cursor = QtGui.QTextCursor(cursorOrBlockOrDoc)
         if startPos is not None:
             cursor.setPosition(startPos)

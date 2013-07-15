@@ -136,7 +136,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
-        self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=800)
+        self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1500)
         self.__previousTooltipBlockNumber = -1
 
         #: The list of actions, (none is a separator)
@@ -753,6 +753,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         initialState = event.isAccepted()
         event.ignore()
         self.mousePressed.emit(event)
+        c = self.cursorForPosition(event.pos())
+        for sel in self.__selections:
+            if sel.cursor.blockNumber() == c.blockNumber():
+                sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initialState)
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
