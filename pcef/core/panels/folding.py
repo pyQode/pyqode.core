@@ -56,6 +56,13 @@ class FoldingPanel(Panel):
     DESCRIPTION = "Manage and draw folding indicators"
     IDENTIFIER = "foldingPanel"
 
+    @property
+    def indicators(self):
+        retVal = []
+        for indic in self.__indicators:
+            retVal.append(indic)
+        return retVal
+
     def __init__(self):
         Panel.__init__(self)
         self.__indicators = []
@@ -125,6 +132,9 @@ class FoldingPanel(Panel):
 
     def clearIndicators(self):
         """ Clears the markers list """
+        for foldingIndicator in self.__indicators:
+            if foldingIndicator.state == foldingIndicator.FOLDED:
+                self.unfold(foldingIndicator)
         self.__indicators[:] = []
         self.repaint()
 
