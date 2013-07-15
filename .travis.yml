@@ -7,7 +7,7 @@ before_install:
  - sudo apt-get install -qq python-pyside
  - sudo apt-get install -qq python-qt4
  - sudo apt-get install -qq python3-pyside
- - sudo apt-get install -qq python3-qt4
+ - sudo apt-get install -qq python3-pyqt4
  - export PYTHONPATH="$PYTHONPATH:/usr/lib/python2.7/dist-packages/"
  - sudo python setup.py install
  - "export DISPLAY=:99.0"
