@@ -1,7 +1,7 @@
 """
-This is a simple test script to is meant to be run by Travis CI to ensure
+This is a simple test script to that is meant to be run by Travis CI to ensure
 everything works properly foreach bindings on each supported python
-version (2.7, 3.2, 3.3).
+version (2.7, 3.2).
 
 It runs a QApplication and shows a QGenericCodeEdit for 500ms.
 """
