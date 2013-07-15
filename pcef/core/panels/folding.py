@@ -181,6 +181,7 @@ class FoldingPanel(Panel):
         foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
         foldingIndicator._deco.setOutline(self.__decoColor)
         foldingIndicator._deco.setFullWidth(True)
+        foldingIndicator._deco.signals.clicked.connect(self.__onDecoClicked)
         self.editor.addDecoration(foldingIndicator._deco)
         foldingIndicator.state = FoldingIndicator.FOLDED
 
@@ -193,6 +194,7 @@ class FoldingPanel(Panel):
         self.__fold(foldingIndicator.start, foldingIndicator.end, fold=False)
         foldingIndicator.state = FoldingIndicator.UNFOLDED
         self.editor.removeDecoration(foldingIndicator._deco)
+        foldingIndicator._deco.signals.clicked.disconnect(self.__onDecoClicked)
         self.__foldRemainings(foldingIndicator)
 
     def __foldRemainings(self, foldingIndicator):
@@ -225,6 +227,11 @@ class FoldingPanel(Panel):
             block.setVisible(not fold)
             doc.markContentsDirty(block.position(), block.length())
         self.editor.refreshPanels()
+
+    def __onDecoClicked(self, deco):
+        fi = self.getIndicatorForLine(deco.cursor.blockNumber()+1)
+        if fi and fi.state == fi.FOLDED:
+            self.unfold(fi)
 
     def __drawArrow(self, arrowRect, active, expanded, painter):
         if self.__native:
