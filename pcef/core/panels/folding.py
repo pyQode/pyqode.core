@@ -127,6 +127,8 @@ class FoldingPanel(Panel):
 
         :param indicator: Marker to remove
         """
+        if indicator.state == indicator.FOLDED:
+            self.unfold(indicator)
         self.__indicators.remove(indicator)
         self.repaint()
 
