@@ -1,7 +1,12 @@
 Python/Qt Code Editing Framework
 =====================================
 
-*version 1.0.0-dev*
+*version 1.0.0-dev* 
+
+.. image:: https://travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
+    :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
+    :alt: Travis-CI build status
+
 
 **WARNING: The library is being massively refactorised/rewritten and is not usable for now**
 
