@@ -16,10 +16,12 @@ import sys
 #     sys.path.append("/usr/local/lib/python2.7/dist-packages")
 #     sys.path.append("/usr/lib/python2/dist-packages")
 print(sys.path)
-if "--Pyqt" in sys.argv:
+if "--PyQt" in sys.argv:
     import PyQt4
+    print(PyQt4)
 elif "--PySide" in sys.argv:
     import PySide
+    print(PySide)
 from pcef.qt import QtCore, QtGui
 from pcef.core import QGenericCodeEdit
 
