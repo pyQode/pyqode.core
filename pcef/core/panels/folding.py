@@ -80,6 +80,17 @@ class FoldingPanel(Panel):
         self.__systemColor = mergedColors(b, h, 50)
         self.__decorations = []
 
+    def __installActions(self):
+        self.editor.addSeparator()
+        self.__actionFoldAll = QtGui.QAction("Fold all", self.editor)
+        self.__actionFoldAll.setShortcut("Ctrl+-")
+        self.__actionFoldAll.triggered.connect(self.foldAll)
+        self.editor.addAction(self.__actionFoldAll)
+        self.__actionUnfoldAll = QtGui.QAction("Unfold all", self.editor)
+        self.__actionUnfoldAll.setShortcut("Ctrl++")
+        self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
+        self.editor.addAction(self.__actionUnfoldAll)
+
     def install(self, editor):
         """
         Adds two properties to the editor style:
@@ -95,6 +106,7 @@ class FoldingPanel(Panel):
                                                      self.__systemColor)
         self.__decoColor = driftColor(
             self.editor.style.value("panelBackground"))
+        self.__installActions()
 
     def onStyleChanged(self, section, key, value):
         Panel.onStyleChanged(self, section, key, value)
@@ -179,8 +191,9 @@ class FoldingPanel(Panel):
                            startLine=foldingIndicator.start+1,
                            endLine=foldingIndicator.end)
         foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
+        foldingIndicator._deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
         foldingIndicator._deco.setOutline(self.__decoColor)
-        foldingIndicator._deco.setFullWidth(True)
+        # foldingIndicator._deco.setFullWidth(True)
         foldingIndicator._deco.signals.clicked.connect(self.__onDecoClicked)
         self.editor.addDecoration(foldingIndicator._deco)
         foldingIndicator.state = FoldingIndicator.FOLDED
@@ -196,6 +209,16 @@ class FoldingPanel(Panel):
         self.editor.removeDecoration(foldingIndicator._deco)
         foldingIndicator._deco.signals.clicked.disconnect(self.__onDecoClicked)
         self.__foldRemainings(foldingIndicator)
+
+    def foldAll(self):
+        for foldingIndicator in reversed(self.__indicators):
+            if foldingIndicator.state == foldingIndicator.UNFOLDED:
+                self.fold(foldingIndicator)
+
+    def unfoldAll(self):
+        for foldingIndicator in reversed(self.__indicators):
+            if foldingIndicator.state == foldingIndicator.FOLDED:
+                self.unfold(foldingIndicator)
 
     def __foldRemainings(self, foldingIndicator):
         """
