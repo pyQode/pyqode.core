@@ -1,0 +1,25 @@
+language: python
+python:
+  - "2.7"
+  - "3.2"
+  - "3.3"
+before_install:
+  - cd ..
+  - curl -O http://www.riverbankcomputing.co.uk/static/Downloads/sip4/sip-4.13.3.tar.gz
+  - tar -xvf sip-4.13.3.tar.gz
+  - cd sip-4.13.3
+  - python configure.py
+  - make -j 4
+  - sudo make install
+  - cd ..
+  - curl -O http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4/PyQt-x11-gpl-4.9.4.tar.gz
+  - tar -xvf PyQt-x11-gpl-4.9.4.tar.gz
+  - cd PyQt-x11-gpl-4.9.4
+  - python configure.py --confirm-license
+  - make -j 4
+  - sudo make install
+  - cd ../TravisRamblings
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+script: python test.py
