@@ -12,6 +12,7 @@ before_install:
  - sudo pip install pygments
  - "export DISPLAY=:99.0"
  - "sh -e /etc/init.d/xvfb start"
+ - "ls /usr/lib/python3/dist-packages"
 script:
   - python test.py --PyQt
   - python test.py --PySide
