@@ -47,7 +47,7 @@ def mergedColors(colorA, colorB, factor):
     return tmp
 
 
-def driftColor(baseColor, factor=100):
+def driftColor(baseColor, factor=110):
     """
     Return a near color that is lighter or darker than the base color.
 
@@ -61,7 +61,7 @@ def driftColor(baseColor, factor=100):
     if baseColor.lightness() > 128:
         return baseColor.darker(factor)
     else:
-        return baseColor.lighter(factor)
+        return baseColor.lighter(factor+10)
 
 
 class TextStyle(object):
