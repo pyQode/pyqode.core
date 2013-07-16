@@ -45,7 +45,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="labelSearch">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -359,7 +359,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="labelReplace">
            <property name="maximumSize">
             <size>
              <width>18</width>
@@ -425,7 +425,7 @@
         <zorder>pushButtonReplace</zorder>
         <zorder>pushButtonReplaceAll</zorder>
         <zorder>horizontalSpacer_2</zorder>
-        <zorder>label_2</zorder>
+        <zorder>labelReplace</zorder>
        </widget>
       </item>
      </layout>
@@ -434,7 +434,7 @@
   </layout>
   <action name="actionSearch">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset theme="edit-find" resource="pcef_icons.qrc">
      <normaloff>:/pcef-icons/rc/edit-find.png</normaloff>:/pcef-icons/rc/edit-find.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +452,7 @@
   </action>
   <action name="actionActionSearchAndReplace">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset theme="edit-find-replace" resource="pcef_icons.qrc">
      <normaloff>:/pcef-icons/rc/edit-find-replace.png</normaloff>:/pcef-icons/rc/edit-find-replace.png</iconset>
    </property>
    <property name="text">
@@ -470,7 +470,7 @@
   </action>
   <action name="actionFindNext">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset theme="go-down" resource="pcef_icons.qrc">
      <normaloff>:/pcef-icons/rc/go-down.png</normaloff>:/pcef-icons/rc/go-down.png</iconset>
    </property>
    <property name="text">
@@ -488,7 +488,7 @@
   </action>
   <action name="actionFindPrevious">
    <property name="icon">
-    <iconset resource="pcef_icons.qrc">
+    <iconset theme="go-up" resource="pcef_icons.qrc">
      <normaloff>:/pcef-icons/rc/go-up.png</normaloff>:/pcef-icons/rc/go-up.png</iconset>
    </property>
    <property name="text">

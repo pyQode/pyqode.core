@@ -15,7 +15,7 @@ from pcef.qt import QtCore, QtGui
 from pcef.core import constants
 from pcef.core.decoration import TextDecoration
 from pcef.core.panel import Panel
-from pcef.core.system import DelayJobRunner
+from pcef.core.system import DelayJobRunner, driftColor
 from pcef.core.ui import loadUi
 
 
@@ -39,27 +39,15 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     DESCRIPTION = "Search and replace text in the editor"
 
     #: Stylesheet
-    STYLESHEET = """QWidget
+    STYLESHEET = """SearchAndReplacePanel
     {
         background-color: %(bck)s;
         color: %(color)s;
     }
 
-    QLineEdit
-    {
-        background-color: %(txt_bck)s;
-        border: 1px solid %(highlight)s;
-        border-radius: 3px;
-    }
-
-    QLineEdit:hover, QLineEdit:focus
-    {
-        border: 1px solid %(color)s;
-        border-radius: 3px;
-    }
-
     QPushButton
     {
+        color: %(color)s;
         background-color: transparent;
         padding: 5px;
         border: none;
@@ -86,6 +74,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     QCheckBox
     {
         padding: 4px;
+        color: %(color)s;
     }
 
     QCheckBox:hover
@@ -95,7 +84,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
             border-radius: 5px;
     }
     """
-    _KEYS = ["panelBackground", "background", "foreground", "panelHighlight"]
+    _KEYS = ["panelBackground", "background", "panelForeground",
+             "panelHighlight"]
 
     #: Signal emitted when a search operation finished
     searchFinished = QtCore.Signal()
@@ -122,6 +112,20 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
+        findIcon = QtGui.QIcon.fromTheme("edit-find", QtGui.QIcon(":"))
+        replaceIcon = QtGui.QIcon.fromTheme("edit-find-replace", QtGui.QIcon(":"))
+        nextIcon = QtGui.QIcon.fromTheme("go-down", QtGui.QIcon(":"))
+        previousIcon = QtGui.QIcon.fromTheme("go-up", QtGui.QIcon(":"))
+        closeIcon = QtGui.QIcon.fromTheme("application-exit", QtGui.QIcon(":"))
+        self.actionSearch.setIcon(findIcon)
+        self.labelSearch.setPixmap(findIcon.pixmap(16, 16))
+        self.actionActionSearchAndReplace.setIcon(replaceIcon)
+        self.labelReplace.setPixmap(replaceIcon.pixmap(16, 16))
+        self.actionFindNext.setIcon(nextIcon)
+        self.pushButtonNext.setIcon(nextIcon)
+        self.actionFindPrevious.setIcon(previousIcon)
+        self.pushButtonPrevious.setIcon(previousIcon)
+        self.pushButtonClose.setIcon(closeIcon)
 
     def install(self, editor):
         Panel.install(self, editor)
@@ -137,6 +141,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
             self.__resetStylesheet()
 
     def onStateChanged(self, state):
+        Panel.onStateChanged(self, state)
         if state:
             # add menus
             self.__separator = self.editor.addSeparator()
@@ -163,7 +168,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         else:
             # remove menus
             if self.__separator is not None:
-                self.editor.removeSeparator(self.__separator)
+                self.editor.removeAction(self.__separator)
             self.editor.removeAction(self.actionSearch)
             self.editor.removeAction(
                 self.actionActionSearchAndReplace)
@@ -446,11 +451,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__updateButtons(txt=self.lineEditReplace.text())
 
     def __resetStylesheet(self):
+        highlight = driftColor(self.editor.style.value(self._KEYS[0])).name()
         stylesheet = self.STYLESHEET % {
             "bck": self.editor.style.value(self._KEYS[0]).name(),
             "txt_bck": self.editor.style.value(self._KEYS[1]).name(),
             "color": self.editor.style.value(self._KEYS[2]).name(),
-            "highlight": self.editor.style.value(self._KEYS[3]).name()}
+            "highlight": highlight}
         self.setStyleSheet(stylesheet)
 
     def __getCurrentOccurrence(self):

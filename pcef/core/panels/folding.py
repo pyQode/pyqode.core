@@ -105,7 +105,7 @@ class FoldingPanel(Panel):
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
                                                      self.__systemColor)
         self.__decoColor = driftColor(
-            self.editor.style.value("panelBackground"))
+            self.editor.style.value("background"))
         self.__installActions()
 
     def onStyleChanged(self, section, key, value):
@@ -114,7 +114,7 @@ class FoldingPanel(Panel):
             self.__native = self.editor.style.value_from_str(value)
         elif key == "foldIndicatorBackground":
             self.__color = QtGui.QColor(value)
-        elif key == "panelBackground":
+        elif key == "background":
             self.__decoColor = driftColor(QtGui.QColor(value))
 
     def resetIndicatorsBackground(self):

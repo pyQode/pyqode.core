@@ -32,7 +32,7 @@
      <x>0</x>
      <y>0</y>
      <width>1078</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -78,7 +78,7 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="examples.qrc">
+    <iconset theme="document-open" resource="simple_editor.qrc">
      <normaloff>:/example_icons/rc/folder.png</normaloff>:/example_icons/rc/folder.png</iconset>
    </property>
    <property name="text">
@@ -96,7 +96,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="examples.qrc">
+    <iconset theme="document-save" resource="simple_editor.qrc">
      <normaloff>:/example_icons/rc/document-save.png</normaloff>:/example_icons/rc/document-save.png</iconset>
    </property>
    <property name="text">
@@ -120,6 +120,9 @@
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset theme="help-about"/>
+   </property>
    <property name="text">
     <string>About</string>
    </property>
@@ -127,18 +130,18 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QGenericCodeEdit</class>
-   <extends>QCodeEdit</extends>
-   <header>pcef.core</header>
-  </customwidget>
-  <customwidget>
    <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>pcef.core.editor</header>
   </customwidget>
+  <customwidget>
+   <class>QGenericCodeEdit</class>
+   <extends>QCodeEdit</extends>
+   <header>pcef.core</header>
+  </customwidget>
  </customwidgets>
  <resources>
-  <include location="examples.qrc"/>
+  <include location="simple_editor.qrc"/>
  </resources>
  <connections/>
 </ui>
