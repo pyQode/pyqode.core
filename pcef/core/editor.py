@@ -1055,6 +1055,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
+        if self.size().height() == cr.height() + hscroll_height:
+            hscroll_height = 0
+        if self.size().width() == cr.width() + vscroll_width:
+            vscroll_width = 0
         left = 0
         panels = list(self.__panels[PanelPosition.LEFT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
