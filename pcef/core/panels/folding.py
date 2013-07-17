@@ -290,7 +290,6 @@ class FoldingPanel(Panel):
         This function must be used to ensure all indicators states are up to
         date.
         """
-        print("update indics")
         for indicator in self.__indicators:
             if self.__getIndicatorState(indicator) == FoldingIndicator.FOLDED:
                 if indicator.state == FoldingIndicator.UNFOLDED:
