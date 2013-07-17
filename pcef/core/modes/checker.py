@@ -24,11 +24,11 @@ class Message(object):
     A message will be displayed in the editor's marker panel and/or as a
     TextDecoration (if status is error or warning).
     """
-    ICONS = {MSG_STATUS_INFO: ("dialog-info",
+    ICONS = {MSG_STATUS_INFO: ("marker-info",
                                ":/pcef-icons/rc/dialog-info.png"),
-             MSG_STATUS_WARNING: ("dialog-warning",
+             MSG_STATUS_WARNING: ("marker-warning",
                                   ":/pcef-icons/rc/dialog-warning.png"),
-             MSG_STATUS_ERROR: ("dialog-error",
+             MSG_STATUS_ERROR: ("marker-error",
                                 ":/pcef-icons/rc/dialog-error.png")}
 
     COLORS = {MSG_STATUS_INFO: "#4040DD",
