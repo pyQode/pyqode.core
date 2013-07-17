@@ -61,7 +61,7 @@ class Message(object):
         self._decoration = None
 
 
-class Checker(Mode):
+class Checker(Mode, QtCore.QObject):
     """
     This mode is an abstract base class for code checker modes.
 
@@ -82,6 +82,7 @@ class Checker(Mode):
 
     def __init__(self, clearOnRequest=True):
         Mode.__init__(self)
+        QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=2, delay=1200)
         self.__messages = []
         self.__mutex = QtCore.QMutex()
