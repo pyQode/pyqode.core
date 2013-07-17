@@ -13,6 +13,7 @@ This module contains the marker panel
 """
 from pcef.qt import QtCore, QtGui
 from pcef.core.panel import Panel
+from pcef.core.system import DelayJobRunner
 
 
 class Marker(QtCore.QObject):
@@ -82,10 +83,21 @@ class MarkerPanel(Panel):
 
         :param marker: Marker to add
         """
+        key, val = self.makeMarkerIcon(marker)
+        if key and val:
+            self.__icons[key] = val
         self.__markers.append(marker)
-        if not marker.icon in self.__icons:
-            self.__icons[marker.icon] = QtGui.QIcon(marker.icon)
         self.repaint()
+
+    def makeMarkerIcon(self, marker):
+        if isinstance(marker.icon, tuple):
+            return (marker.icon[0],
+                    QtGui.QIcon.fromTheme(marker.icon[0],
+                                          QtGui.QIcon(marker.icon[1])))
+        elif isinstance(marker, str):
+            return marker.icon, QtGui.QIcon(marker.icon)
+        else:
+            return None, None
 
     def removeMarker(self, marker):
         """
@@ -132,7 +144,11 @@ class MarkerPanel(Panel):
                 r.setY(top)
                 r.setWidth(self.sizeHint().width())
                 r.setHeight(self.sizeHint().height())
-                self.__icons[marker.icon].paint(painter, r)
+                if isinstance(marker.icon, tuple):
+                    key = marker.icon[0]
+                else:
+                    key = marker.icon
+                self.__icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
