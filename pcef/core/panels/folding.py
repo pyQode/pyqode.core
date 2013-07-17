@@ -420,11 +420,11 @@ class FoldingPanel(Panel):
         """ Installs fold all and unfold all action on the editor widget. """
         self.editor.addSeparator()
         self.__actionFoldAll = QtGui.QAction("Fold all", self.editor)
-        self.__actionFoldAll.setShortcut("Ctrl+-")
+        self.__actionFoldAll.setShortcut("Ctrl+Shift+-")
         self.__actionFoldAll.triggered.connect(self.foldAll)
         self.editor.addAction(self.__actionFoldAll)
         self.__actionUnfoldAll = QtGui.QAction("Unfold all", self.editor)
-        self.__actionUnfoldAll.setShortcut("Ctrl++")
+        self.__actionUnfoldAll.setShortcut("Ctrl+Shift++")
         self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
         self.editor.addAction(self.__actionUnfoldAll)
 
