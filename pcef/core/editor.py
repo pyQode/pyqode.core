@@ -5,7 +5,6 @@ import logging
 import sys
 from pcef.core import constants
 from pcef.core.constants import PanelPosition
-from pcef.core.constants import CODE_EDIT_STYLESHEET
 from pcef.core.properties import PropertyRegistry
 from pcef.core.system import DelayJobRunner
 from pcef.qt import QtGui, QtCore
@@ -1153,16 +1152,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def __resetStyleSheet(self, section, key, value):
         """ Resets stylesheet. """
-        stylesheet = CODE_EDIT_STYLESHEET % {
-            "background": self.style.value("background").name(),
-            "foreground": self.style.value("foreground").name(),
-            "selectionBackground": self.style.value(
-                "selectionBackground").name(),
-            "selectionForeground": self.style.value(
-                "selectionForeground").name()}
-        self.setStyleSheet(stylesheet)
-        self.setFont(QtGui.QFont(self.style.value("font"),
-                                      self.style.value("fontSize")))
+        font = self.style.value("font")
+        self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
+        p = self.palette()
+        c = self.style.value("background")
+        p.setColor(p.Base, c)
+        c = self.style.value("foreground")
+        p.setColor(p.Text, c)
+        self.setPalette(p)
+        self.setBackgroundVisible(True)
+        self.setAutoFillBackground(True)
 
     def __onSettingsChanged(self, section, key, value):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *

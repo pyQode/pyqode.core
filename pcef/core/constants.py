@@ -26,17 +26,6 @@ elif sys.platform == "darwin":
     FONT = "Monaco"
 #: Default editor font size
 FONT_SIZE = 10
-#: Editor stylesheet
-CODE_EDIT_STYLESHEET = """QCodeEdit
-{
-    background-color: %(background)s;
-    color: %(foreground)s;
-    selection-background-color: %(selectionBackground)s;
-    selection-color: %(selectionForeground)s;
-    border: none;
-    border-radius: 0px;
-}
-"""
 # Colors
 EDITOR_BACKGROUND = QColor("#FFFFFF")
 EDITOR_FOREGROUND = QColor("#000000")
