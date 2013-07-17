@@ -445,8 +445,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.cptOccurrences = len(occurrences)
         if not self.cptOccurrences:
             self.__current_occurrence = -1
-        elif self.__getCurrentOccurrence() == -1:
-            self.selectNext()
         self.__updateLabels()
         self.__updateButtons(txt=self.lineEditReplace.text())
 
