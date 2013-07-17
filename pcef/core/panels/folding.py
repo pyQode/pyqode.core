@@ -84,6 +84,7 @@ class FoldingPanel(Panel):
         h = pal.highlight().color()
         self.__systemColor = mergedColors(b, h, 50)
         self.__decorations = []
+        self.__updateRequested = False
 
     def __installActions(self):
         self.editor.addSeparator()
@@ -136,6 +137,7 @@ class FoldingPanel(Panel):
         :param indicator: Marker to add
         """
         self.__indicators.append(indicator)
+        self.__updateRequested = True
 
     def removeIndicator(self, indicator):
         """
@@ -146,14 +148,15 @@ class FoldingPanel(Panel):
         if indicator.state == indicator.FOLDED:
             self.unfold(indicator)
         self.__indicators.remove(indicator)
+        self.__updateRequested = True
 
     def clearIndicators(self):
         """ Clears the markers list """
         for foldingIndicator in self.__indicators:
             if foldingIndicator.state == foldingIndicator.FOLDED:
                 self.editor.removeDecoration(foldingIndicator._deco)
-                # self.unfold(foldingIndicator)
         self.__indicators[:] = []
+        self.__updateRequested = True
 
     def getIndicatorForLine(self, line):
         """
@@ -372,7 +375,9 @@ class FoldingPanel(Panel):
 
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
-        self.__updateIndicatorsStates()
+        if self.__updateRequested:
+            self.__updateIndicatorsStates()
+            self.__updateRequested = False
         painter = QtGui.QPainter(self)
         if self.__mouseOveredIndic:
             indic = self.__mouseOveredIndic
