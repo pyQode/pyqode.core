@@ -136,7 +136,6 @@ class FoldingPanel(Panel):
         :param indicator: Marker to add
         """
         self.__indicators.append(indicator)
-        self.repaint()
 
     def removeIndicator(self, indicator):
         """
@@ -147,7 +146,6 @@ class FoldingPanel(Panel):
         if indicator.state == indicator.FOLDED:
             self.unfold(indicator)
         self.__indicators.remove(indicator)
-        self.repaint()
 
     def clearIndicators(self):
         """ Clears the markers list """
@@ -156,7 +154,6 @@ class FoldingPanel(Panel):
                 self.editor.removeDecoration(foldingIndicator._deco)
                 # self.unfold(foldingIndicator)
         self.__indicators[:] = []
-        self.repaint()
 
     def getIndicatorForLine(self, line):
         """
@@ -293,6 +290,7 @@ class FoldingPanel(Panel):
         This function must be used to ensure all indicators states are up to
         date.
         """
+        print("update indics")
         for indicator in self.__indicators:
             if self.__getIndicatorState(indicator) == FoldingIndicator.FOLDED:
                 if indicator.state == FoldingIndicator.UNFOLDED:
@@ -377,7 +375,6 @@ class FoldingPanel(Panel):
         Panel.paintEvent(self, event)
         self.__updateIndicatorsStates()
         painter = QtGui.QPainter(self)
-
         if self.__mouseOveredIndic:
             indic = self.__mouseOveredIndic
             h = 0
