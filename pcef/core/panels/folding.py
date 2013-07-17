@@ -221,6 +221,9 @@ class FoldingPanel(Panel):
         Checks the QTextBlock states and determine if the foldingIndicator is
         folded or not.
         """
+        if (not foldingIndicator.start or not foldingIndicator.end or
+                    foldingIndicator.start > foldingIndicator.end):
+            return foldingIndicator.UNFOLDED
         for i in range(foldingIndicator.start, foldingIndicator.end):
             if not self.__isShared(i, foldingIndicator):
                 block = self.editor.document().findBlockByNumber(i)
