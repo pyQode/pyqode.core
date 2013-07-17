@@ -23,6 +23,10 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         loadUi("simple_editor.ui", self, rcFilename="simple_editor.qrc")
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
+        if QtGui.QIcon.hasThemeIcon("document-save"):
+            self.actionSave.setIcon(QtGui.QIcon.fromTheme("document-save"))
+        if QtGui.QIcon.hasThemeIcon("document-open"):
+            self.actionOpen.setIcon(QtGui.QIcon.fromTheme("document-open"))
         # edit menu
         mnu = QtGui.QMenu("Edit", self.menubar)
         mnu.addActions(self.editor.actions())
