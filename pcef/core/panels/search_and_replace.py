@@ -112,11 +112,17 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        findIcon = QtGui.QIcon.fromTheme("edit-find", QtGui.QIcon(":"))
-        replaceIcon = QtGui.QIcon.fromTheme("edit-find-replace", QtGui.QIcon(":"))
-        nextIcon = QtGui.QIcon.fromTheme("go-down", QtGui.QIcon(":"))
-        previousIcon = QtGui.QIcon.fromTheme("go-up", QtGui.QIcon(":"))
-        closeIcon = QtGui.QIcon.fromTheme("application-exit", QtGui.QIcon(":"))
+        findIcon = QtGui.QIcon.fromTheme(
+            "edit-find", QtGui.QIcon(":/pcef-icons/rc/edit-find.png"))
+        replaceIcon = QtGui.QIcon.fromTheme(
+            "edit-find-replace",
+            QtGui.QIcon(":/pcef-icons/rc/edit-find-replace.png"))
+        nextIcon = QtGui.QIcon.fromTheme(
+            "go-down", QtGui.QIcon(":/pcef-icons/rc/go-down.png"))
+        previousIcon = QtGui.QIcon.fromTheme(
+            "go-up", QtGui.QIcon(":/pcef-icons/rc/go-up.png"))
+        closeIcon = QtGui.QIcon.fromTheme(
+            "application-exit", QtGui.QIcon(":/pcef-icons/rc/close.png"))
         self.actionSearch.setIcon(findIcon)
         self.labelSearch.setPixmap(findIcon.pixmap(16, 16))
         self.actionActionSearchAndReplace.setIcon(replaceIcon)
