@@ -18,6 +18,9 @@
     <file>rc/edit-select-all.png</file>
     <file>rc/edit-undo.png</file>
     <file>rc/format-indent-less.png</file>
+    <file>rc/dialog-error.png</file>
+    <file>rc/dialog-info.png</file>
+    <file>rc/dialog-warning.png</file>
     <file>rc/format-indent-more.png</file>
     <file>rc/go-down.png</file>
     <file>rc/go-up.png</file>
