@@ -12,9 +12,9 @@
 This module contains the definition of the Mode class
 """
 import weakref
+from pcef.qt import QtCore
 
-
-class Mode(object):
+class Mode(QtCore.QObject):
     """
     Base class for editor extension/mode. An extension is a "thing" that can be
     installed on the QCodeEdit to add new behaviours.
@@ -67,6 +67,7 @@ class Mode(object):
         setup sefl.name and self.description (you can override them after
         calling this constructor if you need it).
         """
+        QtCore.QObject.__init__(self)
         #: Mode name
         self.name = self.IDENTIFIER
         #: Mode description
