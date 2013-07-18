@@ -28,7 +28,7 @@ class FileWatcherMode(Mode):
     def __init__(self):
         super(FileWatcherMode, self).__init__()
         self.__fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.__cancelNextNotification = True
+        self.__cancelNextNotification = False
         self.__flgNotify = False
         self.__changeWaiting = False
         self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
