@@ -76,6 +76,8 @@ class Panel(QtGui.QWidget, Mode):
         :param state: True = enabled, False = disabled
         :type state: bool
         """
+        if not self.editor.isVisible():
+            return
         if state is True:
             self.show()
         else:
