@@ -48,9 +48,19 @@ class PropertyRegistry(QtCore.QObject):
     #: key and the last parameter holds the property's value
     valueChanged = QtCore.Signal(str, str, str)
 
-    def __init__(self):
+    def __init__(self, copy=None):
         QtCore.QObject.__init__(self)
-        self.__dict = {"General": {}}
+        if copy:
+            self.__dict = copy.__dict
+        else:
+            self.__dict = {"General": {}}
+
+    def copy(self, propertyRegistry):
+        self.__dict = propertyRegistry.__dict
+        self.valueChanged.emit("", "", "")
+
+    def clone(self):
+        return PropertyRegistry(copy=self)
 
     def addProperty(self, key, value, section="General"):
         """
