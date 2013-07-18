@@ -1057,7 +1057,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         styleName = QtGui.QApplication.instance().style().metaObject().className()
         if "OXYGEN" in styleName.upper():
             vscroll_width = hscroll_height = 0
-        print(styleName)
         left = 0
         panels = list(self.__panels[PanelPosition.LEFT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
