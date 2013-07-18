@@ -123,6 +123,22 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self.__blocks
 
+    @property
+    def style(self):
+        return self.__style
+
+    @style.setter
+    def style(self, value):
+        """
+        Sets the editor style. The valueChanged signal will be emitted with all
+        parameters set to an empty string ("").
+
+        :param value: The new editor style
+        :type value: PropertyRegistry
+        """
+        self.__style = value
+        self.__style.valueChanged.emit("", "", "")
+
     def __init__(self, parent=None, createDefaultActions=True):
         """
         :param parent: Parent widget
@@ -955,7 +971,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Init the style PropertyRegistry
         """
-        self.style = PropertyRegistry()
+        self.__style = PropertyRegistry()
         self.style.valueChanged.connect(self.__resetPalette)
         self.style.addProperty("font", constants.FONT)
         self.style.addProperty("fontSize", constants.FONT_SIZE)
