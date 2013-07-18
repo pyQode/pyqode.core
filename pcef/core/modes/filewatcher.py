@@ -68,7 +68,9 @@ class FileWatcherMode(Mode):
     def __onEditorFilePathChanged(self):
         print("adapt path")
         path = self.editor.filePath
-        self.__fileSystemWatcher.removePaths(self.__fileSystemWatcher.files())
+        if len(self.__fileSystemWatcher.files()):
+            self.__fileSystemWatcher.removePaths(
+                self.__fileSystemWatcher.files())
         if path not in self.__fileSystemWatcher.files():
             self.__fileSystemWatcher.addPath(path)
 
