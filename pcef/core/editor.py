@@ -612,7 +612,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 cursor.movePosition(QtGui.QTextCursor.StartOfLine)
                 cursor.insertText(" " * nbSpaces)
                 cursor.movePosition(QtGui.QTextCursor.EndOfLine)
-                cursor.setPosition(cursor.position() + 1)
+                cursor.movePosition(cursor.Down, cursor.MoveAnchor)
                 nbSpacesAdded += nbSpaces
                 if not i:
                     startOffset = nbSpaces
@@ -667,7 +667,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     cursor.clearSelection()
                 # next line
                 cursor.movePosition(QtGui.QTextCursor.EndOfLine)
-                cursor.setPosition(cursor.position() + 1)
+                cursor.movePosition(cursor.Down, cursor.MoveAnchor)
             if cpt:
                 cursor.setPosition(sel_start - startOffset)
             else:
