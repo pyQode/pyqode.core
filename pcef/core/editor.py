@@ -1151,14 +1151,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def __resetPalette(self, section, key, value):
         """ Resets stylesheet. """
-        font = self.style.value("font")
-        self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
-        p = self.palette()
-        c = self.style.value("background")
-        p.setColor(p.Base, c)
-        c = self.style.value("foreground")
-        p.setColor(p.Text, c)
-        self.setPalette(p)
+        if key == "font" or key == "fontSize" or not key:
+            print(key, value)
+            font = self.style.value("font")
+            self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
+        if key == "background" or key == "foreground" or not key:
+            p = self.palette()
+            c = self.style.value("background")
+            p.setColor(p.Base, c)
+            c = self.style.value("foreground")
+            p.setColor(p.Text, c)
+            self.setPalette(p)
 
 
     def __onSettingsChanged(self, section, key, value):
