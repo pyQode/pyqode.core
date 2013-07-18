@@ -305,7 +305,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
-        print("saveToFile")
         self.textSaving.emit(filePath)
         if not filePath:
             if self.filePath:
