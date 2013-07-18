@@ -12,6 +12,12 @@
 This package contains the core modes (language independant)
 """
 from pcef.core.modes.caret_line_highlight import CaretLineHighlighterMode
+from pcef.core.modes.checker import CheckerMode, CheckerMessage
+from pcef.core.modes.checker import MSG_STATUS_ERROR
+from pcef.core.modes.checker import MSG_STATUS_INFO
+from pcef.core.modes.checker import MSG_STATUS_WARNING
+from pcef.core.modes.checker import CHECK_TRIGGER_TXT_CHANGED
+from pcef.core.modes.checker import CHECK_TRIGGER_TXT_SAVED
 from pcef.core.modes.filewatcher import FileWatcherMode
 from pcef.core.modes.right_margin import RightMarginMode
 from pcef.core.modes.zoom import ZoomMode

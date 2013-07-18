@@ -23,6 +23,12 @@ from pcef.core.editor import QCodeEdit
 from pcef.core.mode import Mode
 from pcef.core.modes import AutoIndentMode
 from pcef.core.modes import CaretLineHighlighterMode
+from pcef.core.modes import CheckerMode, CheckerMessage
+from pcef.core.modes import MSG_STATUS_ERROR
+from pcef.core.modes import MSG_STATUS_INFO
+from pcef.core.modes import MSG_STATUS_WARNING
+from pcef.core.modes import CHECK_TRIGGER_TXT_CHANGED
+from pcef.core.modes import CHECK_TRIGGER_TXT_SAVED
 from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
 from pcef.core.modes import PygmentsHighlighterMode
@@ -92,8 +98,11 @@ class QGenericCodeEdit(QCodeEdit):
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
            "FoldingIndicator", "SearchAndReplacePanel",
-           "CaretLineHighlighterMode", "FileWatcherMode", "RightMarginMode",
-           "ZoomMode", "PygmentsHighlighterMode", "AutoIndentMode",
-           "PanelPosition", "TextDecoration", "PropertyRegistry", "TextStyle",
+           "CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
+           "MSG_STATUS_INFO", "MSG_STATUS_ERROR", "MSG_STATUS_WARNING",
+           "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
+           "FileWatcherMode", "RightMarginMode", "ZoomMode",
+           "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
+           "TextDecoration", "PropertyRegistry", "TextStyle",
            "QGenericCodeEdit", "JobRunner", "DelayJobRunner", "getUiDirectory",
            "getRcDirectory"]
