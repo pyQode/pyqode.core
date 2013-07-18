@@ -34,7 +34,6 @@ class FileWatcherMode(Mode):
         self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     def __notifyChange(self):
-        print("notify")
         self.__flgNotify = True
         auto = self.editor.settings.value("autoReloadChangedFiles")
         if (auto or QtGui.QMessageBox.question(
@@ -66,7 +65,6 @@ class FileWatcherMode(Mode):
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
-        print("adapt path")
         path = self.editor.filePath
         if len(self.__fileSystemWatcher.files()):
             self.__fileSystemWatcher.removePaths(
