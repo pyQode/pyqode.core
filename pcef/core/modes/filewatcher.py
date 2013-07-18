@@ -61,7 +61,6 @@ class FileWatcherMode(Mode):
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
-        print("path changed")
         path = self.editor.filePath
         if path not in self.__fileSystemWatcher.files():
             self.__fileSystemWatcher.addPath(path)
