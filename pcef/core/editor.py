@@ -1153,14 +1153,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Resets stylesheet. """
         font = self.style.value("font")
         self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
+        self.setAutoFillBackground(True)
         p = self.palette()
         c = self.style.value("background")
         p.setColor(p.Base, c)
+        p.setColor(p.Window, c)
         c = self.style.value("foreground")
         p.setColor(p.Text, c)
         self.setPalette(p)
-        self.setBackgroundVisible(True)
-        self.setAutoFillBackground(True)
+
 
     def __onSettingsChanged(self, section, key, value):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
