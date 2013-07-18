@@ -15,6 +15,11 @@ MSG_STATUS_WARNING = 1
 #: Status value for an error message
 MSG_STATUS_ERROR = 2
 
+#: Check is triggered when text has changed
+CHECK_TRIGGER_TXT_CHANGED = 0
+#: Check is triggered when text has been saved.
+CHECK_TRIGGER_TXT_SAVED = 1
+
 
 class Message(object):
     """
@@ -80,11 +85,12 @@ class Checker(Mode, QtCore.QObject):
     addMessageRequested = QtCore.Signal(Message)
     clearMessagesRequested = QtCore.Signal()
 
-    def __init__(self, clearOnRequest=True):
+    def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=2, delay=1200)
         self.__messages = []
+        self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
         self.__clearOnRequest = clearOnRequest
 
@@ -134,11 +140,17 @@ class Checker(Mode, QtCore.QObject):
 
     def onStateChanged(self, state):
         if state:
-            self.editor.textChanged.connect(self.requestAnalysis)
+            if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
+                self.editor.textChanged.connect(self.requestAnalysis)
+            elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
+                self.editor.textSaved.connect(self.requestAnalysis)
             self.addMessageRequested.connect(self.addMessage)
             self.clearMessagesRequested.connect(self.clearMessages)
         else:
-            self.editor.textChanged.disconnect(self.requestAnalysis)
+            if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
+                self.editor.textChanged.disconnect(self.requestAnalysis)
+            elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
+                self.editor.textSaved.disconnect(self.requestAnalysis)
             self.addMessageRequested.disconnect(self.addMessage)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
@@ -198,7 +210,7 @@ if __name__ == "__main__":
         win = QtGui.QMainWindow()
         edit = QGenericCodeEdit()
         win.setCentralWidget(edit)
-        edit.installMode(FancyChecker())
+        edit.installMode(FancyChecker(trigger=CHECK_TRIGGER_TXT_CHANGED))
         edit.installPanel(MarkerPanel())
         edit.openFile(__file__)
         win.show()
