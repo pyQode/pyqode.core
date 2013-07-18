@@ -21,7 +21,7 @@ CHECK_TRIGGER_TXT_CHANGED = 0
 CHECK_TRIGGER_TXT_SAVED = 1
 
 
-class Message(object):
+class CheckerMessage(object):
     """
     A message associates a description with a status and few other information
     such as line and column number, custom icon (to override the status icon).
@@ -66,7 +66,7 @@ class Message(object):
         self._decoration = None
 
 
-class Checker(Mode, QtCore.QObject):
+class CheckerMode(Mode, QtCore.QObject):
     """
     This mode is an abstract base class for code checker modes.
 
@@ -82,7 +82,7 @@ class Checker(Mode, QtCore.QObject):
     current file path.
     """
 
-    addMessageRequested = QtCore.Signal(Message)
+    addMessageRequested = QtCore.Signal(CheckerMessage)
     clearMessagesRequested = QtCore.Signal()
 
     def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED):
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     except ImportError:
         pass
 
-    class FancyChecker(Checker):
+    class FancyChecker(CheckerMode):
         """
         Example checker. Clear messages and add a message of each status on a
         randome line.
@@ -195,13 +195,13 @@ if __name__ == "__main__":
 
         def run(self, document, filePath):
             self.clearMessagesRequested.emit()
-            msg = Message("A fancy info message", MSG_STATUS_INFO,
+            msg = CheckerMessage("A fancy info message", MSG_STATUS_INFO,
                           random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
-            msg = Message("A fancy warning message", MSG_STATUS_WARNING,
+            msg = CheckerMessage("A fancy warning message", MSG_STATUS_WARNING,
                           random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
-            msg = Message("A fancy error message", MSG_STATUS_ERROR,
+            msg = CheckerMessage("A fancy error message", MSG_STATUS_ERROR,
                           random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
 

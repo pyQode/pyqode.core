@@ -264,9 +264,12 @@ class FoldingPanel(Panel):
         for i in range(foldingIndicator.start, foldingIndicator.end):
             block = self.editor.document().findBlockByNumber(i)
             block.setVisible(not fold)
-            doc.markContentsDirty(block.position(), block.length())
             if not self.__isShared(i, foldingIndicator):
                 block.setUserData(FoldingPanel._BlockFoldData(folded=fold))
+
+        for i in range(self.editor.lineCount()):
+            block = self.editor.document().findBlockByNumber(i)
+            doc.markContentsDirty(block.position(), block.length())
         self.editor.refreshPanels()
 
     def __isShared(self, lineNbr, owner):
