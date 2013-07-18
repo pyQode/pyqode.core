@@ -361,7 +361,7 @@ class PygmentsHighlighterMode(Mode):
 
     def onStyleChanged(self, section, key, value):
         """ Updates the pygments style """
-        if key == "pygmentsStyle":
+        if key == "pygmentsStyle" or not key:
             if self.highlighter is not None:
                 self.highlighter.style = self.editor.style.value(
                     "pygmentsStyle")

@@ -58,8 +58,9 @@ class CaretLineHighlighterMode(Mode):
         """
         Changes the highlight brush color and refresh highlighting
         """
-        if key == "caretLineBackground":
-            self.__brush = QtGui.QBrush(QtGui.QColor(value))
+        if key == "caretLineBackground" or not key:
+            self.__brush = QtGui.QBrush(
+                self.editor.style.value("caretLineBackground"))
             self.__updateHighlight()
 
     def clearDeco(self):

@@ -100,6 +100,7 @@ class Mode(object):
         self.__editor = weakref.ref(editor)
         self.enabled = True
         editor.style.valueChanged.connect(self.onStyleChanged)
+        editor.settings.valueChanged.connect(self.onSettingsChanged)
 
     def uninstall(self):
         """
@@ -122,6 +123,16 @@ class Mode(object):
 
     def onStyleChanged(self, section, key, value):
         """
-        Automatically called when a style property changed
+        Automatically called when a style property changed.
+
+        .. note: If the editor style changed globally, key will be set to "".
+        """
+        pass
+
+    def onSettingsChanged(self, section, key, value):
+        """
+        Automatically called when a settings property changed
+
+        .. note: If the editor style changed globally, key will be set to "".
         """
         pass

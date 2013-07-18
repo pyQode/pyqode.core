@@ -37,10 +37,10 @@ class LineNumberPanel(Panel):
 
     def onStyleChanged(self, section, key, value):
         Panel.onStyleChanged(self, section, key, value)
-        if key == "lineForeground":
-            self._lineColorU = self.editor.style.value_from_str(value)
-        elif key == "lineForegroundSel":
-            self._lineColorS = self.editor.style.value_from_str(value)
+        if key == "lineForeground" or not key:
+            self._lineColorU = self.editor.style.value("lineForeground")
+        elif key == "lineForegroundSel" or not key:
+            self._lineColorS = self.editor.style.value("lineForegroundSel")
 
     def sizeHint(self):
         """

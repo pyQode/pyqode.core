@@ -136,8 +136,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param value: The new editor style
         :type value: PropertyRegistry
         """
-        self.__style = value
-        self.__style.valueChanged.emit("", "", "")
+        self.__style.copy(value)
 
     def __init__(self, parent=None, createDefaultActions=True):
         """
@@ -1168,7 +1167,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def __resetPalette(self, section, key, value):
         """ Resets stylesheet. """
         if key == "font" or key == "fontSize" or not key:
-            print(key, value)
             font = self.style.value("font")
             self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
         if key == "background" or key == "foreground" or not key:

@@ -40,9 +40,6 @@ class AutoIndentMode(Mode):
     def __init__(self):
         super(AutoIndentMode, self).__init__()
 
-    def onStyleChanged(self):
-        pass  # style not needed
-
     def _getIndent(self, tc):
         """
         Return the indentation text (a series of spaces, tabs)

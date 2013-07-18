@@ -50,8 +50,8 @@ class RightMarginMode(Mode):
         :param key:
         :param value:
         """
-        if key == "margin":
-            self.__pen = QtGui.QPen(QtGui.QColor(value))
+        if key == "margin" or not key:
+            self.__pen = self.editor.style.value("margin")
             self.editor.update()
 
     def onStateChanged(self, state):

@@ -89,11 +89,13 @@ class Panel(QtGui.QWidget, Mode):
         :param key:
         :param value:
         """
-        if key == "panelBackground":
-            self.backgroundBrush = QtGui.QBrush(QtGui.QColor(value))
+        if key == "panelBackground" or not key:
+            self.backgroundBrush = QtGui.QBrush(
+                self.editor.style.value("panelBackground"))
             self.editor.repaint()
-        elif key == "panelForeground":
-            self.foregroundPen = QtGui.QPen(QtGui.QColor(value))
+        if key == "panelForeground" or not key:
+            self.foregroundPen = QtGui.QPen(
+                self.editor.style.value("panelForeground"))
             self.editor.repaint()
 
     def paintEvent(self, event):

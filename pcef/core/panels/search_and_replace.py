@@ -143,7 +143,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
                                       constants.SEARCH_OCCURRENCES_FOREGROUND)
 
     def onStyleChanged(self, section, key, value):
-        if key in self._KEYS:
+        if key in self._KEYS or not key:
             self.__resetStylesheet()
 
     def onStateChanged(self, state):

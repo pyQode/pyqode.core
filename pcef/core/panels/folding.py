@@ -105,12 +105,13 @@ class FoldingPanel(Panel):
 
     def onStyleChanged(self, section, key, value):
         Panel.onStyleChanged(self, section, key, value)
-        if key == "nativeFoldingIndicator":
-            self.__native = self.editor.style.value_from_str(value)
-        elif key == "foldIndicatorBackground":
-            self.__color = QtGui.QColor(value)
-        elif key == "background":
-            self.__decoColor = driftColor(QtGui.QColor(value))
+        if key == "nativeFoldingIndicator" or not key:
+            self.__native = self.editor.style.value("nativeFoldingIndicator")
+            key = None
+        if key == "foldIndicatorBackground" or not key:
+            self.__color = self.editor.style.value("foldIndicatorBackground")
+        if key == "background" or not key:
+            self.__decoColor = driftColor(self.editor.style.value("background"))
 
     def resetIndicatorsBackground(self):
         """
