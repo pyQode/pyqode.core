@@ -105,9 +105,10 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         self.__messages.append(message)
         if message.line:
-            message._marker = Marker(message.line, message.icon,
-                                     message.description)
-            self.editor.markerPanel.addMarker(message._marker)
+            if hasattr(self.editor, "markerPanel"):
+                message._marker = Marker(message.line, message.icon,
+                                         message.description)
+                self.editor.markerPanel.addMarker(message._marker)
             message._decoration = TextDecoration(self.editor.textCursor(),
                                                  startLine=message.line,
                                                  tooltip=message.description,
