@@ -38,6 +38,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     newTextSet = QtCore.Signal()
     #: Signal emitted when the text is saved
     textSaved = QtCore.Signal(str)
+    textSaving = QtCore.Signal(str)
     #: Signal emitted when the dirty state changed
     dirtyChanged = QtCore.Signal(bool)
     #: Signal emitted when a key is pressed
@@ -304,6 +305,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
+        print("saveToFile")
+        self.textSaving.emit(filePath)
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
@@ -317,9 +320,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             content = self.__encodePlainText(self.getDefaultEncoding())
         with open(filePath, "wb") as f:
             f.write(content)
-        self.textSaved.emit(filePath)
         self.dirty = False
         self.__filePath = filePath
+        self.textSaved.emit(filePath)
         return True
 
     def installMode(self, mode):

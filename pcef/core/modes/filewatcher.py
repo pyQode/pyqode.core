@@ -34,6 +34,7 @@ class FileWatcherMode(Mode):
         self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     def __notifyChange(self):
+        print("notify")
         self.__flgNotify = True
         auto = self.editor.settings.value("autoReloadChangedFiles")
         if (auto or QtGui.QMessageBox.question(
@@ -47,7 +48,7 @@ class FileWatcherMode(Mode):
         self.__changeWaiting = False
         self.__flgNotify = False
 
-    def __onFileChanged(self):
+    def __onFileChanged(self, path):
         if self.__cancelNextNotification:
             self.__cancelNextNotification = False
             return
@@ -55,13 +56,19 @@ class FileWatcherMode(Mode):
         if self.editor.hasFocus() and self.__flgNotify:
             self.__notifyChange()
 
-    def __onEditorTextSaved(self):
+    def __onEditorTextSaved(self, path):
         self.__cancelNextNotification = True
         self.__onEditorFilePathChanged()
+        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
+
+    def __onEditorTextSaving(self, path):
+        self.__fileSystemWatcher.fileChanged.disconnect(self.__onFileChanged)
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
+        print("adapt path")
         path = self.editor.filePath
+        self.__fileSystemWatcher.removePaths(self.__fileSystemWatcher.files())
         if path not in self.__fileSystemWatcher.files():
             self.__fileSystemWatcher.addPath(path)
 
@@ -83,10 +90,12 @@ class FileWatcherMode(Mode):
         """
         if state is True:
             self.editor.textSaved.connect(self.__onEditorTextSaved)
+            self.editor.textSaving.connect(self.__onEditorTextSaving)
             self.editor.newTextSet.connect(self.__onEditorFilePathChanged)
             self.editor.focusedIn.connect(self.__onEditorFocusIn)
         else:
             self.editor.textSaved.disconnect(self.__onEditorTextSaved)
+            self.editor.textSaving.connect(self.__onEditorTextSaving)
             self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
             self.editor.focusedIn.disconnect(self.__onEditorFocusIn)
             self.__fileSystemWatcher.removePath(self.editor.filePath)
