@@ -956,7 +956,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Init the style PropertyRegistry
         """
         self.style = PropertyRegistry()
-        self.style.valueChanged.connect(self.__resetStyleSheet)
+        self.style.valueChanged.connect(self.__resetPalette)
         self.style.addProperty("font", constants.FONT)
         self.style.addProperty("fontSize", constants.FONT_SIZE)
         self.style.addProperty("background", constants.EDITOR_BACKGROUND)
@@ -973,7 +973,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             "panelForeground", self.palette().windowText().color())
         self.style.addProperty(
             "panelHighlight", self.palette().highlight().color())
-        self.__resetStyleSheet("", "", "")
+        self.__resetPalette("", "", "")
 
     def __encodePlainText(self, encoding):
         if sys.version_info[0] == 3:
@@ -1149,15 +1149,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 bottom += panel.sizeHint().height()
         self.setViewportMargins(left, top, right, bottom)
 
-    def __resetStyleSheet(self, section, key, value):
+    def __resetPalette(self, section, key, value):
         """ Resets stylesheet. """
         font = self.style.value("font")
         self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
-        self.setAutoFillBackground(True)
         p = self.palette()
         c = self.style.value("background")
         p.setColor(p.Base, c)
-        p.setColor(p.Window, c)
         c = self.style.value("foreground")
         p.setColor(p.Text, c)
         self.setPalette(p)
