@@ -39,44 +39,6 @@ CARET_LINE_BACKGROUND = QColor("#E4EDF8")
 SEARCH_OCCURRENCES_BACKGROUND = QColor("#FFFF00")
 SEARCH_OCCURRENCES_FOREGROUND = QColor("#000000")
 
-# Default highlighter styles values, mostly for the python highlighter but they
-# may be shared between different highlighter/languages
-DEFAULT_STYLES = {
-    'keyword': TextStyle('#808000 nbold nitalic nunderlined'),
-    'builtins': TextStyle('#808000 nbold nitalic nunderlined'),
-    'operator': TextStyle('darkGray nbold nitalic nunderlined'),
-    'punctuation': TextStyle('darkGray nbold nitalic nunderlined'),
-    'decorator': TextStyle('#808000 nbold nitalic nunderlined'),
-    'brace': TextStyle('#404040 nbold nitalic nunderlined'),
-    'class': TextStyle('#800080 nbold nitalic nunderlined'),
-    'function': TextStyle('#800080 nbold nitalic nunderlined'),
-    'string': TextStyle('#008000 nbold nitalic nunderlined'),
-    'docstring': TextStyle('#000080 nbold nitalic nunderlined'),
-    'comment': TextStyle('#008000 nbold italic nunderlined'),
-    'self': TextStyle('#8F2828 nbold italic nunderlined'),
-    'numbers': TextStyle('#000080 nbold nitalic nunderlined'),
-    'predefined': TextStyle('#B200B2 nbold nitalic nunderlined'),
-    'docstringTag': TextStyle('#0000FF nbold nitalic underlined'),
-}
-
-DEFAULT_DARK_STYLES = {
-    'keyword': TextStyle('#CC7832 bold nitalic nunderlined'),
-    'builtins': TextStyle('#CC7832 nbold nitalic nunderlined'),
-    'operator': TextStyle('#A9B7C6 nbold nitalic nunderlined'),
-    'punctuation': TextStyle('#A9B7C6 nbold nitalic nunderlined'),
-    'decorator': TextStyle('#BBB529 nbold nitalic nunderlined'),
-    'brace': TextStyle('#AAAAAA nbold nitalic nunderlined'),
-    'class': TextStyle('#A9B7C6 bold nitalic nunderlined'),
-    'function': TextStyle('#A9B7C6 bold nitalic nunderlined'),
-    'string': TextStyle('#A5C261 nbold nitalic nunderlined'),
-    'docstring': TextStyle('#629755 nbold nitalic nunderlined'),
-    'comment': TextStyle('#808080 nbold italic nunderlined'),
-    'self': TextStyle('#94558D nbold italic nunderlined'),
-    'numbers': TextStyle('#6897B3 nbold nitalic nunderlined'),
-    'predefined': TextStyle('#B200B2 nbold nitalic nunderlined'),
-    'docstringTag': TextStyle('#427735 bold nitalic underlined')
-}
-
 #
 # Default settings value
 #
