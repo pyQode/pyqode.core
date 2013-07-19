@@ -13,6 +13,7 @@ Integrates the generic editor using the pcef qt designer plugin.
 """
 import os
 import sys
+import pcef.core
 from pcef.qt import QtCore, QtGui
 from ui import loadUi
 
@@ -31,6 +32,30 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         mnu = QtGui.QMenu("Edit", self.menubar)
         mnu.addActions(self.editor.actions())
         self.menubar.addMenu(mnu)
+        self.setupModesMenu()
+        self.setupPanelsMenu()
+        self.setupStylesMenu()
+        try:
+            self.editor.openFile(__file__)
+        except (OSError, IOError) as e:
+            pass
+        except AttributeError:
+            pass
+
+    def setupStylesMenu(self):
+        group = QtGui.QActionGroup(self)
+        currentStyle = self.editor.style.value("pygmentsStyle")
+        group.triggered.connect(self.onStyleTriggered)
+        for style in sorted(pcef.core.PYGMENTS_STYLES):
+            a = QtGui.QAction(self.menuStyles)
+            a.setText(style)
+            a.setCheckable(True)
+            if style == currentStyle:
+                a.setChecked(True)
+            group.addAction(a)
+            self.menuStyles.addAction(a)
+
+    def setupModesMenu(self):
         # Add modes to the modes menu
         for k, v in self.editor.modes().items():
             a = QtGui.QAction(self.menuModes)
@@ -40,7 +65,8 @@ class SimpleEditorWindow(QtGui.QMainWindow):
             a.changed.connect(self.onModeCheckStateChanged)
             a.mode = v
             self.menuModes.addAction(a)
-        # Add panels to the panels menu
+
+    def setupPanelsMenu(self):
         for zones, panel_dic in self.editor.panels().items():
             for k, v in panel_dic.items():
                 a = QtGui.QAction(self.menuModes)
@@ -50,12 +76,10 @@ class SimpleEditorWindow(QtGui.QMainWindow):
                 a.changed.connect(self.onPanelCheckStateChanged)
                 a.panel = v
                 self.menuPanels.addAction(a)
-        try:
-            self.editor.openFile(__file__)
-        except (OSError, IOError) as e:
-            pass
-        except AttributeError:
-            pass
+
+    @QtCore.Slot(QtGui.QAction)
+    def onStyleTriggered(self, action):
+        self.editor.style.setValue("pygmentsStyle", action.text())
 
     @QtCore.Slot()
     def on_actionOpen_triggered(self):
