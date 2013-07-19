@@ -31,7 +31,7 @@ from pcef.core.modes import CHECK_TRIGGER_TXT_CHANGED
 from pcef.core.modes import CHECK_TRIGGER_TXT_SAVED
 from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
-from pcef.core.modes import PygmentsHighlighterMode
+from pcef.core.modes import PygmentsHighlighterMode, PYGMENTS_STYLES
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
 from pcef.core.panels import FoldingPanel, FoldingIndicator
@@ -105,4 +105,4 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
            "TextDecoration", "PropertyRegistry", "TextStyle",
            "QGenericCodeEdit", "JobRunner", "DelayJobRunner", "getUiDirectory",
-           "getRcDirectory"]
+           "getRcDirectory", "PYGMENTS_STYLES"]
