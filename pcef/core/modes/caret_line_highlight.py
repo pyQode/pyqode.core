@@ -14,6 +14,7 @@ This module contains the care line highlighter mode
 from pcef.core import constants
 from pcef.core.mode import Mode
 from pcef.core.decoration import TextDecoration
+from pcef.core.system import driftColor
 from pcef.qt import QtGui
 
 class CaretLineHighlighterMode(Mode):
@@ -49,8 +50,8 @@ class CaretLineHighlighterMode(Mode):
             - caretLineBackground
         """
         Mode._onInstall(self, editor)
-        color = self.editor.style.addProperty("caretLineBackground",
-                                              constants.CARET_LINE_BACKGROUND)
+        color = self.editor.style.addProperty(
+            "caretLineBackground", driftColor(constants.EDITOR_BACKGROUND))
         self.__brush = QtGui.QBrush(QtGui.QColor(color))
         self.__updateHighlight()
 
@@ -58,10 +59,20 @@ class CaretLineHighlighterMode(Mode):
         """
         Changes the highlight brush color and refresh highlighting
         """
-        if key == "caretLineBackground" or not key:
+        if key == "caretLineBackground":
             self.__brush = QtGui.QBrush(
                 self.editor.style.value("caretLineBackground"))
             self.__updateHighlight()
+        if not key or key == "background":
+            b = self.editor.style.value("background")
+            factor = 105
+            if b.lightness() < 128:
+                factor = 150
+            if b.lightness() == 0:
+                b = QtGui.QColor("#101010")
+            self.editor.style.setValue("caretLineBackground",
+                                       driftColor(b, factor))
+
 
     def clearDeco(self):
         if self.__decoration:
