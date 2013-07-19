@@ -57,7 +57,7 @@ class AutoIndentMode(Mode):
         tc.setPosition(pos)
         return indent
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state is True:
             self.editor.postKeyPressed.connect(self.__onKeyPressed)
         else:

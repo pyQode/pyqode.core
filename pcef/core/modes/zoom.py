@@ -29,7 +29,7 @@ class ZoomMode(Mode):
         self.prev_delta = 0
         self.default_font_size = constants.FONT_SIZE
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """

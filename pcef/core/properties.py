@@ -46,7 +46,7 @@ class PropertyRegistry(QtCore.QObject):
     #: Signal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
-    valueChanged = QtCore.Signal(str, str, str)
+    valueChanged = QtCore.Signal(str, str)
 
     def __init__(self, copy=None):
         QtCore.QObject.__init__(self)
@@ -57,7 +57,7 @@ class PropertyRegistry(QtCore.QObject):
 
     def copy(self, propertyRegistry):
         self.__dict = propertyRegistry.__dict
-        self.valueChanged.emit("", "", "")
+        self.valueChanged.emit("", "")
 
     def clone(self):
         return PropertyRegistry(copy=self)
@@ -88,6 +88,26 @@ class PropertyRegistry(QtCore.QObject):
             self.__dict[section] = {key: value}
         return self.value_from_str(value)
 
+    def removeProperty(self, key, section="General"):
+        """
+        Adds a property with a default value.
+
+        .. remark:: If the property already exists in the given section,
+                    the original value is kept and returned as a result.
+
+        :param key: The name/key of the property
+
+        :param value: The value of the property.
+        :type value: int or float or bool or string or QColor or TextStyle
+
+        :return The original value if the property does not already exists,
+                else it return the exisiting property value.
+                (Use setValue to change the value of a property).
+        """
+        if section in self.__dict:
+            if key in self.__dict[section]:
+                self.__dict.pop(key)
+
     def setValue(self, key, value, section="General"):
         """
         Sets the value of a property
@@ -103,7 +123,7 @@ class PropertyRegistry(QtCore.QObject):
         value = self.__value_to_str(value)
         if self.__dict[section][key] != value:
             self.__dict[section][key] = value
-            self.valueChanged.emit(section, key, value)
+            self.valueChanged.emit(section, key)
 
     def value(self, key, section="General", default=""):
         """
@@ -192,8 +212,7 @@ class PropertyRegistry(QtCore.QObject):
             self.load(f.read())
         for section in self.__dict:
             for key in self.__dict[section]:
-                self.valueChanged.emit(
-                    section, key, self.__dict[section][key])
+                self.valueChanged.emit(section, key)
 
     def save(self, filepath):
         """

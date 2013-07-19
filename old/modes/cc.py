@@ -267,13 +267,13 @@ class CodeCompletionMode(Mode):
         self._models = sorted(self._models, key=lambda mdl: mdl.priority,
                               reverse=True)
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Setup the completer with the CodeEdit.
 
         :param editor: CodeEditorWidget instance
         """
-        super(CodeCompletionMode, self).install(editor)
+        super(CodeCompletionMode, self)._onInstall(editor)
         self.__completer.setWidget(editor.codeEdit)
         self.__completer.setCaseSensitivity(self.__caseSensitivity)
         self.__completer.setCompletionMode(QCompleter.PopupCompletion)

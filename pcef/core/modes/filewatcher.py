@@ -77,14 +77,14 @@ class FileWatcherMode(Mode):
         if self.__changeWaiting:
             self.__notifyChange()
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Adds autoReloadChangedFiles settings on install.
         """
-        Mode.install(self, editor)
+        Mode._onInstall(self, editor)
         self.editor.settings.addProperty("autoReloadChangedFiles", False)
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """

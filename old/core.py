@@ -287,13 +287,13 @@ class CodeEditorWidget(QWidget, StyledObject):
     def clearModes(self):
         keys = self.__modes.keys()
         for k in keys:
-            self.__modes[k].uninstall()
+            self.__modes[k]._onUninstall()
         self.__modes.clear()
 
     def clearPanels(self):
         keys = self.__panels.keys()
         for k in keys:
-            self.__panels[k].uninstall()
+            self.__panels[k]._onUninstall()
         self.__panels.clear()
 
     def installMode(self, mode):
@@ -303,14 +303,14 @@ class CodeEditorWidget(QWidget, StyledObject):
         """
         self.__logger.info("Installing mode %s" % mode.name)
         self.__modes[mode.name] = mode
-        mode.install(self)
+        mode._onInstall(self)
         mode.currentStyle = self.currentStyle
         mode.enabled = True
 
     def uninstallMode(self, id):
         m = self.__modes[id]
         self.__modes.pop(id, None)
-        m.uninstall()
+        m._onUninstall()
 
     def installPanel(self, panel, zone):
         """ Installs a Panel on the widget.
@@ -322,7 +322,7 @@ class CodeEditorWidget(QWidget, StyledObject):
         self.__logger.info(
             "Installing Panel {0} on zone {1}".format(panel.name, zone))
         self.__panels[panel.name] = panel
-        panel.install(self)
+        panel._onInstall(self)
         panel.currentStyle = self.currentStyle
         panel.enabled = True
         self.__zones[zone].addWidget(panel)

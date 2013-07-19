@@ -330,7 +330,7 @@ class PygmentsHighlighterMode(Mode):
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments " \
                    "lexer"
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         :type editor: pcef.editors.GenericEditor
         """
@@ -340,10 +340,10 @@ class PygmentsHighlighterMode(Mode):
         self.prev_txt = ""
         style = editor.style.addProperty("pygmentsStyle", "default")
         self.highlighter.style = style
-        Mode.install(self, editor)
+        Mode._onInstall(self, editor)
 
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         self.highlighter.enabled = state
         if state is True:
             self.editor.textSaved.connect(self.__onTextSaved)
@@ -359,7 +359,7 @@ class PygmentsHighlighterMode(Mode):
     def __onTextSaved(self):
         self.highlighter.rehighlight()
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
         """ Updates the pygments style """
         if key == "pygmentsStyle" or not key:
             if self.highlighter is not None:

@@ -24,8 +24,9 @@ class Mode(object):
     methods.
 
     Subclasses must/should override the following methods:
-        - onStateChanged: to connect/disconnect to/from the code edit signals
-        - onStyleChanged: to refresh ui colors (mainly used by panels)
+        - _onStateChanged: to connect/disconnect to/from the code edit signals
+        - _onStyleChanged: to refresh ui colors (mainly used by panels)
+        - _onSettingsChanged: to refresh some settings value.
     """
     #: The mode identifier, must redefined for every subclasses
     IDENTIFIER = ""
@@ -60,7 +61,7 @@ class Mode(object):
         """
         if enabled != self.__enabled:
             self.__enabled = enabled
-            self.onStateChanged(enabled)
+            self._onStateChanged(enabled)
 
     def __init__(self):
         """
@@ -84,7 +85,7 @@ class Mode(object):
         """
         return self.name
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Installs the extension on the editor.
 
@@ -99,17 +100,17 @@ class Mode(object):
         """
         self.__editor = weakref.ref(editor)
         self.enabled = True
-        editor.style.valueChanged.connect(self.onStyleChanged)
-        editor.settings.valueChanged.connect(self.onSettingsChanged)
+        editor.style.valueChanged.connect(self._onStyleChanged)
+        editor.settings.valueChanged.connect(self._onSettingsChanged)
 
-    def uninstall(self):
+    def _onUninstall(self):
         """
         Uninstall the mode
         """
         self.enabled = False
         self.__editor = None
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         Called when the enable state changed.
 
@@ -121,7 +122,7 @@ class Mode(object):
         """
         raise NotImplementedError()
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
         """
         Automatically called when a style property changed.
 
@@ -129,7 +130,7 @@ class Mode(object):
         """
         pass
 
-    def onSettingsChanged(self, section, key, value):
+    def _onSettingsChanged(self, section, key, value):
         """
         Automatically called when a settings property changed
 

@@ -133,8 +133,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.pushButtonPrevious.setIcon(previousIcon)
         self.pushButtonClose.setIcon(closeIcon)
 
-    def install(self, editor):
-        Panel.install(self, editor)
+    def _onInstall(self, editor):
+        Panel._onInstall(self, editor)
         self.__resetStylesheet()
         self.on_pushButtonClose_clicked()
         self.editor.style.addProperty("searchOccurrenceBackground",
@@ -142,12 +142,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.editor.style.addProperty("searchOccurrenceForeground",
                                       constants.SEARCH_OCCURRENCES_FOREGROUND)
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
+        Panel._onStyleChanged(self, section, key)
         if key in self._KEYS or not key:
             self.__resetStylesheet()
 
-    def onStateChanged(self, state):
-        Panel.onStateChanged(self, state)
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
         if state:
             # add menus
             self.__separator = self.editor.addSeparator()

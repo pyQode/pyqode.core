@@ -30,19 +30,19 @@ class RightMarginMode(Mode):
         self.marginPos = constants.MARGIN_POS
         self.__pen = QtGui.QPen()
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Installs the mode on the editor and setup drawing tools
 
         :param editor: The editor instance
         """
-        Mode.install(self, editor)
+        Mode._onInstall(self, editor)
         color = self.editor.style.addProperty("margin", "#FF0000")
         self.__pen = QtGui.QPen(QtGui.QColor(color))
         self.marginPos = int(self.editor.settings.addProperty(
             "marginPos", "80"))
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
         """
         Changes the margin color
 
@@ -54,7 +54,7 @@ class RightMarginMode(Mode):
             self.__pen = self.editor.style.value("margin")
             self.editor.update()
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         Connects/Disconnects to the painted event of the editor
 

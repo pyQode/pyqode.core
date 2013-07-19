@@ -139,7 +139,7 @@ class CheckerMode(Mode, QtCore.QObject):
         while len(self.__messages):
             self.removeMessage(self.__messages[0])
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         if state:
             if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
                 self.editor.textChanged.connect(self.requestAnalysis)

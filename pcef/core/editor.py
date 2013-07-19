@@ -331,7 +331,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param mode: The mode instance to install on this widget instance
         """
         self.__modes[mode.name] = mode
-        mode.install(self)
+        mode._onInstall(self)
         setattr(self, mode.name, mode)
 
     def uninstallMode(self, name):
@@ -379,7 +379,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         panel.zoneOrder = len(self.__panels[position])
         self.__panels[position][panel.name] = panel
-        panel.install(self)
+        panel._onInstall(self)
         self.__updateViewportMargins()
         setattr(self, panel.name, panel)
 
@@ -990,7 +990,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             "panelForeground", self.palette().windowText().color())
         self.style.addProperty(
             "panelHighlight", self.palette().highlight().color())
-        self.__resetPalette("", "", "")
+        self.__resetPalette("", "")
 
     def __encodePlainText(self, encoding):
         if sys.version_info[0] == 3:
@@ -1166,7 +1166,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 bottom += panel.sizeHint().height()
         self.setViewportMargins(left, top, right, bottom)
 
-    def __resetPalette(self, section, key, value):
+    def __resetPalette(self, section, key):
         """ Resets stylesheet. """
         if key == "font" or key == "fontSize" or not key:
             font = self.style.value("font")

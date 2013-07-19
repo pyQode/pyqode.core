@@ -86,7 +86,7 @@ class FoldingPanel(Panel):
         self.__decorations = []
         self.__updateRequested = False
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Adds two properties to the editor style:
             - nativeFoldingIndicator: to use native indicators or
@@ -94,7 +94,7 @@ class FoldingPanel(Panel):
             - foldIndicatorBackground: The background color of the fold
               indicator background. Use a os dependant color by default.
         """
-        Panel.install(self, editor)
+        Panel._onInstall(self, editor)
         self.__native = self.editor.style.addProperty("nativeFoldingIndicator",
                                                       True)
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
@@ -103,8 +103,8 @@ class FoldingPanel(Panel):
             self.editor.style.value("background"))
         self.__installActions()
 
-    def onStyleChanged(self, section, key, value):
-        Panel.onStyleChanged(self, section, key, value)
+    def _onStyleChanged(self, section, key):
+        Panel._onStyleChanged(self, section, key)
         if key == "nativeFoldingIndicator" or not key:
             self.__native = self.editor.style.value("nativeFoldingIndicator")
             key = None

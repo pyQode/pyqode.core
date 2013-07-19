@@ -31,7 +31,7 @@ class CaretLineHighlighterMode(Mode):
         self.__brush = None
         self.__pos = -1
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
@@ -43,18 +43,18 @@ class CaretLineHighlighterMode(Mode):
             self.editor.newTextSet.disconnect(self.__updateHighlight)
             self.clearDeco()
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Installs the mode on the editor and add a style property:
             - caretLineBackground
         """
-        Mode.install(self, editor)
+        Mode._onInstall(self, editor)
         color = self.editor.style.addProperty("caretLineBackground",
                                               constants.CARET_LINE_BACKGROUND)
         self.__brush = QtGui.QBrush(QtGui.QColor(color))
         self.__updateHighlight()
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
         """
         Changes the highlight brush color and refresh highlighting
         """

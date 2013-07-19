@@ -26,8 +26,8 @@ class LineNumberPanel(Panel):
         Panel.__init__(self)
         self.scrollable = True
 
-    def install(self, editor):
-        Panel.install(self, editor)
+    def _onInstall(self, editor):
+        Panel._onInstall(self, editor)
         self._lineColorU = self.editor.style.addProperty(
             "lineForeground", self.palette().color(QtGui.QPalette.Disabled,
                                                   QtGui.QPalette.WindowText))
@@ -35,8 +35,8 @@ class LineNumberPanel(Panel):
             "lineForegroundSel", self.palette().color(QtGui.QPalette.Normal,
                                                   QtGui.QPalette.WindowText))
 
-    def onStyleChanged(self, section, key, value):
-        Panel.onStyleChanged(self, section, key, value)
+    def _onStyleChanged(self, section, key):
+        Panel._onStyleChanged(self, section, key)
         if key == "lineForeground" or not key:
             self._lineColorU = self.editor.style.value("lineForeground")
         elif key == "lineForegroundSel" or not key:

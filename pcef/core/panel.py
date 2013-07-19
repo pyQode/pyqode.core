@@ -53,7 +53,7 @@ class Panel(QtGui.QWidget, Mode):
         #: changed)
         self.foregroundPen = None
 
-    def install(self, editor):
+    def _onInstall(self, editor):
         """
         Extends the Mode.install method to set the editor instance
         as the parent widget.
@@ -62,7 +62,7 @@ class Panel(QtGui.QWidget, Mode):
 
         :param editor: QCodeEdit instance
         """
-        Mode.install(self, editor)
+        Mode._onInstall(self, editor)
         self.setParent(editor)
         self.editor.refreshPanels()
         self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
@@ -70,7 +70,7 @@ class Panel(QtGui.QWidget, Mode):
         self.foregroundPen = QtGui.QPen(QtGui.QColor(
             self.editor.style.value("panelForeground")))
 
-    def onStateChanged(self, state):
+    def _onStateChanged(self, state):
         """ Shows/Hides the Panel
 
         :param state: True = enabled, False = disabled
@@ -83,7 +83,7 @@ class Panel(QtGui.QWidget, Mode):
         else:
             self.hide()
 
-    def onStyleChanged(self, section, key, value):
+    def _onStyleChanged(self, section, key):
         """
         Repaints widget if the panel background color changed.
 
