@@ -32,6 +32,12 @@ from pygments.token import Whitespace, Comment
 from pygments.util import ClassNotFound
 
 
+from pygments.styles import STYLE_MAP
+
+PYGMENTS_STYLES = STYLE_MAP.keys()
+
+
+
 def get_tokens_unprocessed(self, text, stack=('root',)):
     """ Split ``text`` into (tokentype, text) pairs.
 
@@ -341,7 +347,14 @@ class PygmentsHighlighterMode(Mode):
         style = editor.style.addProperty("pygmentsStyle", "default")
         self.highlighter.style = style
         Mode._onInstall(self, editor)
-
+        self.editor.style.setValue(
+                    "background",
+                    QtGui.QColor(self.highlighter.style.background_color))
+        c = self.highlighter.style.style_for_token(Text)['color']
+        if c is None:
+            c = '000000'
+        self.editor.style.setValue(
+            "foreground", QtGui.QColor("#{0}".format(c)))
 
     def _onStateChanged(self, state):
         self.highlighter.enabled = state
@@ -366,6 +379,14 @@ class PygmentsHighlighterMode(Mode):
                 self.highlighter.style = self.editor.style.value(
                     "pygmentsStyle")
                 self.highlighter.rehighlight()
+                self.editor.style.setValue(
+                    "background",
+                    QtGui.QColor(self.highlighter.style.background_color))
+                c = self.highlighter.style.style_for_token(Text)['color']
+                if c is None:
+                    c = '000000'
+                self.editor.style.setValue(
+                    "foreground", QtGui.QColor("#{0}".format(c)))
 
     def setLexerFromFilename(self, fn="file.py"):
         """
