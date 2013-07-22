@@ -24,8 +24,9 @@ CUSTOM_OBJECTS = {}
 for entrypoint in pkg_resources.iter_entry_points("pcef_plugins"):
     plugin = entrypoint.load()
     for name, obj in inspect.getmembers(plugin):
-        if inspect.isclass(obj):
-            CUSTOM_OBJECTS[obj._name] = obj._type
+        if name == "PLUGINS_TYPES":
+            for k, v in obj.items():
+                CUSTOM_OBJECTS[k] = v
 
 
 class UiLoader(QUiLoader):
