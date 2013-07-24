@@ -149,6 +149,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+
+        self.__marginSizes = (0, 0, 0, 0)
+        bottom = 0
+
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
@@ -497,6 +501,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.__selections[:] = []
         self.setExtraSelections(self.__selections)
+
+    def marginSize(self, position=PanelPosition.LEFT):
+        return self.__marginSizes[position]
 
     def selectFullLines(self, start, end, applySelection=True):
         """
@@ -1241,6 +1248,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         for panel in self.__panels[PanelPosition.BOTTOM].values():
             if panel.isVisible():
                 bottom += panel.sizeHint().height()
+        self.__marginSizes = (top, left, right, bottom)
         self.setViewportMargins(left, top, right, bottom)
 
     def __resetPalette(self, section, key):
