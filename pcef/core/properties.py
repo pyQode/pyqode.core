@@ -183,6 +183,8 @@ class PropertyRegistry(QtCore.QObject):
             return QtGui.QColor(value_str)
         elif value_str.startswith('#'):
             return TextStyle(value_str)
+        elif value_str.startswith("[") and value_str.endswith("]"):
+            return list(value_str.replace("[", "").replace("]", ""))
         else:
             return value_str
 
