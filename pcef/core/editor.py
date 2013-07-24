@@ -3,6 +3,7 @@ This module contains the definition of the QCodeEdit
 """
 import logging
 import sys
+import weakref
 from pcef.core import constants
 from pcef.core.constants import PanelPosition
 from pcef.core.properties import PropertyRegistry
@@ -191,6 +192,20 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.updateRequest.connect(self.__updatePanels)
 
         self.setMouseTracking(True)
+
+    def __del__(self):
+        self.uninstallAll()
+
+    def uninstallAll(self):
+        while len(self.__modes):
+            k = self.__modes.keys()[0]
+            self.uninstallMode(k)
+        while len(self.__panels):
+            zone = self.__panels.keys()[0]
+            while len(self.__panels[zone]):
+                k = self.__panels[zone].keys()[0]
+                self.uninstallPanel(k, zone)
+            self.__panels.pop(zone, None)
 
     def showContextMenu(self, pt):
         mnu = QtGui.QMenu(self)
@@ -387,8 +402,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         m = self.mode(name)
         if m:
-            m.uninstall()
-            self.__panels.pop(name, None)
+            m._editor = weakref.ref(self)
+            m._onUninstall()
+            self.__modes.pop(name, None)
         self.__dict__.pop(name, None)
 
     def mode(self, name):
@@ -425,6 +441,23 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         panel._onInstall(self)
         self.__updateViewportMargins()
         setattr(self, panel.name, panel)
+
+    def uninstallPanel(self, name, zone):
+        """
+        Uninstalls a previously installed panel.
+
+        :param name: The name of the panel to uninstall
+
+        :return:
+        """
+        m = self.__panels[zone][name]
+        if m:
+            try:
+                m._onUninstall()
+            except (RuntimeError, AttributeError):
+                pass
+            self.__panels[zone].pop(name, None)
+        self.__dict__.pop(name, None)
 
     def panels(self):
         """

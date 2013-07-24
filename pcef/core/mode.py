@@ -38,10 +38,10 @@ class Mode(object):
         """
         Provides easy access to the CodeEditorWidget weakref
 
-        :rtype: pcef.QCodeEdit
+        :rtype: pcef.core.QCodeEdit
         """
-        if self.__editor is not None:
-            return self.__editor()
+        if self._editor is not None:
+            return self._editor()
         else:
             return None
 
@@ -77,7 +77,7 @@ class Mode(object):
         #  disconnect their slots to disable any actions)
         self.__enabled = False
         #: Editor instance
-        self.__editor = None
+        self._editor = None
 
     def __str__(self):
         """
@@ -98,7 +98,7 @@ class Mode(object):
         :param editor: editor widget instance
         :type editor: pcef.QCodeEdit
         """
-        self.__editor = weakref.ref(editor)
+        self._editor = weakref.ref(editor)
         self.enabled = True
         editor.style.valueChanged.connect(self._onStyleChanged)
         editor.settings.valueChanged.connect(self._onSettingsChanged)
@@ -108,7 +108,7 @@ class Mode(object):
         Uninstall the mode
         """
         self.enabled = False
-        self.__editor = None
+        self._editor = None
 
     def _onStateChanged(self, state):
         """
