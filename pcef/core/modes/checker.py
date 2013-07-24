@@ -85,7 +85,8 @@ class CheckerMode(Mode, QtCore.QObject):
     addMessageRequested = QtCore.Signal(CheckerMessage)
     clearMessagesRequested = QtCore.Signal()
 
-    def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED):
+    def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
+                 showEditorTooltip=False):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=2, delay=1200)
@@ -93,6 +94,7 @@ class CheckerMode(Mode, QtCore.QObject):
         self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
         self.__clearOnRequest = clearOnRequest
+        self.__showTooltip = showEditorTooltip
 
     def addMessage(self, message):
         """
@@ -109,9 +111,12 @@ class CheckerMode(Mode, QtCore.QObject):
                 message._marker = Marker(message.line, message.icon,
                                          message.description)
                 self.editor.markerPanel.addMarker(message._marker)
+            tooltip=None
+            if self.__showTooltip:
+                tooltip = message.description
             message._decoration = TextDecoration(self.editor.textCursor(),
                                                  startLine=message.line,
-                                                 tooltip=message.description,
+                                                 tooltip=tooltip,
                                                  draw_order=3)
             message._decoration.setFullWidth(True)
             message._decoration.setError(color=QtGui.QColor(message.color))
