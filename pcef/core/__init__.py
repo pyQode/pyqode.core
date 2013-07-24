@@ -29,6 +29,7 @@ from pcef.core.modes import MSG_STATUS_INFO
 from pcef.core.modes import MSG_STATUS_WARNING
 from pcef.core.modes import CHECK_TRIGGER_TXT_CHANGED
 from pcef.core.modes import CHECK_TRIGGER_TXT_SAVED
+from pcef.core.modes import CodeCompletionMode
 from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
 from pcef.core.modes import PygmentsHighlighterMode, PYGMENTS_STYLES
@@ -101,8 +102,8 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "MSG_STATUS_INFO", "MSG_STATUS_ERROR", "MSG_STATUS_WARNING",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
-           "FileWatcherMode", "RightMarginMode", "ZoomMode",
-           "PygmentsHighlighterMode", "AutoIndentMode", "PanelPosition",
-           "TextDecoration", "PropertyRegistry", "TextStyle",
+           "CodeCompletionMode", "FileWatcherMode", "RightMarginMode",
+           "ZoomMode", "PygmentsHighlighterMode", "AutoIndentMode",
+           "PanelPosition", "TextDecoration", "PropertyRegistry", "TextStyle",
            "QGenericCodeEdit", "JobRunner", "DelayJobRunner", "getUiDirectory",
            "getRcDirectory", "PYGMENTS_STYLES"]
