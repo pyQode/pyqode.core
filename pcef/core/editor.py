@@ -239,6 +239,49 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the selected text. """
         return self.textCursor().selectedText()
 
+    def selectWordUnderCursor(self, selectWholeWord=False, tc=None):
+        """
+        Selects the word under cursor using the separators defined in the
+        editor settings as "wordSeparators"
+
+        :param selectWholeWord: If set to true the whole word is selected, else
+                                the selection stops at the cursor position.
+
+        :param tc: Custom text cursor (e.g. from a QTextDocument clone)
+
+        :return The QTextCursor that contains the selected word.
+        """
+        if not tc:
+            tc = self.textCursor()
+        word_separators = self.settings.value("wordSeparators")
+        end_pos = start_pos = tc.position()
+        while not tc.atStart():
+            # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
+            tc.movePosition(tc.Left, tc.KeepAnchor, 1)
+            ch = tc.selectedText()[0]
+            word_separators = self.settings.value("wordSeparators")
+            st = tc.selectedText()
+            if (st in word_separators and (st != "n" and st != "t")
+                    or ch.isspace()):
+                break  # start boundary found
+            start_pos = tc.position()
+            tc.setPosition(start_pos)
+        if selectWholeWord:
+            tc.setPosition(end_pos)
+            while not tc.atEnd():
+                # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
+                tc.movePosition(tc.Right, tc.KeepAnchor, 1)
+                ch = tc.selectedText()[0]
+                st = tc.selectedText()
+                if (st in word_separators and (st != "n" and st != "t")
+                        or ch.isspace()):
+                    break  # end boundary found
+                end_pos = tc.position()
+                tc.setPosition(end_pos)
+        tc.setPosition(start_pos)
+        tc.setPosition(end_pos, tc.KeepAnchor)
+        return tc
+
     def detectEncoding(self, data):
         """
         Detects file encoding.
@@ -967,6 +1010,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.settings.addProperty("showWhiteSpaces", False)
         self.settings.addProperty("tabLength", constants.TAB_SIZE)
         self.settings.addProperty("useSpacesInsteadOfTab", True)
+        self.settings.addProperty("wordSeparators", constants.WORD_SEPARATORS)
 
     def __initStyle(self):
         """
