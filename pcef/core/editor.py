@@ -198,14 +198,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setMouseTracking(True)
 
     def __del__(self):
-        self.uninstallAll()
+        pass
+        # todo fix it
+        # self.uninstallAll()
 
     def uninstallAll(self):
         while len(self.__modes):
-            k = self.__modes.keys()[0]
+            k = list(self.__modes.keys())[0]
             self.uninstallMode(k)
         while len(self.__panels):
-            zone = self.__panels.keys()[0]
+            zone = list(self.__panels.keys())[0]
             while len(self.__panels[zone]):
                 k = self.__panels[zone].keys()[0]
                 self.uninstallPanel(k, zone)
