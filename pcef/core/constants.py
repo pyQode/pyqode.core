@@ -39,6 +39,10 @@ CARET_LINE_BACKGROUND = QColor("#E4EDF8")
 SEARCH_OCCURRENCES_BACKGROUND = QColor("#FFFF00")
 SEARCH_OCCURRENCES_FOREGROUND = QColor("#000000")
 
+WORD_SEPARATORS = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                   '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",
+                   ".", "/", ";", '[', ']', '\\', '\n', '\t', '=', '-', ' ', '']
+
 #
 # Default settings value
 #
