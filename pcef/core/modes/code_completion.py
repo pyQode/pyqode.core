@@ -359,7 +359,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
         return sorted(words)
 
     def run(self, document, filePath, fileEncoding):
-        print("run")
         retVal = []
         assert isinstance(document, QtGui.QTextDocument)
         settings = self.settings()
