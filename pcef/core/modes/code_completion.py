@@ -341,7 +341,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
                 txt = txt.replace(sep, default_sep)
         words = txt.split(default_sep)
         for w in words:
-            w.strip()
+            w = w.strip()
             if w == '':
                 words.remove(w)
             if len(w) == 1:
