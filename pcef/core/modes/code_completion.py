@@ -74,7 +74,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
         self.__triggerKey = None
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=500)
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
