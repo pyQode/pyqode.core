@@ -537,4 +537,3 @@ if __name__ == '__main__':
     e = Example()
     e.show()
     sys.exit(app.exec_())
-
