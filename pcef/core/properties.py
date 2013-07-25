@@ -154,6 +154,8 @@ class PropertyRegistry(QtCore.QObject):
         """
         if isinstance(value, QtGui.QColor):
             return value.name()
+        elif isinstance(value, list):
+            return "[%s]" % '²'.join(value)
         else:
             return str(value)
 
@@ -184,7 +186,8 @@ class PropertyRegistry(QtCore.QObject):
         elif value_str.startswith('#'):
             return TextStyle(value_str)
         elif value_str.startswith("[") and value_str.endswith("]"):
-            return list(value_str.replace("[", "").replace("]", ""))
+            value_str = value_str[1:len(value_str)-1]
+            return value_str.split("²")
         else:
             return value_str
 
