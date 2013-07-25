@@ -187,7 +187,12 @@ class PropertyRegistry(QtCore.QObject):
             return TextStyle(value_str)
         elif value_str.startswith("[") and value_str.endswith("]"):
             value_str = value_str[1:len(value_str)-1]
-            return value_str.split("²")
+            lst = value_str.split("²")
+            try:
+                lst.remove("")
+            except ValueError:
+                pass
+            return lst
         else:
             return value_str
 
