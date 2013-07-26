@@ -75,7 +75,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
         self.__triggerKey = None
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=5, delay=1200)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
@@ -94,26 +94,36 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def requestCompletion(self, immediate=False):
         code = self.editor.toPlainText()
+        useThreads = self.editor.settings.value(
+            "useThreads", section="codeCompletion")
         if not immediate:
             self.__jobRunner.requestJob(
-                self.__collectCompletions, True, code,
+                self.__collectCompletions, useThreads, code,
                 self.editor.cursorPosition[0], self.editor.cursorPosition[1],
                 self.completionPrefix, self.editor.filePath,
                 self.editor.fileEncoding)
         else:
             self.__jobRunner.cancelRequests()
-            self.__jobRunner.startJob(
-                self.__collectCompletions, False, code,
-                self.editor.cursorPosition[0], self.editor.cursorPosition[1],
-                self.completionPrefix, self.editor.filePath,
-                self.editor.fileEncoding)
+            if useThreads:
+                self.__jobRunner.startJob(
+                    self.__collectCompletions, False, code,
+                    self.editor.cursorPosition[0],
+                    self.editor.cursorPosition[1], self.completionPrefix,
+                    self.editor.filePath, self.editor.fileEncoding)
+            else:
+                self.__collectCompletions(
+                    code, self.editor.cursorPosition[0],
+                    self.editor.cursorPosition[1], self.completionPrefix,
+                    self.editor.filePath, self.editor.fileEncoding)
 
     def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
+        print("Run", l, c)
         completions = []
         for completionProvider in self.__providers:
             completions += completionProvider.run(code, l, c, prefix,
                                                   filePath, fileEncoding)
         self.completionsReady.emit(completions)
+        print("Finished", l, c)
 
     def _onInstall(self, editor):
         self.__completer = QtGui.QCompleter([""], editor)
@@ -130,6 +140,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.editor.settings.addProperty("showTooltips", True,
                                          section="codeCompletion")
         self.editor.settings.addProperty("caseSensitive", True,
+                                         section="codeCompletion")
+        self.editor.settings.addProperty("useThreads", True,
                                          section="codeCompletion")
 
     def _onUninstall(self):
@@ -205,22 +217,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                  event.key() == QtCore.Qt.Key_End or
                  event.key() == QtCore.Qt.Key_Home)):
                 self.__hidePopup()
-            prefixLen = len(self.completionPrefix)
-            # detect auto trigger symbols symbols such as ".", "->"
-            tc = self.editor.selectWordUnderCursor()
-            tc.setPosition(tc.position())
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-            textToCursor = tc.selectedText()
-            symbols = self.editor.settings.value(
-                "triggerSymbols", section="codeCompletion")
-            for symbol in symbols:
-                if textToCursor.endswith(symbol):
-                    self.requestCompletion(immediate=True)
-                    return
-            if prefixLen >= self.editor.settings.value(
-                    "triggerLength", section="codeCompletion"):
-                self.requestCompletion()
-
+            else:
+                prefixLen = len(self.completionPrefix)
+                # detect auto trigger symbols symbols such as ".", "->"
+                tc = self.editor.selectWordUnderCursor()
+                tc.setPosition(tc.position())
+                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                textToCursor = tc.selectedText()
+                symbols = self.editor.settings.value(
+                    "triggerSymbols", section="codeCompletion")
+                for symbol in symbols:
+                    if textToCursor.endswith(symbol):
+                        self.requestCompletion(immediate=True)
+                        return
+                if prefixLen >= self.editor.settings.value(
+                        "triggerLength", section="codeCompletion"):
+                    self.requestCompletion()
 
     def __isPrintableKeyEvent(self, event):
         try:
@@ -292,7 +304,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # show the completion list
         self.__completer.complete(cr)
         self.__completer.popup().setCurrentIndex(
-                    self.__completer.completionModel().index(0, 0))
+            self.__completer.completionModel().index(0, 0))
 
     def __insertCompletion(self, completion):
         tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
@@ -406,7 +418,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
 
 if __name__ == '__main__':
-    from pcef.core import QCodeEdit, constants
 
     class Example(QCodeEdit):
 
