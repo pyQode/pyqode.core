@@ -28,7 +28,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     The widget also provides a series of convenience methods to:
         - open/save a file
-        - manipulate the text cursor / getting text informations (line, col,...)
+        - manipulate the text cursor / getting text informations (line, col)
 
     The widget exposes a style property which is a dictionary of properties
     (more about this topic in the style section)
@@ -151,7 +151,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.__init__(self, parent)
 
         self.__marginSizes = (0, 0, 0, 0)
-        bottom = 0
 
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
@@ -764,8 +763,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.setTextCursor(cursor)
         else:
             self.keyPressEvent(
-                QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Backtab,
-                          QtCore.Qt.NoModifier))
+                QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress,
+                                QtCore.Qt.Key_Backtab,
+                                QtCore.Qt.NoModifier))
 
     def refreshPanels(self):
         """ Refreshes the editor panels. """
@@ -814,7 +814,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.__doHomeKey(
                 event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
         elif (event.key() == QtCore.Qt.Key_D and
-                      event.modifiers() & QtCore.Qt.ControlModifier):
+              event.modifiers() & QtCore.Qt.ControlModifier):
             self.duplicateLine()
             event.accept()
         self.keyPressed.emit(event)
@@ -941,9 +941,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__actions.append(action)
         QtGui.QPlainTextEdit.addAction(self, action)
 
-    def removeAction(self, action):
-        assert isinstance(action, QtGui.QAction)
-
     def actions(self):
         return self.__actions
 
@@ -977,9 +974,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.addAction(a)
         self.addSeparator()
         a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-copy",
-                                  QtGui.QIcon(constants.ACTION_COPY[0]))
-            , "Copy", self)
+            QtGui.QIcon.fromTheme(
+                "edit-copy", QtGui.QIcon(constants.ACTION_COPY[0])),
+            "Copy", self)
         a.setShortcut(constants.ACTION_COPY[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.copy)
@@ -1039,7 +1036,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         a = QtGui.QAction(
             QtGui.QIcon.fromTheme("start-here",
                                   QtGui.QIcon(constants.ACTION_GOTO_LINE[0])),
-                          "Go to line", self)
+            "Go to line", self)
         a.setShortcut(constants.ACTION_GOTO_LINE[1])
         a.setIconVisibleInMenu(True)
         a.triggered.connect(self.gotoLine)
@@ -1159,7 +1156,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
-        styleName = QtGui.QApplication.instance().style().metaObject().className()
+        styleName = \
+            QtGui.QApplication.instance().style().metaObject().className()
         if "OXYGEN" in styleName.upper():
             vscroll_width = hscroll_height = 0
         left = 0
@@ -1212,7 +1210,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Updates the panel on update request. (Scroll, update clipping rect,...)
         """
         for zones_id, zone in self.__panels.items():
-            if zones_id == PanelPosition.TOP or zones_id == PanelPosition.BOTTOM:
+            if zones_id == PanelPosition.TOP or \
+               zones_id == PanelPosition.BOTTOM:
                 continue
             panels = list(zone.values())
             for panel in panels:
@@ -1267,7 +1266,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             c = self.style.value("foreground")
             p.setColor(p.Text, c)
             self.setPalette(p)
-
 
     def __onSettingsChanged(self, section, key):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *

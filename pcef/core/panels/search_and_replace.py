@@ -27,13 +27,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     It uses the QTextDocument API to search for some text. Search operation is
     performed in a background thread.
 
-    The search panel can also be used pragmatically. To do that, the client code
-    must first request a search (**requestSearch**) and connect to the
-    searchFinished signal. The results of the search can then be retrieved using
-    the cptOccurrences attribute and the getOccurrences method. The client code
-    may now navigates through occurrences (**selectNext**/**selectionPrevious**)
-    or replace the occurences with their own text (
-    **replaceOccurrence**/**replaceAll**).
+    The search panel can also be used pragmatically. To do that, the client
+    code must first request a search (**requestSearch**) and connect to the
+    searchFinished signal. The results of the search can then be retrieved
+    using the cptOccurrences attribute and the getOccurrences method. The
+    client code may now navigates through occurrences
+    (**selectNext**/**selectionPrevious**) or replace the occurences with their
+    own text (**replaceOccurrence**/**replaceAll**).
     """
     IDENTIFIER = "searchPanel"
     DESCRIPTION = "Search and replace text in the editor"
@@ -521,6 +521,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.pushButtonPrevious.setEnabled(enable)
         self.actionFindNext.setEnabled(enable)
         self.actionFindPrevious.setEnabled(enable)
-        enable = txt != self.lineEditSearch.text() and bool(self.cptOccurrences)
+        enable = (txt != self.lineEditSearch.text() and
+                  bool(self.cptOccurrences))
         self.pushButtonReplace.setEnabled(enable)
         self.pushButtonReplaceAll.setEnabled(enable)

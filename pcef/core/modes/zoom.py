@@ -15,6 +15,7 @@ from pcef.core import constants
 from pcef.core.mode import Mode
 from pcef.qt import QtCore
 
+
 class ZoomMode(Mode):
     """
     Zoom in/out mode. (the editor font is increased/decreased)

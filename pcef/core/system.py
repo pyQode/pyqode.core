@@ -209,13 +209,13 @@ class _JobThread(QtCore.QThread):
 
 class JobRunner(object):
     """
-    Utility class to easily run an asynchroneous job. A job is a simple callable
-    (method) that will be run in a background thread.
+    Utility class to easily run an asynchroneous job. A job is a simple
+    callable (method) that will be run in a background thread.
 
-    JobRunner implements a job queue to ensure there is only one job running per
-    JobRunner instance. If a job is already running, the new job will wait for
-    the current job to finish unless you want to force its execution. It that
-    case the current job will be terminated.
+    JobRunner implements a job queue to ensure there is only one job running
+    per JobRunner instance. If a job is already running, the new job will wait
+    for the current job to finish unless you want to force its execution. It
+    that case the current job will be terminated.
 
     Additional parameters can be supplied to the job using *args and
     **kwargs.
@@ -260,8 +260,8 @@ class JobRunner(object):
         :param job: job.
         :type job: callable
 
-        :param force: Specify if we must force the job execution by stopping the
-        job that is currently running (if any).
+        :param force: Specify if we must force the job execution by stopping
+                      the job that is currently running (if any).
         :type force: bool
 
         :param args: *args
@@ -334,8 +334,8 @@ class DelayJobRunner(JobRunner):
         :param async: Specify if the job should be run asynchronously
         :type async: bool
 
-        :param force: Specify if we must force the job execution by stopping the
-        job that is currently running (if any).
+        :param force: Specify if we must force the job execution by stopping
+                      the job that is currently running (if any).
         :type force: bool
 
         :param args: *args
@@ -410,7 +410,6 @@ if __name__ == '__main__':
                 self.jobRunner.startJob(self.xxx, False, "#FF00FF", 30)
             print("Finished")
 
-    import sys
     app = QtGui.QApplication(sys.argv)
     e = Example()
     e.show()

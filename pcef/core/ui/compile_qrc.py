@@ -18,6 +18,7 @@ compile each qrc file (NAME.qrc) to:
 import fnmatch
 import os
 
+
 def findQrcFilesRecursively(root=os.getcwd()):
     matches = []
     for root, dirnames, filenames in os.walk(root):

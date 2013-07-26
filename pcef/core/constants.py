@@ -96,4 +96,3 @@ class PanelPosition(object):
     RIGHT = 2
     # bottom margin
     BOTTOM = 3
-

@@ -11,12 +11,11 @@
 """
 This package contains the core panels (language independant)
 """
-from pcef.core.panels.folding import FoldingPanel, FoldingIndicator
+from pcef.core.panels.folding import FoldingPanel
+from pcef.core.panels.folding import FoldingIndicator
 from pcef.core.panels.line_number import LineNumberPanel
 from pcef.core.panels.marker import MarkerPanel, Marker
 from pcef.core.panels.search_and_replace import SearchAndReplacePanel
 
 __all__ = ["LineNumberPanel", "SearchAndReplacePanel", "MarkerPanel",
-           "Marker", "FoldingIndicator"]
-
-
+           "Marker", "FoldingIndicator", "FoldingPanel"]

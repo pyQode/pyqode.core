@@ -17,6 +17,7 @@ from pcef.core.decoration import TextDecoration
 from pcef.core.system import driftColor
 from pcef.qt import QtGui
 
+
 class CaretLineHighlighterMode(Mode):
     """
     This mode highlights the caret line (active line)
@@ -40,7 +41,8 @@ class CaretLineHighlighterMode(Mode):
             self.editor.cursorPositionChanged.connect(self.__updateHighlight)
             self.editor.newTextSet.connect(self.__updateHighlight)
         else:
-            self.editor.cursorPositionChanged.disconnect(self.__updateHighlight)
+            self.editor.cursorPositionChanged.disconnect(
+                self.__updateHighlight)
             self.editor.newTextSet.disconnect(self.__updateHighlight)
             self.clearDeco()
 
@@ -72,7 +74,6 @@ class CaretLineHighlighterMode(Mode):
                 b = QtGui.QColor("#101010")
             self.editor.style.setValue("caretLineBackground",
                                        driftColor(b, factor))
-
 
     def clearDeco(self):
         if self.__decoration:

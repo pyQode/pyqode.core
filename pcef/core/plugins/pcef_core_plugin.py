@@ -79,7 +79,6 @@ try:
         def createWidget(self, parent):
             return pcef.core.QCodeEdit(parent)
 
-
     class QGenericCodeEditPlugin(QCodeEditPlugin):
         _module = 'pcef.core'        # path to the widget's module
         _class = 'QGenericCodeEdit'    # name of the widget class

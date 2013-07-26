@@ -30,10 +30,10 @@ class LineNumberPanel(Panel):
         Panel._onInstall(self, editor)
         self._lineColorU = self.editor.style.addProperty(
             "lineForeground", self.palette().color(QtGui.QPalette.Disabled,
-                                                  QtGui.QPalette.WindowText))
+                                                   QtGui.QPalette.WindowText))
         self._lineColorS = self.editor.style.addProperty(
-            "lineForegroundSel", self.palette().color(QtGui.QPalette.Normal,
-                                                  QtGui.QPalette.WindowText))
+            "lineForegroundSel", self.palette().color(
+                QtGui.QPalette.Normal, QtGui.QPalette.WindowText))
 
     def _onStyleChanged(self, section, key):
         Panel._onStyleChanged(self, section, key)
@@ -44,9 +44,8 @@ class LineNumberPanel(Panel):
 
     def sizeHint(self):
         """
-        Returns the panel size hint (as the panel is on the left, we only need to
-        compute the width
-        :return:
+        Returns the panel size hint (as the panel is on the left, we only need
+        to compute the width
         """
         return QtCore.QSize(self.lineNumberAreaWidth(), 50)
 

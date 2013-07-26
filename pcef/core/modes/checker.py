@@ -111,7 +111,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 message._marker = Marker(message.line, message.icon,
                                          message.description)
                 self.editor.markerPanel.addMarker(message._marker)
-            tooltip=None
+            tooltip = None
             if self.__showTooltip:
                 tooltip = message.description
             message._decoration = TextDecoration(self.editor.textCursor(),
@@ -197,18 +197,22 @@ if __name__ == "__main__":
         randome line.
         """
         IDENTIFIER = "fancyChecker"
-        DESCRIPTION = "An example checker, does not actually do anything usefull"
+        DESCRIPTION = "An example checker, does not actually do anything " \
+                      "usefull"
 
         def run(self, document, filePath):
             self.clearMessagesRequested.emit()
-            msg = CheckerMessage("A fancy info message", MSG_STATUS_INFO,
-                          random.randint(1, self.editor.lineCount()))
+            msg = CheckerMessage(
+                "A fancy info message", MSG_STATUS_INFO,
+                random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
-            msg = CheckerMessage("A fancy warning message", MSG_STATUS_WARNING,
-                          random.randint(1, self.editor.lineCount()))
+            msg = CheckerMessage(
+                "A fancy warning message", MSG_STATUS_WARNING,
+                random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
-            msg = CheckerMessage("A fancy error message", MSG_STATUS_ERROR,
-                          random.randint(1, self.editor.lineCount()))
+            msg = CheckerMessage(
+                "A fancy error message", MSG_STATUS_ERROR,
+                random.randint(1, self.editor.lineCount()))
             self.addMessageRequested.emit(msg)
 
     def main():

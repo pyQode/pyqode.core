@@ -40,7 +40,7 @@ class FileWatcherMode(Mode):
                 self.editor, "File changed",
                 "The file <i>%s</i> has has changed externally.\n"
                 "Do you want reload it?" % os.path.basename(
-                        self.editor.filePath),
+                    self.editor.filePath),
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No) ==
                 QtGui.QMessageBox.Yes):
             self.editor.openFile(self.editor.filePath)

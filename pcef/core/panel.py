@@ -60,7 +60,7 @@ class Panel(QtGui.QWidget, Mode):
 
         Also adds the panelBackground and panel foreground.
 
-        :param editor: QCodeEdit instance
+        :param editor: pcef.core.QCodeEdit instance
         """
         Mode._onInstall(self, editor)
         self.setParent(editor)

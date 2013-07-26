@@ -79,7 +79,8 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.format.setBackground(brush)
 
     def setOutline(self, color):
-        self.format.setProperty(QtGui.QTextFormat.OutlinePen, QtGui.QPen(color))
+        self.format.setProperty(QtGui.QTextFormat.OutlinePen,
+                                QtGui.QPen(color))
 
     def setFullWidth(self, flag=True, clear=True):
         """ Sets full width selection

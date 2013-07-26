@@ -33,7 +33,6 @@ os.environ.setdefault("QT_API", "PyQt")
 import pkg_resources
 import subprocess
 import sys
-from PyQt4 import QtCore
 
 
 def get_pth_sep():
@@ -45,31 +44,6 @@ def get_pth_sep():
     else:
         sep = ':'
     return sep
-
-
-# def get_pcef_path(env, sep):
-#     """
-#     Gets pcef path and add it to the python path if pcef has not been installed
-#     yet.
-#
-#     :param env: os.environ
-#
-#     :param sep: path separator
-#
-#     :return: pcef path
-#     """
-#     import pcef
-#     dir = QtCore.QFileInfo(pcef.__file__).dir()
-#     dir.cdUp()
-#     pcef_path = os.path.normpath(dir.path())
-#     if 'PYTHONPATH' in env:
-#         python_pth = env['PYTHONPATH']
-#         if pcef_path not in python_pth.split(sep):
-#             env['PYTHONPATH'] = python_pth + sep + pcef_path
-#     else:
-#         env['PYTHONPATH'] = pcef_path
-#     print("PCEF path: %s" % pcef_path)
-#     return pcef_path
 
 
 def set_plugins_path(env, sep):

@@ -111,7 +111,8 @@ class FoldingPanel(Panel):
         if key == "foldIndicatorBackground" or not key:
             self.__color = self.editor.style.value("foldIndicatorBackground")
         if key == "background" or not key:
-            self.__decoColor = driftColor(self.editor.style.value("background"))
+            self.__decoColor = driftColor(self.editor.style.value(
+                                          "background"))
 
     def resetIndicatorsBackground(self):
         """
@@ -223,7 +224,7 @@ class FoldingPanel(Panel):
         folded or not.
         """
         if (not foldingIndicator.start or not foldingIndicator.end or
-                    foldingIndicator.start > foldingIndicator.end):
+                foldingIndicator.start > foldingIndicator.end):
             return foldingIndicator.UNFOLDED
         for i in range(foldingIndicator.start, foldingIndicator.end):
             if not self.__isShared(i, foldingIndicator):
@@ -280,8 +281,8 @@ class FoldingPanel(Panel):
 
         :param owner: The current lineNumber owner (FoldingIndicator)
 
-        :return: True if the lineNbr is shared, False if the line number is only
-                 used for the owner indicator
+        :return: True if the lineNbr is shared, False if the line number is
+                 only used for the owner indicator
         """
         for indic in reversed(self.__indicators):
             if indic == owner:
@@ -314,7 +315,6 @@ class FoldingPanel(Panel):
             if self.__getIndicatorState(indicator) == FoldingIndicator.FOLDED:
                 if indicator.state == FoldingIndicator.UNFOLDED:
                     self.fold(indicator)
-
 
     def __drawArrow(self, arrowRect, active, expanded, painter):
         """
@@ -507,8 +507,8 @@ class FoldingPanel(Panel):
 
     def leaveEvent(self, e):
         """
-        Reset the mouse overed indic to None and clear scope decoration when the
-        user leaves the foldingPanel
+        Reset the mouse overed indic to None and clear scope decoration when
+        the user leaves the foldingPanel
         """
         self.__mouseOveredIndic = None
         self.__clearDecorations()
@@ -516,7 +516,7 @@ class FoldingPanel(Panel):
 
 
 if __name__ == '__main__':
-    from pcef.core import QGenericCodeEdit, constants
+    from pcef.core import QGenericCodeEdit
 
     class Example(QGenericCodeEdit):
 

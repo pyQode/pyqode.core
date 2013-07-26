@@ -12,7 +12,7 @@
 This setup script packages the core package of PCEF: pcef-core
 """
 from setuptools import setup, find_packages
-import sys
+
 
 def read_version():
     with open("pcef/core/__init__.py") as f:
@@ -25,8 +25,10 @@ def read_version():
 def readme():
     return str(open('README.rst').read())
 
+
 # get requirements
 requirements = ['pygments']
+
 
 setup(
     name='pcef-core',

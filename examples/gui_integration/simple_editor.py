@@ -34,7 +34,6 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         self.menubar.addMenu(mnu)
         self.setupModesMenu()
         self.setupPanelsMenu()
-        self.setupStylesMenu()
         try:
             self.editor.openFile(__file__)
         except (OSError, IOError) as e:

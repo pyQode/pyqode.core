@@ -37,7 +37,6 @@ from pygments.styles import STYLE_MAP
 PYGMENTS_STYLES = STYLE_MAP.keys()
 
 
-
 def get_tokens_unprocessed(self, text, stack=('root',)):
     """ Split ``text`` into (tokentype, text) pairs.
 
@@ -101,7 +100,8 @@ RegexLexer.get_tokens_unprocessed = get_tokens_unprocessed
 # Even with the above monkey patch to store state, multiline comments do not
 # work since they are stateless (Pygments uses a single multiline regex for
 # these comments, but Qt lexes by line). So we need to add a state for comments
-# to the C and C++ lexers. This means that nested multiline comments will appear
+# to the C and C++ lexers. This means that nested multiline comments will
+# appear
 # to be valid C/C++, but this is better than the alternative for now.
 
 def replace_pattern(tokens, new_pattern):
@@ -138,7 +138,8 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
 
     def __repr__(self):
         attrs = ['syntax_stack']
-        kwds = ', '.join(['%s=%r' % (attr, getattr(self, attr)) for attr in attrs])
+        kwds = ', '.join(
+            ['%s=%r' % (attr, getattr(self, attr)) for attr in attrs])
         return 'PygmentsBlockUserData(%s)' % kwds
 
 
@@ -148,9 +149,9 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
 
     hilighlightingBlock = QtCore.Signal(str, QSyntaxHighlighter)
 
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
 
     def __init__(self, parent, lexer=None):
         super(QPygmentsHighlighter, self).__init__(parent)
@@ -214,9 +215,9 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
 
         self.hilighlightingBlock.emit(original_text, self)
 
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     # 'PygmentsHighlighter' interface
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     def __set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
@@ -245,9 +246,9 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
     #: gets/sets the **pygments** style.
     style = property(__get_style, __set_style)
 
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     # Protected interface
-    #---------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
 
     def _clear_caches(self):
         """ Clear caches for brushes and formats.

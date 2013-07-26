@@ -18,11 +18,12 @@ from pcef.core.system import DelayJobRunner
 
 class Marker(QtCore.QObject):
     """
-    Defines a marker: a line number (position), an icon (string) and an optional
-    description string used as a tool tip.
+    Defines a marker: a line number (position), an icon (string) and an
+    optional description string used as a tool tip.
 
     The position of the marker can be changed dynamically.
     """
+
     @property
     def icon(self):
         """
@@ -59,8 +60,9 @@ class MarkerPanel(Panel):
     displayed makers.
 
     This panel exposes to signal:
-      - addMarkerRequest: when the user click the panel where there is no marker
-      - removeMarkerRequest: when the user click on a marker on the panel.
+      - addMarkerRequest: when the user click the panel where there is no
+                          marker
+      - removeMarkerRequest: when the user click on a marker on the panel
     """
     DESCRIPTION = "Draw icons in a side panel"
     IDENTIFIER = "markerPanel"
@@ -180,7 +182,7 @@ class MarkerPanel(Panel):
 
 
 if __name__ == '__main__':
-    from pcef.core import QGenericCodeEdit, constants, DelayJobRunner
+    from pcef.core import QGenericCodeEdit, constants
 
     class Example(QGenericCodeEdit):
 
