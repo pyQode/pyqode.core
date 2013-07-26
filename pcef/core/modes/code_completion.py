@@ -151,7 +151,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerSymbols", ["."], section="codeCompletion")
         self.editor.settings.addProperty("showTooltips", True,
                                          section="codeCompletion")
-        self.editor.settings.addProperty("caseSensitive", True,
+        self.editor.settings.addProperty("caseSensitive", False,
                                          section="codeCompletion")
         self.editor.settings.addProperty("useThreads", True,
                                          section="codeCompletion")
@@ -246,7 +246,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                         return
                 if prefixLen >= self.editor.settings.value(
                         "triggerLength", section="codeCompletion"):
-                    logging.getLogger("pcef-cc").debug("Symbols trigger")
+                    logging.getLogger("pcef-cc").debug("Len trigger")
                     self.requestCompletion()
 
     def __isPrintableKeyEvent(self, event):
@@ -302,26 +302,33 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return False
 
     def __showPopup(self):
-        if self.editor.settings.value("caseSensitive",
-                                      section="codeCompletion"):
-            self.__completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        cnt = self.__completer.completionCount()
+        fullPrefix = self.editor.selectWordUnderCursor(
+            selectWholeWord=True).selectedText()
+        if (fullPrefix == self.__currentCompletion) and cnt == 1:
+            self.__hidePopup()
         else:
-            self.__completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        # set prefix
-        self.__completer.setCompletionPrefix(self.completionPrefix)
-        # compute size and pos
-        cr = self.editor.cursorRect()
-        cr.setWidth(400)
-        charWidth = self.editor.fontMetrics().width('A')
-        prefixLen = (len(self.completionPrefix) * charWidth)
-        cr.setX(cr.x() + self.editor.marginSize() - prefixLen)
-        cr.setWidth(
-            self.__completer.popup().sizeHintForColumn(0) +
-            self.__completer.popup().verticalScrollBar().sizeHint().width())
-        # show the completion list
-        self.__completer.complete(cr)
-        self.__completer.popup().setCurrentIndex(
-            self.__completer.completionModel().index(0, 0))
+            if self.editor.settings.value("caseSensitive",
+                                          section="codeCompletion"):
+                self.__completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+            else:
+                self.__completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+            # set prefix
+            self.__completer.setCompletionPrefix(self.completionPrefix)
+            # compute size and pos
+            cr = self.editor.cursorRect()
+            cr.setWidth(400)
+            charWidth = self.editor.fontMetrics().width('A')
+            prefixLen = (len(self.completionPrefix) * charWidth)
+            cr.setX(cr.x() + self.editor.marginSize() - prefixLen)
+            cr.setWidth(
+                self.__completer.popup().sizeHintForColumn(0) +
+                self.__completer.popup().verticalScrollBar().sizeHint().width())
+            # show the completion list
+            self.__completer.complete(cr)
+            self.__completer.popup().setCurrentIndex(
+                self.__completer.completionModel().index(0, 0))
+
 
     def __insertCompletion(self, completion):
         tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
@@ -361,11 +368,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not completion in self.__tooltips:
             QtGui.QToolTip.hideText()
             return
-        tooltip = self.__tooltips[completion]
-        pos = self.__completer.popup().pos()
-        pos.setX(pos.x() + self.__completer.popup().size().width())
-        pos.setY(pos.y() - 15)
-        QtGui.QToolTip.showText(pos, tooltip, self.editor)
+        tooltip = self.__tooltips[completion].strip()
+        if tooltip:
+            pos = self.__completer.popup().pos()
+            pos.setX(pos.x() + self.__completer.popup().size().width())
+            pos.setY(pos.y() - 15)
+            QtGui.QToolTip.showText(pos, tooltip, self.editor)
+        else:
+            QtGui.QToolTip.hideText()
 
     def __onCursorPositionChanged(self):
         cl = self.editor.cursorPosition[0]
