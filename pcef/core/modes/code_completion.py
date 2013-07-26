@@ -39,8 +39,16 @@ class CompletionProvider(object):
     Subclasses must implement the run method to return a list of completions.
     """
 
-    def __init__(self, priority=0):
+    @property
+    def editor(self):
+        """
+        :return: QCodeEdit
+        """
+        return self.__editor()
+
+    def __init__(self, editor, priority=0):
         self.priority = priority
+        self.__editor = weakref.ref(editor)
 
     def run(self, code, line, column, completionPrefix,
             filePath, fileEncoding):
@@ -378,7 +386,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
     """
 
     def __init__(self, editor):
-        CompletionProvider.__init__(self)
+        CompletionProvider.__init__(self, editor)
         assert isinstance(editor, QCodeEdit)
         self.settings = weakref.ref(editor.settings)
 
