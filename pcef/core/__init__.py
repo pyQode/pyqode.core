@@ -43,6 +43,8 @@ from pcef.core.panels import LineNumberPanel
 from pcef.core.panels import MarkerPanel, Marker
 from pcef.core.panels import SearchAndReplacePanel
 from pcef.core.properties import PropertyRegistry
+from pcef.core.system import indexByName
+from pcef.core.system import indexMatching
 from pcef.core.system import TextStyle
 from pcef.core.system import JobRunner
 from pcef.core.system import DelayJobRunner
@@ -114,4 +116,4 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
-           "PYGMENTS_STYLES"]
+           "PYGMENTS_STYLES", "indexByName", "indexMatching"]

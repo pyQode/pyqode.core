@@ -64,6 +64,35 @@ def driftColor(baseColor, factor=110):
         return baseColor.lighter(factor+10)
 
 
+def indexMatching(seq, condition):
+    """
+    Returns the index of the element that match condition.
+
+    :param seq: The sequence to parse
+
+    :param condition: The index condition
+
+    :return: Index of the element that mathc the condition of -1
+    """
+    for i,x in enumerate(seq):
+        if condition(x):
+            return i
+    return -1
+
+
+def indexByName(seq, name):
+    """
+    Search an element by "name".
+
+    :param seq: Sequence to parse
+
+    :param name: Name of the element
+
+    :return: Index of the element of -1
+    """
+    return indexMatching(seq, lambda x: x.name == name)
+
+
 class TextStyle(object):
     """
     Defines a text style: a color associated with text style options (bold,
