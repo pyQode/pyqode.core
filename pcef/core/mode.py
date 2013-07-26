@@ -130,7 +130,7 @@ class Mode(object):
         """
         pass
 
-    def _onSettingsChanged(self, section, key, value):
+    def _onSettingsChanged(self, section, key):
         """
         Automatically called when a settings property changed
 
