@@ -220,7 +220,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 # update completion prefix
                 self.__showPopup()
-        elif (self.completionPrefix == "" and
+        elif (self.completionPrefix == "" and not isShortcut and
               (event.key() == QtCore.Qt.Key_Backspace or
                event.key() == QtCore.Qt.Key_Delete or
                event.key() == QtCore.Qt.Key_Left or
