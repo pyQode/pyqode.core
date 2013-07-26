@@ -75,7 +75,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
         self.__triggerKey = None
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=500)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=5, delay=1200)
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
@@ -92,17 +92,25 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__providers, key=lambda provider: provider.priority,
             reverse=True)
 
-    def requestCompletion(self):
+    def requestCompletion(self, immediate=False):
         code = self.editor.toPlainText()
-        self.__jobRunner.requestJob(self.__collectCompletions, True,
-                                    code,
-                                    self.editor.cursorPosition[0],
-                                    self.editor.cursorPosition[1],
-                                    self.completionPrefix,
-                                    self.editor.filePath,
-                                    self.editor.fileEncoding)
+        if not immediate:
+            print('request')
+            self.__jobRunner.requestJob(
+                self.__collectCompletions, True, code,
+                self.editor.cursorPosition[0], self.editor.cursorPosition[1],
+                self.completionPrefix, self.editor.filePath,
+                self.editor.fileEncoding)
+        else:
+            self.__jobRunner.cancelRequests()
+            self.__jobRunner.startJob(
+                self.__collectCompletions, False, code,
+                self.editor.cursorPosition[0], self.editor.cursorPosition[1],
+                self.completionPrefix, self.editor.filePath,
+                self.editor.fileEncoding)
 
     def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
+        print('exec')
         completions = []
         for completionProvider in self.__providers:
             completions += completionProvider.run(code, l, c, prefix,
@@ -164,7 +172,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self.__completer.popup().isVisible():
             self.__handleCompleterEvents(event)
         if isShortcut:
-            self.requestCompletion()
+            self.requestCompletion(immediate=True)
             event.accept()
 
     def __onKeyReleased(self, event):
@@ -179,12 +187,27 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             event.key() == QtCore.Qt.Key_Backspace) or
                 self.completionPrefix == "" and
                     (event.key() == QtCore.Qt.Key_Backspace or
-                     event.key() == QtCore.Qt.Key_Delete)):
+                     event.key() == QtCore.Qt.Key_Delete or
+                     event.key() == QtCore.Qt.Key_Left or
+                     event.key() == QtCore.Qt.Key_Right or
+                     event.key() == QtCore.Qt.Key_Space or
+                     event.key() == QtCore.Qt.Key_End or
+                     event.key() == QtCore.Qt.Key_Home)):
                 self.__hidePopup()
+                print("Cancel")
             else:
                 self.__showPopup()
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
+            if (self.completionPrefix == "" and
+                (event.key() == QtCore.Qt.Key_Backspace or
+                 event.key() == QtCore.Qt.Key_Delete or
+                 event.key() == QtCore.Qt.Key_Left or
+                 event.key() == QtCore.Qt.Key_Right or
+                 event.key() == QtCore.Qt.Key_Space or
+                 event.key() == QtCore.Qt.Key_End or
+                 event.key() == QtCore.Qt.Key_Home)):
+                self.__hidePopup()
             prefixLen = len(self.completionPrefix)
             # detect auto trigger symbols symbols such as ".", "->"
             tc = self.editor.selectWordUnderCursor()
@@ -195,7 +218,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 "triggerSymbols", section="codeCompletion")
             for symbol in symbols:
                 if textToCursor.endswith(symbol):
-                    self.requestCompletion()
+                    self.requestCompletion(immediate=True)
                     return
             if prefixLen >= self.editor.settings.value(
                     "triggerLength", section="codeCompletion"):
@@ -232,6 +255,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __hidePopup(self):
         self.__completer.popup().hide()
+        self.__jobRunner.cancelRequests()
+        self.__jobRunner.stopJob()
         QtGui.QToolTip.hideText()
 
     def __handleCompleterEvents(self, event):
