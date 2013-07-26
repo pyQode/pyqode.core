@@ -21,7 +21,7 @@ class Completion(QtCore.QObject):
     def __init__(self, text, icon=None, tooltip=None):
         QtCore.QObject.__init__(self)
         #: Displayed text.
-        self.text = text
+        self.text = text.strip()
         #: QIcon used for the decoration role.
         self.icon = icon
         # optional description
@@ -41,7 +41,8 @@ class CompletionProvider(object):
     def __init__(self, priority=0):
         self.priority = priority
 
-    def run(self, document, filePath, fileEncoding):
+    def run(self, code, line, column, completionPrefix,
+            filePath, fileEncoding):
         """
         Provides a list of possible code completions. Must be implemented by
         subclasses
@@ -92,15 +93,20 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             reverse=True)
 
     def requestCompletion(self):
+        code = self.editor.toPlainText()
         self.__jobRunner.requestJob(self.__collectCompletions, True,
-                                    self.editor.document().clone(),
+                                    code,
+                                    self.editor.cursorPosition[0],
+                                    self.editor.cursorPosition[1],
+                                    self.completionPrefix,
                                     self.editor.filePath,
                                     self.editor.fileEncoding)
 
-    def __collectCompletions(self, doc, filePath, fileEncoding):
+    def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
         completions = []
         for completionProvider in self.__providers:
-            completions += completionProvider.run(doc, filePath, fileEncoding)
+            completions += completionProvider.run(code, l, c, prefix,
+                                                  filePath, fileEncoding)
         self.completionsReady.emit(completions)
 
     def _onInstall(self, editor):
@@ -114,7 +120,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__triggerLength = self.editor.settings.addProperty(
             "triggerLength", 1, section="codeCompletion")
         self.editor.settings.addProperty(
-            "tTriggerSymbols", ["."], section="codeCompletion")
+            "triggerSymbols", ["."], section="codeCompletion")
         self.editor.settings.addProperty("showTooltips", True,
                                          section="codeCompletion")
         self.editor.settings.addProperty("caseSensitive", True,
@@ -157,42 +163,44 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # handle completer popup events ourselves
         if self.__completer.popup().isVisible():
             self.__handleCompleterEvents(event)
-        elif isShortcut:
+        if isShortcut:
             self.requestCompletion()
             event.accept()
 
     def __onKeyReleased(self, event):
+        # print("KR", self.editor.toPlainText())
         isPrintable = self.__isPrintableKeyEvent(event)
         isShortcut = self.__isShortcut(event)
         if self.__completer.popup().isVisible():
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
             cnt = self.__completer.completionCount()
-            if not cnt or not self.completionPrefix:
-                self.__completer.popup().hide()
-                QtGui.QToolTip.hideText()
+            if (not cnt or (int(event.modifiers()) and
+                            event.key() == QtCore.Qt.Key_Backspace) or
+                self.completionPrefix == "" and
+                    (event.key() == QtCore.Qt.Key_Backspace or
+                     event.key() == QtCore.Qt.Key_Delete)):
+                self.__hidePopup()
             else:
-                self.__completer.popup().setCurrentIndex(
-                    self.__completer.completionModel().index(0, 0))
                 self.__showPopup()
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
             prefixLen = len(self.completionPrefix)
+            # detect auto trigger symbols symbols such as ".", "->"
+            tc = self.editor.selectWordUnderCursor()
+            tc.setPosition(tc.position())
+            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+            textToCursor = tc.selectedText()
+            symbols = self.editor.settings.value(
+                "triggerSymbols", section="codeCompletion")
+            for symbol in symbols:
+                if textToCursor.endswith(symbol):
+                    self.requestCompletion()
+                    return
             if prefixLen >= self.editor.settings.value(
                     "triggerLength", section="codeCompletion"):
                 self.requestCompletion()
-            else:
-                # detect auto trigger symbols symbols such as ".", "->"
-                tc = self.editor.selectWordUnderCursor()
-                tc.setPosition(tc.position())
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                textToCursor = tc.selectedText()
-                symbols = self.editor.settings.value(
-                    "triggerSymbols", section="codeCompletion")
-                for symbol in symbols:
-                    if textToCursor.endswith(symbol):
-                        self.requestCompletion()
-                        break
+
 
     def __isPrintableKeyEvent(self, event):
         try:
@@ -222,20 +230,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return val and event.key() == self.editor.settings.value(
             "triggerKey", section="codeCompletion")
 
+    def __hidePopup(self):
+        self.__completer.popup().hide()
+        QtGui.QToolTip.hideText()
+
     def __handleCompleterEvents(self, event):
         # complete
         if (event.key() == QtCore.Qt.Key_Enter or
                 event.key() == QtCore.Qt.Key_Return):
             self.__insertCompletion(self.__currentCompletion)
-            self.__completer.popup().hide()
-            QtGui.QToolTip.hideText()
+            self.__hidePopup()
             event.accept()
             return True
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
                 event.key() == QtCore.Qt.Key_Backtab):
-            self.__completer.popup().hide()
-            QtGui.QToolTip.hideText()
+            self.__hidePopup()
             event.accept()
             return True
         return False
@@ -259,6 +269,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__completer.popup().verticalScrollBar().sizeHint().width())
         # show the completion list
         self.__completer.complete(cr)
+        self.__completer.popup().setCurrentIndex(
+                    self.__completer.completionModel().index(0, 0))
 
     def __insertCompletion(self, completion):
         tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
@@ -308,8 +320,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         cl = self.editor.cursorPosition[0]
         if cl != self.__cursorLine:
             self.__cursorLine = cl
-            self.__completer.popup().hide()
-            QtGui.QToolTip.hideText()
+            self.__hidePopup()
+            self.__jobRunner.cancelRequests()
+            self.__jobRunner.stopJob()
 
 
 class DocumentWordCompletionProvider(CompletionProvider):
@@ -323,7 +336,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
         self.settings = weakref.ref(editor.settings)
 
     @staticmethod
-    def split(doc, seps):
+    def split(txt, seps):
         """
         Splits a text in a meaningful list of words.
 
@@ -335,7 +348,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
         numbers, ...)
         """
         default_sep = seps[0]
-        txt = doc.toPlainText()
         for sep in seps[1:]:
             if sep:
                 txt = txt.replace(sep, default_sep)
@@ -358,14 +370,14 @@ class DocumentWordCompletionProvider(CompletionProvider):
             pass
         return sorted(words)
 
-    def run(self, document, filePath, fileEncoding):
+    def run(self, code, line, column, completionPrefix,
+            filePath, fileEncoding):
         retVal = []
-        assert isinstance(document, QtGui.QTextDocument)
         settings = self.settings()
         separators = constants.WORD_SEPARATORS
         if settings:
             separators = settings.value("wordSeparators")
-        words = self.split(document, separators)
+        words = self.split(code, separators)
         for w in words:
             retVal.append(Completion(w))
         return retVal
