@@ -195,7 +195,6 @@ class PropertyRegistry(QtCore.QObject):
                 lst.remove("")
             except ValueError:
                 pass
-            print(lst)
             return lst
         else:
             return value_str
