@@ -818,9 +818,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.duplicateLine()
             event.accept()
         self.keyPressed.emit(event)
+        state = event.isAccepted()
         if not event.isAccepted():
             event.setAccepted(initialState)
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        event.setAccepted(state)
         self.postKeyPressed.emit(event)
 
     def keyReleaseEvent(self, event):
@@ -929,7 +931,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
-        self.__onSettingsChanged("", "", "")
+        self.__onSettingsChanged("", "")
         self.newTextSet.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -1267,7 +1269,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.setPalette(p)
 
 
-    def __onSettingsChanged(self, section, key, value):
+    def __onSettingsChanged(self, section, key):
         self.setTabStopWidth(int(self.settings.value("tabLength")) *
                              self.fontMetrics().widthChar(" "))
         self.setShowWhitespaces(self.settings.value("showWhiteSpaces"))
