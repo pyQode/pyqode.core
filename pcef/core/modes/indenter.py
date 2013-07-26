@@ -69,7 +69,7 @@ class AutoIndentMode(Mode):
         :param keyEvent: the key event
         """
         assert isinstance(keyEvent, QKeyEvent)
-        if hasattr(keyEvent, "stop") and keyEvent.stop:
+        if keyEvent.isAccepted():
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             tc = self.editor.textCursor()
