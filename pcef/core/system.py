@@ -261,6 +261,10 @@ class JobRunner(object):
     def caller(self):
         return self.__caller()
 
+    @property
+    def jobRunning(self):
+        return self.__jobRunning
+
     def __init__(self, caller, nbThreadsMax=3):
         """
         :param caller: The object that will ask for a job to be run. This must

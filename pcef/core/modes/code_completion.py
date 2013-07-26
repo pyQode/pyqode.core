@@ -89,6 +89,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
+        self.__cancelNext = False
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -219,35 +220,34 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 # update completion prefix
                 self.__showPopup()
+        elif (self.completionPrefix == "" and
+              (event.key() == QtCore.Qt.Key_Backspace or
+               event.key() == QtCore.Qt.Key_Delete or
+               event.key() == QtCore.Qt.Key_Left or
+               event.key() == QtCore.Qt.Key_Right or
+               event.key() == QtCore.Qt.Key_Space or
+               event.key() == QtCore.Qt.Key_End or
+               event.key() == QtCore.Qt.Key_Home)):
+            self.__hidePopup()
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
-            if (self.completionPrefix == "" and
-                (event.key() == QtCore.Qt.Key_Backspace or
-                 event.key() == QtCore.Qt.Key_Delete or
-                 event.key() == QtCore.Qt.Key_Left or
-                 event.key() == QtCore.Qt.Key_Right or
-                 event.key() == QtCore.Qt.Key_Space or
-                 event.key() == QtCore.Qt.Key_End or
-                 event.key() == QtCore.Qt.Key_Home)):
-                self.__hidePopup()
-            else:
-                prefixLen = len(self.completionPrefix)
-                # detect auto trigger symbols symbols such as ".", "->"
-                tc = self.editor.selectWordUnderCursor()
-                tc.setPosition(tc.position())
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                textToCursor = tc.selectedText()
-                symbols = self.editor.settings.value(
-                    "triggerSymbols", section="codeCompletion")
-                for symbol in symbols:
-                    if textToCursor.endswith(symbol):
-                        logging.getLogger("pcef-cc").debug("Symbols trigger")
-                        self.requestCompletion(immediate=False)
-                        return
-                if prefixLen >= self.editor.settings.value(
-                        "triggerLength", section="codeCompletion"):
-                    logging.getLogger("pcef-cc").debug("Len trigger")
-                    self.requestCompletion()
+            prefixLen = len(self.completionPrefix)
+            # detect auto trigger symbols symbols such as ".", "->"
+            tc = self.editor.selectWordUnderCursor()
+            tc.setPosition(tc.position())
+            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+            textToCursor = tc.selectedText()
+            symbols = self.editor.settings.value(
+                "triggerSymbols", section="codeCompletion")
+            for symbol in symbols:
+                if textToCursor.endswith(symbol):
+                    logging.getLogger("pcef-cc").debug("Symbols trigger")
+                    self.requestCompletion(immediate=False)
+                    return
+            if prefixLen >= self.editor.settings.value(
+                    "triggerLength", section="codeCompletion"):
+                logging.getLogger("pcef-cc").debug("Len trigger")
+                self.requestCompletion()
 
     def __isPrintableKeyEvent(self, event):
         try:
@@ -261,9 +261,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__currentCompletion = completion
 
     def __applyResults(self, completions):
-        self.__completer.setModel(self.__createCompleterModel(completions))
-        self.__showPopup()
-        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        if self.__cancelNext:
+            self.__cancelNext = False
+            print("Canceled")
+        else:
+            self.__completer.setModel(self.__createCompleterModel(completions))
+            self.__showPopup()
+            self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
     def __isShortcut(self, event):
         """
@@ -282,7 +286,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
-        self.__jobRunner.stopJob()
+        if self.__jobRunner.jobRunning:
+            self.__cancelNext = True
+            print("Cancel Next")
         QtGui.QToolTip.hideText()
 
     def __handleCompleterEvents(self, event):
