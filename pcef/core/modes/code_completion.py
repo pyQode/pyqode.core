@@ -1,6 +1,7 @@
 """
 This module contains the code completion mode and the related classes.
 """
+import logging
 import weakref
 from pcef.core import constants
 from pcef.core.editor import QCodeEdit
@@ -61,6 +62,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     DESCRIPTION = "Provides a code completion/suggestion system"
 
     completionsReady = QtCore.Signal(object)
+    waitCursorRequested = QtCore.Signal()
 
     @property
     def completionPrefix(self):
@@ -79,6 +81,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
+        self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
         self.__providers.append(provider)
@@ -117,13 +120,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     self.editor.filePath, self.editor.fileEncoding)
 
     def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
-        print("Run", l, c)
+        logging.getLogger("pcef-cc").debug("Run")
+        self.waitCursorRequested.emit()
         completions = []
         for completionProvider in self.__providers:
             completions += completionProvider.run(code, l, c, prefix,
                                                   filePath, fileEncoding)
         self.completionsReady.emit(completions)
-        print("Finished", l, c)
+        logging.getLogger("pcef-cc").debug("Finished")
 
     def _onInstall(self, editor):
         self.__completer = QtGui.QCompleter([""], editor)
@@ -189,7 +193,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # print("KR", self.editor.toPlainText())
         isPrintable = self.__isPrintableKeyEvent(event)
         isShortcut = self.__isShortcut(event)
-        if self.__completer.popup().isVisible():
+        if self.__completer.popup().isVisible() and not isShortcut:
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
             cnt = self.__completer.completionCount()
@@ -205,6 +209,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      event.key() == QtCore.Qt.Key_Home)):
                 self.__hidePopup()
             else:
+                # update completion prefix
                 self.__showPopup()
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
@@ -228,10 +233,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     "triggerSymbols", section="codeCompletion")
                 for symbol in symbols:
                     if textToCursor.endswith(symbol):
-                        self.requestCompletion(immediate=True)
+                        logging.getLogger("pcef-cc").debug("Symbols trigger")
+                        self.requestCompletion(immediate=False)
                         return
                 if prefixLen >= self.editor.settings.value(
                         "triggerLength", section="codeCompletion"):
+                    logging.getLogger("pcef-cc").debug("Symbols trigger")
                     self.requestCompletion()
 
     def __isPrintableKeyEvent(self, event):
@@ -248,6 +255,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __applyResults(self, completions):
         self.__completer.setModel(self.__createCompleterModel(completions))
         self.__showPopup()
+        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
     def __isShortcut(self, event):
         """
@@ -263,6 +271,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerKey", section="codeCompletion")
 
     def __hidePopup(self):
+        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
         self.__jobRunner.stopJob()
@@ -357,6 +366,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__hidePopup()
             self.__jobRunner.cancelRequests()
             self.__jobRunner.stopJob()
+
+    @QtCore.Slot()
+    def __setWaitCursor(self):
+        self.editor.viewport().setCursor(QtCore.Qt.WaitCursor)
 
 
 class DocumentWordCompletionProvider(CompletionProvider):
