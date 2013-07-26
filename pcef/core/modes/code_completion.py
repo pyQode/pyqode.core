@@ -95,7 +95,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def requestCompletion(self, immediate=False):
         code = self.editor.toPlainText()
         if not immediate:
-            print('request')
             self.__jobRunner.requestJob(
                 self.__collectCompletions, True, code,
                 self.editor.cursorPosition[0], self.editor.cursorPosition[1],
@@ -110,7 +109,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.editor.fileEncoding)
 
     def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
-        print('exec')
         completions = []
         for completionProvider in self.__providers:
             completions += completionProvider.run(code, l, c, prefix,
@@ -194,7 +192,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      event.key() == QtCore.Qt.Key_End or
                      event.key() == QtCore.Qt.Key_Home)):
                 self.__hidePopup()
-                print("Cancel")
             else:
                 self.__showPopup()
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
