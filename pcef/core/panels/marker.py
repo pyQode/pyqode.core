@@ -74,7 +74,7 @@ class MarkerPanel(Panel):
         self.__icons = {}
         self.__previousLine = -1
         self.scrollable = True
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1500)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=100)
         self.setMouseTracking(True)
 
     def addMarker(self, marker):
@@ -163,14 +163,20 @@ class MarkerPanel(Panel):
         if marker and marker.description:
             if self.__previousLine != line:
                 self.__jobRunner.requestJob(self.__displayTooltip, False,
-                                            marker.description, event.pos().y())
+                                            marker.description,
+                                            self.editor.linePos(
+                                                marker.position - 2))
         else:
             self.__jobRunner.cancelRequests()
         self.__previousLine = line
 
+    def leaveEvent(self, *args, **kwargs):
+        QtGui.QToolTip.hideText()
+        self.__previousLine = -1
+
     def __displayTooltip(self, tooltip, top):
-        QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(0, top)),
-                                tooltip, self)
+        QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
+            self.sizeHint().width(), top)), tooltip, self)
 
 
 if __name__ == '__main__':
