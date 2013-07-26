@@ -168,7 +168,7 @@ class PropertyRegistry(QtCore.QObject):
         :rtype int or float or bool or string or QColor or TextStyle
         """
         if sys.version_info[0] == 2:
-            value_str = unicode(value_str)
+            value_str = value_str.decode("utf-8")
         else:
             value_str = str(value_str)
         # color or format
@@ -187,11 +187,15 @@ class PropertyRegistry(QtCore.QObject):
             return TextStyle(value_str)
         elif value_str.startswith("[") and value_str.endswith("]"):
             value_str = value_str[1:len(value_str)-1]
-            lst = value_str.split("²")
+            if sys.version_info[0] == 2:
+                lst = value_str.split("²".decode("utf-8"))
+            else:
+                lst = value_str.split("²")
             try:
                 lst.remove("")
             except ValueError:
                 pass
+            print(lst)
             return lst
         else:
             return value_str
