@@ -70,7 +70,7 @@ class FoldingPanel(Panel):
 
     def getSystemColor(self):
         pal = self.editor.palette()
-        b = pal.base().color()
+        b = pal.window().color()
         h = pal.highlight().color()
         return mergedColors(b, h, 50)
 
@@ -163,7 +163,7 @@ class FoldingPanel(Panel):
                            endLine=foldingIndicator.end)
         foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
         foldingIndicator._deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
-        self.__decoColor = driftColor(self.editor.palette().window().color())
+        self.__decoColor = driftColor(self.editor.palette().base().color())
         foldingIndicator._deco.setOutline(self.__decoColor)
         foldingIndicator._deco.signals.clicked.connect(self.__onDecoClicked)
         self.editor.addDecoration(foldingIndicator._deco)
@@ -410,7 +410,7 @@ class FoldingPanel(Panel):
         :param indic: Indic to setup.
         """
         self.__mouseOveredIndic = indic
-        self.__decoColor = driftColor(self.editor.palette().window().color())
+        self.__decoColor = driftColor(self.editor.palette().base().color())
         tc = self.editor.textCursor()
         d = TextDecoration(tc, startLine=1, endLine=indic.start)
         d.setFullWidth(True, clear=False)
