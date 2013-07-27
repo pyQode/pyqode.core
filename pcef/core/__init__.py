@@ -51,7 +51,7 @@ from pcef.core.system import DelayJobRunner
 from pcef.qt.ui import importRc
 
 #: pcef-core version
-__version__ = "1.0.0-dev"
+__version__ = "1.0.0-beta.1"
 
 
 def getUiDirectory():
