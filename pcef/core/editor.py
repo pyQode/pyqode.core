@@ -979,6 +979,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.newTextSet.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
+        title = QtCore.QFileInfo(self.filePath).fileName()
+        self.setDocumentTitle(title)
+        self.setWindowTitle(title)
 
     def addAction(self, action):
         assert isinstance(action, QtGui.QAction)
