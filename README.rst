@@ -1,5 +1,5 @@
-PCEF - Python/Qt Code Editing Framework
-=======================================
+A python-qt source code editing framework/widget
+======================================================
 
 *version 1.0.0-beta.1*
 
