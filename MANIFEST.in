@@ -11,6 +11,12 @@ include doc/*
 include doc/source/*
 include doc/source/_static/*
 include doc/source/api/*
+include examples/gui_integration/*
+include examples/gui_integration/ui/*
+include examples/gui_integration/ui/rc/*
+include examples/qt_bindings/*
+include examples/styling/*
+
 
 
 
