@@ -93,12 +93,12 @@ Resources
 
 -  `Downloads`_
 -  `Source repository`_
--  `Documentation version 0.2`_
+-  `Documentation`_ *(outdated)*
 -  `Wiki`_
 
 .. _Downloads: https://github.com/ColinDuquesnoy/pcef-core/releases
 .. _Source repository: https://github.com/ColinDuquesnoy/pcef-core/
-.. _Documentation version 0.2: http://packages.python.org/PCEF
+.. _Documentation : http://packages.python.org/PCEF
 .. _Wiki: https://github.com/ColinDuquesnoy/pcef-core/wiki
 
 Screenshots
