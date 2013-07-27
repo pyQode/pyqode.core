@@ -108,10 +108,11 @@ def main():
         faulthandler.enable()
     except ImportError:
         pass
-
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
     win.show()
+    print(win.editor.settings.dump())
+    print(win.editor.style.dump())
     app.exec_()
 
 if __name__ == "__main__":
