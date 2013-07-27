@@ -1,8 +1,9 @@
+PCEF - Python/Qt Code Editing Framework
+==========================================
+
 *version 1.0.0-beta* 
 
-.. image:: https://travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
-    :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
-    :alt: Travis-CI build status
+![alt text](https://travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop "Travis-CI build status")
     
 **Beta! The public API is stable but the documentation is not available at the moment. 
 However the code already contains valuable comments and there are quite a few examples available in the examples directory)**
@@ -52,9 +53,7 @@ pcef-core depends on the following libraries:
 Installation
 --------------
 
-You can install pcef-core using pip or easy_install::
-
-    pip install pcef-core
+    $ pip install pcef-core
     
 Resources
 ------------
