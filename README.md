@@ -72,6 +72,7 @@ def main():
     app = QApplication(sys.argv)
 	editor = pcef.core.QGenericCodeEdit()
 	editor.openFile(__file__)
+	editor.resize(800, 600)
 	editor.show()
 	return app.exec_()
 
