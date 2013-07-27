@@ -58,7 +58,7 @@ Installation
 Usage
 --------------
 
-Here is a simple example using PyQt4:
+Here is a [simple example using PyQt4](https://gist.github.com/ColinDuquesnoy/6096185):
 
 ```python
 # simple example using PyQt4
