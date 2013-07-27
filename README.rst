@@ -100,3 +100,33 @@ Resources
 .. _Source repository: https://github.com/ColinDuquesnoy/pcef-core/
 .. _Documentation version 0.2: http://packages.python.org/PCEF
 .. _Wiki: https://github.com/ColinDuquesnoy/pcef-core/wiki
+
+Screenshots
+------------
+
+Here are a few screenshots of the gui integration example on several different platforms:
+
+* Windows 7:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/windows7.PNG
+    :alt: Windows 7
+    
+* Ubuntu:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/ubuntu.png
+    :alt: Ubuntu
+    
+* Linux Mint:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/mint.png
+    :alt: Linux mint
+    
+* KDE:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde.png
+    :alt: KDE
+    
+* Gnome:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/gnome.png
+    :alt: Gnome
