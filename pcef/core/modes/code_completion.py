@@ -271,7 +271,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __applyResults(self, completions):
         if self.__cancelNext:
             self.__cancelNext = False
-            print("Canceled")
         else:
             self.__completer.setModel(self.__createCompleterModel(completions))
             self.__showPopup()
@@ -296,7 +295,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__jobRunner.cancelRequests()
         if self.__jobRunner.jobRunning:
             self.__cancelNext = True
-            print("Cancel Next")
         QtGui.QToolTip.hideText()
 
     def __handleCompleterEvents(self, event):

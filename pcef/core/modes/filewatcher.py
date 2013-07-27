@@ -83,7 +83,6 @@ class FileWatcherMode(Mode):
         """
         Change the watched file
         """
-        print("Path changed")
         path = self.editor.filePath
         if len(self.__fileSystemWatcher.files()):
             self.__fileSystemWatcher.removePaths(
