@@ -199,13 +199,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
 
     def __onKeyReleased(self, event):
-        # print("KR", self.editor.toPlainText())
         isPrintable = self.__isPrintableKeyEvent(event)
         isEndOfWordChar = False
         if isPrintable:
             k = str(chr(event.key()))
             seps = self.editor.settings.value("wordSeparators")
             isEndOfWordChar = k in seps
+        if isEndOfWordChar:
+            self.__jobRunner.cancelRequests()
         isShortcut = self.__isShortcut(event)
         symbols = self.editor.settings.value(
                 "triggerSymbols", section="codeCompletion")
@@ -237,10 +238,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                event.key() == QtCore.Qt.Key_End or
                event.key() == QtCore.Qt.Key_Home)):
             self.__hidePopup()
-        # elif (isPrintable and isEndOfWordChar and
-        #           not str(chr(event.key())) in symbols and not isShortcut):
-        #     self.__hidePopup()
-        #     print("Hide")
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
             prefixLen = len(self.completionPrefix)
