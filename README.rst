@@ -1,6 +1,12 @@
 PCEF - Python/Qt Code Editing Framework
 =======================================
 
+*version 1.0.0-beta.1*
+
+.. image:: https://api.travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
+    :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
+    :alt: Travis-CI build status
+
 What is PCEF?
 -------------
 
