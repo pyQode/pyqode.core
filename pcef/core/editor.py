@@ -1197,10 +1197,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
-        app = QtGui.QApplication.instance()
-        styleName = app.style().metaObject().className()
-        if "OXYGEN" in styleName.upper() or app.styleSheet():
-            vscroll_width = hscroll_height = 0
+        hscroll_height = self.size().height() - (cr.height() + hscroll_height)
+        vscroll_width = self.size().width() - (cr.width() + vscroll_width)
+        print(hscroll_height, vscroll_width)
+        if hscroll_height < 10:
+            hscroll_height = 0
+        if vscroll_width < 10:
+            vscroll_width = 0
+        print(hscroll_height, vscroll_width)
         left = 0
         panels = list(self.__panels[PanelPosition.LEFT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
