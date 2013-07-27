@@ -499,8 +499,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__mutex.unlock()
 
     def __compareCursors(self, a, b):
-        assert isinstance(a, QtGui.QTextCursor)
-        assert isinstance(b, QtGui.QTextCursor)
         return (a.selectionStart() == b.selectionStart() and
                 a.selectionEnd() == b.selectionEnd())
 

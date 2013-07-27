@@ -68,7 +68,6 @@ class AutoIndentMode(Mode):
         Auto indent if the released key is the return key.
         :param keyEvent: the key event
         """
-        assert isinstance(keyEvent, QKeyEvent)
         if keyEvent.isAccepted():
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:

@@ -45,7 +45,6 @@ class Marker(QtCore.QObject):
         :param parent: The optional parent object.
         """
         QtCore.QObject.__init__(self, parent)
-        assert not isinstance(icon, QtGui.QIcon)
         #: The position of the marker.
         self.position = position
         self.__icon = icon

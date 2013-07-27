@@ -248,7 +248,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if not line:
                 line = 1
         tc = self.textCursor()
-        assert isinstance(tc, QtGui.QTextCursor)
         tc.movePosition(tc.Start, tc.MoveAnchor)
         tc.movePosition(tc.Down, tc.MoveAnchor, line-1)
         if move:
@@ -984,7 +983,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setWindowTitle(title)
 
     def addAction(self, action):
-        assert isinstance(action, QtGui.QAction)
         self.__actions.append(action)
         QtGui.QPlainTextEdit.addAction(self, action)
 

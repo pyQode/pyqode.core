@@ -58,7 +58,6 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.cursor = cursor
 
     def containsCursor(self, textCursor):
-        assert isinstance(textCursor, QtGui.QTextCursor)
         return self.cursor.selectionStart() <= textCursor.position() < \
             self.cursor.selectionEnd()
 

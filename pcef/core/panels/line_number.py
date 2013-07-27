@@ -55,7 +55,6 @@ class LineNumberPanel(Panel):
         """
         Starts selecting
         """
-        assert isinstance(e, QtGui.QMouseEvent)
         self.__selecting = True
         self.__selStart = e.pos().y()
         start = end = self.editor.lineNumber(self.__selStart)

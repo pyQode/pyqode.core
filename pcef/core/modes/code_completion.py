@@ -409,7 +409,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
     def __init__(self, editor):
         CompletionProvider.__init__(self, editor)
-        assert isinstance(editor, QCodeEdit)
         self.settings = weakref.ref(editor.settings)
 
     @staticmethod
