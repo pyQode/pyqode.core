@@ -66,9 +66,9 @@ class Panel(QtGui.QWidget, Mode):
         self.setParent(editor)
         self.editor.refreshPanels()
         self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
-            self.editor.style.value("panelBackground")))
+            self.palette().window().color()))
         self.foregroundPen = QtGui.QPen(QtGui.QColor(
-            self.editor.style.value("panelForeground")))
+            self.palette().windowText().color()))
 
     def _onStateChanged(self, state):
         """ Shows/Hides the Panel
@@ -83,26 +83,13 @@ class Panel(QtGui.QWidget, Mode):
         else:
             self.hide()
 
-    def _onStyleChanged(self, section, key):
-        """
-        Repaints widget if the panel background color changed.
-
-        :param section:
-        :param key:
-        :param value:
-        """
-        if key == "panelBackground" or not key:
-            self.backgroundBrush = QtGui.QBrush(
-                self.editor.style.value("panelBackground"))
-            self.editor.repaint()
-        if key == "panelForeground" or not key:
-            self.foregroundPen = QtGui.QPen(
-                self.editor.style.value("panelForeground"))
-            self.editor.repaint()
-
     def paintEvent(self, event):
         if self.isVisible():
             # fill background
+            self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
+                self.editor.palette().window().color()))
+            self.foregroundPen = QtGui.QPen(QtGui.QColor(
+                self.editor.palette().windowText().color()))
             painter = QtGui.QPainter(self)
             painter.fillRect(event.rect(), self.backgroundBrush)
 

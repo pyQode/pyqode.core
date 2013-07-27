@@ -456,13 +456,16 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__updateButtons(txt=self.lineEditReplace.text())
 
     def __resetStylesheet(self):
-        highlight = driftColor(self.editor.style.value(self._KEYS[0])).name()
+        highlight = driftColor(self.editor.palette().window().color())
         stylesheet = self.STYLESHEET % {
-            "bck": self.editor.style.value(self._KEYS[0]).name(),
-            "txt_bck": self.editor.style.value(self._KEYS[1]).name(),
-            "color": self.editor.style.value(self._KEYS[2]).name(),
-            "highlight": highlight}
+            "bck": self.editor.palette().window().color().name(),
+            "color": self.editor.palette().windowText().color().name(),
+            "highlight": highlight.name()}
         self.setStyleSheet(stylesheet)
+
+    def paintEvent(self, event):
+        Panel.paintEvent(self, event)
+        self.__resetStylesheet()
 
     def __getCurrentOccurrence(self):
         self.__mutex.lock()

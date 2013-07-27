@@ -28,19 +28,6 @@ class LineNumberPanel(Panel):
 
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)
-        self._lineColorU = self.editor.style.addProperty(
-            "lineForeground", self.palette().color(QtGui.QPalette.Disabled,
-                                                   QtGui.QPalette.WindowText))
-        self._lineColorS = self.editor.style.addProperty(
-            "lineForegroundSel", self.palette().color(
-                QtGui.QPalette.Normal, QtGui.QPalette.WindowText))
-
-    def _onStyleChanged(self, section, key):
-        Panel._onStyleChanged(self, section, key)
-        if key == "lineForeground" or not key:
-            self._lineColorU = self.editor.style.value("lineForeground")
-        elif key == "lineForegroundSel" or not key:
-            self._lineColorS = self.editor.style.value("lineForegroundSel")
 
     def sizeHint(self):
         """
@@ -103,6 +90,10 @@ class LineNumberPanel(Panel):
         Paints the line numbers
         """
         Panel.paintEvent(self, event)
+        self._lineColorU = self.palette().color(
+            QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
+        self._lineColorS = self.palette().color(
+            QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
         if self.isVisible():
             painter = QtGui.QPainter(self)
             # get style options (font, size)

@@ -68,6 +68,12 @@ class FoldingPanel(Panel):
             retVal.append(indic)
         return retVal
 
+    def getSystemColor(self):
+        pal = self.editor.palette()
+        b = pal.base().color()
+        h = pal.highlight().color()
+        return mergedColors(b, h, 50)
+
     def __init__(self):
         Panel.__init__(self)
         self.__indicators = []
@@ -78,11 +84,6 @@ class FoldingPanel(Panel):
                                  QtGui.QIcon(constants.ICON_ARROW_RIGHT[1]))
         self.__downArrowIcon = (QtGui.QIcon(constants.ICON_ARROW_DOWN[0]),
                                 QtGui.QIcon(constants.ICON_ARROW_DOWN[1]))
-        # get the native fold scope color
-        pal = self.palette()
-        b = pal.base().color()
-        h = pal.highlight().color()
-        self.__systemColor = mergedColors(b, h, 50)
         self.__decorations = []
         self.__updateRequested = False
 
@@ -98,7 +99,7 @@ class FoldingPanel(Panel):
         self.__native = self.editor.style.addProperty("nativeFoldingIndicator",
                                                       True)
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
-                                                     self.__systemColor)
+                                                     self.getSystemColor())
         self.__decoColor = driftColor(
             self.editor.style.value("background"))
         self.__installActions()
@@ -367,6 +368,9 @@ class FoldingPanel(Panel):
         :param painter: The widget's painter.
         """
         c = self.__color
+        if self.__native:
+            print("Get Sys color")
+            c = self.getSystemColor()
         grad = QtGui.QLinearGradient(foldZoneRect.topLeft(),
                                      foldZoneRect.topRight())
         grad.setColorAt(0, c.lighter(110))
