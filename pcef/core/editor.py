@@ -355,8 +355,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 "\t", " " * self.settings.value("tabLength"))
         self.__filePath = filePath
         self.__fileEncoding = encoding
-        self.setPlainText(content)
+        self.cleanupTrailingWhitespaces(content)
         self.dirty = False
+
+    def cleanupTrailingWhitespaces(self, content):
+        value = self.verticalScrollBar().value()
+        pos = self.cursorPosition
+        lines = content.splitlines()
+        newLines = []
+        for l in lines:
+            newLines.append(l.rstrip())
+        self.setPlainText("\n".join(newLines))
+        tc = self.textCursor()
+        tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
+        p = tc.position()
+        tc.select(tc.LineUnderCursor)
+        if tc.selectedText():
+            tc.setPosition(p)
+            tc.movePosition(tc.Right, tc.MoveAnchor, pos[1])
+        else:
+            tc.setPosition(p)
+        self.setTextCursor(tc)
+        self.verticalScrollBar().setValue(value)
 
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
@@ -368,6 +388,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
+        self.cleanupTrailingWhitespaces(self.toPlainText())
         self.textSaving.emit(filePath)
         if not filePath:
             if self.filePath:
