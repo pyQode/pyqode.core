@@ -126,6 +126,11 @@ Here are a few screenshots of the gui integration example on several different p
 .. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde.png
     :alt: KDE
     
+* KDE with a dark color scheme:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde-dark.png
+    :alt: KDE dark
+    
 * Gnome:
 
 .. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/gnome.png
