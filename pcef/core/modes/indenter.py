@@ -32,7 +32,7 @@ class AutoIndentMode(Mode):
     This mode can be extended by overriding the _getIndent method.
     """
     #: Mode identifier
-    IDENTIFIER = "autoIndent"
+    IDENTIFIER = "autoIndentMode"
     DESCRIPTION = """ A basic auto indent mode that provides a basic auto
     indentation based on the previous line indentation.
     """

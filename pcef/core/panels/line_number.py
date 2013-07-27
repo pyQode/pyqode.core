@@ -19,7 +19,7 @@ class LineNumberPanel(Panel):
     """
     The liner number panel displays the document line numbers.
     """
-    IDENTIFIER = "lineNumberArea"
+    IDENTIFIER = "lineNumberPanel"
     DESCRIPTION = "Display line number"
 
     def __init__(self):

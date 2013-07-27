@@ -35,7 +35,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     (**selectNext**/**selectionPrevious**) or replace the occurences with their
     own text (**replaceOccurrence**/**replaceAll**).
     """
-    IDENTIFIER = "searchPanel"
+    IDENTIFIER = "searchAndReplacePanel"
     DESCRIPTION = "Search and replace text in the editor"
 
     #: Stylesheet
