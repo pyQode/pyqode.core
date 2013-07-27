@@ -87,9 +87,9 @@ class Panel(QtGui.QWidget, Mode):
         if self.isVisible():
             # fill background
             self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
-                self.editor.palette().window().color()))
+                self.palette().window().color()))
             self.foregroundPen = QtGui.QPen(QtGui.QColor(
-                self.editor.palette().windowText().color()))
+                self.palette().windowText().color()))
             painter = QtGui.QPainter(self)
             painter.fillRect(event.rect(), self.backgroundBrush)
 

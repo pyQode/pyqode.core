@@ -1113,12 +1113,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                self.palette().highlight().color())
         self.style.addProperty("selectionForeground",
                                self.palette().highlightedText().color())
-        self.style.addProperty(
-            "panelBackground", self.palette().window().color())
-        self.style.addProperty(
-            "panelForeground", self.palette().windowText().color())
-        self.style.addProperty(
-            "panelHighlight", self.palette().highlight().color())
         self.__resetPalette("", "")
 
     def __encodePlainText(self, encoding):
@@ -1200,9 +1194,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
-        styleName = \
-            QtGui.QApplication.instance().style().metaObject().className()
-        if "OXYGEN" in styleName.upper():
+        app = QtGui.QApplication.instance()
+        styleName = app.style().metaObject().className()
+        if "OXYGEN" in styleName.upper() or app.styleSheet():
             vscroll_width = hscroll_height = 0
         left = 0
         panels = list(self.__panels[PanelPosition.LEFT].values())

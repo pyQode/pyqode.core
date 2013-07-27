@@ -100,8 +100,7 @@ class FoldingPanel(Panel):
                                                       True)
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
                                                      self.getSystemColor())
-        self.__decoColor = driftColor(
-            self.editor.style.value("background"))
+        self.__decoColor = driftColor(self.editor.palette().window().color())
         self.__installActions()
 
     def _onStyleChanged(self, section, key):
@@ -112,8 +111,8 @@ class FoldingPanel(Panel):
         if key == "foldIndicatorBackground" or not key:
             self.__color = self.editor.style.value("foldIndicatorBackground")
         if key == "background" or not key:
-            self.__decoColor = driftColor(self.editor.style.value(
-                                          "background"))
+            self.__decoColor = driftColor(
+                self.editor.palette().window().color())
 
     def resetIndicatorsBackground(self):
         """
@@ -164,6 +163,7 @@ class FoldingPanel(Panel):
                            endLine=foldingIndicator.end)
         foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
         foldingIndicator._deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
+        self.__decoColor = driftColor(self.editor.palette().window().color())
         foldingIndicator._deco.setOutline(self.__decoColor)
         foldingIndicator._deco.signals.clicked.connect(self.__onDecoClicked)
         self.editor.addDecoration(foldingIndicator._deco)
@@ -369,7 +369,6 @@ class FoldingPanel(Panel):
         """
         c = self.__color
         if self.__native:
-            print("Get Sys color")
             c = self.getSystemColor()
         grad = QtGui.QLinearGradient(foldZoneRect.topLeft(),
                                      foldZoneRect.topRight())
@@ -411,6 +410,7 @@ class FoldingPanel(Panel):
         :param indic: Indic to setup.
         """
         self.__mouseOveredIndic = indic
+        self.__decoColor = driftColor(self.editor.palette().window().color())
         tc = self.editor.textCursor()
         d = TextDecoration(tc, startLine=1, endLine=indic.start)
         d.setFullWidth(True, clear=False)
