@@ -28,12 +28,15 @@ class FileWatcherMode(Mode):
     def __init__(self):
         super(FileWatcherMode, self).__init__()
         self.__fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.__cancelNextNotification = False
         self.__flgNotify = False
         self.__changeWaiting = False
         self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     def __notifyChange(self):
+        """
+        Notify user from external change if autoReloadChangedFiles is False then
+        reload the changed file in the editor
+        """
         self.__flgNotify = True
         auto = self.editor.settings.value("autoReloadChangedFiles")
         if (auto or QtGui.QMessageBox.question(
@@ -48,23 +51,39 @@ class FileWatcherMode(Mode):
         self.__flgNotify = False
 
     def __onFileChanged(self, path):
-        if self.__cancelNextNotification:
-            self.__cancelNextNotification = False
-            return
+        """
+        On file changed, notify the user if we have focus, otherwise delay the
+        notification to the focusIn event
+        """
         self.__changeWaiting = True
         if self.editor.hasFocus() and self.__flgNotify:
             self.__notifyChange()
 
     def __onEditorTextSaved(self, path):
-        self.__cancelNextNotification = True
-        self.__onEditorFilePathChanged()
-        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
+        """
+        Reconnect fileChanged signal after a short amount of time.
+        """
+        QtCore.QTimer.singleShot(100, self.__reconnectFileChanged)
 
     def __onEditorTextSaving(self, path):
+        """
+        Disconnect fileChanged signal to avoid notification when the file is
+        saved by the pcef widget.
+        """
         self.__fileSystemWatcher.fileChanged.disconnect(self.__onFileChanged)
+
+    def __reconnectFileChanged(self):
+        """
+        Connects the fileChanged again
+        """
+        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
+        """
+        Change the watched file
+        """
+        print("Path changed")
         path = self.editor.filePath
         if len(self.__fileSystemWatcher.files()):
             self.__fileSystemWatcher.removePaths(
@@ -74,6 +93,9 @@ class FileWatcherMode(Mode):
 
     @QtCore.Slot()
     def __onEditorFocusIn(self):
+        """
+        Notify if there are pending changes
+        """
         if self.__changeWaiting:
             self.__notifyChange()
 
