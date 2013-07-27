@@ -355,17 +355,40 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 "\t", " " * self.settings.value("tabLength"))
         self.__filePath = filePath
         self.__fileEncoding = encoding
-        self.cleanupTrailingWhitespaces(content)
+        self.cleanupText(content)
         self.dirty = False
 
-    def cleanupTrailingWhitespaces(self, content):
+    def cleanupText(self, content=None):
+        """
+        Removes trailing whitespaces and ensure one single blank line at the end
+        of the QTextDocument. (call setPlainText to update the text).
+
+        :param content: The text to cleanup and display. If None, the current
+                        content is used.
+        """
+        if not content:
+            content = self.toPlainText()
         value = self.verticalScrollBar().value()
         pos = self.cursorPosition
         lines = content.splitlines()
         newLines = []
         for l in lines:
             newLines.append(l.rstrip())
+        if newLines[len(newLines)-1]:
+            newLines.append("")
+        else:
+            # remove last blank line (except one)
+            i = 0
+            while True:
+                l = newLines[len(newLines) - i - 1]
+                if l:
+                    break
+                i += 1
+            for j in range(i-1):
+                newLines.pop(len(newLines) - 1)
+        # update text
         self.setPlainText("\n".join(newLines))
+        # restore cursor and scrollbars
         tc = self.textCursor()
         tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
         p = tc.position()
@@ -388,7 +411,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
-        self.cleanupTrailingWhitespaces(self.toPlainText())
+        self.cleanupText(self.toPlainText())
         self.textSaving.emit(filePath)
         if not filePath:
             if self.filePath:
