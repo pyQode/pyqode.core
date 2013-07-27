@@ -201,7 +201,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __onKeyReleased(self, event):
         # print("KR", self.editor.toPlainText())
         isPrintable = self.__isPrintableKeyEvent(event)
+        isEndOfWordChar = False
+        if isPrintable:
+            k = str(chr(event.key()))
+            seps = self.editor.settings.value("wordSeparators")
+            isEndOfWordChar = k in seps
         isShortcut = self.__isShortcut(event)
+        symbols = self.editor.settings.value(
+                "triggerSymbols", section="codeCompletion")
         if self.__completer.popup().isVisible() and not isShortcut:
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
@@ -215,7 +222,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      event.key() == QtCore.Qt.Key_Right or
                      event.key() == QtCore.Qt.Key_Space or
                      event.key() == QtCore.Qt.Key_End or
-                     event.key() == QtCore.Qt.Key_Home)):
+                     event.key() == QtCore.Qt.Key_Home) or
+                    (isEndOfWordChar and not str(chr(event.key())) in symbols)):
                 self.__hidePopup()
             else:
                 # update completion prefix
@@ -229,6 +237,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                event.key() == QtCore.Qt.Key_End or
                event.key() == QtCore.Qt.Key_Home)):
             self.__hidePopup()
+        # elif (isPrintable and isEndOfWordChar and
+        #           not str(chr(event.key())) in symbols and not isShortcut):
+        #     self.__hidePopup()
+        #     print("Hide")
         elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
               event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
             prefixLen = len(self.completionPrefix)
@@ -237,8 +249,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             tc.setPosition(tc.position())
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
             textToCursor = tc.selectedText()
-            symbols = self.editor.settings.value(
-                "triggerSymbols", section="codeCompletion")
+
             for symbol in symbols:
                 if textToCursor.endswith(symbol):
                     logging.getLogger("pcef-cc").debug("Symbols trigger")
