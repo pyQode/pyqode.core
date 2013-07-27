@@ -11,10 +11,10 @@ What is PCEF?
 -------------
 
 PCEF is a *flexible source code editing framework* for Python Qt
-applications.
+applications. **PCEF is not an IDE**.
 
 *pcef-core* is the foundation package, it contains everything you need
-to create a generic (language independant) code editor widget and is the
+to create a generic (language independant) code editor widget. It is the
 mandatory requirement for any pcef extension.
 
 The base widget (QCodeEdit) is a simple extension of QPlainTextEdit that
