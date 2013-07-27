@@ -1,4 +1,4 @@
-A python-qt source code editing framework/widget
+A python/qt source code editing framework
 ======================================================
 
 *version 1.0.0-beta.1*
