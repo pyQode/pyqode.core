@@ -1,123 +1,59 @@
 Python/Qt Code Editing Framework
 =====================================
 
-*version 1.0.0-dev* 
+*version 1.0.0-beta* 
 
 .. image:: https://travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
     :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
     :alt: Travis-CI build status
 
+PCEF is a flexible source code editing framework for Python Qt applications.
 
-**WARNING: The library is being massively refactorised/rewritten and is not usable for now**
+pcef-core is the foundation package for PCEF, it contains all you need to create a generic (language independant) code
+editor widget.
 
-PCEF is code editing framework for python qt applications. It provides a flexible code editor that you can just drop in any PySide or PyQt
-applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
+The base widget is a simple extension of QPlainTextEdit that can be customised by adding extensions (modes and panels).
 
-The framework also provides two pre-configurededitors:
-* a generic (langage independent) editor widget
-* a python editor widget
-
-Here are the core features (used in the generic editor):
-
-* **syntax highlighting mode** (using pygments)
-* **code completion** (static word list, from document words)
-* line number Panel
-* **code folding** Panel
-* markers Panel (to add breakpoints, bookmarks, errors,...)
-* right margin indicator mode
-* active line highlighting mode
-* **editor zoom** mode
-* find and replace Panel
-* **text decorations** (squiggle, box)
-* unicode support (specify encoding when you load your file)
-* **easy styling** (built-in white and dark styles + possibility to customize using **JSON style schemes**)
-* **flexible framework** to add custom panels/modes
-* auto indent mode(indentation level is based on the previous line indent)
-
-Here are the python specific features:
-
-* accurate code completion using **Jedi**
-* calltips (using Jedi too)
-* on the fly syntax checking (pylint + pyflakes + pep8)
-* smart indentation mode
-* code folding mode
+Here are the core features:
+  * supports PySide and PyQt4
+  * supports Python 2 and Python 3
+  * simple widget based on QPlainTextEdit
+  * easily customisable (modes and panels)
+  * native look and feel close to Qt creator
+  * builtin modes and panels (folding, line number, code completion, syntax highlighting)
+  * Qt Designer plugin
+  * language specific extensions (see the wiki)
+  
+** The code is in beta, the public API is stable but the documentation is not available at the moment. However the code
+is already commented and there are quite a few examples available in the examples directory) **
 
 License
 ---------
 
 PCEF is licensed under the LGPL v3.
 
+_Note that is you use the PyQt backend, you will have to comply with the GPL license._
+
+Requirements
+--------------
+
+pcef-core depends on the following libraries:
+   
+   * PyQt4 or PySide
+   * Python 2.7 or Python 3 (>= 3.2)
+   * pygments
+   * setuptools
+
 Installation
 --------------
 
-PCEF is hosted on pypi. You can installing using pip (you need to have setuptools and PySide already installed)::
+You can install pcef-core using pip or easy_install::
 
-    pip install PCEF
-
-To run the examples, execute one of the following commands::
+    pip install pcef-core
     
-    pcef_generic_example
-
-You can also clone the repository or download the source archive and install the package manually::
-    
-    python setup.py install
-
-To run the examples run the one of the following scripts (you don't need to install pcef to run the examples):
-
-- run_generic_example.py
-
 Resources
 ------------
 
-* Source repository: https://github.com/ColinDuquesnoy/PCEF/
-* Documentation: http://packages.python.org/PCEF
-* Package repository: http://pypi.python.org/pypi/PCEF/
-
-
-Usage
---------
-
-.. highlight:: python
-
-Here is a simple example::
-
-    #!/usr/bin/env python
-    import sys
-
-    from PySide.QtGui import QApplication
-    from PySide.QtGui import QMainWindow
-
-    from pcef import openFileInEditor
-    from pcef.editors.python import PythonEditor
-
-
-    def main():
-        """ Application entry point """
-        # create qt objects (app, window and our editor)
-        app = QApplication(sys.argv)
-        window = QMainWindow()
-        editor = PythonEditor()
-        window.setCentralWidget(editor)
-
-        # open a file
-        openFileInEditor(editor, __file__)
-
-        # run
-        window.show()
-        app.exec_()
-
-
-    if __name__ == "__main__":
-        main()
-
-
-Screenshots
---------------
-
-* Default white style:
-
-.. image:: /doc/source/_static/white_style.png
-
-* Default dark style (inspired from the Darcula theme (Pycharm)):
-
-.. image:: /doc/source/_static/dark_style.png
+* Source repository: https://github.com/ColinDuquesnoy/pcef-core/
+* Documentation: http://packages.python.org/PCEF (version 0.2!)
+* Package repository: http://pypi.python.org/pypi/pcef-core/
