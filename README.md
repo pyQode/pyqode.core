@@ -70,15 +70,15 @@ from PyQt4.QtGui import QApplication
 
 def main():
     app = QApplication(sys.argv)
-	editor = pcef.core.QGenericCodeEdit()
-	editor.openFile(__file__)
-	editor.resize(800, 600)
-	editor.show()
-	return app.exec_()
+    editor = pcef.core.QGenericCodeEdit()
+    editor.openFile(__file__)
+    editor.resize(800, 600)
+    editor.show()
+    return app.exec_()
 
 
 if __name__ == "__main__":
-	sys.exit(main())
+    sys.exit(main())
 ```
 
 Screenshots
