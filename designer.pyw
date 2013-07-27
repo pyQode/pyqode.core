@@ -72,12 +72,18 @@ def run(env):
     """
     try:
         p = subprocess.Popen(["designer"], env=env)
+        if p.wait():
+            raise OSError()
     except OSError:
         try:
             p = subprocess.Popen(["designer-qt4"], env=env)
+            if p.wait():
+                raise OSError()
         except OSError:
             try:
                 p = subprocess.Popen(["designer-qt4"], env=env)
+                if p.wait():
+                    raise OSError()
             except OSError:
                 print("Failed to start Qt Designer")
     if p:
