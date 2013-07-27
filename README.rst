@@ -1,4 +1,4 @@
-Python/Qt Code Editing Framework
+PCEF: Python/Qt Code Editing Framework
 =====================================
 
 *version 1.0.0-beta* 
@@ -6,15 +6,26 @@ Python/Qt Code Editing Framework
 .. image:: https://travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
     :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
     :alt: Travis-CI build status
+    
+**Beta! The public API is stable but the documentation is not available at the moment. 
+However the code already contains valuable comments and there are quite a few examples available in the examples directory)**
+
+What is PCEF?
+----------------
 
 PCEF is a flexible source code editing framework for Python Qt applications.
 
-pcef-core is the foundation package for PCEF, it contains all you need to create a generic (language independant) code
-editor widget.
+**pcef-core** is the foundation package, it contains everything you need to create a 
+generic (language independant) code editor widget.
 
 The base widget is a simple extension of QPlainTextEdit that can be customised by adding extensions (modes and panels).
 
+
+Features
+-------------
+
 Here are the core features:
+
   * supports PySide and PyQt4
   * supports Python 2 and Python 3
   * simple widget based on QPlainTextEdit
@@ -23,9 +34,6 @@ Here are the core features:
   * builtin modes and panels (folding, line number, code completion, syntax highlighting)
   * Qt Designer plugin
   * language specific extensions (see the wiki)
-  
-** The code is in beta, the public API is stable but the documentation is not available at the moment. However the code
-is already commented and there are quite a few examples available in the examples directory) **
 
 License
 ---------
