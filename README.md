@@ -11,12 +11,13 @@ However the code already contains valuable comments and there are quite a few ex
 What is PCEF?
 ----------------
 
-PCEF is a flexible source code editing framework for Python Qt applications.
+PCEF is a *flexible source code editing framework* for Python Qt applications.
 
-**pcef-core** is the foundation package, it contains everything you need to create a 
-generic (language independant) code editor widget.
+*pcef-core* is the foundation package, it contains everything you need to create a 
+generic (language independant) code editor widget and is the mandatory requirement for any pcef extension.
 
-The base widget is a simple extension of QPlainTextEdit that can be customised by adding extensions (modes and panels).
+The base widget (QCodeEdit) is a simple extension of QPlainTextEdit that can be customised by adding 
+extensions (modes and panels).
 
 
 Features
@@ -31,14 +32,13 @@ Here are the core features:
   * native look and feel close to Qt creator
   * builtin modes and panels (folding, line number, code completion, syntax highlighting)
   * Qt Designer plugin
-  * language specific extensions (see the wiki)
+  * [language specific extensions](https://github.com/ColinDuquesnoy/pcef-core/wiki/Extensions)
 
 License
 ---------
 
 PCEF is licensed under the LGPL v3.
 
-_Note that is you use the PyQt backend, you will have to comply with the GPL license._
 
 Requirements
 --------------
@@ -55,9 +55,40 @@ Installation
 
     $ pip install pcef-core
     
-Resources
-------------
+Usage
+--------------
 
-* Source repository: https://github.com/ColinDuquesnoy/pcef-core/
-* Documentation: http://packages.python.org/PCEF (version 0.2!)
-* Package repository: http://pypi.python.org/pypi/pcef-core/
+Here is a simple example using PyQt4:
+
+```python
+# simple example using PyQt4
+import sys
+import PyQt4
+import pcef.core
+from PyQt4.QtGui import QApplication
+
+
+def main():
+    app = QApplication(sys.argv)
+	editor = pcef.core.QGenericCodeEdit()
+	editor.openFile(__file__)
+	editor.show()
+	return app.exec_()
+
+
+if __name__ == "__main__":
+	sys.exit(main())
+```
+
+Screenshots
+----------------
+
+**TODO**
+    
+Resources
+----------------
+
+* [Downloads](https://github.com/ColinDuquesnoy/pcef-core/releases)
+* [Source repository](https://github.com/ColinDuquesnoy/pcef-core/)
+* [Documentation version 0.2](http://packages.python.org/PCEF)
+* [Wiki](https://github.com/ColinDuquesnoy/pcef-core/wiki)
