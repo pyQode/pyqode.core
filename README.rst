@@ -108,30 +108,30 @@ Here are a few screenshots of the gui integration example on several different p
 
 * Windows 7:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/windows7.PNG
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/windows7.PNG
     :alt: Windows 7
     
 * Ubuntu:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/ubuntu.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/ubuntu.png
     :alt: Ubuntu
     
 * Linux Mint:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/mint.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/mint.png
     :alt: Linux mint
     
 * KDE:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/kde.png
     :alt: KDE
     
 * KDE with a dark color scheme:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde-dark.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/kde-dark.png
     :alt: KDE dark
     
 * Gnome:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/gnome.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/gnome.png
     :alt: Gnome
