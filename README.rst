@@ -63,13 +63,15 @@ Installation
 Usage
 -----
 
+The *public API* is exposed by the *pcef.core* package.
+
 Here is a `simple example using PyQt4`_:
 
 .. code:: python
 
     # simple example using PyQt4
     import sys
-    import PyQt4
+    import PyQt4  # just to tell pcef we want to use PyQt4.
     import pcef.core
     from PyQt4.QtGui import QApplication
 
