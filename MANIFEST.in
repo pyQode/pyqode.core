@@ -5,17 +5,18 @@
 
 include MANIFEST.in
 include setup.py
-include run_generic_example.py
 include COPYING
 include README.rst
 include doc/*
 include doc/source/*
 include doc/source/_static/*
 include doc/source/api/*
-include pcef/ui/*
-include pcef/ui/rc/*
-include examples/ui/*
-include examples/ui/rc/*
+include examples/gui_integration/*
+include examples/gui_integration/ui/*
+include examples/gui_integration/ui/rc/*
+include examples/qt_bindings/*
+include examples/styling/*
+
 
 
 

@@ -1,116 +1,137 @@
-PySide Code Editing Framework
-=====================================
+A python/qt source code editing framework
+======================================================
 
-*version 0.2.0*
+*version 1.0.0-beta.1*
 
-PCEF is code editing framework for PySide applications. It provides a flexible code editor that you can just drop in any PySide
-applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
+.. image:: https://api.travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=develop
+    :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
+    :alt: Travis-CI build status
 
-The framework also provides two pre-configurededitors:
-* a generic (langage independent) editor widget
-* a python editor widget
+What is PCEF?
+-------------
 
-Here are the core features (used in the generic editor):
+PCEF is a *flexible source code editing framework* for Python Qt
+applications. **PCEF is a widget, not an IDE**.
 
-* **syntax highlighting mode** (using pygments)
-* **code completion** (static word list, from document words)
-* line number Panel
-* **code folding** Panel
-* markers Panel (to add breakpoints, bookmarks, errors,...)
-* right margin indicator mode
-* active line highlighting mode
-* **editor zoom** mode
-* find and replace Panel
-* **text decorations** (squiggle, box)
-* unicode support (specify encoding when you load your file)
-* **easy styling** (built-in white and dark styles + possibility to customize using **JSON style schemes**)
-* **flexible framework** to add custom panels/modes
-* auto indent mode(indentation level is based on the previous line indent)
+*pcef-core* is the foundation package, it contains everything you need
+to create a generic (language independant) code editor widget. It is the
+mandatory requirement for any pcef extension.
 
-Here are the python specific features:
+The base widget (QCodeEdit) is a simple extension of QPlainTextEdit that
+can be customised by adding extensions (modes and panels).
 
-* accurate code completion using **Jedi**
-* calltips (using Jedi too)
-* on the fly syntax checking (pylint + pyflakes + pep8)
-* smart indentation mode
-* code folding mode
+Features
+--------
+
+Here are the core features:
+
+-  supports PySide and PyQt4
+-  supports Python 2 and Python 3
+-  simple widget based on QPlainTextEdit
+-  easily customisable (modes and panels)
+-  native look and feel close to Qt creator
+-  builtin modes and panels (folding, line number, code completion,
+   syntax highlighting)
+-  Qt Designer plugin
+-  `language specific extensions`_
+
+.. _language specific extensions: https://github.com/ColinDuquesnoy/pcef-core/wiki/Extensions
+
 
 License
----------
+-------
 
 PCEF is licensed under the LGPL v3.
 
-Installation
---------------
-
-PCEF is hosted on pypi. You can installing using pip (you need to have setuptools and PySide already installed)::
-
-    pip install PCEF
-
-To run the examples, execute one of the following commands::
-    
-    pcef_generic_example
-
-You can also clone the repository or download the source archive and install the package manually::
-    
-    python setup.py install
-
-To run the examples run the one of the following scripts (you don't need to install pcef to run the examples):
-
-- run_generic_example.py
-
-Resources
+Requirements
 ------------
 
-* Source repository: https://github.com/ColinDuquesnoy/PCEF/
-* Documentation: http://packages.python.org/PCEF
-* Package repository: http://pypi.python.org/pypi/PCEF/
+pcef-core depends on the following libraries:
 
+-  PyQt4 or PySide
+-  Python 2.7 or Python 3 (>= 3.2)
+-  pygments
+-  setuptools
+
+Installation
+------------
+
+::
+
+    $ pip install pcef-core
 
 Usage
---------
+-----
 
-.. highlight:: python
+Here is a `simple example using PyQt4`_:
 
-Here is a simple example::
+.. code:: python
 
-    #!/usr/bin/env python2  # python 2 only at the moment
+    # simple example using PyQt4
     import sys
-
-    from PySide.QtGui import QApplication
-    from PySide.QtGui import QMainWindow
-
-    from pcef import openFileInEditor
-    from pcef.editors.python import PythonEditor
+    import PyQt4
+    import pcef.core
+    from PyQt4.QtGui import QApplication
 
 
     def main():
-        """ Application entry point """
-        # create qt objects (app, window and our editor)
         app = QApplication(sys.argv)
-        window = QMainWindow()
-        editor = PythonEditor()
-        window.setCentralWidget(editor)
-
-        # open a file
-        openFileInEditor(editor, __file__)
-
-        # run
-        window.show()
-        app.exec_()
+        editor = pcef.core.QGenericCodeEdit()
+        editor.openFile(__file__)
+        editor.resize(800, 600)
+        editor.show()
+        return app.exec_()
 
 
     if __name__ == "__main__":
-        main()
+        sys.exit(main())
 
+.. _simple example using PyQt4: https://gist.github.com/ColinDuquesnoy/6096185
+
+Resources
+---------
+
+-  `Downloads`_
+-  `Source repository`_
+-  `Documentation`_ *(outdated)*
+-  `Wiki`_
+
+.. _Downloads: https://github.com/ColinDuquesnoy/pcef-core/releases
+.. _Source repository: https://github.com/ColinDuquesnoy/pcef-core/
+.. _Documentation : http://packages.python.org/PCEF
+.. _Wiki: https://github.com/ColinDuquesnoy/pcef-core/wiki
 
 Screenshots
---------------
+------------
 
-* Default white style:
+Here are a few screenshots of the gui integration example on several different platforms:
 
-.. image:: /doc/source/_static/white_style.png
+* Windows 7:
 
-* Default dark style (inspired from the Darcula theme (Pycharm)):
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/windows7.PNG
+    :alt: Windows 7
+    
+* Ubuntu:
 
-.. image:: /doc/source/_static/dark_style.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/ubuntu.png
+    :alt: Ubuntu
+    
+* Linux Mint:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/mint.png
+    :alt: Linux mint
+    
+* KDE:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde.png
+    :alt: KDE
+    
+* KDE with a dark color scheme:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/kde-dark.png
+    :alt: KDE dark
+    
+* Gnome:
+
+.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/develop/screenshots/gnome.png
+    :alt: Gnome
