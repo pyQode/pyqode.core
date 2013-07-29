@@ -339,7 +339,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the system's default encoding """
         return sys.getfilesystemencoding()
 
-    def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None):
+    def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None,
+                 detectEncoding=False):
         """
         Helper method to open a file in the editor.
 
@@ -347,17 +348,27 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param replaceTabsBySpaces: True to replace tabs by spaces
                (settings.value("tabSpace") * " ")
+
+        :param encoding: The encoding to use. If no encoding is provided and
+        detectEncoding is false, pcef will try to decode the content using the
+        system default encoding.
+
+        :param detectEncoding: If true and no encoding is specified, pcef will
+                               try to detect encoding using chardet.
+                               .. warning: chardet is **slow** on large files
         """
+        # encoding = "utf-8"
         with open(filePath, 'rb') as f:
             data = f.read()
-            if not encoding:
+            if not encoding and detectEncoding:
                 try:
                     encoding = self.detectEncoding(data)
                 except UnicodeEncodeError:
                     QtGui.QMessageBox.warning(self, "Failed to open file",
                                               "Failed to open file, encoding "
                                               "could not be detected properly")
-                    return
+            else:
+                encoding = self.getDefaultEncoding()
             content = data.decode(encoding)
         if replaceTabsBySpaces:
             content = content.replace(
@@ -420,8 +431,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
-        self.cleanupText(self.toPlainText())
         self.textSaving.emit(filePath)
+        self.cleanupText(self.toPlainText())
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
