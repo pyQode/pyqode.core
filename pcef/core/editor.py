@@ -1145,8 +1145,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         top = int(self.blockBoundingGeometry(block).translated(
             self.contentOffset()).top())
         bottom = top + int(self.blockBoundingRect(block).height())
+        ebottom_top = 0 #event.rect().top()
+        ebottom_bottom = self.height()
         while block.isValid():
-            if block.isVisible():
+            if (block.isVisible() and (top >= ebottom_top and bottom <= ebottom_bottom)):
                 self.__blocks.append((top, blockNumber+1))
             block = block.next()
             top = bottom
@@ -1161,6 +1163,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         hscroll_height = 0
         if self.horizontalScrollBar().isVisible():
             hscroll_height = self.horizontalScrollBar().height()
+        cr = self.contentsRect()
+        hscroll_height = self.size().height() - (cr.height() + hscroll_height)
+        vscroll_width = self.size().width() - (cr.width() + vscroll_width)
+        if hscroll_height < 10:
+            hscroll_height = 0
+        if vscroll_width < 10:
+            vscroll_width = 0
         # Left panels
         left = 0
         for panel in self.__panels[PanelPosition.LEFT].values():
