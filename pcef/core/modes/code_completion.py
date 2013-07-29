@@ -420,6 +420,21 @@ class DocumentWordCompletionProvider(CompletionProvider):
     def __init__(self, editor):
         CompletionProvider.__init__(self, editor)
         self.settings = weakref.ref(editor.settings)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=10)
+        self.editor.newTextSet.connect(self.__request_parsing)
+        self.__words = []
+        self.__completions = []
+
+    def __request_parsing(self):
+        self.__jobRunner.requestJob(self.parse, True, self.editor.toPlainText(),
+                                    self.settings().value("wordSeparators"))
+
+    def parse(self, code, wordSeparators=constants.WORD_SEPARATORS):
+        print("Parse")
+        self.__words = self.split(code, wordSeparators)
+        self.__completions[:] = []
+        for w in self.__words:
+            self.__completions.append(Completion(w))
 
     @staticmethod
     def split(txt, seps):
@@ -445,7 +460,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
             if len(w) == 1:
                 words.remove(w)
             try:
-                int(w)
+                float(w)
                 words.remove(w)
             except ValueError:
                 pass
@@ -458,15 +473,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
     def run(self, code, line, column, completionPrefix,
             filePath, fileEncoding):
-        retVal = []
-        settings = self.settings()
-        separators = constants.WORD_SEPARATORS
-        if settings:
-            separators = settings.value("wordSeparators")
-        words = self.split(code, separators)
-        for w in words:
-            retVal.append(Completion(w))
-        return retVal
+        return self.__completions
 
 
 if __name__ == '__main__':
