@@ -89,7 +89,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if self.__dirty != value:
             self.__dirty = value
             self.dirtyChanged.emit(value)
-            print("Dirty changed: ", value)
 
     @property
     def cursorPosition(self):
