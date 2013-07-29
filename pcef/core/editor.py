@@ -89,6 +89,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if self.__dirty != value:
             self.__dirty = value
             self.dirtyChanged.emit(value)
+            print("Dirty changed: ", value)
 
     @property
     def cursorPosition(self):
@@ -160,6 +161,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
         self.__modifiedLines = set()
+        self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
 
         #: The list of visible blocks, update every paintEvent
@@ -415,6 +417,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         pos = self.cursorPosition
 
         # cleanup whitespaces
+        self.__cleaning = True
         for line in self.__modifiedLines:
             self.setLineText(line, self.lineText(line).rstrip())
 
@@ -430,6 +433,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 i += 1
             for j in range(i-1):
                 self.removeLastLine()
+
+        self.__cleaning = False
+        self.__originalText = self.toPlainText()
 
         # restore cursor and scrollbars
         tc = self.textCursor()
@@ -1325,9 +1331,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Updates dirty flag on text changed.
         """
-        self.__modifiedLines.add(self.cursorPosition[0])
-        txt = self.toPlainText()
-        self.dirty = (txt != self.__originalText)
+        if not self.__cleaning:
+            self.__modifiedLines.add(self.cursorPosition[0])
+            txt = self.toPlainText()
+            self.dirty = (txt != self.__originalText)
 
     def __updateViewportMargins(self):
         """
