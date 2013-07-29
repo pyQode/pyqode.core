@@ -288,12 +288,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         while not tc.atStart():
             # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
             tc.movePosition(tc.Left, tc.KeepAnchor, 1)
-            ch = tc.selectedText()[0]
-            word_separators = self.settings.value("wordSeparators")
-            st = tc.selectedText()
-            if (st in word_separators and (st != "n" and st != "t")
-                    or ch.isspace()):
-                break  # start boundary found
+            try:
+                ch = tc.selectedText()[0]
+                word_separators = self.settings.value("wordSeparators")
+                st = tc.selectedText()
+                if (st in word_separators and (st != "n" and st != "t")
+                        or ch.isspace()):
+                    break  # start boundary found
+            except IndexError:
+                break  # nothing selectable
             start_pos = tc.position()
             tc.setPosition(start_pos)
         if selectWholeWord:
