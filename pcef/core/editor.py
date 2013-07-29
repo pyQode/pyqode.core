@@ -159,7 +159,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
-
+        self.__modifiedLines = set()
         self.__marginSizes = (0, 0, 0, 0)
 
         #: The list of visible blocks, update every paintEvent
@@ -375,10 +375,35 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 "\t", " " * self.settings.value("tabLength"))
         self.__filePath = filePath
         self.__fileEncoding = encoding
-        self.cleanupText(content)
+        self.setPlainText(content)
+        # self.cleanupDocument()
         self.dirty = False
 
-    def cleanupText(self, content=None):
+    def lineText(self, lineNbr):
+        tc = self.textCursor()
+        tc.movePosition(tc.Start)
+        tc.movePosition(tc.Down, tc.MoveAnchor, lineNbr - 1)
+        tc.select(tc.LineUnderCursor)
+        return tc.selectedText()
+
+    def setLineText(self, lineNbr, text):
+        tc = self.textCursor()
+        tc.movePosition(tc.Start)
+        tc.movePosition(tc.Down, tc.MoveAnchor, lineNbr - 1)
+        tc.select(tc.LineUnderCursor)
+        tc.insertText(text)
+        self.setTextCursor(tc)
+
+    def removeLastLine(self):
+        tc = self.textCursor()
+        tc.movePosition(tc.End, tc.MoveAnchor)
+        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
+        tc.movePosition(tc.End, tc.KeepAnchor)
+        tc.removeSelectedText()
+        tc.deletePreviousChar()
+        self.setTextCursor(tc)
+
+    def cleanupDocument(self):
         """
         Removes trailing whitespaces and ensure one single blank line at the end
         of the QTextDocument. (call setPlainText to update the text).
@@ -386,31 +411,32 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param content: The text to cleanup and display. If None, the current
                         content is used.
         """
-        if not content:
-            content = self.toPlainText()
         value = self.verticalScrollBar().value()
         pos = self.cursorPosition
-        lines = content.splitlines()
-        newLines = []
-        for l in lines:
-            newLines.append(l.rstrip())
-        if newLines[len(newLines)-1]:
-            newLines.append("")
+
+        # cleanup whitespaces
+        for line in self.__modifiedLines:
+            print("Cleanu line %d" % line)
+            self.setLineText(line, self.lineText(line).rstrip())
+
+        if self.lineText(self.lineCount()):
+            self.appendPlainText("\n")
         else:
             # remove last blank line (except one)
             i = 0
             while True:
-                l = newLines[len(newLines) - i - 1]
+                l = self.lineText(self.lineCount() - i)
                 if l:
                     break
                 i += 1
             for j in range(i-1):
-                newLines.pop(len(newLines) - 1)
-        # update text
-        self.setPlainText("\n".join(newLines))
+                self.removeLastLine()
+
         # restore cursor and scrollbars
         tc = self.textCursor()
+        tc.movePosition(tc.Start)
         tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
+        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
         p = tc.position()
         tc.select(tc.LineUnderCursor)
         if tc.selectedText():
@@ -432,7 +458,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :return: The operation status as a bool (True for success)
         """
         self.textSaving.emit(filePath)
-        self.cleanupText(self.toPlainText())
+        self.cleanupDocument()
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
@@ -995,6 +1021,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self.__originalText = txt
+        self.__modifiedLines.clear()
         self.__onSettingsChanged("", "")
         self.newTextSet.emit()
         self.redoAvailable.emit(False)
@@ -1299,6 +1326,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Updates dirty flag on text changed.
         """
+        self.__modifiedLines.add(self.cursorPosition[0])
         txt = self.toPlainText()
         self.dirty = (txt != self.__originalText)
 
