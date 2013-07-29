@@ -63,14 +63,19 @@ class FileWatcherMode(Mode):
         """
         Reconnect fileChanged signal after a short amount of time.
         """
-        QtCore.QTimer.singleShot(100, self.__reconnectFileChanged)
+        QtCore.QTimer.singleShot(5000, self.__reconnectFileChanged)
 
     def __onEditorTextSaving(self, path):
         """
         Disconnect fileChanged signal to avoid notification when the file is
         saved by the pcef widget.
         """
-        self.__fileSystemWatcher.fileChanged.disconnect(self.__onFileChanged)
+        try:
+            self.__fileSystemWatcher.fileChanged.disconnect(self.__onFileChanged)
+        except TypeError:
+            pass
+        except RuntimeError:
+            pass
 
     def __reconnectFileChanged(self):
         """
