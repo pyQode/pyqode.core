@@ -416,7 +416,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         # cleanup whitespaces
         for line in self.__modifiedLines:
-            print("Cleanu line %d" % line)
             self.setLineText(line, self.lineText(line).rstrip())
 
         if self.lineText(self.lineCount()):

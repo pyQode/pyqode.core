@@ -430,7 +430,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
                                     self.settings().value("wordSeparators"))
 
     def parse(self, code, wordSeparators=constants.WORD_SEPARATORS):
-        print("Parse")
         self.__words = self.split(code, wordSeparators)
         self.__completions[:] = []
         for w in self.__words:
