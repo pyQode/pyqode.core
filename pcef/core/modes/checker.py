@@ -11,6 +11,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
+import logging
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner
 from pcef.core.panels.marker import Marker
@@ -99,7 +100,7 @@ class CheckerMode(Mode, QtCore.QObject):
                  showEditorTooltip=False):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=2, delay=1200)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
         self.__messages = []
         self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
@@ -170,7 +171,7 @@ class CheckerMode(Mode, QtCore.QObject):
             self.addMessageRequested.disconnect(self.addMessage)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
-    def run(self, document, filePath):
+    def run(self, code, filePath):
         """
         Abstract method that is ran from a background thread. Override this
         method to implement a concrete checker.
@@ -186,7 +187,7 @@ class CheckerMode(Mode, QtCore.QObject):
         if self.__clearOnRequest:
             self.clearMessages()
         self.__jobRunner.requestJob(self.run, True,
-                                    self.editor.document().clone(),
+                                    self.editor.toPlainText(),
                                     self.editor.filePath)
 
 
