@@ -88,7 +88,6 @@ class MarkerPanel(Panel):
         if key and val:
             self.__icons[key] = val
         self.__markers.append(marker)
-        self.repaint()
 
     def makeMarkerIcon(self, marker):
         if isinstance(marker.icon, tuple):
@@ -107,12 +106,10 @@ class MarkerPanel(Panel):
         :param marker: Marker to remove
         """
         self.__markers.remove(marker)
-        self.repaint()
 
     def clearMarkers(self):
         """ Clears the markers list """
         self.__markers[:] = []
-        self.repaint()
 
     def getMarkerForLine(self, line):
         """
