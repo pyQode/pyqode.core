@@ -1201,20 +1201,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             blockNumber = block.blockNumber()
 
     def __computeZonesSizes(self):
-        # takes scrolll bar into account
-        vscroll_width = 0
-        if self.verticalScrollBar().isVisible():
-            vscroll_width = self.verticalScrollBar().width()
-        hscroll_height = 0
-        if self.horizontalScrollBar().isVisible():
-            hscroll_height = self.horizontalScrollBar().height()
-        cr = self.contentsRect()
-        hscroll_height = self.size().height() - (cr.height() + hscroll_height)
-        vscroll_width = self.size().width() - (cr.width() + vscroll_width)
-        if hscroll_height < 10:
-            hscroll_height = 0
-        if vscroll_width < 10:
-            vscroll_width = 0
         # Left panels
         left = 0
         for panel in self.__panels[PanelPosition.LEFT].values():
@@ -1223,7 +1209,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             sh = panel.sizeHint()
             left += sh.width()
         # Right panels
-        right = vscroll_width
+        right = 0
         for panel in self.__panels[PanelPosition.RIGHT].values():
             if not panel.isVisible():
                 continue
@@ -1237,7 +1223,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             sh = panel.sizeHint()
             top += sh.height()
         # Bottom panels
-        bottom = hscroll_height
+        bottom = 0
         for panel in self.__panels[PanelPosition.BOTTOM].values():
             if not panel.isVisible():
                 continue
@@ -1251,20 +1237,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Resizes panels geometries
         """
         cr = self.contentsRect()
+        vcr = self.viewport().contentsRect()
         s_bottom, s_left, s_right, s_top = self.__computeZonesSizes()
-        # takes scrolll bar into account
-        vscroll_width = 0
-        if self.verticalScrollBar().isVisible():
-            vscroll_width = self.verticalScrollBar().width()
-        hscroll_height = 0
-        if self.horizontalScrollBar().isVisible():
-            hscroll_height = self.horizontalScrollBar().height()
-        hscroll_height = self.size().height() - (cr.height() + hscroll_height)
-        vscroll_width = self.size().width() - (cr.width() + vscroll_width)
-        if hscroll_height < 10:
-            hscroll_height = 0
-        if vscroll_width < 10:
-            vscroll_width = 0
+        w_offset = cr.width() - (vcr.width() + s_left + s_right)
+        h_offset = cr.height() - (vcr.height() + s_bottom + s_top)
         left = 0
         panels = list(self.__panels[PanelPosition.LEFT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
@@ -1275,17 +1251,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             sh = panel.sizeHint()
             panel.setGeometry(cr.left() + left, cr.top() + s_top,
                               sh.width(),
-                              cr.height() - s_bottom - s_top)
+                              cr.height() - s_bottom - s_top - h_offset)
             left += sh.width()
-        right = vscroll_width
+        right = 0
         panels = list(self.__panels[PanelPosition.RIGHT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
         for panel in panels:
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
-            panel.setGeometry(cr.right() - right - sh.width(),
-                              cr.top(), sh.width(), cr.height())
+            panel.setGeometry(cr.right() - right - sh.width() - w_offset,
+                              cr.top(), sh.width(), cr.height() - h_offset)
             right += sh.width()
         top = 0
         panels = list(self.__panels[PanelPosition.TOP].values())
@@ -1295,10 +1271,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 continue
             sh = panel.sizeHint()
             panel.setGeometry(cr.left(), cr.top() + top,
-                              cr.width() - vscroll_width,
+                              cr.width() - w_offset,
                               sh.height())
             top += sh.height()
-        bottom = hscroll_height
+        bottom = 0
         panels = list(self.__panels[PanelPosition.BOTTOM].values())
         panels.sort(key=lambda panel: panel.zoneOrder)
         for panel in panels:
@@ -1306,8 +1282,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 continue
             sh = panel.sizeHint()
             panel.setGeometry(cr.left(),
-                              cr.bottom() - bottom - sh.height(),
-                              cr.width() - vscroll_width, sh.height())
+                              cr.bottom() - bottom - sh.height() - h_offset,
+                              cr.width() - w_offset, sh.height())
             bottom += sh.height()
 
     def __updatePanels(self, rect, dy):
@@ -1325,6 +1301,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 if dy:
                     panel.scroll(0, dy)
                 else:
+                    # todo optimize, called on every cursor blink!!!
                     panel.update(0, rect.y(), panel.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.__updateViewportMargins()
