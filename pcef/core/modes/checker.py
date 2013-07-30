@@ -93,45 +93,52 @@ class CheckerMode(Mode, QtCore.QObject):
     current file path.
     """
 
-    addMessageRequested = QtCore.Signal(CheckerMessage)
+    addMessagesRequested = QtCore.Signal(object, bool)
     clearMessagesRequested = QtCore.Signal()
 
     def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
                  showEditorTooltip=False):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1500)
         self.__messages = []
         self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
         self.__clearOnRequest = clearOnRequest
         self.__showTooltip = showEditorTooltip
 
-    def addMessage(self, message):
+    def addMessage(self, messages, clear=False):
         """
         Adds a message.
 
         .. warning: Do not use this method from the run method, use
                     addMessageRequested signal instead.
 
-        :param message: Message to add
+        :param messages: A list of messages or a single message
         """
-        self.__messages.append(message)
-        if message.line:
-            if hasattr(self.editor, "markerPanel"):
-                message._marker = Marker(message.line, message.icon,
-                                         message.description)
-                self.editor.markerPanel.addMarker(message._marker)
-            tooltip = None
-            if self.__showTooltip:
-                tooltip = message.description
-            message._decoration = TextDecoration(self.editor.textCursor(),
-                                                 startLine=message.line,
-                                                 tooltip=tooltip,
-                                                 draw_order=3)
-            message._decoration.setFullWidth(True)
-            message._decoration.setError(color=QtGui.QColor(message.color))
-            self.editor.addDecoration(message._decoration)
+        if clear:
+            self.clearMessages()
+        if isinstance(messages, CheckerMessage):
+            messages = [messages]
+        if len(messages):
+            print("Add messages")
+        for message in messages:
+            self.__messages.append(message)
+            if message.line:
+                if hasattr(self.editor, "markerPanel"):
+                    message._marker = Marker(message.line, message.icon,
+                                             message.description)
+                    self.editor.markerPanel.addMarker(message._marker)
+                tooltip = None
+                if self.__showTooltip:
+                    tooltip = message.description
+                message._decoration = TextDecoration(self.editor.textCursor(),
+                                                     startLine=message.line,
+                                                     tooltip=tooltip,
+                                                     draw_order=3)
+                message._decoration.setFullWidth(True)
+                message._decoration.setError(color=QtGui.QColor(message.color))
+                self.editor.addDecoration(message._decoration)
 
     def removeMessage(self, message):
         """
@@ -161,14 +168,14 @@ class CheckerMode(Mode, QtCore.QObject):
                 self.editor.textChanged.connect(self.requestAnalysis)
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.connect(self.requestAnalysis)
-            self.addMessageRequested.connect(self.addMessage)
+            self.addMessagesRequested.connect(self.addMessage)
             self.clearMessagesRequested.connect(self.clearMessages)
         else:
             if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
                 self.editor.textChanged.disconnect(self.requestAnalysis)
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.disconnect(self.requestAnalysis)
-            self.addMessageRequested.disconnect(self.addMessage)
+            self.addMessagesRequested.disconnect(self.addMessage)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
     def run(self, code, filePath):
@@ -216,15 +223,15 @@ if __name__ == "__main__":
             msg = CheckerMessage(
                 "A fancy info message", MSG_STATUS_INFO,
                 random.randint(1, self.editor.lineCount()))
-            self.addMessageRequested.emit(msg)
+            self.addMessagesRequested.emit(msg)
             msg = CheckerMessage(
                 "A fancy warning message", MSG_STATUS_WARNING,
                 random.randint(1, self.editor.lineCount()))
-            self.addMessageRequested.emit(msg)
+            self.addMessagesRequested.emit(msg)
             msg = CheckerMessage(
                 "A fancy error message", MSG_STATUS_ERROR,
                 random.randint(1, self.editor.lineCount()))
-            self.addMessageRequested.emit(msg)
+            self.addMessagesRequested.emit(msg)
 
     def main():
         app = QtGui.QApplication(sys.argv)
