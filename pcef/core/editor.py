@@ -1190,10 +1190,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         top = int(self.blockBoundingGeometry(block).translated(
             self.contentOffset()).top())
         bottom = top + int(self.blockBoundingRect(block).height())
-        ebottom_top = 0 #event.rect().top()
+        ebottom_top = 0
         ebottom_bottom = self.height()
         while block.isValid():
-            if (block.isVisible() and (top >= ebottom_top and bottom <= ebottom_bottom)):
+            visible = (top >= ebottom_top and bottom <= ebottom_bottom)
+            if not visible:
+                break
+            if block.isVisible():
                 self.__blocks.append((top, blockNumber+1))
             block = block.next()
             top = bottom
