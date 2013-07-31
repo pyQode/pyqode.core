@@ -224,9 +224,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.__panels.pop(zone, None)
 
     def showContextMenu(self, pt):
-        mnu = QtGui.QMenu(self)
-        mnu.addActions(self.__actions)
-        mnu.exec_(self.mapToGlobal(pt))
+        self.mnu = QtGui.QMenu()
+        self.mnu.addActions(self.__actions)
+        self.mnu.popup(self.mapToGlobal(pt))
 
     @QtCore.Slot()
     def delete(self):
