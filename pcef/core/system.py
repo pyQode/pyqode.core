@@ -15,8 +15,40 @@ import os
 import logging
 import sys
 import weakref
+import collections
+import functools
 from pcef.qt import QtCore, QtGui
 
+
+class memoized(object):
+    """
+    Decorator. Caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is returned
+    (not reevaluated).
+    """
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+
+    def __call__(self, *args):
+        if not isinstance(args, collections.Hashable):
+            # uncacheable. a list, for instance.
+            # better to not cache than blow up.
+            return self.func(*args)
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            value = self.func(*args)
+            self.cache[args] = value
+            return value
+
+    def __repr__(self):
+        """ Return the function's docstring."""
+        return self.func.__doc__
+
+    def __get__(self, obj, objtype):
+        """ Support instance methods. """
+        return functools.partial(self.__call__, obj)
 
 def findSettingsDirectory(appName="PCEF"):
     """
@@ -32,7 +64,7 @@ def findSettingsDirectory(appName="PCEF"):
         os.mkdir(pth)
     return pth
 
-
+@memoized
 def mergedColors(colorA, colorB, factor):
     maxFactor = 100
     colorA = QtGui.QColor(colorA)
@@ -46,7 +78,7 @@ def mergedColors(colorA, colorB, factor):
                 (colorB.blue() * (maxFactor - factor)) / maxFactor)
     return tmp
 
-
+@memoized
 def driftColor(baseColor, factor=110):
     """
     Return a near color that is lighter or darker than the base color.
@@ -126,6 +158,7 @@ class TextStyle(object):
             underlined = "underlined"
         return " ".join([color, bold, italic, underlined])
 
+    @memoized
     def from_string(self, string):
         tokens = string.split(" ")
         assert len(tokens) == 4
