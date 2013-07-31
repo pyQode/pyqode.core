@@ -120,8 +120,6 @@ class CheckerMode(Mode, QtCore.QObject):
             self.clearMessages()
         if isinstance(messages, CheckerMessage):
             messages = [messages]
-        if len(messages):
-            print("Add messages")
         for message in messages:
             self.__messages.append(message)
             if message.line:
