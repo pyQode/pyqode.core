@@ -120,7 +120,10 @@ class CheckerMode(Mode, QtCore.QObject):
             self.clearMessages()
         if isinstance(messages, CheckerMessage):
             messages = [messages]
-        for message in messages:
+        nbMsg = len(messages)
+        if nbMsg > 20:
+            nbMsg = 20
+        for message in messages[0:nbMsg]:
             self.__messages.append(message)
             if message.line:
                 if hasattr(self.editor, "markerPanel"):
