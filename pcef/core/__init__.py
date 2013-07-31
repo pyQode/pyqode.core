@@ -48,6 +48,7 @@ from pcef.core.system import indexMatching
 from pcef.core.system import TextStyle
 from pcef.core.system import JobRunner
 from pcef.core.system import DelayJobRunner
+from pcef.core.system import memoized
 from pcef.qt.ui import importRc
 
 #: pcef-core version
@@ -116,4 +117,4 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
-           "PYGMENTS_STYLES", "indexByName", "indexMatching"]
+           "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized"]
