@@ -779,7 +779,19 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             sel_end = cursor.selectionEnd()
             has_selection = True
             if not cursor.hasSelection():
-                cursor.select(QtGui.QTextCursor.LineUnderCursor)
+                new_cursor = self.textCursor()
+                new_cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+                selectedText = new_cursor.selectedText()
+                txt = selectedText.strip()
+                if not txt:
+                    cursor.select(QtGui.QTextCursor.LineUnderCursor)
+                else:
+                    indentation = len(selectedText)
+                    nbSpaces = size - (indentation % size)
+                    cursor.insertText(" " * nbSpaces)
+                    self.setTextCursor(cursor)
+                    cursor.endEditBlock()
+                    return
                 has_selection = False
             nb_lines = len(cursor.selection().toPlainText().splitlines())
             if nb_lines == 0:
@@ -830,7 +842,27 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             cpt = 0
             nbSpacesRemoved = 0
             for i in range(nb_lines):
-                cursor.movePosition(QtGui.QTextCursor.StartOfLine)
+                new_cursor = self.textCursor()
+                new_cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+                selectedText = new_cursor.selectedText()
+                txt = selectedText.strip()
+                if not txt:
+                    cursor.movePosition(QtGui.QTextCursor.StartOfLine)
+                else:
+                    # get back
+                    new_cursor = self.textCursor()
+                    new_cursor.movePosition(new_cursor.PreviousWord)
+                    new_cursor.movePosition(new_cursor.EndOfWord)
+                    delta = self.textCursor().position() - new_cursor.position()
+                    if delta > size:
+                        delta = size
+                    tc = self.textCursor()
+                    for i in range(delta):
+                        tc.movePosition(new_cursor.Left,
+                                        new_cursor.MoveAnchor, 1)
+                        tc.deleteChar()
+                    cursor.endEditBlock()
+                    return
                 indentation = self.getLineIndent()
                 nbSpaces = indentation - (indentation - (indentation % size))
                 if not nbSpaces:
