@@ -31,16 +31,19 @@ class memoized(object):
         self.cache = {}
 
     def __call__(self, *args):
-        if not isinstance(args, collections.Hashable):
-            # uncacheable. a list, for instance.
-            # better to not cache than blow up.
+        try:
+            if not isinstance(args, collections.Hashable):
+                # uncacheable. a list, for instance.
+                # better to not cache than blow up.
+                return self.func(*args)
+            if args in self.cache:
+                return self.cache[args]
+            else:
+                value = self.func(*args)
+                self.cache[args] = value
+                return value
+        except TypeError:
             return self.func(*args)
-        if args in self.cache:
-            return self.cache[args]
-        else:
-            value = self.func(*args)
-            self.cache[args] = value
-            return value
 
     def __repr__(self):
         """ Return the function's docstring."""
@@ -64,7 +67,7 @@ def findSettingsDirectory(appName="PCEF"):
         os.mkdir(pth)
     return pth
 
-@memoized
+
 def mergedColors(colorA, colorB, factor):
     maxFactor = 100
     colorA = QtGui.QColor(colorA)
@@ -78,7 +81,7 @@ def mergedColors(colorA, colorB, factor):
                 (colorB.blue() * (maxFactor - factor)) / maxFactor)
     return tmp
 
-@memoized
+
 def driftColor(baseColor, factor=110):
     """
     Return a near color that is lighter or darker than the base color.
