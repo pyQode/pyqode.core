@@ -361,6 +361,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                try to detect encoding using chardet.
                                .. warning: chardet is **slow** on large files
         """
+        QtGui.QApplication.processEvents()
         # encoding = "utf-8"
         with open(filePath, 'rb') as f:
             data = f.read()
@@ -379,8 +380,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 "\t", " " * self.settings.value("tabLength"))
         self.__filePath = filePath
         self.__fileEncoding = encoding
+        QtGui.QApplication.processEvents()
         self.setPlainText(content)
-        # self.cleanupDocument()
         self.dirty = False
 
     def lineText(self, lineNbr):
