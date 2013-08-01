@@ -96,12 +96,6 @@ class Panel(QtGui.QWidget, Mode):
     def showEvent(self, *args, **kwargs):
         self.editor.refreshPanels()
 
-    def show(self):
-        self.adjustSize()
-        QtGui.QWidget.show(self)
-        self.editor.refreshPanels()
-
-    def hide(self):
-        self.adjustSize()
-        QtGui.QWidget.hide(self)
+    def setVisible(self, visible):
+        QtGui.QWidget.setVisible(self, visible)
         self.editor.refreshPanels()
