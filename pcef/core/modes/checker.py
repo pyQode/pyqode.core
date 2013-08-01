@@ -11,7 +11,6 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
-import logging
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner
 from pcef.core.panels.marker import Marker
