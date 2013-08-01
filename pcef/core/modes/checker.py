@@ -168,6 +168,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 self.editor.textChanged.connect(self.requestAnalysis)
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.connect(self.requestAnalysis)
+                self.editor.newTextSet.connect(self.requestAnalysis)
             self.addMessagesRequested.connect(self.addMessage)
             self.clearMessagesRequested.connect(self.clearMessages)
         else:
@@ -175,6 +176,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 self.editor.textChanged.disconnect(self.requestAnalysis)
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.disconnect(self.requestAnalysis)
+                self.editor.newTextSet.disconnect(self.requestAnalysis)
             self.addMessagesRequested.disconnect(self.addMessage)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
