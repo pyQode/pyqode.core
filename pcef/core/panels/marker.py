@@ -13,7 +13,7 @@ This module contains the marker panel
 """
 from pcef.qt import QtCore, QtGui
 from pcef.core.panel import Panel
-from pcef.core.system import DelayJobRunner
+from pcef.core.system import DelayJobRunner, memoized
 
 
 class Marker(QtCore.QObject):
@@ -84,18 +84,18 @@ class MarkerPanel(Panel):
 
         :param marker: Marker to add
         """
-        key, val = self.makeMarkerIcon(marker)
+        key, val = self.makeMarkerIcon(marker.icon)
         if key and val:
             self.__icons[key] = val
         self.__markers.append(marker)
 
-    def makeMarkerIcon(self, marker):
-        if isinstance(marker.icon, tuple):
-            return (marker.icon[0],
-                    QtGui.QIcon.fromTheme(marker.icon[0],
-                                          QtGui.QIcon(marker.icon[1])))
-        elif isinstance(marker, str):
-            return marker.icon, QtGui.QIcon(marker.icon)
+    @memoized
+    def makeMarkerIcon(self, icon):
+        if isinstance(icon, tuple):
+            return icon[0], QtGui.QIcon.fromTheme(
+                icon[0], QtGui.QIcon(icon[1]))
+        elif isinstance(icon, str):
+            return icon, QtGui.QIcon(icon)
         else:
             return None, None
 
