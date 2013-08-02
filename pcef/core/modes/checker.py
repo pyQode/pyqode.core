@@ -11,6 +11,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
+import multiprocessing
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner
 from pcef.core.panels.marker import Marker
@@ -60,7 +61,6 @@ class CheckerMessage(object):
         :param icon:
         :param color:
         """
-        # QtCore.QObject.__init__(self)
         assert 0 <= status <= 2
         self.description = description
         self.status = status
@@ -95,12 +95,14 @@ class CheckerMode(Mode, QtCore.QObject):
     addMessagesRequested = QtCore.Signal(object, bool)
     clearMessagesRequested = QtCore.Signal()
 
-    def __init__(self, clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
+    def __init__(self, process_func,
+                 clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
                  showEditorTooltip=False):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1500)
         self.__messages = []
+        self.__process_func = process_func
         self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
         self.__clearOnRequest = clearOnRequest
@@ -180,24 +182,28 @@ class CheckerMode(Mode, QtCore.QObject):
             self.addMessagesRequested.disconnect(self.addMessage)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
-    def run(self, code, filePath):
+    def __runAnalysis(self, code, filePath, fileEncoding):
         """
-        Abstract method that is ran from a background thread. Override this
-        method to implement a concrete checker.
-
-        :param document: Clone of the QTextDocument (thread safe)
-
-        :param filePath: The current file path.
+        Creates a subprocess. The subprocess receive a queue for storing
+        results and the code and filePath parameters. The subprocess must fill
+        the queue with the message it wants to be displayed.
         """
-        raise NotImplementedError()
+        q = multiprocessing.Queue()
+        p = multiprocessing.Process(
+            target=self.__process_func, name="%s process" % self.name,
+            args=(q, code, filePath, fileEncoding))
+        p.start()
+        self.addMessagesRequested.emit(q.get(), True)
+        p.join()
 
     def requestAnalysis(self):
         """ Request an analysis job. """
         if self.__clearOnRequest:
             self.clearMessages()
-        self.__jobRunner.requestJob(self.run, True,
+        self.__jobRunner.requestJob(self.__runAnalysis, True,
                                     self.editor.toPlainText(),
-                                    self.editor.filePath)
+                                    self.editor.filePath,
+                                    self.editor.fileEncoding)
 
 
 if __name__ == "__main__":
