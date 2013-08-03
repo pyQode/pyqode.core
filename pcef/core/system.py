@@ -11,6 +11,7 @@
 """
 Contains utility functions
 """
+import multiprocessing
 import os
 import logging
 import sys
@@ -434,6 +435,121 @@ class DelayJobRunner(JobRunner):
         self.__args = None
         self.__kwargs = None
         self.__async = None
+
+
+class SubprocessServer(object):
+    """
+    Utility class to run a child process to do the heavy load computations
+    such as file layout analysis, code completion requests.
+
+    To use the server, just create an instance and call the start method.
+
+    To request a job, use the requestWork method and pass it your worker object
+    (already configured to do its work).
+
+    The server will send the request to the child process and will emit the
+    workCompleted signal when the job finished
+    """
+    class Signals(QtCore.QObject):
+        """
+        Holds the server signals.
+        """
+        #: Signal emitted when a new work is requested.
+        #: Parameters:
+        #: -----------
+        #:   * caller id
+        #:   * worker object
+        workRequested = QtCore.Signal(object, object)
+
+        #: Signal emitted when a new work is requested.
+        #: Parameters:
+        #: -----------
+        #:   * caller id
+        #:   * worker object
+        #:   * worker results
+        workCompleted = QtCore.Signal(object, object, object)
+
+    def __init__(self, name="PCEFSubprocessServer", pollInterval=500,
+                 autoCloseOnQuit=True):
+        # todo: is it good do it here or should it be left to the user ?
+        multiprocessing.freeze_support()
+        self.signals = self.Signals()
+        self.__pollInterval = pollInterval
+
+        # create a pipe to communicate with the child process.
+        self.__parent_conn = None
+        self.__child_conn = None
+        self.__parent_conn, self.__child_conn = multiprocessing.Pipe(True)
+        # create the process and pass the child connection for communication
+        self.__process = multiprocessing.Process(
+            target=self.__childProcess, name=name, args=(self.__child_conn,))
+
+        # we poll the client socket every pollInterval
+        self.__pollTimer = QtCore.QTimer()
+        self.__pollTimer.timeout.connect(self.__poll)
+        self.__running = False
+
+        if autoCloseOnQuit:
+            QtGui.QApplication.instance().aboutToQuit.connect(self.close)
+
+    def close(self):
+        """
+        Close the server, terminate the child process
+        """
+        if self.__running:
+            self.__process.terminate()
+            self.__running = False
+
+    def start(self):
+        """
+        Start the server. This will actually start the child process.
+        """
+        self.__pollTimer.start(self.__pollInterval)
+        self.__process.start()
+        self.__running = True
+
+    def requestWork(self, caller, worker):
+        """
+        Request a work. The work will be called in the child process and its
+        results will be available throught the workCompleted signal.
+
+        :param id: CompletionMode id
+
+        :param worker: Callable **object**, must override __call__ with no
+                       parameters.
+        """
+        self.__parent_conn.send([id(caller), worker])
+
+    def __poll(self):
+        """
+        Poll the child process for any incoming results
+        """
+        if self.__parent_conn.poll():
+            data = self.__parent_conn.recv()
+            # print("CLIENT: Data received", data)
+            assert len(data) == 3
+            id = data[0]
+            worker = data[1]
+            results = data[2]
+            # print(id, worker, results)
+            self.signals.workCompleted.emit(id, worker, results)
+
+    def __childProcess(self, conn):
+        """
+        This is the child process. It run endlessly waiting for incoming work
+        requests.
+        """
+        while True:  # run endlessly
+            time.sleep(0.1)
+            data = conn.recv()
+            # print("SERVER: Data received", data)
+            assert len(data) == 2
+            id = data[0]
+            worker = data[1]
+            # exec worker
+            results = worker()
+            conn.send([id, worker, results])
+            # print("Finsihed")
 
 
 if __name__ == '__main__':
