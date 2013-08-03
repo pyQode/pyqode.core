@@ -486,7 +486,7 @@ class SubprocessServer(object):
         self.__parent_conn, self.__child_conn = multiprocessing.Pipe(True)
         # create the process and pass the child connection for communication
         self.__process = multiprocessing.Process(
-            target=self.childProcess, name=name, args=(self.__child_conn,))
+            target=childProcess, name=name, args=(self.__child_conn,))
 
         # we poll the client socket every pollInterval
         self.__pollTimer = QtCore.QTimer()
@@ -541,22 +541,22 @@ class SubprocessServer(object):
             # print(id, worker, results)
             self.signals.workCompleted.emit(id, worker, results)
 
-    def childProcess(self, conn):
-        """
-        This is the child process. It run endlessly waiting for incoming work
-        requests.
-        """
-        while True:  # run endlessly
-            time.sleep(0.1)
-            data = conn.recv()
-            # print("SERVER: Data received", data)
-            assert len(data) == 2
-            id = data[0]
-            worker = data[1]
-            # exec worker
-            results = worker()
-            conn.send([id, worker, results])
-            # print("Finsihed")
+def childProcess(conn):
+    """
+    This is the child process. It run endlessly waiting for incoming work
+    requests.
+    """
+    while True:  # run endlessly
+        time.sleep(0.1)
+        data = conn.recv()
+        # print("SERVER: Data received", data)
+        assert len(data) == 2
+        id = data[0]
+        worker = data[1]
+        # exec worker
+        results = worker()
+        conn.send([id, worker, results])
+        # print("Finsihed")
 
 
 if __name__ == '__main__':
