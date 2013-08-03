@@ -15,7 +15,7 @@ import logging
 from pcef.core import constants
 from pcef.core.editor import QCodeEdit
 from pcef.core.mode import Mode
-from pcef.core.system import DelayJobRunner, SubprocessServer
+from pcef.core.system import DelayJobRunner, SubprocessServer, memoized
 from pcef.qt import QtGui, QtCore
 
 
@@ -443,6 +443,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         tc.insertText(completion)
         self.editor.setTextCursor(tc)
 
+    @memoized
+    def __makeIcon(self, icon):
+        return QtGui.QIcon(icon)
+
     def __createCompleterModel(self, completions):
         """
         Creates a QStandardModel that holds the suggestion from the completion
@@ -466,8 +470,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 if completion.tooltip is not None:
                     self.__tooltips[completion.text] = completion.tooltip
                 if completion.icon is not None:
-                    item.setData(
-                        QtGui.QIcon(completion.icon), QtCore.Qt.DecorationRole)
+                    item.setData(self.__makeIcon(completion.icon),
+                                 QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
         return cc_model
 
