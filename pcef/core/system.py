@@ -520,7 +520,9 @@ class SubprocessServer(object):
         :param worker: Callable **object**, must override __call__ with no
                        parameters.
         """
+        caller_id = id(caller)
         self.__parent_conn.send([id(caller), worker])
+        self.signals.workRequested.emit(caller_id, worker)
 
     def __poll(self):
         """
