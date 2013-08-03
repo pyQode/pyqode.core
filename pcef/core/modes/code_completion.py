@@ -70,7 +70,7 @@ class CompletionWorker(object):
                     prov.previousResults = old_results
                 results = prov.complete(*self.__args)
                 completions.append(results)
-                if results > 20:
+                if len(results) > 20:
                     break
         else:
             for prov in self.__providers:
