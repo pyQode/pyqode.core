@@ -438,6 +438,26 @@ class DelayJobRunner(JobRunner):
         self.__async = None
 
 
+class _ServerSignals(QtCore.QObject):
+    """
+    Holds the server signals.
+    """
+    #: Signal emitted when a new work is requested.
+    #: Parameters:
+    #: -----------
+    #:   * caller id
+    #:   * worker object
+    workRequested = QtCore.Signal(object, object)
+
+    #: Signal emitted when a new work is requested.
+    #: Parameters:
+    #: -----------
+    #:   * caller id
+    #:   * worker object
+    #:   * worker results
+    workCompleted = QtCore.Signal(object, object, object)
+
+
 class SubprocessServer(object):
     """
     Utility class to run a child process to do the heavy load computations
@@ -451,30 +471,13 @@ class SubprocessServer(object):
     The server will send the request to the child process and will emit the
     workCompleted signal when the job finished
     """
-    class Signals(QtCore.QObject):
-        """
-        Holds the server signals.
-        """
-        #: Signal emitted when a new work is requested.
-        #: Parameters:
-        #: -----------
-        #:   * caller id
-        #:   * worker object
-        workRequested = QtCore.Signal(object, object)
 
-        #: Signal emitted when a new work is requested.
-        #: Parameters:
-        #: -----------
-        #:   * caller id
-        #:   * worker object
-        #:   * worker results
-        workCompleted = QtCore.Signal(object, object, object)
 
     def __init__(self, name="PCEFSubprocessServer", pollInterval=500,
                  autoCloseOnQuit=True):
         # todo: is it good do it here or should it be left to the user ?
         multiprocessing.freeze_support()
-        self.signals = self.Signals()
+        self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
 
         # create a pipe to communicate with the child process.
@@ -483,7 +486,7 @@ class SubprocessServer(object):
         self.__parent_conn, self.__child_conn = multiprocessing.Pipe(True)
         # create the process and pass the child connection for communication
         self.__process = multiprocessing.Process(
-            target=self.__childProcess, name=name, args=(self.__child_conn,))
+            target=self.childProcess, name=name, args=(self.__child_conn,))
 
         # we poll the client socket every pollInterval
         self.__pollTimer = QtCore.QTimer()
@@ -538,7 +541,7 @@ class SubprocessServer(object):
             # print(id, worker, results)
             self.signals.workCompleted.emit(id, worker, results)
 
-    def __childProcess(self, conn):
+    def childProcess(self, conn):
         """
         This is the child process. It run endlessly waiting for incoming work
         requests.
