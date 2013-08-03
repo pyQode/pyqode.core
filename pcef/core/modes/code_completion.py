@@ -283,7 +283,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # handle completer popup events ourselves
         if self.__completer.popup().isVisible():
             self.__handleCompleterEvents(event)
-        if isShortcut:
+        elif isShortcut:
             self.requestCompletion(immediate=True)
             event.accept()
 
