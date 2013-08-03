@@ -175,7 +175,7 @@ if not select():
                       "PyQt or PySide to user pcef. Returning with "
                       "error code -1")
     sys.exit(-1)
-__logger.info("Using %s" % os.environ["QT_API"])
+__logger.debug("Using %s" % os.environ["QT_API"])
 
 from pcef.qt import QtCore, QtGui
 from pcef.qt.ui import loadUi, importRc
