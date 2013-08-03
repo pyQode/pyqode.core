@@ -12,15 +12,67 @@
 This module contains the code completion mode and the related classes.
 """
 import logging
-import weakref
 from pcef.core import constants
 from pcef.core.editor import QCodeEdit
 from pcef.core.mode import Mode
-from pcef.core.system import DelayJobRunner
+from pcef.core.system import DelayJobRunner, SubprocessServer
 from pcef.qt import QtGui, QtCore
 
 
-class Completion(QtCore.QObject):
+class PreLoadWorker(object):
+    """
+    A worker object that will run the preload method on all completion provider
+    in the child process.
+    """
+
+    def __init__(self, providers, previous_results, *args):
+        """
+        :param providers: The list of completion providers
+
+        :param previous_results: The list of previous results foreach provider
+
+        :param args: The preload method arguments
+        """
+        self.__providers = providers
+        self.__old_res = previous_results
+        self.__args = args
+
+    def __call__(self):
+        """
+        Do the work (this will be called in the child process by the
+        SubprocessServer).
+        """
+        results = []
+        for prov in self.__providers:
+            r = prov.preload(*self.__args)
+            results.append(r)
+        return results
+
+
+class CompletionWorker(object):
+    """
+    A worker object that will run the complete method of
+    """
+    def __init__(self, providers, old_res, *args):
+        self.__providers = providers
+        self.__old_res = old_res
+        self.__args = args
+
+    def __call__(self, *args, **kwargs):
+        """
+        Do the work (this will be called in the child process by the
+        SubprocessServer).
+        """
+        completions = []
+        # print(self.__old_res)
+        for prov, old_results in zip(self.__providers, self.__old_res):
+            if len(old_results) > 1:
+                prov.previousResults = old_results
+            completions.append(prov.complete(*self.__args))
+        return completions
+
+
+class Completion(object):
     """
     Defines a code completion. A code suggestion is made up of the following
     elements:
@@ -30,13 +82,15 @@ class Completion(QtCore.QObject):
     """
 
     def __init__(self, text, icon=None, tooltip=None):
-        QtCore.QObject.__init__(self)
         #: Displayed text.
         self.text = text.strip()
-        #: QIcon used for the decoration role.
+        #: filename/resource name of the icon used for the decoration role
         self.icon = icon
         # optional description
         self.tooltip = tooltip
+
+    def isNull(self):
+        return self.text == ""
 
     def __repr__(self):
         return self.text
@@ -44,27 +98,27 @@ class Completion(QtCore.QObject):
 
 class CompletionProvider(object):
     """
-    Base class for code completion providers.
+    Base class for code completion providers, objects that scan some code and
+    return a list of Completion objects.
 
-    Subclasses must implement the run method to return a list of completions.
+    There are two methods to override:
+        - preload: preload the list of Completions when a new text is set on the
+                   editor. Optional.
+        - complete: complete the current text. All subclasses needs to implement
+                    this method. Provides that use preload can just return
+                    self.previousResults
     """
+    PRIORITY = 0
 
-    @property
-    def editor(self):
-        """
-        :return: QCodeEdit
-        """
-        return self.__editor()
+    def __init__(self):
+        self.previousResults = None
 
-    def __init__(self, editor, priority=0):
-        self.priority = priority
-        self.__editor = weakref.ref(editor)
+    def preload(self, code, fileEncoding, filePath):
+        return [Completion("")]
 
-    def run(self, code, line, column, completionPrefix,
-            filePath, fileEncoding):
+    def complete(self, code, line, column, completionPrefix, filePath, fileEncoding):
         """
-        Provides a list of possible code completions. Must be implemented by
-        subclasses
+        Provides a list of possible code completions.
 
         :param document: QTextDocument
         :param filePath: Document file path
@@ -78,6 +132,8 @@ class CompletionProvider(object):
 class CodeCompletionMode(Mode, QtCore.QObject):
     IDENTIFIER = "codeCompletionMode"
     DESCRIPTION = "Provides a code completion/suggestion system"
+
+    __SERVER = None
 
     completionsReady = QtCore.Signal(object)
     waitCursorRequested = QtCore.Signal()
@@ -100,55 +156,58 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__tooltips = {}
         self.__cursorLine = -1
         self.__cancelNext = False
+        self.__previous_results = None
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
         self.__providers.append(provider)
         self.__providers = sorted(
-            self.__providers, key=lambda provider: provider.priority,
+            self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def removeCompletionProvider(self, provider):
         self.__providers.remove(provider)
         self.__providers = sorted(
-            self.__providers, key=lambda provider: provider.priority,
+            self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def requestCompletion(self, immediate=False):
         code = self.editor.toPlainText()
-        useThreads = self.editor.settings.value(
-            "useThreads", section="codeCompletion")
         if not immediate:
             self.__jobRunner.requestJob(
-                self.__collectCompletions, useThreads, code,
-                self.editor.cursorPosition[0], self.editor.cursorPosition[1],
+                self.__collectCompletions, False, self.__previous_results,
+                code, self.editor.cursorPosition[0], self.editor.cursorPosition[1],
                 self.completionPrefix, self.editor.filePath,
                 self.editor.fileEncoding)
         else:
             self.__jobRunner.cancelRequests()
-            if useThreads:
-                self.__jobRunner.startJob(
-                    self.__collectCompletions, False, code,
-                    self.editor.cursorPosition[0],
-                    self.editor.cursorPosition[1], self.completionPrefix,
-                    self.editor.filePath, self.editor.fileEncoding)
-            else:
-                self.__collectCompletions(
-                    code, self.editor.cursorPosition[0],
-                    self.editor.cursorPosition[1], self.completionPrefix,
-                    self.editor.filePath, self.editor.fileEncoding)
+            self.__collectCompletions(self.__previous_results,
+                code, self.editor.cursorPosition[0],
+                self.editor.cursorPosition[1], self.completionPrefix,
+                self.editor.filePath, self.editor.fileEncoding)
 
-    def __collectCompletions(self, code, l, c, prefix, filePath, fileEncoding):
-        logging.getLogger("pcef-cc").debug("Run")
-        self.waitCursorRequested.emit()
-        completions = []
-        for completionProvider in self.__providers:
-            completions += completionProvider.run(code, l, c, prefix,
-                                                  filePath, fileEncoding)
-        self.completionsReady.emit(completions)
-        logging.getLogger("pcef-cc").debug("Finished")
+    def requestPreload(self):
+        code = self.editor.toPlainText()
+        self.__jobRunner.requestJob(
+            self.__preload, False, self.__previous_results,
+            code, self.editor.filePath, self.editor.fileEncoding)
+
+    def __collectCompletions(self, previous_results, *args):
+        worker = CompletionWorker(self.__providers, previous_results, *args)
+        CodeCompletionMode.__SERVER.requestWork(self, worker)
+        # completions will be displayed when the finished signal is triggered
+
+    def __preload(self, previous_results, *args):
+        # print("Preload")
+        worker = PreLoadWorker(self.__providers, previous_results, *args)
+        CodeCompletionMode.__SERVER.requestWork(self, worker)
 
     def _onInstall(self, editor):
+        if CodeCompletionMode.__SERVER is None:
+            s = SubprocessServer()
+            s.start()
+            CodeCompletionMode.__SERVER = s
+        s.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -180,6 +239,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__displayCompletionTooltip)
             self.editor.cursorPositionChanged.connect(
                 self.__onCursorPositionChanged)
+            self.editor.newTextSet.connect(self.requestPreload)
         else:
             self.editor.focusedIn.disconnect(self._onFocusIn)
             self.editor.keyPressed.disconnect(self.__onKeyPressed)
@@ -189,6 +249,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__displayCompletionTooltip)
             self.editor.cursorPositionChanged.disconnect(
                 self.__onCursorPositionChanged)
+            self.editor.newTextSet.disconnect(self.requestPreload)
 
     def _onFocusIn(self, event):
         """
@@ -197,6 +258,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         :param event: QFocusEvents
         """
         self.__completer.setWidget(self.editor)
+
+    def __onWorkFinished(self, caller_id, worker, results):
+        if caller_id == id(self) and isinstance(worker, CompletionWorker):
+            all = []
+            for res in results:
+                all += res
+            self.completionsReady.emit(all)
+            self.__previous_results = results
+            # print("Results:", results)
+        elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
+            self.__previous_results = results
+            # print("Results:", results)
 
     def __onKeyPressed(self, event):
         QtGui.QToolTip.hideText()
@@ -351,7 +424,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__completer.popup().setCurrentIndex(
                 self.__completer.completionModel().index(0, 0))
 
-
     def __insertCompletion(self, completion):
         tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
         tc.insertText(completion)
@@ -369,6 +441,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         displayedTexts = []
         self.__tooltips.clear()
         for completion in completions:
+            if completion.isNull():
+                continue
             # skip redundant completion
             if completion.text != self.completionPrefix and \
                     not completion.text in displayedTexts:
@@ -417,23 +491,17 @@ class DocumentWordCompletionProvider(CompletionProvider):
     Provides code completions using the document words.
     """
 
-    def __init__(self, editor):
-        CompletionProvider.__init__(self, editor)
-        self.settings = weakref.ref(editor.settings)
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=10)
-        self.editor.newTextSet.connect(self.__request_parsing)
-        self.__words = []
-        self.__completions = []
+    def __init__(self):
+        CompletionProvider.__init__(self)
 
-    def __request_parsing(self):
-        self.__jobRunner.requestJob(self.parse, True, self.editor.toPlainText(),
-                                    self.settings().value("wordSeparators"))
+    def preload(self, code, fileEncoding, filePath):
+        return self.parse(code)
 
     def parse(self, code, wordSeparators=constants.WORD_SEPARATORS):
-        self.__words = self.split(code, wordSeparators)
-        self.__completions[:] = []
-        for w in self.__words:
-            self.__completions.append(Completion(w))
+        completions = []
+        for w in self.split(code, wordSeparators):
+            completions.append(Completion(w))
+        return completions
 
     @staticmethod
     def split(txt, seps):
@@ -447,32 +515,27 @@ class DocumentWordCompletionProvider(CompletionProvider):
         :return: A set of words found in the document (excluding punctuations,
         numbers, ...)
         """
+        # replace all possible separators with a default sep
         default_sep = seps[0]
         for sep in seps[1:]:
             if sep:
                 txt = txt.replace(sep, default_sep)
-        words = txt.split(default_sep)
-        for w in words:
-            w = w.strip()
-            if w == '':
-                words.remove(w)
-            if len(w) == 1:
-                words.remove(w)
-            try:
-                float(w)
-                words.remove(w)
-            except ValueError:
-                pass
-        words = set(words)
-        try:
-            words.remove("")
-        except KeyError:
-            pass
+        # now we can split using the default_sep
+        raw_words = txt.split(default_sep)
+        words = set()
+        for w in raw_words:
+            # w = w.strip()
+            if w.isalpha():
+                words.add(w)
+        print(len(words))
         return sorted(words)
 
-    def run(self, code, line, column, completionPrefix,
-            filePath, fileEncoding):
-        return self.__completions
+    def complete(self, code, line, column, completionPrefix,
+                 filePath, fileEncoding):
+        if not self.previousResults:
+            return self.parse(code)
+        else:
+            return self.previousResults
 
 
 if __name__ == '__main__':
