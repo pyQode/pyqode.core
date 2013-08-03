@@ -64,11 +64,17 @@ class CompletionWorker(object):
         SubprocessServer).
         """
         completions = []
-        # print(self.__old_res)
-        for prov, old_results in zip(self.__providers, self.__old_res):
-            if len(old_results) > 1:
-                prov.previousResults = old_results
-            completions.append(prov.complete(*self.__args))
+        if self.__old_res:
+            for prov, old_results in zip(self.__providers, self.__old_res):
+                if len(old_results) > 1:
+                    prov.previousResults = old_results
+                results = prov.complete(*self.__args)
+                completions.append(results)
+                if results > 20:
+                    break
+        else:
+            for prov in self.__providers:
+                completions.append(prov.complete(*self.__args))
         return completions
 
 
@@ -133,10 +139,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     IDENTIFIER = "codeCompletionMode"
     DESCRIPTION = "Provides a code completion/suggestion system"
 
-    __SERVER = None
+    SERVER = None
 
     completionsReady = QtCore.Signal(object)
     waitCursorRequested = QtCore.Signal()
+
+    preLoadStarted = QtCore.Signal()
+    preLoadCompleted = QtCore.Signal()
 
     @property
     def completionPrefix(self):
@@ -151,12 +160,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
         self.__triggerKey = None
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=500)
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
         self.__cancelNext = False
         self.__previous_results = None
+        self.__preloadFinished = False
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -172,6 +182,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             reverse=True)
 
     def requestCompletion(self, immediate=False):
+        if not self.__preloadFinished:
+            return
         code = self.editor.toPlainText()
         if not immediate:
             self.__jobRunner.requestJob(
@@ -187,6 +199,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.editor.filePath, self.editor.fileEncoding)
 
     def requestPreload(self):
+        self.__preloadFinished = False
         code = self.editor.toPlainText()
         self.__jobRunner.requestJob(
             self.__preload, False, self.__previous_results,
@@ -194,19 +207,19 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __collectCompletions(self, previous_results, *args):
         worker = CompletionWorker(self.__providers, previous_results, *args)
-        CodeCompletionMode.__SERVER.requestWork(self, worker)
+        CodeCompletionMode.SERVER.requestWork(self, worker)
         # completions will be displayed when the finished signal is triggered
 
     def __preload(self, previous_results, *args):
-        # print("Preload")
+        self.preLoadStarted.emit()
         worker = PreLoadWorker(self.__providers, previous_results, *args)
-        CodeCompletionMode.__SERVER.requestWork(self, worker)
+        CodeCompletionMode.SERVER.requestWork(self, worker)
 
     def _onInstall(self, editor):
-        if CodeCompletionMode.__SERVER is None:
+        if CodeCompletionMode.SERVER is None:
             s = SubprocessServer()
             s.start()
-            CodeCompletionMode.__SERVER = s
+            CodeCompletionMode.SERVER = s
         s.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
@@ -214,7 +227,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__completer.highlighted.connect(self.__onCompletionChanged)
         Mode._onInstall(self, editor)
         self.editor.settings.addProperty(
-            "triggerKey", QtCore.Qt.Key_Space, section="codeCompletion")
+            "triggerKey", int(QtCore.Qt.Key_Space), section="codeCompletion")
         self.__triggerLength = self.editor.settings.addProperty(
             "triggerLength", 1, section="codeCompletion")
         self.editor.settings.addProperty(
@@ -266,10 +279,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 all += res
             self.completionsReady.emit(all)
             self.__previous_results = results
-            # print("Results:", results)
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
             self.__previous_results = results
-            # print("Results:", results)
+            self.__preloadFinished = True
+            self.preLoadCompleted.emit()
 
     def __onKeyPressed(self, event):
         QtGui.QToolTip.hideText()
@@ -369,8 +382,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         :return: bool
         """
         val = int(event.modifiers() & QtCore.Qt.ControlModifier)
-        return val and event.key() == self.editor.settings.value(
-            "triggerKey", section="codeCompletion")
+        triggerKey = int(self.editor.settings.value(
+            "triggerKey", section="codeCompletion"))
+        return val and event.key() == triggerKey
 
     def __hidePopup(self):
         self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
@@ -527,7 +541,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
             # w = w.strip()
             if w.isalpha():
                 words.add(w)
-        print(len(words))
         return sorted(words)
 
     def complete(self, code, line, column, completionPrefix,
