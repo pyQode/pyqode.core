@@ -11,13 +11,14 @@
 """
 Contains utility functions
 """
-import multiprocessing
-import os
-import logging
-import sys
-import weakref
 import collections
 import functools
+import logging
+import multiprocessing
+import os
+import sys
+import time
+import weakref
 from pcef.qt import QtCore, QtGui
 
 
@@ -504,6 +505,7 @@ class SubprocessServer(object):
         """
         Start the server. This will actually start the child process.
         """
+        print("Server started")
         self.__pollTimer.start(self.__pollInterval)
         self.__process.start()
         self.__running = True
