@@ -193,7 +193,10 @@ class CheckerMode(Mode, QtCore.QObject):
             target=self.__process_func, name="%s process" % self.name,
             args=(q, code, filePath, fileEncoding))
         p.start()
-        self.addMessagesRequested.emit(q.get(), True)
+        try:
+            self.addMessagesRequested.emit(q.get(), True)
+        except IOError:
+            pass
         p.join()
 
     def requestAnalysis(self):
