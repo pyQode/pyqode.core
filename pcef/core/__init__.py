@@ -48,8 +48,10 @@ from pcef.core.system import indexMatching
 from pcef.core.system import TextStyle
 from pcef.core.system import JobRunner
 from pcef.core.system import DelayJobRunner
+from pcef.core.system import SubprocessServer
 from pcef.core.system import memoized
 from pcef.qt.ui import importRc
+
 
 #: pcef-core version
 __version__ = "1.0.0-beta.1"
@@ -102,7 +104,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
         self.codeCompletionMode.addCompletionProvider(
-            DocumentWordCompletionProvider(self))
+            DocumentWordCompletionProvider())
 
 
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
@@ -117,4 +119,5 @@ __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
-           "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized"]
+           "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
+           "SubprocessServer"]
