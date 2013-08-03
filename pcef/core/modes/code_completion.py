@@ -151,8 +151,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def completionPrefix(self):
         prefix = self.editor.selectWordUnderCursor().selectedText()
         if prefix == "":
-            prefix = self.editor.selectWordUnderCursor(
-                selectWholeWord=True).selectedText()
+            try:
+                prefix = self.editor.selectWordUnderCursor(
+                    selectWholeWord=True).selectedText()[0]
+            except IndexError:
+                pass
         return prefix
 
     def __init__(self):
@@ -205,16 +208,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__preload, False, self.__previous_results,
             code, self.editor.filePath, self.editor.fileEncoding)
 
-    def __collectCompletions(self, previous_results, *args):
-        worker = CompletionWorker(self.__providers, previous_results, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
-        # completions will be displayed when the finished signal is triggered
-
-    def __preload(self, previous_results, *args):
-        self.preLoadStarted.emit()
-        worker = PreLoadWorker(self.__providers, previous_results, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
-
     def _onInstall(self, editor):
         if CodeCompletionMode.SERVER is None:
             s = SubprocessServer()
@@ -244,27 +237,27 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _onStateChanged(self, state):
         if state:
-            self.editor.focusedIn.connect(self._onFocusIn)
+            self.editor.focusedIn.connect(self.__onFocusIn)
             self.editor.keyPressed.connect(self.__onKeyPressed)
             self.editor.postKeyPressed.connect(self.__onKeyReleased)
-            self.completionsReady.connect(self.__applyResults)
+            self.completionsReady.connect(self.__showCompletions)
             self.__completer.highlighted.connect(
                 self.__displayCompletionTooltip)
             self.editor.cursorPositionChanged.connect(
                 self.__onCursorPositionChanged)
             self.editor.newTextSet.connect(self.requestPreload)
         else:
-            self.editor.focusedIn.disconnect(self._onFocusIn)
+            self.editor.focusedIn.disconnect(self.__onFocusIn)
             self.editor.keyPressed.disconnect(self.__onKeyPressed)
             self.editor.postKeyPressed.disconnect(self.__onKeyReleased)
-            self.completionsReady.disconnect(self.__applyResults)
+            self.completionsReady.disconnect(self.__showCompletions)
             self.__completer.highlighted.disconnect(
                 self.__displayCompletionTooltip)
             self.editor.cursorPositionChanged.disconnect(
                 self.__onCursorPositionChanged)
             self.editor.newTextSet.disconnect(self.requestPreload)
 
-    def _onFocusIn(self, event):
+    def __onFocusIn(self, event):
         """
         Resets completer widget
 
@@ -295,104 +288,78 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
 
     def __onKeyReleased(self, event):
+        if self.__isShortcut(event):
+            return
         isPrintable = self.__isPrintableKeyEvent(event)
+        navigationKey = (event.key() == QtCore.Qt.Key_Backspace or
+                         event.key() == QtCore.Qt.Key_Back or
+                         event.key() == QtCore.Qt.Key_Delete or
+                         event.key() == QtCore.Qt.Key_Left or
+                         event.key() == QtCore.Qt.Key_Right or
+                         event.key() == QtCore.Qt.Key_Space or
+                         event.key() == QtCore.Qt.Key_End or
+                         event.key() == QtCore.Qt.Key_Home)
+        symbols = self.editor.settings.value(
+            "triggerSymbols", section="codeCompletion")
         isEndOfWordChar = False
         if isPrintable:
             k = str(chr(event.key()))
             seps = self.editor.settings.value("wordSeparators")
-            isEndOfWordChar = k in seps
-        if isEndOfWordChar:
-            self.__jobRunner.cancelRequests()
-        isShortcut = self.__isShortcut(event)
-        symbols = self.editor.settings.value(
-                "triggerSymbols", section="codeCompletion")
-        if self.__completer.popup().isVisible() and not isShortcut:
+            isEndOfWordChar = (k in seps and
+                               not str(chr(event.key())) in symbols)
+        if self.__completer.popup().isVisible():
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
             cnt = self.__completer.completionCount()
-            if (not cnt or (int(event.modifiers()) and
-                            event.key() == QtCore.Qt.Key_Backspace) or
-                self.completionPrefix == "" and
-                    (event.key() == QtCore.Qt.Key_Backspace or
-                     event.key() == QtCore.Qt.Key_Delete or
-                     event.key() == QtCore.Qt.Key_Left or
-                     event.key() == QtCore.Qt.Key_Right or
-                     event.key() == QtCore.Qt.Key_Space or
-                     event.key() == QtCore.Qt.Key_End or
-                     event.key() == QtCore.Qt.Key_Home) or
-                    (isEndOfWordChar and not str(chr(event.key())) in symbols)):
+            if (not cnt or
+                    (self.completionPrefix == "" and navigationKey) or
+                    isEndOfWordChar or
+                    (int(event.modifiers()) and
+                     event.key() == QtCore.Qt.Key_Backspace)):
                 self.__hidePopup()
             else:
-                # update completion prefix
                 self.__showPopup()
-        elif (self.completionPrefix == "" and not isShortcut and
-              (event.key() == QtCore.Qt.Key_Backspace or
-               event.key() == QtCore.Qt.Key_Delete or
-               event.key() == QtCore.Qt.Key_Left or
-               event.key() == QtCore.Qt.Key_Right or
-               event.key() == QtCore.Qt.Key_Space or
-               event.key() == QtCore.Qt.Key_End or
-               event.key() == QtCore.Qt.Key_Home)):
-            self.__hidePopup()
-        elif (isPrintable or event.key() == QtCore.Qt.Key_Delete or
-              event.key() == QtCore.Qt.Key_Backspace) and not isShortcut:
-            prefixLen = len(self.completionPrefix)
-            # detect auto trigger symbols symbols such as ".", "->"
-            tc = self.editor.selectWordUnderCursor()
-            tc.setPosition(tc.position())
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-            textToCursor = tc.selectedText()
-
-            for symbol in symbols:
-                if textToCursor.endswith(symbol):
-                    logging.getLogger("pcef-cc").debug("Symbols trigger")
-                    self.requestCompletion(immediate=False)
-                    return
-            if prefixLen >= self.editor.settings.value(
-                    "triggerLength", section="codeCompletion"):
-                logging.getLogger("pcef-cc").debug("Len trigger")
-                self.requestCompletion()
-
-    def __isPrintableKeyEvent(self, event):
-        try:
-            ch = chr(event.key())
-        except ValueError:
-            return False
         else:
-            return True
+            if not navigationKey:
+                # detect auto trigger symbols symbols such as ".", "->"
+                tc = self.editor.selectWordUnderCursor()
+                tc.setPosition(tc.position())
+                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                textToCursor = tc.selectedText()
+                for symbol in symbols:
+                    if textToCursor.endswith(symbol):
+                        logging.getLogger("pcef-cc").debug("Symbols trigger")
+                        self.requestCompletion(immediate=False)
+                        return
+            if isPrintable:
+                prefixLen = len(self.completionPrefix)
+                if prefixLen >= self.editor.settings.value(
+                        "triggerLength", section="codeCompletion"):
+                    logging.getLogger("pcef-cc").debug("Len trigger")
+                    self.requestCompletion()
 
     def __onCompletionChanged(self, completion):
         self.__currentCompletion = completion
 
-    def __applyResults(self, completions):
+    def __onCursorPositionChanged(self):
+        cl = self.editor.cursorPosition[0]
+        if cl != self.__cursorLine:
+            self.__cursorLine = cl
+            self.__hidePopup()
+            self.__jobRunner.cancelRequests()
+            self.__jobRunner.stopJob()
+
+    @QtCore.Slot()
+    def __setWaitCursor(self):
+        self.editor.viewport().setCursor(QtCore.Qt.WaitCursor)
+
+    def __showCompletions(self, completions):
         if self.__cancelNext:
             self.__cancelNext = False
         else:
             self.__completer.setModel(self.__createCompleterModel(completions))
             self.__showPopup()
             self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-
-    def __isShortcut(self, event):
-        """
-        Checks if the event's key and modifiers make the completion shortcut
-        (Ctrl+M)
-
-        :param event: QKeyEvent
-
-        :return: bool
-        """
-        val = int(event.modifiers() & QtCore.Qt.ControlModifier)
-        triggerKey = int(self.editor.settings.value(
-            "triggerKey", section="codeCompletion"))
-        return val and event.key() == triggerKey
-
-    def __hidePopup(self):
-        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-        self.__completer.popup().hide()
-        self.__jobRunner.cancelRequests()
-        if self.__jobRunner.jobRunning:
-            self.__cancelNext = True
-        QtGui.QToolTip.hideText()
 
     def __handleCompleterEvents(self, event):
         # complete
@@ -409,6 +376,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
             return True
         return False
+
+    def __hidePopup(self):
+        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        self.__completer.popup().hide()
+        self.__jobRunner.cancelRequests()
+        if self.__jobRunner.jobRunning:
+            self.__cancelNext = True
+        QtGui.QToolTip.hideText()
 
     def __showPopup(self):
         cnt = self.__completer.completionCount()
@@ -442,6 +417,28 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
         tc.insertText(completion)
         self.editor.setTextCursor(tc)
+
+    def __isShortcut(self, event):
+        """
+        Checks if the event's key and modifiers make the completion shortcut
+        (Ctrl+M)
+
+        :param event: QKeyEvent
+
+        :return: bool
+        """
+        val = int(event.modifiers() & QtCore.Qt.ControlModifier)
+        triggerKey = int(self.editor.settings.value(
+            "triggerKey", section="codeCompletion"))
+        return val and event.key() == triggerKey
+
+    def __isPrintableKeyEvent(self, event):
+        try:
+            ch = chr(event.key())
+        except ValueError:
+            return False
+        else:
+            return int(event.modifiers()) == 0
 
     @memoized
     def __makeIcon(self, icon):
@@ -491,17 +488,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         else:
             QtGui.QToolTip.hideText()
 
-    def __onCursorPositionChanged(self):
-        cl = self.editor.cursorPosition[0]
-        if cl != self.__cursorLine:
-            self.__cursorLine = cl
-            self.__hidePopup()
-            self.__jobRunner.cancelRequests()
-            self.__jobRunner.stopJob()
+    def __collectCompletions(self, previous_results, *args):
+        worker = CompletionWorker(self.__providers, previous_results, *args)
+        CodeCompletionMode.SERVER.requestWork(self, worker)
+        # completions will be displayed when the finished signal is triggered
 
-    @QtCore.Slot()
-    def __setWaitCursor(self):
-        self.editor.viewport().setCursor(QtCore.Qt.WaitCursor)
+    def __preload(self, previous_results, *args):
+        self.preLoadStarted.emit()
+        worker = PreLoadWorker(self.__providers, previous_results, *args)
+        CodeCompletionMode.SERVER.requestWork(self, worker)
 
 
 class DocumentWordCompletionProvider(CompletionProvider):
