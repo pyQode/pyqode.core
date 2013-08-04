@@ -11,6 +11,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
+import logging
 import multiprocessing
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner
@@ -188,16 +189,20 @@ class CheckerMode(Mode, QtCore.QObject):
         results and the code and filePath parameters. The subprocess must fill
         the queue with the message it wants to be displayed.
         """
-        q = multiprocessing.Queue()
-        p = multiprocessing.Process(
-            target=self.__process_func, name="%s process" % self.name,
-            args=(q, code, filePath, fileEncoding))
-        p.start()
         try:
-            self.addMessagesRequested.emit(q.get(), True)
-        except IOError:
-            pass
-        p.join()
+            q = multiprocessing.Queue()
+            p = multiprocessing.Process(
+                target=self.__process_func, name="%s process" % self.name,
+                args=(q, code, filePath, fileEncoding))
+            p.start()
+            try:
+                self.addMessagesRequested.emit(q.get(), True)
+            except IOError:
+                pass
+            p.join()
+        except OSError as e:
+            logging.getLogger("pcef").error("%s: failed to run analysis, %s" %
+                                            (self.name, e))
 
     def requestAnalysis(self):
         """ Request an analysis job. """
