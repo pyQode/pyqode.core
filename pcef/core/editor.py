@@ -381,12 +381,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                try to detect encoding using chardet.
                                .. warning: chardet is **slow** on large files
         """
-        QtGui.QApplication.processEvents()
         content, encoding = self.readFile(filePath, encoding, detectEncoding,
                                           replaceTabsBySpaces)
         self.__filePath = filePath
         self.__fileEncoding = encoding
-        QtGui.QApplication.processEvents()
         self.setPlainText(content)
         self.dirty = False
 
