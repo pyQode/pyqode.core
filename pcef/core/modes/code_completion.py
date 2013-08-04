@@ -319,10 +319,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     isEndOfWordChar or
                     (int(event.modifiers()) and
                      event.key() == QtCore.Qt.Key_Backspace)):
+                print("should hide")
                 self.__hidePopup()
             else:
                 self.__showPopup()
         else:
+            if self.completionPrefix == "":
+                return self.__hidePopup()
             if not navigationKey and int(event.modifiers()) == 0:
                 # detect auto trigger symbols symbols such as ".", "->"
                 tc = self.editor.selectWordUnderCursor()
