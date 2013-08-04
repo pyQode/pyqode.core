@@ -110,7 +110,6 @@ class LineNumberPanel(Panel):
             cl = self.editor.cursorPosition[0]
             # draw every visible blocks
             for top, blockNumber in self.editor.visibleBlocks:
-                painter.setPen(self.foregroundPen)
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):
                     painter.setPen(penSelected)
