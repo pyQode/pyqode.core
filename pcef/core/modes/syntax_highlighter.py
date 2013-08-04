@@ -15,9 +15,10 @@ on pygments.
 .. note: This code is taken and adapted from the IPython project.
 """
 from pcef.core.mode import Mode
+from pcef.core.highlighter import SyntaxHighlighter
 from pcef.qt import QtGui, QtCore
 from pcef.qt.QtCore import QRegExp
-from pcef.qt.QtGui import QSyntaxHighlighter
+# from pcef.qt.QtGui import QSyntaxHighlighter
 
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
@@ -143,11 +144,11 @@ class PygmentsBlockUserData(QtGui.QTextBlockUserData):
         return 'PygmentsBlockUserData(%s)' % kwds
 
 
-class QPygmentsHighlighter(QSyntaxHighlighter):
+class QPygmentsHighlighter(SyntaxHighlighter):
     """ Syntax highlighter that uses Pygments for parsing.
     """
 
-    hilighlightingBlock = QtCore.Signal(str, QSyntaxHighlighter)
+    hilighlightingBlock = QtCore.Signal(str, SyntaxHighlighter)
 
     #--------------------------------------------------------------------------
     # 'QSyntaxHighlighter' interface
@@ -178,6 +179,7 @@ class QPygmentsHighlighter(QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         """ Highlight a block of text """
+        SyntaxHighlighter.highlightBlock(self, text)
         if self.enabled is False:
             return
         original_text = text
