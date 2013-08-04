@@ -343,6 +343,26 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the system's default encoding """
         return sys.getfilesystemencoding()
 
+    def readFile(self, filePath, replaceTabsBySpaces=True, encoding=None,
+                 detectEncoding=False):
+        # encoding = "utf-8"
+        with open(filePath, 'rb') as f:
+            data = f.read()
+            if not encoding and detectEncoding:
+                try:
+                    encoding = self.detectEncoding(data)
+                except UnicodeEncodeError:
+                    QtGui.QMessageBox.warning(self, "Failed to open file",
+                                              "Failed to open file, encoding "
+                                              "could not be detected properly")
+            else:
+                encoding = self.getDefaultEncoding()
+            content = data.decode(encoding)
+        if replaceTabsBySpaces:
+            content = content.replace(
+                "\t", " " * self.settings.value("tabLength"))
+        return content, encoding
+
     def openFile(self, filePath, replaceTabsBySpaces=True, encoding=None,
                  detectEncoding=False):
         """
@@ -362,22 +382,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                .. warning: chardet is **slow** on large files
         """
         QtGui.QApplication.processEvents()
-        # encoding = "utf-8"
-        with open(filePath, 'rb') as f:
-            data = f.read()
-            if not encoding and detectEncoding:
-                try:
-                    encoding = self.detectEncoding(data)
-                except UnicodeEncodeError:
-                    QtGui.QMessageBox.warning(self, "Failed to open file",
-                                              "Failed to open file, encoding "
-                                              "could not be detected properly")
-            else:
-                encoding = self.getDefaultEncoding()
-            content = data.decode(encoding)
-        if replaceTabsBySpaces:
-            content = content.replace(
-                "\t", " " * self.settings.value("tabLength"))
+        content, encoding = self.readFile(filePath, encoding, detectEncoding,
+                                          replaceTabsBySpaces)
         self.__filePath = filePath
         self.__fileEncoding = encoding
         QtGui.QApplication.processEvents()
