@@ -20,6 +20,7 @@ from pcef.core import constants
 from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.editor import QCodeEdit
+from pcef.core.highlighter import SyntaxHighlighter
 from pcef.core.mode import Mode
 from pcef.core.modes import AutoIndentMode
 from pcef.core.modes import CaretLineHighlighterMode
@@ -108,6 +109,7 @@ class QGenericCodeEdit(QCodeEdit):
 
 
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
+           "SyntaxHighlighter",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
            "FoldingIndicator", "SearchAndReplacePanel",
            "CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
