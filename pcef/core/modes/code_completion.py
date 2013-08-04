@@ -332,7 +332,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             for k in keys:
                 if int(k) == event.key():
                     logging.getLogger("pcef-cc").debug("Key trigger")
-                    self.requestCompletion(immediate=False)
+                    self.requestCompletion(immediate=True)
                     return
             if not navigationKey and int(event.modifiers()) == 0:
                 # detect auto trigger symbols symbols such as ".", "->"
