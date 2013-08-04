@@ -280,6 +280,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
 
+
     def __onKeyPressed(self, event):
         QtGui.QToolTip.hideText()
         isShortcut = self.__isShortcut(event)
@@ -321,7 +322,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     isEndOfWordChar or
                     (int(event.modifiers()) and
                      event.key() == QtCore.Qt.Key_Backspace)):
-                print("should hide")
                 self.__hidePopup()
             else:
                 self.__showPopup()
@@ -329,7 +329,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             # also check for trigger keys
             keys = self.editor.settings.value("triggerKeys",
                                               section="codeCompletion")
-            print(event.key())
             for k in keys:
                 if int(k) == event.key():
                     logging.getLogger("pcef-cc").debug("Key trigger")
