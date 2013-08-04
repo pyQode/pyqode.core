@@ -23,6 +23,29 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __del__(self):
         self.__blocks.clear()
 
+    def getFoldingIndent(self, text):
+        """
+        Return the folding indent of the block.
+
+        This must be specialised for a specific language, it just use the
+        regular indent here.
+
+        :param text:
+        :return:
+        """
+        return len(text) - len(text.strip())
+
+    def isStartFolder(self, text, userData):
+        """
+        Checks if the block is a start folder
+        """
+        fi = self.currentBlock().next().userData().foldIndent
+        return userData.foldIndent < fi
+
+    def isEndFolder(self, text, userData):
+        fi = self.currentBlock().next().userData().foldIndent
+        return userData.foldIndent > fi
+
     def highlightBlock(self, text):
         # parse line indent
         userData = self.currentBlockUserData()
@@ -30,6 +53,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
             userData = TextBlockUserData()
         # update user data with parenthesis infos, indent info,...
         userData.indent = len(text) - len(text.strip())
+        userData.foldIndent = self.getFoldingIndent(text)
         userData.lineNumber = self.currentBlock().blockNumber() + 1
         logging.getLogger("pcef").info(userData)
         # set current block's user date
