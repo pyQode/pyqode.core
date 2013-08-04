@@ -159,6 +159,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()
         self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
@@ -204,6 +205,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
+        self.cursorPositionChanged.connect(self.refreshPanels)
 
         self.setMouseTracking(True)
 
@@ -1342,7 +1344,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     panel.scroll(0, dy)
                 else:
                     # todo optimize, called on every cursor blink!!!
-                    panel.update(0, rect.y(), panel.width(), rect.height())
+                    l, c = self.cursorPosition
+                    ol, oc = self.__cachedCursorPos
+                    if l != ol or c != oc:
+                        panel.update(0, rect.y(), panel.width(), rect.height())
+                    self.__cachedCursorPos = self.cursorPosition
         if rect.contains(self.viewport().rect()):
             self.__updateViewportMargins()
 
