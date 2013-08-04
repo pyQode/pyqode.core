@@ -125,13 +125,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @property
     def visibleBlocks(self):
         """
-        Returns the list of visible blocks/lines
+        Returns the list of visible blocks.
 
-        Each block is a tuple made up of the line top position and the line
-        number (already 1 based)
+        Each element in the list is a tuple made up of the line top position,
+        the line number (already 1 based), and the QTextBlock itself.
 
-        :return: A list of tuple(top position, line number)
-        :rtype List of tuple(int, int)
+        :return: A list of tuple(top position, line number, block)
+        :rtype List of tuple(int, int, QtGui.QTextBlock)
         """
         return self.__blocks
 
@@ -687,7 +687,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param y_pos: Y pos in the QCodeEdit
         """
         height = self.fontMetrics().height()
-        for top, l in self.__blocks:
+        for top, l, block in self.__blocks:
             if top <= y_pos <= top + height:
                 return l
         return None
@@ -1236,7 +1236,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if not visible:
                 break
             if block.isVisible():
-                self.__blocks.append((top, blockNumber+1))
+                self.__blocks.append((top, blockNumber+1, block))
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())

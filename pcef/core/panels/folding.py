@@ -459,7 +459,7 @@ class FoldingPanel(Panel):
             w = self.sizeHint().width()
             self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
 
-        for top, blockNumber in self.editor.visibleBlocks:
+        for top, blockNumber, block in self.editor.visibleBlocks:
             indic = self.__getIndicatorForLine(blockNumber)
             if indic:
                 # compute rectangles
