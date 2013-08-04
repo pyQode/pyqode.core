@@ -187,6 +187,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def requestCompletion(self, immediate=False):
         if not self.__preloadFinished:
             return
+        print("request")
         code = self.editor.toPlainText()
         if not immediate:
             self.__jobRunner.requestJob(
@@ -320,7 +321,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 self.__showPopup()
         else:
-            if not navigationKey:
+            if not navigationKey and int(event.modifiers()) == 0:
                 # detect auto trigger symbols symbols such as ".", "->"
                 tc = self.editor.selectWordUnderCursor()
                 tc.setPosition(tc.position())
@@ -360,10 +361,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
             l = tc.selectedText()
             lastChar = l[len(l) - 1]
-            symbols = self.editor.settings.value(
-                "triggerSymbols", section="codeCompletion")
-            seps = self.editor.settings.value("wordSeparators")
-            return lastChar in seps and not lastChar in symbols
+            if lastChar != ' ':
+                symbols = self.editor.settings.value(
+                    "triggerSymbols", section="codeCompletion")
+                seps = self.editor.settings.value("wordSeparators")
+                return lastChar in seps and not lastChar in symbols
+            return False
         except IndexError:
             return False
 
