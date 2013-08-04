@@ -345,13 +345,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                         logging.getLogger("pcef-cc").debug("Symbols trigger")
                         self.requestCompletion(immediate=False)
                         return
-            if isPrintable:
-                prefixLen = len(self.completionPrefix)
-                if prefixLen >= self.editor.settings.value(
-                        "triggerLength", section="codeCompletion"):
-                    logging.getLogger("pcef-cc").debug("Len trigger")
-                    self.requestCompletion()
-                    return
+                if isPrintable:
+                    prefixLen = len(self.completionPrefix)
+                    if prefixLen >= self.editor.settings.value(
+                            "triggerLength", section="codeCompletion"):
+                        logging.getLogger("pcef-cc").debug("Len trigger")
+                        self.requestCompletion()
+                        return
             if self.completionPrefix == "":
                 return self.__hidePopup()
 
