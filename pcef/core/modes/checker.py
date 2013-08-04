@@ -142,6 +142,8 @@ class CheckerMode(Mode, QtCore.QObject):
                 message._decoration.setFullWidth(True)
                 message._decoration.setError(color=QtGui.QColor(message.color))
                 self.editor.addDecoration(message._decoration)
+        if hasattr(self.editor, "markerPanel"):
+            self.editor.markerPanel.repaint()
 
     def removeMessage(self, message):
         """
@@ -164,6 +166,8 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         while len(self.__messages):
             self.removeMessage(self.__messages[0])
+        if hasattr(self.editor, "markerPanel"):
+            self.editor.markerPanel.repaint()
 
     def _onStateChanged(self, state):
         if state:
