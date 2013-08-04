@@ -353,13 +353,37 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __setWaitCursor(self):
         self.editor.viewport().setCursor(QtCore.Qt.WaitCursor)
 
+    def __isLastCharEndOfWord(self):
+        try:
+            tc = self.editor.selectWordUnderCursor()
+            tc.setPosition(tc.position())
+            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+            l = tc.selectedText()
+            lastChar = l[len(l) - 1]
+            symbols = self.editor.settings.value(
+                "triggerSymbols", section="codeCompletion")
+            seps = self.editor.settings.value("wordSeparators")
+            return lastChar in seps and not lastChar in symbols
+        except IndexError:
+            return False
+
     def __showCompletions(self, completions):
+        # user typed too fast: end of word char has been inserted
+        if self.__isLastCharEndOfWord():
+            return
+        # user typed too fast: the user already typed the only suggestion we
+        # have
+        elif (len(completions) == 1 and
+              completions[0].text == self.completionPrefix):
+            return
+        # a request cancel has been set
         if self.__cancelNext:
             self.__cancelNext = False
-        else:
-            self.__completer.setModel(self.__createCompleterModel(completions))
-            self.__showPopup()
-            self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+            return
+        # we can show the completer
+        self.__completer.setModel(self.__createCompleterModel(completions))
+        self.__showPopup()
+        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
     def __handleCompleterEvents(self, event):
         # complete
