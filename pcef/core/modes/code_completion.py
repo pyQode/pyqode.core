@@ -297,6 +297,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                          event.key() == QtCore.Qt.Key_Delete or
                          event.key() == QtCore.Qt.Key_Left or
                          event.key() == QtCore.Qt.Key_Right or
+                         event.key() == QtCore.Qt.Key_Up or
+                         event.key() == QtCore.Qt.Key_Down or
                          event.key() == QtCore.Qt.Key_Space or
                          event.key() == QtCore.Qt.Key_End or
                          event.key() == QtCore.Qt.Key_Home)
