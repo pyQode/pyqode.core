@@ -187,7 +187,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def requestCompletion(self, immediate=False):
         if not self.__preloadFinished:
             return
-        print("request")
         code = self.editor.toPlainText()
         if not immediate:
             self.__jobRunner.requestJob(
@@ -219,6 +218,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
         self.__completer.highlighted.connect(self.__onCompletionChanged)
+        self.__completer.setModel(QtGui.QStandardItemModel())
         Mode._onInstall(self, editor)
         self.editor.settings.addProperty(
             "triggerKey", int(QtCore.Qt.Key_Space), section="codeCompletion")
@@ -226,6 +226,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerLength", 1, section="codeCompletion")
         self.editor.settings.addProperty(
             "triggerSymbols", ["."], section="codeCompletion")
+        self.editor.settings.addProperty(
+            "triggerKeys", [int(QtCore.Qt.Key_Period)], section="codeCompletion")
         self.editor.settings.addProperty("showTooltips", True,
                                          section="codeCompletion")
         self.editor.settings.addProperty("caseSensitive", False,
@@ -271,7 +273,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             all = []
             for res in results:
                 all += res
-            self.completionsReady.emit(all)
+            self.__showCompletions(all)
             self.__previous_results = results
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
             self.__previous_results = results
@@ -305,11 +307,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         symbols = self.editor.settings.value(
             "triggerSymbols", section="codeCompletion")
         isEndOfWordChar = False
+        k = None
         if isPrintable:
             k = str(chr(event.key()))
             seps = self.editor.settings.value("wordSeparators")
-            isEndOfWordChar = (k in seps and
-                               not str(chr(event.key())) in symbols)
+            isEndOfWordChar = (k in seps and not k in symbols)
         if self.__completer.popup().isVisible():
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
@@ -324,8 +326,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 self.__showPopup()
         else:
-            if self.completionPrefix == "":
-                return self.__hidePopup()
+            # also check for trigger keys
+            keys = self.editor.settings.value("triggerKeys",
+                                              section="codeCompletion")
+            print(event.key())
+            for k in keys:
+                if int(k) == event.key():
+                    logging.getLogger("pcef-cc").debug("Key trigger")
+                    self.requestCompletion(immediate=False)
+                    return
             if not navigationKey and int(event.modifiers()) == 0:
                 # detect auto trigger symbols symbols such as ".", "->"
                 tc = self.editor.selectWordUnderCursor()
@@ -343,6 +352,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                         "triggerLength", section="codeCompletion"):
                     logging.getLogger("pcef-cc").debug("Len trigger")
                     self.requestCompletion()
+                    return
+            if self.completionPrefix == "":
+                return self.__hidePopup()
 
     def __onCompletionChanged(self, completion):
         self.__currentCompletion = completion
@@ -389,7 +401,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__cancelNext = False
             return
         # we can show the completer
-        self.__completer.setModel(self.__createCompleterModel(completions))
+        self._updateCompletionModel(completions,
+                                    self.__completer.model())
         self.__showPopup()
         self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
@@ -476,7 +489,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __makeIcon(self, icon):
         return QtGui.QIcon(icon)
 
-    def __createCompleterModel(self, completions):
+    def _updateCompletionModel(self, completions, cc_model):
         """
         Creates a QStandardModel that holds the suggestion from the completion
         models for the QCompleter
@@ -484,7 +497,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         :param completionPrefix:
         """
         # build the completion model
-        cc_model = QtGui.QStandardItemModel()
+        cc_model.clear()
         displayedTexts = []
         self.__tooltips.clear()
         for completion in completions:
@@ -523,7 +536,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __collectCompletions(self, previous_results, *args):
         worker = CompletionWorker(self.__providers, previous_results, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
-        # completions will be displayed when the finished signal is triggered
 
     def __preload(self, previous_results, *args):
         self.preLoadStarted.emit()
