@@ -77,6 +77,7 @@ class MarkerPanel(Panel):
         self.scrollable = True
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=100)
         self.setMouseTracking(True)
+        self.__toRemove = []
 
     def addMarker(self, marker):
         """
@@ -87,7 +88,13 @@ class MarkerPanel(Panel):
         key, val = self.makeMarkerIcon(marker.icon)
         if key and val:
             self.__icons[key] = val
-        self.__markers.append(marker)
+        # self.__markers.append(marker)
+        doc = self.editor.document()
+        assert isinstance(doc, QtGui.QTextDocument)
+        block = doc.findBlockByLineNumber(marker.position - 1)
+        usrData = block.userData()
+        if hasattr(usrData, "marker"):
+            usrData.marker = marker
 
     @memoized
     def makeMarkerIcon(self, icon):
@@ -105,7 +112,8 @@ class MarkerPanel(Panel):
 
         :param marker: Marker to remove
         """
-        self.__markers.remove(marker)
+        # self.__markers.remove(marker)
+        self.__toRemove.append(marker)
 
     def clearMarkers(self):
         """ Clears the markers list """
@@ -134,19 +142,25 @@ class MarkerPanel(Panel):
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
-        for top, blockNumber in self.editor.visibleBlocks:
-            marker = self.getMarkerForLine(blockNumber)
-            if marker and marker.icon:
-                r = QtCore.QRect()
-                r.setX(0)
-                r.setY(top)
-                r.setWidth(self.sizeHint().width())
-                r.setHeight(self.sizeHint().height())
-                if isinstance(marker.icon, tuple):
-                    key = marker.icon[0]
-                else:
-                    key = marker.icon
-                self.__icons[key].paint(painter, r)
+        for top, blockNumber, block in self.editor.visibleBlocks:
+            usrData = block.userData()
+            if hasattr(usrData, "marker"):
+                marker = usrData.marker
+                if marker in self.__toRemove:
+                    usrData.marker = None
+                    self.__toRemove.remove(marker)
+                    continue
+                if marker and marker.icon:
+                    r = QtCore.QRect()
+                    r.setX(0)
+                    r.setY(top)
+                    r.setWidth(self.sizeHint().width())
+                    r.setHeight(self.sizeHint().height())
+                    if isinstance(marker.icon, tuple):
+                        key = marker.icon[0]
+                    else:
+                        key = marker.icon
+                    self.__icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
