@@ -72,7 +72,7 @@ class PropertyRegistry(QtCore.QObject):
         :param key: The name/key of the property
 
         :param value: The value of the property.
-        :type value: int or float or bool or string or QColor or TextStyle
+        :type value: int or float or bool or string or QColor or TextStyle or list
 
         :return The original value if the property does not already exists,
                 else it return the exisiting property value.
@@ -155,7 +155,15 @@ class PropertyRegistry(QtCore.QObject):
         if isinstance(value, QtGui.QColor):
             return value.name()
         elif isinstance(value, list):
-            return "[%s]" % '²'.join(value)
+            try:
+                return "[%s]" % '²'.join(value)
+            except TypeError:
+                txt = ""
+                for v in value:
+                    txt += "%s," % str(value)
+                txt = txt[0:len(txt) - 2]
+                txt += "]"
+                return txt
         else:
             return str(value)
 
