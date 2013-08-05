@@ -11,6 +11,7 @@
 """
 This module contains the marker panel
 """
+import time
 from pcef.qt import QtCore, QtGui
 from pcef.core import constants
 from pcef.core.panel import Panel
@@ -30,13 +31,13 @@ class FoldingIndicator(object):
     #: Block folded
     FOLDED = 1
 
-    def __init__(self, start, end):
+    def __init__(self):
         #: Indicator start position
-        self.start = start
+        self.start = -1
         #: Indicator end position
-        self.end = end
+        self.end = -1
         #: Indicator state (folded, unfolded)
-        self.state = FoldingIndicator.UNFOLDED
+        self.folded = False
         self._deco = None
 
 
@@ -79,12 +80,12 @@ class FoldingPanel(Panel):
         self.__indicators = []
         self.scrollable = True
         self.setMouseTracking(True)
-        self.__mouseOveredIndic = None
+        self.__hoveredStartLine = -1
         self.__rightArrowIcon = (QtGui.QIcon(constants.ICON_ARROW_RIGHT[0]),
                                  QtGui.QIcon(constants.ICON_ARROW_RIGHT[1]))
         self.__downArrowIcon = (QtGui.QIcon(constants.ICON_ARROW_DOWN[0]),
                                 QtGui.QIcon(constants.ICON_ARROW_DOWN[1]))
-        self.__decorations = []
+        self.__scopeDecorations = []
         self.__updateRequested = False
 
     def _onInstall(self, editor):
@@ -206,18 +207,18 @@ class FoldingPanel(Panel):
     #             return indic
     #     return None
     #
-    # def __getNearestIndicator(self, line):
-    #     """
-    #     Gets the nearest indicator whose range wraps the line parameter.
-    #
-    #     :param line: The line to researh
-    #
-    #     :return: FoldingIndicator or None
-    #     """
-    #     for indic in reversed(self.__indicators):
-    #         if indic.start <= line <= indic.end:
-    #             return indic
-    #     return None
+    def __getNearestIndicator(self, line):
+        """
+        Gets the nearest indicator whose range wraps the line parameter.
+
+        :param line: The line to researh
+
+        :return: FoldingIndicator or None
+        """
+        for indic in reversed(self.__indicators):
+            if indic.start <= line <= indic.end:
+                return indic
+        return None
     #
     # def __getIndicatorState(self, foldingIndicator):
     #     """
@@ -393,35 +394,35 @@ class FoldingPanel(Panel):
                          foldZoneRect.bottomLeft() -
                          QtCore.QPoint(0, 1))
 
-    # def __clearDecorations(self):
-    #     """
-    #     Clear all decorations (scope highlight decorations)
-    #     """
-    #     for d in self.__decorations:
-    #         self.editor.removeDecoration(d)
-    #     self.__decorations[:] = []
-    #     return
+    def __clearScopeDecorations(self):
+        """
+        Clear all decorations (scope highlight decorations)
+        """
+        for d in self.__scopeDecorations:
+            self.editor.removeDecoration(d)
+        self.__scopeDecorations[:] = []
+        return
 
-    # def __addDecorationsForIndic(self, indic):
-    #     """
-    #     Sets a TextDecoration for the folded indicator.
-    #
-    #     :param indic: Indic to setup.
-    #     """
-    #     self.__mouseOveredIndic = indic
-    #     self.__decoColor = driftColor(self.editor.palette().base().color())
-    #     tc = self.editor.textCursor()
-    #     d = TextDecoration(tc, startLine=1, endLine=indic.start)
-    #     d.setFullWidth(True, clear=False)
-    #     d.setBackground(self.__decoColor)
-    #     self.editor.addDecoration(d)
-    #     self.__decorations.append(d)
-    #     d = TextDecoration(tc, startLine=indic.end+1,
-    #                        endLine=self.editor.lineCount())
-    #     d.setFullWidth(True, clear=False)
-    #     d.setBackground(self.__decoColor)
-    #     self.editor.addDecoration(d)
-    #     self.__decorations.append(d)
+    def __addScopeDecoration(self, start, end):
+        """
+        Show a scope decoration on the editor widget
+
+        :param start: Start line
+        :param end: End line
+        """
+        self.__decoColor = driftColor(self.editor.palette().base().color())
+        tc = self.editor.textCursor()
+        d = TextDecoration(tc, startLine=1, endLine=start)
+        d.setFullWidth(True, clear=False)
+        d.setBackground(self.__decoColor)
+        self.editor.addDecoration(d)
+        self.__scopeDecorations.append(d)
+        d = TextDecoration(tc, startLine=end + 1,
+                           endLine=self.editor.lineCount())
+        d.setFullWidth(True, clear=False)
+        d.setBackground(self.__decoColor)
+        self.editor.addDecoration(d)
+        self.__scopeDecorations.append(d)
 
     # def __installActions(self):
     #     """ Installs fold all and unfold all action on the editor widget. """
@@ -435,79 +436,88 @@ class FoldingPanel(Panel):
     #     self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
     #     self.editor.addAction(self.__actionUnfoldAll)
 
-    def paintEvent(self, event):
-        """
-        Paint the indicators arrow + active indicator background zone.
+    def __findNextValidBlock(self, block):
+        bl = block.next()
+        while len(bl.text().strip()) == 0:
+            n = bl.next()
+            if n.isValid():
+                bl = n
+            else:
+                break
+        return bl
 
-        :param event:
-        """
-        Panel.paintEvent(self, event)
-        painter = QtGui.QPainter(self)
+    def __collectIndicators(self):
+        self.__indicators = []
         for i, b in enumerate(self.editor.visibleBlocks):
             top, line, block = b[0], b[1], b[2]
-            # print(line)
-            if block.previous().isValid():
-                nxtUsrData = block.next().userData()
-                usrData = block.userData()
-                if nxtUsrData and usrData:
-                    if nxtUsrData.foldIndent > usrData.foldIndent and \
-                            len(block.text().strip()):
-                        # draw the arrow
-                        expanded = not usrData.folded
-                        arrowRect = QtCore.QRect(
-                            0, top, self.sizeHint().width(),
-                            self.sizeHint().height())
-                        # check mouse over (probably detecting nearest,...)
-                        active = False
-                        self.__drawArrow(arrowRect, active, expanded, painter)
+            if not len(block.text()):
+                continue
+            bl = self.__findNextValidBlock(block)
+            nxtUsrData = bl.userData()
+            usrData = block.userData()
+            if nxtUsrData and usrData:
+                # is it a folding start
+                if nxtUsrData.foldIndent > usrData.foldIndent:
+                    arrowRect = QtCore.QRect(0, top, self.sizeHint().width(),
+                                             self.sizeHint().height())
+                    fi = FoldingIndicator()
+                    fi.start = line
+                    fi.folded = usrData.folded
+                    fi.end = self.editor.lineCount() - 1
+                    fi.rect = arrowRect
+                    fi.active = False
+                    # find end folding region
+                    if not usrData.folded:
                         # find its end
                         stopAtEnds = True
                         for ntop, nline, nblock in self.editor.visibleBlocks[
-                                    i + 1:len(self.editor.visibleBlocks)-1]:
+                                                   i + 1:len(
+                                                           self.editor.visibleBlocks) - 1]:
                             if not len(nblock.text().strip()):
                                 continue
                             nUsrData = nblock.userData()
                             if usrData.foldIndent >= nUsrData.foldIndent:
                                 stopAtEnds = False
                                 break
-                        if stopAtEnds:
-                            print("%s stops at end" % line)
-                        else:
+                        if not stopAtEnds:
                             # avoid empty lines
                             stop = nline - 1
                             lastBlock = nblock.previous()
                             while len(lastBlock.text().strip()) == 0:
                                 lastBlock = lastBlock.previous()
                                 stop -= 1
-                            print("%d ends at %d" % (line, stop))
+                            fi.end = stop
+                    if fi.end - fi.start > 3:
+                        self.__indicators.append(fi)
 
-        print("-------------------")
-        # if self.__updateRequested:
-        #     self.__updateIndicatorsStates()
-        #     self.__updateRequested = False
-        # painter = QtGui.QPainter(self)
-        # if self.__mouseOveredIndic:
-        #     indic = self.__mouseOveredIndic
-        #     h = 0
-        #     if indic.state == FoldingIndicator.UNFOLDED:
-        #         top = (self.editor.linePos(indic.start) -
-        #                self.sizeHint().height())
-        #     else:
-        #         top = self.editor.linePos(indic.start)
-        #     bottom = self.editor.linePos(indic.end)
-        #     h = bottom - top
-        #     w = self.sizeHint().width()
-        #     self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
-        #
-        # for top, blockNumber, block in self.editor.visibleBlocks:
-        #     indic = self.__getIndicatorForLine(blockNumber)
-        #     if indic:
-        #         # compute rectangles
-        #         arrowRect = QtCore.QRect(
-        #             0, top, self.sizeHint().width(), self.sizeHint().height())
-        #         expanded = indic.state == FoldingIndicator.UNFOLDED
-        #         active = indic == self.__mouseOveredIndic
-        #         self.__drawArrow(arrowRect, active, expanded, painter)
+    def __drawActiveIndicatorBackground(self, fi, painter):
+        # draw background rect
+        if not fi.folded:
+            top = (self.editor.linePos(fi.start) -
+                   self.sizeHint().height())
+        else:
+            top = self.editor.linePos(fi.start)
+        bottom = self.editor.linePos(fi.end)
+        h = bottom - top
+        w = self.sizeHint().width()
+        self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
+
+    def paintEvent(self, event):
+        """
+        Paint the indicators arrow + active indicator background zone.
+
+        :param event:
+        """
+        t = time.time()
+        Panel.paintEvent(self, event)
+        painter = QtGui.QPainter(self)
+        self.__collectIndicators()
+        for fi in self.__indicators:
+            if fi.start == self.__hoveredStartLine:
+                fi.active = True
+                self.__drawActiveIndicatorBackground(fi, painter)
+            self.__drawArrow(fi.rect, fi.active, not fi.folded, painter)
+        print("Paint time:", time.time() - t)
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
@@ -528,18 +538,20 @@ class FoldingPanel(Panel):
         Panel.mouseMoveEvent(self, event)
         line = self.editor.lineNumber(event.pos().y())
         if not line:
-            self.__mouseOveredIndic = None
+            # self.__mouseOveredIndic = None
             return
-        # indic = self.__getNearestIndicator(line)
-        # if indic != self.__mouseOveredIndic:
-        #     self.__clearDecorations()
-        #     if not indic:
-        #         self.repaint()
-        #         return
-        #     else:
-        #         self.__addDecorationsForIndic(indic)
-        #         self.repaint()
-    #
+        indic = self.__getNearestIndicator(line)
+        if not indic:
+            self.__hoveredStartLine = -1
+            self.__clearScopeDecorations()
+            self.repaint()
+        else:
+            if self.__hoveredStartLine != indic.start:
+                self.__clearScopeDecorations()
+                self.__hoveredStartLine = indic.start
+                self.__addScopeDecoration(indic.start, indic.end)
+                self.repaint()
+
     # def mousePressEvent(self, event):
     #     """ Folds/unfolds the pressed indicator if any. """
     #     if self.__mouseOveredIndic:
@@ -548,14 +560,15 @@ class FoldingPanel(Panel):
     #         else:
     #             self.unfold(self.__mouseOveredIndic)
     #
-    # def leaveEvent(self, e):
-    #     """
-    #     Reset the mouse overed indic to None and clear scope decoration when
-    #     the user leaves the foldingPanel
-    #     """
-    #     self.__mouseOveredIndic = None
-    #     self.__clearDecorations()
-    #     self.repaint()
+
+    def leaveEvent(self, e):
+        """
+        Reset the mouse overed indic to None and clear scope decoration when
+        the user leaves the foldingPanel
+        """
+        self.__hoveredStartLine = None
+        self.__clearScopeDecorations()
+        self.repaint()
 
 
 if __name__ == '__main__':
