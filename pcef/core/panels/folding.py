@@ -174,7 +174,6 @@ class FoldingPanel(Panel):
                     if not usrData.foldStart:
                         usrData.folded = True
                 block.setUserData(usrData)
-                doc.markContentsDirty(block.position(), block.length())
             else:
                 break
         # unfold last blank lines
@@ -184,9 +183,10 @@ class FoldingPanel(Panel):
                 block.setVisible(True)
             else:
                 break
-        # tc = self.editor.textCursor()
-        # tc.select(tc.Document)
-        # doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        tc = self.editor.textCursor()
+        tc.select(tc.Document)
+        doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.editor.refreshPanels()
         self.repaint()
         foldingIndicator.folded = True
 
@@ -199,8 +199,6 @@ class FoldingPanel(Panel):
             if len(b.text().strip()):
                 if ud.foldStart:
                     b.setVisible(not usrData.folded)
-                    # if not ud.folded:
-                    #     b.setVisible(False)
                     if not ud.folded:
                         self.unfoldChild(end, j, ud)
                 else:
@@ -234,8 +232,6 @@ class FoldingPanel(Panel):
             elif not len(block.text().strip()):
                 block.setVisible(True)
             block.setUserData(usrData)
-            doc.markContentsDirty(block.position(), block.length())
-
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
@@ -529,7 +525,7 @@ class FoldingPanel(Panel):
                             lastBlock = lastBlock.previous()
                             stop -= 1
                         fi.end = stop
-                    if fi.foldIndent < 3:
+                    if fi.foldIndent < 3 and fi.end - fi.start > 1:
                         self.__indicators.append(fi)
 
     def __drawActiveIndicatorBackground(self, fi, painter):
