@@ -41,6 +41,9 @@ class FoldingIndicator(object):
         self.foldIndent = -1  # the fold indent value for the region to fold
         self._deco = None
 
+    def __repr__(self):
+        return ("%d - %d" % (self.start, self.end))
+
 
 class FoldingPanel(Panel):
     """
@@ -104,6 +107,52 @@ class FoldingPanel(Panel):
                                                      self.getSystemColor())
         self.__decoColor = driftColor(self.editor.palette().window().color())
         # self.__installActions()
+
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
+        if state:
+            self.editor.blockCountChanged.connect(self.analyseFoldings)
+
+    def analyseFoldings(self):
+        pass
+        # todo a temporiser
+        # t = time.time()
+        # print("Analysis ----------------------------------------------")
+        # start_indicators = []
+        # indicators = []
+        # prevFoldIndent = 0
+        # b = self.editor.document().firstBlock()
+        # while b and b.isValid():
+        #     # print(b.userData())
+        #     usd = b.userData()
+        #     if usd.foldIndent != -1:  # skip blank lines
+        #         if usd.foldStart:
+        #             fi = FoldingIndicator()
+        #             fi.start = b.blockNumber() + 1
+        #             fi.folded = usd.folded
+        #             fi.foldIndent = usd.foldIndent
+        #             start_indicators.append(fi)
+        #         else:
+        #             nblock = b.next()
+        #             while nblock and nblock.isValid() and len(nblock.text().strip()) == 0:
+        #                 nblock = nblock.next()
+        #             nusd = nblock.userData()
+        #             if nusd:
+        #                 if len(start_indicators) and nusd.foldIndent <= start_indicators[len(start_indicators) - 1].foldIndent:
+        #                     delta = start_indicators[len(start_indicators) - 1].foldIndent - nusd.foldIndent
+        #                     for i in range(delta + 1):
+        #                         fi = start_indicators.pop()
+        #                         fi.end = b.blockNumber() + 1
+        #                         indicators.append(fi)
+        #             else:
+        #                 while len(start_indicators):
+        #                     fi = start_indicators.pop()
+        #                     fi.end = b.blockNumber() + 1
+        #                     indicators.append(fi)
+        #         # prevFoldIndent = usd.foldIndent
+        #     b = b.next()
+        # # print(indicators)
+        # print(time.time() - t)
 
     def _onStyleChanged(self, section, key):
         Panel._onStyleChanged(self, section, key)
@@ -492,7 +541,7 @@ class FoldingPanel(Panel):
             bl = self.__findNextValidBlock(block)
             nxtUsrData = bl.userData()
             usrData = block.userData()
-            if nxtUsrData and usrData:
+            if nxtUsrData and usrData and usrData.foldIndent != -1:
                 # is it a folding start
                 if nxtUsrData.foldIndent > usrData.foldIndent:
                     arrowRect = QtCore.QRect(0, top, self.sizeHint().width(),
@@ -546,7 +595,7 @@ class FoldingPanel(Panel):
 
         :param event:
         """
-        t = time.time()
+        print("Paint event")
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
         self.__collectIndicators()
@@ -554,6 +603,18 @@ class FoldingPanel(Panel):
             if fi.start == self.__hoveredStartLine:
                 fi.active = True
                 self.__drawActiveIndicatorBackground(fi, painter)
+            if fi.folded:
+                deco = TextDecoration(
+                    self.editor.textCursor(), startLine=fi.start)
+                d = TextDecoration(self.editor.textCursor(),
+                                   startLine=fi.start+1,
+                                   endLine=fi.end)
+                deco.tooltip = d.cursor.selection().toPlainText()
+                deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
+                self.__decoColor = driftColor(self.editor.palette().base().color())
+                deco.setOutline(self.__decoColor)
+                # deco.signals.clicked.connect(self.__onDecoClicked)
+                self.editor.addDecoration(deco)
             self.__drawArrow(fi.rect, fi.active, not fi.folded, painter)
 
     def sizeHint(self):
