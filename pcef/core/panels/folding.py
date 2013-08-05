@@ -38,6 +38,7 @@ class FoldingIndicator(object):
         self.end = -1
         #: Indicator state (folded, unfolded)
         self.folded = False
+        self.foldIndent = -1  # the fold indent value for the region to fold
         self._deco = None
 
 
@@ -150,38 +151,96 @@ class FoldingPanel(Panel):
     #     self.__indicators[:] = []
     #     self.__updateRequested = True
 
-    # def fold(self, foldingIndicator):
-    #     """
-    #     Folds the specified folding indicator
-    #
-    #     :param foldingIndicator: The indicator to fold.
-    #     """
-    #     self.__fold(foldingIndicator, fold=True)
-    #     foldingIndicator._deco = TextDecoration(
-    #         self.editor.textCursor(), startLine=foldingIndicator.start)
-    #     d = TextDecoration(self.editor.textCursor(),
-    #                        startLine=foldingIndicator.start+1,
-    #                        endLine=foldingIndicator.end)
-    #     foldingIndicator._deco.tooltip = d.cursor.selection().toPlainText()
-    #     foldingIndicator._deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
-    #     self.__decoColor = driftColor(self.editor.palette().base().color())
-    #     foldingIndicator._deco.setOutline(self.__decoColor)
-    #     foldingIndicator._deco.signals.clicked.connect(self.__onDecoClicked)
-    #     self.editor.addDecoration(foldingIndicator._deco)
-    #     foldingIndicator.state = FoldingIndicator.FOLDED
-    #
-    # def unfold(self, foldingIndicator):
-    #     """
-    #     Unfolds the specified folding indicator.
-    #
-    #     :param foldingIndicator: The indicator to unfold.
-    #     """
-    #     self.__fold(foldingIndicator, fold=False)
-    #     foldingIndicator.state = FoldingIndicator.UNFOLDED
-    #     self.editor.removeDecoration(foldingIndicator._deco)
-    #     foldingIndicator._deco.signals.clicked.disconnect(self.__onDecoClicked)
-    #     self.__foldRemainings(foldingIndicator)
-    #
+    def fold(self, foldingIndicator):
+        """
+        Folds the specified folding indicator
+
+        :param foldingIndicator: The indicator to fold.
+        """
+        doc = self.editor.document()
+        b = self.editor.document().findBlockByNumber(foldingIndicator.start - 1)
+        d = b.userData()
+        d.folded = True
+        b.setUserData(d)
+        last = -1
+        for i in range(foldingIndicator.start, foldingIndicator.end):
+            last = i
+            block = self.editor.document().findBlockByNumber(i)
+            usrData = block.userData()
+            if (usrData.foldIndent >= foldingIndicator.foldIndent or
+                    not len(block.text().strip())):
+                block.setVisible(False)
+                if usrData.foldIndent == foldingIndicator.foldIndent:
+                    if not usrData.foldStart:
+                        usrData.folded = True
+                block.setUserData(usrData)
+                doc.markContentsDirty(block.position(), block.length())
+            else:
+                break
+        # unfold last blank lines
+        for i in reversed(range(foldingIndicator.start, last)):
+            block = self.editor.document().findBlockByNumber(i)
+            if not len(block.text().strip()):
+                block.setVisible(True)
+            else:
+                break
+        # tc = self.editor.textCursor()
+        # tc.select(tc.Document)
+        # doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.repaint()
+        foldingIndicator.folded = True
+
+    def unfoldChild(self, end, i, usrData):
+        for j in range(i + 1, end):
+            b = self.editor.document().findBlockByNumber(j)
+            ud = b.userData()
+            if ud.foldIndent < usrData.foldIndent:
+                return
+            if len(b.text().strip()):
+                if ud.foldStart:
+                    b.setVisible(not usrData.folded)
+                    # if not ud.folded:
+                    #     b.setVisible(False)
+                    if not ud.folded:
+                        self.unfoldChild(end, j, ud)
+                else:
+                    if not ud.folded:
+                        b.setVisible(not usrData.folded)
+                    else:
+                        b.setVisible(not ud.folded)
+            else:
+                b.setVisible(True)
+
+    def unfold(self, start, end, foldIndent):
+        """
+        Unfolds the specified folding indicator.
+
+        :param foldingIndicator: The indicator to unfold.
+        """
+        doc = self.editor.document()
+        b = self.editor.document().findBlockByNumber(start - 1)
+        d = b.userData()
+        d.folded = False
+        b.setUserData(d)
+        for i in range(start, end):
+            block = self.editor.document().findBlockByNumber(i)
+            usrData = block.userData()
+            if usrData.foldIndent == foldIndent:
+                block.setVisible(True)
+                if usrData.foldStart:
+                    self.unfoldChild(end, i, usrData)
+                else:
+                    usrData.folded = False
+            elif not len(block.text().strip()):
+                block.setVisible(True)
+            block.setUserData(usrData)
+            doc.markContentsDirty(block.position(), block.length())
+
+        tc = self.editor.textCursor()
+        tc.select(tc.Document)
+        doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.repaint()
+
     # def foldAll(self):
     #     """ Folds all indicators """
     #     for foldingIndicator in reversed(self.__indicators):
@@ -219,6 +278,12 @@ class FoldingPanel(Panel):
             if indic.start <= line <= indic.end:
                 return indic
         return None
+
+    def __getIndicatorForStart(self, line):
+        for indic in self.__indicators:
+            if indic.start == line:
+                return indic
+        return None
     #
     # def __getIndicatorState(self, foldingIndicator):
     #     """
@@ -249,31 +314,7 @@ class FoldingPanel(Panel):
     #         if found:
     #             self.__fold(indic, indic.state == FoldingIndicator.FOLDED)
     #
-    # def __fold(self, foldingIndicator, fold=True):
-    #     """
-    #     Folds/Unfolds a block of text delimitted by start/end line numbers.
-    #
-    #     Hides/show the text block and set a custom user data to remember its
-    #     state.
-    #
-    #     :param start: Start folding line (this line is not fold, only the next
-    #     ones)
-    #
-    #     :param end: End folding line.
-    #
-    #     :param fold: True to fold, False to unfold
-    #     """
-    #     doc = self.editor.document()
-    #     for i in range(foldingIndicator.start, foldingIndicator.end):
-    #         block = self.editor.document().findBlockByNumber(i)
-    #         block.setVisible(not fold)
-    #         if not self.__isShared(i, foldingIndicator):
-    #             block.setUserData(FoldingPanel._BlockFoldData(folded=fold))
-    #     tc = self.editor.textCursor()
-    #     tc.select(tc.Document)
-    #     doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
-    #     self.editor.refreshPanels()
-    #
+
     # def __isShared(self, lineNbr, owner):
     #     """
     #     Checks if a line number is shared by another FoldingIndicator.
@@ -466,28 +507,29 @@ class FoldingPanel(Panel):
                     fi.end = self.editor.lineCount() - 1
                     fi.rect = arrowRect
                     fi.active = False
+                    fi.foldIndent = nxtUsrData.foldIndent
                     # find end folding region
-                    if not usrData.folded:
-                        # find its end
-                        stopAtEnds = True
-                        for ntop, nline, nblock in self.editor.visibleBlocks[
-                                                   i + 1:len(
-                                                           self.editor.visibleBlocks) - 1]:
-                            if not len(nblock.text().strip()):
-                                continue
-                            nUsrData = nblock.userData()
-                            if usrData.foldIndent >= nUsrData.foldIndent:
-                                stopAtEnds = False
-                                break
-                        if not stopAtEnds:
-                            # avoid empty lines
-                            stop = nline - 1
-                            lastBlock = nblock.previous()
-                            while len(lastBlock.text().strip()) == 0:
-                                lastBlock = lastBlock.previous()
-                                stop -= 1
-                            fi.end = stop
-                    if fi.end - fi.start > 3:
+
+                    # find its end
+                    stopAtEnds = True
+                    for ntop, nline, nblock in self.editor.visibleBlocks[
+                                               i + 1:len(
+                                                       self.editor.visibleBlocks) - 1]:
+                        if not len(nblock.text().strip()):
+                            continue
+                        nUsrData = nblock.userData()
+                        if usrData.foldIndent >= nUsrData.foldIndent:
+                            stopAtEnds = False
+                            break
+                    if not stopAtEnds:
+                        # avoid empty lines
+                        stop = nline - 1
+                        lastBlock = nblock.previous()
+                        while len(lastBlock.text().strip()) == 0:
+                            lastBlock = lastBlock.previous()
+                            stop -= 1
+                        fi.end = stop
+                    if fi.foldIndent < 3:
                         self.__indicators.append(fi)
 
     def __drawActiveIndicatorBackground(self, fi, painter):
@@ -517,7 +559,6 @@ class FoldingPanel(Panel):
                 fi.active = True
                 self.__drawActiveIndicatorBackground(fi, painter)
             self.__drawArrow(fi.rect, fi.active, not fi.folded, painter)
-        print("Paint time:", time.time() - t)
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
@@ -552,14 +593,19 @@ class FoldingPanel(Panel):
                 self.__addScopeDecoration(indic.start, indic.end)
                 self.repaint()
 
-    # def mousePressEvent(self, event):
-    #     """ Folds/unfolds the pressed indicator if any. """
-    #     if self.__mouseOveredIndic:
-    #         if self.__mouseOveredIndic.state == FoldingIndicator.UNFOLDED:
-    #             self.fold(self.__mouseOveredIndic)
-    #         else:
-    #             self.unfold(self.__mouseOveredIndic)
-    #
+    def mousePressEvent(self, event):
+        """ Folds/unfolds the pressed indicator if any. """
+        if self.__hoveredStartLine != -1:
+            indic = self.__getIndicatorForStart(self.__hoveredStartLine)
+            if not indic:
+                return
+            if indic.folded:
+                # pass
+                self.unfold(indic.start, indic.end, indic.foldIndent)
+                # indic.folded = False
+            else:
+                self.fold(indic)
+            indic.folded = not indic.folded
 
     def leaveEvent(self, e):
         """
