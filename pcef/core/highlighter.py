@@ -33,7 +33,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         :param text:
         :return:
         """
-        return len(text) - len(text.strip())
+        stripped = len(text.strip())
+        if stripped:
+            return len(text) - len(text.strip())
+        else:
+            return 0
 
     def isStartFolder(self, text, userData):
         """
@@ -55,7 +59,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         userData.indent = len(text) - len(text.strip())
         userData.foldIndent = self.getFoldingIndent(text)
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        logging.getLogger("pcef").info(userData)
+        # logging.getLogger("pcef").info(userData)
         # set current block's user date
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
