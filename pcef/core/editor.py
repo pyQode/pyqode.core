@@ -206,6 +206,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
         self.cursorPositionChanged.connect(self.refreshPanels)
+        self.document().blockCountChanged.connect(self.refreshPanels)
 
         self.setMouseTracking(True)
 
