@@ -35,7 +35,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         """
         stripped = len(text.strip())
         if stripped:
-            return len(text) - len(text.strip())
+            return int((len(text) - len(text.strip())) /
+                       float(self.editor.settings.value("tabLength")))
         else:
             return 0
 
@@ -58,8 +59,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         # update user data with parenthesis infos, indent info,...
         userData.indent = len(text) - len(text.strip())
         userData.foldIndent = self.getFoldingIndent(text)
+        pb = self.currentBlock().previous()
+        if pb.isValid():
+            pd = pb.userData()
+            if pd:
+                if userData.foldIndent > pd.foldIndent:
+                    pd.foldStart = True
+                    self.currentBlock().previous().setUserData(pd)
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        # logging.getLogger("pcef").info(userData)
+        logging.getLogger("pcef").info(userData)
         # set current block's user date
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
