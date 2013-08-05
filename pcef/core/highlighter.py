@@ -38,7 +38,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
             return int((len(text) - len(text.strip())) /
                        float(self.editor.settings.value("tabLength")))
         else:
-            return 0
+            return -1
 
     def isStartFolder(self, text, userData):
         """
@@ -57,17 +57,20 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         if userData is None:
             userData = TextBlockUserData()
         # update user data with parenthesis infos, indent info,...
-        userData.indent = len(text) - len(text.strip())
         userData.foldIndent = self.getFoldingIndent(text)
+        userData.lineNumber = self.currentBlock().blockNumber() + 1
+        if userData.lineNumber == 23:
+            pass
         pb = self.currentBlock().previous()
         if pb.isValid():
+            while pb and pb.isValid() and len(pb.text().strip()) == 0:
+                pb = pb.previous()
             pd = pb.userData()
             if pd:
                 if userData.foldIndent > pd.foldIndent:
                     pd.foldStart = True
-                    self.currentBlock().previous().setUserData(pd)
-        userData.lineNumber = self.currentBlock().blockNumber() + 1
-        logging.getLogger("pcef").info(userData)
+                    pb.setUserData(pd)
+        # logging.getLogger("pcef").info(userData)
         # set current block's user date
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)

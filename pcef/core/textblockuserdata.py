@@ -12,15 +12,12 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.folded = False
         # specify if the block is the fold start
         self.foldStart = False
-        # specify fold indent
         self.foldIndent = -1
-        self.indent = -1
         self.marker = None
         self.parenthesisInfos = []
 
     def __repr__(self):
-        return ("#{} - Folded: {}  FoldIndent: {} - StartFold: {}"
-                " - Indent: {} - Marker: {} - Parenthesis: {}"
+        return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
+                "- Marker: {} - Parenthesis: {}"
                 "".format(self.lineNumber, self.folded, self.foldIndent,
-                          self.foldStart,
-                          self.indent, self.marker, self.parenthesisInfos))
+                          self.foldStart, self.marker, self.parenthesisInfos))
