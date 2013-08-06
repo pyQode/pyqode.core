@@ -143,6 +143,8 @@ class TextStyle(object):
         """
         :param style: The style string ("#rrggbb [bold] [italic] [underlined])
         """
+        if "underlined" in style and not "nunderlined" in style:
+            pass
         self.color = QtGui.QColor()
         self.bold = False
         self.italic = False
@@ -175,7 +177,7 @@ class TextStyle(object):
         if tokens[2] == "italic":
             self.italic = True
         self.underlined = False
-        if tokens[1] == "underlined":
+        if tokens[3] == "underlined":
             self.underlined = True
 
 
