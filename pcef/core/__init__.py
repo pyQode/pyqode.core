@@ -17,6 +17,7 @@ code editor widget
 #
 import os
 from pcef.core import constants
+from pcef.core import logger
 from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.editor import QCodeEdit
@@ -108,7 +109,7 @@ class QGenericCodeEdit(QCodeEdit):
             DocumentWordCompletionProvider())
 
 
-__all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
+__all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "SyntaxHighlighter",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
            "SearchAndReplacePanel", "CaretLineHighlighterMode", "CheckerMode",

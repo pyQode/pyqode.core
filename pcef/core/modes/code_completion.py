@@ -11,12 +11,12 @@
 """
 This module contains the code completion mode and the related classes.
 """
-import logging
 from pcef.core import constants
 from pcef.core.editor import QCodeEdit
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner, SubprocessServer, memoized
 from pcef.qt import QtGui, QtCore
+from pcef.core import logger
 
 
 class PreLoadWorker(object):
@@ -331,7 +331,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                               section="codeCompletion")
             for k in keys:
                 if int(k) == event.key():
-                    logging.getLogger("pcef-cc").debug("Key trigger")
+                    logger.debug("CC: Key trigger")
                     self.requestCompletion(immediate=True)
                     return
             if not navigationKey and int(event.modifiers()) == 0:
@@ -342,14 +342,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 textToCursor = tc.selectedText()
                 for symbol in symbols:
                     if textToCursor.endswith(symbol):
-                        logging.getLogger("pcef-cc").debug("Symbols trigger")
+                        logger.debug("CC: Symbols trigger")
                         self.requestCompletion(immediate=False)
                         return
                 if isPrintable:
                     prefixLen = len(self.completionPrefix)
                     if prefixLen >= self.editor.settings.value(
                             "triggerLength", section="codeCompletion"):
-                        logging.getLogger("pcef-cc").debug("Len trigger")
+                        logger.debug("CC: Len trigger")
                         self.requestCompletion()
                         return
             if self.completionPrefix == "":

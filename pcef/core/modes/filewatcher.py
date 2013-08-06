@@ -11,8 +11,8 @@
 """
 Contains the mode that control the external changes of file.
 """
-import logging
 import os
+from pcef.core import logger
 from pcef.core.mode import Mode
 from pcef.qt import QtCore, QtGui
 
@@ -57,7 +57,6 @@ class FileWatcherMode(Mode):
         """
         content, encoding = self.editor.readFile(
             path, encoding=self.editor.fileEncoding)
-        logger = logging.getLogger("pcef")
         if content == self.editor.toPlainText():
             logger.debug("FileWatcherMode: Internal change, skipping")
             return

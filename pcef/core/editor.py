@@ -11,9 +11,9 @@
 """
 This module contains the definition of the QCodeEdit
 """
-import logging
 import sys
 import weakref
+from pcef.core import logger
 from pcef.core import constants
 from pcef.core.constants import PanelPosition
 from pcef.core.properties import PropertyRegistry
@@ -336,8 +336,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             else:
                 encoding = chardet.detect(data)['encoding']
         except ImportError:
-            logging.getLogger("pcef").warning("chardet not available, "
-                                              "using utf8 by default")
+            logger.warning("chardet not available, using utf8 by default")
             encoding = self.getDefaultEncoding()
         return encoding
 

@@ -11,8 +11,8 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
-import logging
 import multiprocessing
+from pcef.core import logger
 from pcef.core.mode import Mode
 from pcef.core.system import DelayJobRunner
 from pcef.core.panels.marker import Marker
@@ -205,8 +205,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 pass
             p.join()
         except OSError as e:
-            logging.getLogger("pcef").error("%s: failed to run analysis, %s" %
-                                            (self.name, e))
+            logger.error("%s: failed to run analysis, %s" (self.name, e))
 
     def requestAnalysis(self):
         """ Request an analysis job. """

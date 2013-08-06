@@ -1,8 +1,8 @@
 """
 Base class for pcef syntax hightlighters
 """
-import logging
 import os
+from pcef.core import logger
 from pcef.core.textblockuserdata import TextBlockUserData
 from pcef.qt import QtGui, QtCore
 
@@ -79,7 +79,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 if userData.foldIndent > pd.foldIndent:
                     pd.foldStart = True
                     pb.setUserData(pd)
-        # logging.getLogger("pcef").info(userData)
         # set current block's user date
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)

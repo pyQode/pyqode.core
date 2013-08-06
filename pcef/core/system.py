@@ -13,12 +13,12 @@ Contains utility functions
 """
 import collections
 import functools
-import logging
 import multiprocessing
 import os
 import sys
 import time
 import weakref
+from pcef.core import logger
 from pcef.qt import QtCore, QtGui
 
 
@@ -270,7 +270,7 @@ class _JobThread(QtCore.QThread):
             self.used = False
             self.setMethods(None, None)
         else:
-            logging.warning("Executing not callable statement: %s" %
+            logger.warning("Executing not callable statement: %s" %
                             self.executeOnRun)
 
 
@@ -356,8 +356,7 @@ class JobRunner(object):
                 self.__jobQueue[0].start()
             return True
         else:
-            logging.getLogger("pcef").debug(
-                "Failed to queue job. All threads are used")
+            logger.warning("Failed to queue job. All threads are used")
             return False
 
     def __executeNext(self):
