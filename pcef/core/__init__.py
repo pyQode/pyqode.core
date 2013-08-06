@@ -39,7 +39,7 @@ from pcef.core.panel import Panel
 from pcef.core.modes import PygmentsHighlighterMode, PYGMENTS_STYLES
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
-from pcef.core.panels import FoldingPanel, FoldingIndicator
+from pcef.core.panels import FoldingPanel
 from pcef.core.panels import LineNumberPanel
 from pcef.core.panels import MarkerPanel, Marker
 from pcef.core.panels import SearchAndReplacePanel
@@ -111,9 +111,9 @@ class QGenericCodeEdit(QCodeEdit):
 __all__ = ["__version__", "constants", "Mode", "Panel", "QCodeEdit",
            "SyntaxHighlighter",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
-           "FoldingIndicator", "SearchAndReplacePanel",
-           "CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
-           "MSG_STATUS_INFO", "MSG_STATUS_ERROR", "MSG_STATUS_WARNING",
+           "SearchAndReplacePanel", "CaretLineHighlighterMode", "CheckerMode",
+           "CheckerMessage", "MSG_STATUS_INFO", "MSG_STATUS_ERROR",
+           "MSG_STATUS_WARNING",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider" "FileWatcherMode",
