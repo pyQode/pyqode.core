@@ -91,6 +91,9 @@ class FoldingPanel(Panel):
         self.__foldDecorations = []
         self.__updateRequested = False
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1000)
+        self._foldedBoxes = []
+
+        self.__previousBoxLine = -1
 
     def _onInstall(self, editor):
         """
@@ -107,6 +110,17 @@ class FoldingPanel(Panel):
                                                      self.getSystemColor())
         self.__decoColor = driftColor(self.editor.palette().window().color())
         self.__installActions()
+
+    def _onStateChanged(self, state):
+        Panel._onStateChanged(self, state)
+        if state:
+            self.editor.painted.connect(self._drawFoldedPopup)
+            self.editor.mouseMoved.connect(self.__onEditorMouseMove)
+            self.editor.mousePressed.connect(self.__onEditorMousePress)
+        else:
+            self.editor.painted.disconnect(self._drawFoldedPopup)
+            self.editor.mouseMoved.disconnect(self.__onEditorMouseMove)
+            self.editor.mousePressed.disconnect(self.__onEditorMousePress)
 
     def _onStyleChanged(self, section, key):
         Panel._onStyleChanged(self, section, key)
@@ -126,6 +140,17 @@ class FoldingPanel(Panel):
         self.editor.style.setValue(
             "foldIndicatorBackground", self.__systemColor)
 
+    def __foldBlock(self, b):
+        usd = b.userData()
+        usd.folded = True
+        b.setUserData(usd)
+
+    def __unfoldBlock(self, b):
+        usd = b.userData()
+        if usd:
+            usd.folded = False
+            b.setUserData(usd)
+
     def fold(self, foldingIndicator):
         """
         Folds the specified folding indicator
@@ -134,9 +159,7 @@ class FoldingPanel(Panel):
         """
         doc = self.editor.document()
         b = self.editor.document().findBlockByNumber(foldingIndicator.start - 1)
-        d = b.userData()
-        d.folded = True
-        b.setUserData(d)
+        self.__foldBlock(b)
         last = -1
         for i in range(foldingIndicator.start, foldingIndicator.end):
             last = i
@@ -161,8 +184,12 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
-        foldingIndicator.folded = True
-        self.editor.repaint()
+        print("Fold finished")
+        self.__collectIndicators()
+        self.__clearScopeDecorations()
+        self.__addScopeDecoration(foldingIndicator.start,
+                                  foldingIndicator.start)
+        self.repaint()
 
     def unfoldChild(self, end, i, usrData):
         for j in range(i + 1, end):
@@ -183,17 +210,18 @@ class FoldingPanel(Panel):
             else:
                 b.setVisible(True)
 
-    def unfold(self, start, end, foldIndent):
+    def unfold(self, indic):
         """
         Unfolds the specified folding indicator.
 
         :param foldingIndicator: The indicator to unfold.
         """
+        start = indic.start
+        end = indic.end
+        foldIndent = indic.foldIndent
         doc = self.editor.document()
         b = self.editor.document().findBlockByNumber(start - 1)
-        d = b.userData()
-        d.folded = False
-        b.setUserData(d)
+        self.__unfoldBlock(b)
         for i in range(start, end):
             block = self.editor.document().findBlockByNumber(i)
             usrData = block.userData()
@@ -209,6 +237,9 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.__collectIndicators()
+        self.__clearScopeDecorations()
+        self.__addScopeDecoration(start, end)
         self.repaint()
 
     def __unfoldPreviousBlankLines(self, b):
@@ -223,39 +254,29 @@ class FoldingPanel(Panel):
 
     def foldAll(self):
         """ Folds all indicators whose fold indent is > 0 """
-        # self.__collectIndicators()
-        # toFold = []
-        # # for fi in self.__indicators:
-        # #     if fi.folded == False:
-        # #         toFold.append(fi)
-        # # while len(toFold):
-        # #     self.fold(toFold.pop())
-        # #     self.__collectIndicators()
-        # #     toFold[:] = []
-        # #     for fi in self.__indicators:
-        # #         if fi.folded == False:
-        # #             toFold.append(fi)
-
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             usd = b.userData()
             if usd.foldIndent == 0:  # indicator start
-                if usd.foldStart:
-                    self.__unfoldPreviousBlankLines(b)
-                    usd.folded = True  # fold the indicator
+                # if usd.foldStart:
+                self.__unfoldPreviousBlankLines(b)
+                self.__foldBlock(b)
             else:
                 if b != self.editor.document().lastBlock():
                     b.setVisible(False)
                     usd.folded = True
+                    if usd.foldStart:
+                        self.__foldBlock(b)
                 else:
                     # unfold previous blank lines
                     self.__unfoldPreviousBlankLines(b)
             b = b.next()
         tc = self.editor.textCursor()
         tc.select(tc.Document)
-        self.editor.document().markContentsDirty(
-            tc.selectionStart(), tc.selectionEnd())
-        self.editor.update()
+        self.editor.document().markContentsDirty(tc.selectionStart(),
+                                                 tc.selectionEnd())
+        self.editor.updateVisibleBlocks(None)
+        self.__collectIndicators()
         self.repaint()
 
     def unfoldAll(self):
@@ -267,10 +288,14 @@ class FoldingPanel(Panel):
             b.setVisible(True)
             usd.folded = False
             b = b.next()
+            # if usd.foldStart:
+            self.__unfoldBlock(b)
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         self.editor.document().markContentsDirty(
             tc.selectionStart(), tc.selectionEnd())
+        self.editor.updateVisibleBlocks(None)
+        self.__collectIndicators()
         self.repaint()
 
     def __getNearestIndicator(self, line):
@@ -291,16 +316,6 @@ class FoldingPanel(Panel):
             if indic.start == line:
                 return indic
         return None
-
-    def __onDecoClicked(self, deco):
-        """
-        Unfolds indicator if the editor decoration is clicked
-
-        :param deco: The clicked decoration
-        """
-        fi = self.__getIndicatorForStart(deco.cursor.blockNumber() + 1)
-        if fi and fi.folded:
-            self.unfold(fi.start, fi.end, fi.foldIndent)
 
     def __drawArrow(self, arrowRect, active, expanded, painter):
         """
@@ -452,6 +467,7 @@ class FoldingPanel(Panel):
                     fi.rect = arrowRect
                     fi.active = False
                     fi.foldIndent = nxtUsrData.foldIndent
+                    fi.text = block.text()
                     # find its end
                     stopAtEnds = True
                     for ntop, nline, nblock in self.editor.visibleBlocks[
@@ -471,6 +487,11 @@ class FoldingPanel(Panel):
                             lastBlock = lastBlock.previous()
                             stop -= 1
                         fi.end = stop
+                    # select code
+                    d = TextDecoration(self.editor.textCursor(),
+                                   startLine=fi.start+1,
+                                   endLine=fi.end)
+                    fi.tooltip = d.cursor.selection().toPlainText()
                     self.__indicators.append(fi)
 
     def __drawActiveIndicatorBackground(self, fi, painter):
@@ -485,6 +506,56 @@ class FoldingPanel(Panel):
         w = self.sizeHint().width()
         self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
 
+    def _drawFoldedPopup(self):
+        if self.editor.hasFocus():
+            self.__collectIndicators()
+        self._foldedBoxes[:] = []
+        painter = QtGui.QPainter(self.editor.viewport())
+        for fi in self.__indicators:
+            if fi.folded:
+                font = self.editor.currentCharFormat().font()
+                fm = QtGui.QFontMetricsF(font)
+                pos = len(fi.text)
+                offset = self.editor.contentOffset().x() + \
+                    self.editor.document().documentMargin()
+                charW = fm.width(' ')
+                left = round(charW * pos) + offset + charW
+                top = fi.rect.top() + 1
+                w = 5 * charW
+                h = fi.rect.height() - 2
+                rect = QtCore.QRectF(left, top, w, h)
+                painter.drawRoundedRect(rect, 3, 3)
+                painter.drawText(left + charW, top + 2 * h / 3, "...")
+                self._foldedBoxes.append((fi, rect))
+
+    def __onEditorMouseMove(self, event):
+        for fi, box in self._foldedBoxes:
+            result = box.contains(event.posF())
+            # l = self.editor.lineNumber(event.pos().y())
+            if result:
+                # if l != self.__previousBoxLine:
+                #     pos = QtCore.QPoint(self.editor.left,
+                #                         self.editor.linePos(l))
+                #     QtGui.QToolTip.showText(self.editor.mapToGlobal(pos),
+                #                             fi.tooltip[0:512], self.editor)
+                #     self.__previousBoxLine = l
+                self.editor.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+                return
+        # if self.__previousBoxLine != -1:
+        #     self.__previousBoxLine = -1
+            # QtGui.QToolTip.hideText()
+            # print("hide")
+        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+
+    def __onEditorMousePress(self, event):
+        for fi, box in self._foldedBoxes:
+            result = box.contains(event.posF())
+            # l = self.editor.lineNumber(event.pos().y())
+            if result:
+                self.unfold(fi)
+                self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+                self.__clearScopeDecorations()
+
     def paintEvent(self, event):
         """
         Paint the indicators arrow + active indicator background zone.
@@ -493,7 +564,6 @@ class FoldingPanel(Panel):
         """
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
-        self.__collectIndicators()
         for d in self.__foldDecorations:
             self.editor.removeDecoration(d)
         self.__foldDecorations[:] = []
@@ -502,21 +572,6 @@ class FoldingPanel(Panel):
             if fi.start == self.__hoveredStartLine:
                 fi.active = True
                 self.__drawActiveIndicatorBackground(fi, painter)
-            # if fi.folded and self.editor.hasFocus():
-            #     deco = TextDecoration(
-            #         self.editor.textCursor(), startLine=fi.start)
-            #     d = TextDecoration(self.editor.textCursor(),
-            #                        startLine=fi.start + 1,
-            #                        endLine=fi.end)
-            #     deco.tooltip = d.cursor.selection().toPlainText()
-            #     deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
-            #     self.__decoColor = driftColor(
-            #         self.editor.palette().base().color())
-            #     deco.setOutline(self.__decoColor)
-            #     deco.signals.clicked.connect(self.__onDecoClicked)
-            #     self.editor.addDecoration(deco)
-            #     self.__foldDecorations.append(deco)
-
             self.__drawArrow(fi.rect, fi.active, not fi.folded, painter)
 
     def sizeHint(self):
@@ -545,6 +600,7 @@ class FoldingPanel(Panel):
             self.__hoveredStartLine = -1
             self.__clearScopeDecorations()
             self.repaint()
+            self.editor.repaint()
         else:
             if self.__hoveredStartLine != indic.start:
                 self.__clearScopeDecorations()
@@ -560,7 +616,7 @@ class FoldingPanel(Panel):
                 return
             if indic.folded:
                 # pass
-                self.unfold(indic.start, indic.end, indic.foldIndent)
+                self.unfold(indic)
                 # indic.folded = False
             else:
                 self.fold(indic)

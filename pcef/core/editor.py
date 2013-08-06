@@ -163,6 +163,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__modifiedLines = set()
         self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
+        self.top = self.left = self.right = self.bottom = -1
         self.setCenterOnScroll(True)
 
         #: The list of visible blocks, update every paintEvent
@@ -206,6 +207,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
+        self.blockCountChanged.connect(self.update)
+        self.cursorPositionChanged.connect(self.update)
+        self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
 
@@ -709,6 +713,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.style.setValue("fontSize",
                             self.style.value("fontSize") + increment)
+        tc = self.textCursor()
+        tc.select(tc.Document)
+        self.document().markContentsDirty(tc.selectionStart(),
+                                                 tc.selectionEnd())
 
     def zoomOut(self, increment=1):
         """
@@ -724,6 +732,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if value <= 0:
             value = increment
         self.style.setValue("fontSize", value)
+        tc = self.textCursor()
+        tc.select(tc.Document)
+        self.document().markContentsDirty(tc.selectionStart(),
+                                                 tc.selectionEnd())
 
     def getLineIndent(self):
         """
@@ -924,7 +936,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param e: paint event
         """
-        self.__updateVisibleBlocks(e)
+        self.updateVisibleBlocks(e)
+        # self.painted.emit(e)
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
@@ -981,6 +994,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.focusedIn.emit(event)
         QtGui.QPlainTextEdit.focusInEvent(self, event)
+        self.repaint()
+        QtGui.QApplication.processEvents()
+
+    def focusOutEvent(self, event):
+        QtGui.QPlainTextEdit.focusOutEvent(self, event)
+        self.repaint()
+        QtGui.QApplication.processEvents()
 
     def mousePressEvent(self, event):
         """
@@ -1216,7 +1236,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             content = unicode(self.toPlainText()).encode(encoding)
         return content
 
-    def __updateVisibleBlocks(self, event):
+    def updateVisibleBlocks(self, event):
         """
         Update the list of visible blocks/lines position.
 
@@ -1270,7 +1290,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 continue
             sh = panel.sizeHint()
             bottom += sh.height()
-
+        self.top, self.left, self.right, self.bottom = top, left, right, bottom
         return bottom, left, right, top
 
     def __resizePanels(self):
@@ -1343,10 +1363,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     panel.scroll(0, dy)
                 else:
                     # todo optimize, called on every cursor blink!!!
-                    # l, c = self.cursorPosition
-                    # ol, oc = self.__cachedCursorPos
-                    # if l != ol or c != oc:
-                    panel.update(0, rect.y(), panel.width(), rect.height())
+                    l, c = self.cursorPosition
+                    ol, oc = self.__cachedCursorPos
+                    if l != ol or c != oc:
+                        panel.update(0, rect.y(), panel.width(), rect.height())
                     self.__cachedCursorPos = self.cursorPosition
         if rect.contains(self.viewport().rect()):
             self.__updateViewportMargins()
