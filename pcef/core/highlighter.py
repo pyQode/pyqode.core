@@ -33,6 +33,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
         :param text:
         :return:
         """
+        pb = self.currentBlock().previous()
+        if pb:
+            ptxt = pb.text().rstrip()
+            if(ptxt.endswith("(") or ptxt.endswith(",") or
+               ptxt.endswith("\\") or ptxt.endswith("+") or
+               ptxt.endswith("-") or ptxt.endswith("*") or
+               ptxt.endswith("/") or ptxt.endswith("and") or
+               ptxt.endswith("or")):
+                return pb.userData().foldIndent
         stripped = len(text.strip())
         if stripped:
             return int((len(text) - len(text.strip())) /
