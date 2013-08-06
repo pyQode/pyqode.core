@@ -104,6 +104,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         loadUi("search_panel.ui", self)
         #: Occurrences counter
         self.cptOccurrences = 0
+        self.__previousStylesheet = ""
         self.__separator = None
         self.__decorations = []
         self.__mutex = QtCore.QMutex()
@@ -222,6 +223,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.lineEditSearch.setText(newText)
         self.lineEditSearch.selectAll()
         self.lineEditSearch.setFocus()
+        self.setFocusPolicy(QtCore.Qt.ClickFocus)
         if not textChanged:
             self.requestSearch(newText)
 
@@ -461,7 +463,9 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
             "bck": self.editor.palette().window().color().name(),
             "color": self.editor.palette().windowText().color().name(),
             "highlight": highlight.name()}
-        self.setStyleSheet(stylesheet)
+        if stylesheet != self.__previousStylesheet:
+            self.setStyleSheet(stylesheet)
+            self.__previousStylesheet = stylesheet
 
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
