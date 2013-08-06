@@ -27,6 +27,7 @@ from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers import get_lexer_for_filename
+from pygments.lexers.text import TexLexer
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
@@ -175,7 +176,7 @@ class QPygmentsHighlighter(SyntaxHighlighter):
         try:
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
-            self._lexer = PythonLexer()
+            self._lexer = TexLexer()
 
     def highlightBlock(self, text):
         """ Highlight a block of text """
@@ -345,6 +346,7 @@ class PygmentsHighlighterMode(Mode):
         """
         self.triggers = ["*", '**', '"', "'", "/"]
         self.highlighter = QPygmentsHighlighter(editor.document())
+        self.highlighter.editor = editor
         self.highlighter._clear_caches()
         self.prev_txt = ""
         style = editor.style.addProperty("pygmentsStyle", "default")
@@ -407,4 +409,8 @@ class PygmentsHighlighterMode(Mode):
         """
         assert self.highlighter is not None, "SyntaxHighlightingMode not "\
                                              "installed"
+        l = self.highlighter._lexer
         self.highlighter.setLexerFromFilename(fn)
+        if l != self.highlighter._lexer:
+            self.highlighter.rehighlight()
+        print(self.highlighter._lexer)
