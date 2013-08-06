@@ -531,29 +531,21 @@ class FoldingPanel(Panel):
     def __onEditorMouseMove(self, event):
         for fi, box in self._foldedBoxes:
             result = box.contains(event.posF())
-            # l = self.editor.lineNumber(event.pos().y())
+            l = self.editor.lineNumber(event.pos().y())
             if result:
-                # if l != self.__previousBoxLine:
-                #     pos = QtCore.QPoint(self.editor.left,
-                #                         self.editor.linePos(l))
-                #     QtGui.QToolTip.showText(self.editor.mapToGlobal(pos),
-                #                             fi.tooltip[0:512], self.editor)
-                #     self.__previousBoxLine = l
-                self.editor.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+                if l != self.__previousBoxLine:
+                    self.editor.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+                    self.__previousBoxLine = l
                 return
-        # if self.__previousBoxLine != -1:
-        #     self.__previousBoxLine = -1
-            # QtGui.QToolTip.hideText()
-            # print("hide")
-        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        if self.__previousBoxLine != -1:
+            self.__previousBoxLine = -1
+            self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
     def __onEditorMousePress(self, event):
         for fi, box in self._foldedBoxes:
             result = box.contains(event.posF())
-            # l = self.editor.lineNumber(event.pos().y())
             if result:
                 self.unfold(fi)
-                self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
                 self.__clearScopeDecorations()
 
     def paintEvent(self, event):
