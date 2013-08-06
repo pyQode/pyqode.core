@@ -106,6 +106,7 @@ class FoldingPanel(Panel):
         self.__color = self.editor.style.addProperty("foldIndicatorBackground",
                                                      self.getSystemColor())
         self.__decoColor = driftColor(self.editor.palette().window().color())
+        self.__installActions()
 
     def _onStyleChanged(self, section, key):
         Panel._onStyleChanged(self, section, key)
@@ -211,17 +212,35 @@ class FoldingPanel(Panel):
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
         self.repaint()
 
-    # def foldAll(self):
-    #     """ Folds all indicators """
-    #     for foldingIndicator in reversed(self.__indicators):
-    #         if foldingIndicator.state == foldingIndicator.UNFOLDED:
-    #             self.fold(foldingIndicator)
-    #
-    # def unfoldAll(self):
-    #     """ Unfolds all indicators """
-    #     for foldingIndicator in reversed(self.__indicators):
-    #         if foldingIndicator.state == foldingIndicator.FOLDED:
-    #             self.unfold(foldingIndicator)
+    def foldAll(self):
+        """ Folds all indicators whose fold indent is > 0 """
+        b = self.editor.document().firstBlock()
+        while b and b.isValid():
+            usd = b.userData()
+            if usd.foldIndent > 0 or len(b.text().strip()) == 0:
+                b.setVisible(False)
+                usd.folded = True
+            b = b.next()
+        tc = self.editor.textCursor()
+        tc.select(tc.Document)
+        self.editor.document().markContentsDirty(
+            tc.selectionStart(), tc.selectionEnd())
+        self.repaint()
+
+    def unfoldAll(self):
+        """ Unfolds all indicators whose fold indent is > 0"""
+        b = self.editor.document().firstBlock()
+        while b and b.isValid():
+            usd = b.userData()
+            if usd.foldIndent > 0 or len(b.text().strip()) == 0:
+                b.setVisible(True)
+                usd.folded = False
+            b = b.next()
+        tc = self.editor.textCursor()
+        tc.select(tc.Document)
+        self.editor.document().markContentsDirty(
+            tc.selectionStart(), tc.selectionEnd())
+        self.repaint()
 
     def __getNearestIndicator(self, line):
         """
@@ -359,17 +378,17 @@ class FoldingPanel(Panel):
         self.editor.addDecoration(d)
         self.__scopeDecorations.append(d)
 
-    # def __installActions(self):
-    #     """ Installs fold all and unfold all action on the editor widget. """
-    #     self.editor.addSeparator()
-    #     self.__actionFoldAll = QtGui.QAction("Fold all", self.editor)
-    #     self.__actionFoldAll.setShortcut("Ctrl+Shift+-")
-    #     self.__actionFoldAll.triggered.connect(self.foldAll)
-    #     self.editor.addAction(self.__actionFoldAll)
-    #     self.__actionUnfoldAll = QtGui.QAction("Unfold all", self.editor)
-    #     self.__actionUnfoldAll.setShortcut("Ctrl+Shift++")
-    #     self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
-    #     self.editor.addAction(self.__actionUnfoldAll)
+    def __installActions(self):
+        """ Installs fold all and unfold all action on the editor widget. """
+        self.editor.addSeparator()
+        self.__actionFoldAll = QtGui.QAction("Fold all", self.editor)
+        self.__actionFoldAll.setShortcut("Ctrl+Shift+-")
+        self.__actionFoldAll.triggered.connect(self.foldAll)
+        self.editor.addAction(self.__actionFoldAll)
+        self.__actionUnfoldAll = QtGui.QAction("Unfold all", self.editor)
+        self.__actionUnfoldAll.setShortcut("Ctrl+Shift++")
+        self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
+        self.editor.addAction(self.__actionUnfoldAll)
 
     def __findNextValidBlock(self, block):
         bl = block.next()
