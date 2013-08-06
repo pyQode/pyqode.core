@@ -206,8 +206,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.blockCountChanged.connect(self.__updateViewportMargins)
         self.textChanged.connect(self.__ontextChanged)
         self.updateRequest.connect(self.__updatePanels)
-        self.cursorPositionChanged.connect(self.refreshPanels)
-        self.document().blockCountChanged.connect(self.refreshPanels)
 
         self.setMouseTracking(True)
 
@@ -1346,10 +1344,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     panel.scroll(0, dy)
                 else:
                     # todo optimize, called on every cursor blink!!!
-                    l, c = self.cursorPosition
-                    ol, oc = self.__cachedCursorPos
-                    if l != ol or c != oc:
-                        panel.update(0, rect.y(), panel.width(), rect.height())
+                    # l, c = self.cursorPosition
+                    # ol, oc = self.__cachedCursorPos
+                    # if l != ol or c != oc:
+                    panel.update(0, rect.y(), panel.width(), rect.height())
                     self.__cachedCursorPos = self.cursorPosition
         if rect.contains(self.viewport().rect()):
             self.__updateViewportMargins()
