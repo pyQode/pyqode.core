@@ -423,8 +423,10 @@ class FoldingPanel(Panel):
                             lastBlock = lastBlock.previous()
                             stop -= 1
                         fi.end = stop
-                    # if fi.foldIndent < 3 and fi.end - fi.start > 1:
-                    self.__indicators.append(fi)
+                    if fi.foldIndent < 3:
+                       self.__indicators.append(fi)
+                    elif fi.end - fi.start > 5:
+                        self.__indicators.append(fi)
 
     def __drawActiveIndicatorBackground(self, fi, painter):
         # draw background rect
