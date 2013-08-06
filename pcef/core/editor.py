@@ -163,6 +163,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__modifiedLines = set()
         self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
+        self.setCenterOnScroll(True)
 
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
