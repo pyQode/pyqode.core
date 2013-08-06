@@ -151,7 +151,7 @@ class FoldingPanel(Panel):
                 block.setUserData(usrData)
             else:
                 break
-        # unfold last blank lines
+            # unfold last blank lines
         for i in reversed(range(foldingIndicator.start, last)):
             block = self.editor.document().findBlockByNumber(i)
             if not len(block.text().strip()):
@@ -161,9 +161,8 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
-        self.editor.refreshPanels()
-        self.repaint()
         foldingIndicator.folded = True
+        self.editor.repaint()
 
     def unfoldChild(self, end, i, usrData):
         for j in range(i + 1, end):
@@ -212,19 +211,51 @@ class FoldingPanel(Panel):
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
         self.repaint()
 
+    def __unfoldPreviousBlankLines(self, b):
+        # unfold previous blank lines as they are on the level 0
+        prevBlock = b.previous()
+        while prevBlock and prevBlock.isValid() and \
+                        len(prevBlock.text().strip()) == 0:
+            prevBlock.setVisible(True)
+            pusd = prevBlock.userData()
+            pusd.folded = False
+            prevBlock = prevBlock.previous()
+
     def foldAll(self):
         """ Folds all indicators whose fold indent is > 0 """
+        # self.__collectIndicators()
+        # toFold = []
+        # # for fi in self.__indicators:
+        # #     if fi.folded == False:
+        # #         toFold.append(fi)
+        # # while len(toFold):
+        # #     self.fold(toFold.pop())
+        # #     self.__collectIndicators()
+        # #     toFold[:] = []
+        # #     for fi in self.__indicators:
+        # #         if fi.folded == False:
+        # #             toFold.append(fi)
+
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             usd = b.userData()
-            if usd.foldIndent > 0 or len(b.text().strip()) == 0:
-                b.setVisible(False)
-                usd.folded = True
+            if usd.foldIndent == 0:  # indicator start
+                if usd.foldStart:
+                    self.__unfoldPreviousBlankLines(b)
+                    usd.folded = True  # fold the indicator
+            else:
+                if b != self.editor.document().lastBlock():
+                    b.setVisible(False)
+                    usd.folded = True
+                else:
+                    # unfold previous blank lines
+                    self.__unfoldPreviousBlankLines(b)
             b = b.next()
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         self.editor.document().markContentsDirty(
             tc.selectionStart(), tc.selectionEnd())
+        self.editor.update()
         self.repaint()
 
     def unfoldAll(self):
@@ -232,9 +263,9 @@ class FoldingPanel(Panel):
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             usd = b.userData()
-            if usd.foldIndent > 0 or len(b.text().strip()) == 0:
-                b.setVisible(True)
-                usd.folded = False
+            # if usd.foldIndent > 0 or len(b.text().strip()) == 0:
+            b.setVisible(True)
+            usd.folded = False
             b = b.next()
         tc = self.editor.textCursor()
         tc.select(tc.Document)
@@ -267,7 +298,7 @@ class FoldingPanel(Panel):
 
         :param deco: The clicked decoration
         """
-        fi = self.__getIndicatorForStart(deco.cursor.blockNumber()+1)
+        fi = self.__getIndicatorForStart(deco.cursor.blockNumber() + 1)
         if fi and fi.folded:
             self.unfold(fi.start, fi.end, fi.foldIndent)
 
@@ -421,8 +452,6 @@ class FoldingPanel(Panel):
                     fi.rect = arrowRect
                     fi.active = False
                     fi.foldIndent = nxtUsrData.foldIndent
-                    # find end folding region
-
                     # find its end
                     stopAtEnds = True
                     for ntop, nline, nblock in self.editor.visibleBlocks[
@@ -442,10 +471,7 @@ class FoldingPanel(Panel):
                             lastBlock = lastBlock.previous()
                             stop -= 1
                         fi.end = stop
-                    if fi.foldIndent < 3:
-                       self.__indicators.append(fi)
-                    elif fi.end - fi.start > 5:
-                        self.__indicators.append(fi)
+                    self.__indicators.append(fi)
 
     def __drawActiveIndicatorBackground(self, fi, painter):
         # draw background rect
@@ -476,19 +502,20 @@ class FoldingPanel(Panel):
             if fi.start == self.__hoveredStartLine:
                 fi.active = True
                 self.__drawActiveIndicatorBackground(fi, painter)
-            if fi.folded:
-                deco = TextDecoration(
-                    self.editor.textCursor(), startLine=fi.start)
-                d = TextDecoration(self.editor.textCursor(),
-                                   startLine=fi.start+1,
-                                   endLine=fi.end)
-                deco.tooltip = d.cursor.selection().toPlainText()
-                deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
-                self.__decoColor = driftColor(self.editor.palette().base().color())
-                deco.setOutline(self.__decoColor)
-                deco.signals.clicked.connect(self.__onDecoClicked)
-                self.editor.addDecoration(deco)
-                self.__foldDecorations.append(deco)
+            # if fi.folded and self.editor.hasFocus():
+            #     deco = TextDecoration(
+            #         self.editor.textCursor(), startLine=fi.start)
+            #     d = TextDecoration(self.editor.textCursor(),
+            #                        startLine=fi.start + 1,
+            #                        endLine=fi.end)
+            #     deco.tooltip = d.cursor.selection().toPlainText()
+            #     deco.cursor.select(QtGui.QTextCursor.LineUnderCursor)
+            #     self.__decoColor = driftColor(
+            #         self.editor.palette().base().color())
+            #     deco.setOutline(self.__decoColor)
+            #     deco.signals.clicked.connect(self.__onDecoClicked)
+            #     self.editor.addDecoration(deco)
+            #     self.__foldDecorations.append(deco)
 
             self.__drawArrow(fi.rect, fi.active, not fi.folded, painter)
 
@@ -553,7 +580,6 @@ if __name__ == '__main__':
     from pcef.core import QGenericCodeEdit
 
     class Example(QGenericCodeEdit):
-
         def __init__(self):
             QGenericCodeEdit.__init__(self, parent=None)
             self.openFile(__file__)
@@ -567,6 +593,7 @@ if __name__ == '__main__':
             self.foldingPanel.zoneOrder = -1
 
     import sys
+
     app = QtGui.QApplication(sys.argv)
     e = Example()
     e.show()
