@@ -918,6 +918,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Refreshes the editor panels. """
         self.__resizePanels()
         self.__updateViewportMargins()
+        self.__updatePanels(self.contentsRect(), 0)
         self.update()
 
     def resizeEvent(self, e):
