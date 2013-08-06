@@ -88,7 +88,7 @@ class MarkerPanel(Panel):
         key, val = self.makeMarkerIcon(marker.icon)
         if key and val:
             self.__icons[key] = val
-        # self.__markers.append(marker)
+        self.__markers.append(marker)
         doc = self.editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker.position - 1)
@@ -112,7 +112,7 @@ class MarkerPanel(Panel):
 
         :param marker: Marker to remove
         """
-        # self.__markers.remove(marker)
+        self.__markers.remove(marker)
         self.__toRemove.append(marker)
 
     def clearMarkers(self):
