@@ -99,7 +99,7 @@ class CheckerMode(Mode, QtCore.QObject):
     def __init__(self, process_func,
                  delay=500,
                  clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
-                 showEditorTooltip=False):
+                 showEditorTooltip=True):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=delay)

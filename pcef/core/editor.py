@@ -169,7 +169,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
-        self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1500)
+        self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
         self.__previousTooltipBlockNumber = -1
 
         #: The list of actions, (none is a separator)
@@ -1065,6 +1065,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if not blockFound:
             self.__previousTooltipBlockNumber = -1
             self.__tooltipRunner.cancelRequests()
+            QtGui.QToolTip.hideText()
         self.mouseMoved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
