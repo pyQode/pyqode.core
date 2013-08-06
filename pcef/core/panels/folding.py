@@ -184,7 +184,6 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.select(tc.Document)
         doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
-        print("Fold finished")
         self.__collectIndicators()
         self.__clearScopeDecorations()
         self.__addScopeDecoration(foldingIndicator.start,
@@ -277,7 +276,7 @@ class FoldingPanel(Panel):
                                                  tc.selectionEnd())
         self.editor.updateVisibleBlocks(None)
         self.__collectIndicators()
-        self.repaint()
+        self.editor.refreshPanels()
 
     def unfoldAll(self):
         """ Unfolds all indicators whose fold indent is > 0"""
@@ -296,7 +295,7 @@ class FoldingPanel(Panel):
             tc.selectionStart(), tc.selectionEnd())
         self.editor.updateVisibleBlocks(None)
         self.__collectIndicators()
-        self.repaint()
+        self.editor.update()
 
     def __getNearestIndicator(self, line):
         """
