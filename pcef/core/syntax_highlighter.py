@@ -180,7 +180,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
                 if prevUsd:
                     prevUsd.foldStart = self._foldDetector.isFoldStart(
                         prevBlock, self.currentBlock())
-            prevBlock.setUserData(prevUsd)
+                prevBlock.setUserData(prevUsd)
         # set current block's user data
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
