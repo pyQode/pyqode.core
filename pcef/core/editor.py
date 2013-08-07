@@ -360,7 +360,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     QtGui.QMessageBox.warning(self, "Failed to open file",
                                               "Failed to open file, encoding "
                                               "could not be detected properly")
-            else:
+            if not encoding:
                 encoding = self.getDefaultEncoding()
             content = data.decode(encoding)
         if replaceTabsBySpaces:
