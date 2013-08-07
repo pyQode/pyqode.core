@@ -22,6 +22,8 @@ from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.editor import QCodeEdit
 from pcef.core.syntax_highlighter import SyntaxHighlighter
+from pcef.core.syntax_highlighter import FoldDetector
+from pcef.core.syntax_highlighter import IndentBasedFoldDetector
 from pcef.core.mode import Mode
 from pcef.core.modes import AutoIndentMode
 from pcef.core.modes import CaretLineHighlighterMode
@@ -114,7 +116,7 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "LineNumberPanel", "MarkerPanel", "Marker", "FoldingPanel",
            "SearchAndReplacePanel", "CaretLineHighlighterMode", "CheckerMode",
            "CheckerMessage", "MSG_STATUS_INFO", "MSG_STATUS_ERROR",
-           "MSG_STATUS_WARNING",
+           "MSG_STATUS_WARNING", "FoldDetector", "IndentBasedFoldDetector",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider" "FileWatcherMode",
