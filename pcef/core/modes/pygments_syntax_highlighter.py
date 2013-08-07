@@ -61,8 +61,6 @@ except ImportError as e:  # too new on some systems
     logger.error("Faile to import pygments lexer, please update your pygments "
                  "installation. %s" % e)
 
-
-
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
 from pygments.util import ClassNotFound
@@ -192,7 +190,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             CMakeLexer: IndentBasedFoldDetector(),
             RstLexer: IndentBasedFoldDetector(),
         }
-    except ImportError:
+    except NameError:
         LEXERS_FOLD_DETECTORS = {}
 
     def __init__(self, parent, lexer=None):
