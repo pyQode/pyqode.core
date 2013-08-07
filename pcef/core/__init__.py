@@ -98,6 +98,7 @@ class QGenericCodeEdit(QCodeEdit):
         QCodeEdit.__init__(self, parent)
         self.setLineWrapMode(self.NoWrap)
         self.setWindowTitle("PCEF - Generic Editor")
+        self.installPanel(FoldingPanel(), PanelPosition.LEFT)
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
         self.installMode(FileWatcherMode())
