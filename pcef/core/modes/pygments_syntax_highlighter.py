@@ -34,11 +34,14 @@ from pygments.lexers.other import BatchLexer
 from pygments.lexers.other import HtmlLexer
 from pygments.lexers.compiled import CythonLexer
 from pygments.lexers.web import XmlLexer
-from pygments.lexers.web import JsonLexer
 from pygments.lexers.dotnet import BooLexer
 from pygments.lexers.text import MakefileLexer
 from pygments.lexers.text import CMakeLexer
 from pygments.lexers.text import RstLexer
+try:
+    from pygments.lexers.web import JsonLexer
+except ImportError:  # too new on some systems
+    JsonLexer = "NoLexerFound"
 
 from pygments.lexers.dotnet import CSharpLexer
 from pygments.lexers.web import ActionScriptLexer
@@ -57,6 +60,8 @@ from pygments.lexers.compiled import GoLexer
 from pygments.lexers.compiled import ObjectiveCLexer
 from pygments.lexers.compiled import ObjectiveCppLexer
 from pygments.lexers.compiled import ValaLexer
+
+
 
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
