@@ -16,7 +16,7 @@ on pygments.
 """
 from pcef.core import logger
 from pcef.core.mode import Mode
-from pcef.core.syntax_highlighter import SyntaxHighlighter
+from pcef.core.syntax_highlighter import SyntaxHighlighter, IndentBasedFoldDetector
 from pcef.qt import QtGui, QtCore
 from pcef.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
@@ -27,7 +27,37 @@ from pygments.lexer import _TokenType
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
+
 from pygments.lexers.agile import PythonLexer
+from pygments.lexers.text import BashLexer
+from pygments.lexers.other import BatchLexer
+from pygments.lexers.other import HtmlLexer
+from pygments.lexers.compiled import CythonLexer
+from pygments.lexers.web import XmlLexer
+from pygments.lexers.web import JsonLexer
+from pygments.lexers.dotnet import BooLexer
+from pygments.lexers.text import MakefileLexer
+from pygments.lexers.text import CMakeLexer
+from pygments.lexers.text import RstLexer
+
+from pygments.lexers.dotnet import CSharpLexer
+from pygments.lexers.web import ActionScriptLexer
+from pygments.lexers.web import CoffeeScriptLexer
+from pygments.lexers.web import CssLexer
+from pygments.lexers.web import JavascriptLexer
+from pygments.lexers.web import QmlLexer
+from pygments.lexers.web import PhpLexer
+from pygments.lexers.compiled import AdaLexer
+from pygments.lexers.compiled import CLexer
+from pygments.lexers.compiled import CppLexer
+from pygments.lexers.compiled import CudaLexer
+from pygments.lexers.compiled import DLexer
+from pygments.lexers.compiled import GLShaderLexer
+from pygments.lexers.compiled import GoLexer
+from pygments.lexers.compiled import ObjectiveCLexer
+from pygments.lexers.compiled import ObjectiveCppLexer
+from pygments.lexers.compiled import ValaLexer
+
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
 from pygments.util import ClassNotFound
@@ -142,6 +172,29 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     #: Mode description
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
+    #: Associates a fold detector to a specific pygments lexer.
+    LEXERS_FOLD_DETECTORS = {
+        PythonLexer: IndentBasedFoldDetector(),
+        CythonLexer: IndentBasedFoldDetector(),
+        BashLexer: IndentBasedFoldDetector(),
+        BatchLexer: IndentBasedFoldDetector(),
+        XmlLexer: IndentBasedFoldDetector(),
+        HtmlLexer: IndentBasedFoldDetector(),
+        JsonLexer: IndentBasedFoldDetector(),
+        BooLexer: IndentBasedFoldDetector(),
+        MakefileLexer: IndentBasedFoldDetector(),
+        CMakeLexer: IndentBasedFoldDetector(),
+        RstLexer: IndentBasedFoldDetector(),
+    }
+
+    def __init__(self, parent, lexer=None):
+        super(PygmentsSyntaxHighlighter, self).__init__(parent)
+        self._document = QtGui.QTextDocument()
+        self._formatter = HtmlFormatter(nowrap=True)
+        self._lexer = lexer if lexer else PythonLexer()
+        self.__previousFilename = ""
+        self.style = "default"
+
     def _onInstall(self, editor):
         """
         :type editor: pcef.editors.GenericEditor
@@ -171,6 +224,13 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def __updateLexer(self):
         self.setLexerFromFilename(self.editor.fileName)
+        if hasattr(self.editor, "foldingPanel"):
+            if type(self._lexer) in self.LEXERS_FOLD_DETECTORS:
+                self.setFoldDetector(
+                    self.LEXERS_FOLD_DETECTORS[type(self._lexer)])
+                self.editor.foldingPanel.enabled = True
+            else:
+                self.editor.foldingPanel.enabled = False
 
     def __onTextSaved(self):
         self.rehighlight()
@@ -210,14 +270,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self.rehighlight()
         print(self._lexer)
 
-    def __init__(self, parent, lexer=None):
-        super(PygmentsSyntaxHighlighter, self).__init__(parent)
-        self._document = QtGui.QTextDocument()
-        self._formatter = HtmlFormatter(nowrap=True)
-        self._lexer = lexer if lexer else PythonLexer()
-        self.__previousFilename = ""
-        self.style = "default"
-
     def setLexerFromFilename(self, filename):
         """
         Change the lexer based on the filename (actually only the extension is
@@ -226,6 +278,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         :param filename: Filename or extension
         """
         try:
+            if filename.endswith("~"):
+                filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
             logger.warning("Failed to find lexer from filename %s" % filename)
@@ -245,7 +299,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         fn = self.editor.fileName
         if fn != self.__previousFilename:
             self.__previousFilename = fn
-            self.setLexerFromFilename(fn)
             self.__updateLexer()
         if self._lexer is None:
             return
