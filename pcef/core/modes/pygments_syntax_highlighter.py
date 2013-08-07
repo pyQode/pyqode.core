@@ -14,20 +14,19 @@ on pygments.
 
 .. note: This code is taken and adapted from the IPython project.
 """
+from pcef.core import logger
 from pcef.core.mode import Mode
-from pcef.core.highlighter import SyntaxHighlighter
+from pcef.core.syntax_highlighter import SyntaxHighlighter
 from pcef.qt import QtGui, QtCore
 from pcef.qt.QtCore import QRegExp
-# from pcef.qt.QtGui import QSyntaxHighlighter
-
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers.compiled import CLexer, CppLexer
-from pygments.lexers import get_lexer_for_filename
-from pygments.lexers.text import TexLexer
+from pygments.lexers.dotnet import CSharpLexer
+from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 from pygments.lexers.agile import PythonLexer
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
@@ -50,7 +49,11 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
         statestack = list(self._saved_state_stack)
     else:
         statestack = list(stack)
-    statetokens = tokendefs[statestack[-1]]
+    try:
+        statetokens = tokendefs[statestack[-1]]
+    except KeyError:
+        self._saved_state_stack = None
+        return
     while 1:
         for rexmatch, action, new_state in statetokens:
             m = rexmatch(text, pos)
@@ -125,46 +128,95 @@ replace_pattern(CLexer.tokens, comment_start)
 replace_pattern(CppLexer.tokens, comment_start)
 CLexer.tokens['comment'] = comment_state
 CppLexer.tokens['comment'] = comment_state
+CSharpLexer.tokens['comment'] = comment_state
 
 
-class PygmentsBlockUserData(QtGui.QTextBlockUserData):
-    """ Storage for the user data associated with each line.
+class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     """
+    This mode enable syntax highlighting using the pygments library
 
-    syntax_stack = ('root',)
-
-    def __init__(self, **kwds):
-        for key, value in kwds.items():
-            setattr(self, key, value)
-        QtGui.QTextBlockUserData.__init__(self)
-
-    def __repr__(self):
-        attrs = ['syntax_stack']
-        kwds = ', '.join(
-            ['%s=%r' % (attr, getattr(self, attr)) for attr in attrs])
-        return 'PygmentsBlockUserData(%s)' % kwds
-
-
-class QPygmentsHighlighter(SyntaxHighlighter):
-    """ Syntax highlighter that uses Pygments for parsing.
+    .. warnings: There are some issues with multi-line comments, they are not
+                 properly highlighted until a full re-highlight is triggered.
+                 The text is automatically re-highlighted on save.
     """
+    #: Mode description
+    DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
-    hilighlightingBlock = QtCore.Signal(str, SyntaxHighlighter)
+    def _onInstall(self, editor):
+        """
+        :type editor: pcef.editors.GenericEditor
+        """
+        SyntaxHighlighter._onInstall(self, editor)
+        self.triggers = ["*", '**', '"', "'", "/"]
+        self._clear_caches()
+        self.prev_txt = ""
+        style = editor.style.addProperty("pygmentsStyle", "default")
+        self.style = style
+        self.editor.style.setValue(
+                    "background",
+                    QtGui.QColor(self.style.background_color))
+        c = self.style.style_for_token(Text)['color']
+        if c is None:
+            c = '000000'
+        self.editor.style.setValue(
+            "foreground", QtGui.QColor("#{0}".format(c)))
 
-    #--------------------------------------------------------------------------
-    # 'QSyntaxHighlighter' interface
-    #--------------------------------------------------------------------------
+    def _onStateChanged(self, state):
+        self.enabled = state
+        if state is True:
+            self.editor.textSaved.connect(self.rehighlight)
+        else:
+            self.editor.textSaved.disconnect(self.rehighlight)
+        self.rehighlight()
+
+    def __updateLexer(self):
+        self.setLexerFromFilename(self.editor.fileName)
+
+    def __onTextSaved(self):
+        self.rehighlight()
+
+    def _onStyleChanged(self, section, key):
+        """ Updates the pygments style """
+        if key == "pygmentsStyle" or not key:
+            self.style = self.editor.style.value(
+                "pygmentsStyle")
+            self.rehighlight()
+            self.editor.style.setValue(
+                "background",
+                QtGui.QColor(self.style.background_color))
+            c = self.style.style_for_token(Text)['color']
+            if c is None:
+                c = '000000'
+            self.editor.style.setValue(
+                "foreground", QtGui.QColor("#{0}".format(c)))
+
+    def setLexerFromFilename(self, fn="file.py"):
+        """
+        Change the highlighter lexer on the fly by supplying the filename
+        to highlight
+
+        .. note::
+            Actually only the file extension is needed
+
+        .. note::
+            The default lexer is the Python lexer
+
+        :param fn: Filename or extension
+        :type fn: str
+        """
+        l = self._lexer
+        self.setLexerFromFilename(fn)
+        if l != self._lexer:
+            self.rehighlight()
+        print(self._lexer)
 
     def __init__(self, parent, lexer=None):
-        super(QPygmentsHighlighter, self).__init__(parent)
-
+        super(PygmentsSyntaxHighlighter, self).__init__(parent)
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self.enabled = True
-        # QTextBlockUserData is buggy on PyQt 4.9; so we implement our own way
-        # keeping user data foreach line.
-        self.user_datas = {}  # line_nbr: user_data
+        self.__previousFilename = ""
+        self.style = "default"
 
     def setLexerFromFilename(self, filename):
         """
@@ -176,19 +228,42 @@ class QPygmentsHighlighter(SyntaxHighlighter):
         try:
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
-            self._lexer = TexLexer()
+            logger.warning("Failed to find lexer from filename %s" % filename)
+            self._lexer = None
+
+    def setLexerFromMimeType(self, mime, **options):
+        try:
+            self._lexer = get_lexer_for_mimetype(mime, **options)
+        except ClassNotFound:
+            logger.warning("Failed to find lexer from mime type %s" % mime)
+            self._lexer = None
 
     def highlightBlock(self, text):
         """ Highlight a block of text """
         SyntaxHighlighter.highlightBlock(self, text)
+
+        fn = self.editor.fileName
+        if fn != self.__previousFilename:
+            self.__previousFilename = fn
+            self.setLexerFromFilename(fn)
+            self.__updateLexer()
+        if self._lexer is None:
+            return
+
+        #Spaces
+        expression = QRegExp('\s+')
+        index = expression.indexIn(text, 0)
+        while index >= 0:
+            index = expression.pos(0)
+            length = len(expression.cap(0))
+            self.setFormat(index, length, self._get_format(Whitespace))
+            index = expression.indexIn(text, index + length)
+
         if self.enabled is False:
             return
-        original_text = text
-        line_nbr = self.currentBlock().previous().blockNumber()
-        prev_data = None
-        if line_nbr in self.user_datas:
-            prev_data = self.user_datas[line_nbr]
-        if prev_data is not None and hasattr(prev_data, "syntax_stack"):
+        prev_data = self.currentBlock().previous().userData()
+
+        if hasattr(prev_data, "syntax_stack"):
             self._lexer._saved_state_stack = prev_data.syntax_stack
         elif hasattr(self._lexer, '_saved_state_stack'):
             del self._lexer._saved_state_stack
@@ -201,26 +276,12 @@ class QPygmentsHighlighter(SyntaxHighlighter):
             index += length
 
         if hasattr(self._lexer, '_saved_state_stack'):
-            data = PygmentsBlockUserData(
-                syntax_stack=self._lexer._saved_state_stack)
-            self.user_datas[self.currentBlock().blockNumber()] = data
+            data = self.currentBlock().userData()
+            setattr(data, "syntax_stack", self._lexer._saved_state_stack)
+            self.currentBlock().setUserData(data)
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 
-        #Spaces
-        expression = QRegExp('\s+')
-        index = expression.indexIn(original_text, 0)
-        while index >= 0:
-            index = expression.pos(0)
-            length = len(expression.cap(0))
-            self.setFormat(index, length, self._get_format(Whitespace))
-            index = expression.indexIn(original_text, index + length)
-
-        self.hilighlightingBlock.emit(original_text, self)
-
-    #--------------------------------------------------------------------------
-    # 'PygmentsHighlighter' interface
-    #--------------------------------------------------------------------------
     def __set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
@@ -229,6 +290,12 @@ class QPygmentsHighlighter(SyntaxHighlighter):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()
+
+    def __get_style(self):
+        return self._style
+
+    #: gets/sets the **pygments** style.
+    style = property(__get_style, __set_style)
 
     def set_style_sheet(self, stylesheet):
         """ Sets a CSS stylesheet. The classes in the stylesheet should
@@ -242,16 +309,6 @@ class QPygmentsHighlighter(SyntaxHighlighter):
         self._document.setDefaultStyleSheet(stylesheet)
         self._style = None
         self._clear_caches()
-
-    def __get_style(self):
-        return self._style
-
-    #: gets/sets the **pygments** style.
-    style = property(__get_style, __set_style)
-
-    #--------------------------------------------------------------------------
-    # Protected interface
-    #--------------------------------------------------------------------------
 
     def _clear_caches(self):
         """ Clear caches for brushes and formats.
@@ -324,93 +381,3 @@ class QPygmentsHighlighter(SyntaxHighlighter):
                       int(color[2:4], base=16),
                       int(color[4:6], base=16))
         return qcolor
-
-
-class PygmentsHighlighterMode(Mode):
-    """
-    This mode enable syntax highlighting (using the QPygmentsHighlighter).
-
-    .. warnings: There are some issues with multiline comments, they are not
-                 properly hilighted until a full rehighlight is triggered.
-                 The text is automatically rehighlighted on save.
-    """
-    #: Mode identifier
-    IDENTIFIER = "pygmentsHighlighterMode"
-    #: Mode description
-    DESCRIPTION = "Apply syntax highlighting to the editor using pygments " \
-                   "lexer"
-
-    def _onInstall(self, editor):
-        """
-        :type editor: pcef.editors.GenericEditor
-        """
-        self.triggers = ["*", '**', '"', "'", "/"]
-        self.highlighter = QPygmentsHighlighter(editor.document())
-        self.highlighter.editor = editor
-        self.highlighter._clear_caches()
-        self.prev_txt = ""
-        style = editor.style.addProperty("pygmentsStyle", "default")
-        self.highlighter.style = style
-        Mode._onInstall(self, editor)
-        self.editor.style.setValue(
-                    "background",
-                    QtGui.QColor(self.highlighter.style.background_color))
-        c = self.highlighter.style.style_for_token(Text)['color']
-        if c is None:
-            c = '000000'
-        self.editor.style.setValue(
-            "foreground", QtGui.QColor("#{0}".format(c)))
-
-    def _onStateChanged(self, state):
-        self.highlighter.enabled = state
-        if state is True:
-            self.editor.textSaved.connect(self.__onTextSaved)
-            self.editor.newTextSet.connect(self.__updateLexer)
-        else:
-            self.editor.textSaved.disconnect(self.__onTextSaved)
-            self.editor.newTextSet.disconnect(self.__updateLexer)
-        self.highlighter.rehighlight()
-
-    def __updateLexer(self):
-        self.setLexerFromFilename(self.editor.fileName)
-
-    def __onTextSaved(self):
-        self.highlighter.rehighlight()
-
-    def _onStyleChanged(self, section, key):
-        """ Updates the pygments style """
-        if key == "pygmentsStyle" or not key:
-            if self.highlighter is not None:
-                self.highlighter.style = self.editor.style.value(
-                    "pygmentsStyle")
-                self.highlighter.rehighlight()
-                self.editor.style.setValue(
-                    "background",
-                    QtGui.QColor(self.highlighter.style.background_color))
-                c = self.highlighter.style.style_for_token(Text)['color']
-                if c is None:
-                    c = '000000'
-                self.editor.style.setValue(
-                    "foreground", QtGui.QColor("#{0}".format(c)))
-
-    def setLexerFromFilename(self, fn="file.py"):
-        """
-        Change the highlighter lexer on the fly by supplying the filename
-        to highlight
-
-        .. note::
-            Actually only the file extension is needed
-
-        .. note::
-            The default lexer is the Python lexer
-
-        :param fn: Filename or extension
-        :type fn: str
-        """
-        assert self.highlighter is not None, "SyntaxHighlightingMode not "\
-                                             "installed"
-        l = self.highlighter._lexer
-        self.highlighter.setLexerFromFilename(fn)
-        if l != self.highlighter._lexer:
-            self.highlighter.rehighlight()
-        print(self.highlighter._lexer)

@@ -21,7 +21,7 @@ from pcef.core import logger
 from pcef.core.constants import PanelPosition
 from pcef.core.decoration import TextDecoration
 from pcef.core.editor import QCodeEdit
-from pcef.core.highlighter import SyntaxHighlighter
+from pcef.core.syntax_highlighter import SyntaxHighlighter
 from pcef.core.mode import Mode
 from pcef.core.modes import AutoIndentMode
 from pcef.core.modes import CaretLineHighlighterMode
@@ -37,7 +37,7 @@ from pcef.core.modes import Completion
 from pcef.core.modes import DocumentWordCompletionProvider
 from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
-from pcef.core.modes import PygmentsHighlighterMode, PYGMENTS_STYLES
+from pcef.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pcef.core.modes import RightMarginMode
 from pcef.core.modes import ZoomMode
 from pcef.core.panels import FoldingPanel
@@ -101,7 +101,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
-        self.installMode(PygmentsHighlighterMode())
+        self.installMode(PygmentsSyntaxHighlighter(self.document()))
         self.installMode(ZoomMode())
         self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
@@ -118,7 +118,7 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider" "FileWatcherMode",
-           "RightMarginMode", "ZoomMode", "PygmentsHighlighterMode",
+           "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "AutoIndentMode", "PanelPosition", "TextDecoration",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
