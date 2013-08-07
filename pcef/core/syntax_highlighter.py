@@ -117,7 +117,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def __del__(self):
         self.__blocks.clear()
 
-    def setFolder(self, foldDetector):
+    def setFoldDetector(self, foldDetector):
         self._foldDetector = foldDetector
 
     def getFoldingIndent(self, text):
