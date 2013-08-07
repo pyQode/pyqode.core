@@ -28,38 +28,38 @@ from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 
-from pygments.lexers.agile import PythonLexer
-from pygments.lexers.text import BashLexer
-from pygments.lexers.other import BatchLexer
-from pygments.lexers.other import HtmlLexer
-from pygments.lexers.compiled import CythonLexer
-from pygments.lexers.web import XmlLexer
-from pygments.lexers.dotnet import BooLexer
-from pygments.lexers.text import MakefileLexer
-from pygments.lexers.text import CMakeLexer
-from pygments.lexers.text import RstLexer
 try:
+    from pygments.lexers.agile import PythonLexer
+    from pygments.lexers.text import BashLexer
+    from pygments.lexers.other import BatchLexer
+    from pygments.lexers.other import HtmlLexer
+    from pygments.lexers.compiled import CythonLexer
+    from pygments.lexers.web import XmlLexer
+    from pygments.lexers.dotnet import BooLexer
+    from pygments.lexers.text import MakefileLexer
+    from pygments.lexers.text import CMakeLexer
+    from pygments.lexers.text import RstLexer
     from pygments.lexers.web import JsonLexer
-except ImportError:  # too new on some systems
-    JsonLexer = "NoLexerFound"
-
-from pygments.lexers.dotnet import CSharpLexer
-from pygments.lexers.web import ActionScriptLexer
-from pygments.lexers.web import CoffeeScriptLexer
-from pygments.lexers.web import CssLexer
-from pygments.lexers.web import JavascriptLexer
-from pygments.lexers.web import QmlLexer
-from pygments.lexers.web import PhpLexer
-from pygments.lexers.compiled import AdaLexer
-from pygments.lexers.compiled import CLexer
-from pygments.lexers.compiled import CppLexer
-from pygments.lexers.compiled import CudaLexer
-from pygments.lexers.compiled import DLexer
-from pygments.lexers.compiled import GLShaderLexer
-from pygments.lexers.compiled import GoLexer
-from pygments.lexers.compiled import ObjectiveCLexer
-from pygments.lexers.compiled import ObjectiveCppLexer
-from pygments.lexers.compiled import ValaLexer
+    from pygments.lexers.dotnet import CSharpLexer
+    from pygments.lexers.web import ActionScriptLexer
+    from pygments.lexers.web import CoffeeScriptLexer
+    from pygments.lexers.web import CssLexer
+    from pygments.lexers.web import JavascriptLexer
+    from pygments.lexers.web import QmlLexer
+    from pygments.lexers.web import PhpLexer
+    from pygments.lexers.compiled import AdaLexer
+    from pygments.lexers.compiled import CLexer
+    from pygments.lexers.compiled import CppLexer
+    from pygments.lexers.compiled import CudaLexer
+    from pygments.lexers.compiled import DLexer
+    from pygments.lexers.compiled import GLShaderLexer
+    from pygments.lexers.compiled import GoLexer
+    from pygments.lexers.compiled import ObjectiveCLexer
+    from pygments.lexers.compiled import ObjectiveCppLexer
+    from pygments.lexers.compiled import ValaLexer
+except ImportError as e:  # too new on some systems
+    logger.error("Faile to import pygments lexer, please update your pygments "
+                 "installation. %s" % e)
 
 
 
@@ -178,19 +178,22 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
     #: Associates a fold detector to a specific pygments lexer.
-    LEXERS_FOLD_DETECTORS = {
-        PythonLexer: IndentBasedFoldDetector(),
-        CythonLexer: IndentBasedFoldDetector(),
-        BashLexer: IndentBasedFoldDetector(),
-        BatchLexer: IndentBasedFoldDetector(),
-        XmlLexer: IndentBasedFoldDetector(),
-        HtmlLexer: IndentBasedFoldDetector(),
-        JsonLexer: IndentBasedFoldDetector(),
-        BooLexer: IndentBasedFoldDetector(),
-        MakefileLexer: IndentBasedFoldDetector(),
-        CMakeLexer: IndentBasedFoldDetector(),
-        RstLexer: IndentBasedFoldDetector(),
-    }
+    try:
+        LEXERS_FOLD_DETECTORS = {
+            PythonLexer: IndentBasedFoldDetector(),
+            CythonLexer: IndentBasedFoldDetector(),
+            BashLexer: IndentBasedFoldDetector(),
+            BatchLexer: IndentBasedFoldDetector(),
+            XmlLexer: IndentBasedFoldDetector(),
+            HtmlLexer: IndentBasedFoldDetector(),
+            JsonLexer: IndentBasedFoldDetector(),
+            BooLexer: IndentBasedFoldDetector(),
+            MakefileLexer: IndentBasedFoldDetector(),
+            CMakeLexer: IndentBasedFoldDetector(),
+            RstLexer: IndentBasedFoldDetector(),
+        }
+    except ImportError:
+        LEXERS_FOLD_DETECTORS = {}
 
     def __init__(self, parent, lexer=None):
         super(PygmentsSyntaxHighlighter, self).__init__(parent)
