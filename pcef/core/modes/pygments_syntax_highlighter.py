@@ -16,7 +16,7 @@ on pygments.
 """
 from pcef.core import logger
 from pcef.core.mode import Mode
-from pcef.core.syntax_highlighter import SyntaxHighlighter, IndentBasedFoldDetector
+from pcef.core.syntax_highlighter import SyntaxHighlighter, IndentBasedFoldDetector, CharBasedFoldDetector
 from pcef.qt import QtGui, QtCore
 from pcef.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
@@ -40,11 +40,13 @@ try:
     from pygments.lexers.text import CMakeLexer
     from pygments.lexers.text import RstLexer
     from pygments.lexers.web import JsonLexer
+
     from pygments.lexers.dotnet import CSharpLexer
     from pygments.lexers.web import ActionScriptLexer
     from pygments.lexers.web import CoffeeScriptLexer
     from pygments.lexers.web import CssLexer
     from pygments.lexers.web import JavascriptLexer
+    from pygments.lexers.jvm import JavaLexer
     from pygments.lexers.web import QmlLexer
     from pygments.lexers.web import PhpLexer
     from pygments.lexers.compiled import AdaLexer
@@ -178,6 +180,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     #: Associates a fold detector to a specific pygments lexer.
     try:
         LEXERS_FOLD_DETECTORS = {
+            # indent based
             PythonLexer: IndentBasedFoldDetector(),
             CythonLexer: IndentBasedFoldDetector(),
             BashLexer: IndentBasedFoldDetector(),
@@ -189,6 +192,26 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             MakefileLexer: IndentBasedFoldDetector(),
             CMakeLexer: IndentBasedFoldDetector(),
             RstLexer: IndentBasedFoldDetector(),
+
+            # c family
+            CLexer: CharBasedFoldDetector(),
+            CppLexer: CharBasedFoldDetector(),
+            CSharpLexer: CharBasedFoldDetector(),
+            ActionScriptLexer: CharBasedFoldDetector(),
+            CoffeeScriptLexer: CharBasedFoldDetector(),
+            CssLexer: CharBasedFoldDetector(),
+            JavascriptLexer: CharBasedFoldDetector(),
+            JavaLexer: CharBasedFoldDetector(),
+            QmlLexer: CharBasedFoldDetector(),
+            PhpLexer: CharBasedFoldDetector(),
+            AdaLexer: CharBasedFoldDetector(),
+            CudaLexer: CharBasedFoldDetector(),
+            DLexer: CharBasedFoldDetector(),
+            GLShaderLexer: CharBasedFoldDetector(),
+            GoLexer: CharBasedFoldDetector(),
+            ObjectiveCLexer: CharBasedFoldDetector(),
+            ObjectiveCppLexer: CharBasedFoldDetector(),
+            ValaLexer: CharBasedFoldDetector(),
         }
     except NameError:
         LEXERS_FOLD_DETECTORS = {}
