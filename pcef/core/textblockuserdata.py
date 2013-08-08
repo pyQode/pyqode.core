@@ -20,8 +20,10 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.foldStart = False
         self.foldIndent = -1
         self.marker = None
-        #: list of ParenthesisInfo
-        self.parentheses = []
+        #: list of ParenthesisInfo, pne foreach character type
+        self.parentheses = []  # ()
+        self.brackets = []  # []
+        self.braces = []  # ()
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"

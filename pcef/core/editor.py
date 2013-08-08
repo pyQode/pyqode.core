@@ -254,17 +254,48 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         data = self.textCursor().block().userData()
         if data:
             pos = self.textCursor().block().position()
+            # parentheses
             parentheses = data.parentheses
             for i, info in enumerate(parentheses):
                 cursorPos = (self.textCursor().position() -
                              self.textCursor().block().position())
                 if info.position == cursorPos - 1:
                     if info.character == "(":  # or info.character == "[" or info.character == "{":
-                        if self.matchLeftParenthesis(self.textCursor().block(), i + 1, 0):
-                            self.createParenthesisSelection(pos + info.position)
+                        self.createParenthesisSelection(
+                            pos + info.position,
+                            self.matchLeftParenthesis(
+                                self.textCursor().block(), i + 1, 0))
                     elif info.character == ")":  #or info.character == "]" or info.character == "]":
-                        if self.matchRightParenthesis(self.textCursor().block(), i - 1, 0):
-                            self.createParenthesisSelection(pos + info.position)
+                        self.createParenthesisSelection(
+                            pos + info.position, self.matchRightParenthesis(self.textCursor().block(), i - 1, 0))
+            # brackets
+            parentheses = data.brackets
+            for i, info in enumerate(parentheses):
+                cursorPos = (self.textCursor().position() -
+                             self.textCursor().block().position())
+                if info.position == cursorPos - 1:
+                    if info.character == "[":
+                        self.createParenthesisSelection(
+                            pos + info.position,
+                            self.matchLeftBracket(
+                                self.textCursor().block(), i + 1, 0))
+                    elif info.character == "]":
+                        self.createParenthesisSelection(
+                            pos + info.position, self.matchRightBracket(self.textCursor().block(), i - 1, 0))
+            # braces
+            parentheses = data.braces
+            for i, info in enumerate(parentheses):
+                cursorPos = (self.textCursor().position() -
+                             self.textCursor().block().position())
+                if info.position == cursorPos - 1:
+                    if info.character == "{":
+                        self.createParenthesisSelection(
+                            pos + info.position,
+                            self.matchLeftBrace(
+                                self.textCursor().block(), i + 1, 0))
+                    elif info.character == "}":
+                        self.createParenthesisSelection(
+                            pos + info.position, self.matchRightBrace(self.textCursor().block(), i - 1, 0))
 
     def matchLeftParenthesis(self, currentBlock, i, cpt):
         data = currentBlock.userData()
@@ -277,39 +308,124 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if info.character == ")" and cpt == 0:
                 self.createParenthesisSelection(currentBlock.position() + info.position)
                 return True
-            else:
+            elif info.character == ")":
                 cpt -= 1
         currentBlock = currentBlock.next()
         if currentBlock.isValid():
             return self.matchLeftParenthesis(currentBlock, 0, cpt)
         return False
 
-    def matchRightParenthesis(self, currentBlock, i, cpt):
+    def matchRightParenthesis(self, currentBlock, i, numRightParentheses):
         data = currentBlock.userData()
         parentheses = data.parentheses
-        for j in reversed(range(0, len(parentheses) - i - 1)):
-            print("J: ", j)
-            info = parentheses[j]
+        for j in range(i, -1, -1):
+            if j >= 0:
+                info = parentheses[j]
             if info.character == ")":
-                cpt += 1
+                numRightParentheses += 1
                 continue
-            if info.character == "(" and cpt == 0:
-                self.createParenthesisSelection(currentBlock.position() + info.position)
-                return True
-            else:
-                cpt -= 1
-            currentBlock = currentBlock.next()
+            if info.character == "(":
+                if numRightParentheses == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                else:
+                    numRightParentheses -= 1
+        currentBlock = currentBlock.previous()
         if currentBlock.isValid():
-            return self.matchLeftParenthesis(currentBlock, 0, cpt)
+            data = currentBlock.userData()
+            parentheses = data.parentheses
+            return self.matchRightParenthesis(currentBlock, len(parentheses) -1, numRightParentheses)
         return False
 
-    def createParenthesisSelection(self, pos):
-        print("Create sel")
+    def matchLeftBracket(self, currentBlock, i, cpt):
+        data = currentBlock.userData()
+        parentheses = data.brackets
+        for j in range(i, len(parentheses)):
+            info = parentheses[j]
+            if info.character == "[":
+                cpt += 1
+                continue
+            if info.character == "]" and cpt == 0:
+                self.createParenthesisSelection(currentBlock.position() + info.position)
+                return True
+            elif info.character == "]":
+                cpt -= 1
+        currentBlock = currentBlock.next()
+        if currentBlock.isValid():
+            return self.matchLeftBracket(currentBlock, 0, cpt)
+        return False
+
+    def matchRightBracket(self, currentBlock, i, numRightParentheses):
+        data = currentBlock.userData()
+        parentheses = data.brackets
+        for j in range(i, -1, -1):
+            if j >= 0:
+                info = parentheses[j]
+            if info.character == "]":
+                numRightParentheses += 1
+                continue
+            if info.character == "[":
+                if numRightParentheses == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                else:
+                    numRightParentheses -= 1
+        currentBlock = currentBlock.previous()
+        if currentBlock.isValid():
+            data = currentBlock.userData()
+            parentheses = data.brackets
+            return self.matchRightBracket(currentBlock, len(parentheses) -1, numRightParentheses)
+        return False
+
+    def matchLeftBrace(self, currentBlock, i, cpt):
+        data = currentBlock.userData()
+        parentheses = data.braces
+        for j in range(i, len(parentheses)):
+            info = parentheses[j]
+            if info.character == "{":
+                cpt += 1
+                continue
+            if info.character == "}" and cpt == 0:
+                self.createParenthesisSelection(currentBlock.position() + info.position)
+                return True
+            elif info.character == "}":
+                cpt -= 1
+        currentBlock = currentBlock.next()
+        if currentBlock.isValid():
+            return self.matchLeftBrace(currentBlock, 0, cpt)
+        return False
+
+    def matchRightBrace(self, currentBlock, i, numRightParentheses):
+        data = currentBlock.userData()
+        parentheses = data.braces
+        for j in range(i, -1, -1):
+            if j >= 0:
+                info = parentheses[j]
+            if info.character == "}":
+                numRightParentheses += 1
+                continue
+            if info.character == "{":
+                if numRightParentheses == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                else:
+                    numRightParentheses -= 1
+        currentBlock = currentBlock.previous()
+        if currentBlock.isValid():
+            data = currentBlock.userData()
+            parentheses = data.braces
+            return self.matchRightBrace(currentBlock, len(parentheses) -1, numRightParentheses)
+        return False
+
+    def createParenthesisSelection(self, pos, match=True):
         cursor = self.textCursor()
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
-        d = TextDecoration(cursor, 10)
-        d.setBackground(QtCore.Qt.green)
+        d = TextDecoration(cursor, draw_order=10)
+        if match:
+            d.setBackground(QtCore.Qt.green)
+        else:
+            d.setBackground(QtCore.Qt.red)
         self.__parenthesisSelections.append(d)
         self.addDecoration(d)
 # {
