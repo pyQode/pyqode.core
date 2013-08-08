@@ -204,6 +204,8 @@ class PropertyRegistry(QtCore.QObject):
             except ValueError:
                 pass
             return lst
+        elif value_str == "None":
+            return None
         else:
             return value_str
 
