@@ -70,18 +70,48 @@ class IndentBasedFoldDetector(FoldDetector):
         else:
             return -1
 
-    def isFoldStart(self, currentBlock, nextBlock):
-        """
-        Checks if the current block is a start fold block
 
-        :param current: Current block
-        :param next: Next block
-        :return: True or False
+class CharBasedFoldDetector(FoldDetector):
+    """
+    Detects folding based on character triggers
+
+    Suitable for c family langauges (c, c++, C#, java, D, ...)
+    """
+    def __init__(self, starts='{', ends='}'):
         """
-        currUsd = currentBlock.userData()
-        nextUsd = nextBlock.userData()
-        if currUsd.foldIndent < nextUsd.foldIndent:
-            return True
+        :param starts: Start triggering character
+        :param starts: Start triggering character
+        """
+        self._start = starts
+        self._end = ends
+
+    def getFoldIndent(self, highlighter, block, text):
+        if block.blockNumber() + 1 == 62:
+            pass
+        pb = block.previous()
+        if pb and pb.isValid():
+            txt = pb.text()
+            usd = pb.userData()
+            stext = text.strip()
+            if stext.startswith(self._start):
+                return usd.foldIndent + 1
+            else:
+                # fold start
+                if self._start in txt and not self._end in txt:
+                    stext = txt.strip()
+                    if not stext.startswith(self._start):
+                        return usd.foldIndent + 1
+                    else:
+                        return usd.foldIndent
+                # fold end
+                elif self._end in txt and not self._start in txt:
+                    usd = pb.userData()
+                    return usd.foldIndent - 1
+                else:
+                    # same folding level as the previous block
+                    return usd.foldIndent
+        else:
+            return 0
 
 
 class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
