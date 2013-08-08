@@ -259,7 +259,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             for i, info in enumerate(parentheses):
                 cursorPos = (self.textCursor().position() -
                              self.textCursor().block().position())
-                if info.position == cursorPos - 1:
+                if info.position == cursorPos or info.position == cursorPos -1:
                     if info.character == "(":  # or info.character == "[" or info.character == "{":
                         self.createParenthesisSelection(
                             pos + info.position,
@@ -273,7 +273,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             for i, info in enumerate(parentheses):
                 cursorPos = (self.textCursor().position() -
                              self.textCursor().block().position())
-                if info.position == cursorPos - 1:
+                if info.position == cursorPos or info.position == cursorPos -1:
                     if info.character == "[":
                         self.createParenthesisSelection(
                             pos + info.position,
@@ -287,7 +287,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             for i, info in enumerate(parentheses):
                 cursorPos = (self.textCursor().position() -
                              self.textCursor().block().position())
-                if info.position == cursorPos - 1:
+                if info.position == cursorPos or info.position == cursorPos -1:
                     if info.character == "{":
                         self.createParenthesisSelection(
                             pos + info.position,
