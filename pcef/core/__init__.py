@@ -42,6 +42,7 @@ from pcef.core.modes import FileWatcherMode
 from pcef.core.panel import Panel
 from pcef.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pcef.core.modes import RightMarginMode
+from pcef.core.modes import SymbolMatcherMode
 from pcef.core.modes import ZoomMode
 from pcef.core.panels import FoldingPanel
 from pcef.core.panels import LineNumberPanel
@@ -111,6 +112,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(CodeCompletionMode())
         self.codeCompletionMode.addCompletionProvider(
             DocumentWordCompletionProvider())
+        self.installMode(SymbolMatcherMode())
 
 
 __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
@@ -128,4 +130,4 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
            "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
-           "SubprocessServer"]
+           "SubprocessServer", "SymbolMatcherMode"]

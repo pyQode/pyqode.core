@@ -23,6 +23,7 @@ from pcef.core.modes.code_completion import CompletionProvider
 from pcef.core.modes.code_completion import Completion
 from pcef.core.modes.code_completion import DocumentWordCompletionProvider
 from pcef.core.modes.filewatcher import FileWatcherMode
+from pcef.core.modes.matcher import SymbolMatcherMode
 from pcef.core.modes.right_margin import RightMarginMode
 from pcef.core.modes.zoom import ZoomMode
 from pcef.core.modes.pygments_syntax_highlighter import PygmentsSyntaxHighlighter
@@ -35,5 +36,6 @@ __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "CHECK_TRIGGER_TXT_SAVED", "CHECK_TRIGGER_TXT_CHANGED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider", "FileWatcherMode",
+           "SymbolMatcherMode",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "PYGMENTS_STYLES", "AutoIndentMode"]

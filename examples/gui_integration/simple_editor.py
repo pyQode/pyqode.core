@@ -61,7 +61,6 @@ class SimpleEditorWindow(QtGui.QMainWindow):
             a = QtGui.QAction(self.menuModes)
             a.setText(k)
             a.setCheckable(True)
-
             a.setChecked(True)
             a.changed.connect(self.onModeCheckStateChanged)
             a.mode = v
