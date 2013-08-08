@@ -18,6 +18,7 @@ from pcef.core import constants
 from pcef.core.constants import PanelPosition
 from pcef.core.properties import PropertyRegistry
 from pcef.core.system import DelayJobRunner
+from pcef.core.decoration import TextDecoration
 from pcef.qt import QtGui, QtCore
 
 
@@ -169,6 +170,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
 
+        self.__parenthesisSelections = []
+
         self.__tooltipRunner = DelayJobRunner(self, nbThreadsMax=1, delay=700)
         self.__previousTooltipBlockNumber = -1
 
@@ -209,6 +212,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.updateRequest.connect(self.__updatePanels)
         self.blockCountChanged.connect(self.update)
         self.cursorPositionChanged.connect(self.update)
+        self.cursorPositionChanged.connect(self.matchParenthesis)
         self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
@@ -242,6 +246,89 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def lineCount(self):
         """ Returns the document line count """
         return self.document().blockCount()
+
+    def matchParenthesis(self):
+        for s in self.__parenthesisSelections:
+            self.removeDecoration(s)
+        self.__parenthesisSelections[:] = []
+        data = self.textCursor().block().userData()
+        if data:
+            pos = self.textCursor().block().position()
+            parentheses = data.parentheses
+            for i, info in enumerate(parentheses):
+                cursorPos = (self.textCursor().position() -
+                             self.textCursor().block().position())
+                if info.position == cursorPos - 1:
+                    if info.character == "(":  # or info.character == "[" or info.character == "{":
+                        if self.matchLeftParenthesis(self.textCursor().block(), i + 1, 0):
+                            self.createParenthesisSelection(pos + info.position)
+                    elif info.character == ")":  #or info.character == "]" or info.character == "]":
+                        if self.matchRightParenthesis(self.textCursor().block(), i - 1, 0):
+                            self.createParenthesisSelection(pos + info.position)
+
+    def matchLeftParenthesis(self, currentBlock, i, cpt):
+        data = currentBlock.userData()
+        parentheses = data.parentheses
+        for j in range(i, len(parentheses)):
+            info = parentheses[j]
+            if info.character == "(":
+                cpt += 1
+                continue
+            if info.character == ")" and cpt == 0:
+                self.createParenthesisSelection(currentBlock.position() + info.position)
+                return True
+            else:
+                cpt -= 1
+        currentBlock = currentBlock.next()
+        if currentBlock.isValid():
+            return self.matchLeftParenthesis(currentBlock, 0, cpt)
+        return False
+
+    def matchRightParenthesis(self, currentBlock, i, cpt):
+        data = currentBlock.userData()
+        parentheses = data.parentheses
+        for j in reversed(range(0, len(parentheses) - i - 1)):
+            print("J: ", j)
+            info = parentheses[j]
+            if info.character == ")":
+                cpt += 1
+                continue
+            if info.character == "(" and cpt == 0:
+                self.createParenthesisSelection(currentBlock.position() + info.position)
+                return True
+            else:
+                cpt -= 1
+            currentBlock = currentBlock.next()
+        if currentBlock.isValid():
+            return self.matchLeftParenthesis(currentBlock, 0, cpt)
+        return False
+
+    def createParenthesisSelection(self, pos):
+        print("Create sel")
+        cursor = self.textCursor()
+        cursor.setPosition(pos)
+        cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
+        d = TextDecoration(cursor, 10)
+        d.setBackground(QtCore.Qt.green)
+        self.__parenthesisSelections.append(d)
+        self.addDecoration(d)
+# {
+#     QList<QTextEdit::ExtraSelection> selections = extraSelections();
+#
+#     QTextEdit::ExtraSelection selection;
+#     QTextCharFormat format = selection.format;
+#     format.setBackground(Qt::green);
+#     selection.format = format;
+#
+#     QTextCursor cursor = textCursor();
+#     cursor.setPosition(pos);
+#     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+#     selection.cursor = cursor;
+#
+#     selections.append(selection);
+#
+#     setExtraSelections(selections);
+# }
 
     def gotoLine(self, line=None, move=True):
         """

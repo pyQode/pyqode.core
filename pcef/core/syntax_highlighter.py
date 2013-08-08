@@ -3,7 +3,7 @@ Base class for pcef syntax hightlighters
 """
 import os
 from pcef.core.mode import Mode
-from pcef.core.textblockuserdata import TextBlockUserData
+from pcef.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pcef.qt import QtGui, QtCore
 
 
@@ -150,52 +150,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def setFoldDetector(self, foldDetector):
         self._foldDetector = foldDetector
 
-    def getFoldingIndent(self, text):
-        """
-        Return the folding indent of the block.
-
-        This must be specialised for a specific language, it just use the
-        regular indent here.
-
-        :param text:
-        :return:
-        """
-        pb = self.currentBlock().previous()
-        if pb:
-            ptxt = pb.text().rstrip()
-            if(ptxt.endswith("(") or ptxt.endswith(",") or
-               ptxt.endswith("\\") or ptxt.endswith("+") or
-               ptxt.endswith("-") or ptxt.endswith("*") or
-               ptxt.endswith("/") or ptxt.endswith("and") or
-               ptxt.endswith("or")):
-                return pb.userData().foldIndent
-        stripped = len(text.strip())
-        if stripped:
-            return int((len(text) - len(text.strip())))
-        else:
-            return -1
-
-    def isFoldStart(self, currentBlock, nextBlock):
-        """
-        Checks if the current block is a start fold block
-
-        :param current: Current block
-        :param next: Next block
-        :return: True or False
-        """
-        currUsd = currentBlock.userData()
-        nextUsd = nextBlock.userData()
-        if currUsd.foldIndent < nextUsd.foldIndent:
-            return True
-
-    def highlightBlock(self, text):
-        # parse line indent
-        userData = self.currentBlockUserData()
-        if userData is None:
-            userData = TextBlockUserData()
-            self.setCurrentBlockUserData(userData)
-        # update user data with parenthesis infos, indent info,...
-        userData.lineNumber = self.currentBlock().blockNumber() + 1
+    def detectFolding(self, text, userData):
         # Collect folding informations
         if self._foldDetector:
             userData.foldIndent = self._foldDetector.getFoldIndent(
@@ -204,14 +159,58 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             if prevBlock and prevBlock.isValid():
                 # skip blank lines
                 while (prevBlock and prevBlock.isValid() and
-                       len(prevBlock.text().strip()) == 0):
+                               len(prevBlock.text().strip()) == 0):
                     prevBlock = prevBlock.previous()
                 prevUsd = prevBlock.userData()
                 if prevUsd:
                     prevUsd.foldStart = self._foldDetector.isFoldStart(
                         prevBlock, self.currentBlock())
                 prevBlock.setUserData(prevUsd)
-        # set current block's user data
+
+    def detectParenthesis(self, text, userData):
+        userData.parentheses[:] = []
+        leftPos = text.find("(", 0)
+        while leftPos != -1:
+            info = ParenthesisInfo(leftPos, "(")
+            userData.parentheses.append(info)
+            leftPos = text.find("(", leftPos + 1)
+        rightPos = text.find(")", 0)
+        while rightPos != -1:
+            info = ParenthesisInfo(rightPos, ")")
+            userData.parentheses.append(info)
+            rightPos = text.find(")", rightPos + 1)
+        # leftPos = text.find("{", 0)
+        # while leftPos != -1:
+        #     info = ParenthesisInfo(leftPos, "{")
+        #     userData.parentheses.append(info)
+        #     leftPos = text.find("{", leftPos + 1)
+        # rightPos = text.find("}", 0)
+        # while rightPos != -1:
+        #     info = ParenthesisInfo(rightPos, "}")
+        #     userData.parentheses.append(info)
+        #     rightPos = text.find("}", rightPos + 1)
+        # leftPos = text.find("[", 0)
+        # while leftPos != -1:
+        #     info = ParenthesisInfo(leftPos, "[")
+        #     userData.parentheses.append(info)
+        #     leftPos = text.find("]", leftPos + 1)
+        # rightPos = text.find("]", 0)
+        # while rightPos != -1:
+        #     info = ParenthesisInfo(rightPos, "]")
+        #     userData.parentheses.append(info)
+        #     rightPos = text.find("]", rightPos + 1)
+
+    def highlightBlock(self, text):
+        # setup user data
+        userData = self.currentBlockUserData()
+        if userData is None:
+            userData = TextBlockUserData()
+            self.setCurrentBlockUserData(userData)
+        # update user data
+        userData.lineNumber = self.currentBlock().blockNumber() + 1
+        self.detectFolding(text, userData)
+        self.detectParenthesis(text, userData)
+
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
         self.setCurrentBlockUserData(userData)

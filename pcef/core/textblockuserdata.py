@@ -4,6 +4,12 @@ Contains the text block user data structure
 from pcef.qt import QtGui
 
 
+class ParenthesisInfo(object):
+    def __init__(self, pos, char):
+        self.position = pos
+        self.character = char
+
+
 class TextBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
@@ -14,7 +20,8 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.foldStart = False
         self.foldIndent = -1
         self.marker = None
-        self.parenthesisInfos = []
+        #: list of ParenthesisInfo
+        self.parentheses = []
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
