@@ -268,8 +268,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     elif info.character == ")":  #or info.character == "]" or info.character == "]":
                         self.createParenthesisSelection(
                             pos + info.position, self.matchRightParenthesis(self.textCursor().block(), i - 1, 0))
-            # brackets
-            parentheses = data.brackets
+            # squareBrackets
+            parentheses = data.squareBrackets
             for i, info in enumerate(parentheses):
                 cursorPos = (self.textCursor().position() -
                              self.textCursor().block().position())
@@ -298,124 +298,142 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                             pos + info.position, self.matchRightBrace(self.textCursor().block(), i - 1, 0))
 
     def matchLeftParenthesis(self, currentBlock, i, cpt):
-        data = currentBlock.userData()
-        parentheses = data.parentheses
-        for j in range(i, len(parentheses)):
-            info = parentheses[j]
-            if info.character == "(":
-                cpt += 1
-                continue
-            if info.character == ")" and cpt == 0:
-                self.createParenthesisSelection(currentBlock.position() + info.position)
-                return True
-            elif info.character == ")":
-                cpt -= 1
-        currentBlock = currentBlock.next()
-        if currentBlock.isValid():
-            return self.matchLeftParenthesis(currentBlock, 0, cpt)
-        return False
-
-    def matchRightParenthesis(self, currentBlock, i, numRightParentheses):
-        data = currentBlock.userData()
-        parentheses = data.parentheses
-        for j in range(i, -1, -1):
-            if j >= 0:
-                info = parentheses[j]
-            if info.character == ")":
-                numRightParentheses += 1
-                continue
-            if info.character == "(":
-                if numRightParentheses == 0:
-                    self.createParenthesisSelection(currentBlock.position() + info.position)
-                    return True
-                else:
-                    numRightParentheses -= 1
-        currentBlock = currentBlock.previous()
-        if currentBlock.isValid():
+        try:
             data = currentBlock.userData()
             parentheses = data.parentheses
-            return self.matchRightParenthesis(currentBlock, len(parentheses) -1, numRightParentheses)
-        return False
+            for j in range(i, len(parentheses)):
+                info = parentheses[j]
+                if info.character == "(":
+                    cpt += 1
+                    continue
+                if info.character == ")" and cpt == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                elif info.character == ")":
+                    cpt -= 1
+            currentBlock = currentBlock.next()
+            if currentBlock.isValid():
+                return self.matchLeftParenthesis(currentBlock, 0, cpt)
+            return False
+        except RuntimeError:  # recursion limit exeeded when working in big files
+            return False
+
+    def matchRightParenthesis(self, currentBlock, i, numRightParentheses):
+        try:
+            data = currentBlock.userData()
+            parentheses = data.parentheses
+            for j in range(i, -1, -1):
+                if j >= 0:
+                    info = parentheses[j]
+                if info.character == ")":
+                    numRightParentheses += 1
+                    continue
+                if info.character == "(":
+                    if numRightParentheses == 0:
+                        self.createParenthesisSelection(currentBlock.position() + info.position)
+                        return True
+                    else:
+                        numRightParentheses -= 1
+            currentBlock = currentBlock.previous()
+            if currentBlock.isValid():
+                data = currentBlock.userData()
+                parentheses = data.parentheses
+                return self.matchRightParenthesis(currentBlock, len(parentheses) -1, numRightParentheses)
+            return False
+        except RuntimeError:  # recursion limit exeeded when working in big files
+            return False
 
     def matchLeftBracket(self, currentBlock, i, cpt):
-        data = currentBlock.userData()
-        parentheses = data.brackets
-        for j in range(i, len(parentheses)):
-            info = parentheses[j]
-            if info.character == "[":
-                cpt += 1
-                continue
-            if info.character == "]" and cpt == 0:
-                self.createParenthesisSelection(currentBlock.position() + info.position)
-                return True
-            elif info.character == "]":
-                cpt -= 1
-        currentBlock = currentBlock.next()
-        if currentBlock.isValid():
-            return self.matchLeftBracket(currentBlock, 0, cpt)
-        return False
+        try:
+            data = currentBlock.userData()
+            parentheses = data.squareBrackets
+            for j in range(i, len(parentheses)):
+                info = parentheses[j]
+                if info.character == "[":
+                    cpt += 1
+                    continue
+                if info.character == "]" and cpt == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                elif info.character == "]":
+                    cpt -= 1
+            currentBlock = currentBlock.next()
+            if currentBlock.isValid():
+                return self.matchLeftBracket(currentBlock, 0, cpt)
+            return False
+        except RuntimeError:
+            return False
 
     def matchRightBracket(self, currentBlock, i, numRightParentheses):
-        data = currentBlock.userData()
-        parentheses = data.brackets
-        for j in range(i, -1, -1):
-            if j >= 0:
-                info = parentheses[j]
-            if info.character == "]":
-                numRightParentheses += 1
-                continue
-            if info.character == "[":
-                if numRightParentheses == 0:
-                    self.createParenthesisSelection(currentBlock.position() + info.position)
-                    return True
-                else:
-                    numRightParentheses -= 1
-        currentBlock = currentBlock.previous()
-        if currentBlock.isValid():
+        try:
             data = currentBlock.userData()
-            parentheses = data.brackets
-            return self.matchRightBracket(currentBlock, len(parentheses) -1, numRightParentheses)
-        return False
+            parentheses = data.squareBrackets
+            for j in range(i, -1, -1):
+                if j >= 0:
+                    info = parentheses[j]
+                if info.character == "]":
+                    numRightParentheses += 1
+                    continue
+                if info.character == "[":
+                    if numRightParentheses == 0:
+                        self.createParenthesisSelection(currentBlock.position() + info.position)
+                        return True
+                    else:
+                        numRightParentheses -= 1
+            currentBlock = currentBlock.previous()
+            if currentBlock.isValid():
+                data = currentBlock.userData()
+                parentheses = data.squareBrackets
+                return self.matchRightBracket(currentBlock, len(parentheses) -1, numRightParentheses)
+            return False
+        except RuntimeError:
+            return False
 
     def matchLeftBrace(self, currentBlock, i, cpt):
-        data = currentBlock.userData()
-        parentheses = data.braces
-        for j in range(i, len(parentheses)):
-            info = parentheses[j]
-            if info.character == "{":
-                cpt += 1
-                continue
-            if info.character == "}" and cpt == 0:
-                self.createParenthesisSelection(currentBlock.position() + info.position)
-                return True
-            elif info.character == "}":
-                cpt -= 1
-        currentBlock = currentBlock.next()
-        if currentBlock.isValid():
-            return self.matchLeftBrace(currentBlock, 0, cpt)
-        return False
-
-    def matchRightBrace(self, currentBlock, i, numRightParentheses):
-        data = currentBlock.userData()
-        parentheses = data.braces
-        for j in range(i, -1, -1):
-            if j >= 0:
-                info = parentheses[j]
-            if info.character == "}":
-                numRightParentheses += 1
-                continue
-            if info.character == "{":
-                if numRightParentheses == 0:
-                    self.createParenthesisSelection(currentBlock.position() + info.position)
-                    return True
-                else:
-                    numRightParentheses -= 1
-        currentBlock = currentBlock.previous()
-        if currentBlock.isValid():
+        try:
             data = currentBlock.userData()
             parentheses = data.braces
-            return self.matchRightBrace(currentBlock, len(parentheses) -1, numRightParentheses)
-        return False
+            for j in range(i, len(parentheses)):
+                info = parentheses[j]
+                if info.character == "{":
+                    cpt += 1
+                    continue
+                if info.character == "}" and cpt == 0:
+                    self.createParenthesisSelection(currentBlock.position() + info.position)
+                    return True
+                elif info.character == "}":
+                    cpt -= 1
+            currentBlock = currentBlock.next()
+            if currentBlock.isValid():
+                return self.matchLeftBrace(currentBlock, 0, cpt)
+            return False
+        except RuntimeError:
+            return False
+
+    def matchRightBrace(self, currentBlock, i, numRightParentheses):
+        try:
+            data = currentBlock.userData()
+            parentheses = data.braces
+            for j in range(i, -1, -1):
+                if j >= 0:
+                    info = parentheses[j]
+                if info.character == "}":
+                    numRightParentheses += 1
+                    continue
+                if info.character == "{":
+                    if numRightParentheses == 0:
+                        self.createParenthesisSelection(currentBlock.position() + info.position)
+                        return True
+                    else:
+                        numRightParentheses -= 1
+            currentBlock = currentBlock.previous()
+            if currentBlock.isValid():
+                data = currentBlock.userData()
+                parentheses = data.braces
+                return self.matchRightBrace(currentBlock, len(parentheses) -1, numRightParentheses)
+            return False
+        except RuntimeError:
+            return False
 
     def createParenthesisSelection(self, pos, match=True):
         cursor = self.textCursor()
