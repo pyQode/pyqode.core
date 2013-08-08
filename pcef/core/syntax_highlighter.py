@@ -169,7 +169,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     def detectParentheses(self, text, userData):
         userData.parentheses[:] = []
-        userData.brackets[:] = []
+        userData.squareBrackets[:] = []
         userData.braces[:] = []
         # parentheses
         leftPos = text.find("(", 0)
@@ -193,19 +193,19 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             info = ParenthesisInfo(rightPos, "}")
             userData.braces.append(info)
             rightPos = text.find("}", rightPos + 1)
-        # brackets
+        # squareBrackets
         leftPos = text.find("[", 0)
         while leftPos != -1:
             info = ParenthesisInfo(leftPos, "[")
-            userData.brackets.append(info)
+            userData.squareBrackets.append(info)
             leftPos = text.find("[", leftPos + 1)
         rightPos = text.find("]", 0)
         while rightPos != -1:
             info = ParenthesisInfo(rightPos, "]")
-            userData.brackets.append(info)
+            userData.squareBrackets.append(info)
             rightPos = text.find("]", rightPos + 1)
-        if len(userData.brackets):
-            print("Brackets")
+        if len(userData.squareBrackets):
+            print("squareBrackets")
 
     def highlightBlock(self, text):
         # setup user data

@@ -22,7 +22,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.marker = None
         #: list of ParenthesisInfo, pne foreach character type
         self.parentheses = []  # ()
-        self.brackets = []  # []
+        self.squareBrackets = []  # []
         self.braces = []  # ()
 
     def __repr__(self):
