@@ -1,4 +1,4 @@
-pyQode - Python/Qt Code Editor widget
+Python/Qt Code Editor Widget library
 ======================================================
 
 *version 1.0.0-beta*
