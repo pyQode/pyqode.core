@@ -188,7 +188,8 @@ class FoldingPanel(Panel):
         self.__clearScopeDecorations()
         self.__addScopeDecoration(foldingIndicator.start,
                                   foldingIndicator.start)
-        self.repaint()
+        # self.repaint()
+        self.editor.refreshPanels()
 
     def unfoldChild(self, end, i, usrData):
         for j in range(i + 1, end):
@@ -239,7 +240,8 @@ class FoldingPanel(Panel):
         self.__collectIndicators()
         self.__clearScopeDecorations()
         self.__addScopeDecoration(start, end)
-        self.repaint()
+        # self.repaint()
+        self.editor.refreshPanels()
 
     def __unfoldPreviousBlankLines(self, b):
         # unfold previous blank lines as they are on the level 0
