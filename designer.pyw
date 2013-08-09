@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# PCEF - Python/Qt Code Editing Framework
+# pyQode - Python/Qt Code Editor widget
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
 # This software is released under the LGPLv3 license.
@@ -9,7 +9,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Run this script to run qt designer with the pcef plugins.
+Run this script to run qt designer with the pyqode plugins.
 
 Requires
 ---------
@@ -21,12 +21,12 @@ On windows you just have to install PyQt with its designer.
 Usage
 -----
 
-You can try the pcef qt designer plugin without installing pcef, just run
+You can try the pyqode qt designer plugin without installing pyqode, just run
 designer.pyw from the source package.
 
-If pcef is installed, this script is installed into the Scripts folder on
+If pyqode is installed, this script is installed into the Scripts folder on
 windows or in a standard bin folder on linux. Open a terminal and run
-**pcef_designer**.
+**pyqode_designer**.
 """
 import os
 os.environ.setdefault("QT_API", "PyQt")
@@ -52,7 +52,7 @@ def set_plugins_path(env, sep):
     """
     paths = ""
     dict = {}
-    for entrypoint in pkg_resources.iter_entry_points("pcef_plugins"):
+    for entrypoint in pkg_resources.iter_entry_points("pyqode_plugins"):
         plugin = entrypoint.load()
         pth = os.path.dirname(plugin.__file__)
         if not pth in dict:
@@ -63,7 +63,7 @@ def set_plugins_path(env, sep):
         env['PYQTDESIGNERPATH'] = pyqt_designer_path + sep + paths
     else:
         env['PYQTDESIGNERPATH'] = paths
-    print("PCEF plugins paths: %s" % env["PYQTDESIGNERPATH"])
+    print("pyQode plugins paths: %s" % env["PYQTDESIGNERPATH"])
 
 
 def run(env):
@@ -115,5 +115,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # import pcef
+    # import pyqode
     sys.exit(main())

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# PCEF documentation build configuration file, created by
+# pyQode documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan  3 17:16:17 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PCEF'
+project = u'pyQode'
 copyright = u'2013, Colin Duquesnoy'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PCEFDoc'
+htmlhelp_basename = 'pyQodeDoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pcef', u'PCEF Documentation',
+    ('index', 'pyqode', u'PCEF Documentation',
      [u'Colin Duquesnoy'], 1)
 ]
 

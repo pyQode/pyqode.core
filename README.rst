@@ -1,21 +1,21 @@
-A python/qt source code editing framework
+pyQode - Python/Qt Code Editor widget
 ======================================================
 
-*version 1.0.0-beta.1*
+*version 1.0.0-beta*
 
-.. image:: https://api.travis-ci.org/ColinDuquesnoy/pcef-core.png?branch=master
-    :target: https://travis-ci.org/ColinDuquesnoy/pcef-core
+.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyQode-core.png?branch=master
+    :target: https://travis-ci.org/ColinDuquesnoy/pyQode-core
     :alt: Travis-CI build status
 
-What is PCEF?
+What is pyQode?
 -------------
 
-PCEF is a *flexible source code editing framework* for Python Qt
-applications. **PCEF is a library, not an IDE**.
+pyQode is a *flexible source code editor widget* for Python Qt
+applications. **pyQode is a library/widget, not an IDE**.
 
-*pcef-core* is the foundation package, it contains everything you need
-to create a generic (language independant) code editor widget. It is the
-mandatory requirement for any pcef extension.
+*pyqode-core* is the foundation package, it contains everything you need
+to create a generic (language independent) code editor widget. It is the
+mandatory requirement for any pyQode extension.
 
 The base widget (QCodeEdit) is a simple extension of QPlainTextEdit that
 can be customised by adding extensions (modes and panels).
@@ -35,18 +35,18 @@ Here are the core features:
 -  Qt Designer plugin
 -  `language specific extensions`_
 
-.. _language specific extensions: https://github.com/ColinDuquesnoy/pcef-core/wiki/Extensions
+.. _language specific extensions: https://github.com/ColinDuquesnoy/pyqode-core/wiki/Extensions
 
 
 License
 -------
 
-PCEF is licensed under the LGPL v3.
+pyQode is licensed under the LGPL v3.
 
 Requirements
 ------------
 
-pcef-core depends on the following libraries:
+pyqode-core depends on the following libraries:
 
 -  PyQt4 or PySide
 -  Python 2.7 or Python 3 (>= 3.2)
@@ -58,12 +58,12 @@ Installation
 
 ::
 
-    $ pip install pcef-core
+    $ pip install pyqode-core
 
 Usage
 -----
 
-The *public API* is exposed by the *pcef.core* package.
+The *public API* is exposed by the *pyqode.core* package.
 
 Here is a `simple example using PyQt4`_:
 
@@ -71,14 +71,14 @@ Here is a `simple example using PyQt4`_:
 
     # simple example using PyQt4
     import sys
-    import PyQt4  # just to tell pcef we want to use PyQt4.
-    import pcef.core
+    import PyQt4  # just to tell pyqode we want to use PyQt4.
+    import pyqode.core
     from PyQt4.QtGui import QApplication
 
 
     def main():
         app = QApplication(sys.argv)
-        editor = pcef.core.QGenericCodeEdit()
+        editor = pyqode.core.QGenericCodeEdit()
         editor.openFile(__file__)
         editor.resize(800, 600)
         editor.show()
@@ -98,10 +98,10 @@ Resources
 -  `Documentation`_ *(outdated)*
 -  `Wiki`_
 
-.. _Downloads: https://github.com/ColinDuquesnoy/pcef-core/releases
-.. _Source repository: https://github.com/ColinDuquesnoy/pcef-core/
+.. _Downloads: https://github.com/ColinDuquesnoy/pyqode-core/releases
+.. _Source repository: https://github.com/ColinDuquesnoy/pyqode-core/
 .. _Documentation : http://packages.python.org/PCEF
-.. _Wiki: https://github.com/ColinDuquesnoy/pcef-core/wiki
+.. _Wiki: https://github.com/ColinDuquesnoy/pyqode-core/wiki
 
 Screenshots
 ------------
@@ -110,30 +110,30 @@ Here are a few screenshots of the gui integration example on several different p
 
 * Windows 7:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/windows7.PNG
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/windows7.PNG
     :alt: Windows 7
     
 * Ubuntu:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/ubuntu.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/ubuntu.png
     :alt: Ubuntu
     
 * Linux Mint:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/mint.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/mint.png
     :alt: Linux mint
     
 * KDE:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/kde.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/kde.png
     :alt: KDE
     
 * KDE with a dark color scheme:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/kde-dark.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/kde-dark.png
     :alt: KDE dark
     
 * Gnome:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pcef-core/master/screenshots/gnome.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/gnome.png
     :alt: Gnome

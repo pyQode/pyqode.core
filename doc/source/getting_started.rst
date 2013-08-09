@@ -1,4 +1,4 @@
-.. PCEF - Python/Qt Code Editing Framework
+.. pyQode - Python/Qt Code Editor widget
 .. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 
 .. This document is released under the LGPLv3 license.
@@ -43,7 +43,7 @@ The text edit is a subclass of a QPlainTextEdit to adds a few new events:
 
           For that purpose, there is two way to use pcef:
 
-            - use a pre-made editor that already fits your needs (from pcef.editors import)
+            - use a pre-made editor that already fits your needs (from pyqode.editors import)
             - use the raw/core editor widget where you can install the modes/panels you really need.
 
           In both cases user will always have a way to add a new mode/Panel or to disable already installed one.
@@ -65,7 +65,7 @@ Here is a minimal example code:
     from PySide.QtGui import QApplication
     from PySide.QtGui import QMainWindow
     from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pcef.editors import GenericEditor  # a language independent editor
+    from pyqode.editors import GenericEditor  # a language independent editor
 
 
     def main():
@@ -97,7 +97,7 @@ If you want a full customisation of the editor, you should start with the core e
     from PySide.QtGui import QApplication
     from PySide.QtGui import QMainWindow
     from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pcef.core import CodeEditorWidget  # the most basic editor widget (no modes nor panels installed)
+    from pyqode.core import CodeEditorWidget  # the most basic editor widget (no modes nor panels installed)
 
 
     def main():

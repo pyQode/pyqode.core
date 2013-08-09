@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# PCEF - Python/Qt Code Editing Framework
+# pyQode - Python/Qt Code Editor widget
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
 # This software is released under the LGPLv3 license.
@@ -9,13 +9,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-This setup script packages the core package of PCEF: pcef-core
+This setup script packages the core package of pyQode: pyqode-core
 """
 from setuptools import setup, find_packages
 
 
 def read_version():
-    with open("pcef/core/__init__.py") as f:
+    with open("pyqode/core/__init__.py") as f:
         lines = f.read().splitlines()
         for l in lines:
             if "__version__" in l:
@@ -31,23 +31,23 @@ requirements = ['pygments']
 
 
 setup(
-    name='pcef-core',
-    namespace_packages=['pcef'],
+    name='pyqode-core',
+    namespace_packages=['pyqode'],
     version=read_version(),
     packages=find_packages(),
     keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
-    package_data={'pcef.core.ui': ['*.ui', 'rc/*']},
-    package_dir={'pcef': 'pcef'},
-    url='https://github.com/ColinDuquesnoy/PCEF',
+    package_data={'pyqode.core.ui': ['*.ui', 'rc/*']},
+    package_dir={'pyqode': 'pyqode'},
+    url='https://github.com/ColinDuquesnoy/pyQode-core',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
-    description='Python-Qt Code Editing Framework (P.C.E.F.)',
+    description='Python/Qt Code Editor widget',
     long_description=readme(),
     install_requires=requirements,
     entry_points={'gui_scripts':
-                  ['pcef_designer = designer:main'],
-                  'pcef_plugins':
-                  ['pcef_core = pcef.core.plugins.pcef_core_plugin']},
+                  ['pyqode_designer = designer:main'],
+                  'pyqode_plugins':
+                  ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
     zip_safe=False
 )

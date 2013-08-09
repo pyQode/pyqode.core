@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# PCEF - Python/Qt Code Editing Framework
+# pyQode - Python/Qt Code Editor widget
 # Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 #
 # This software is released under the LGPLv3 license.
@@ -9,12 +9,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 """
-Integrates the generic editor using the pcef qt designer plugin.
+Integrates the generic editor using the pyqode qt designer plugin.
 """
 import os
 import sys
-import pcef.core
-from pcef.qt import QtCore, QtGui
+import pyqode.core
+from pyqode.qt import QtCore, QtGui
 from ui import loadUi
 
 
@@ -24,10 +24,12 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         loadUi("simple_editor.ui", self, rcFilename="simple_editor.qrc")
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
-        if QtGui.QIcon.hasThemeIcon("document-save"):
-            self.actionSave.setIcon(QtGui.QIcon.fromTheme("document-save"))
-        if QtGui.QIcon.hasThemeIcon("document-open"):
-            self.actionOpen.setIcon(QtGui.QIcon.fromTheme("document-open"))
+        self.actionOpen.setIcon(
+            QtGui.QIcon.fromTheme("document-save", QtGui.QIcon(
+                ":/example_icons/rc/folder.png")))
+        self.actionSave.setIcon(
+            QtGui.QIcon.fromTheme("document-save", QtGui.QIcon(
+                ":/example_icons/rc/document-save.png")))
         # edit menu
         mnu = QtGui.QMenu("Edit", self.menubar)
         mnu.addActions(self.editor.actions())
@@ -46,7 +48,7 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         group = QtGui.QActionGroup(self)
         currentStyle = self.editor.style.value("pygmentsStyle")
         group.triggered.connect(self.onStyleTriggered)
-        for style in sorted(pcef.core.PYGMENTS_STYLES):
+        for style in sorted(pyqode.core.PYGMENTS_STYLES):
             a = QtGui.QAction(self.menuStyles)
             a.setText(style)
             a.setCheckable(True)

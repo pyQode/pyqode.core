@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PCEF - Simple Editor</string>
+   <string>pyQode - Simple Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -145,12 +145,12 @@
   <customwidget>
    <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>pcef.core.editor</header>
+   <header>pyqode.core.editor</header>
   </customwidget>
   <customwidget>
    <class>QGenericCodeEdit</class>
    <extends>QCodeEdit</extends>
-   <header>pcef.core</header>
+   <header>pyqode.core</header>
   </customwidget>
  </customwidgets>
  <resources>
