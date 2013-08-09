@@ -25,7 +25,7 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         self.actionOpen.setIcon(
-            QtGui.QIcon.fromTheme("document-save", QtGui.QIcon(
+            QtGui.QIcon.fromTheme("document-open", QtGui.QIcon(
                 ":/example_icons/rc/folder.png")))
         self.actionSave.setIcon(
             QtGui.QIcon.fromTheme("document-save", QtGui.QIcon(
