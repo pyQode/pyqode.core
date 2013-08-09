@@ -1,14 +1,14 @@
 Python/Qt Code Editor Widget library
 ======================================================
 
-*version 1.0.0-beta*
+*version 1.0b*
 
 .. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode-core.png?branch=master
     :target: https://travis-ci.org/ColinDuquesnoy/pyqode-core
     :alt: Travis-CI build status
 
 What is pyQode?
--------------
+--------------------
 
 pyQode is a *flexible source code editor widget* for Python Qt
 applications. **pyQode is a library/widget, not an IDE**.
