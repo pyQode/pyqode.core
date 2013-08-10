@@ -213,7 +213,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             s = SubprocessServer()
             s.start()
             CodeCompletionMode.SERVER = s
-        s.signals.workCompleted.connect(self.__onWorkFinished)
+        CodeCompletionMode.SERVER.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
