@@ -66,7 +66,7 @@ class IndentBasedFoldDetector(FoldDetector):
                 return pb.userData().foldIndent
         stripped = len(text.strip())
         if stripped:
-            return int((len(text) - len(text.strip())))
+            return int((len(text) - len(text.lstrip())))
         else:
             return -1
 
@@ -86,9 +86,11 @@ class CharBasedFoldDetector(FoldDetector):
         self._end = ends
 
     def getFoldIndent(self, highlighter, block, text):
-        if block.blockNumber() + 1 == 62:
-            pass
+        if len(text.strip()) == 0:
+            return -1
         pb = block.previous()
+        while pb and pb.isValid() and not len(pb.text().strip()):
+            pb = pb.previous()
         if pb and pb.isValid():
             txt = pb.text()
             usd = pb.userData()
