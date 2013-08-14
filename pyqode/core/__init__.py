@@ -78,7 +78,7 @@ def getRcDirectory():
                         "rc")
 
 # import the core rc modules
-if os.environ["QT_API"] == "PyQt4":
+if os.environ["QT_API"] == "PyQt":
     from pyqode.core.ui import pyqode_icons_pyqt_rc
 else:
     from pyqode.core.ui import pyqode_icons_pyside_rc
