@@ -36,7 +36,7 @@ setup(
     version=read_version(),
     packages=find_packages(),
     keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
-    package_data={'pyqode.core.ui': ['*.ui', 'rc/*']},
+    package_data={'pyqode.core.ui': ['*.ui', '*.qrc', 'rc/*']},
     package_dir={'pyqode': 'pyqode'},
     url='https://github.com/ColinDuquesnoy/pyQode-core',
     license='GNU LGPL v3',
