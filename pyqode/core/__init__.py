@@ -15,6 +15,7 @@ code editor widget
 #
 # exposes public core api
 #
+from glob import glob
 import os
 from pyqode.core import constants
 from pyqode.core import logger
@@ -56,7 +57,6 @@ from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
 from pyqode.core.system import SubprocessServer
 from pyqode.core.system import memoized
-from pyqode.qt.ui import importRc
 
 
 #: pyqode-core version
@@ -67,7 +67,7 @@ def getUiDirectory():
     """
     Gets the pyqode-core ui directory
     """
-    return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui")
+    return os.path.join(os.path.dirname(__file__), "ui")
 
 
 def getRcDirectory():
@@ -82,6 +82,19 @@ if os.environ["QT_API"] == "PyQt":
     from pyqode.core.ui import pyqode_icons_pyqt_rc
 else:
     from pyqode.core.ui import pyqode_icons_pyside_rc
+
+
+def cxFreeze_getDataFiles():
+    """
+    Returns the core package's data files in a format suitable for cx_freeze.
+    """
+    uiDir = os.path.join(os.path.dirname(__file__), "ui")
+    dataFiles = []
+    for f in glob(os.path.join(uiDir, "*.ui")):
+        assert os.path.exists(f)
+        dataFiles += [tuple((f, os.path.join("pyqode_ui/",
+                                            os.path.split(f)[1])))]
+    return dataFiles
 
 #
 # Example of a generic code editor widgey
