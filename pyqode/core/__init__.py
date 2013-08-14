@@ -17,6 +17,7 @@ code editor widget
 #
 from glob import glob
 import os
+import sys
 from pyqode.core import constants
 from pyqode.core import logger
 from pyqode.core.constants import PanelPosition
@@ -139,10 +140,13 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "CharBasedFoldDetector",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
-           "DocumentWordCompletionProvider" "FileWatcherMode",
+           "DocumentWordCompletionProvider", "FileWatcherMode",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "AutoIndentMode", "PanelPosition", "TextDecoration",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
            "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
            "SubprocessServer", "SymbolMatcherMode"]
+
+if sys.platform == "win32":
+    __all__ += ["cxFreeze_getDataFiles"]
