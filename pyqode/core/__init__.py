@@ -78,8 +78,10 @@ def getRcDirectory():
                         "rc")
 
 # import the core rc modules
-importRc(os.path.join(getUiDirectory(), "pyqode_icons.qrc"))
-
+if os.environ["QT_API"] == "PyQt4":
+    from pyqode.core.ui import pyqode_icons_pyqt_rc
+else:
+    from pyqode.core.ui import pyqode_icons_pyside_rc
 
 #
 # Example of a generic code editor widgey

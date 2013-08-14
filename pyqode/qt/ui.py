@@ -26,7 +26,13 @@ def loadUi(uiFile, baseInstance):
         from pyqode.qt.pyside_ui import loadUi as load_ui
     else:
         from pyqode.qt.pyqt_ui import loadUi as load_ui
-    load_ui(uiFile, baseInstance)
+    try:
+        load_ui(uiFile, baseInstance)
+    except IOError:
+        # maybe we are in a frozen script, in that case user should copy pyqode
+        # ui to the root folder
+        load_ui(os.path.join("pyqode_ui", os.path.split(uiFile)[1]),
+                baseInstance)
 
 
 def importRc(rcFile):
