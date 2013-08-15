@@ -27,6 +27,5 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
-                "- Marker: {} - Parenthesis: {}"
                 "".format(self.lineNumber, self.folded, self.foldIndent,
-                          self.foldStart, self.marker, self.parenthesisInfos))
+                          self.foldStart))

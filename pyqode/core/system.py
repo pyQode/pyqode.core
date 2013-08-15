@@ -558,9 +558,7 @@ def childProcess(conn):
         # exec worker
         setattr(worker, "processDict", dict)
         results = worker()
-        print(dict)
         conn.send([id, worker, results])
-        # print("Finsihed")
 
 
 if __name__ == '__main__':
