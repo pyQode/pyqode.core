@@ -209,6 +209,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             rightPos = text.find("]", rightPos + 1)
 
     def highlightBlock(self, text):
+        self.blockHighlightStarted.emit(self, text)
         # setup user data
         userData = self.currentBlockUserData()
         if userData is None:
@@ -222,3 +223,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
         self.setCurrentBlockUserData(userData)
+        self.doHighlightBlock(text)
+        self.blockHighlightFinished.emit(self, text)
+
+    def doHighlightBlock(self, text):
+        raise NotImplementedError()

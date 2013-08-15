@@ -216,8 +216,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     except NameError:
         LEXERS_FOLD_DETECTORS = {}
 
-    def __init__(self, parent, lexer=None):
-        super(PygmentsSyntaxHighlighter, self).__init__(parent)
+    def __init__(self, document, lexer=None):
+        super(PygmentsSyntaxHighlighter, self).__init__(document)
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
@@ -321,10 +321,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             logger.warning("Failed to find lexer from mime type %s" % mime)
             self._lexer = None
 
-    def highlightBlock(self, text):
+    def doHighlightBlock(self, text):
         """ Highlight a block of text """
-        SyntaxHighlighter.highlightBlock(self, text)
-
         fn = self.editor.fileName
         if fn != self.__previousFilename:
             self.__previousFilename = fn
