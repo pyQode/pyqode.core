@@ -547,6 +547,7 @@ def childProcess(conn):
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
+    dict = {}  # a global data dictionary
     while True:  # run endlessly
         time.sleep(0.1)
         data = conn.recv()
@@ -555,7 +556,9 @@ def childProcess(conn):
         id = data[0]
         worker = data[1]
         # exec worker
+        setattr(worker, "processDict", dict)
         results = worker()
+        print(dict)
         conn.send([id, worker, results])
         # print("Finsihed")
 
