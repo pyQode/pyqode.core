@@ -29,8 +29,6 @@ class PreLoadWorker(object):
         """
         :param providers: The list of completion providers
 
-        :param previous_results: The list of previous results foreach provider
-
         :param args: The preload method arguments
         """
         self.__providers = providers
@@ -43,6 +41,7 @@ class PreLoadWorker(object):
         """
         results = []
         for prov in self.__providers:
+            # pass the process dict to every providers
             setattr(prov, "processDict", self.processDict)
             r = prov.preload(*self.__args)
             results.append(r)
@@ -64,6 +63,7 @@ class CompletionWorker(object):
         """
         completions = []
         for prov in self.__providers:
+            # pass the process dict to every providers
             setattr(prov, "processDict", self.processDict)
             completions.append(prov.complete(*self.__args))
             if len(completions) > 20:
@@ -104,13 +104,12 @@ class CompletionProvider(object):
         - preload: preload the list of Completions when a new text is set on the
                    editor. Optional.
         - complete: complete the current text. All subclasses needs to implement
-                    this method. Provides that use preload can just return
-                    self.previousResults
+                    this method.
+    .. note: As the provider is executed in a child process, your class instance
+    will loose its data every time its run. To store persistent data (such as
+    the preload results), you may use the 'processDict' attribute
     """
     PRIORITY = 0
-
-    def __init__(self):
-        self.previousResults = None
 
     def preload(self, code, fileEncoding, filePath):
         return [Completion("")]
@@ -161,7 +160,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__tooltips = {}
         self.__cursorLine = -1
         self.__cancelNext = False
-        self.__previous_results = None
         self.__preloadFinished = False
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
@@ -266,9 +264,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             for res in results:
                 all += res
             self.__showCompletions(all)
-            self.__previous_results = results
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
-            self.__previous_results = results
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
 
