@@ -25,7 +25,7 @@ class PreLoadWorker(object):
     in the child process.
     """
 
-    def __init__(self, providers, previous_results, *args):
+    def __init__(self, providers, *args):
         """
         :param providers: The list of completion providers
 
@@ -34,7 +34,6 @@ class PreLoadWorker(object):
         :param args: The preload method arguments
         """
         self.__providers = providers
-        self.__old_res = previous_results
         self.__args = args
 
     def __call__(self):
@@ -44,6 +43,7 @@ class PreLoadWorker(object):
         """
         results = []
         for prov in self.__providers:
+            setattr(prov, "processDict", self.processDict)
             r = prov.preload(*self.__args)
             results.append(r)
         return results
@@ -53,9 +53,8 @@ class CompletionWorker(object):
     """
     A worker object that will run the complete method of
     """
-    def __init__(self, providers, old_res, *args):
+    def __init__(self, providers, *args):
         self.__providers = providers
-        self.__old_res = old_res
         self.__args = args
 
     def __call__(self, *args, **kwargs):
@@ -64,17 +63,11 @@ class CompletionWorker(object):
         SubprocessServer).
         """
         completions = []
-        if self.__old_res:
-            for prov, old_results in zip(self.__providers, self.__old_res):
-                if len(old_results) > 1:
-                    prov.previousResults = old_results
-                results = prov.complete(*self.__args)
-                completions.append(results)
-                if len(results) > 20:
-                    break
-        else:
-            for prov in self.__providers:
-                completions.append(prov.complete(*self.__args))
+        for prov in self.__providers:
+            setattr(prov, "processDict", self.processDict)
+            completions.append(prov.complete(*self.__args))
+            if len(completions) > 20:
+                break
         return completions
 
 
@@ -190,14 +183,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         code = self.editor.toPlainText()
         if not immediate:
             self.__jobRunner.requestJob(
-                self.__collectCompletions, False, self.__previous_results,
+                self.__collectCompletions, False,
                 code, self.editor.cursorPosition[0], self.editor.cursorPosition[1],
                 self.completionPrefix, self.editor.filePath,
                 self.editor.fileEncoding)
         else:
             self.__jobRunner.cancelRequests()
-            self.__collectCompletions(self.__previous_results,
-                code, self.editor.cursorPosition[0],
+            self.__collectCompletions(code, self.editor.cursorPosition[0],
                 self.editor.cursorPosition[1], self.completionPrefix,
                 self.editor.filePath, self.editor.fileEncoding)
 
@@ -205,8 +197,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preloadFinished = False
         code = self.editor.toPlainText()
         self.__jobRunner.requestJob(
-            self.__preload, False, self.__previous_results,
-            code, self.editor.filePath, self.editor.fileEncoding)
+            self.__preload, False, code,
+            self.editor.filePath, self.editor.fileEncoding)
 
     def _onInstall(self, editor):
         if CodeCompletionMode.SERVER is None:
@@ -532,13 +524,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         else:
             QtGui.QToolTip.hideText()
 
-    def __collectCompletions(self, previous_results, *args):
-        worker = CompletionWorker(self.__providers, previous_results, *args)
+    def __collectCompletions(self, *args):
+        worker = CompletionWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
 
-    def __preload(self, previous_results, *args):
+    def __preload(self, *args):
         self.preLoadStarted.emit()
-        worker = PreLoadWorker(self.__providers, previous_results, *args)
+        worker = PreLoadWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
 
 
@@ -557,6 +549,8 @@ class DocumentWordCompletionProvider(CompletionProvider):
         completions = []
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
+        # store results in the subprocess dict for later use
+        self.processDict["docWords"] = completions
         return completions
 
     @staticmethod
@@ -587,10 +581,11 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
     def complete(self, code, line, column, completionPrefix,
                  filePath, fileEncoding):
-        if not self.previousResults:
+        # get previous result from the server process dict
+        words = self.processDict["docWords"]
+        if not words or not len(words):
             return self.parse(code)
-        else:
-            return self.previousResults
+        return words
 
 
 if __name__ == '__main__':
