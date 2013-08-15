@@ -82,6 +82,7 @@ class PropertyRegistry(QtCore.QObject):
         if section in self.__dict:
             if key in self.__dict[section]:
                 value = self.value(key, section)
+                return value
             else:
                 self.__dict[section][key] = value
         else:
