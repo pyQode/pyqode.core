@@ -29,6 +29,7 @@ class AutoIndentMode(Mode):
 
     def __init__(self):
         super(AutoIndentMode, self).__init__()
+        self.minIndent = 0
 
     def _getIndent(self, tc):
         """
@@ -45,6 +46,8 @@ class AutoIndentMode(Mode):
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
         tc.setPosition(pos)
+        if indent < self.minIndent:
+            indent = self.minIndent
         return indent
 
     def _onStateChanged(self, state):
