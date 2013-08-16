@@ -894,13 +894,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     delta = self.textCursor().position() - new_cursor.position()
                     if delta > size:
                         delta = size
-                    tc = self.textCursor()
-                    for i in range(delta):
-                        tc.movePosition(new_cursor.Left,
-                                        new_cursor.MoveAnchor, 1)
-                        tc.deleteChar()
-                    cursor.endEditBlock()
-                    return
+                    if delta > 0:
+                        tc = self.textCursor()
+                        for i in range(delta):
+                            tc.movePosition(new_cursor.Left,
+                                            new_cursor.MoveAnchor, 1)
+                            tc.deleteChar()
+                        cursor.endEditBlock()
+                        return
                 indentation = self.getLineIndent()
                 nbSpaces = indentation - (indentation - (indentation % size))
                 if not nbSpaces:
