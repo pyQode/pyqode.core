@@ -53,7 +53,7 @@ class CheckerMessage(object):
               MSG_STATUS_ERROR: "#DD4040"}
 
     def __init__(self, description, status, line, col=None, icon=None,
-                 color=None):
+                 color=None, filename=None):
         """
         :param description: The message description (used as a tooltip)
         :param status:
@@ -75,6 +75,7 @@ class CheckerMessage(object):
             self.icon = self.ICONS[status]
         self._marker = None
         self._decoration = None
+        self.filename = filename
 
 
 class CheckerMode(Mode, QtCore.QObject):
