@@ -52,6 +52,16 @@ class CheckerMessage(object):
               MSG_STATUS_WARNING: "#DDDD40",
               MSG_STATUS_ERROR: "#DD4040"}
 
+    @classmethod
+    def statusToString(cls, status):
+        strings = {MSG_STATUS_INFO: "Info", MSG_STATUS_WARNING: "Warning",
+                   MSG_STATUS_ERROR: "Error"}
+        return strings[status]
+
+    @property
+    def statusString(self):
+        return self.statusToString(self.status)
+
     def __init__(self, description, status, line, col=None, icon=None,
                  color=None, filename=None):
         """
