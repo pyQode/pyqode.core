@@ -77,6 +77,9 @@ class CheckerMessage(object):
         self._decoration = None
         self.filename = filename
 
+    def __repr__(self):
+        return "{0} {1}".format(self.description, self.line)
+
 
 class CheckerMode(Mode, QtCore.QObject):
     """
