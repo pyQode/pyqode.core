@@ -39,8 +39,12 @@ class RightMarginMode(Mode):
         Mode._onInstall(self, editor)
         color = self.editor.style.addProperty("margin", "#FF0000")
         self.__pen = QtGui.QPen(QtGui.QColor(color))
-        self.marginPos = int(self.editor.settings.addProperty(
-            "marginPos", "80"))
+        self.marginPos = self.editor.settings.addProperty(
+            "rightMarginPos", "80")
+
+    def _onSettingsChanged(self, section, key):
+        if key == "rightMarginPos" or not key:
+            self.marginPos = self.editor.settings.value("rightMarginPos")
 
     def _onStyleChanged(self, section, key):
         """
