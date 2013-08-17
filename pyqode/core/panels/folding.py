@@ -174,10 +174,11 @@ class FoldingPanel(Panel):
                 block.setUserData(usrData)
             else:
                 break
-            # unfold last blank lines
+        # unfold last blank lines
         for i in reversed(range(foldingIndicator.start, last)):
             block = self.editor.document().findBlockByNumber(i)
-            if not len(block.text().strip()):
+            foldIndent = block.userData().foldIndent
+            if not len(block.text().strip()) and foldIndent != foldingIndicator.foldIndent:
                 block.setVisible(True)
             else:
                 break
