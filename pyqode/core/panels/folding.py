@@ -117,6 +117,7 @@ class FoldingPanel(Panel):
             self.editor.painted.connect(self._drawFoldedPopup)
             self.editor.mouseMoved.connect(self.__onEditorMouseMove)
             self.editor.mousePressed.connect(self.__onEditorMousePress)
+            self.editor.updateRequest.connect(self.__updateDirtyLines)
         else:
             self.editor.painted.disconnect(self._drawFoldedPopup)
             self.editor.mouseMoved.disconnect(self.__onEditorMouseMove)
@@ -630,6 +631,18 @@ class FoldingPanel(Panel):
         self.__hoveredStartLine = None
         self.__clearScopeDecorations()
         self.repaint()
+
+    def __updateDirtyLines(self, rect, dy):
+        if dy:
+            self.editor.updateVisibleBlocks(None)
+            tc = self.editor.textCursor()
+            for top, line, block in self.editor.visibleBlocks:
+                usd = block.userData()
+                if usd.foldStart and usd.folded:
+                    tc.setPosition(block.position())
+                    tc.select(tc.LineUnderCursor)
+                    self.editor.document().markContentsDirty(
+                        tc.selectionStart(), tc.selectionEnd())
 
 
 if __name__ == '__main__':
