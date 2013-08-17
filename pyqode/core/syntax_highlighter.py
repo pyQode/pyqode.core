@@ -76,7 +76,7 @@ class IndentBasedFoldDetector(FoldDetector):
             while not len(nb.text().strip()) and nb.isValid():
                 nb = nb.next()
             nbIndent = (len(nb.text()) - len(nb.text().lstrip()))
-            print(pb.userState())
+            # print(pb.userState())
             if nbIndent >= pbIndent or pb.userState() & 0x7F:
                 if pb.userData():
                     return pb.userData().foldIndent
