@@ -20,7 +20,10 @@ import time
 import weakref
 from pyqode.core import logger
 from pyqode.qt import QtCore, QtGui
-
+if sys.version_info[0] == 3:
+    import _thread as thread
+else:
+    import thread
 
 class memoized(object):
     """
@@ -551,18 +554,31 @@ def childProcess(conn):
     while True:  # run endlessly
         time.sleep(0.1)
         data = conn.recv()
-        # print("SERVER: Data received", data)
         assert len(data) == 2
         id = data[0]
         worker = data[1]
-        # exec worker
         setattr(worker, "processDict", dict)
-        try:
-            results = worker()
-        except Exception as e:
-            logger.critical(e)
-            results = None
-        conn.send([id, worker, results])
+        thread.start_new_thread(workerThread, (conn, id, worker))
+
+
+def workerThread(conn, id, worker):
+    """
+    This function call the worker object. It is meant to be executed in a thread
+
+    :param conn: connection
+
+    :param id: caller id
+
+    :param worker: worker instance
+    """
+    # print("worker thread executing")
+    try:
+        results = worker()
+    except Exception as e:
+        logger.critical(e)
+        results = None
+    conn.send([id, worker, results])
+
 
 
 if __name__ == '__main__':
