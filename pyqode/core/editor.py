@@ -246,23 +246,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the document line count """
         return self.document().blockCount()
 
-# {
-#     QList<QTextEdit::ExtraSelection> selections = extraSelections();
-#
-#     QTextEdit::ExtraSelection selection;
-#     QTextCharFormat format = selection.format;
-#     format.setBackground(Qt::green);
-#     selection.format = format;
-#
-#     QTextCursor cursor = textCursor();
-#     cursor.setPosition(pos);
-#     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
-#     selection.cursor = cursor;
-#
-#     selections.append(selection);
-#
-#     setExtraSelections(selections);
-# }
 
     def gotoLine(self, line=None, move=True):
         """
