@@ -557,7 +557,11 @@ def childProcess(conn):
         worker = data[1]
         # exec worker
         setattr(worker, "processDict", dict)
-        results = worker()
+        try:
+            results = worker()
+        except Exception as e:
+            logger.critical(e)
+            results = None
         conn.send([id, worker, results])
 
 
