@@ -46,7 +46,7 @@ class AutoIndentMode(Mode):
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
         tc.setPosition(pos)
-        if indent < self.minIndent:
+        if len(indent) < self.minIndent:
             indent = self.minIndent
         return indent
 
