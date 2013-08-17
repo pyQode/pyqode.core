@@ -960,7 +960,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param e: paint event
         """
         self.updateVisibleBlocks(e)
-        # self.painted.emit(e)
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
@@ -1386,7 +1385,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 if dy:
                     panel.scroll(0, dy)
                 else:
-                    # todo optimize, called on every cursor blink!!!
                     l, c = self.cursorPosition
                     ol, oc = self.__cachedCursorPos
                     if l != ol or c != oc:
