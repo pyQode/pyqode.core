@@ -512,8 +512,8 @@ class FoldingPanel(Panel):
         self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
 
     def _drawFoldedPopup(self):
-        if self.editor.hasFocus():
-            self.__collectIndicators()
+        #if self.editor.hasFocus():
+        self.__collectIndicators()
         self._foldedBoxes[:] = []
         painter = QtGui.QPainter(self.editor.viewport())
         for fi in self.__indicators:
