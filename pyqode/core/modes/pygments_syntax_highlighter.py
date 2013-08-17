@@ -297,7 +297,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self.setLexerFromFilename(fn)
         if l != self._lexer:
             self.rehighlight()
-        print(self._lexer)
 
     def setLexerFromFilename(self, filename):
         """
