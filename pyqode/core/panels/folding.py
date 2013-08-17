@@ -232,7 +232,10 @@ class FoldingPanel(Panel):
                 else:
                     usrData.folded = False
             elif not len(block.text().strip()):
-                block.setVisible(True)
+                if usrData.foldIndent == -1:
+                    block.setVisible(True)
+                else:
+                    block.setVisible(False)
             block.setUserData(usrData)
         tc = self.editor.textCursor()
         tc.select(tc.Document)
@@ -257,9 +260,10 @@ class FoldingPanel(Panel):
         """ Folds all indicators whose fold indent is > 0 """
         b = self.editor.document().firstBlock()
         while b and b.isValid():
+            if b.blockNumber() == 602:
+                pass
             usd = b.userData()
             if usd.foldIndent == 0:  # indicator start
-                # if usd.foldStart:
                 self.__unfoldPreviousBlankLines(b)
                 self.__foldBlock(b)
             else:
