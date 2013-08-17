@@ -79,7 +79,7 @@ class IndentBasedFoldDetector(FoldDetector):
             # print(pb.userState())
             if nbIndent >= pbIndent or pb.userState() & 0x7F:
                 if pb.userData():
-                    return pb.userData().foldIndent
+                    return nbIndent
             return -1
 
 
@@ -99,6 +99,8 @@ class CharBasedFoldDetector(FoldDetector):
 
     def getFoldIndent(self, highlighter, block, text):
         pb = block.previous()
+        if block.blockNumber() == 34:
+            pass
         while pb and pb.isValid() and not len(pb.text().strip()):
             pb = pb.previous()
         if pb and pb.isValid():
@@ -121,6 +123,11 @@ class CharBasedFoldDetector(FoldDetector):
                     return usd.foldIndent - 1
                 else:
                     # same folding level as the previous block
+                    nb = block.next()
+                    while nb.isValid() and not len(nb.text().strip()):
+                        nb = nb.next()
+                    if nb.isValid() and self._start in nb.text() and not len(text.strip()):
+                        return usd.foldIndent + 1
                     return usd.foldIndent
         else:
             return 0
