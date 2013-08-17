@@ -166,7 +166,7 @@ class FoldingPanel(Panel):
             block = self.editor.document().findBlockByNumber(i)
             usrData = block.userData()
             if (usrData.foldIndent >= foldingIndicator.foldIndent or
-                    not len(block.text().strip())):
+                    not len(block.text().strip()) or usrData.foldIndent == -1):
                 block.setVisible(False)
                 if usrData.foldIndent == foldingIndicator.foldIndent:
                     if not usrData.foldStart:
@@ -195,7 +195,7 @@ class FoldingPanel(Panel):
         for j in range(i + 1, end):
             b = self.editor.document().findBlockByNumber(j)
             ud = b.userData()
-            if ud.foldIndent < usrData.foldIndent:
+            if ud.foldIndent <= usrData.foldIndent:
                 return
             if len(b.text().strip()):
                 if ud.foldStart:
@@ -223,6 +223,8 @@ class FoldingPanel(Panel):
         b = self.editor.document().findBlockByNumber(start - 1)
         self.__unfoldBlock(b)
         for i in range(start, end):
+            if i == 64:
+                pass
             block = self.editor.document().findBlockByNumber(i)
             usrData = block.userData()
             if usrData.foldIndent == foldIndent:

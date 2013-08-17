@@ -68,6 +68,18 @@ class IndentBasedFoldDetector(FoldDetector):
         if stripped:
             return int((len(text) - len(text.lstrip())))
         else:
+            while not len(pb.text().strip()) and pb.isValid():
+                pb = pb.previous()
+            pbIndent = (len(pb.text()) - len(pb.text().lstrip()))
+            # check next blocks to see if their indent is >= then the last block
+            nb = block.next()
+            while not len(nb.text().strip()) and nb.isValid():
+                nb = nb.next()
+            nbIndent = (len(nb.text()) - len(nb.text().lstrip()))
+            print(pb.userState())
+            if nbIndent >= pbIndent or pb.userState() & 0x7F:
+                if pb.userData():
+                    return pb.userData().foldIndent
             return -1
 
 
@@ -75,7 +87,7 @@ class CharBasedFoldDetector(FoldDetector):
     """
     Detects folding based on character triggers
 
-    Suitable for c family langauges (c, c++, C#, java, D, ...)
+    Suitable for c family languages (c, c++, C#, java, D, ...)
     """
     def __init__(self, starts='{', ends='}'):
         """
@@ -86,8 +98,6 @@ class CharBasedFoldDetector(FoldDetector):
         self._end = ends
 
     def getFoldIndent(self, highlighter, block, text):
-        if len(text.strip()) == 0:
-            return -1
         pb = block.previous()
         while pb and pb.isValid() and not len(pb.text().strip()):
             pb = pb.previous()
