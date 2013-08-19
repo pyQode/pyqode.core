@@ -420,7 +420,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         tc.movePosition(tc.Down, tc.MoveAnchor, lineNbr - 1)
         tc.select(tc.LineUnderCursor)
         tc.insertText(text)
-        self.setTextCursor(tc)
+        #self.setTextCursor(tc)
 
     def removeLastLine(self):
         tc = self.textCursor()
@@ -441,11 +441,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         value = self.verticalScrollBar().value()
         pos = self.cursorPosition
+        atBlockEnd = self.textCursor().atBlockEnd()
 
         # cleanup whitespaces
         self.__cleaning = True
+        eaten = 0
         for line in self.__modifiedLines:
-            self.setLineText(line, self.lineText(line).rstrip())
+            txt = self.lineText(line)
+            stxt = txt.rstrip()
+            self.setLineText(line, stxt)
+            if pos[0] == line and atBlockEnd:
+                eaten = len(txt) - len(stxt)
 
         if self.lineText(self.lineCount()):
             self.appendPlainText("\n")
@@ -472,8 +478,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         tc.select(tc.LineUnderCursor)
         if tc.selectedText():
             tc.setPosition(p)
-            tc.movePosition(tc.Right, tc.MoveAnchor, pos[1])
+            offset = pos[1] - eaten
+            tc.movePosition(tc.Right, tc.MoveAnchor, offset)
         else:
+            print("No text selected")
             tc.setPosition(p)
         self.setTextCursor(tc)
         self.verticalScrollBar().setValue(value)
