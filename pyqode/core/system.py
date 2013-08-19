@@ -514,6 +514,7 @@ class SubprocessServer(object):
         """
         Close the server, terminate the child process
         """
+        logger.info("Close server")
         if self.__running:
             self.__process.terminate()
             self.__running = False
@@ -522,7 +523,7 @@ class SubprocessServer(object):
         """
         Start the server. This will actually start the child process.
         """
-        print("Server started")
+        logger.info("Server started")
         self.__pollTimer.start(self.__pollInterval)
         self.__process.start()
         self.__running = True
@@ -581,14 +582,12 @@ def workerThread(conn, id, worker):
 
     :param worker: worker instance
     """
-    # print("worker thread executing")
     try:
         results = worker()
     except Exception as e:
         logger.critical(e)
-        results = None
+        results = []
     conn.send([id, worker, results])
-
 
 
 if __name__ == '__main__':
