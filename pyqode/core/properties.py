@@ -66,6 +66,29 @@ class PropertyRegistry(QtCore.QObject):
         else:
             self.__dict = {"General": {}}
 
+    def sections(self):
+        """
+        Generates the list of sections
+        """
+        for k in self.__dict.keys():
+            yield k
+
+    def allProperties(self):
+        """
+        Generates the list of properties dictionaries.
+        """
+        for k, v in self.__dict.items():
+            yield v
+
+    def properties(self, section):
+        """
+        Gets the dictionary of properties of a specific section.
+
+        :param section: The properties' section
+        :return: dict of properties
+        """
+        return self.__dict[section]
+
     def copy(self, propertyRegistry):
         self.__dict = propertyRegistry.__dict
         self.valueChanged.emit("", "")
