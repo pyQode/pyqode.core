@@ -39,7 +39,7 @@ class AutoIndentMode(Mode):
 
     def __init__(self):
         super(AutoIndentMode, self).__init__()
-        self.minIndent = 0
+        self.minIndent = ""
 
     def _getIndent(self, tc):
         """
