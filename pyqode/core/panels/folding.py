@@ -138,11 +138,14 @@ class FoldingPanel(Panel):
         if key == "nativeFoldingIndicator" or not key:
             self.__native = self.editor.style.value("nativeFoldingIndicator")
             key = None
+            self.repaint()
         if key == "foldIndicatorBackground" or not key:
             self.__color = self.editor.style.value("foldIndicatorBackground")
+            self.repaint()
         if key == "background" or not key:
             self.__decoColor = driftColor(
                 self.editor.palette().window().color())
+            self.repaint()
 
     def resetIndicatorsBackground(self):
         """
