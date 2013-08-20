@@ -24,7 +24,7 @@ This file contains all the pyQode QtDesigner plugins.
 Installation:
 ==================
 
-run designer.pyw (Qt Designer must be installed on your system and must be
+run designer.py (Qt Designer must be installed on your system and must be
 in your path on Windows, pyqode-core must be installed)
 """
 # This only works with PyQt, PySide does not support the QtDesigner module
