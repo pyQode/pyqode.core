@@ -244,6 +244,12 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             info = ParenthesisInfo(rightPos, "]")
             userData.squareBrackets.append(info)
             rightPos = text.find("]", rightPos + 1)
+        userData.parentheses[:] = sorted(
+            userData.parentheses, key=lambda x: x.position)
+        userData.squareBrackets[:] = sorted(
+            userData.squareBrackets, key=lambda x: x.position)
+        userData.braces[:] = sorted(
+            userData.braces, key=lambda x: x.position)
 
     def highlightBlock(self, text):
         self.blockHighlightStarted.emit(self, text)
