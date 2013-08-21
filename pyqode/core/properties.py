@@ -70,7 +70,7 @@ class PropertyRegistry(QtCore.QObject):
         """
         Generates the list of sections
         """
-        for k in self.__dict.keys():
+        for k in sorted(self.__dict.keys()):
             yield k
 
     def allProperties(self):
