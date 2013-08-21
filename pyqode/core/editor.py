@@ -723,6 +723,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.style.setValue("fontSize", constants.FONT_SIZE)
 
+    def markWholeDocumentDirty(self):
+        tc = self.textCursor()
+        tc.select(tc.Document)
+        self.document().markContentsDirty(tc.selectionStart(),
+                                          tc.selectionEnd())
+
     def zoomIn(self, increment=1):
         """
         Zooms in the editor.
@@ -735,10 +741,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.style.setValue("fontSize",
                             self.style.value("fontSize") + increment)
-        tc = self.textCursor()
-        tc.select(tc.Document)
-        self.document().markContentsDirty(tc.selectionStart(),
-                                                 tc.selectionEnd())
+        self.markWholeDocumentDirty()
 
     def zoomOut(self, increment=1):
         """
@@ -754,10 +757,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if value <= 0:
             value = increment
         self.style.setValue("fontSize", value)
-        tc = self.textCursor()
-        tc.select(tc.Document)
-        self.document().markContentsDirty(tc.selectionStart(),
-                                                 tc.selectionEnd())
+        self.markWholeDocumentDirty()
 
     def getLineIndent(self):
         """

@@ -196,9 +196,7 @@ class FoldingPanel(Panel):
                 block.setVisible(True)
             else:
                 break
-        tc = self.editor.textCursor()
-        tc.select(tc.Document)
-        doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.editor.markWholeDocumentDirty()
         self.__collectIndicators()
         self.__clearScopeDecorations()
         self.__addScopeDecoration(foldingIndicator.start,
@@ -254,9 +252,7 @@ class FoldingPanel(Panel):
                 else:
                     block.setVisible(False)
             block.setUserData(usrData)
-        tc = self.editor.textCursor()
-        tc.select(tc.Document)
-        doc.markContentsDirty(tc.selectionStart(), tc.selectionEnd())
+        self.editor.markWholeDocumentDirty()
         self.__collectIndicators()
         self.__clearScopeDecorations()
         self.__addScopeDecoration(start, end)
@@ -293,10 +289,7 @@ class FoldingPanel(Panel):
                     # unfold previous blank lines
                     self.__unfoldPreviousBlankLines(b)
             b = b.next()
-        tc = self.editor.textCursor()
-        tc.select(tc.Document)
-        self.editor.document().markContentsDirty(tc.selectionStart(),
-                                                 tc.selectionEnd())
+        self.editor.markWholeDocumentDirty()
         self.editor.updateVisibleBlocks(None)
         self.__collectIndicators()
         self.editor.refreshPanels()
@@ -312,10 +305,7 @@ class FoldingPanel(Panel):
             b = b.next()
             # if usd.foldStart:
             self.__unfoldBlock(b)
-        tc = self.editor.textCursor()
-        tc.select(tc.Document)
-        self.editor.document().markContentsDirty(
-            tc.selectionStart(), tc.selectionEnd())
+        self.editor.markWholeDocumentDirty()
         self.editor.updateVisibleBlocks(None)
         self.__collectIndicators()
         self.editor.update()
@@ -652,10 +642,7 @@ class FoldingPanel(Panel):
             for top, line, block in self.editor.visibleBlocks:
                 usd = block.userData()
                 if usd.foldStart and usd.folded:
-                    tc.setPosition(block.position())
-                    tc.select(tc.LineUnderCursor)
-                    self.editor.document().markContentsDirty(
-                        tc.selectionStart(), tc.selectionEnd())
+                    self.editor.markWholeDocumentDirty()
 
 
 if __name__ == '__main__':

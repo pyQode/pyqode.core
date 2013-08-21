@@ -66,7 +66,8 @@ class RightMarginMode(Mode):
         """
         if key == "margin" or not key:
             self.__pen = self.editor.style.value("margin")
-            self.editor.update()
+            self.editor.markWholeDocumentDirty()
+            self.editor.repaint()
 
     def _onStateChanged(self, state):
         """
@@ -76,10 +77,10 @@ class RightMarginMode(Mode):
         """
         if state:
             self.editor.painted.connect(self.__paintMargin)
-            self.editor.update()
+            self.editor.repaint()
         else:
             self.editor.painted.disconnect(self.__paintMargin)
-            self.editor.update()
+            self.editor.repaint()
 
     def __paintMargin(self, event):
         """ Paints the right margin after editor paint event. """
@@ -92,4 +93,4 @@ class RightMarginMode(Mode):
         x80 = round(fm.width(' ') * pos) + offset
         p = QtGui.QPainter(self.editor.viewport())
         p.setPen(self.__pen)
-        p.drawLine(x80, rect.top(), x80, rect.bottom())
+        p.drawLine(x80, 0, x80, 2 ** 16)
