@@ -1426,12 +1426,18 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if key == "font" or key == "fontSize" or not key:
             font = self.style.value("font")
             self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
-        if key == "background" or key == "foreground" or not key:
+        if (key == "background" or key == "foreground" or
+                key == "selectionBackground" or key == "selectionForeground"
+                or not key):
             p = self.palette()
             c = self.style.value("background")
             p.setColor(p.Base, c)
             c = self.style.value("foreground")
             p.setColor(p.Text, c)
+            c = self.style.value("selectionBackground")
+            p.setColor(QtGui.QPalette.Highlight, c)
+            c = self.style.value("selectionForeground")
+            p.setColor(QtGui.QPalette.HighlightedText, c)
             self.setPalette(p)
 
     def __onSettingsChanged(self, section, key):
