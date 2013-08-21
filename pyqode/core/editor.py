@@ -1020,11 +1020,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.repaint()
         QtGui.QApplication.processEvents()
 
-    def focusOutEvent(self, event):
-        QtGui.QPlainTextEdit.focusOutEvent(self, event)
-        self.repaint()
-        QtGui.QApplication.processEvents()
-
     def mousePressEvent(self, event):
         """
         Overrides mousePressEvent to emits mousePressed signal
