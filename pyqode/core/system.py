@@ -68,6 +68,7 @@ class memoized(object):
         """ Support instance methods. """
         return functools.partial(self.__call__, obj)
 
+
 def findSettingsDirectory(appName="pyQode"):
     """
     Creates and returns the path to a directory that suits well to store app/lib
@@ -156,8 +157,6 @@ class TextStyle(object):
         """
         :param style: The style string ("#rrggbb [bold] [italic] [underlined])
         """
-        if "underlined" in style and not "nunderlined" in style:
-            pass
         self.color = QtGui.QColor()
         self.bold = False
         self.italic = False
