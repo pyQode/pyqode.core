@@ -232,8 +232,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                          section="codeCompletion")
         self.editor.settings.addProperty("caseSensitive", False,
                                          section="codeCompletion")
-        self.editor.settings.addProperty("useThreads", True,
-                                         section="codeCompletion")
 
     def _onUninstall(self):
         self.__completer = None
