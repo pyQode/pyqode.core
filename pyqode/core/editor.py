@@ -32,7 +32,6 @@ from pyqode.core.decoration import TextDecoration
 from pyqode.qt import QtGui, QtCore
 
 
-#noinspection PyProtectedMember
 class QCodeEdit(QtGui.QPlainTextEdit):
     """
     This is the core code editor widget which inherits from a QPlainTextEdit
