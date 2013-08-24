@@ -58,7 +58,8 @@ class FoldDetector(object):
         """
         return -1
 
-    def isFoldStart(self, currentBlock, nextBlock):
+    @staticmethod
+    def isFoldStart(currentBlock, nextBlock):
         currUsd = currentBlock.userData()
         nextUsd = nextBlock.userData()
         if currUsd.foldIndent < nextUsd.foldIndent:
@@ -207,7 +208,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
                         prevBlock, self.currentBlock())
                 prevBlock.setUserData(prevUsd)
 
-    def detectParentheses(self, text, userData):
+    @staticmethod
+    def detectParentheses(text, userData):
         userData.parentheses[:] = []
         userData.squareBrackets[:] = []
         userData.braces[:] = []

@@ -35,6 +35,8 @@ class LineNumberPanel(Panel):
     def __init__(self):
         Panel.__init__(self)
         self.scrollable = True
+        self.__selecting = False
+        self.__selStart = -1
 
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)

@@ -50,7 +50,7 @@ class _FoldingIndicator(object):
         self.foldIndent = -1  # the fold indent value for the region to fold
 
     def __repr__(self):
-        return ("%d - %d" % (self.start, self.end))
+        return "%d - %d" % (self.start, self.end)
 
 
 class FoldingPanel(Panel):
@@ -154,12 +154,14 @@ class FoldingPanel(Panel):
         self.editor.style.setValue(
             "foldIndicatorBackground", self.__systemColor)
 
-    def __foldBlock(self, b):
+    @staticmethod
+    def __foldBlock(b):
         usd = b.userData()
         usd.folded = True
         b.setUserData(usd)
 
-    def __unfoldBlock(self, b):
+    @staticmethod
+    def __unfoldBlock(b):
         usd = b.userData()
         if usd:
             usd.folded = False
@@ -171,7 +173,6 @@ class FoldingPanel(Panel):
 
         :param foldingIndicator: The indicator to fold.
         """
-        doc = self.editor.document()
         b = self.editor.document().findBlockByNumber(foldingIndicator.start - 1)
         self.__foldBlock(b)
         last = -1
@@ -232,7 +233,6 @@ class FoldingPanel(Panel):
         start = indic.start
         end = indic.end
         foldIndent = indic.foldIndent
-        doc = self.editor.document()
         b = self.editor.document().findBlockByNumber(start - 1)
         self.__unfoldBlock(b)
         for i in range(start, end):
@@ -259,7 +259,8 @@ class FoldingPanel(Panel):
         # self.repaint()
         self.editor.refreshPanels()
 
-    def __unfoldPreviousBlankLines(self, b):
+    @staticmethod
+    def __unfoldPreviousBlankLines(b):
         # unfold previous blank lines as they are on the level 0
         prevBlock = b.previous()
         while prevBlock and prevBlock.isValid() and \
@@ -448,7 +449,8 @@ class FoldingPanel(Panel):
         self.__actionUnfoldAll.triggered.connect(self.unfoldAll)
         self.editor.addAction(self.__actionUnfoldAll)
 
-    def __findNextValidBlock(self, block):
+    @staticmethod
+    def __findNextValidBlock(block):
         bl = block.next()
         while len(bl.text().strip()) == 0:
             n = bl.next()
@@ -482,6 +484,8 @@ class FoldingPanel(Panel):
                     fi.text = block.text()
                     # find its end
                     stopAtEnds = True
+                    nline = 0
+                    nblock = None
                     for ntop, nline, nblock in self.editor.visibleBlocks[
                                                i + 1:len(
                                                        self.editor.visibleBlocks) - 1]:
@@ -638,7 +642,6 @@ class FoldingPanel(Panel):
     def __updateDirtyLines(self, rect, dy):
         if dy:
             self.editor.updateVisibleBlocks(None)
-            tc = self.editor.textCursor()
             for top, line, block in self.editor.visibleBlocks:
                 usd = block.userData()
                 if usd.foldStart and usd.folded:

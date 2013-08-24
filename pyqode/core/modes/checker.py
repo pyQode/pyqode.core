@@ -93,8 +93,8 @@ class CheckerMessage(object):
         self.icon = icon
         if self.icon is None:
             self.icon = self.ICONS[status]
-        self._marker = None
-        self._decoration = None
+        self.marker = None
+        self.decoration = None
         self.filename = filename
 
     def __repr__(self):
@@ -154,19 +154,19 @@ class CheckerMode(Mode, QtCore.QObject):
             self.__messages.append(message)
             if message.line:
                 if hasattr(self.editor, "markerPanel"):
-                    message._marker = Marker(message.line, message.icon,
+                    message.marker = Marker(message.line, message.icon,
                                              message.description)
-                    self.editor.markerPanel.addMarker(message._marker)
+                    self.editor.markerPanel.addMarker(message.marker)
                 tooltip = None
                 if self.__showTooltip:
                     tooltip = message.description
-                message._decoration = TextDecoration(self.editor.textCursor(),
+                message.decoration = TextDecoration(self.editor.textCursor(),
                                                      startLine=message.line,
                                                      tooltip=tooltip,
                                                      draw_order=3)
-                message._decoration.setFullWidth(True)
-                message._decoration.setError(color=QtGui.QColor(message.color))
-                self.editor.addDecoration(message._decoration)
+                message.decoration.setFullWidth(True)
+                message.decoration.setError(color=QtGui.QColor(message.color))
+                self.editor.addDecoration(message.decoration)
         if hasattr(self.editor, "markerPanel"):
             self.editor.markerPanel.repaint()
 
@@ -177,10 +177,10 @@ class CheckerMode(Mode, QtCore.QObject):
         :param message: Message to remove
         """
         self.__messages.remove(message)
-        if message._marker:
-            self.editor.markerPanel.removeMarker(message._marker)
-        if message._decoration:
-            self.editor.removeDecoration(message._decoration)
+        if message.marker:
+            self.editor.markerPanel.removeMarker(message.marker)
+        if message.decoration:
+            self.editor.removeDecoration(message.decoration)
 
     def clearMessages(self):
         """
@@ -230,7 +230,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 pass
             p.join()
         except OSError as e:
-            logger.error("%s: failed to run analysis, %s" (self.name, e))
+            logger.error("%s: failed to run analysis, %s" % (self.name, e))
 
     def requestAnalysis(self):
         """ Request an analysis job. """
@@ -246,12 +246,6 @@ if __name__ == "__main__":
     import sys
     import random
     from pyqode.core import QGenericCodeEdit, MarkerPanel
-
-    try:
-        import faulthandler
-        faulthandler.enable()
-    except ImportError:
-        pass
 
     class FancyChecker(CheckerMode):
         """

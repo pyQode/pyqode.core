@@ -268,10 +268,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __onWorkFinished(self, caller_id, worker, results):
         if caller_id == id(self) and isinstance(worker, CompletionWorker):
-            all = []
+            all_results = []
             for res in results:
-                all += res
-            self.__showCompletions(all)
+                all_results += res
+            self.__showCompletions(all_results)
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
@@ -306,7 +306,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         symbols = self.editor.settings.value(
             "triggerSymbols", section="codeCompletion")
         isEndOfWordChar = False
-        k = None
         if isPrintable:
             k = str(chr(event.key()))
             seps = constants.WORD_SEPARATORS
@@ -474,16 +473,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerKey", section="codeCompletion"))
         return val and event.key() == triggerKey
 
-    def __isPrintableKeyEvent(self, event):
+    @staticmethod
+    def __isPrintableKeyEvent(event):
         try:
-            ch = chr(event.key())
+            chr(event.key())
         except ValueError:
             return False
         else:
             return int(event.modifiers()) == 0
 
+    @staticmethod
     @memoized
-    def __makeIcon(self, icon):
+    def __makeIcon(icon):
         return QtGui.QIcon(icon)
 
     def _updateCompletionModel(self, completions, cc_model):
@@ -548,15 +549,16 @@ class DocumentWordCompletionProvider(CompletionProvider):
     def __init__(self):
         CompletionProvider.__init__(self)
 
-    def preload(self, code, fileEncoding, filePath):
-        return self.parse(code)
+    def preload(self, code, filePath, fileEncoding):
+        return self.parse(code, filePath=filePath)
 
-    def parse(self, code, wordSeparators=constants.WORD_SEPARATORS):
+    def parse(self, code, wordSeparators=constants.WORD_SEPARATORS,
+              filePath=""):
         completions = []
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
         # store results in the subprocess dict for later use
-        self.processDict["docWords"] = completions
+        self.processDict["docWords%s" % filePath] = completions
         return completions
 
     @staticmethod
@@ -588,9 +590,9 @@ class DocumentWordCompletionProvider(CompletionProvider):
     def complete(self, code, line, column, completionPrefix,
                  filePath, fileEncoding):
         # get previous result from the server process dict
-        words = self.processDict["docWords"]
+        words = self.processDict["docWords%s" % filePath]
         if not words or not len(words):
-            return self.parse(code)
+            return self.parse(code, filePath=filePath)
         return words
 
 

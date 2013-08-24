@@ -176,6 +176,7 @@ CppLexer.tokens['comment'] = comment_state
 CSharpLexer.tokens['comment'] = comment_state
 
 
+#noinspection PyProtectedMember
 class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     """
     This mode enable syntax highlighting using the pygments library
@@ -331,6 +332,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             logger.warning("Failed to find lexer from mime type %s" % mime)
             self._lexer = None
 
+    #noinspection PyProtectedMember
     def doHighlightBlock(self, text):
         """ Highlight a block of text """
         fn = self.editor.fileName
@@ -356,6 +358,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if hasattr(prev_data, "syntax_stack"):
             self._lexer._saved_state_stack = prev_data.syntax_stack
         elif hasattr(self._lexer, '_saved_state_stack'):
+            #noinspection PyProtectedMember
             del self._lexer._saved_state_stack
 
         # Lex the text using Pygments
@@ -462,7 +465,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self._brushes[color] = result
         return result
 
-    def _get_color(self, color):
+    @staticmethod
+    def _get_color(color):
         """ Returns a QColor built from a Pygments color string.
         """
         color = str(color).replace("#", "")

@@ -243,6 +243,8 @@ class _JobThread(QtCore.QThread):
         self.used = False
         self.args = ()
         self.kwargs = {}
+        self.executeOnRun = None
+        self.executeOnFinish = None
 
     @staticmethod
     def stopJobThreadInstance(caller, method, *args, **kwargs):
@@ -549,11 +551,11 @@ class SubprocessServer(object):
             data = self.__parent_conn.recv()
             # print("CLIENT: Data received", data)
             assert len(data) == 3
-            id = data[0]
+            caller_id = data[0]
             worker = data[1]
             results = data[2]
             # print(id, worker, results)
-            self.signals.workCompleted.emit(id, worker, results)
+            self.signals.workCompleted.emit(caller_id, worker, results)
 
 def childProcess(conn):
     """
@@ -565,13 +567,13 @@ def childProcess(conn):
         time.sleep(0.1)
         data = conn.recv()
         assert len(data) == 2
-        id = data[0]
+        caller_id = data[0]
         worker = data[1]
         setattr(worker, "processDict", dict)
-        thread.start_new_thread(workerThread, (conn, id, worker))
+        thread.start_new_thread(workerThread, (conn, caller_id, worker))
 
 
-def workerThread(conn, id, worker):
+def workerThread(conn, caller_id, worker):
     """
     This function call the worker object. It is meant to be executed in a thread
 
@@ -586,7 +588,7 @@ def workerThread(conn, id, worker):
     except Exception as e:
         logger.critical(e)
         results = []
-    conn.send([id, worker, results])
+    conn.send([caller_id, worker, results])
 
 
 if __name__ == '__main__':

@@ -32,6 +32,7 @@ from pyqode.core.decoration import TextDecoration
 from pyqode.qt import QtGui, QtCore
 
 
+#noinspection PyProtectedMember
 class QCodeEdit(QtGui.QPlainTextEdit):
     """
     This is the core code editor widget which inherits from a QPlainTextEdit
@@ -226,6 +227,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.setMouseTracking(True)
 
+        self.mnu = None
+
     def __del__(self):
         pass
         # todo fix it
@@ -358,7 +361,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             encoding = self.getDefaultEncoding()
         return encoding
 
-    def getDefaultEncoding(self):
+    @staticmethod
+    def getDefaultEncoding():
         """ Returns the system's default encoding """
         return sys.getfilesystemencoding()
 
@@ -504,7 +508,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             else:
                 return False
         if encoding:
-            self.fileEncoding = encoding
+            self.__fileEncoding = encoding
         try:
             content = self.__encodePlainText(self.fileEncoding)
         except UnicodeEncodeError:

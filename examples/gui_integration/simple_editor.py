@@ -46,7 +46,7 @@ class SimpleEditorWindow(QtGui.QMainWindow):
         self.setupStylesMenu()
         try:
             self.editor.openFile(__file__)
-        except (OSError, IOError) as e:
+        except (OSError, IOError):
             pass
         except AttributeError:
             pass

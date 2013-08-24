@@ -80,6 +80,7 @@ def run(env):
     """
     Runs qt designer with our customised environment.
     """
+    p = None
     try:
         p = subprocess.Popen(["designer"], env=env)
         if p.wait():

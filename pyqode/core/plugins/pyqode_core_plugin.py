@@ -52,7 +52,8 @@ try:
         _type = pyqode.core.QCodeEdit
 
         def __init__(self, parent=None):
-            QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self)
+            QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(self,
+                                                              parent=parent)
             self.initialized = False
 
         def initialize(self, formEditor):

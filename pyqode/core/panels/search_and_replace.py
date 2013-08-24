@@ -512,7 +512,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
         self.__current_occurrence = cr
         self.__mutex.unlock()
 
-    def __compareCursors(self, a, b):
+    @staticmethod
+    def __compareCursors(a, b):
         return (a.selectionStart() == b.selectionStart() and
                 a.selectionEnd() == b.selectionEnd())
 

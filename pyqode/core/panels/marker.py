@@ -106,8 +106,9 @@ class MarkerPanel(Panel):
         if hasattr(usrData, "marker"):
             usrData.marker = marker
 
+    @staticmethod
     @memoized
-    def makeMarkerIcon(self, icon):
+    def makeMarkerIcon(icon):
         if isinstance(icon, tuple):
             return icon[0], QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
