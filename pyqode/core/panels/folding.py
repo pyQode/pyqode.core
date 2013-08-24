@@ -516,7 +516,7 @@ class FoldingPanel(Panel):
         bottom = self.editor.linePos(fi.end)
         h = bottom - top
         w = self.sizeHint().width()
-        self.__drawBackgroundRect(QtCore.QRect(0, top, w, h), painter)
+        self.__drawBackgroundRect(QtCore.QRectF(0, top, w, h), painter)
 
     def _drawFoldedPopup(self):
         #if self.editor.hasFocus():
