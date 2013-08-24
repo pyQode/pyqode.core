@@ -82,6 +82,9 @@ class CaretLineHighlighterMode(Mode):
                 factor = 180
             if b.lightness() == 0:
                 b = QtGui.QColor("#101010")
+            self.__brush = QtGui.QBrush(
+                self.editor.style.value("caretLineBackground"))
+            self.__updateHighlight()
             self.editor.style.setValue("caretLineBackground",
                                        driftColor(b, factor))
 
