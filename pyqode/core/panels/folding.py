@@ -391,21 +391,21 @@ class FoldingPanel(Panel):
         painter.fillRect(foldZoneRect, grad)
         painter.setPen(QtGui.QPen(outline))
         painter.drawLine(foldZoneRect.topLeft() +
-                         QtCore.QPoint(1, 0),
+                         QtCore.QPointF(1, 0),
                          foldZoneRect.topRight() -
-                         QtCore.QPoint(1, 0))
+                         QtCore.QPointF(1, 0))
         painter.drawLine(foldZoneRect.bottomLeft() +
-                         QtCore.QPoint(1, 0),
+                         QtCore.QPointF(1, 0),
                          foldZoneRect.bottomRight() -
-                         QtCore.QPoint(1, 0))
+                         QtCore.QPointF(1, 0))
         painter.drawLine(foldZoneRect.topRight() +
-                         QtCore.QPoint(0, 1),
+                         QtCore.QPointF(0, 1),
                          foldZoneRect.bottomRight() -
-                         QtCore.QPoint(0, 1))
+                         QtCore.QPointF(0, 1))
         painter.drawLine(foldZoneRect.topLeft() +
-                         QtCore.QPoint(0, 1),
+                         QtCore.QPointF(0, 1),
                          foldZoneRect.bottomLeft() -
-                         QtCore.QPoint(0, 1))
+                         QtCore.QPointF(0, 1))
 
     def __clearScopeDecorations(self):
         """
