@@ -80,7 +80,7 @@ from pygments.util import ClassNotFound
 
 from pygments.styles import STYLE_MAP
 
-PYGMENTS_STYLES = STYLE_MAP.keys()
+PYGMENTS_STYLES = sorted(STYLE_MAP.keys())
 
 
 def get_tokens_unprocessed(self, text, stack=('root',)):
@@ -319,6 +319,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             if filename.endswith("~"):
                 filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
+            print(self._lexer)
         except ClassNotFound:
             logger.warning("Failed to find lexer from filename %s" % filename)
             self._lexer = None
