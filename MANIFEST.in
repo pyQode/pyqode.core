@@ -1,12 +1,13 @@
 #
 # MANIFEST.in
 #
-# Manifest template for creating the PCEF source distribution.
-
+# Manifest template for creating the pyQode source distribution.
 include MANIFEST.in
 include setup.py
 include COPYING
 include README.rst
+include pyqode/core/ui/*
+include pyqode/core/ui/rc/*
 include doc/*
 include doc/source/*
 include doc/source/_static/*

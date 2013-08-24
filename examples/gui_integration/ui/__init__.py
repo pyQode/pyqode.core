@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# PCEF - Python/Qt Code Editing Framework
-# Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+# Copyright 2013 Colin Duquesnoy
 #
-# This software is released under the LGPLv3 license.
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# This file is part of pyQode.
+#
+# pyQode is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# pyQode is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License along
+# with pyQode. If not, see http://www.gnu.org/licenses/.
 #
 import os
-import pcef.qt
+import pyqode.qt
 
 
 def loadUi(uiFileName, baseInstance, rcFilename=None):
@@ -28,5 +38,5 @@ def loadUi(uiFileName, baseInstance, rcFilename=None):
     if rcFilename:
         rcFile = os.path.join(os.path.abspath(os.path.join(__file__, "..")),
                               rcFilename)
-        pcef.qt.importRc(rcFile)
-    pcef.qt.loadUi(uiFile, baseInstance)
+        pyqode.qt.importRc(rcFile)
+    pyqode.qt.loadUi(uiFile, baseInstance)

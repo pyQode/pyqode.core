@@ -1,6 +1,24 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# PCEF documentation build configuration file, created by
+# Copyright 2013 Colin Duquesnoy
+#
+# This file is part of pyQode.
+#
+# pyQode is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# pyQode is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License along
+# with pyQode. If not, see http://www.gnu.org/licenses/.
+#
+# pyQode documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan  3 17:16:17 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +58,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PCEF'
+project = u'pyQode'
 copyright = u'2013, Colin Duquesnoy'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +182,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PCEFDoc'
+htmlhelp_basename = 'pyQodeDoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -213,7 +231,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pcef', u'PCEF Documentation',
+    ('index', 'pyqode', u'PCEF Documentation',
      [u'Colin Duquesnoy'], 1)
 ]
 

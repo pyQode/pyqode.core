@@ -1,4 +1,4 @@
-.. PCEF - Python/Qt Code Editing Framework
+.. pyQode - Python/Qt Code Editor widget
 .. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 
 .. This document is released under the LGPLv3 license.

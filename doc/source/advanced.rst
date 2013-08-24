@@ -1,4 +1,4 @@
-.. PCEF - Python/Qt Code Editing Framework
+.. pyQode - Python/Qt Code Editor widget
 .. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
 
 .. This document is released under the LGPLv3 license.
@@ -51,7 +51,7 @@ Here is how you can retrieve a built-in style (or a style you added using addSty
 
 .. code-block:: python
 
-    from pcef.styles import getStyle
+    from pyqode.styles import getStyle
     defaultStyle = getStyle('Default')
     darkStyle = getStyle('Dark')
 
@@ -68,8 +68,8 @@ in the following example:
 
 .. code-block:: python
 
-    from pcef.core import Mode
-    from pcef.core import Panel
+    from pyqode.core import Mode
+    from pyqode.core import Panel
 
     class MyMode(Mode):
 

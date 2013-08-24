@@ -29,7 +29,5 @@ nosetests.xml
 .pydevproject
 # pycharm
 .idea
-# logs
-pcef.log
 /*.json
 __pycache__
