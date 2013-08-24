@@ -184,7 +184,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self._foldDetector = foldDetector
 
     def __del__(self):
-        self.__blocks.clear()
+        if os.environ["QT_API"] == "PyQt":
+            self.__blocks.clear()
 
     def setFoldDetector(self, foldDetector):
         self._foldDetector = foldDetector
