@@ -292,7 +292,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def selectWordUnderCursor(self, selectWholeWord=False, tc=None):
         """
         Selects the word under cursor using the separators defined in the
-        editor settings as "wordSeparators"
+        the constants module.
 
         :param selectWholeWord: If set to true the whole word is selected, else
                                 the selection stops at the cursor position.
@@ -303,14 +303,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if not tc:
             tc = self.textCursor()
-        word_separators = self.settings.value("wordSeparators")
+        word_separators = constants.WORD_SEPARATORS
         end_pos = start_pos = tc.position()
         while not tc.atStart():
             # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
             tc.movePosition(tc.Left, tc.KeepAnchor, 1)
             try:
                 ch = tc.selectedText()[0]
-                word_separators = self.settings.value("wordSeparators")
+                word_separators = constants.WORD_SEPARATORS
                 st = tc.selectedText()
                 if (st in word_separators and (st != "n" and st != "t")
                         or ch.isspace()):
@@ -1228,7 +1228,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.settings.addProperty("showWhiteSpaces", False)
         self.settings.addProperty("tabLength", constants.TAB_SIZE)
         self.settings.addProperty("useSpacesInsteadOfTab", True)
-        self.settings.addProperty("wordSeparators", constants.WORD_SEPARATORS)
+        #self.settings.addProperty("wordSeparators", constants.WORD_SEPARATORS)
 
     def __initStyle(self):
         """

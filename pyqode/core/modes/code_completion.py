@@ -309,7 +309,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         k = None
         if isPrintable:
             k = str(chr(event.key()))
-            seps = self.editor.settings.value("wordSeparators")
+            seps = constants.WORD_SEPARATORS
             isEndOfWordChar = (k in seps and not k in symbols)
         if self.__completer.popup().isVisible():
             # Update completion prefix
@@ -378,7 +378,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if lastChar != ' ':
                 symbols = self.editor.settings.value(
                     "triggerSymbols", section="codeCompletion")
-                seps = self.editor.settings.value("wordSeparators")
+                seps = constants.WORD_SEPARATORS
                 return lastChar in seps and not lastChar in symbols
             return False
         except IndexError:
