@@ -290,25 +290,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self.editor.style.setValue(
                 "foreground", QtGui.QColor("#{0}".format(c)))
 
-    def setLexerFromFilename(self, fn="file.py"):
-        """
-        Change the highlighter lexer on the fly by supplying the filename
-        to highlight
-
-        .. note::
-            Actually only the file extension is needed
-
-        .. note::
-            The default lexer is the Python lexer
-
-        :param fn: Filename or extension
-        :type fn: str
-        """
-        l = self._lexer
-        self.setLexerFromFilename(fn)
-        if l != self._lexer:
-            self.rehighlight()
-
     def setLexerFromFilename(self, filename):
         """
         Change the lexer based on the filename (actually only the extension is
