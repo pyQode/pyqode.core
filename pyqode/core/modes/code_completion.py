@@ -269,6 +269,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __onWorkFinished(self, caller_id, worker, results):
         if caller_id == id(self) and isinstance(worker, CompletionWorker):
+            self.editor.setCursor(QtCore.Qt.IBeamCursor)
             all_results = []
             for res in results:
                 all_results += res
@@ -328,9 +329,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             keys = self.editor.settings.value("triggerKeys",
                                               section="codeCompletion")
             for k in keys:
-                # print("ek:", event.key())
                 if chr(int(k)) == event.text():
-                    logger.info("CC: Key trigger")
+                    logger.debug("CC: Key trigger")
                     self.requestCompletion(immediate=True)
                     return
             if not navigationKey and int(event.modifiers()) == 0:
@@ -367,7 +367,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @QtCore.Slot()
     def __setWaitCursor(self):
-        self.editor.viewport().setCursor(QtCore.Qt.WaitCursor)
+        print("Set wait cursor")
+        self.editor.setCursor(QtCore.Qt.WaitCursor)
 
     def __isLastCharEndOfWord(self):
         try:
@@ -402,7 +403,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._updateCompletionModel(completions,
                                     self.__completer.model())
         self.__showPopup()
-        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
 
     def __handleCompleterEvents(self, event):
         # complete
@@ -421,7 +422,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return False
 
     def __hidePopup(self):
-        self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
         if self.__jobRunner.jobRunning:
@@ -534,6 +535,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             QtGui.QToolTip.hideText()
 
     def __collectCompletions(self, *args):
+        self.waitCursorRequested.emit()
         worker = CompletionWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
 
