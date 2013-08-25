@@ -373,7 +373,7 @@ class JobRunner(object):
                 self.__jobQueue[0].start()
             return True
         else:
-            logger.warning("Failed to queue job. All threads are used")
+            logger.debug("Failed to queue job. All threads are used")
             return False
 
     def __executeNext(self):
