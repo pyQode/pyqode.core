@@ -836,6 +836,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if not cursor.hasSelection():
                 cursor.select(cursor.LineUnderCursor)
             nb_lines = len(cursor.selection().toPlainText().splitlines())
+            if nb_lines == 0:
+                nb_lines = 1
             block = doc.findBlock(cursor.selectionStart())
             assert isinstance(block, QtGui.QTextBlock)
             i = 0
@@ -891,6 +893,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress,
                                 QtCore.Qt.Key_Backtab,
                                 QtCore.Qt.NoModifier))
+
+    def setCursor(self, cursor):
+        print("SetCursor: ", cursor)
+        self.viewport().setCursor(cursor)
+        QtGui.QApplication.processEvents()
 
     def refreshPanels(self):
         """ Refreshes the editor panels. """
