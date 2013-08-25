@@ -588,14 +588,12 @@ def workerThread(conn, caller_id, worker):
 
     :param worker: worker instance
     """
-    print("Work")
     try:
         results = worker()
     except Exception as e:
         logger.critical(e)
         results = []
     conn.send([caller_id, worker, results])
-    print("Finished")
 
 
 if __name__ == '__main__':
