@@ -895,7 +895,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                 QtCore.Qt.NoModifier))
 
     def setCursor(self, cursor):
-        print("SetCursor: ", cursor)
         self.viewport().setCursor(cursor)
         QtGui.QApplication.processEvents()
 
