@@ -54,7 +54,8 @@ class PreLoadWorker(object):
             # pass the process dict to every providers
             setattr(prov, "processDict", self.processDict)
             r = prov.preload(*self.__args)
-            results.append(r)
+            if r:
+                results.append(r)
         return results
 
 
@@ -122,7 +123,7 @@ class CompletionProvider(object):
     PRIORITY = 0
 
     def preload(self, code, fileEncoding, filePath):
-        return [Completion("")]
+        return None
 
     def complete(self, code, line, column, completionPrefix, filePath, fileEncoding):
         """
@@ -327,8 +328,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             keys = self.editor.settings.value("triggerKeys",
                                               section="codeCompletion")
             for k in keys:
-                if int(k) == event.key():
-                    logger.debug("CC: Key trigger")
+                # print("ek:", event.key())
+                if chr(int(k)) == event.text():
+                    logger.info("CC: Key trigger")
                     self.requestCompletion(immediate=True)
                     return
             if not navigationKey and int(event.modifiers()) == 0:
