@@ -35,6 +35,7 @@ if sys.version_info[0] == 3:
 else:
     import thread
 
+
 class memoized(object):
     """
     Decorator. Caches a function's return value each time it is called.
@@ -557,6 +558,7 @@ class SubprocessServer(object):
             # print(id, worker, results)
             self.signals.workCompleted.emit(caller_id, worker, results)
 
+
 def childProcess(conn):
     """
     This is the child process. It run endlessly waiting for incoming work
@@ -570,7 +572,10 @@ def childProcess(conn):
         caller_id = data[0]
         worker = data[1]
         setattr(worker, "processDict", dict)
-        thread.start_new_thread(workerThread, (conn, caller_id, worker))
+        if sys.platform == "win32":
+            workerThread(conn, caller_id, worker)
+        else:
+            thread.start_new_thread(workerThread, (conn, caller_id, worker))
 
 
 def workerThread(conn, caller_id, worker):
@@ -583,12 +588,14 @@ def workerThread(conn, caller_id, worker):
 
     :param worker: worker instance
     """
+    print("Work")
     try:
         results = worker()
     except Exception as e:
         logger.critical(e)
         results = []
     conn.send([caller_id, worker, results])
+    print("Finished")
 
 
 if __name__ == '__main__':
