@@ -331,7 +331,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             for k in keys:
                 if chr(int(k)) == event.text():
                     logger.debug("CC: Key trigger")
-                    self.requestCompletion(immediate=True)
+                    self.requestCompletion(immediate=False)
                     return
             if not navigationKey and int(event.modifiers()) == 0:
                 # detect auto trigger symbols symbols such as ".", "->"
@@ -367,7 +367,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @QtCore.Slot()
     def __setWaitCursor(self):
-        print("Set wait cursor")
         self.editor.setCursor(QtCore.Qt.WaitCursor)
 
     def __isLastCharEndOfWord(self):
