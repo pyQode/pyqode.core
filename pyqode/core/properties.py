@@ -90,7 +90,13 @@ class PropertyRegistry(QtCore.QObject):
         return self.__dict[section]
 
     def copy(self, propertyRegistry):
-        self.__dict = propertyRegistry.__dict
+        #self.__dict = propertyRegistry.__dict
+        #self.__dict = copy.copy(propertyRegistry.__dict)
+        for sk, sv in propertyRegistry.__dict.items():
+            for pk, pv in sv.items():
+                if sk in self.__dict:
+                    if pk in self.__dict[sk]:
+                        self.__dict[sk][pk] = pv
         self.valueChanged.emit("", "")
 
     def clone(self):

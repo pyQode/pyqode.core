@@ -300,7 +300,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             if filename.endswith("~"):
                 filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
-            print(self._lexer)
         except ClassNotFound:
             logger.warning("Failed to find lexer from filename %s" % filename)
             self._lexer = None

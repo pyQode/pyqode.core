@@ -40,7 +40,6 @@ def readme():
 requirements = ['pygments']
 
 packages = find_packages()
-print("PACKAGES:", packages)
 setup(
     name='pyqode-core',
     namespace_packages=['pyqode'],
