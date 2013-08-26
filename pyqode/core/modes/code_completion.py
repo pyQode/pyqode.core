@@ -323,24 +323,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__hidePopup()
             else:
                 self.__showPopup()
-        # also check for trigger keys
-        keys = self.editor.settings.value("triggerKeys",
-                                          section="codeCompletion")
-        for k in keys:
-            if chr(int(k)) == event.text():
-                logger.debug("CC: Key trigger")
-                self.__hidePopup()
-                self.requestCompletion(immediate=False)
-                return
-        if not navigationKey and int(event.modifiers()) == 0:
-            # detect auto trigger symbols symbols such as ".", "->"
+        # Also check for user defined trigger symbols such as ".", "->", etc...
+        if not navigationKey:
             tc = self.editor.selectWordUnderCursor()
             tc.setPosition(tc.position())
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
             textToCursor = tc.selectedText()
             for symbol in symbols:
                 if textToCursor.endswith(symbol):
-                    logger.debug("CC: Symbols trigger")
+                    logger.warning("CC: Symbols trigger")
+                    print("CC")
                     self.requestCompletion(immediate=False)
                     return
             if isPrintable:
