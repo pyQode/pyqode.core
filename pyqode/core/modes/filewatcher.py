@@ -83,7 +83,7 @@ class FileWatcherMode(Mode):
         if len(self.__fileSystemWatcher.files()):
             self.__fileSystemWatcher.removePaths(
                 self.__fileSystemWatcher.files())
-        if path not in self.__fileSystemWatcher.files():
+        if path and path not in self.__fileSystemWatcher.files():
             self.__fileSystemWatcher.addPath(path)
 
     @QtCore.Slot()
