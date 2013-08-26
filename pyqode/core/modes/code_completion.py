@@ -278,7 +278,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
 
-
     def __onKeyPressed(self, event):
         QtGui.QToolTip.hideText()
         isShortcut = self.__isShortcut(event)
@@ -333,27 +332,26 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__hidePopup()
                 self.requestCompletion(immediate=False)
                 return
-        if not self.__completer.popup().isVisible():
-            if not navigationKey and int(event.modifiers()) == 0:
-                # detect auto trigger symbols symbols such as ".", "->"
-                tc = self.editor.selectWordUnderCursor()
-                tc.setPosition(tc.position())
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                textToCursor = tc.selectedText()
-                for symbol in symbols:
-                    if textToCursor.endswith(symbol):
-                        logger.debug("CC: Symbols trigger")
-                        self.requestCompletion(immediate=False)
-                        return
-                if isPrintable:
-                    prefixLen = len(self.completionPrefix)
-                    if prefixLen >= self.editor.settings.value(
-                            "triggerLength", section="codeCompletion"):
-                        logger.debug("CC: Len trigger")
-                        self.requestCompletion()
-                        return
-            if self.completionPrefix == "":
-                return self.__hidePopup()
+        if not navigationKey and int(event.modifiers()) == 0:
+            # detect auto trigger symbols symbols such as ".", "->"
+            tc = self.editor.selectWordUnderCursor()
+            tc.setPosition(tc.position())
+            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+            textToCursor = tc.selectedText()
+            for symbol in symbols:
+                if textToCursor.endswith(symbol):
+                    logger.debug("CC: Symbols trigger")
+                    self.requestCompletion(immediate=False)
+                    return
+            if isPrintable:
+                prefixLen = len(self.completionPrefix)
+                if prefixLen >= self.editor.settings.value(
+                        "triggerLength", section="codeCompletion"):
+                    logger.debug("CC: Len trigger")
+                    self.requestCompletion()
+                    return
+        if self.completionPrefix == "":
+            return self.__hidePopup()
 
     def __onCompletionChanged(self, completion):
         self.__currentCompletion = completion
