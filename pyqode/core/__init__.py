@@ -51,6 +51,7 @@ from pyqode.core.modes import CompletionProvider
 from pyqode.core.modes import Completion
 from pyqode.core.modes import DocumentWordCompletionProvider
 from pyqode.core.modes import FileWatcherMode
+from pyqode.core.modes import IndenterMode
 from pyqode.core.panel import Panel
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
@@ -136,6 +137,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(ZoomMode())
         self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
+        self.installMode(IndenterMode())
         self.codeCompletionMode.addCompletionProvider(
             DocumentWordCompletionProvider())
         self.installMode(SymbolMatcherMode())
@@ -152,7 +154,7 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider", "FileWatcherMode",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "AutoIndentMode", "PanelPosition", "TextDecoration",
+           "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "getUiDirectory", "getRcDirectory",
            "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
