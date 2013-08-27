@@ -174,6 +174,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__cursorLine = -1
         self.__cancelNext = False
         self.__preloadFinished = False
+        self.__requestCnt = 0
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -275,6 +276,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             all_results = []
             for res in results:
                 all_results += res
+            self.__requestCnt -= 1
             self.__showCompletions(all_results)
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
             self.__preloadFinished = True
@@ -326,27 +328,29 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 self.__showPopup()
         # text triggers
-        if isPrintable and event.text() != " ":
-            print(isPrintable, event.text(), len(event.text()), ord(event.text()))
-            # trigger symbols
-            tc = self.editor.selectWordUnderCursor()
-            tc.setPosition(tc.position())
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-            textToCursor = tc.selectedText()
-            for symbol in symbols:
-                if textToCursor.endswith(symbol):
-                    logger.warning("CC: Symbols trigger")
-                    self.requestCompletion(immediate=False)
+        if isPrintable:
+            if event.text() == " ":
+                self.__cancelNext = bool(self.__requestCnt)
+            else:
+                # trigger symbols
+                tc = self.editor.selectWordUnderCursor()
+                tc.setPosition(tc.position())
+                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                textToCursor = tc.selectedText()
+                for symbol in symbols:
+                    if textToCursor.endswith(symbol):
+                        logger.warning("CC: Symbols trigger")
+                        self.requestCompletion(immediate=False)
+                        return
+                # trigger length
+                prefixLen = len(self.completionPrefix)
+                if prefixLen >= self.editor.settings.value(
+                        "triggerLength", section="codeCompletion"):
+                    logger.debug("CC: Len trigger")
+                    self.requestCompletion()
                     return
-            # trigger length
-            prefixLen = len(self.completionPrefix)
-            if prefixLen >= self.editor.settings.value(
-                    "triggerLength", section="codeCompletion"):
-                logger.debug("CC: Len trigger")
-                self.requestCompletion()
-                return
-        if self.completionPrefix == "":
-            return self.__hidePopup()
+            if self.completionPrefix == "":
+                return self.__hidePopup()
 
     def __onCompletionChanged(self, completion):
         self.__currentCompletion = completion
@@ -380,8 +384,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def __showCompletions(self, completions):
+        print("ShowCompletions", self.__cancelNext)
         # user typed too fast: end of word char has been inserted
-        if self.__isLastCharEndOfWord() or self.completionPrefix == "":
+        if self.__isLastCharEndOfWord():
             return
         # user typed too fast: the user already typed the only suggestion we
         # have
@@ -418,8 +423,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
-        if self.__jobRunner.jobRunning:
-            self.__cancelNext = True
         QtGui.QToolTip.hideText()
 
     def __showPopup(self):
@@ -558,6 +561,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.waitCursorRequested.emit()
         worker = CompletionWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
+        self.__requestCnt += 1
 
     def __preload(self, *args):
         self.preLoadStarted.emit()
