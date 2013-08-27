@@ -564,6 +564,9 @@ def childProcess(conn):
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
+    if hasattr(sys, "frozen"):
+        sys.stdout = open('stdout.log', 'w')
+        sys.stderr = open('stderr.log', 'w')
     dict = {}  # a global data dictionary
     while True:  # run endlessly
         time.sleep(0.1)
