@@ -26,10 +26,7 @@ from pyqode.qt.QtGui import QTextCursor, QKeyEvent
 
 
 class AutoIndentMode(Mode):
-    """ A basic auto indent mode that provides a basic auto indentation based 
-    on the previous line indentation.
-
-    This mode can be extended by overriding the _getIndent method.
+    """ Automatically indents the text on new line.
     """
     #: Mode identifier
     IDENTIFIER = "autoIndentMode"
