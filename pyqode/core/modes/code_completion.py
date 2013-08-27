@@ -21,6 +21,8 @@
 """
 This module contains the code completion mode and the related classes.
 """
+import re
+import sys
 from pyqode.core import constants
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
@@ -159,7 +161,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     selectWholeWord=True).selectedText()[0]
             except IndexError:
                 pass
-        return prefix
+        return prefix.strip()
 
     def __init__(self):
         Mode.__init__(self)
@@ -308,7 +310,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerSymbols", section="codeCompletion")
         isEndOfWordChar = False
         if isPrintable:
-            k = str(chr(event.key()))
+            k = event.text()
             seps = constants.WORD_SEPARATORS
             isEndOfWordChar = (k in seps and not k in symbols)
         if self.__completer.popup().isVisible():
@@ -323,8 +325,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__hidePopup()
             else:
                 self.__showPopup()
-        # Also check for user defined trigger symbols such as ".", "->", etc...
-        if not navigationKey:
+        # text triggers
+        if isPrintable and event.text() != " ":
+            print(isPrintable, event.text(), len(event.text()), ord(event.text()))
+            # trigger symbols
             tc = self.editor.selectWordUnderCursor()
             tc.setPosition(tc.position())
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
@@ -332,16 +336,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             for symbol in symbols:
                 if textToCursor.endswith(symbol):
                     logger.warning("CC: Symbols trigger")
-                    print("CC")
                     self.requestCompletion(immediate=False)
                     return
-            if isPrintable:
-                prefixLen = len(self.completionPrefix)
-                if prefixLen >= self.editor.settings.value(
-                        "triggerLength", section="codeCompletion"):
-                    logger.debug("CC: Len trigger")
-                    self.requestCompletion()
-                    return
+            # trigger length
+            prefixLen = len(self.completionPrefix)
+            if prefixLen >= self.editor.settings.value(
+                    "triggerLength", section="codeCompletion"):
+                logger.debug("CC: Len trigger")
+                self.requestCompletion()
+                return
         if self.completionPrefix == "":
             return self.__hidePopup()
 
@@ -378,7 +381,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __showCompletions(self, completions):
         # user typed too fast: end of word char has been inserted
-        if self.__isLastCharEndOfWord():
+        if self.__isLastCharEndOfWord() or self.completionPrefix == "":
             return
         # user typed too fast: the user already typed the only suggestion we
         # have
@@ -467,13 +470,40 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return val and event.key() == triggerKey
 
     @staticmethod
+    def strip_control_characters(input):
+        if input:
+
+            # unicode invalid characters
+            if sys.version_info[0] == 2:
+                RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                             u'|' + \
+                             u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                             (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+            else:
+                RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                             u'|' + \
+                             u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                             (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
+            input = re.sub(RE_ILLEGAL, "", input)
+            # ascii control characters
+            input = re.sub(r"[\x01-\x1F\x7F]", "", input)
+        return input
+
+    @staticmethod
     def __isPrintableKeyEvent(event):
-        try:
-            chr(event.key())
-        except ValueError:
-            return False
-        else:
-            return int(event.modifiers()) == 0
+        return len(CodeCompletionMode.strip_control_characters(
+            event.text())) == 1
+        #print("TXT", event.text())
+        #try:
+        #    chr(event.key())
+        #except ValueError:
+        #    return False
+        #else:
+        #    return int(event.modifiers()) == 0
 
     @staticmethod
     @memoized
