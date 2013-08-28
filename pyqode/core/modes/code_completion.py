@@ -340,6 +340,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 for symbol in symbols:
                     if textToCursor.endswith(symbol):
                         logger.warning("CC: Symbols trigger")
+                        self.__hidePopup()
                         self.requestCompletion(immediate=False)
                         return
                 # trigger length
