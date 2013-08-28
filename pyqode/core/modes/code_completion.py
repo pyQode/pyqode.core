@@ -289,10 +289,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.requestCompletion()
             event.accept()
 
-    def __onKeyReleased(self, event):
-        if self.__isShortcut(event):
-            return
-        isPrintable = self.__isPrintableKeyEvent(event)
+    def __isNavigationKey(self, event):
         navigationKey = (event.key() == QtCore.Qt.Key_Backspace or
                          event.key() == QtCore.Qt.Key_Back or
                          event.key() == QtCore.Qt.Key_Delete or
@@ -303,13 +300,24 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                          event.key() == QtCore.Qt.Key_Space or
                          event.key() == QtCore.Qt.Key_End or
                          event.key() == QtCore.Qt.Key_Home)
-        symbols = self.editor.settings.value(
-            "triggerSymbols", section="Code completion")
+        return navigationKey
+
+    def __isEndOfWordChar(self, event, isPrintable, symbols):
         isEndOfWordChar = False
-        if isPrintable:
+        if isPrintable and symbols:
             k = event.text()
             seps = constants.WORD_SEPARATORS
             isEndOfWordChar = (k in seps and not k in symbols)
+        return isEndOfWordChar
+
+    def __onKeyReleased(self, event):
+        if self.__isShortcut(event):
+            return
+        isPrintable = self.__isPrintableKeyEvent(event)
+        navigationKey = self.__isNavigationKey(event)
+        symbols = self.editor.settings.value(
+            "triggerSymbols", section="Code completion")
+        isEndOfWordChar = self.__isEndOfWordChar(event, isPrintable, symbols)
         if self.__completer.popup().isVisible():
             # Update completion prefix
             self.__completer.setCompletionPrefix(self.completionPrefix)
@@ -328,16 +336,17 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__cancelNext = bool(self.__requestCnt)
             else:
                 # trigger symbols
-                tc = self.editor.selectWordUnderCursor()
-                tc.setPosition(tc.position())
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                textToCursor = tc.selectedText()
-                for symbol in symbols:
-                    if textToCursor.endswith(symbol):
-                        logger.debug("CC: Symbols trigger")
-                        self.__hidePopup()
-                        self.requestCompletion()
-                        return
+                if symbols:
+                    tc = self.editor.selectWordUnderCursor()
+                    tc.setPosition(tc.position())
+                    tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                    textToCursor = tc.selectedText()
+                    for symbol in symbols:
+                        if textToCursor.endswith(symbol):
+                            logger.debug("CC: Symbols trigger")
+                            self.__hidePopup()
+                            self.requestCompletion()
+                            return
                 # trigger length
                 if not self.__completer.popup().isVisible():
                     prefixLen = len(self.completionPrefix)
