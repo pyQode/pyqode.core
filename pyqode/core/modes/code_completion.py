@@ -284,7 +284,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__handleCompleterEvents(event)
             if isShortcut:
                 event.accept()
-        elif isShortcut:
+        if isShortcut:
             self.requestCompletion()
             event.accept()
 
