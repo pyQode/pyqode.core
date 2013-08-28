@@ -168,13 +168,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
         self.__triggerKey = None
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=500)
+        # use to display a waiting cursor if completion provider takes too much
+        # time
+        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1000)
         self.__providers = []
         self.__tooltips = {}
         self.__cursorLine = -1
         self.__cancelNext = False
         self.__preloadFinished = False
         self.__requestCnt = 0
+        self.__lastCompletionPrefix = ""
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -189,28 +192,19 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
-    def requestCompletion(self, immediate=False):
-        if not self.__preloadFinished:
+    def requestCompletion(self):
+        if not self.__preloadFinished or self.__requestCnt:
             return
-        code = self.editor.toPlainText()
-        if not immediate:
-            self.__jobRunner.requestJob(
-                self.__collectCompletions, False,
-                code, self.editor.cursorPosition[0], self.editor.cursorPosition[1],
-                self.completionPrefix, self.editor.filePath,
-                self.editor.fileEncoding)
-        else:
-            self.__jobRunner.cancelRequests()
-            self.__collectCompletions(code, self.editor.cursorPosition[0],
-                self.editor.cursorPosition[1], self.completionPrefix,
-                self.editor.filePath, self.editor.fileEncoding)
+        self.__requestCnt += 1
+        self.__collectCompletions(
+            self.editor.toPlainText(), self.editor.cursorPosition[0],
+            self.editor.cursorPosition[1], self.completionPrefix,
+            self.editor.filePath, self.editor.fileEncoding)
 
     def requestPreload(self):
         self.__preloadFinished = False
         code = self.editor.toPlainText()
-        self.__jobRunner.requestJob(
-            self.__preload, False, code,
-            self.editor.filePath, self.editor.fileEncoding)
+        self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
     def _onInstall(self, editor):
         if CodeCompletionMode.SERVER is None:
@@ -291,7 +285,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if isShortcut:
                 event.accept()
         elif isShortcut:
-            self.requestCompletion(immediate=True)
+            self.requestCompletion()
             event.accept()
 
     def __onKeyReleased(self, event):
@@ -339,17 +333,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 textToCursor = tc.selectedText()
                 for symbol in symbols:
                     if textToCursor.endswith(symbol):
-                        logger.warning("CC: Symbols trigger")
+                        logger.debug("CC: Symbols trigger")
                         self.__hidePopup()
-                        self.requestCompletion(immediate=False)
+                        self.requestCompletion()
                         return
                 # trigger length
-                prefixLen = len(self.completionPrefix)
-                if prefixLen >= self.editor.settings.value(
-                        "triggerLength", section="codeCompletion"):
-                    logger.debug("CC: Len trigger")
-                    self.requestCompletion()
-                    return
+                if not self.__completer.popup().isVisible():
+                    prefixLen = len(self.completionPrefix)
+                    if prefixLen == self.editor.settings.value(
+                            "triggerLength", section="codeCompletion"):
+                        logger.debug("CC: Len trigger")
+                        self.requestCompletion()
+                        return
             if self.completionPrefix == "":
                 return self.__hidePopup()
 
@@ -385,7 +380,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def __showCompletions(self, completions):
-        print("ShowCompletions", self.__cancelNext)
+        self.__jobRunner.cancelRequests()
         # user typed too fast: end of word char has been inserted
         if self.__isLastCharEndOfWord():
             return
@@ -424,12 +419,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
+        print("Hide tooltip from hide popup")
         QtGui.QToolTip.hideText()
 
     def __showPopup(self):
         cnt = self.__completer.completionCount()
         fullPrefix = self.editor.selectWordUnderCursor(
             selectWholeWord=True).selectedText()
+        print(fullPrefix)
         if (fullPrefix == self.__currentCompletion) and cnt == 1:
             self.__hidePopup()
         else:
@@ -559,10 +556,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             QtGui.QToolTip.hideText()
 
     def __collectCompletions(self, *args):
-        self.waitCursorRequested.emit()
+        self.__jobRunner.requestJob(self.__setWaitCursor, False)
         worker = CompletionWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
-        self.__requestCnt += 1
 
     def __preload(self, *args):
         self.preLoadStarted.emit()

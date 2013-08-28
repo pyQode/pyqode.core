@@ -1055,9 +1055,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 blockFound = True
                 break
         if not blockFound:
+            if self.__previousTooltipBlockNumber != -1:
+                QtGui.QToolTip.hideText()
             self.__previousTooltipBlockNumber = -1
             self.__tooltipRunner.cancelRequests()
-            QtGui.QToolTip.hideText()
         self.mouseMoved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
