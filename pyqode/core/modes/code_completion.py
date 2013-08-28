@@ -219,17 +219,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__completer.setModel(QtGui.QStandardItemModel())
         Mode._onInstall(self, editor)
         self.editor.settings.addProperty(
-            "triggerKey", int(QtCore.Qt.Key_Space), section="codeCompletion")
+            "triggerKey", int(QtCore.Qt.Key_Space), section="Code completion")
         self.__triggerLength = self.editor.settings.addProperty(
-            "triggerLength", 1, section="codeCompletion")
+            "triggerLength", 1, section="Code completion")
         self.editor.settings.addProperty(
-            "triggerSymbols", ["."], section="codeCompletion")
+            "triggerSymbols", ["."], section="Code completion")
         self.editor.settings.addProperty(
-            "triggerKeys", [int(QtCore.Qt.Key_Period)], section="codeCompletion")
+            "triggerKeys", [int(QtCore.Qt.Key_Period)],
+            section="Code completion")
         self.editor.settings.addProperty("showTooltips", True,
-                                         section="codeCompletion")
+                                         section="Code completion")
         self.editor.settings.addProperty("caseSensitive", False,
-                                         section="codeCompletion")
+                                         section="Code completion")
 
     def _onUninstall(self):
         self.__completer = None
@@ -303,7 +304,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                          event.key() == QtCore.Qt.Key_End or
                          event.key() == QtCore.Qt.Key_Home)
         symbols = self.editor.settings.value(
-            "triggerSymbols", section="codeCompletion")
+            "triggerSymbols", section="Code completion")
         isEndOfWordChar = False
         if isPrintable:
             k = event.text()
@@ -341,7 +342,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 if not self.__completer.popup().isVisible():
                     prefixLen = len(self.completionPrefix)
                     if prefixLen == self.editor.settings.value(
-                            "triggerLength", section="codeCompletion"):
+                            "triggerLength", section="Code completion"):
                         logger.debug("CC: Len trigger")
                         self.requestCompletion()
                         return
@@ -372,7 +373,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             lastChar = l[len(l) - 1]
             if lastChar != ' ':
                 symbols = self.editor.settings.value(
-                    "triggerSymbols", section="codeCompletion")
+                    "triggerSymbols", section="Code completion")
                 seps = constants.WORD_SEPARATORS
                 return lastChar in seps and not lastChar in symbols
             return False
@@ -419,19 +420,17 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self.__completer.popup().hide()
         self.__jobRunner.cancelRequests()
-        print("Hide tooltip from hide popup")
         QtGui.QToolTip.hideText()
 
     def __showPopup(self):
         cnt = self.__completer.completionCount()
         fullPrefix = self.editor.selectWordUnderCursor(
             selectWholeWord=True).selectedText()
-        print(fullPrefix)
         if (fullPrefix == self.__currentCompletion) and cnt == 1:
             self.__hidePopup()
         else:
             if self.editor.settings.value("caseSensitive",
-                                          section="codeCompletion"):
+                                          section="Code completion"):
                 self.__completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
             else:
                 self.__completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -467,7 +466,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         val = int(event.modifiers() & QtCore.Qt.ControlModifier)
         triggerKey = int(self.editor.settings.value(
-            "triggerKey", section="codeCompletion"))
+            "triggerKey", section="Code completion"))
         return val and event.key() == triggerKey
 
     @staticmethod
@@ -541,7 +540,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __displayCompletionTooltip(self, completion):
         if not self.editor.settings.value("showTooltips",
-                                          section="codeCompletion"):
+                                          section="Code completion"):
             return
         if not completion in self.__tooltips:
             QtGui.QToolTip.hideText()
