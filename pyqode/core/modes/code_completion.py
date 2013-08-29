@@ -388,6 +388,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
         except IndexError:
             return False
+        except TypeError:
+            return False  # no symbols
 
     def __showCompletions(self, completions):
         self.__jobRunner.cancelRequests()
