@@ -564,6 +564,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             QtGui.QToolTip.hideText()
 
     def __collectCompletions(self, *args):
+        logger.debug("Completion requested")
         self.__jobRunner.requestJob(self.__setWaitCursor, False)
         worker = CompletionWorker(self.__providers, *args)
         CodeCompletionMode.SERVER.requestWork(self, worker)
