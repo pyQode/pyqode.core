@@ -491,8 +491,6 @@ class SubprocessServer(object):
 
     def __init__(self, name="pyQodeSubprocessServer", pollInterval=500,
                  autoCloseOnQuit=True):
-        # todo: is it good do it here or should it be left to the user ?
-        multiprocessing.freeze_support()
         self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
 
