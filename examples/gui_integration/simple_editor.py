@@ -25,13 +25,14 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 import pyqode.core
 from pyqode.qt import QtCore, QtGui
-from ui import loadUi
+from ui.simple_editor_ui import Ui_MainWindow
 
 
-class SimpleEditorWindow(QtGui.QMainWindow):
+class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        loadUi("simple_editor.ui", self, rcFilename="simple_editor.qrc")
+        Ui_MainWindow.__init__(self)
+        self.setupUi(self)
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         self.actionOpen.setIcon(
@@ -124,6 +125,7 @@ def main():
     win.show()
     print(win.editor.settings.dump())
     print(win.editor.style.dump())
+    print(app)
     app.exec_()
 
 if __name__ == "__main__":

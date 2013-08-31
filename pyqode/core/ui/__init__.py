@@ -19,28 +19,13 @@
 # with pyQode. If not, see http://www.gnu.org/licenses/.
 #
 """
-Contains the ui needed by the various widgets. (Resources/Icons are stored in
-the rc subdirectory.
+This package contains the ui files and their compiled version.
+
+.. warning: To make it easy to use the *.ui and *.qrc with all python version
+            and different qt bindings, we compile the ui and qrc file using
+            pyuic4/pyrcc4 (with -py3 switchà then manually edit those files
+            to import QtCore and QtGui from pyqode.qt instead of PyQt4.
+
+            The compile_ui script automates this task, simply run it to update
+            all *.ui/*.qrc.
 """
-import os
-import pyqode.qt
-
-
-def loadUi(uiFileName, baseInstance, rcFilename=None):
-    """
-    Loads an ui file from the ui package and load the specified qrc (must
-    already be compiled)
-
-    :param uiFileName: The ui file name (without path)
-
-    :param baseInstance: The baseInstance on which the ui is built
-
-    :param rcFilename: The optional qrc file to load
-    """
-    uiFile = os.path.join(os.path.abspath(os.path.join(__file__, "..")),
-                          uiFileName)
-    if rcFilename:
-        rcFile = os.path.join(os.path.abspath(os.path.join(__file__, "..")),
-                              rcFilename)
-        pyqode.qt.importRc(rcFile)
-    pyqode.qt.loadUi(uiFile, baseInstance)

@@ -75,38 +75,38 @@ from pyqode.core.system import memoized
 __version__ = "1.0b"
 
 
-def getUiDirectory():
-    """
-    Gets the pyqode-core ui directory
-    """
-    return os.path.join(os.path.dirname(__file__), "ui")
+# def getUiDirectory():
+#     """
+#     Gets the pyqode-core ui directory
+#     """
+#     return os.path.join(os.path.dirname(__file__), "ui")
+#
+#
+# def getRcDirectory():
+#     """
+#     Gets the pyqode-core rc directory
+#     """
+#     return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui",
+#                         "rc")
+#
+# # import the core rc modules
+# if os.environ["QT_API"] == "PyQt":
+#     from pyqode.core.ui import rc_pyqode_core
+# else:
+#     from pyqode.core.ui import pyqode_icons_pyside_rc
 
 
-def getRcDirectory():
-    """
-    Gets the pyqode-core rc directory
-    """
-    return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui",
-                        "rc")
-
-# import the core rc modules
-if os.environ["QT_API"] == "PyQt":
-    from pyqode.core.ui import pyqode_icons_pyqt_rc
-else:
-    from pyqode.core.ui import pyqode_icons_pyside_rc
-
-
-def cxFreeze_getDataFiles():
-    """
-    Returns the core package's data files in a format suitable for cx_freeze.
-    """
-    uiDir = os.path.join(os.path.dirname(__file__), "ui")
-    dataFiles = []
-    for f in glob(os.path.join(uiDir, "*.ui")):
-        assert os.path.exists(f)
-        dataFiles += [tuple((f, os.path.join("pyqode_ui/",
-                                            os.path.split(f)[1])))]
-    return dataFiles
+# def cxFreeze_getDataFiles():
+#     """
+#     Returns the core package's data files in a format suitable for cx_freeze.
+#     """
+#     uiDir = os.path.join(os.path.dirname(__file__), "ui")
+#     dataFiles = []
+#     for f in glob(os.path.join(uiDir, "*.ui")):
+#         assert os.path.exists(f)
+#         dataFiles += [tuple((f, os.path.join("pyqode_ui/",
+#                                             os.path.split(f)[1])))]
+#     return dataFiles
 
 #
 # Example of a generic code editor widgey

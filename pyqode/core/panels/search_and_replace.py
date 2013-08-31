@@ -26,10 +26,10 @@ from pyqode.core import constants
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.panel import Panel
 from pyqode.core.system import DelayJobRunner, driftColor
-from pyqode.core.ui import loadUi
+from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
 
 
-class SearchAndReplacePanel(Panel, DelayJobRunner):
+class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     """
     This panel allow the user to search and replace some text in the current
     editor.
@@ -111,7 +111,9 @@ class SearchAndReplacePanel(Panel, DelayJobRunner):
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
-        loadUi("search_panel.ui", self)
+        Ui_SearchPanel.__init__(self)
+        self.setupUi(self)
+
         #: Occurrences counter
         self.cptOccurrences = 0
         self.__previousStylesheet = ""
