@@ -35,6 +35,7 @@ if sys.version_info[0] == 3:
 else:
     import thread
 
+
 class memoized(object):
     """
     Decorator. Caches a function's return value each time it is called.
@@ -372,7 +373,7 @@ class JobRunner(object):
                 self.__jobQueue[0].start()
             return True
         else:
-            logger.warning("Failed to queue job. All threads are used")
+            logger.debug("Failed to queue job. All threads are used")
             return False
 
     def __executeNext(self):
@@ -490,8 +491,6 @@ class SubprocessServer(object):
 
     def __init__(self, name="pyQodeSubprocessServer", pollInterval=500,
                  autoCloseOnQuit=True):
-        # todo: is it good do it here or should it be left to the user ?
-        multiprocessing.freeze_support()
         self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
 
@@ -557,11 +556,15 @@ class SubprocessServer(object):
             # print(id, worker, results)
             self.signals.workCompleted.emit(caller_id, worker, results)
 
+
 def childProcess(conn):
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
+    if hasattr(sys, "frozen"):
+        sys.stdout = open('stdout.log', 'w')
+        sys.stderr = open('stderr.log', 'w')
     dict = {}  # a global data dictionary
     while True:  # run endlessly
         time.sleep(0.1)
@@ -570,7 +573,10 @@ def childProcess(conn):
         caller_id = data[0]
         worker = data[1]
         setattr(worker, "processDict", dict)
-        thread.start_new_thread(workerThread, (conn, caller_id, worker))
+        if sys.platform == "win32":
+            workerThread(conn, caller_id, worker)
+        else:
+            thread.start_new_thread(workerThread, (conn, caller_id, worker))
 
 
 def workerThread(conn, caller_id, worker):

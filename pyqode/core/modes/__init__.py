@@ -38,7 +38,8 @@ from pyqode.core.modes.right_margin import RightMarginMode
 from pyqode.core.modes.zoom import ZoomMode
 from pyqode.core.modes.pygments_syntax_highlighter import PygmentsSyntaxHighlighter
 from pyqode.core.modes.pygments_syntax_highlighter import PYGMENTS_STYLES
-from pyqode.core.modes.indenter import AutoIndentMode
+from pyqode.core.modes.autoindent import AutoIndentMode
+from pyqode.core.modes.indenter import IndenterMode
 
 
 __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
@@ -46,6 +47,6 @@ __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "CHECK_TRIGGER_TXT_SAVED", "CHECK_TRIGGER_TXT_CHANGED",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider", "FileWatcherMode",
-           "SymbolMatcherMode",
+           "SymbolMatcherMode", "IndenterMode"
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "PYGMENTS_STYLES", "AutoIndentMode"]

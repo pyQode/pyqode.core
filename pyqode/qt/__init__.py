@@ -185,7 +185,7 @@ if not select():
                       "PyQt or PySide to user pyqode. Returning with "
                       "error code -1")
     sys.exit(-1)
-__logger.debug("Using %s" % os.environ["QT_API"])
+# __logger.debug("Using %s" % os.environ["QT_API"])
 
 from pyqode.qt import QtCore, QtGui
 from pyqode.qt.ui import loadUi, importRc

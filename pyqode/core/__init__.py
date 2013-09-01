@@ -25,9 +25,6 @@ code editor widget
 #
 # exposes public core api
 #
-from glob import glob
-import os
-import sys
 from pyqode.core import constants
 from pyqode.core import logger
 from pyqode.core.constants import PanelPosition
@@ -51,6 +48,7 @@ from pyqode.core.modes import CompletionProvider
 from pyqode.core.modes import Completion
 from pyqode.core.modes import DocumentWordCompletionProvider
 from pyqode.core.modes import FileWatcherMode
+from pyqode.core.modes import IndenterMode
 from pyqode.core.panel import Panel
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
@@ -71,44 +69,11 @@ from pyqode.core.system import memoized
 
 
 #: pyqode-core version
-__version__ = "1.0b"
+__version__ = "1.0b2"
 
-
-def getUiDirectory():
-    """
-    Gets the pyqode-core ui directory
-    """
-    return os.path.join(os.path.dirname(__file__), "ui")
-
-
-def getRcDirectory():
-    """
-    Gets the pyqode-core rc directory
-    """
-    return os.path.join(os.path.abspath(os.path.join(__file__, "..")), "ui",
-                        "rc")
-
-# import the core rc modules
-if os.environ["QT_API"] == "PyQt":
-    from pyqode.core.ui import pyqode_icons_pyqt_rc
-else:
-    from pyqode.core.ui import pyqode_icons_pyside_rc
-
-
-def cxFreeze_getDataFiles():
-    """
-    Returns the core package's data files in a format suitable for cx_freeze.
-    """
-    uiDir = os.path.join(os.path.dirname(__file__), "ui")
-    dataFiles = []
-    for f in glob(os.path.join(uiDir, "*.ui")):
-        assert os.path.exists(f)
-        dataFiles += [tuple((f, os.path.join("pyqode_ui/",
-                                            os.path.split(f)[1])))]
-    return dataFiles
 
 #
-# Example of a generic code editor widgey
+# Example of a generic code editor widget
 #
 class QGenericCodeEdit(QCodeEdit):
     """
@@ -136,6 +101,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(ZoomMode())
         self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
+        self.installMode(IndenterMode())
         self.codeCompletionMode.addCompletionProvider(
             DocumentWordCompletionProvider())
         self.installMode(SymbolMatcherMode())
@@ -152,11 +118,8 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "CodeCompletionMode", "CompletionProvider", "Completion",
            "DocumentWordCompletionProvider", "FileWatcherMode",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "AutoIndentMode", "PanelPosition", "TextDecoration",
+           "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
-           "DelayJobRunner", "getUiDirectory", "getRcDirectory",
+           "DelayJobRunner",
            "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
            "SubprocessServer", "SymbolMatcherMode"]
-
-if sys.platform == "win32":
-    __all__ += ["cxFreeze_getDataFiles"]

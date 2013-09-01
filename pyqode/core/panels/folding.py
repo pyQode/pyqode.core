@@ -550,12 +550,12 @@ class FoldingPanel(Panel):
             l = self.editor.lineNumber(event.pos().y())
             if result:
                 if l != self.__previousBoxLine:
-                    self.editor.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+                    self.editor.setCursor(QtCore.Qt.PointingHandCursor)
                     self.__previousBoxLine = l
                 return
         if self.__previousBoxLine != -1:
             self.__previousBoxLine = -1
-            self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+            self.editor.setCursor(QtCore.Qt.IBeamCursor)
 
     def __onEditorMousePress(self, event):
         for fi, box in self._foldedBoxes:

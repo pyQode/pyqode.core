@@ -176,7 +176,6 @@ CppLexer.tokens['comment'] = comment_state
 CSharpLexer.tokens['comment'] = comment_state
 
 
-#noinspection PyProtectedMember
 class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     """
     This mode enable syntax highlighting using the pygments library
@@ -301,7 +300,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             if filename.endswith("~"):
                 filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
-            print(self._lexer)
         except ClassNotFound:
             logger.warning("Failed to find lexer from filename %s" % filename)
             self._lexer = None
@@ -313,7 +311,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             logger.warning("Failed to find lexer from mime type %s" % mime)
             self._lexer = None
 
-    #noinspection PyProtectedMember
     def doHighlightBlock(self, text):
         """ Highlight a block of text """
         fn = self.editor.fileName
@@ -339,7 +336,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if hasattr(prev_data, "syntax_stack"):
             self._lexer._saved_state_stack = prev_data.syntax_stack
         elif hasattr(self._lexer, '_saved_state_stack'):
-            #noinspection PyProtectedMember
             del self._lexer._saved_state_stack
 
         # Lex the text using Pygments

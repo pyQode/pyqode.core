@@ -29,8 +29,9 @@ def read_version():
         lines = f.read().splitlines()
         for l in lines:
             if "__version__" in l:
-                return l.split("=")[1].strip()
+                return l.split("=")[1].strip().replace('"', '')
 
+print(read_version())
 
 def readme():
     return str(open('README.rst').read())
@@ -40,25 +41,22 @@ def readme():
 requirements = ['pygments']
 
 packages = find_packages()
-print("PACKAGES:", packages)
 setup(
-    name='pyqode-core',
+    name='pyqode.core',
     namespace_packages=['pyqode'],
     version=read_version(),
-    packages= packages,
+    packages=packages,
     keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
     package_data={'pyqode.core.ui': ['*.ui', '*.qrc', 'rc/*']},
     #package_dir={'pyqode': 'pyqode', "pyqode_designer":},
-    url='https://github.com/ColinDuquesnoy/pyQode-core',
+    url='https://github.com/ColinDuquesnoy/pyqode.core',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
     long_description=readme(),
     install_requires=requirements,
-    entry_points={'gui_scripts':
-                  ['pyqode_designer = pyqode_designer.designer:main'],
-                  'pyqode_plugins':
+    entry_points={'pyqode_plugins':
                   ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
     zip_safe=False
 )

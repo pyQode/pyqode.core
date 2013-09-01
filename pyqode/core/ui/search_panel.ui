@@ -68,7 +68,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="pycode_icons.qrc">:/pycode-icons/rc/edit-find.png</pixmap>
+            <pixmap>:/pycode-icons/rc/edit-find.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -97,8 +97,8 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pycode_icons.qrc">
-             <normaloff>:/pycode-icons/rc/go-up.png</normaloff>:/pycode-icons/rc/go-up.png</iconset>
+            <iconset>
+             <normaloff>:/pyqode_icons/rc/go-up.png</normaloff>:/pyqode_icons/rc/go-up.png</iconset>
            </property>
           </widget>
          </item>
@@ -108,7 +108,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pycode_icons.qrc">
+            <iconset>
              <normaloff>:/pycode-icons/rc/go-down.png</normaloff>:/pycode-icons/rc/go-down.png</iconset>
            </property>
           </widget>
@@ -338,7 +338,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="pycode_icons.qrc">
+            <iconset>
              <normaloff>:/pycode-icons/rc/close.png</normaloff>:/pycode-icons/rc/close.png</iconset>
            </property>
            <property name="iconSize">
@@ -370,7 +370,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="pycode_icons.qrc">:/pycode-icons/rc/edit-find-replace.png</pixmap>
+            <pixmap>:/pycode-icons/rc/edit-find-replace.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -434,7 +434,7 @@
   </layout>
   <action name="actionSearch">
    <property name="icon">
-    <iconset theme="edit-find" resource="pycode_icons.qrc">
+    <iconset theme="edit-find">
      <normaloff>:/pycode-icons/rc/edit-find.png</normaloff>:/pycode-icons/rc/edit-find.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +452,7 @@
   </action>
   <action name="actionActionSearchAndReplace">
    <property name="icon">
-    <iconset theme="edit-find-replace" resource="pycode_icons.qrc">
+    <iconset theme="edit-find-replace">
      <normaloff>:/pycode-icons/rc/edit-find-replace.png</normaloff>:/pycode-icons/rc/edit-find-replace.png</iconset>
    </property>
    <property name="text">
@@ -470,7 +470,7 @@
   </action>
   <action name="actionFindNext">
    <property name="icon">
-    <iconset theme="go-down" resource="pycode_icons.qrc">
+    <iconset theme="go-down">
      <normaloff>:/pycode-icons/rc/go-down.png</normaloff>:/pycode-icons/rc/go-down.png</iconset>
    </property>
    <property name="text">
@@ -488,7 +488,7 @@
   </action>
   <action name="actionFindPrevious">
    <property name="icon">
-    <iconset theme="go-up" resource="pycode_icons.qrc">
+    <iconset theme="go-up">
      <normaloff>:/pycode-icons/rc/go-up.png</normaloff>:/pycode-icons/rc/go-up.png</iconset>
    </property>
    <property name="text">
@@ -517,7 +517,7 @@
   <tabstop>pushButtonClose</tabstop>
  </tabstops>
  <resources>
-  <include location="pycode_icons.qrc"/>
+  <include location="pyqode_core.qrc"/>
  </resources>
  <connections/>
 </ui>
