@@ -3,21 +3,22 @@
 #
 # Manifest template for creating the pyQode source distribution.
 include MANIFEST.in
+# setup, license and readme
 include setup.py
 include COPYING
+include COPYING.lesser
 include README.rst
+# ui sources and resources
 include pyqode/core/ui/*
 include pyqode/core/ui/rc/*
+# doc event if it is completely outdated
 include doc/*
 include doc/source/*
 include doc/source/_static/*
 include doc/source/api/*
+# examples
 include examples/gui_integration/*
 include examples/gui_integration/ui/*
 include examples/gui_integration/ui/rc/*
 include examples/qt_bindings/*
 include examples/styling/*
-
-
-
-

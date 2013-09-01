@@ -69,7 +69,7 @@ from pyqode.core.system import memoized
 
 
 #: pyqode-core version
-__version__ = "1.0b"
+__version__ = "1.0b2"
 
 
 #
