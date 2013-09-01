@@ -483,12 +483,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @staticmethod
     def strip_control_characters(input):
         if input:
-
             # unicode invalid characters
             if sys.version_info[0] == 2:
-                RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             u'|' + \
-                             u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                             '|' + \
+                             '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
                              (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                               unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                               unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
@@ -508,13 +507,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def __isPrintableKeyEvent(event):
         return len(CodeCompletionMode.strip_control_characters(
             event.text())) == 1
-        #print("TXT", event.text())
-        #try:
-        #    chr(event.key())
-        #except ValueError:
-        #    return False
-        #else:
-        #    return int(event.modifiers()) == 0
 
     @staticmethod
     @memoized
