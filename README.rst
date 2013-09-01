@@ -1,7 +1,7 @@
 Python/Qt Code Editor Widget library
 ======================================================
 
-*version 1.0b*
+*version 1.0b2*
 
 .. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode-core.png?branch=master
     :target: https://travis-ci.org/ColinDuquesnoy/pyqode-core
@@ -11,14 +11,25 @@ What is pyQode?
 --------------------
 
 pyQode is a *flexible source code editor widget* for Python Qt
-applications. **pyQode is a library/widget, not an IDE**.
+applications. **pyQode is a library/widget, not an IDE**. You can see it as an
+alternative to QScintilla.$
 
-*pyqode-core* is the foundation package, it contains everything you need
-to create a generic (language independent) code editor widget. It is the
-mandatory requirement for any pyQode extension.
+pyQode is a **namespace packages** made up of the following official packages:
+  * `pyqode.core`_: This is the foundation package, it contains the pyqode base
+    classes (QCodeEdit, Mode, Panel) and a set of builtin modes and panels that
+    are useful for any kind of code editor. With pyqode.core you can already
+    create a generic code editor (similar to gedit, notepad++) with only a few
+    lines of code
+  * `pyqode.python`_: Adds various python specific modes and panels
+  * `pyqode.widgets`_: A set of additional widgets that might be useful when
+                       developing a pyqode based application (QPropertyGrid,
+                       QInteractiveConsole, QEditorTabWidgets, ...)
+  * `pyqode.designer`_: Starts Qt Designer with all the installed pyqode plugins
 
-The base widget (QCodeEdit) is a simple extension of QPlainTextEdit that
-can be customised by adding extensions (modes and panels).
+.. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
+.. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
+.. _pyqode.widgets: https://github.com/ColinDuquesnoy/pyqode.widgets
+.. _pyqode.designer: https://github.com/ColinDuquesnoy/pyqode.designer
 
 Features
 --------
@@ -58,7 +69,7 @@ Installation
 
 ::
 
-    $ pip install pyqode-core
+    $ pip install pyqode.core
 
 Usage
 -----
@@ -98,10 +109,10 @@ Resources
 -  `Documentation`_ *(outdated)*
 -  `Wiki`_
 
-.. _Downloads: https://github.com/ColinDuquesnoy/pyqode-core/releases
-.. _Source repository: https://github.com/ColinDuquesnoy/pyqode-core/
+.. _Downloads: https://github.com/ColinDuquesnoy/pyqode.core/releases
+.. _Source repository: https://github.com/ColinDuquesnoy/pyqode.core/
 .. _Documentation : http://packages.python.org/PCEF
-.. _Wiki: https://github.com/ColinDuquesnoy/pyqode-core/wiki
+.. _Wiki: https://github.com/ColinDuquesnoy/pyqode.core/wiki
 
 Screenshots
 ------------
@@ -110,30 +121,30 @@ Here are a few screenshots of the gui integration example on several different p
 
 * Windows 7:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/windows7.PNG
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/windows7.PNG
     :alt: Windows 7
     
 * Ubuntu:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/ubuntu.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/ubuntu.png
     :alt: Ubuntu
     
 * Linux Mint:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/mint.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/mint.png
     :alt: Linux mint
     
 * KDE:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/kde.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde.png
     :alt: KDE
     
 * KDE with a dark color scheme:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/kde-dark.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde-dark.png
     :alt: KDE dark
     
 * Gnome:
 
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode-core/master/screenshots/gnome.png
+.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/gnome.png
     :alt: Gnome
