@@ -49,16 +49,14 @@ setup(
     keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
     package_data={'pyqode.core.ui': ['*.ui', '*.qrc', 'rc/*']},
     #package_dir={'pyqode': 'pyqode', "pyqode_designer":},
-    url='https://github.com/ColinDuquesnoy/pyQode-core',
+    url='https://github.com/ColinDuquesnoy/pyqode.core',
     license='GNU LGPL v3',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
     long_description=readme(),
     install_requires=requirements,
-    entry_points={'gui_scripts':
-                  ['pyqode_designer = pyqode_designer.designer:main'],
-                  'pyqode_plugins':
+    entry_points={'pyqode_plugins':
                   ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
     zip_safe=False
 )
