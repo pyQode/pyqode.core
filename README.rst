@@ -12,47 +12,48 @@ What is pyQode?
 
 pyQode is a *flexible source code editor widget* for Python Qt
 applications. **pyQode is a library/widget, not an IDE**. You can see it as an
-alternative to QScintilla.$
+alternative to QScintilla.
+
 
 pyQode is a **namespace packages** made up of the following official packages:
-  * `pyqode.core`_: This is the foundation package, it contains the pyqode base
-    classes (QCodeEdit, Mode, Panel) and a set of builtin modes and panels that
-    are useful for any kind of code editor. With pyqode.core you can already
-    create a generic code editor (similar to gedit, notepad++) with only a few
-    lines of code
-  * `pyqode.python`_: Adds various python specific modes and panels
-  * `pyqode.widgets`_: A set of additional widgets that might be useful when
-                       developing a pyqode based application (QPropertyGrid,
-                       QInteractiveConsole, QEditorTabWidgets, ...)
-  * `pyqode.designer`_: Starts Qt Designer with all the installed pyqode plugins
+
+  - `pyqode.core`_
+
+  - `pyqode.python`_ 
+
+  - `pyqode.widgets`_
+
+  - `pyqode.designer`_
 
 .. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
 .. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
 .. _pyqode.widgets: https://github.com/ColinDuquesnoy/pyqode.widgets
 .. _pyqode.designer: https://github.com/ColinDuquesnoy/pyqode.designer
 
+**pyqode.core** is the foundation package, it contains the pyqode base classes (QCodeEdit, Mode, Panel) 
+and a set of builtin modes and panels that are useful for any kind of code editor. With pyqode.core you 
+can already create a generic code editor (similar to gedit, notepad++) with only a few lines of code.
+
 Features
 --------
 
 Here are the core features:
 
--  supports PySide and PyQt4
--  supports Python 2 and Python 3
+-  supports PySide and/or PyQt4
+-  supports Python 2 and/or Python 3
 -  simple widget based on QPlainTextEdit
 -  easily customisable (modes and panels)
 -  native look and feel close to Qt creator
 -  builtin modes and panels (folding, line number, code completion,
    syntax highlighting)
 -  Qt Designer plugin
--  `language specific extensions`_
-
-.. _language specific extensions: https://github.com/ColinDuquesnoy/pyqode-core/wiki/Extensions
 
 
 License
 -------
 
 pyQode is licensed under the LGPL v3.
+
 
 Requirements
 ------------
@@ -64,12 +65,14 @@ pyqode-core depends on the following libraries:
 -  pygments
 -  setuptools
 
+
 Installation
 ------------
 
 ::
 
     $ pip install pyqode.core
+
 
 Usage
 -----
