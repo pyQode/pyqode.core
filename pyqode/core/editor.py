@@ -465,6 +465,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         pos = self.cursorPosition
         atBlockEnd = self.textCursor().atBlockEnd()
 
+        self.textCursor().beginEditBlock()
+
         # cleanup whitespaces
         self.__cleaning = True
         eaten = 0
@@ -506,6 +508,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             tc.setPosition(p)
         self.setTextCursor(tc)
         self.verticalScrollBar().setValue(value)
+
+        self.textCursor().endEditBlock()
 
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
