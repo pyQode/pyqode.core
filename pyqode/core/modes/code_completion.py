@@ -487,12 +487,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if input:
             # unicode invalid characters
             if sys.version_info[0] == 2:
-                RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             u'|' + \
-                             u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                             (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+                try:
+                    RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                                 u'|' + \
+                                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                                 (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+                except SyntaxError:
+                    pass # don't confuse python 3.2, it should never use this code
             else:
                 RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                              '|' + \
