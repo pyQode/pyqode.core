@@ -21,6 +21,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
+import os
 import multiprocessing
 from pyqode.core import logger
 from pyqode.core.mode import Mode
@@ -218,6 +219,8 @@ class CheckerMode(Mode, QtCore.QObject):
         results and the code and filePath parameters. The subprocess must fill
         the queue with the message it wants to be displayed.
         """
+        if "PYQODE_NO_COMPLETION_SERVER" in os.environ:
+            return
         try:
             q = multiprocessing.Queue()
             p = multiprocessing.Process(
