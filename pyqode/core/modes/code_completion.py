@@ -213,7 +213,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 s = SubprocessServer()
                 s.start()
                 CodeCompletionMode.SERVER = s
-                print("Start server")
             CodeCompletionMode.SERVER.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
@@ -488,9 +487,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if input:
             # unicode invalid characters
             if sys.version_info[0] == 2:
-                RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             '|' + \
-                             '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                RE_ILLEGAL = u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                             u'|' + \
+                             u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
                              (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                               unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                               unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
