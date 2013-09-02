@@ -495,7 +495,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
                                   unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))""")
                 except SyntaxError:
-                    pass # don't confuse python 3.2, it should never use this code
+                    pass # This is horrible, I know but this is the only way I found to fool this damn python 3.2 interpreter wich hates u"..."
             else:
                 RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                              '|' + \
