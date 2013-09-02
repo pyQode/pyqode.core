@@ -23,6 +23,7 @@ This module contains the code completion mode and the related classes.
 """
 import re
 import sys
+import os
 from pyqode.core import constants
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
@@ -207,10 +208,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
     def _onInstall(self, editor):
-        if CodeCompletionMode.SERVER is None:
+        if (CodeCompletionMode.SERVER is None and
+                not os.environ.has_key("PYQODE_NO_COMPLETION_SERVER")):
             s = SubprocessServer()
             s.start()
             CodeCompletionMode.SERVER = s
+            print("Start server")
         CodeCompletionMode.SERVER.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
