@@ -1,0 +1,50 @@
+.. Copyright 2013 Colin Duquesnoy
+.. This file is part of pyQode.
+
+.. pyQode is free software: you can redistribute it and/or modify it under
+.. the terms of the GNU Lesser General Public License as published by the Free
+.. Software Foundation, either version 3 of the License, or (at your option) any
+.. later version.
+.. pyQode is distributed in the hope that it will be useful, but WITHOUT
+.. ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+.. FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+.. details.
+
+.. You should have received a copy of the GNU Lesser General Public License along
+.. with pyQode. If not, see http://www.gnu.org/licenses/.
+
+What's New?
+===========
+This page lists the most prominent milestones achieved by the pyQode
+developers. For more specific details about what is planned and what has been 
+accomplished, please visit the `issues page on github`_ and the
+:doc:`changelog </changelog>`, respectively.
+
+Next Version
+------------
+
+Version **1.1** will focus on adding PyQt5 support and improve the API stability.
+
+Milestones
+-------------
+
+* **1.0**:
+
+    - The API has been completely rewritten and renamed into pyQode.
+    - It is now a namespace package; functionality are split over separate packages, pyqode.core being the foundation package.
+    - It now supports both python 2.7 and python 3.3 and can works with PyQt4 or PySide.
+    - The look and feel and the performances have been improved, the API is cleaner.
+    - Qt designer plugins are also available.
+
+* **0.2**:
+    - Add python support:
+
+        * code completion and calltips using `Jedi`_
+        * inspection and code checking using pyflakes.py and pep8.py
+
+* **0.1**:
+    PCEF: Language independent editor framework
+
+
+.. _`jedi`: https://github.com/davidhalter/jedi
+.. _`issues page on github`: https://github.com/ColinDuquesnoy/PCEF/issues
