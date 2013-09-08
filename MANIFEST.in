@@ -5,7 +5,8 @@
 include MANIFEST.in
 # setup, license and readme
 include setup.py
-include LICENSE
+include LICENSE.txt
+include AUTHORS.txt
 include README.rst
 # ui sources and resources
 include pyqode/core/ui/*
