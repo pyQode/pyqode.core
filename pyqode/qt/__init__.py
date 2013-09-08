@@ -188,5 +188,4 @@ if not select():
 # __logger.debug("Using %s" % os.environ["QT_API"])
 
 from pyqode.qt import QtCore, QtGui
-from pyqode.qt.ui import loadUi, importRc
-__all__ = ["QtCore", "QtGui", "loadUi", "importRc"]
+__all__ = ["QtCore", "QtGui"]
