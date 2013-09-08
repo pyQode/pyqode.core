@@ -12,8 +12,7 @@ Before reading this you should have pyqode.core and PySide/PyQt4 :doc:`installed
 Public API
 --------------
 
-The public API is fully exposed by the pyqode.core package using the __all__
-attribute.
+The public API is fully exposed by the pyqode.core package.
 
 You only need to import **pyqode.core** to get access to the entire public API::
 
@@ -48,7 +47,6 @@ or
 .. code-block:: bash
 
     $ python your_script.py --PyQt
-
 
 .. warning:: The QT_API string is case sensitive (this will change with version 1.1)
 
@@ -97,6 +95,11 @@ There is actually two way to use pyqode:
 
     - use a pre-made editor that already fits your needs (QGenericCodeEdit)
     - use the raw editor widget and install your own selection of modes and panels.
+
+
+.. note:: The editor widget is meant to work with files instead of raw text.
+          Prefer to use the openFile/saveToFile methods instead of the
+          setPlainText/plainText methods.
 
 Using a pre-made editor
 ----------------------------

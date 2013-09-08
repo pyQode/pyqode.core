@@ -35,7 +35,7 @@ Parts of the documentation:
     advanced
     examples
     changelog
-    api/api_doc
+    api
     bugs
     contribute
     license
