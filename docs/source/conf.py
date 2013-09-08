@@ -1,23 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Copyright 2013 Colin Duquesnoy
-#
-# This file is part of pyQode.
-#
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-#
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
-#
 # pyQode documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan  3 17:16:17 2013.
 #
@@ -201,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PCEF.tex', u'PCEF Documentation',
+  ('index', 'pyQode.tex', u'pyQode Documentation',
    u'Colin Duquesnoy', 'manual'),
 ]
 
@@ -231,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyqode', u'PCEF Documentation',
+    ('index', 'pyqode', u'pyQode Documentation',
      [u'Colin Duquesnoy'], 1)
 ]
 
@@ -245,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PCEF', u'PCEF Documentation',
-   u'Colin Duquesnoy', 'PCEF', 'One line description of project.',
+  ('index', 'pyQode', u'pyQode Documentation',
+   u'Colin Duquesnoy', 'pyQode', 'One line description of project.',
    'Miscellaneous'),
 ]
 

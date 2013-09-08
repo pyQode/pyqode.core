@@ -52,7 +52,7 @@ Here are the core features:
 License
 -------
 
-pyQode is licensed under the LGPL v3.
+pyQode is licensed under the MIT license.
 
 
 Requirements
