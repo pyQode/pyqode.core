@@ -135,7 +135,7 @@ class Mode(object):
         :param state: True = enabled, False = disabled
         :type state: bool
         """
-        raise NotImplementedError()
+        pass
 
     def _onStyleChanged(self, section, key):
         """
