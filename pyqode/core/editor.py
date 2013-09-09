@@ -135,6 +135,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self.__filePath
 
+    @filePath.setter
+    def filePath(self, value):
+        self.__filePath = value
+
     @property
     def fileEncoding(self):
         """
