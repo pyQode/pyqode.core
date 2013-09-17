@@ -39,6 +39,7 @@ from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
 from pyqode.core.syntax_highlighter import CharBasedFoldDetector
+from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pyqode.core.mode import Mode
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
@@ -125,6 +126,6 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
-           "DelayJobRunner",
+           "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
            "SubprocessServer", "SymbolMatcherMode"]
