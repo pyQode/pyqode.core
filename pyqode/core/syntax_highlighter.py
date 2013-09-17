@@ -163,7 +163,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     Base class for syntax highlighter modes.
 
-    It takes care of filling the document with our custom user data.
+    It takes care of filling up the document with our custom user data.
 
     It also provides signal that you can hook to apply apply custom
     highlighting
