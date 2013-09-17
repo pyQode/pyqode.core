@@ -3,8 +3,8 @@ Python/Qt Code Editor Widget library
 
 *version 1.0b2*
 
-.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode-core.png?branch=master
-    :target: https://travis-ci.org/ColinDuquesnoy/pyqode-core
+.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode.core.png?branch=master
+    :target: https://travis-ci.org/ColinDuquesnoy/pyqode.core
     :alt: Travis-CI build status
 
 What is pyQode?
