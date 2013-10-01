@@ -28,6 +28,7 @@ import sys
 # verbose mode
 import logging
 logging.basicConfig(level=logging.DEBUG)
+
 import pyqode.core
 from pyqode.qt import QtCore, QtGui
 from ui.simple_editor_ui import Ui_MainWindow

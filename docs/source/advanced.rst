@@ -418,3 +418,59 @@ At the moment, there is already two specific FoldDetector:
 
 Designer plugins
 --------------------
+
+pyQode comes with a mechanism to quickly create Qt designer plugins and most
+of the widgets already have their own plugin. To use the existing pyQode plugins
+you need to use the `pyqode.designer`_ startup script. This scripts discover the
+pyqode plugins using pkgconfig and starts Qt Designer with the correct plugins
+path. A pyQode Qt Designer is thus a Qt designer plugin but also a setuptools
+plugin (using the entry points mechanism).
+
+This section will tell you how to create your own Designer script and make it
+available to the startup script.
+
+For that you need to create a python module for you plugin following this scheme:
+
+
+.. code-block:: python
+
+    # This only works with PyQt, PySide does not support the QtDesigner module
+    # but the generated ui files can be used at runtime by pyside.
+    import os
+    if not 'QT_API' in os.environ:
+        os.environ.setdefault("QT_API", "PyQt")
+    from pyqode.qt.QtGui import QIcon
+
+    # TODO import you widget module
+    from your_package.your_widget import QYourWidget
+
+    # enumerates the widgets exposed by your plugins. If you don't do that, your
+    # ui scripts won't load properly (you will have TypeError)
+    PLUGINS_TYPES = {'QHomeWidget': pyqode.widgets.QHomeWidget}
+
+    from pyqode.core.plugins.pyqode_core_plugin import QCodeEditPlugin
+
+    class YourPlugin(QCodeEditPlugin):
+        _module = 'your_package.your_widget' # path to the widget's module
+        _class = 'QYourWidget'    # name of the widget class
+        _name = "QYourWidget"  # I don't know why but this must be the same
+                               # value as define for _class
+
+        def createWidget(self, parent):
+            return QYourWidget()
+
+
+Now that you have a script you must install it as a **pyqode_plugins**. For that purpose
+you must add an entry point to your setup.py:
+
+.. code-block:: python
+
+    setup(
+        ...
+        entry_points={'pyqode_plugins':
+                     ['your_plugin_module = your_package.your_plugin_module']},
+        ...
+        )
+
+
+.. _`pyqode.designer`:

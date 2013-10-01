@@ -1,24 +1,83 @@
 Examples
 ========
-If you downloaded a source archive or cloned PCEF from github, these examples
-will be located in the examples subdirectory of the project's root. Examples can be run without installation by running
-the following scripts (found at the project's root):
+If you downloaded a source archive or cloned pyQode from github, you will find a
+series of examples in the examples directory at the root of the archive.
 
-- run_generic_example.py
+All examples requires pyqode.core to be installed.
 
-If you installed pcef using pip, examples are installed as gui scripts. Run the following commands in your terminal:
-
-- pcef_generic_example
-
-.. note:: On windows, you will need to append *c:\\Python27\\Scripts* to your path to be able to execute the gui_scripts.
+.. note:: All examples are bindings independent so that all user can run them
+          without being required to install an unwanted qt binding.
 
 .. contents:: :local:
 
 .. highlight:: python
    :linenothreshold: 5
 
-Generic example
------------------
-.. literalinclude:: /../../examples/generic_example.py
+Using a pre-made editor
+-----------------------
+
+This example show how to use a pre-made editor.
+
+.. literalinclude:: /../../examples/premade.py
    :linenos:
 
+Creating a custom editor
+----------------------------
+
+This example show how to create a custom editor from scratch using the available
+modes and panels.
+
+.. literalinclude:: /../../examples/custom.py
+   :linenos:
+
+Gui integration
+-----------------
+
+This simple example show how you can build a simple generic editor using
+pyqode.core. The example user interface has been designed in Qt Designer using
+the pyqode.core plugins to add the QGenericCodeEdit to the ui.
+
+.. literalinclude:: /../../examples/gui_integration/simple_editor.py
+   :linenos:
+
+.. note:: This example makes use of a designer ui file compiled using the
+          translate_ui script. This script call the pyside compiler and replace
+          a few imports to make it usable by both bindings. You typically don't
+          need to do that in a real world application where you use one qt
+          binding.
+
+Force PyQt4
+----------------
+
+This example shows you how you can force pyQode to use PyQt4.
+
+.. literalinclude:: /../../examples/qt_bindings/pyqt.py
+   :linenos:
+
+Force PySide
+----------------
+
+This example shows you how you can force pyQode to use PySide.
+
+.. literalinclude:: /../../examples/qt_bindings/pyside.py
+   :linenos:
+
+Dump style and settings
+-------------------------
+
+This example dumps the style and settings property registry of a simple QCodeEdit
+and a QGenericCodeEdit to show you the dynamic nature of the settings depending
+on the installed modes/panels.
+
+.. literalinclude:: /../../examples/styling/dump.py
+   :linenos:
+
+Save and load settings
+-------------------------
+
+This example show you how you can serialize/deserialize style and settings
+properties. The example create a first editor and modify its style manually. The
+style is then save to a json file and used to setup a second editor.
+
+.. literalinclude:: /../../examples/styling/save_load.py
+   :linenos:

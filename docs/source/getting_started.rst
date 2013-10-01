@@ -180,6 +180,7 @@ Changing the editor style and settings:
 Editor style and settings can be easily customised using the editor's style and settings properties:
 
 .. code-block:: python
+
     editor = pyqode.core.QCodeEdit()
     editor.style.setValue("backgound", QtGui.QColor("#000000"))
     editor.settings.setValue("tabLength", 4)

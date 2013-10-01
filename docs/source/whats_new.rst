@@ -13,7 +13,9 @@ Version **1.1** will focus on adding PyQt5 support and improve the API stability
 Milestones
 -------------
 
-* **1.0**:
+1.0:
++++++++++
+
 
     - The API has been completely rewritten and renamed into pyQode.
     - It is now a namespace package; functionality are split over separate packages, pyqode.core being the foundation package.
@@ -21,14 +23,17 @@ Milestones
     - The look and feel and the performances have been improved, the API is cleaner.
     - Qt designer plugins are also available.
 
-* **0.2**:
+0.2:
++++++++++
     - Add python support:
 
         * code completion and calltips using `Jedi`_
         * inspection and code checking using pyflakes.py and pep8.py
 
-* **0.1**:
-    PCEF: Language independent editor framework
+0.1:
++++++++++
+
+    Initial development of PCEF with a focus on a generic code editor.
 
 
 .. _`jedi`: https://github.com/davidhalter/jedi
