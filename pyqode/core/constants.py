@@ -101,13 +101,13 @@ ICON_ARROW_DOWN = (":/pyqode-icons/rc/arrow_down_off.png",
 #
 class PanelPosition(object):
     """
-    Enumerate the possible panel positions
+    Enumerates the possible panel positions
     """
     #: top margin
     TOP = 0
-    # left margin
+    #: left margin
     LEFT = 1
-    # right margin
+    #: right margin
     RIGHT = 2
-    # bottom margin
+    #: bottom margin
     BOTTOM = 3
