@@ -36,17 +36,21 @@ from pyqode.core import constants
 from pyqode.core import logger
 
 # core classes
-from pyqode.core.constants import PanelPosition
-from pyqode.core.decoration import TextDecoration
 from pyqode.core.editor import QCodeEdit
+from pyqode.core.mode import Mode
+from pyqode.core.panel import Panel
+from pyqode.core.constants import PanelPosition
+from pyqode.core.properties import PropertyRegistry
+from pyqode.core.decoration import TextDecoration
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
 from pyqode.core.syntax_highlighter import CharBasedFoldDetector
 from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
-from pyqode.core.properties import PropertyRegistry
-from pyqode.core.mode import Mode
-from pyqode.core.panel import Panel
+from pyqode.core.system import TextStyle
+from pyqode.core.system import JobRunner
+from pyqode.core.system import DelayJobRunner
+from pyqode.core.system import SubprocessServer
 
 # modes
 from pyqode.core.modes import AutoIndentMode
@@ -67,19 +71,12 @@ from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
 from pyqode.core.modes import SymbolMatcherMode
 from pyqode.core.modes import ZoomMode
+
+# panels
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.panels import LineNumberPanel
 from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
-
-
-from pyqode.core.system import indexByName
-from pyqode.core.system import indexMatching
-from pyqode.core.system import TextStyle
-from pyqode.core.system import JobRunner
-from pyqode.core.system import DelayJobRunner
-from pyqode.core.system import SubprocessServer
-from pyqode.core.system import memoized
 
 
 #: pyqode-core version
@@ -94,12 +91,20 @@ class QGenericCodeEdit(QCodeEdit):
     Extends QCodeEdit with a hardcoded set of modes and panels.
 
     **Panels:**
-        * line number panel
-        * search and replace panel
+        * :class:`pyqode.core.FoldingPanel`
+        * :class:`pyqode.core.LineNumberPanel`
+        * :class:`pyqode.core.SearchAndReplacePanel`
 
     **Modes:**
-        * document word completion
-        * generic syntax highlighter (pygments)
+        * :class:`pyqode.core.FileWatcherMode`
+        * :class:`pyqode.core.CaretLineHighlighterMode`
+        * :class:`pyqode.core.RightMarginMode`
+        * :class:`pyqode.core.PygmentsSyntaxHighlighter`
+        * :class:`pyqode.core.ZoomMode`
+        * :class:`pyqode.core.AutoIndentMode`
+        * :class:`pyqode.core.CodeCompletionMode`
+        * :class:`pyqode.core.IndenterMode`
+        * :class:`pyqode.core.SymbolMatcherMode`
     """
     def __init__(self, parent=None):
         QCodeEdit.__init__(self, parent)
@@ -135,5 +140,4 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
-           "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
-           "SubprocessServer", "SymbolMatcherMode"]
+           "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]
