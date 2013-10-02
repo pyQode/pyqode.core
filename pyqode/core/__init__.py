@@ -30,8 +30,12 @@ code editor widget
 #
 # exposes public core api
 #
+
+# modules
 from pyqode.core import constants
 from pyqode.core import logger
+
+# core classes
 from pyqode.core.constants import PanelPosition
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.editor import QCodeEdit
@@ -40,7 +44,11 @@ from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
 from pyqode.core.syntax_highlighter import CharBasedFoldDetector
 from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
+from pyqode.core.properties import PropertyRegistry
 from pyqode.core.mode import Mode
+from pyqode.core.panel import Panel
+
+# modes
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
@@ -55,7 +63,6 @@ from pyqode.core.modes import Completion
 from pyqode.core.modes import DocumentWordCompletionProvider
 from pyqode.core.modes import FileWatcherMode
 from pyqode.core.modes import IndenterMode
-from pyqode.core.panel import Panel
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
 from pyqode.core.modes import SymbolMatcherMode
@@ -64,7 +71,8 @@ from pyqode.core.panels import FoldingPanel
 from pyqode.core.panels import LineNumberPanel
 from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
-from pyqode.core.properties import PropertyRegistry
+
+
 from pyqode.core.system import indexByName
 from pyqode.core.system import indexMatching
 from pyqode.core.system import TextStyle
