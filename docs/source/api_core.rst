@@ -9,6 +9,11 @@ QCodeEdit
 .. autoclass:: pyqode.core.QCodeEdit
     :members:
 
+QGenericCodeEdit
+--------------------
+.. autoclass:: pyqode.core.QGenericCodeEdit
+    :members:
+
 PanelPosition
 --------------------
 .. autoclass:: pyqode.core.PanelPosition
