@@ -1,11 +1,17 @@
 Python/Qt Code Editor Widget library
 ======================================================
 
-*version 1.0b2*
-
 .. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode.core.png?branch=master
     :target: https://travis-ci.org/ColinDuquesnoy/pyqode.core
     :alt: Travis-CI build status
+
+.. image:: https://pypip.in/d/pyqode.core/badge.png
+    :target: https://crate.io/packages/pyqode.core/
+    :alt: Number of PyPI downloads
+
+.. image:: https://pypip.in/v/pyqode.core/badge.png
+    :target: https://crate.io/packages/pyqode.core/
+    :alt: Latest PyPI version
 
 What is pyQode?
 --------------------
