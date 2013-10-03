@@ -14,6 +14,12 @@ QGenericCodeEdit
 .. autoclass:: pyqode.core.QGenericCodeEdit
     :members:
 
+Mode
+----------------
+.. autoclass:: pyqode.core.Mode
+    :members:
+    :private-members:
+
 PanelPosition
 --------------------
 .. autoclass:: pyqode.core.PanelPosition

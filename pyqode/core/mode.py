@@ -32,16 +32,33 @@ from pyqode.qt import QtCore
 
 class Mode(object):
     """
-    Base class for editor extension/mode. An extension is a "thing" that can be
-    installed on the QCodeEdit to add new behaviours.
+    Base class for editor extensions. An extension is a "thing" that can be
+    installed on the QCodeEdit to add new behaviours or to modify the
+    appearance.
 
-    An extension is added to a QCodeEdit by using the addMode or addPanel
-    methods.
+    An extension is added to a QCodeEdit by using the
+    :meth:`pyqode.core.QCodeEdit.installMode` or
+    :meth:`pyqode.core.QCodeEdit.installPanel` methods.
 
     Subclasses must/should override the following methods:
-        - _onStateChanged: to connect/disconnect to/from the code edit signals
-        - _onStyleChanged: to refresh ui colors (mainly used by panels)
-        - _onSettingsChanged: to refresh some settings value.
+        - :meth:`pyqode.core.Mode._onStateChanged`
+        - :meth:`pyqode.core.Mode._onStyleChanged`
+        - :meth:`pyqode.core.Mode._onSettingsChanged`
+
+    Uses :attr:`pyqode.core.Mode.IDENTIFIER` and
+    :attr:`pyqode.core.Mode.DESCRIPTION` to setup the mode name and
+    description:
+
+    .. code-block:: python
+
+        class MyMode(Mode):
+            IDENTIFIER = "myMode"
+            DESCRIPTION = "Describes your mode here"
+
+        m = MyMode()
+        print(m.name, m.description)
+
+        >>> ("myMode", "Describes your mode here" )
     """
     #: The mode identifier, must redefined for every subclasses
     IDENTIFIER = ""
@@ -63,7 +80,8 @@ class Mode(object):
     @property
     def enabled(self):
         """
-        Enabled flag
+        Tell if the mode is enabled, :meth:`pyqode.core.Mode._onStateChanged` is
+        called when the value changed.
         """
         return self.__enabled
 
@@ -79,12 +97,8 @@ class Mode(object):
             self._onStateChanged(enabled)
 
     def __init__(self):
-        """
-        Creates the extension. Uses self.IDENTIFIER and self.DESCRIPTION to
-        setup sefl.name and self.description (you can override them after
-        calling this constructor if you need it).
-        """
-        #: Mode name
+        #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
+        #: attribute key when you install a mode.
         self.name = self.IDENTIFIER
         #: Mode description
         self.description = self.DESCRIPTION
@@ -102,10 +116,12 @@ class Mode(object):
 
     def _onInstall(self, editor):
         """
-        Installs the extension on the editor.
+        Installs the extension on the editor. Subclasses might want to override
+        this method to add new style/settings properties to the editor.
 
         .. warning::
-            For internal use only.
+            For internal use only, never call this method yourself from
+            anywhere!
 
         .. warning::
             Don't forget to call **super** when subclassing
