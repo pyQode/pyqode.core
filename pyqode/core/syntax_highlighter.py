@@ -34,17 +34,22 @@ from pyqode.qt import QtGui, QtCore
 
 class FoldDetector(object):
     """
+    Abstract base class for fold indicators.
+
+
     A fold detector take care of detecting the folding indent of a specific text
     block.
+
 
     A code folding marker will appear the line *before* the one where the
     indention level increases. The code folding region will end in the last
     line that has the same indention level (or higher), skipping blank lines.
 
-    You must override the getFoldIndent method to create a custom fold detector.
 
-    The base implementation does not perform any detection.
+    You **must** override the :meth:`pyqode.core.FoldDetector.getFoldIndent`
+    method to create a custom fold detector.
     """
+
     def getFoldIndent(self, highlighter, block, text):
         """
         Return the fold indent of a QTextBlock
@@ -55,13 +60,18 @@ class FoldDetector(object):
         indention level (or higher).
 
         :param highlighter: Reference to the highlighter
+        :type highlighter: pyqode.core.SyntaxHighlighter
 
         :param block: Block to parse
-        :param text: Text of the block (for convenience)
+        :type block: QtGui.QTextBlock
 
-        :return: int
+        :param text: Text of the block (for convenience)
+        :type text: str
+
+        :return: The fold indent
+        :rtype: int
         """
-        return -1
+        raise NotImplementedError()
 
     @staticmethod
     def isFoldStart(currentBlock, nextBlock):
@@ -115,13 +125,9 @@ class CharBasedFoldDetector(FoldDetector):
 
     Suitable for c family languages (c, c++, C#, java, D, ...)
     """
-    def __init__(self, starts='{', ends='}'):
-        """
-        :param starts: Start triggering character
-        :param starts: Start triggering character
-        """
-        self._start = starts
-        self._end = ends
+    def __init__(self, start='{', end='}'):
+        self._start = start
+        self._end = end
 
     def getFoldIndent(self, highlighter, block, text):
         pb = block.previous()
@@ -161,12 +167,23 @@ class CharBasedFoldDetector(FoldDetector):
 
 class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
-    Base class for syntax highlighter modes.
+    Abstract Base class for syntax highlighter modes.
 
-    It takes care of filling up the document with our custom user data.
+    It fills up the document with our custom user data, setup the parenthesis
+    infos and run the FoldDetector on every text block. It **does not do any
+    syntax highlighting**, this task is left to the sublasses such as
+    :class:`pyqode.core.PygmentsSyntaxHighlighter`.
 
-    It also provides signal that you can hook to apply apply custom
-    highlighting
+    Subclasses **must** override the
+    :meth:`pyqode.core.SyntaxHighlighter.doHighlight` method to apply custom
+    highlighting.
+
+    **Signals**:
+        - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightStarted`
+        - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightFinished`
+
+    .. warning:: You should always inherit from this class to create a new
+                 syntax. **Never inherit directly from QSyntaxHighlighter.**
     """
     #: Mode identifier
     IDENTIFIER = "syntaxHighlighterMode"
@@ -185,7 +202,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self._spacesExpression = QtCore.QRegExp('\s+')
         if os.environ["QT_API"] == "PyQt":
             # there is a bug with QTextBlockUserData in PyQt4, we need to
-            # keep a reference on the otherwise they are removed from memory
+            # keep a reference on them, otherwise they are removed from memory.
             self.__blocks = set()
         self._foldDetector = foldDetector
 
@@ -194,9 +211,18 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.__blocks.clear()
 
     def setFoldDetector(self, foldDetector):
+        """
+        Setup the fold detector object to use to detect fold indents.
+
+        :param foldDetector: FoldDetector
+        :type foldDetector: pyqode.core.FoldDetector
+        """
         self._foldDetector = foldDetector
 
-    def detectFolding(self, text, userData):
+    def _detectFolding(self, text, userData):
+        """
+        Detect folding indents using a foldDetector.
+        """
         # Collect folding informations
         if self._foldDetector:
             userData.foldIndent = self._foldDetector.getFoldIndent(
@@ -214,7 +240,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
                 prevBlock.setUserData(prevUsd)
 
     @staticmethod
-    def detectParentheses(text, userData):
+    def _detectParentheses(text, userData):
         userData.parentheses[:] = []
         userData.squareBrackets[:] = []
         userData.braces[:] = []
@@ -268,8 +294,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setCurrentBlockUserData(userData)
         # update user data
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        self.detectFolding(text, userData)
-        self.detectParentheses(text, userData)
+        self._detectFolding(text, userData)
+        self._detectParentheses(text, userData)
 
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
@@ -278,4 +304,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.blockHighlightFinished.emit(self, text)
 
     def doHighlightBlock(self, text):
+        """
+        Abstract method. Override this to apply syntax highlighting.
+
+        :param text: Line of text to highlight.
+        """
         raise NotImplementedError()

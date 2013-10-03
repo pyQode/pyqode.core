@@ -38,23 +38,26 @@ class PropertyRegistry(QtCore.QObject):
     """
     PropertyRegistry is a class that manage a registry/dictionary of properties.
 
-    Each property is described by:
-        - a key: string - name of the property
-        - a value: string - value of the property that is stored as a string
-        - a section:
-
     For a better organisation, properties are grouped by sections.
 
-    When a property value is changed, the valueChanged signal is emitted.
+    Each property is described by:
+        - a **key**: the name of the property
+        - a **value**: the value of the property, stored as a string
+        - a **section**: the section which contains the property.
+          Default section is *"General"*
+
+    **Signals**
+        - valueChanged(str key, str section)
 
     .. note:: Even if the value is stored as a string, the class will try its
-              best to "cast" the value string to its original type.
-              Supported types are:
+              best to *"cast"* the string value to its original type.
+
+              Here are the supported types:
                 - int
                 - float
                 - bool
                 - QColor
-                - pyqode.core.system.TextStyle
+                - :class:`pyqode.core.TextStyle`
                 - string
     """
 
@@ -93,9 +96,18 @@ class PropertyRegistry(QtCore.QObject):
         """
         return self.__dict[section]
 
-    def copy(self, propertyRegistry):
-        #self.__dict = propertyRegistry.__dict
-        #self.__dict = copy.copy(propertyRegistry.__dict)
+    def update(self, propertyRegistry):
+        """
+        Updates the values of the current instance from the value of the
+        registry passed as a parameter.
+
+        .. note:: :attr:`pyqode.core.PropertyRegistry.valueChanged` will be
+                  emitted with a key and section parameter set to an empty
+                  string.
+
+        :param propertyRegistry: The source of the update.
+        :type propertyRegistry: pyqode.core.PropertyRegistry
+        """
         for sk, sv in propertyRegistry.__dict.items():
             for pk, pv in sv.items():
                 if sk in self.__dict:
@@ -110,17 +122,17 @@ class PropertyRegistry(QtCore.QObject):
         """
         Adds a property with a default value.
 
-        .. remark:: If the property already exists in the given section,
-                    the original value is kept and returned as a result.
+        .. note:: If the property already exists in the given section,
+                  the original value is kept and returned as a result. To change
+                  a value use :meth:`pyqode.core.PropertyRegistry.setValue`.
 
         :param key: The name/key of the property
+        :type key: str
 
         :param value: The value of the property.
-        :type value: int or float or bool or string or QColor or TextStyle or list
 
-        :return The original value if the property does not already exists,
-                else it return the exisiting property value.
-                (Use setValue to change the value of a property).
+        :return: The original value if the property does not already exists,
+                 else it return the existing value.
         """
         value = self.__value_to_str(value)
         if section in self.__dict:
@@ -135,19 +147,13 @@ class PropertyRegistry(QtCore.QObject):
 
     def removeProperty(self, key, section="General"):
         """
-        Adds a property with a default value.
+        Remove a property from the registry.
 
-        .. remark:: If the property already exists in the given section,
-                    the original value is kept and returned as a result.
+        :param section: The section of the property to remove.
+        :type section: str
 
-        :param key: The name/key of the property
-
-        :param value: The value of the property.
-        :type value: int or float or bool or string or QColor or TextStyle
-
-        :return The original value if the property does not already exists,
-                else it return the exisiting property value.
-                (Use setValue to change the value of a property).
+        :param key: The name/key of the property to remove
+        :type key: str
         """
         if section in self.__dict:
             if key in self.__dict[section]:
@@ -163,7 +169,7 @@ class PropertyRegistry(QtCore.QObject):
         :type value: int or float or bool or string or QColor or TextStyle
 
         :return: The value string. Because this might be the old property value
-        that is used if the property already exists
+                 that is used if the property already exists
         """
         value = self.__value_to_str(value)
         if self.__dict[section][key] != value:
@@ -182,7 +188,6 @@ class PropertyRegistry(QtCore.QObject):
                         not exists
 
         :return: The property's value
-        :rtype int or float or bool or string or QColor or TextStyle
         """
         if section in self.__dict:
             if key in self.__dict[section]:

@@ -5,7 +5,8 @@ The API reference documentation is auto extracted from the source code and only
 cover the public API exposed by the **pyqode.core** package.
 
 For an easier browsing, the base classes of the framework have been separated
-from the available modes and panels.
+from the available modes and panels. A class diagram is also available so that
+you can quickly get the big picture.
 
 Parts of the public API reference
 ------------------------------------

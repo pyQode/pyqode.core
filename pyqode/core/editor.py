@@ -195,7 +195,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param value: The new editor style
         :type value: PropertyRegistry
         """
-        self.__style.copy(value)
+        self.__style.update(value)
 
     @property
     def settings(self):
@@ -210,7 +210,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param value: The new editor settings
         :type value: PropertyRegistry
         """
-        self.__settings.copy(value)
+        self.__settings.update(value)
 
     def __init__(self, parent=None, createDefaultActions=True):
         """

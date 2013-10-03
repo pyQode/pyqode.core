@@ -30,25 +30,46 @@ from pyqode.qt import QtGui
 
 
 class ParenthesisInfo(object):
+    """
+    Stores information about a parenthesis in a line of code.
+    """
     def __init__(self, pos, char):
+        #: Position of the parenthesis, expressed as a number of character
         self.position = pos
+        #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
         self.character = char
 
 
 class TextBlockUserData(QtGui.QTextBlockUserData):
+    """
+    Custom text block data. pyQode use text block data for many purposes:
+        - folding detection
+        - symbols matching
+        - mar
+
+    You can also add your own
+    """
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
+        #: Line number of the data, for convenience
         self.lineNumber = -1
-        # specify if the block is folded
+        #: Specify if the block is folded
         self.folded = False
-        # specify if the block is the fold start
+        #: Specify if the block is a fold start
         self.foldStart = False
+        #: The block's fold indent
         self.foldIndent = -1
+        #: The :class:`pyqode.core.Marker` associated with the text block
         self.marker = None
-        #: list of ParenthesisInfo, pne foreach character type
-        self.parentheses = []  # ()
-        self.squareBrackets = []  # []
-        self.braces = []  # ()
+        #: List of :class:`pyqode.core.ParenthesisInfo` for the "(" and ")"
+        #: symbols
+        self.parentheses = []
+        #: List of :class:`pyqode.core.ParenthesisInfo` for the "[" and "]"
+        #: symbols
+        self.squareBrackets = []
+        #: List of :class:`pyqode.core.ParenthesisInfo` for the "{" and "}"
+        #: symbols
+        self.braces = []
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
