@@ -34,15 +34,15 @@ class Panel(QtGui.QWidget, Mode):
     """
     Base class for editor panels.
 
-    A panel is a mode and a widget.
+    A panel is a mode and a QWidget.
 
-    Panels are drawn in the QCodeEdit viewport margins.
+    .. note:: A disabled panel will be hidden automatically.
     """
 
     @property
     def scrollable(self):
         """
-        A scrollable panel will follow the editor's scrollbars. Left and right
+        A scrollable panel will follow the editor's scroll-bars. Left and right
         panels follow the vertical scrollbar. Top and bottom panels follow the
         horizontal scrollbar.
         """
@@ -50,43 +50,42 @@ class Panel(QtGui.QWidget, Mode):
 
     @scrollable.setter
     def scrollable(self, value):
-        """ Sets the scrollable flag. """
         self.__scrollable = value
 
     def __init__(self):
         Mode.__init__(self)
         QtGui.QWidget.__init__(self)
-        #: Panel order into the zone it is installed. This value is
+        #: Panel order into the zone it is installed to. This value is
         #: automatically set when installing the panel but it can be changed
         #: later (negative values can also be used).
         self.zoneOrder = -1
         self.__scrollable = False
-        #: The background brush (automatically updated when panelBackground
-        #: change)
-        self.backgroundBrush = None
-        #: The foreground pen (automatically updated when panelForeground
-        #: changed)
-        self.foregroundPen = None
+        self._backgroundBrush = None
+        self._foregroundPen = None
 
     def _onInstall(self, editor):
         """
-        Extends the Mode.install method to set the editor instance
-        as the parent widget.
+        Extends :meth:`pyqode.core.Mode._onInstall` method to set the editor
+        instance as the parent widget.
 
-        Also adds the panelBackground and panel foreground.
+        .. warning:: Don't forget to call **super** if you override this method!
 
-        :param editor: pyqode.core.QCodeEdit instance
+        :param editor: Editor instance
+        :type editor: pyqode.core.QCodeEdit
         """
         Mode._onInstall(self, editor)
         self.setParent(editor)
         self.editor.refreshPanels()
-        self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
+        self._backgroundBrush = QtGui.QBrush(QtGui.QColor(
             self.palette().window().color()))
-        self.foregroundPen = QtGui.QPen(QtGui.QColor(
+        self._foregroundPen = QtGui.QPen(QtGui.QColor(
             self.palette().windowText().color()))
 
     def _onStateChanged(self, state):
-        """ Shows/Hides the Panel
+        """
+        Shows/Hides the Panel
+
+        .. warning:: Don't forget to call **super** if you override this method!
 
         :param state: True = enabled, False = disabled
         :type state: bool
@@ -101,12 +100,12 @@ class Panel(QtGui.QWidget, Mode):
     def paintEvent(self, event):
         if self.isVisible():
             # fill background
-            self.backgroundBrush = QtGui.QBrush(QtGui.QColor(
+            self._backgroundBrush = QtGui.QBrush(QtGui.QColor(
                 self.palette().window().color()))
-            self.foregroundPen = QtGui.QPen(QtGui.QColor(
+            self._foregroundPen = QtGui.QPen(QtGui.QColor(
                 self.palette().windowText().color()))
             painter = QtGui.QPainter(self)
-            painter.fillRect(event.rect(), self.backgroundBrush)
+            painter.fillRect(event.rect(), self._backgroundBrush)
 
     def showEvent(self, *args, **kwargs):
         self.editor.refreshPanels()
