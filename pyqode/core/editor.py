@@ -46,7 +46,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     (see :class:`pyqode.core.PropertyRegistry`) and by adding a series of
     additional signal and methods.
 
-    .. note:: The QCodeEdit has been designed to work with files (
+    .. note:: QCodeEdit has been designed to work with files (
               :meth:`pyqode.core.QCodeEdit.openFile`,
               :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
               Well, you can still use some plain text but many modes and panels

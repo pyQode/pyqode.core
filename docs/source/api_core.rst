@@ -20,6 +20,12 @@ Mode
     :members:
     :private-members:
 
+Panel
+----------------
+.. autoclass:: pyqode.core.Panel
+    :members:
+    :private-members:
+
 PanelPosition
 --------------------
 .. autoclass:: pyqode.core.PanelPosition
