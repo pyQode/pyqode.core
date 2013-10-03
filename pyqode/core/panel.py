@@ -45,6 +45,8 @@ class Panel(QtGui.QWidget, Mode):
         A scrollable panel will follow the editor's scroll-bars. Left and right
         panels follow the vertical scrollbar. Top and bottom panels follow the
         horizontal scrollbar.
+
+        :type: bool
         """
         return self.__scrollable
 

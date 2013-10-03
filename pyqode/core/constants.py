@@ -103,11 +103,11 @@ class PanelPosition(object):
     """
     Enumerates the possible panel positions
     """
-    #: top margin
+    #: Top margin
     TOP = 0
-    #: left margin
+    #: Left margin
     LEFT = 1
-    #: right margin
+    #: Right margin
     RIGHT = 2
-    #: bottom margin
+    #: Bottom margin
     BOTTOM = 3
