@@ -32,8 +32,8 @@ code editor widget
 #
 
 # modules
-from pyqode.core import constants
-from pyqode.core import logger
+#from pyqode.core import constants
+#from pyqode.core import logger
 
 # core classes
 from pyqode.core.editor import QCodeEdit
