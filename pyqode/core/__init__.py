@@ -30,12 +30,10 @@ code editor widget
 #
 # exposes public core api
 #
-
 # modules
-#from pyqode.core import constants
-#from pyqode.core import logger
-import os, sys
-print(os.system("ls ../.."), sys.path)
+from pyqode.core import constants
+from pyqode.core import logger
+
 # core classes
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
