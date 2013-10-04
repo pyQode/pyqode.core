@@ -34,8 +34,8 @@ code editor widget
 # modules
 #from pyqode.core import constants
 #from pyqode.core import logger
-import os
-print(os.system("ls ../.."))
+import os, sys
+print(os.system("ls ../.."), sys.path)
 # core classes
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
