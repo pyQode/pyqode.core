@@ -127,8 +127,8 @@ def setup_apiv2():
     """
     # setup PyQt api to version 2
     if sys.version_info[0] == 2:
-        import sip
         try:
+            import sip
             sip.setapi("QString", 2)
             sip.setapi("QVariant", 2)
         except:
