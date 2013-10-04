@@ -27,7 +27,52 @@
 Bindings independant QtGui module
 """
 import os
-if os.environ['QT_API'] == 'PyQt':
-    from PyQt4.QtGui import *
-else:
-    from PySide.QtGui import *
+try:
+    if os.environ['QT_API'] == 'PyQt':
+        from PyQt4.QtGui import *
+    else:
+        from PySide.QtGui import *
+except TypeError:
+    class QColor(object):
+        def __init__(self, *args):
+            pass
+
+    class QTextEdit(object):
+        class ExtraSelection(object):
+            pass
+
+    class QPlainTextEdit(object):
+        pass
+
+    class QPaintEvent(object):
+        pass
+
+    class QKeyEvent(object):
+        pass
+
+    class QMouseEvent(object):
+        pass
+
+    class QWheelEvent(object):
+        pass
+
+    class QFocusEvent(object):
+        pass
+
+    class QWidget(object):
+        pass
+
+    class QTextBlockUserData(object):
+        pass
+
+    class QSyntaxHighlighter(object):
+        pass
+
+    class QTextCursor(object):
+        pass
+
+    class QTextBlock(object):
+        pass
+
+    class QTextDocument(object):
+        pass

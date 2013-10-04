@@ -27,14 +27,51 @@
 Bindings independant QtCore module
 """
 import os
-if os.environ['QT_API'] == 'PyQt':
-    from PyQt4.QtCore import *
-    from PyQt4.Qt import Qt
-    from PyQt4.QtCore import pyqtSignal as Signal
-    from PyQt4.QtCore import pyqtSlot as Slot
-    from PyQt4.QtCore import pyqtProperty as Property
-    from PyQt4.QtCore import QT_VERSION_STR as __version__
-else:
-    import PySide.QtCore
-    __version__ = PySide.QtCore.__version__
-    from PySide.QtCore import *
+try:
+    if os.environ['QT_API'] == 'PyQt':
+        from PyQt4.QtCore import *
+        from PyQt4.Qt import Qt
+        from PyQt4.QtCore import pyqtSignal as Signal
+        from PyQt4.QtCore import pyqtSlot as Slot
+        from PyQt4.QtCore import pyqtProperty as Property
+        from PyQt4.QtCore import QT_VERSION_STR as __version__
+    else:
+        import PySide.QtCore
+        __version__ = PySide.QtCore.__version__
+        from PySide.QtCore import *
+except TypeError:
+    class Qt(object):
+        blue = None
+        red = None
+
+    class QObject(object):
+        pass
+
+    class Signal(object):
+        def __init__(self, *args):
+            pass
+
+    class Slot(object):
+        def __init__(self, *args):
+            pass
+
+        def __call__(self, *args, **kwargs):
+            pass
+
+    class QThread(object):
+        pass
+
+    class QEvent(object):
+        @staticmethod
+        def Type(foo):
+            pass
+
+        @staticmethod
+        def registerEventType():
+            pass
+
+    def qRegisterResourceData(*args):
+        pass
+
+    class QRegExp(object):
+        pass
