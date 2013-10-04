@@ -53,8 +53,7 @@ to detect which API has already been imported by the client code
 pyQode will choose PyQt if nothing has been specified or imported and if PyQt
 is available.
 
-If no qt bindings were found, **the application will exit with return code -1**
-and a meaningful log message in the terminal
+If no qt bindings were found a RuntimeError is raised.
 
 Usage
 ------------------------
@@ -188,8 +187,9 @@ def select():
 if not select():
     __logger.critical("Failed to find a qt bindings, please install "
                       "PyQt or PySide to user pyqode. Returning with "
-                      "error code -1")
-    sys.exit(-1)
+                      "error code.")
+    raise RuntimeError("No Qt bindings found")
+    #sys.exit(-1)
 # __logger.debug("Using %s" % os.environ["QT_API"])
 
 from pyqode.qt import QtCore, QtGui
