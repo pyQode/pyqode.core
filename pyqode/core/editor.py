@@ -46,14 +46,30 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     (see :class:`pyqode.core.PropertyRegistry`) and by adding a series of
     additional signal and methods.
 
-    .. note:: QCodeEdit has been designed to work with files (
-              :meth:`pyqode.core.QCodeEdit.openFile`,
-              :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
-              Well, you can still use some plain text but many modes and panels
-              that rely heavily on the current file name/path won't work
-              properly (e.g. the syntax highlighter mode uses the file name
-              extension to automatically adapt the lexer so you will need to do
-              it manually depending on the nature of the text/code to edit).
+    **Settings** :attr:`pyqode.core.QCodeEdit.settings`
+
+    ====================== ====================== ======= ======================
+    Key                    Section                Type    Default value
+    ====================== ====================== ======= ======================
+    showWhiteSpaces        General                bool    False
+    tabLength              General                int     4
+    useSpacesInsteadOfTab  General                bool    True
+    minIndentColumn        General                int     0
+    ====================== ====================== ======= ======================
+
+    **Style** :attr:`pyqode.core.QCodeEdit.style`
+
+    ====================== ====================== ======= ======================
+    Key                    Section                Type    Default value
+    ====================== ====================== ======= ======================
+    font                   General                string  OS Dependant: *monospace* on GNU/Linux, *Consolas* on Windows and *Monaco* on Darwin
+    fontSize               General                int     10
+    background             General                QColor  #FFFFFF
+    foreground             General                QColor  #000000
+    whiteSpaceForeground   General                QColor  #dddddd
+    selectionBackground    General                QColor  QPalette.highlight()
+    selectionForeground    General                QColor  QPalette.highlightedText()
+    ====================== ====================== ======= ======================
 
     **Signals:**
         - :attr:`pyqode.core.QCodeEdit.painted`
@@ -72,6 +88,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         - :attr:`pyqode.core.QCodeEdit.mouseMoved`
         - :attr:`pyqode.core.QCodeEdit.indentRequested`
         - :attr:`pyqode.core.QCodeEdit.unIndentRequested`
+
+    .. note:: QCodeEdit has been designed to work with files (
+              :meth:`pyqode.core.QCodeEdit.openFile`,
+              :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
+              Well, you can still use some plain text but many modes and panels
+              that rely heavily on the current file name/path won't work
+              properly (e.g. the syntax highlighter mode uses the file name
+              extension to automatically adapt the lexer so you will need to do
+              it manually depending on the nature of the text/code to edit).
     """
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
@@ -184,32 +209,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @property
     def style(self):
+        """
+        Gets/Sets the editor style properties.
+
+        :type: pyqode.core.QPropertyRegistry
+        """
         return self.__style
 
     @style.setter
     def style(self, value):
-        """
-        Sets the editor style. The valueChanged signal will be emitted with all
-        parameters set to an empty string ("").
-
-        :param value: The new editor style
-        :type value: PropertyRegistry
-        """
         self.__style.update(value)
 
     @property
     def settings(self):
+        """
+        Gets/Sets the editor settings properties.
+
+        :type: pyqode.core.QPropertyRegistry
+        """
         return self.__settings
 
     @settings.setter
     def settings(self, value):
-        """
-        Sets the editor settings. The valueChanged signal will be emitted with
-        all parameters set to an empty string ("").
-
-        :param value: The new editor settings
-        :type value: PropertyRegistry
-        """
         self.__settings.update(value)
 
     def __init__(self, parent=None, createDefaultActions=True):
