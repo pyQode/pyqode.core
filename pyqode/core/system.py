@@ -306,16 +306,15 @@ class JobRunner(object):
     for the current job to finish unless you want to force its execution. It
     that case the current job will be terminated.
 
-    Additional parameters can be supplied to the job using *args and
-    **kwargs.
+    Additional parameters can be supplied to the job using args and kwargs.
 
-    Usage
-    ------------
-    self.jobRunner = JobRunner(self)
-    self.jobRunner.startJob(self.aJobMethod)
+    .. code-block:: python
+
+        self.jobRunner = JobRunner(self)
+        self.jobRunner.startJob(self.aJobMethod)
 
     .. warning:: Do not manipulate QWidgets from your job method. Use
-                 signal/slots to propagate changes to the ui
+                 signal/slots to propagate changes to the ui.
     """
     @property
     def caller(self):
@@ -357,9 +356,8 @@ class JobRunner(object):
                       the job that is currently running (if any).
         :type force: bool
 
-        :param args: *args
-
-        :param kwargs: **kwargs
+        :param args: args
+        :param kwargs: kwargs
         """
         thread = self.findUnusedThread()
         if thread:
@@ -401,12 +399,12 @@ class JobRunner(object):
 
 class DelayJobRunner(JobRunner):
     """
-    Extends the JobRunner to be able to introduce a delay between the job
-    request and the job execution. If a new job is requested the timer is
-    stopped (discarding a possible waiting job).
+    Extends the JobRunner to introduce a delay between the job request and the
+    job execution. If a new job is requested, the timer is stopped discarding a
+    possible waiting job.
 
-    This is made so that jobs that are run when the editor textChanged signal
-    is emitted does not actually run (when the user types too fast).
+    This is heavily used internally for situations where the user can cancel a
+    job (code completion, calltips,...).
     """
     def __init__(self, caller, nbThreadsMax=3, delay=500):
         JobRunner.__init__(self, caller, nbThreadsMax=nbThreadsMax)
@@ -430,9 +428,8 @@ class DelayJobRunner(JobRunner):
                       the job that is currently running (if any).
         :type force: bool
 
-        :param args: *args
-
-        :param kwargs: **kwargs
+        :param args: args
+        :param kwargs: kwargs
         """
         self.__timer.stop()
         self.__job = job
@@ -442,6 +439,9 @@ class DelayJobRunner(JobRunner):
         self.__timer.start(self.__interval)
 
     def cancelRequests(self):
+        """
+        Cancels pending requests.
+        """
         self.__timer.stop()
 
     def __execRequestedJob(self):
@@ -464,15 +464,15 @@ class _ServerSignals(QtCore.QObject):
     Holds the server signals.
     """
     #: Signal emitted when a new work is requested.
-    #: Parameters:
-    #: -----------
+    #:
+    #: **Parameters**:
     #:   * caller id
     #:   * worker object
     workRequested = QtCore.Signal(object, object)
 
     #: Signal emitted when a new work is requested.
-    #: Parameters:
-    #: -----------
+    #:
+    #: **Parameters**:
     #:   * caller id
     #:   * worker object
     #:   * worker results
@@ -481,21 +481,22 @@ class _ServerSignals(QtCore.QObject):
 
 class SubprocessServer(object):
     """
-    Utility class to run a child process to do the heavy load computations
-    such as file layout analysis, code completion requests.
+    Utility class to run a child process use to execute heavy load computations
+    such as file layout analysis, code completion requests...
 
-    To use the server, just create an instance and call the start method.
+    To use the server, just create an instance and call the
+    :meth:`pyqode.core.SubprocessServer.start` method.
 
     To request a job, use the requestWork method and pass it your worker object
     (already configured to do its work).
 
     The server will send the request to the child process and will emit the
-    workCompleted signal when the job finished
+    workCompleted signal when the job finished.
     """
-
 
     def __init__(self, name="pyQodeSubprocessServer", pollInterval=500,
                  autoCloseOnQuit=True):
+        #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
         self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
 
@@ -517,7 +518,7 @@ class SubprocessServer(object):
 
     def close(self):
         """
-        Close the server, terminate the child process
+        Closes the server, terminates the child process.
         """
         logger.info("Close server")
         if self.__running:
@@ -526,7 +527,7 @@ class SubprocessServer(object):
 
     def start(self):
         """
-        Start the server. This will actually start the child process.
+        Starts the server. This will actually start the child process.
         """
         logger.info("Server started")
         self.__pollTimer.start(self.__pollInterval)
@@ -535,13 +536,16 @@ class SubprocessServer(object):
 
     def requestWork(self, caller, worker):
         """
-        Request a work. The work will be called in the child process and its
-        results will be available throught the workCompleted signal.
+        Requests a work. The work will be called in the child process and its
+        results will be available through the
+        :attr:`pyqode.core.SubprocessServer.signals.workCompleted` signal.
 
-        :param id: CompletionMode id
+        :param caller: caller object$
+        :type caller: object
 
         :param worker: Callable **object**, must override __call__ with no
                        parameters.
+        :type worker: callable
         """
         caller_id = id(caller)
         self.__parent_conn.send([id(caller), worker])

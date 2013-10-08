@@ -87,3 +87,27 @@ ParenthesisInfo
 
 .. autoclass:: pyqode.core.ParenthesisInfo
     :members:
+
+
+Utilities
+----------------
+
+JobRunner
+++++++++++++++++++
+
+.. autoclass:: pyqode.core.JobRunner
+    :members:
+
+DelayJobRunner
+++++++++++++++++++
+
+.. autoclass:: pyqode.core.DelayJobRunner
+    :members:
+
+SubprocessServer
+++++++++++++++++++
+.. autoclass:: pyqode.core.SubprocessServer
+    :members:
+
+.. autoclass:: pyqode.core.system._ServerSignals
+    :members:
