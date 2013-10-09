@@ -35,7 +35,17 @@ from pyqode.qt import QtGui
 
 class CaretLineHighlighterMode(Mode):
     """
-    This mode highlights the caret line (active line)
+    This mode highlights the caret line (active line).
+
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    ====================== ====================== ======= ======================
+    Key                    Section                Type    Default value
+    ====================== ====================== ======= ======================
+    caretLineBackground    General                QColor  Computed value based on the background color
+    ====================== ====================== ======= ======================
+    
     """
     #: The mode identifier
     IDENTIFIER = "caretLineHighlighterMode"
@@ -59,7 +69,7 @@ class CaretLineHighlighterMode(Mode):
             self.editor.cursorPositionChanged.disconnect(
                 self.__updateHighlight)
             self.editor.newTextSet.disconnect(self.__updateHighlight)
-            self.clearDeco()
+            self.__clearDeco()
 
     def _onInstall(self, editor):
         """
@@ -93,7 +103,7 @@ class CaretLineHighlighterMode(Mode):
             self.editor.style.setValue("caretLineBackground",
                                        driftColor(b, factor))
 
-    def clearDeco(self):
+    def __clearDeco(self):
         if self.__decoration:
             self.editor.removeDecoration(self.__decoration)
 
@@ -101,7 +111,7 @@ class CaretLineHighlighterMode(Mode):
         """
         Updates the current line decoration
         """
-        self.clearDeco()
+        self.__clearDeco()
         self.__decoration = TextDecoration(self.editor.textCursor())
         self.__decoration.setBackground(self.__brush)
         self.__decoration.setFullWidth()

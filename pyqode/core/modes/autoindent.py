@@ -31,10 +31,15 @@ from pyqode.qt.QtGui import QTextCursor, QKeyEvent
 
 
 class AutoIndentMode(Mode):
-    """ Automatically indents the text on new line.
     """
-    #: Mode identifier
+    Generic indenter mode that indents the text when the user press RETURN.
+
+    You can customize this mode by overriding
+    :meth:`pyqode.core.AutoIndentMode._getIndent`
+    """
+    #: Identifier
     IDENTIFIER = "autoIndentMode"
+    #: Description
     DESCRIPTION = """ A basic auto indent mode that provides a basic auto
     indentation based on the previous line indentation.
     """
@@ -45,7 +50,7 @@ class AutoIndentMode(Mode):
 
     def _getIndent(self, tc):
         """
-        Return the indentation text (a series of spaces, tabs)
+        Return the indentation text (a series of spaces or tabs)
 
         :param tc: QTextCursor
         """
