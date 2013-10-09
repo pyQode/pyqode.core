@@ -275,3 +275,5 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 # -- Options for Inheritance diagrams-------------------------------------------
 inheritance_graph_attrs = dict(rankdir="LR", size='""',
                                fontsize=14, ratio='compress')
+
+autodoc_member_order = 'groupwise'
