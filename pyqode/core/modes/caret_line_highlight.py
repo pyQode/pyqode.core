@@ -45,7 +45,7 @@ class CaretLineHighlighterMode(Mode):
     ====================== ====================== ======= ======================
     caretLineBackground    General                QColor  Computed value based on the background color
     ====================== ====================== ======= ======================
-    
+
     """
     #: The mode identifier
     IDENTIFIER = "caretLineHighlighterMode"
