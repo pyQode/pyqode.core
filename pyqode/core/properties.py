@@ -101,9 +101,8 @@ class PropertyRegistry(QtCore.QObject):
         Updates the values of the current instance from the value of the
         registry passed as a parameter.
 
-        .. note:: :attr:`pyqode.core.PropertyRegistry.valueChanged` will be
-                  emitted with a key and section parameter set to an empty
-                  string.
+        .. note:: This will emit the :attr:`pyqode.core.PropertyRegistry.valueChanged` signal
+                  with a key and section parameter set to an empty string.
 
         :param propertyRegistry: The source of the update.
         :type propertyRegistry: pyqode.core.PropertyRegistry

@@ -89,9 +89,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         - :attr:`pyqode.core.QCodeEdit.indentRequested`
         - :attr:`pyqode.core.QCodeEdit.unIndentRequested`
 
-    .. note:: QCodeEdit has been designed to work with files (
-              :meth:`pyqode.core.QCodeEdit.openFile`,
-              :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
+    .. note:: QCodeEdit has been designed to work with files (:meth:`pyqode.core.QCodeEdit.openFile`
+              , :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
               Well, you can still use some plain text but many modes and panels
               that rely heavily on the current file name/path won't work
               properly (e.g. the syntax highlighter mode uses the file name

@@ -46,6 +46,7 @@ Parts of the documentation:
    :columns: 2
 
    * .. glossary::
+
       :doc:`whats_new`
          What's new since the last release, and what is planned for the next one.
 
