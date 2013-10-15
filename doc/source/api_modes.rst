@@ -102,3 +102,13 @@ RightMarginMode
 ------------------
 .. autoclass:: pyqode.core.RightMarginMode
     :members:
+
+SymbolMatcherMode
+---------------------
+.. autoclass:: pyqode.core.SymbolMatcherMode
+    :members:
+
+ZoomMode
+---------------------
+.. autoclass:: pyqode.core.ZoomMode
+    :members:

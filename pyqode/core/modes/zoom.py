@@ -30,7 +30,12 @@ from pyqode.qt import QtCore
 
 class ZoomMode(Mode):
     """
-    Zoom in/out mode. (the editor font is increased/decreased)
+    This mode make it possible to zoom in/out the editor view.
+
+    Here are the controls:
+      * **zoom out**: *ctrl+-* or *ctrl+mouse wheel backward*
+      * **zoom in**: *ctrl++* or *ctrl+mouse wheel forward*
+      * **reset**: *ctrl + 0*
     """
     #: Mode identifier
     IDENTIFIER = "zoomMode"
