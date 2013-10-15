@@ -69,7 +69,7 @@ class PreLoadWorker(object):
 
 class CompletionWorker(object):
     """
-    A worker object that will run the complete method of
+    A worker object that will run the complete method of every providers
     """
     def __init__(self, providers, *args):
         self.__providers = providers
@@ -92,8 +92,9 @@ class CompletionWorker(object):
 
 class Completion(object):
     """
-    Defines a code completion. A code suggestion is made up of the following
-    elements:
+    Defines a code completion item.
+
+    A completion is made up of the following elements:
         - the suggestion text
         - the suggestion icon. Optional.
         - the suggestion tooltip. Optional.
@@ -126,40 +127,69 @@ class CompletionProvider(object):
                     this method.
     .. note: As the provider is executed in a child process, your class instance
     will loose its data every time its run. To store persistent data (such as
-    the preload results), you may use the 'processDict' attribute
+    the preload results), you may use the 'processDict' attribute. Care must be
+    taken from the key, we suggest a combination of the file path and
+    type(self).__name__.
     """
     PRIORITY = 0
 
     def preload(self, code, fileEncoding, filePath):
         return None
 
-    def complete(self, code, line, column, completionPrefix, filePath, fileEncoding):
+    def complete(self, code, line, column, completionPrefix,
+                 filePath, encodign):
         """
-        Provides a list of possible code completions.
-
-        :param document: QTextDocument
-        :param filePath: Document file path
-        :param fileEncoding: Document file encoding.
-
-        :return: A list of Completion
+        :param code: code string
+        :param line: line number (1 based)
+        :param column: colum number (0 based)
+        :param completionPrefix: The prefix to complete
+        :param filePath: file path of the code to complete
+        :param fileEncoding: encoding of the code to complete
         """
         raise NotImplementedError()
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
+    """
+    This mode provides code completion system wich is extensible. It takes care
+    of running the completion request in a background process using one or more
+    completion provider(s).
+
+    To implement a code completion for a specific language, you only need to
+    implement new :class:`pyqode.core.CompletionProvider`
+
+    The completion pop is shown the user press **ctrl+space** or automatically
+    while the user is typing some code (this can be configured using a series
+    of properties described in the below table).
+
+    .. note:: The code completion mode automatically starts the code completion
+              subprocess shared among all instances the first time it is
+              installed on an editor widget. The process is automatically stopped
+              when the application is about to quit.
+    """
+    #: Mode identifier
     IDENTIFIER = "codeCompletionMode"
+    #: Mode description
     DESCRIPTION = "Provides a code completion/suggestion system"
 
+    #: Code completion server running in a background process and shared among
+    #: all instances. Automatically started the first time a completion mode is
+    #: installed on an editor widget and stopped when the app is about to quit.
     SERVER = None
 
     completionsReady = QtCore.Signal(object)
     waitCursorRequested = QtCore.Signal()
 
+    #: Signal emitted when the preload operation has started.
     preLoadStarted = QtCore.Signal()
+    #: Signal emitted when the preload operation has completed.
     preLoadCompleted = QtCore.Signal()
 
     @property
     def completionPrefix(self):
+        """
+        Returns the current completion prefix
+        """
         prefix = self.editor.selectWordUnderCursor().selectedText()
         if prefix == "":
             try:
@@ -187,18 +217,40 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
+        """
+        Adds a completion provider to the list of providers used to provide
+        code completion to the user.
+
+        Note that the provider instance will be pickled to be sent to the
+        subprocess, this means that you cannot store data to keep results from
+        run to run. Instead you may use
+        :attr:`pyqode.core.CompletionProvider.processDict` which is a regular
+        dict attribute that is set on every provider object when run in the
+        subprocess.
+
+        :param provider: The completion provider instance to add.
+        """
         self.__providers.append(provider)
         self.__providers = sorted(
             self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def removeCompletionProvider(self, provider):
+        """
+        Removes a completion provider.
+
+        :param provider: Provider instance to remove
+        :return:
+        """
         self.__providers.remove(provider)
         self.__providers = sorted(
             self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def requestCompletion(self):
+        """
+        Requests a code completion at the current cursor position.
+        """
         if not self.__preloadFinished or self.__requestCnt:
             return
         self.__requestCnt += 1
@@ -208,6 +260,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.filePath, self.editor.fileEncoding)
 
     def requestPreload(self):
+        """
+        Requests a preload of the document.
+        """
         self.__preloadFinished = False
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
@@ -600,7 +655,8 @@ class DocumentWordCompletionProvider(CompletionProvider):
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
         # store results in the subprocess dict for later use
-        self.processDict["docWords%s" % filePath] = completions
+        self.processDict["docWords%s-%s" %
+                         (filePath, type(self).__name__)] = completions
         return completions
 
     @staticmethod
@@ -632,7 +688,12 @@ class DocumentWordCompletionProvider(CompletionProvider):
     def complete(self, code, line, column, completionPrefix,
                  filePath, fileEncoding):
         # get previous result from the server process dict
-        words = self.processDict["docWords%s" % filePath]
+        try:
+            words = self.processDict["docWords%s-%s"
+                                     % (filePath, type(self).__name__)]
+        except KeyError:
+            words = None
+        print("Words:", words)
         if not words or not len(words):
             return self.parse(code, filePath=filePath)
         return words
@@ -644,13 +705,15 @@ if __name__ == '__main__':
 
         def __init__(self):
             QCodeEdit.__init__(self, parent=None)
-            self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
             self.installMode(CodeCompletionMode())
             self.codeCompletionMode.addCompletionProvider(
-                DocumentWordCompletionProvider(self))
+                DocumentWordCompletionProvider())
+            self.openFile(__file__)
 
     import sys
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     app = QtGui.QApplication(sys.argv)
     e = Example()
     e.show()
