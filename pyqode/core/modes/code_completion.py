@@ -125,11 +125,13 @@ class CompletionProvider(object):
                    editor. Optional.
         - complete: complete the current text. All subclasses needs to implement
                     this method.
+
     .. note: As the provider is executed in a child process, your class instance
-    will loose its data every time its run. To store persistent data (such as
-    the preload results), you may use the 'processDict' attribute. Care must be
-    taken from the key, we suggest a combination of the file path and
-    type(self).__name__.
+             will loose its data every time its run. To store persistent data
+             (such as the preload results), you may use the 'processDict'
+             attribute. Care must be taken from the key, we suggest a
+             combination of the file path and type(self).__name__.
+
     """
     PRIORITY = 0
 
@@ -162,11 +164,27 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     while the user is typing some code (this can be configured using a series
     of properties described in the below table).
 
-    .. note:: The code completion mode automatically starts the code completion
-              subprocess shared among all instances the first time it is
-              installed on an editor widget. The process is automatically stopped
-              when the application is about to quit.
+    The code completion mode adds the following properties to
+    :attr:`pyqode.core.QCodeEdit.settings`
+
+    ====================== ====================== ======= ====================== ================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ================
+    triggerKey             Code completion        int     QtCore.Qt.Key_Space    The key that triggers the code completion requests(ctrl + **space**)
+    triggerLength          Code completion        int     1                      The number of character needed to trigger automatic completion requests.
+    triggerSymbols         Code completion        list    ["."]                  The list of symbols that trigger code completion requests(".", "->", ...)
+    showTooltips           Code completion        bool    True                   Show completion tooltip (e.g. to display the underlying type)
+    caseSensitive          Code completion        bool    False                  Case sensitivity (True is case sensitive)
+    ====================== ====================== ======= ====================== ================
+
+    .. note:: The code completion mode automatically starts a unique subprocess
+              (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
+              to run code completion tasks. This process is automatically closed
+              when the application is about to quit. You can use this process
+              to run custom task on the completion process (e.g. setting up some
+              :py:attr:`sys.modules`).
     """
+    sys.modules
     #: Mode identifier
     IDENTIFIER = "codeCompletionMode"
     #: Mode description
@@ -288,6 +306,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerLength", 1, section="Code completion")
         self.editor.settings.addProperty(
             "triggerSymbols", ["."], section="Code completion")
+        # todo to removed, replaced by trigger symbols
         self.editor.settings.addProperty(
             "triggerKeys", [int(QtCore.Qt.Key_Period)],
             section="Code completion")
@@ -651,6 +670,15 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
     def parse(self, code, wordSeparators=constants.WORD_SEPARATORS,
               filePath=""):
+        """
+        Returns a list of completions based on the code passed as a parameter.
+
+        :param code: The code to parse/tokenize
+        :param wordSeparators: The list of words separators.
+        :param filePath:
+        :return: A list of :class:`pyqode.core.Completion`
+        :rtype: list
+        """
         completions = []
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
@@ -669,7 +697,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
         :param seps: List of words separators
 
         :return: A set of words found in the document (excluding punctuations,
-        numbers, ...)
+                 numbers, ...)
         """
         # replace all possible separators with a default sep
         default_sep = seps[0]

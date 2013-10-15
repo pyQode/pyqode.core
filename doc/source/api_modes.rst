@@ -19,6 +19,29 @@ CaretLineHighlighterMode
 .. autoclass:: pyqode.core.CaretLineHighlighterMode
     :members:
 
+Code completion
+-----------------
+
+CodeCompletionMode
+++++++++++++++++++++
+.. autoclass:: pyqode.core.CodeCompletionMode
+    :members:
+
+CompletionProvider
+++++++++++++++++++++++
+.. autoclass:: pyqode.core.CompletionProvider
+    :members:
+
+Completion
+++++++++++++++
+.. autoclass:: pyqode.core.Completion
+    :members:
+
+DocumentWordCompletionProvider
++++++++++++++++++++++++++++++++++++
+.. autoclass:: pyqode.core.DocumentWordCompletionProvider
+    :members:
+
 Code checkers
 -------------------
 
