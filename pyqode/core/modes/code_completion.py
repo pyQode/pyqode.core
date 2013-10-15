@@ -181,8 +181,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
               to run code completion tasks. This process is automatically closed
               when the application is about to quit. You can use this process
-              to run custom task on the completion process (e.g. setting up some
-              :py:attr:`sys.modules`).
+              to run custom task on the completion process (e.g. setting up some :py:attr:`sys.modules`).
     """
     sys.modules
     #: Mode identifier

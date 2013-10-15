@@ -35,10 +35,9 @@ class SymbolMatcherMode(Mode):
     """
     Do symbols matches highlighting (parenthesis, braces, ...).
 
-    .. note:: This mode requires the document to be filled with
-              :class:`pyqode.core.TextBlockUserData`, i.e. a
-              :class:`pyqode.core.SyntaxHighlighter` must be installed on the
-              editor instance.
+    .. note:: This mode requires the document to be filled with :class:`pyqode.core.TextBlockUserData`,
+              i.e. a :class:`pyqode.core.SyntaxHighlighter` must be installed on
+              the editor instance.
     """
     IDENTIFIER = "symbolMatcherMode"
     DESCRIPTION = "Highlight matching symbols (paren, braces, brackets,...)"
