@@ -32,11 +32,20 @@ from pyqode.qt import QtGui
 
 class IndenterMode(Mode):
     """
-    Implements classic indentation. It inserts/removes tabulations (a series of
-    spaces defined by the tabLength settings) at the cursor position if there is
-    no selection otherwise it fully indents/un-indents selected lines.
+    Implements classic indentation/tabulation.
+
+    It inserts/removes tabulations (a series of spaces defined by the
+    tabLength settings) at the cursor position if there is no selection,
+    otherwise it fully indents/un-indents selected lines.
+
+    To trigger an indentation/un-indentation programatically, you must emit
+    :attr:`pyqode.core.QCodeEdit.indentRequested` or
+    :attr:`pyqode.core.QCodeEdit.unIndentRequested`.
     """
+    #: Mode identifier
     IDENTIFIER = "indenterMode"
+
+    #: Mode description
     DESCRIPTION = "Implements classic indentation"
 
     def _onStateChanged(self, state):
@@ -98,6 +107,9 @@ class IndenterMode(Mode):
         cursor.endEditBlock()
 
     def indent(self):
+        """
+        Indents text at cursor position.
+        """
         cursor = self.editor.textCursor()
         assert isinstance(cursor, QtGui.QTextCursor)
         if cursor.hasSelection():
@@ -109,6 +121,9 @@ class IndenterMode(Mode):
             cursor.endEditBlock()
 
     def unIndent(self):
+        """
+        Un-indents text at cursor position.
+        """
         cursor = self.editor.textCursor()
         assert isinstance(cursor, QtGui.QTextCursor)
         if cursor.hasSelection():

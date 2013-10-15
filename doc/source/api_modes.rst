@@ -80,3 +80,16 @@ Check triggers
 .. autoattribute:: pyqode.core.CHECK_TRIGGER_TXT_SAVED
 
     Check is triggered when text has been saved.
+
+FileWatcherMode
+------------------
+
+.. autoclass:: pyqode.core.FileWatcherMode
+    :members:
+
+IndenterMode
+------------------
+
+.. autoclass:: pyqode.core.IndenterMode
+    :members:
+

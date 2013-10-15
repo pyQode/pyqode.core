@@ -35,6 +35,14 @@ from pyqode.qt import QtCore, QtGui
 class FileWatcherMode(Mode):
     """
     FileWatcher mode. (Verify the external changes from opened file)
+
+    This mode adds the following properties to :attr:`pyqode.core.QCodeEdit.settings`
+
+    ====================== ====================== ======= ====================== ================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ================
+    autoReloadChangedFiles General                bool    False                  Auto reload files that changed externally.
+    ====================== ====================== ======= ====================== ================
     """
     #: Mode identifier
     IDENTIFIER = "fileWatcherMode"
