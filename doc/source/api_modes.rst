@@ -93,3 +93,7 @@ IndenterMode
 .. autoclass:: pyqode.core.IndenterMode
     :members:
 
+PygmentsSyntaxHighlighter
+-----------------------------
+.. autoclass:: pyqode.core.PygmentsSyntaxHighlighter
+    :members:
