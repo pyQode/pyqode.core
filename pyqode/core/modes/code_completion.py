@@ -721,7 +721,6 @@ class DocumentWordCompletionProvider(CompletionProvider):
                                      % (filePath, type(self).__name__)]
         except KeyError:
             words = None
-        print("Words:", words)
         if not words or not len(words):
             return self.parse(code, filePath=filePath)
         return words
