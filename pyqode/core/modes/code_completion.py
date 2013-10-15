@@ -276,6 +276,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __onWorkFinished(self, caller_id, worker, results):
         if caller_id == id(self) and isinstance(worker, CompletionWorker):
+            logger.debug("Completion request finished")
             self.editor.setCursor(QtCore.Qt.IBeamCursor)
             all_results = []
             for res in results:
@@ -283,6 +284,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__requestCnt -= 1
             self.__showCompletions(all_results)
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
+            logger.debug("Preload request finished")
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
 
