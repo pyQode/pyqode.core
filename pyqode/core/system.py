@@ -547,9 +547,16 @@ class SubprocessServer(object):
                        parameters.
         :type worker: callable
         """
+        logger.debug("SubprocessServer requesting work: %s - %s" %
+                     (caller, worker))
         caller_id = id(caller)
-        self.__parent_conn.send([id(caller), worker])
-        self.signals.workRequested.emit(caller_id, worker)
+        if not self.__poll():
+            self.__parent_conn.send([id(caller), worker])
+            self.signals.workRequested.emit(caller_id, worker)
+            logger.debug("SubprocessServer work requested : %s - %s" %
+                         (caller, worker))
+        else:
+            logger.debug("Subprocess server failed to request work")
 
     def __poll(self):
         """
@@ -603,7 +610,8 @@ def workerThread(conn, caller_id, worker):
     except Exception as e:
         logger.critical(e)
         results = []
-    conn.send([caller_id, worker, results])
+    if not conn.poll():
+        conn.send([caller_id, worker, results])
 
 
 if __name__ == '__main__':
