@@ -48,28 +48,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     **Settings** :attr:`pyqode.core.QCodeEdit.settings`
 
-    ====================== ====================== ======= ======================
-    Key                    Section                Type    Default value
-    ====================== ====================== ======= ======================
-    showWhiteSpaces        General                bool    False
-    tabLength              General                int     4
-    useSpacesInsteadOfTab  General                bool    True
-    minIndentColumn        General                int     0
-    ====================== ====================== ======= ======================
+    ======================= ====================== ======= ====================== ==============
+    Key                     Section                Type    Default value          Description
+    ======================= ====================== ======= ====================== ==============
+    showWhiteSpaces         General                bool    False                  Display visual whitespaces
+    tabLength               General                int     4                      Tab length (number of spaces)
+    useSpacesInsteadOfTab   General                bool    True                   Use spaces instead of spaces (be warry of this, most modes still use spaces heavily for internal computations)
+    minIndentColumn         General                int     0                      Min column indent (some languages such as cobol requires to indent code at min col 7)
+    ======================= ====================== ======= ====================== ==============
 
     **Style** :attr:`pyqode.core.QCodeEdit.style`
 
-    ====================== ====================== ======= ======================
-    Key                    Section                Type    Default value
-    ====================== ====================== ======= ======================
-    font                   General                string  OS Dependant: *monospace* on GNU/Linux, *Consolas* on Windows and *Monaco* on Darwin
-    fontSize               General                int     10
-    background             General                QColor  #FFFFFF
-    foreground             General                QColor  #000000
-    whiteSpaceForeground   General                QColor  #dddddd
-    selectionBackground    General                QColor  QPalette.highlight()
-    selectionForeground    General                QColor  QPalette.highlightedText()
-    ====================== ====================== ======= ======================
+    ====================== ====================== ======= ====================== ==============
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ==============
+    font                   General                string  OS Dependant           Font: *monospace* on GNU/Linux, *Consolas* on Windows and *Monaco* on Darwin
+    fontSize               General                int     10                     Font size
+    background             General                QColor  #FFFFFF                Editor background color
+    foreground             General                QColor  #000000                Editor foreground color
+    whiteSpaceForeground   General                QColor  #dddddd                Color of the whitespaces
+    selectionBackground    General                QColor  OS dependant           QtGui.QPalette.highlight().color()
+    selectionForeground    General                QColor  OS dependant           QtGui.QPalette.highlightedText().color()
+    ====================== ====================== ======= ====================== ==============
 
     **Signals:**
         - :attr:`pyqode.core.QCodeEdit.painted`

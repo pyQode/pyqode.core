@@ -40,11 +40,11 @@ class CaretLineHighlighterMode(Mode):
     Here the properties added by the mode to
     :attr:`pyqode.core.QCodeEdit.style`:
 
-    ====================== ====================== ======= ======================
-    Key                    Section                Type    Default value
-    ====================== ====================== ======= ======================
-    caretLineBackground    General                QColor  Computed value based on the background color
-    ====================== ====================== ======= ======================
+    ====================== ====================== ======= ====================== =====================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== =====================
+    caretLineBackground    General                QColor  Computed.              This color is computed based on the background color automatically.
+    ====================== ====================== ======= ====================== =====================
 
     """
     #: The mode identifier
