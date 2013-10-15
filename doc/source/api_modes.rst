@@ -97,3 +97,8 @@ PygmentsSyntaxHighlighter
 -----------------------------
 .. autoclass:: pyqode.core.PygmentsSyntaxHighlighter
     :members:
+
+RightMarginMode
+------------------
+.. autoclass:: pyqode.core.RightMarginMode
+    :members:

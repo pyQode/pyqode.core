@@ -33,15 +33,34 @@ from pyqode.qt import QtGui
 
 class RightMarginMode(Mode):
     """
-    Display the right margin
+    Display a right margin at column 80 by default.
+
+
+    This mode adds the following properties to
+    :attr:`pyqode.core.QCodeEdit.settings`
+
+    ====================== ====================== ======= ====================== ================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ================
+    rightMarginPos         General                int     80                     Column where the margin must be painted.
+    ====================== ====================== ======= ====================== ================
+
+    and to :attr:`pyqode.core.QCodeEdit.style`
+
+    ====================== ====================== ======= ====================== ================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ================
+    margin                 General                QColor  #FF0000                Color of the margin.
+    ====================== ====================== ======= ====================== ================
     """
     #: Mode identifier
     IDENTIFIER = "rightMarginMode"
+
+    #: Mode description
     DESCRIPTION = "Draw the right margin on the text document"
 
     def __init__(self):
         Mode.__init__(self)
-        #: Defines the margin position. 80 is the default
         self.marginPos = constants.MARGIN_POS
         self.__pen = QtGui.QPen()
 
