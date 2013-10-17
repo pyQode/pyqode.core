@@ -73,7 +73,6 @@ setup(
           'Development Status :: 5 - Production/Stable',
           'Environment :: X11 Applications :: Qt',
           'Environment :: Win32 (MS Windows)',
-          'Framework :: pyqode',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',
           'Operating System :: Microsoft :: Windows',
