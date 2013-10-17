@@ -5,6 +5,21 @@ Change Log
 
     These lists are not exhaustive.
 
+1.0
+----------
+
+The API has been completely rewritten. Here are the major changes
+
+ * added support for python 3
+ * added support for PyQt4
+ * added support for Qt Designer plugins
+ * morphed into a namespaces package
+ * improved look and feel: native look and feel close to Qt Create
+ * improved code completion, code folding,
+ * improved performances (using multiprocessing heavily instead of multithreading)
+ * complete documentation and examples
+ * minimum travis ci integration (just to ensure pyqode remains importable for all supported interpreter/qt bingins, there is still no real test suite).
+
 0.1.1
 ----------
 
