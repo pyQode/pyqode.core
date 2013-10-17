@@ -18,10 +18,17 @@ The following packages will be installed automatically:
 .. note:: Optionally, you can install chardet or chardet2 to help pyQode detect
           file encoding automatically.
 
-Easy install
----------------
+.. note:: pyQode runs fine on all Windows version (from Windows XP to Windows 8)
+          and has been tested on the major GNU/Linux desktop environments
+          such as Unity, Gnome, Cinnamon and KDE.
 
-pyQode can be installed from pypi using easy_install or pip:
+          It should run fine on Mac OS too but this has never been tested.
+          (Feedbacks are appreciated).
+
+Easy install (the recommended way)
+--------------------------------------
+
+pyQode can be installed from *pypi* using *easy_install* or *pip*:
 
 .. code-block:: bash
 
