@@ -34,7 +34,9 @@ class LineNumberPanel(Panel):
     """
     The liner number panel displays the document line numbers.
     """
+    #: The panel identifier
     IDENTIFIER = "lineNumberPanel"
+    #: The panel description
     DESCRIPTION = "Display line number"
 
     def __init__(self):

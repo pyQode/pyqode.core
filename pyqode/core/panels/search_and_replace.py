@@ -42,18 +42,34 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     It uses the QTextDocument API to search for some text. Search operation is
     performed in a background thread.
 
-    The search panel can also be used pragmatically. To do that, the client
-    code must first request a search (**requestSearch**) and connect to the
-    searchFinished signal. The results of the search can then be retrieved
-    using the cptOccurrences attribute and the getOccurrences method. The
-    client code may now navigates through occurrences
-    (**selectNext**/**selectionPrevious**) or replace the occurences with their
-    own text (**replaceOccurrence**/**replaceAll**).
+    The search panel can also be used programatically.
+
+    To do that, the client code first requests a search using
+    :meth:`requestSearch` and connects to
+    :attr:`searchFinished`.
+
+    The results of the search can then be retrieved using
+    :attr:`cptOccurrences` and :meth:`getOccurrences`.
+
+    The client code may now navigate through occurrences using :meth:`selectNext`
+    or :meth:`selectPrevious`, or replace the occurrences with a specific
+    text using :meth:`replaceOccurrence` or :meth:`replaceAll`.
+
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    =========================== ====================== ======= ====================== =====================
+    Key                         Section                Type    Default value          Description
+    =========================== ====================== ======= ====================== =====================
+    searchOccurrenceBackground  General                QColor  #FFFF00                Search occurrences background. Default is Yellow.
+    searchOccurrenceForeground  General                QColor  #000000                Search occurrences foreground. Default is Black.
+    =========================== ====================== ======= ====================== =====================
     """
+    #: The panel identifier
     IDENTIFIER = "searchAndReplacePanel"
+    #: The panel description
     DESCRIPTION = "Search and replace text in the editor"
 
-    #: Stylesheet
     STYLESHEET = """SearchAndReplacePanel
     {
         background-color: %(bck)s;
@@ -154,7 +170,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)
         self.__resetStylesheet()
-        self.on_pushButtonClose_clicked()
+        self.__on_pushButtonClose_clicked()
         self.editor.style.addProperty("searchOccurrenceBackground",
                                       constants.SEARCH_OCCURRENCES_BACKGROUND)
         self.editor.style.addProperty("searchOccurrenceForeground",
@@ -215,22 +231,20 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.lineEditReplace.textChanged.disconnect(self.__updateButtons)
             self.searchFinished.connect(self.__onSearchFinished)
 
-    @QtCore.Slot()
-    def on_pushButtonClose_clicked(self):
+    def closePanel(self):
         """
         Closes the panel
-        :return:
         """
         self.hide()
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
+    def __on_pushButtonClose_clicked(self):
+        self.closePanel()
+
+    @QtCore.Slot()
     def on_actionSearch_triggered(self):
-        """
-        Executes the search action using the selected text of the editor
-        (Ctrl+F).
-        """
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -246,10 +260,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
-        """
-        Executes the search and replace action using the selected text of the
-        editor (ctrl+r)
-        """
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -263,17 +273,16 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.requestSearch(newText)
 
     def focusOutEvent(self, event):
-        """ Cancel jobs when leaving the widget """
         self.stopJob()
         self.cancelRequests()
         Panel.focusOutEvent(self, event)
 
     def requestSearch(self, txt=None):
         """
-        Request a search operation.
+        Requests a search operation.
 
         :param txt: The text to replace. If None, the content of lineEditSearch
-        is used instead.
+                    is used instead.
         """
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
@@ -308,7 +317,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Selects the next occurrence.
 
         :return: True in case of success, false if no occurrence could be
-        selected.
+                 selected.
         """
         cr = self.__getCurrentOccurrence()
         occurrences = self.getOccurrences()
@@ -332,7 +341,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Selects previous occurrence.
 
         :return: True in case of success, false if no occurrence could be
-        selected.
+                 selected.
         """
         cr = self.__getCurrentOccurrence()
         occurrences = self.getOccurrences()
@@ -356,10 +365,10 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Replaces the selected occurrence.
 
         :param text: The replacement text. If it is None, the lineEditReplace's
-        text is used instead.
+                     text is used instead.
 
         :return True if the text could be replace properly, False if there is
-        no more occurrences to replace.
+                no more occurrences to replace.
         """
         if text is None or isinstance(text, bool):
             text = self.lineEditReplace.text()
@@ -421,7 +430,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
                     self.selectNext()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
-                self.on_pushButtonClose_clicked()
+                self.__on_pushButtonClose_clicked()
         return Panel.eventFilter(self, obj, event)
 
     def __getUserSearchFlag(self):

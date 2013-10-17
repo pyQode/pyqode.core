@@ -60,31 +60,23 @@ class _FoldingIndicator(object):
 
 class FoldingPanel(Panel):
     """
-    Panel used to draw and fold/unfold text blocks.
+    This panel draws folding indicators and manage user interaction with those
+    indicators.
 
-    **This panel does not detect foldables blocks of the document, it only
-    renders them and let the user fold/unfold a block**
+    All you have to do is setup a :class:`pyqode.core.FoldDetector` on the
+    syntax highlighter (the pygments highlighter does this automatically for
+    you if you let him do) and install a folding panel.
 
-    Client code must manage the folding indicators themselves by using the
-    addIndicator, removeIndicator or clearIndicators.
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
 
-    Client code can also fold/unfold code blocks using the fold and unfold
-    method.
+    .. note:: This panel does not detect foldables blocks of the document,
+              it only renders them and let the user fold/unfold a block
     """
+    #: The panel descriptip,
     DESCRIPTION = "Manage and draw folding indicators"
+    #: The panel identifier
     IDENTIFIER = "foldingPanel"
-
-    # class _BlockFoldData(QtGui.QTextBlockUserData):
-    #     def __init__(self, folded=False):
-    #         QtGui.QTextBlockUserData.__init__(self)
-    #         self.folded = folded
-
-    # @property
-    # def indicators(self):
-    #     retVal = []
-    #     for indic in self.__indicators:
-    #         retVal.append(indic)
-    #     return retVal
 
     def getSystemColor(self):
         pal = self.editor.palette()
@@ -154,7 +146,7 @@ class FoldingPanel(Panel):
 
     def resetIndicatorsBackground(self):
         """
-        Reset the indicators background to the system (os dependant) color.
+        Resets the indicators background to the system (os dependant) color.
         """
         self.editor.style.setValue(
             "foldIndicatorBackground", self.__systemColor)
@@ -233,7 +225,7 @@ class FoldingPanel(Panel):
         """
         Unfolds the specified folding indicator.
 
-        :param foldingIndicator: The indicator to unfold.
+        :param indic: The indicator to unfold.
         """
         start = indic.start
         end = indic.end
@@ -276,7 +268,7 @@ class FoldingPanel(Panel):
             prevBlock = prevBlock.previous()
 
     def foldAll(self):
-        """ Folds all indicators whose fold indent is > 0 """
+        """ Folds all indicators who have a fold indent > 0 """
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             if b.blockNumber() == 602:
@@ -301,7 +293,7 @@ class FoldingPanel(Panel):
         self.editor.refreshPanels()
 
     def unfoldAll(self):
-        """ Unfolds all indicators whose fold indent is > 0"""
+        """ Unfolds all indicators who have a fold indent > 0 """
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             usd = b.userData()
