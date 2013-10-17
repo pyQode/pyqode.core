@@ -21,15 +21,15 @@ applications. **pyQode is a library/widget, not an IDE**. You can see it as an
 alternative to QScintilla.
 
 
-pyQode is a **namespace packages** made up of the following official packages:
+pyQode is a **namespace package** made up of the following official packages:
 
-  - `pyqode.core`_
+  - `pyqode.core`_: core package
 
-  - `pyqode.python`_ 
+  - `pyqode.python`_: python support (code completion, ...)
 
-  - `pyqode.widgets`_
+  - `pyqode.widgets`_: useful widgets for pyqode apps
 
-  - `pyqode.designer`_
+  - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 .. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
 .. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
@@ -64,7 +64,7 @@ pyQode is licensed under the MIT license.
 Requirements
 ------------
 
-pyqode-core depends on the following libraries:
+pyqode.core depends on the following libraries:
 
 -  PyQt4 or PySide
 -  Python 2.7 or Python 3 (>= 3.2)
@@ -74,8 +74,8 @@ pyqode-core depends on the following libraries:
 
 Installation
 ------------
-
-::
+You need to install setuptools, pip and PyQt4 or PySide by yourself. Then you
+can install pyqode using pip::
 
     $ pip install pyqode.core
 
