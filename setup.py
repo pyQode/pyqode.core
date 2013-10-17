@@ -51,7 +51,7 @@ setup(
     namespace_packages=['pyqode'],
     version=read_version(),
     packages=packages,
-    keywords=["QCodeEditor", "PySide", "PyQt", "code editor"],
+    keywords=["QCodeEdit PySide PyQt code editor widget"],
     package_data={'pyqode.core.ui': ['*.ui', '*.qrc', 'rc/*']},
     #package_dir={'pyqode': 'pyqode', "pyqode_designer":},
     url='https://github.com/ColinDuquesnoy/pyqode.core',
@@ -63,5 +63,19 @@ setup(
     install_requires=requirements,
     entry_points={'pyqode_plugins':
                   ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
-    zip_safe=False
-)
+    zip_safe=False,
+    classifiers=[
+          'Development Status :: 5 - Production/Stable',
+          'Environment :: X11 Applications :: Qt',
+          'Environment :: Win32 (MS Windows)',
+          'Framework :: pyqode',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
+          'Operating System :: Microsoft :: Windows',
+          'Operating System :: POSIX :: Linux',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.2',
+          'Programming Language :: Python :: 3.3',
+          'Topic :: Software Development :: Libraries :: Application Frameworks',
+          'Topic :: Software Development :: Widget Sets',
+          'Topic :: Text Editors :: Integrated Development Environments (IDE)'])
