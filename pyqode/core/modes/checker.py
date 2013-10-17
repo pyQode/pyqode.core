@@ -291,7 +291,7 @@ class CheckerMode(Mode, QtCore.QObject):
             try:
                 self.addMessagesRequested.emit(q.get(), True)
             except IOError as e:
-                logger.warning("Failed to add messages: %s", e)
+                logger.warning("Failed to add messages: %s" % e)
             p.join()
         except OSError as e:
             logger.error("%s: failed to run analysis, %s" % (self.name, e))
