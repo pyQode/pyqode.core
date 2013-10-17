@@ -66,16 +66,16 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  PyQt4 or PySide
 -  Python 2.7 or Python 3 (>= 3.2)
+-  PyQt4 or PySide
 -  pygments
--  setuptools
 
 
 Installation
 ------------
-You need to install setuptools, pip and PyQt4 or PySide by yourself. Then you
-can install pyqode using pip::
+You need to install PyQt4 or PySide by yourself.
+
+Then you can install pyqode using pip::
 
     $ pip install pyqode.core
 
