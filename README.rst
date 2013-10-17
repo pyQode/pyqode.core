@@ -115,12 +115,12 @@ Resources
 
 -  `Downloads`_
 -  `Source repository`_
--  `Documentation`_ *(outdated)*
+-  `Documentation`_
 -  `Wiki`_
 
 .. _Downloads: https://github.com/ColinDuquesnoy/pyqode.core/releases
 .. _Source repository: https://github.com/ColinDuquesnoy/pyqode.core/
-.. _Documentation : http://packages.python.org/PCEF
+.. _Documentation : http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/ColinDuquesnoy/pyqode.core/wiki
 
 Screenshots
