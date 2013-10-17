@@ -170,7 +170,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)
         self.__resetStylesheet()
-        self.__on_pushButtonClose_clicked()
+        self.on_pushButtonClose_clicked()
         self.editor.style.addProperty("searchOccurrenceBackground",
                                       constants.SEARCH_OCCURRENCES_BACKGROUND)
         self.editor.style.addProperty("searchOccurrenceForeground",
@@ -240,7 +240,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
-    def __on_pushButtonClose_clicked(self):
+    def on_pushButtonClose_clicked(self):
         self.closePanel()
 
     @QtCore.Slot()
@@ -430,7 +430,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
                     self.selectNext()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
-                self.__on_pushButtonClose_clicked()
+                self.on_pushButtonClose_clicked()
         return Panel.eventFilter(self, obj, event)
 
     def __getUserSearchFlag(self):
