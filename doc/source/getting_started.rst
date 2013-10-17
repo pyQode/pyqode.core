@@ -1,85 +1,130 @@
-.. pyQode - Python/Qt Code Editor widget
-.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
-
-.. This document is released under the LGPLv3 license.
-.. You should have received a copy of the GNU Lesser General Public License
-.. along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 Getting started
 ===============
 
-This page is a gentle introduction to the pcef framework. Before reading this you should have PCEF and
-PySide :doc:`installed </download>` on your system.
+This page is a gentle introduction to the pyQode framework.
+
+Before reading this you should have pyqode.core and PySide/PyQt4 :doc:`installed </download>` on your system.
 
 
 .. contents:: :local:
 
-The editor widget
--------------------
 
-The editor widget is not a subclass of a QPlainTextEdit, it's just a regular widget with an ui designed in Qt designer.
+Public API
+--------------
 
-The widget ui contains a widget promoted to pcef.qplaincodeedit.CodeEdit and 4 layouts where the panels are
-added.
+The public API is fully exposed by the pyqode.core package.
 
-.. image:: _static/editor_widget.png
-    :align: center
-    :width: 600
-    :height: 450
+You only need to import **pyqode.core** to get access to the entire public API::
 
-User can retrieve the text edit control by using the textEdit property.
+    import pyqode.core
+    code_edit = pyqode.core.QCodeEdit()
+    text_deco = pyqode.core.TextDecoration()
+    cc_mode = pyqode.core.CodeCompletionMode()
+    line_nbr_panel = pyqode.core.LineNumberPanel()
 
-The editor widget provides flexibility by the use of editor extensions. There are two types of extensions:
 
-    - Panel: a Panel is a QWidget that is added to one of the four layouts (top, bottom, left, right)
-    - Mode: a mode is an object that adds a new behaviour to the editor usually by connecting to the text edit events.
+Selecting a Qt bindings
+------------------------
 
-The text edit is a subclass of a QPlainTextEdit to adds a few new events:
-    - newTextSet
-    - keyReleased, keyPressed, ....
+The first thing to do when using pyQode is to specify the Qt bindings you want to use for your application
 
-.. note:: This framework aims to keep things simple for the basic user while not preventing advanced user from doing
-          more complex things.
+There are multiple ways of doing this but the preferred way is to simply set an
+environment variable at the top of your main module and then import pyqode.core::
 
-          For that purpose, there is two way to use pcef:
+    import os
+    os.environ["QT_API"] = "PySide"  # or "PyQt" if you want to use PyQt4
+    import pyqode.core
 
-            - use a pre-made editor that already fits your needs (from pyqode.editors import)
-            - use the raw/core editor widget where you can install the modes/panels you really need.
 
-          In both cases user will always have a way to add a new mode/Panel or to disable already installed one.
+You can also specify it using the command line arguments:
+
+.. code-block:: bash
+
+    $ python your_script.py --PySide
+
+or
+
+.. code-block:: bash
+
+    $ python your_script.py --PyQt
+
+.. warning:: The QT_API string is case sensitive (this will change with version 1.1)
+
+
+.. note:: You can also write a qt bindings independent application by using the **pyqode.qt** package.
+          pyQode will pick up the first available bindings and expose it through the **qt** package.
+          Simply import QtGui and QtCore module from pyqode.qt to use the automatically chosen binding:
+
+          .. code-block:: python
+
+              import sys
+              from pyqode.qt import QtGui
+
+              app = QtGui.QApplication(sys.argv)
+              win = QtGui.QMainWindow()
+              win.show()
+              print(app)
+              app.exec_()
+
+**Most of the code samples of this documentation are bindings independent and use the pyqode.qt package.**
+
+
+The editor widget: QCodeEdit
+------------------------------
+
+The editor widget is a simple extension to QPlainTextEdit.
+
+It adds a few utility signals/methods and introduces the concept of **Modes and Panels**.
+
+A mode/panel is an editor extension that, once installed on a QCodeEdit instance, may modify its behaviour and appearance:
+
+  * **Modes** are simple objects which connect to the editor signals to add new behaviours (such as automatic indentation, code completion, syntax checking,...)
+
+  * **Panels** are the combination of a **Mode** and a **QWidget**. They are displayed in the QCodeEdit's content margins.
+    When you install a Panel on a QCodeEdit, you can choose to install it on one of the four following zones:
+
+        .. image:: _static/editor_widget.png
+            :align: center
+            :width: 600
+            :height: 450
+
+
+pyQode tries to keep things simple for the basic user while not preventing advanced user from doing complex things.
+
+There is actually two way to use pyqode:
+
+    - use a pre-made editor that already fits your needs (QGenericCodeEdit)
+    - use the raw editor widget and install your own selection of modes and panels.
+
+
+.. note:: The editor widget is meant to work with files instead of raw text.
+          Prefer to use the openFile/saveToFile methods instead of the
+          setPlainText/plainText methods.
 
 Using a pre-made editor
 ----------------------------
 
-The pcef.editors modules contains a series of pre-made editors.
+Usually, most of the pyqode packages will expose a pre-made code editor widget with
+a set of modes and panels already installed.
 
-A pre-made editor is an editor widget with a set of installed modes and panels.
-At the moment, there is only one editor: GenericEditor.
+pyqode.core exposes the **QGenericCodeEdit** widget, a widget that is suitable for a
+language independent (not very smart) code editor widget.
 
 Here is a minimal example code:
 
-
 .. code-block:: python
 
     import sys
-    from PySide.QtGui import QApplication
-    from PySide.QtGui import QMainWindow
-    from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pyqode.editors import GenericEditor  # a language independent editor
+    from pyqode.qt import QtGui
+    import pyqode.core
 
 
     def main():
-        """ Application entry point """
-        # create qt objects (app, window and our editor)
-        app = QApplication(sys.argv)
-        window = QMainWindow()
-        editor = GenericEditor()
+        app = QtGui.QApplication(sys.argv)
+        window = QtGui.QMainWindow()
+        editor = pyqode.core.QGenericCodeEdit()
+        editor.openFile(__file__)
         window.setCentralWidget(editor)
-
-        # open a file
-        openFileInEditor(editor, __file__)
-
-        # run
         window.show()
         sys.exit(app.exec_())
 
@@ -87,85 +132,57 @@ Here is a minimal example code:
     if __name__ == "__main__":
         main()
 
-Using a raw editor
---------------------
-If you want a full customisation of the editor, you should start with the core editor class:
+Using the raw editor
+---------------------
+
+Using the raw QCodeEdit widget, you will be able to make your own selection of
+modes and panels:
 
 .. code-block:: python
 
     import sys
-    from PySide.QtGui import QApplication
-    from PySide.QtGui import QMainWindow
-    from pcef import openFileInEditor  # utility function to open a file in the editor
-    from pyqode.core import CodeEditorWidget  # the most basic editor widget (no modes nor panels installed)
+    from pyqode.qt import QtGui
+    import pyqode.core
 
 
     def main():
-        """ Application entry point """
-        # create qt objects (app, window and our editor)
-        app = QApplication(sys.argv)
-        window = QMainWindow()
-        editor = CodeEditorWidget()
+        app = QtGui.QApplication(sys.argv)
+        window = QtGui.QMainWindow()
+        editor = pyqode.core.QCodeEdit()
+        editor.openFile(__file__)
+        editor.installMode(pyqode.core.PygmentsSyntaxHighlighter(editor.document()))
+        editor.installPanel(pyqode.core.SearchAndReplacePanel(),
+                            position=pyqode.core.PanelPosition.TOP)
         window.setCentralWidget(editor)
-
-        # open a file
-        openFileInEditor(editor, __file__)
-
-        # run
         window.show()
         sys.exit(app.exec_())
 
 
     if __name__ == "__main__":
         main()
-
-
-Enhancing the editor
--------------------------
-
-The editor widget can be enhanced by adding new modes/panels. (Premade editors already have a set of modes and panels installed)
-
-
-Here is how you can add a new mode on an editor widget:
-
-.. code-block:: python
-
-    myMode = MyMode()  # a subclass of pcef.core.Mode
-    editor.installMode(myMode)
-
-
-And here is how to add a new Panel:
-
-.. code-block:: python
-
-    myPanel = MyPanel()  # a subclass of pcef.core.Panel
-    editor.installPanel(myPanel, editor.PANEL_ZONE_TOP)
 
 
 Retrieving a mode/Panel
 --------------------------------
 
-The editor panels/modes dictionary is left public so that user can easily get a mode/Panel using its name:
+Installed modes and panels are set as object attributes using their name property as the attribute key::
+
+    editor = QCodeEdit()
+    cc = CodeCompletionMode()
+    cc.name = "cc"
+    editor.installMode(CodeCompletionMode())
+    print(editor.cc)
 
 
-.. code-block:: python
+Changing the editor style and settings:
+-------------------------------------------
 
-    # disable code completion
-    editor.modes['Code completion'].enabled = False
-
-    # show search and replace Panel
-    editor.panels['Search and replace'].show()
-
-
-Changing the editor style:
----------------------------
-
-The style can easily be changed by using the currentStyle property of the editor widget.
-
-Example:
+Editor style and settings can be easily customised using the editor's style and settings properties:
 
 .. code-block:: python
 
-    editor.currentStyle = pcef.styles.getStyle('Dark')
+    editor = pyqode.core.QCodeEdit()
+    editor.style.setValue("backgound", QtGui.QColor("#000000"))
+    editor.settings.setValue("tabLength", 4)
 
 Styling is more described in the :doc:`advanced </advanced>` section of the documentation

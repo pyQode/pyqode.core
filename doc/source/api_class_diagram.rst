@@ -1,0 +1,4 @@
+Class diagram
+=================
+
+.. inheritance-diagram:: pyqode.core.QCodeEdit pyqode.core.Mode pyqode.core.Panel pyqode.core.PropertyRegistry pyqode.core.SyntaxHighlighter pyqode.core.FoldDetector pyqode.core.IndentBasedFoldDetector pyqode.core.CharBasedFoldDetector pyqode.core.TextBlockUserData pyqode.core.ParenthesisInfo pyqode.core.TextStyle pyqode.core.JobRunner pyqode.core.DelayJobRunner pyqode.core.SubprocessServer pyqode.core.AutoIndentMode pyqode.core.CaretLineHighlighterMode pyqode.core.CheckerMode pyqode.core.CheckerMessage pyqode.core.CodeCompletionMode pyqode.core.CompletionProvider pyqode.core.Completion pyqode.core.DocumentWordCompletionProvider pyqode.core.FileWatcherMode pyqode.core.IndenterMode pyqode.core.PygmentsSyntaxHighlighter pyqode.core.RightMarginMode pyqode.core.SymbolMatcherMode pyqode.core.ZoomMode pyqode.core.FoldingPanel pyqode.core.LineNumberPanel pyqode.core.MarkerPanel pyqode.core.Marker pyqode.core.SearchAndReplacePanel

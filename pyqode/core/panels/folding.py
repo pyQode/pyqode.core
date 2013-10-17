@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the marker panel
@@ -55,31 +60,23 @@ class _FoldingIndicator(object):
 
 class FoldingPanel(Panel):
     """
-    Panel used to draw and fold/unfold text blocks.
+    This panel draws folding indicators and manage user interaction with those
+    indicators.
 
-    **This panel does not detect foldables blocks of the document, it only
-    renders them and let the user fold/unfold a block**
+    All you have to do is setup a :class:`pyqode.core.FoldDetector` on the
+    syntax highlighter (the pygments highlighter does this automatically for
+    you if you let him do) and install a folding panel.
 
-    Client code must manage the folding indicators themselves by using the
-    addIndicator, removeIndicator or clearIndicators.
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
 
-    Client code can also fold/unfold code blocks using the fold and unfold
-    method.
+    .. note:: This panel does not detect foldables blocks of the document,
+              it only renders them and let the user fold/unfold a block
     """
+    #: The panel descriptip,
     DESCRIPTION = "Manage and draw folding indicators"
+    #: The panel identifier
     IDENTIFIER = "foldingPanel"
-
-    # class _BlockFoldData(QtGui.QTextBlockUserData):
-    #     def __init__(self, folded=False):
-    #         QtGui.QTextBlockUserData.__init__(self)
-    #         self.folded = folded
-
-    # @property
-    # def indicators(self):
-    #     retVal = []
-    #     for indic in self.__indicators:
-    #         retVal.append(indic)
-    #     return retVal
 
     def getSystemColor(self):
         pal = self.editor.palette()
@@ -149,7 +146,7 @@ class FoldingPanel(Panel):
 
     def resetIndicatorsBackground(self):
         """
-        Reset the indicators background to the system (os dependant) color.
+        Resets the indicators background to the system (os dependant) color.
         """
         self.editor.style.setValue(
             "foldIndicatorBackground", self.__systemColor)
@@ -228,7 +225,7 @@ class FoldingPanel(Panel):
         """
         Unfolds the specified folding indicator.
 
-        :param foldingIndicator: The indicator to unfold.
+        :param indic: The indicator to unfold.
         """
         start = indic.start
         end = indic.end
@@ -271,7 +268,7 @@ class FoldingPanel(Panel):
             prevBlock = prevBlock.previous()
 
     def foldAll(self):
-        """ Folds all indicators whose fold indent is > 0 """
+        """ Folds all indicators who have a fold indent > 0 """
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             if b.blockNumber() == 602:
@@ -296,7 +293,7 @@ class FoldingPanel(Panel):
         self.editor.refreshPanels()
 
     def unfoldAll(self):
-        """ Unfolds all indicators whose fold indent is > 0"""
+        """ Unfolds all indicators who have a fold indent > 0 """
         b = self.editor.document().firstBlock()
         while b and b.isValid():
             usd = b.userData()

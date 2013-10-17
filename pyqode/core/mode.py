@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the definition of the Mode class
@@ -27,16 +32,33 @@ from pyqode.qt import QtCore
 
 class Mode(object):
     """
-    Base class for editor extension/mode. An extension is a "thing" that can be
-    installed on the QCodeEdit to add new behaviours.
+    Base class for editor extensions. An extension is a "thing" that can be
+    installed on the QCodeEdit to add new behaviours or to modify the
+    appearance.
 
-    An extension is added to a QCodeEdit by using the addMode or addPanel
-    methods.
+    An extension is added to a QCodeEdit by using the
+    :meth:`pyqode.core.QCodeEdit.installMode` or
+    :meth:`pyqode.core.QCodeEdit.installPanel` methods.
 
     Subclasses must/should override the following methods:
-        - _onStateChanged: to connect/disconnect to/from the code edit signals
-        - _onStyleChanged: to refresh ui colors (mainly used by panels)
-        - _onSettingsChanged: to refresh some settings value.
+        - :meth:`pyqode.core.Mode._onStateChanged`
+        - :meth:`pyqode.core.Mode._onStyleChanged`
+        - :meth:`pyqode.core.Mode._onSettingsChanged`
+
+    Uses :attr:`pyqode.core.Mode.IDENTIFIER` and
+    :attr:`pyqode.core.Mode.DESCRIPTION` to setup the mode name and
+    description:
+
+    .. code-block:: python
+
+        class MyMode(Mode):
+            IDENTIFIER = "myMode"
+            DESCRIPTION = "Describes your mode here"
+
+        m = MyMode()
+        print(m.name, m.description)
+
+        >>> ("myMode", "Describes your mode here" )
     """
     #: The mode identifier, must redefined for every subclasses
     IDENTIFIER = ""
@@ -46,9 +68,9 @@ class Mode(object):
     @property
     def editor(self):
         """
-        Provides easy access to the CodeEditorWidget weakref
+        Provides easy access to the CodeEditorWidget weakref. **READ ONLY**
 
-        :rtype: pyqode.core.QCodeEdit
+        :type: pyqode.core.QCodeEdit
         """
         if self._editor is not None:
             return self._editor()
@@ -58,35 +80,26 @@ class Mode(object):
     @property
     def enabled(self):
         """
-        Enabled flag
+        Tell if the mode is enabled, :meth:`pyqode.core.Mode._onStateChanged` is
+        called when the value changed.
+
+        :type: bool
         """
         return self.__enabled
 
     @enabled.setter
     def enabled(self, enabled):
-        """
-        Sets the enabled flag
-
-        :param enabled: New enable flag value
-        """
         if enabled != self.__enabled:
             self.__enabled = enabled
             self._onStateChanged(enabled)
 
     def __init__(self):
-        """
-        Creates the extension. Uses self.IDENTIFIER and self.DESCRIPTION to
-        setup sefl.name and self.description (you can override them after
-        calling this constructor if you need it).
-        """
-        #: Mode name
+        #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
+        #: attribute key when you install a mode.
         self.name = self.IDENTIFIER
         #: Mode description
         self.description = self.DESCRIPTION
-        #: Mode enables state (subclasses must implement onStateChanged to
-        #  disconnect their slots to disable any actions)
         self.__enabled = False
-        #: Editor instance
         self._editor = None
 
     def __str__(self):
@@ -97,16 +110,16 @@ class Mode(object):
 
     def _onInstall(self, editor):
         """
-        Installs the extension on the editor.
+        Installs the extension on the editor. Subclasses might want to override
+        this method to add new style/settings properties to the editor.
 
-        .. warning::
-            For internal use only.
+        .. note:: This method is called by QCodeEdit when you install a Mode.
+                  You should never call it yourself, even in a subclass.
 
-        .. warning::
-            Don't forget to call **super** when subclassing
+        .. warning:: Don't forget to call **super** when subclassing
 
         :param editor: editor widget instance
-        :type editor: pyqode.QCodeEdit
+        :type editor: pyqode.core.QCodeEdit
         """
         self._editor = weakref.ref(editor)
         self.enabled = True
@@ -124,19 +137,27 @@ class Mode(object):
         """
         Called when the enable state changed.
 
-        .. warning: Raises NotImplementedError. Subclasses must override this
-                    method to disconnect their slots.
+        This method does not do anything, you may override it if you need
+        to connect/disconnect to the editor's signals (connect when state is
+        true and disconnect when it is false).
 
         :param state: True = enabled, False = disabled
         :type state: bool
         """
-        raise NotImplementedError()
+        pass
 
     def _onStyleChanged(self, section, key):
         """
         Automatically called when a style property changed.
 
-        .. note: If the editor style changed globally, key will be set to "".
+        .. note: If the editor style changed globally, key will be set to an
+                 empty string.
+
+        :param section: The section which contains the property that has changed
+        :type section: str
+
+        :param key: The property key
+        :type key: str
         """
         pass
 
@@ -144,6 +165,13 @@ class Mode(object):
         """
         Automatically called when a settings property changed
 
-        .. note: If the editor style changed globally, key will be set to "".
+        .. note: If the editor style changed globally, key will be set to an
+                 empty string.
+
+        :param section: The section which contains the property that has changed
+        :type section: str
+
+        :param key: The property key
+        :type key: str
         """
         pass

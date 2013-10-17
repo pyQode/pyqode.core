@@ -1,57 +1,29 @@
-.. pyQode - Python/Qt Code Editor widget
-.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
-
-.. This document is released under the LGPLv3 license.
-.. You should have received a copy of the GNU Lesser General Public License
-.. along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-Welcome to PCEF documentation!
+Welcome to pyQode documentation!
 =======================================
 
-Welcome to the PCEF documentation!
+pyQode is a flexible source code editor widget library for Python/Qt applications.
 
-What is PCEF?
----------------
+pyQode is a **namespace package** made up of the following official packages:
 
-PCEF is code editing framework for PySide applications. It provides a flexible code editor ready to use in any PySide
-applications. Flexibility is achieved through a system of editor extensions (custom panels and modes).
+    * `pyqode.core`_: The foundation package. Defines the base classes and provides a set of generic modes and panels that can be used for any kind of code editor widget.
 
-At the moment, the framework only provides a generic code editor (language independent) but plans are to at least
-provides full support for python and maybe c++.
+    * `pyqode.python`_: Add python support to pyqode (code completion, calltips, live code checking,...)
 
-Here are the core features:
+    * `pyqode.widgets`_: A set of useful widgets that can be used to speed up the development of pyqode applications (property grid, tab widget,...)
 
- * **syntax highlighting mode** (using pygments)
- * **code completion** (static word list, from document words)
- * line number Panel
- * **code folding** Panel
- * markers Panel (to add breakpoints, bookmarks, errors,...)
- * right margin indicator mode
- * active line highlighting mode
- * **editor zoom** mode
- * find and replace Panel
- * **text decorations** (squiggle, box)
- * unicode support (specify encoding when you load your file)
- * **easy styling** (built-in white and dark styles + possibility to customize using **JSON style schemes**)
- * **flexible framework** to add custom panels/modes
- * auto indent mode(indentation level is based on the previous line indent)
+    * `pyqode.designer`_: Startup script that starts Qt Designer with the installed pyqode plugins
+
+This documentation will only cover the `pyqode.core`_ package.
 
 
-And here are some screenshots (taken from the generic_example v.0.1):
-
-.. image:: _static/white_style.png
-    :alt: Default style
-    :width: 407
-    :height: 358
-
-.. image:: _static/dark_style.png
-    :alt: Dark style
-    :width: 407
-    :height: 358
-
+.. image:: _static/screenshot.png
+    :alt: QGenericCodeEdit on Linux Mint 15 Cinnamon
+    :width: 400
+    :height: 300
+    :align: center
 
 Parts of the documentation:
------------------------------------
+============================
 
 .. toctree::
     :maxdepth: 1
@@ -63,7 +35,7 @@ Parts of the documentation:
     advanced
     examples
     changelog
-    api/api_doc
+    api
     bugs
     contribute
     license
@@ -81,17 +53,17 @@ Parts of the documentation:
    * .. glossary::
 
       :doc:`download`
-         Instructions on where and how to install PCEF.
+         Instructions on where and how to install pyQode.
 
    * .. glossary::
 
       :doc:`getting_started`
-         An introduction to PCEF, covering some basic principles.
+         A gentle introduction to pyQode, covering some basic principles.
 
    * .. glossary::
 
       :doc:`advanced`
-         Cover advanced topics such as styling, creating custom modes and panels and so on.
+         A more in depth approach to pyQode, covering advanced features
 
    * .. glossary::
 
@@ -100,12 +72,12 @@ Parts of the documentation:
 
    * .. glossary::
 
-      :doc:`api/api_doc`
+      :doc:`api`
          The api reference documentation
 
 
 Meta information:
---------------------
+============================
 
 .. hlist::
    :columns: 2
@@ -123,7 +95,7 @@ Meta information:
    * .. glossary::
 
       :doc:`license`
-        PCEF license
+        pyQode license
 
    * .. glossary::
 
@@ -132,8 +104,14 @@ Meta information:
 
 
 Indices and tables:
-----------------------
+============================
 
 * :ref:`genindex`
 
 * :ref:`search`
+
+
+.. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
+.. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
+.. _pyqode.widgets: https://github.com/ColinDuquesnoy/pyqode.widgets
+.. _pyqode.designer: https://github.com/ColinDuquesnoy/pyqode.designer

@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the definition of the QCodeEdit
@@ -34,32 +39,71 @@ from pyqode.qt import QtGui, QtCore
 
 class QCodeEdit(QtGui.QPlainTextEdit):
     """
-    This is the core code editor widget which inherits from a QPlainTextEdit
+    Base class for any pyqode editor widget.
 
-    The code editor provides a series of additional slots specifically suited
-    for code edition:
-        - keyboard events
-        - mouse events
-        - save / dirty events
+    Extends :py:class:`QPlainTextEdit` by adding an extension system (
+    modes and panels), a rich property system for styles and settings
+    (see :class:`pyqode.core.PropertyRegistry`) and by adding a series of
+    additional signal and methods.
 
-    The widget appearance and behaviour can be customised by adding modes and
-    panels (editor extensions).
+    **Settings** :attr:`pyqode.core.QCodeEdit.settings`
 
-    Panels are drawn in the document margin by the panel manager.
+    ======================= ====================== ======= ====================== ==============
+    Key                     Section                Type    Default value          Description
+    ======================= ====================== ======= ====================== ==============
+    showWhiteSpaces         General                bool    False                  Display visual whitespaces
+    tabLength               General                int     4                      Tab length (number of spaces)
+    useSpacesInsteadOfTab   General                bool    True                   Use spaces instead of spaces (be warry of this, most modes still use spaces heavily for internal computations)
+    minIndentColumn         General                int     0                      Min column indent (some languages such as cobol requires to indent code at min col 7)
+    ======================= ====================== ======= ====================== ==============
 
-    The widget also provides a series of convenience methods to:
-        - open/save a file
-        - manipulate the text cursor / getting text informations (line, col)
+    **Style** :attr:`pyqode.core.QCodeEdit.style`
 
-    The widget exposes a style property which is a dictionary of properties
-    (more about this topic in the style section)
+    ====================== ====================== ======= ====================== ==============
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ==============
+    font                   General                string  OS Dependant           Font: *monospace* on GNU/Linux, *Consolas* on Windows and *Monaco* on Darwin
+    fontSize               General                int     10                     Font size
+    background             General                QColor  #FFFFFF                Editor background color
+    foreground             General                QColor  #000000                Editor foreground color
+    whiteSpaceForeground   General                QColor  #dddddd                Color of the whitespaces
+    selectionBackground    General                QColor  OS dependant           QtGui.QPalette.highlight().color()
+    selectionForeground    General                QColor  OS dependant           QtGui.QPalette.highlightedText().color()
+    ====================== ====================== ======= ====================== ==============
+
+    **Signals:**
+        - :attr:`pyqode.core.QCodeEdit.painted`
+        - :attr:`pyqode.core.QCodeEdit.newTextSet`
+        - :attr:`pyqode.core.QCodeEdit.painted`
+        - :attr:`pyqode.core.QCodeEdit.textSaved`
+        - :attr:`pyqode.core.QCodeEdit.textSaving`
+        - :attr:`pyqode.core.QCodeEdit.dirtyChanged`
+        - :attr:`pyqode.core.QCodeEdit.keyPressed`
+        - :attr:`pyqode.core.QCodeEdit.keyReleased`
+        - :attr:`pyqode.core.QCodeEdit.mousePressed`
+        - :attr:`pyqode.core.QCodeEdit.mouseReleased`
+        - :attr:`pyqode.core.QCodeEdit.mouseWheelActivated`
+        - :attr:`pyqode.core.QCodeEdit.postKeyPressed`
+        - :attr:`pyqode.core.QCodeEdit.focusedIn`
+        - :attr:`pyqode.core.QCodeEdit.mouseMoved`
+        - :attr:`pyqode.core.QCodeEdit.indentRequested`
+        - :attr:`pyqode.core.QCodeEdit.unIndentRequested`
+
+    .. note:: QCodeEdit has been designed to work with files (:meth:`pyqode.core.QCodeEdit.openFile`
+              , :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
+              Well, you can still use some plain text but many modes and panels
+              that rely heavily on the current file name/path won't work
+              properly (e.g. the syntax highlighter mode uses the file name
+              extension to automatically adapt the lexer so you will need to do
+              it manually depending on the nature of the text/code to edit).
     """
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
     newTextSet = QtCore.Signal()
-    #: Signal emitted when the text is saved
+    #: Signal emitted when the text is saved to file
     textSaved = QtCore.Signal(str)
+    #: Signal emitted before the text is saved to file
     textSaving = QtCore.Signal(str)
     #: Signal emitted when the dirty state changed
     dirtyChanged = QtCore.Signal(bool)
@@ -87,20 +131,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @property
     def dirty(self):
         """
-        Gets the dirty flag
+        Gets/sets the dirty flag.
+
+        :type: bool
         """
         return self.__dirty
 
     @dirty.setter
     def dirty(self, value):
-        """
-        Sets the dirty flag,
-
-        .. note: The dirtyChanged signal is emitted if the new value is
-                 different from the current value
-
-        :param value: The new value
-        """
         if self.__dirty != value:
             self.__dirty = value
             self.dirtyChanged.emit(value)
@@ -108,7 +146,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @property
     def cursorPosition(self):
         """
-        Returns the text cursor position (line, column)
+        Returns the text cursor position (line, column).
+
+        .. note:: The line number is 1 based while the column number is 0 based.
 
         :return: The cursor position (line, column)
         :rtype: tuple(int, int)
@@ -119,21 +159,37 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @property
     def fileName(self):
         """
-        Returns the file name (see QFileInfo.fileName)
+        Returns the file name (see :meth:`QtCore.QFileInfo.fileName`)
+
+        :rtype: str
         """
         return QtCore.QFileInfo(self.filePath).fileName()
 
     @property
     def filePath(self):
         """
-        Returns the file path
+        Gets/Sets the current file path. This property is used by many modes to
+        work properly. It is automatically set by the
+        :meth:`pyqode.core.QCodeEdit.openFile` and
+        :meth:`pyqode.core.QCodeEdit.saveToFile` methods.
+
+        If you need to work with plain text, be sure to adapt file path
+        accordingly (the extension is enough)
+
+        :type: str
         """
         return self.__filePath
+
+    @filePath.setter
+    def filePath(self, value):
+        self.__filePath = value
 
     @property
     def fileEncoding(self):
         """
         Returns last encoding used to open the file
+
+        :rtype: str
         """
         return self.__fileEncoding
 
@@ -146,39 +202,35 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         the line number (already 1 based), and the QTextBlock itself.
 
         :return: A list of tuple(top position, line number, block)
-        :rtype List of tuple(int, int, QtGui.QTextBlock)
+        :rtype: List of tuple(int, int, QtGui.QTextBlock)
         """
         return self.__blocks
 
     @property
     def style(self):
+        """
+        Gets/Sets the editor style properties.
+
+        :type: pyqode.core.QPropertyRegistry
+        """
         return self.__style
 
     @style.setter
     def style(self, value):
-        """
-        Sets the editor style. The valueChanged signal will be emitted with all
-        parameters set to an empty string ("").
-
-        :param value: The new editor style
-        :type value: PropertyRegistry
-        """
-        self.__style.copy(value)
+        self.__style.update(value)
 
     @property
     def settings(self):
+        """
+        Gets/Sets the editor settings properties.
+
+        :type: pyqode.core.QPropertyRegistry
+        """
         return self.__settings
 
     @settings.setter
     def settings(self, value):
-        """
-        Sets the editor settings. The valueChanged signal will be emitted with
-        all parameters set to an empty string ("").
-
-        :param value: The new editor settings
-        :type value: PropertyRegistry
-        """
-        self.__settings.copy(value)
+        self.__settings.update(value)
 
     def __init__(self, parent=None, createDefaultActions=True):
         """
@@ -286,11 +338,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         the user.
 
         :param line: The line number to go (1 based)
-
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
-
-        :return The new text cursor
+        :return: The new text cursor
+        :rtype: QtGui.QTextCursor
         """
         if line is None or isinstance(line, bool):
             line, result = QtGui.QInputDialog.getInt(
@@ -365,8 +416,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param data: Data from which we want to detect the encoding.
         :type data: bytes
 
-        :return The detected encoding. Return the result of getDefaultEncoding
-        if chardet is not available.
+        :return: The detected encoding. Returns the result of
+                 :meth:`pyqode.core.QCodeEdit.getDefaultEncoding` if chardet is
+                 not available.
         """
         try:
             import chardet
@@ -381,7 +433,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @staticmethod
     def getDefaultEncoding():
-        """ Returns the system's default encoding """
+        """ Returns the result of :py:func:`sys.getfilesystemencoding` """
         return sys.getfilesystemencoding()
 
     def readFile(self, filePath, replaceTabsBySpaces=True, encoding=None,
@@ -410,17 +462,20 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Helper method to open a file in the editor.
 
         :param filePath: The file path to open
+        :type filePath: str
 
         :param replaceTabsBySpaces: True to replace tabs by spaces
                (settings.value("tabSpace") * " ")
+        :type replaceTabsBySpaces: bool
 
         :param encoding: The encoding to use. If no encoding is provided and
-        detectEncoding is false, pyqode will try to decode the content using the
-        system default encoding.
+                         detectEncoding is false, pyqode will try to decode the
+                         content using the system default encoding.
+        :type encoding: str
 
         :param detectEncoding: If true and no encoding is specified, pyqode will
                                try to detect encoding using chardet.
-                               .. warning: chardet is **slow** on large files
+        :type detectEncoding: bool
         """
         content, encoding = self.readFile(filePath, replaceTabsBySpaces,
                                           encoding, detectEncoding)
@@ -430,6 +485,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.dirty = False
 
     def lineText(self, lineNbr):
+        """
+        Gets the current line text.
+
+        :param lineNbr: The line number of the text to get
+
+        :return: Entire line's text
+        :rtype: str
+        """
         tc = self.textCursor()
         tc.movePosition(tc.Start)
         tc.movePosition(tc.Down, tc.MoveAnchor, lineNbr - 1)
@@ -437,14 +500,25 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         return tc.selectedText()
 
     def setLineText(self, lineNbr, text):
+        """
+        Replace the text of a single line by the supplied text.
+
+        :param lineNbr: The line number of the text to remove
+        :type: lineNbr: int
+
+        :param text: Replacement text
+        :type: text: str
+        """
         tc = self.textCursor()
         tc.movePosition(tc.Start)
         tc.movePosition(tc.Down, tc.MoveAnchor, lineNbr - 1)
         tc.select(tc.LineUnderCursor)
         tc.insertText(text)
-        #self.setTextCursor(tc)
 
     def removeLastLine(self):
+        """
+        Removes the last line of the document.
+        """
         tc = self.textCursor()
         tc.movePosition(tc.End, tc.MoveAnchor)
         tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
@@ -457,13 +531,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Removes trailing whitespaces and ensure one single blank line at the end
         of the QTextDocument. (call setPlainText to update the text).
-
-        :param content: The text to cleanup and display. If None, the current
-                        content is used.
         """
         value = self.verticalScrollBar().value()
         pos = self.cursorPosition
         atBlockEnd = self.textCursor().atBlockEnd()
+
+        self.textCursor().beginEditBlock()
 
         # cleanup whitespaces
         self.__cleaning = True
@@ -507,6 +580,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setTextCursor(tc)
         self.verticalScrollBar().setValue(value)
 
+        self.textCursor().endEditBlock()
+
     @QtCore.Slot()
     def saveToFile(self, filePath=None, encoding=None):
         """
@@ -514,6 +589,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param filePath: Optional file path. If None, we use the current file
                          path (set by openFile).
+        :type filePath: str or None
+
+        :param encoding: Optional encoding. If None, the method will use the
+                         last encoding used to open/save the file.
 
         :return: The operation status as a bool (True for success)
         """
@@ -539,9 +618,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def installMode(self, mode):
         """
-        Installs a mode
+        Installs a mode on the editor.
 
-        :param mode: The mode instance to install on this widget instance
+        The mode is set as an object attribute using the mode's name as the key.
+
+        :param mode: The mode instance to install.
+        :type mode: pyqode.core.Mode
         """
         self.__modes[mode.name] = mode
         mode._onInstall(self)
@@ -557,39 +639,47 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         m = self.mode(name)
         if m:
-            m._editor = weakref.ref(self)
             m._onUninstall()
             self.__modes.pop(name, None)
         self.__dict__.pop(name, None)
 
     def mode(self, name):
         """
-        Gets a mode by name
+        Gets a mode by name.
+
+        .. deprecated:: 1.0
+            Use :py:func:`getattr` instead. This method will be remove in the
+            next version.
+
+        :raise: KeyError if the mode has not been installed.
 
         :param name: The name of the mode to get
         :type name: str
 
-        :rtype: pyqode.Mode or None
+        :rtype: pyqode.Mode
         """
-        try:
-            return self.__modes[name]
-        except KeyError:
-            return None
+        return self.__modes[name]
 
     def modes(self):
         """
-        Returns the dictionary of modes
+        Returns the dictionary of modes.
         """
         return self.__modes
 
     def installPanel(self, panel, position=PanelPosition.LEFT):
         """
-        Install a panel on the QCodeEdit
+        Installs a panel on on the editor. You must specify the position of the
+        panel (panels are rendered in one of the four document margins, see
+        :class:`pyqode.core.PanelPosition`.
+
+        The panel is set as an object attribute using the panel's name as the
+        key.
 
         :param panel: The panel instance to install
-
         :param position: The panel position
 
+        :type panel: pyqode.core.Panel
+        :type position: int
         """
         panel.zoneOrder = len(self.__panels[position])
         self.__panels[position][panel.name] = panel
@@ -616,16 +706,19 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def panels(self):
         """
-        Returns the panels dictionary
+        Returns the panels dictionary.
+
+        :return: A dictionary of :class:`pyqode.core.Panel`
+        :rtype: dict
         """
         return self.__panels
 
     def addDecoration(self, decoration):
         """
-        Adds a text decoration
+        Adds a text decoration.
 
         :param decoration: Text decoration
-        :type decoration: pyqode.TextDecoration
+        :type decoration: pyqode.core.TextDecoration
         """
         if decoration not in self.__selections:
             self.__selections.append(decoration)
@@ -638,7 +731,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Remove text decoration.
 
         :param decoration: The decoration to remove
-        :type decoration: pyqode.TextDecoration
+        :type decoration: pyqode.core.TextDecoration
         """
         try:
             self.__selections.remove(decoration)
@@ -654,18 +747,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setExtraSelections(self.__selections)
 
     def marginSize(self, position=PanelPosition.LEFT):
+        """
+        Gets the size of a specific margin.
+
+        :param position: Margin position. See :class:`pyqode.core.PanelPosition`
+
+        :return: The size of the specified margin
+        :rtype: float
+        """
         return self.__marginSizes[position]
 
     def selectFullLines(self, start, end, applySelection=True):
         """
-        Select entire lines between start and end
+        Select entire lines between start and end.
 
         :param start: Start line number (1 based)
-
+        :type start: int
         :param end: End line number (1 based)
+        :type end: int
 
         :param applySelection: True to apply the selection before returning the
                                QTextCursor
+        :type applySelection: bool
 
         :return A QTextCursor that holds the requested selection
         """
@@ -713,12 +816,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def linePos(self, line_number):
         """
-        Gets the line pos on the Y-Axis in pixels (at the center of the line)
+        Gets the line pos on the Y-Axis (at the center of the line) from a
+        line number (1 based).
 
         :param line_number: The line number for which we want to know the
                             position in pixels.
 
-        :rtype int or None
+        :return: The center position of the line.
+        :rtype: int or None
         """
         block = self.document().findBlockByNumber(line_number)
         if block:
@@ -731,6 +836,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Returns the line number from the y_pos
 
         :param y_pos: Y pos in the QCodeEdit
+
+        :return: Line number (1 based)
+        :rtype: int
         """
         height = self.fontMetrics().height()
         for top, l, block in self.__blocks:
@@ -740,11 +848,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def resetZoom(self):
         """
-        Resets the zoom value
+        Resets the zoom value.
         """
         self.style.setValue("fontSize", constants.FONT_SIZE)
 
     def markWholeDocumentDirty(self):
+        """
+        Marks the whole document as dirty to force a full refresh. **SLOW**
+        """
         tc = self.textCursor()
         tc.select(tc.Document)
         self.document().markContentsDirty(tc.selectionStart(),
@@ -757,8 +868,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         The effect is achieved by increasing the editor font size by the
         increment value.
 
-        .. note: Panels that needs to be resized depending on the font size
-        should implement onStyleChanged and trigger an update.
+        Panels that needs to be resized depending on the font size need to
+        implement onStyleChanged.
         """
         self.style.setValue("fontSize",
                             self.style.value("fontSize") + increment)
@@ -771,8 +882,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         The effect is achieved by decreasing the editor font size by the
         increment value.
 
-        .. note: Panels that needs to be resized depending on the font size
-                 should implement onStyleChanged and trigger an update.
+        Panels that needs to be resized depending on the font size need to
+        implement onStyleChanged and trigger an update.
         """
         value = self.style.value("fontSize") - increment
         if value <= 0:
@@ -816,6 +927,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @QtCore.Slot()
     def duplicateLine(self):
+        """
+        Duplicates the line under the cursor. If multiple lines are selected,
+        only the last one is duplicated.
+        """
         tc = self.textCursor()
         tc.select(tc.LineUnderCursor)
         line = tc.selectedText()
@@ -831,84 +946,29 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Indents the text cursor or the selection.
 
-        Emits the indentRequested signal, the indenter mode will perform the actual
-        indentation.
-        #"""
+        Emits the :attr:`pyqode.core.QCodeEdit.indentRequested` signal, the
+        :class:`pyqode.core.IndenterMode` will perform the actual indentation.
+        """
         self.indentRequested.emit()
-        #Indent current line or selection (based on settings.value("tabLength"))
-        #"""
-        #if self.settings.value("useSpacesInsteadOfTab"):
-        #    doc = self.document()
-        #    minIndent = self.settings.value("minIndentColumn")
-        #    tabLen = self.settings.value("tabLength")
-        #    cursor = self.textCursor()
-        #    cursor.beginEditBlock()
-        #    if not cursor.hasSelection():
-        #        cursor.select(cursor.LineUnderCursor)
-        #    nb_lines = len(cursor.selection().toPlainText().splitlines())
-        #    if nb_lines == 0:
-        #        nb_lines = 1
-        #    block = doc.findBlock(cursor.selectionStart())
-        #    assert isinstance(block, QtGui.QTextBlock)
-        #    i = 0
-        #    while i < nb_lines:
-        #        txt = block.text()
-        #        indentation = len(txt) - len(txt.lstrip()) - minIndent
-        #        if indentation >= 0:
-        #            nbSpacesToAdd = tabLen - (indentation % tabLen)
-        #            cursor = QtGui.QTextCursor(block)
-        #            cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-        #            [cursor.insertText(" ") for _ in range(nbSpacesToAdd)]
-        #        block = block.next()
-        #        i += 1
-        #    cursor.endEditBlock()
-        #else:
-        #    self.keyPressEvent(
-        #        QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress, QtCore.Qt.Key_Tab,
-        #                        QtCore.Qt.NoModifier))
 
     @QtCore.Slot()
     def unIndent(self):
         """
         Un-indents the text cursor or the selection.
 
-        Emits the unIndentRequested signal, the indenter mode will perform the
-        actual un-indentation.
-        #"""
+        Emits the :attr:`pyqode.core.QCodeEdit.unIndentRequested` signal, the
+        :class:`pyqode.core.IndenterMode` will perform the actual
+        un-indentation.
+        """
         self.unIndentRequested.emit()
-        #if self.settings.value("useSpacesInsteadOfTab"):
-        #    doc = self.document()
-        #    minIndent = self.settings.value("minIndentColumn")
-        #    tabLen = self.settings.value("tabLength")
-        #    cursor = self.textCursor()
-        #    cursor.beginEditBlock()
-        #    if not cursor.hasSelection():
-        #        cursor.select(cursor.LineUnderCursor)
-        #    nb_lines = len(cursor.selection().toPlainText().splitlines())
-        #    block = doc.findBlock(cursor.selectionStart())
-        #    assert isinstance(block, QtGui.QTextBlock)
-        #    i = 0
-        #    while i < nb_lines:
-        #        txt = block.text()
-        #        indentation = len(txt) - len(txt.lstrip()) - minIndent
-        #        if indentation > 0:
-        #            nbSpacesToRemove = indentation - (indentation - (
-        #                indentation % tabLen))
-        #            if not nbSpacesToRemove:
-        #                nbSpacesToRemove = tabLen
-        #            cursor = QtGui.QTextCursor(block)
-        #            cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-        #            [cursor.deleteChar() for _ in range(nbSpacesToRemove)]
-        #        block = block.next()
-        #        i += 1
-        #    cursor.endEditBlock()
-        #else:
-        #    self.keyPressEvent(
-        #        QtGui.QKeyEvent(QtGui.QKeyEvent.KeyPress,
-        #                        QtCore.Qt.Key_Backtab,
-        #                        QtCore.Qt.NoModifier))
 
     def setCursor(self, cursor):
+        """
+        Changes the viewport cursor
+
+        :param cursor: the nex mouse cursor to set.
+        :type cursor: QtGui.QCursor
+        """
         self.viewport().setCursor(cursor)
         QtGui.QApplication.processEvents()
 
@@ -1063,6 +1123,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
     def showTooltip(self, pos, tooltip):
+        """
+        Show a tool tip at the specified position
+
+        :param pos: Tooltip position
+
+        :param tooltip: Tooltip text
+        """
         QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
         self.__previousTooltipBlockNumber = -1
 
@@ -1091,19 +1158,39 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setWindowTitle(title)
 
     def addAction(self, action):
+        """
+        Adds an action to the editor's context menu.
+
+        :param action: QtGui.QAction
+        """
         self.__actions.append(action)
         QtGui.QPlainTextEdit.addAction(self, action)
 
     def actions(self):
+        """
+        Returns the list of actions/seprators of the context menu.
+        :return:
+        """
         return self.__actions
 
     def addSeparator(self):
+        """
+        Adds a seprator to the editor's context menu.
+
+        :return: The sepator that has been added.
+        :rtype: QtGui.QAction
+        """
         action = QtGui.QAction(self)
         action.setSeparator(True)
         self.__actions.append(action)
         return action
 
     def removeAction(self, action):
+        """
+        Removes an action/separator from the editor's context menu.
+
+        :param action: Action/seprator to remove.
+        """
         self.__actions.remove(action)
 
     def __createDefaultActions(self):
@@ -1235,7 +1322,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Update the list of visible blocks/lines position.
 
-        :param event: paint event
+        :param event: QtGui.QPaintEvent
         """
         self.__blocks[:] = []
         block = self.firstVisibleBlock()

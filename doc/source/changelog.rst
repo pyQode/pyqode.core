@@ -1,10 +1,3 @@
-.. pyQode - Python/Qt Code Editor widget
-.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
-
-.. This document is released under the LGPLv3 license.
-.. You should have received a copy of the GNU Lesser General Public License
-.. along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 Change Log
 ===========
 
@@ -13,14 +6,14 @@ Change Log
     These lists are not exhaustive.
 
 0.1.1
-======
+----------
 
 Bug fixes release:
     - better code completion popup show/hide
 
 
 0.1.0
-======
+-------
 
 First release. Brings the following features:
 

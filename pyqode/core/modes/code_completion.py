@@ -1,28 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the code completion mode and the related classes.
 """
 import re
 import sys
+import os
 from pyqode.core import constants
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
@@ -63,7 +69,7 @@ class PreLoadWorker(object):
 
 class CompletionWorker(object):
     """
-    A worker object that will run the complete method of
+    A worker object that will run the complete method of every providers
     """
     def __init__(self, providers, *args):
         self.__providers = providers
@@ -86,8 +92,9 @@ class CompletionWorker(object):
 
 class Completion(object):
     """
-    Defines a code completion. A code suggestion is made up of the following
-    elements:
+    Defines a code completion item.
+
+    A completion is made up of the following elements:
         - the suggestion text
         - the suggestion icon. Optional.
         - the suggestion tooltip. Optional.
@@ -118,42 +125,88 @@ class CompletionProvider(object):
                    editor. Optional.
         - complete: complete the current text. All subclasses needs to implement
                     this method.
+
     .. note: As the provider is executed in a child process, your class instance
-    will loose its data every time its run. To store persistent data (such as
-    the preload results), you may use the 'processDict' attribute
+             will loose its data every time its run. To store persistent data
+             (such as the preload results), you may use the 'processDict'
+             attribute. Care must be taken from the key, we suggest a
+             combination of the file path and type(self).__name__.
+
     """
     PRIORITY = 0
 
     def preload(self, code, fileEncoding, filePath):
         return None
 
-    def complete(self, code, line, column, completionPrefix, filePath, fileEncoding):
+    def complete(self, code, line, column, completionPrefix,
+                 filePath, encodign):
         """
-        Provides a list of possible code completions.
-
-        :param document: QTextDocument
-        :param filePath: Document file path
-        :param fileEncoding: Document file encoding.
-
-        :return: A list of Completion
+        :param code: code string
+        :param line: line number (1 based)
+        :param column: colum number (0 based)
+        :param completionPrefix: The prefix to complete
+        :param filePath: file path of the code to complete
+        :param fileEncoding: encoding of the code to complete
         """
         raise NotImplementedError()
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
+    """
+    This mode provides code completion system wich is extensible. It takes care
+    of running the completion request in a background process using one or more
+    completion provider(s).
+
+    To implement a code completion for a specific language, you only need to
+    implement new :class:`pyqode.core.CompletionProvider`
+
+    The completion pop is shown the user press **ctrl+space** or automatically
+    while the user is typing some code (this can be configured using a series
+    of properties described in the below table).
+
+    The code completion mode adds the following properties to
+    :attr:`pyqode.core.QCodeEdit.settings`
+
+    ====================== ====================== ======= ====================== ================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== ================
+    triggerKey             Code completion        int     QtCore.Qt.Key_Space    The key that triggers the code completion requests(ctrl + **space**)
+    triggerLength          Code completion        int     1                      The number of character needed to trigger automatic completion requests.
+    triggerSymbols         Code completion        list    ["."]                  The list of symbols that trigger code completion requests(".", "->", ...)
+    showTooltips           Code completion        bool    True                   Show completion tooltip (e.g. to display the underlying type)
+    caseSensitive          Code completion        bool    False                  Case sensitivity (True is case sensitive)
+    ====================== ====================== ======= ====================== ================
+
+    .. note:: The code completion mode automatically starts a unique subprocess
+              (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
+              to run code completion tasks. This process is automatically closed
+              when the application is about to quit. You can use this process
+              to run custom task on the completion process (e.g. setting up some :py:attr:`sys.modules`).
+    """
+    sys.modules
+    #: Mode identifier
     IDENTIFIER = "codeCompletionMode"
+    #: Mode description
     DESCRIPTION = "Provides a code completion/suggestion system"
 
+    #: Code completion server running in a background process and shared among
+    #: all instances. Automatically started the first time a completion mode is
+    #: installed on an editor widget and stopped when the app is about to quit.
     SERVER = None
 
     completionsReady = QtCore.Signal(object)
     waitCursorRequested = QtCore.Signal()
 
+    #: Signal emitted when the preload operation has started.
     preLoadStarted = QtCore.Signal()
+    #: Signal emitted when the preload operation has completed.
     preLoadCompleted = QtCore.Signal()
 
     @property
     def completionPrefix(self):
+        """
+        Returns the current completion prefix
+        """
         prefix = self.editor.selectWordUnderCursor().selectedText()
         if prefix == "":
             try:
@@ -181,18 +234,40 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
+        """
+        Adds a completion provider to the list of providers used to provide
+        code completion to the user.
+
+        Note that the provider instance will be pickled to be sent to the
+        subprocess, this means that you cannot store data to keep results from
+        run to run. Instead you may use
+        :attr:`pyqode.core.CompletionProvider.processDict` which is a regular
+        dict attribute that is set on every provider object when run in the
+        subprocess.
+
+        :param provider: The completion provider instance to add.
+        """
         self.__providers.append(provider)
         self.__providers = sorted(
             self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def removeCompletionProvider(self, provider):
+        """
+        Removes a completion provider.
+
+        :param provider: Provider instance to remove
+        :return:
+        """
         self.__providers.remove(provider)
         self.__providers = sorted(
             self.__providers, key=lambda provider: provider.PRIORITY,
             reverse=True)
 
     def requestCompletion(self):
+        """
+        Requests a code completion at the current cursor position.
+        """
         if not self.__preloadFinished or self.__requestCnt:
             return
         self.__requestCnt += 1
@@ -202,16 +277,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.filePath, self.editor.fileEncoding)
 
     def requestPreload(self):
+        """
+        Requests a preload of the document.
+        """
         self.__preloadFinished = False
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
     def _onInstall(self, editor):
-        if CodeCompletionMode.SERVER is None:
-            s = SubprocessServer()
-            s.start()
-            CodeCompletionMode.SERVER = s
-        CodeCompletionMode.SERVER.signals.workCompleted.connect(self.__onWorkFinished)
+        if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
+            if CodeCompletionMode.SERVER is None:
+                s = SubprocessServer()
+                s.start()
+                CodeCompletionMode.SERVER = s
+            if CodeCompletionMode.SERVER:
+                CodeCompletionMode.SERVER.signals.workCompleted.connect(
+                    self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -224,6 +305,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             "triggerLength", 1, section="Code completion")
         self.editor.settings.addProperty(
             "triggerSymbols", ["."], section="Code completion")
+        # todo to removed, replaced by trigger symbols
         self.editor.settings.addProperty(
             "triggerKeys", [int(QtCore.Qt.Key_Period)],
             section="Code completion")
@@ -267,6 +349,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def __onWorkFinished(self, caller_id, worker, results):
         if caller_id == id(self) and isinstance(worker, CompletionWorker):
+            logger.debug("Completion request finished")
             self.editor.setCursor(QtCore.Qt.IBeamCursor)
             all_results = []
             for res in results:
@@ -274,6 +357,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__requestCnt -= 1
             self.__showCompletions(all_results)
         elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
+            logger.debug("Preload request finished")
             self.__preloadFinished = True
             self.preLoadCompleted.emit()
 
@@ -485,12 +569,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if input:
             # unicode invalid characters
             if sys.version_info[0] == 2:
-                RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             '|' + \
-                             '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                             (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                              unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))
+                try:
+                    RE_ILLEGAL = eval("""u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                                 u'|' + \
+                                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                                 (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
+                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))""")
+                except SyntaxError:
+                    pass # This is horrible, I know but this is the only way I found to fool this damn python 3.2 interpreter wich hates u"..."
             else:
                 RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
                              '|' + \
@@ -582,11 +669,21 @@ class DocumentWordCompletionProvider(CompletionProvider):
 
     def parse(self, code, wordSeparators=constants.WORD_SEPARATORS,
               filePath=""):
+        """
+        Returns a list of completions based on the code passed as a parameter.
+
+        :param code: The code to parse/tokenize
+        :param wordSeparators: The list of words separators.
+        :param filePath:
+        :return: A list of :class:`pyqode.core.Completion`
+        :rtype: list
+        """
         completions = []
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
         # store results in the subprocess dict for later use
-        self.processDict["docWords%s" % filePath] = completions
+        self.processDict["docWords%s-%s" %
+                         (filePath, type(self).__name__)] = completions
         return completions
 
     @staticmethod
@@ -599,7 +696,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
         :param seps: List of words separators
 
         :return: A set of words found in the document (excluding punctuations,
-        numbers, ...)
+                 numbers, ...)
         """
         # replace all possible separators with a default sep
         default_sep = seps[0]
@@ -618,7 +715,11 @@ class DocumentWordCompletionProvider(CompletionProvider):
     def complete(self, code, line, column, completionPrefix,
                  filePath, fileEncoding):
         # get previous result from the server process dict
-        words = self.processDict["docWords%s" % filePath]
+        try:
+            words = self.processDict["docWords%s-%s"
+                                     % (filePath, type(self).__name__)]
+        except KeyError:
+            words = None
         if not words or not len(words):
             return self.parse(code, filePath=filePath)
         return words
@@ -630,13 +731,15 @@ if __name__ == '__main__':
 
         def __init__(self):
             QCodeEdit.__init__(self, parent=None)
-            self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
             self.installMode(CodeCompletionMode())
             self.codeCompletionMode.addCompletionProvider(
-                DocumentWordCompletionProvider(self))
+                DocumentWordCompletionProvider())
+            self.openFile(__file__)
 
     import sys
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     app = QtGui.QApplication(sys.argv)
     e = Example()
     e.show()

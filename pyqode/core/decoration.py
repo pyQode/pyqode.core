@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module defines text edit decorations
@@ -27,6 +32,7 @@ from pyqode.qt import QtCore, QtGui
 class TextDecorationSignals(QtCore.QObject):
     clicked = QtCore.Signal(object)
 
+
 class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
@@ -34,6 +40,17 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
 
     In addition to the helper methods, a tooltip can be added to a decoration.
     Usefull for errors marks and so on...
+
+    Text decoration expose 1 **clicked** signal stored in a separate QObject:
+    :attr:`pyqode.core.TextDecoration.signals`
+
+    .. code-block:: python
+
+        deco = TextDecoration()
+        deco.signals.clicked.connect(a_slot)
+
+        def a_slot(decoration):
+            print(decoration)
     """
 
     def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
@@ -68,6 +85,12 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.cursor = cursor
 
     def containsCursor(self, textCursor):
+        """
+        Checks if the textCursor is in the decoration
+
+        :param textCursor: The text cursor to test
+        :type textCursor: QtGui.QTextCursor
+        """
         return self.cursor.selectionStart() <= textCursor.position() < \
             self.cursor.selectionEnd()
 
@@ -77,24 +100,39 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
 
     def setForeground(self, color):
         """ Sets the foreground color.
-        :param color: QColor """
+        :param color: Color
+        :type color: QtGui.QColor
+        """
         self.format.setForeground(color)
 
     def setBackground(self, brush):
-        """ Sets the background color
+        """
+        Sets the background brush.
 
-        :param brush: QBrush
+        :param brush: Brush
+        :type brush: QtGui.QBrush
         """
         self.format.setBackground(brush)
 
     def setOutline(self, color):
+        """
+        Uses an outline rectangle.
+
+        :param color: Color of the outline rect
+        :type color: QtGui.QColor
+        """
         self.format.setProperty(QtGui.QTextFormat.OutlinePen,
                                 QtGui.QPen(color))
 
     def setFullWidth(self, flag=True, clear=True):
-        """ Sets full width selection
+        """
+        Sets full width selection.
 
         :param flag: True to use full width selection.
+        :type flag: bool
+
+        :param clear: True to clear any previous selection. Default is True.
+        :type clear: bool
         """
         if clear:
             self.cursor.clearSelection()
@@ -103,18 +141,18 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     def setSpellchecking(self, color=QtCore.Qt.blue):
         """ Underlines text as a spellcheck error.
 
-        :param color: color
-        :type color: QColor
+        :param color: Underline color
+        :type color: QtGui.QColor
         """
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
     def setError(self, color=QtCore.Qt.red):
-        """ Highlights text as a syntax error
+        """ Highlights text as a syntax error.
 
-        :param color: color
-        :type color: QColor
+        :param color: Underline color
+        :type color: QtGui.QColor
         """
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SpellCheckUnderline)
@@ -124,8 +162,8 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         """
         Highlights text as a syntax warning
 
-        :param color: color
-        :type color: QColor
+        :param color: Underline color
+        :type color: QtGui.QColor
         """
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SpellCheckUnderline)

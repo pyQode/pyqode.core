@@ -1,11 +1,17 @@
 Python/Qt Code Editor Widget library
 ======================================================
 
-*version 1.0b2*
-
-.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode-core.png?branch=master
-    :target: https://travis-ci.org/ColinDuquesnoy/pyqode-core
+.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode.core.png?branch=master
+    :target: https://travis-ci.org/ColinDuquesnoy/pyqode.core
     :alt: Travis-CI build status
+
+.. image:: https://pypip.in/d/pyqode.core/badge.png
+    :target: https://crate.io/packages/pyqode.core/
+    :alt: Number of PyPI downloads
+
+.. image:: https://pypip.in/v/pyqode.core/badge.png
+    :target: https://crate.io/packages/pyqode.core/
+    :alt: Latest PyPI version
 
 What is pyQode?
 --------------------
@@ -15,15 +21,15 @@ applications. **pyQode is a library/widget, not an IDE**. You can see it as an
 alternative to QScintilla.
 
 
-pyQode is a **namespace packages** made up of the following official packages:
+pyQode is a **namespace package** made up of the following official packages:
 
-  - `pyqode.core`_
+  - `pyqode.core`_: core package
 
-  - `pyqode.python`_ 
+  - `pyqode.python`_: python support (code completion, ...)
 
-  - `pyqode.widgets`_
+  - `pyqode.widgets`_: useful widgets for pyqode apps
 
-  - `pyqode.designer`_
+  - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 .. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
 .. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
@@ -52,24 +58,24 @@ Here are the core features:
 License
 -------
 
-pyQode is licensed under the LGPL v3.
+pyQode is licensed under the MIT license.
 
 
 Requirements
 ------------
 
-pyqode-core depends on the following libraries:
+pyqode.core depends on the following libraries:
 
--  PyQt4 or PySide
 -  Python 2.7 or Python 3 (>= 3.2)
+-  PyQt4 or PySide
 -  pygments
--  setuptools
 
 
 Installation
 ------------
+You need to install PyQt4 or PySide by yourself.
 
-::
+Then you can install pyqode using pip::
 
     $ pip install pyqode.core
 
@@ -109,12 +115,12 @@ Resources
 
 -  `Downloads`_
 -  `Source repository`_
--  `Documentation`_ *(outdated)*
+-  `Documentation`_
 -  `Wiki`_
 
 .. _Downloads: https://github.com/ColinDuquesnoy/pyqode.core/releases
 .. _Source repository: https://github.com/ColinDuquesnoy/pyqode.core/
-.. _Documentation : http://packages.python.org/PCEF
+.. _Documentation : http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/ColinDuquesnoy/pyqode.core/wiki
 
 Screenshots

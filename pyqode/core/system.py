@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 Contains utility functions
@@ -301,16 +306,15 @@ class JobRunner(object):
     for the current job to finish unless you want to force its execution. It
     that case the current job will be terminated.
 
-    Additional parameters can be supplied to the job using *args and
-    **kwargs.
+    Additional parameters can be supplied to the job using args and kwargs.
 
-    Usage
-    ------------
-    self.jobRunner = JobRunner(self)
-    self.jobRunner.startJob(self.aJobMethod)
+    .. code-block:: python
+
+        self.jobRunner = JobRunner(self)
+        self.jobRunner.startJob(self.aJobMethod)
 
     .. warning:: Do not manipulate QWidgets from your job method. Use
-                 signal/slots to propagate changes to the ui
+                 signal/slots to propagate changes to the ui.
     """
     @property
     def caller(self):
@@ -352,9 +356,8 @@ class JobRunner(object):
                       the job that is currently running (if any).
         :type force: bool
 
-        :param args: *args
-
-        :param kwargs: **kwargs
+        :param args: args
+        :param kwargs: kwargs
         """
         thread = self.findUnusedThread()
         if thread:
@@ -396,12 +399,12 @@ class JobRunner(object):
 
 class DelayJobRunner(JobRunner):
     """
-    Extends the JobRunner to be able to introduce a delay between the job
-    request and the job execution. If a new job is requested the timer is
-    stopped (discarding a possible waiting job).
+    Extends the JobRunner to introduce a delay between the job request and the
+    job execution. If a new job is requested, the timer is stopped discarding a
+    possible waiting job.
 
-    This is made so that jobs that are run when the editor textChanged signal
-    is emitted does not actually run (when the user types too fast).
+    This is heavily used internally for situations where the user can cancel a
+    job (code completion, calltips,...).
     """
     def __init__(self, caller, nbThreadsMax=3, delay=500):
         JobRunner.__init__(self, caller, nbThreadsMax=nbThreadsMax)
@@ -425,9 +428,8 @@ class DelayJobRunner(JobRunner):
                       the job that is currently running (if any).
         :type force: bool
 
-        :param args: *args
-
-        :param kwargs: **kwargs
+        :param args: args
+        :param kwargs: kwargs
         """
         self.__timer.stop()
         self.__job = job
@@ -437,6 +439,9 @@ class DelayJobRunner(JobRunner):
         self.__timer.start(self.__interval)
 
     def cancelRequests(self):
+        """
+        Cancels pending requests.
+        """
         self.__timer.stop()
 
     def __execRequestedJob(self):
@@ -459,15 +464,15 @@ class _ServerSignals(QtCore.QObject):
     Holds the server signals.
     """
     #: Signal emitted when a new work is requested.
-    #: Parameters:
-    #: -----------
+    #:
+    #: **Parameters**:
     #:   * caller id
     #:   * worker object
     workRequested = QtCore.Signal(object, object)
 
     #: Signal emitted when a new work is requested.
-    #: Parameters:
-    #: -----------
+    #:
+    #: **Parameters**:
     #:   * caller id
     #:   * worker object
     #:   * worker results
@@ -476,21 +481,22 @@ class _ServerSignals(QtCore.QObject):
 
 class SubprocessServer(object):
     """
-    Utility class to run a child process to do the heavy load computations
-    such as file layout analysis, code completion requests.
+    Utility class to run a child process use to execute heavy load computations
+    such as file layout analysis, code completion requests...
 
-    To use the server, just create an instance and call the start method.
+    To use the server, just create an instance and call the
+    :meth:`pyqode.core.SubprocessServer.start` method.
 
     To request a job, use the requestWork method and pass it your worker object
     (already configured to do its work).
 
     The server will send the request to the child process and will emit the
-    workCompleted signal when the job finished
+    workCompleted signal when the job finished.
     """
-
 
     def __init__(self, name="pyQodeSubprocessServer", pollInterval=500,
                  autoCloseOnQuit=True):
+        #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
         self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
 
@@ -512,7 +518,7 @@ class SubprocessServer(object):
 
     def close(self):
         """
-        Close the server, terminate the child process
+        Closes the server, terminates the child process.
         """
         logger.info("Close server")
         if self.__running:
@@ -521,7 +527,7 @@ class SubprocessServer(object):
 
     def start(self):
         """
-        Start the server. This will actually start the child process.
+        Starts the server. This will actually start the child process.
         """
         logger.info("Server started")
         self.__pollTimer.start(self.__pollInterval)
@@ -530,17 +536,27 @@ class SubprocessServer(object):
 
     def requestWork(self, caller, worker):
         """
-        Request a work. The work will be called in the child process and its
-        results will be available throught the workCompleted signal.
+        Requests a work. The work will be called in the child process and its
+        results will be available through the
+        :attr:`pyqode.core.SubprocessServer.signals.workCompleted` signal.
 
-        :param id: CompletionMode id
+        :param caller: caller object$
+        :type caller: object
 
         :param worker: Callable **object**, must override __call__ with no
                        parameters.
+        :type worker: callable
         """
+        logger.debug("SubprocessServer requesting work: %s - %s" %
+                     (caller, worker))
         caller_id = id(caller)
-        self.__parent_conn.send([id(caller), worker])
-        self.signals.workRequested.emit(caller_id, worker)
+        if not self.__poll():
+            self.__parent_conn.send([id(caller), worker])
+            self.signals.workRequested.emit(caller_id, worker)
+            logger.debug("SubprocessServer work requested : %s - %s" %
+                         (caller, worker))
+        else:
+            logger.debug("Subprocess server failed to request work")
 
     def __poll(self):
         """
@@ -594,7 +610,8 @@ def workerThread(conn, caller_id, worker):
     except Exception as e:
         logger.critical(e)
         results = []
-    conn.send([caller_id, worker, results])
+    if not conn.poll():
+        conn.send([caller_id, worker, results])
 
 
 if __name__ == '__main__':

@@ -1,33 +1,40 @@
-.. pyQode - Python/Qt Code Editor widget
-.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
-
-.. This document is released under the LGPLv3 license.
-.. You should have received a copy of the GNU Lesser General Public License
-.. along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 What's New?
 ===========
-This page lists the most prominent milestones achieved by the PCEF
+This page lists the most prominent milestones achieved by the pyQode
 developers. For more specific details about what is planned and what has been 
 accomplished, please visit the `issues page on github`_ and the
 :doc:`changelog </changelog>`, respectively.
 
-Milestones
-----------
-
-* 0.1: Language independent editor framework
-
-
 Next Version
 ------------
 
-Version 0.2 will focus on getting all the features needed for a python code editor:
-    - code completion (using Jedi)
-    - refactoring (using rope)
-    - syntax checking (using pyflakes)
-    - go to definition
-    - inline documentation
-    - ...
+Version **1.1** will focus on adding PyQt5 support and improve the API stability.
+
+Milestones
+-------------
+
+1.0:
++++++++++
 
 
+    - The API has been completely rewritten and renamed into pyQode.
+    - It is now a namespace package; functionality are split over separate packages, pyqode.core being the foundation package.
+    - It now supports both python 2.7 and python 3.3 and can works with PyQt4 or PySide.
+    - The look and feel and the performances have been improved, the API is cleaner.
+    - Qt designer plugins are also available.
+
+0.2:
++++++++++
+    - Add python support:
+
+        * code completion and calltips using `Jedi`_
+        * inspection and code checking using pyflakes.py and pep8.py
+
+0.1:
++++++++++
+
+    Initial development of PCEF with a focus on a generic code editor.
+
+
+.. _`jedi`: https://github.com/davidhalter/jedi
 .. _`issues page on github`: https://github.com/ColinDuquesnoy/PCEF/issues

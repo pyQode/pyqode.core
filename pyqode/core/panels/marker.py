@@ -1,26 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the marker panel
 """
+from pyqode.core import logger
 from pyqode.qt import QtCore, QtGui
 from pyqode.core.panel import Panel
 from pyqode.core.system import DelayJobRunner, memoized
@@ -28,56 +34,71 @@ from pyqode.core.system import DelayJobRunner, memoized
 
 class Marker(QtCore.QObject):
     """
-    Defines a marker: a line number (position), an icon (string) and an
-    optional description string used as a tool tip.
-
-    The position of the marker can be changed dynamically.
+    A marker is an icon draw on a marker panel at a specific line position and
+    with a possible tooltip.
     """
+
+    @property
+    def position(self):
+        """
+        Gets the marker position (line number)
+        :type: int
+        """
+        return self.__position
 
     @property
     def icon(self):
         """
-        Returns the icon file name. Read-only.
+        Gets the icon file name. Read-only.
         """
         return self.__icon
 
     @property
     def description(self):
-        """ Returns the marker description. """
+        """ Gets the marker description. """
         return self.__description
 
     def __init__(self, position, icon="", description="", parent=None):
         """
         :param position: The marker position/line number.
+        :type position: int
 
         :param icon: the icon filename.
+        :type icon: str
 
         :param parent: The optional parent object.
+        :type parent: QtCore.QObject or None
         """
         QtCore.QObject.__init__(self, parent)
-        #: The position of the marker.
-        self.position = position
+        #: The position of the marker (line number)
+        self.__position = position
         self.__icon = icon
         self.__description = description
 
 
 class MarkerPanel(Panel):
     """
-    This panels takes care of drawing icons at a specific line position.
+    This panels takes care of drawing icons at a specific line number.
 
-    Use addMarker, removeMarker and clearMarkers to manage the collection if
+    Use addMarker, removeMarker and clearMarkers to manage the collection of
     displayed makers.
 
-    This panel exposes to signal:
-      - addMarkerRequest: when the user click the panel where there is no
-                          marker
-      - removeMarkerRequest: when the user click on a marker on the panel
+    You can create a user editable panel (e.g. a breakpoints panel) by using the
+    following signals:
+
+        - :attr:`pyqode.core.MarkerPanel.addMarkerRequested`
+        - :attr:`pyqode.core.MarkerPanel.removeMarkerRequested`
     """
+    #: The panel identifier
     DESCRIPTION = "Draw icons in a side panel"
+    #: The panel description
     IDENTIFIER = "markerPanel"
 
-    addMarkerRequest = QtCore.Signal(int)
-    removeMarkerRequest = QtCore.Signal(int)
+    #: Signal emitted when the user clicked in a place where there is no marker.
+    addMarkerRequested = QtCore.Signal(int)
+
+    #: Signal emitted when the user clicked on an existing marker.
+    removeMarkerRequested = QtCore.Signal(int)
 
     def __init__(self):
         Panel.__init__(self)
@@ -94,6 +115,7 @@ class MarkerPanel(Panel):
         Adds the marker to the panel.
 
         :param marker: Marker to add
+        :type marker: pyqode.core.Marker
         """
         key, val = self.makeMarkerIcon(marker.icon)
         if key and val:
@@ -105,6 +127,7 @@ class MarkerPanel(Panel):
         usrData = block.userData()
         if hasattr(usrData, "marker"):
             usrData.marker = marker
+        self.repaint()
 
     @staticmethod
     @memoized
@@ -119,31 +142,35 @@ class MarkerPanel(Panel):
 
     def removeMarker(self, marker):
         """
-        Removes the marker from the panel
+        Removes a marker from the panel
 
         :param marker: Marker to remove
+        :type marker: pyqode.core.Marker
         """
         self.__markers.remove(marker)
         self.__toRemove.append(marker)
+        self.repaint()
 
     def clearMarkers(self):
         """ Clears the markers list """
-        self.__markers[:] = []
+        while len(self.__markers):
+            self.removeMarker(self.__markers[0])
 
     def getMarkerForLine(self, line):
         """
-        Returns the marker positioned at line or None.
+        Returns the marker that is displayed at the specified line number if
+        any.
 
         :param line: The marker line.
 
         :return: Marker of None
+        :rtype: pyqode.core.Marker
         """
         for marker in self.__markers:
             if line == marker.position:
                 return marker
 
     def sizeHint(self):
-        """ Returns the widget size hint (based on the editor font size) """
         fm = QtGui.QFontMetricsF(self.editor.font())
         size_hint = QtCore.QSize(fm.height(), fm.height())
         if size_hint.width() > 16:
@@ -176,9 +203,11 @@ class MarkerPanel(Panel):
     def mousePressEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
         if self.getMarkerForLine(line):
-            self.removeMarkerRequest.emit(line)
+            logger.debug("Remove marker requested")
+            self.removeMarkerRequested.emit(line)
         else:
-            self.addMarkerRequest.emit(line)
+            logger.debug("Add marker requested")
+            self.addMarkerRequested.emit(line)
 
     def mouseMoveEvent(self, event):
         line = self.editor.lineNumber(event.pos().y())
@@ -216,7 +245,7 @@ if __name__ == '__main__':
                             description="First marker")
             self.markerPanel.addMarker(marker)
             # add another action in 5s
-            QtCore.QTimer.singleShot(5000, self.addOtherMarker)
+            QtCore.QTimer.singleShot(1000, self.addOtherMarker)
 
         def addOtherMarker(self):
             m = self.markerPanel.getMarkerForLine(5)
@@ -224,8 +253,8 @@ if __name__ == '__main__':
             marker = Marker(15, icon=constants.ACTION_PASTE[0],
                             description="Second marker")
             self.markerPanel.addMarker(marker)
-            # clear all in 15s
-            QtCore.QTimer.singleShot(15000, self.markerPanel.clearMarkers)
+            # clear all in 2s
+            QtCore.QTimer.singleShot(2000, self.markerPanel.clearMarkers)
 
     import sys
     app = QtGui.QApplication(sys.argv)

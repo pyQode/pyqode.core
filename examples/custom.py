@@ -24,30 +24,26 @@
 #THE SOFTWARE.
 #
 """
-This is a simple test script to that is meant to be run by Travis CI to ensure
-everything works properly foreach bindings on each supported python
-version (2.7, 3.2).
-
-It runs a QApplication and shows a QGenericCodeEdit for 500ms.
+A simple example that shows how to setup a custom code editor widget based on
+pyqode.core.QCodeEdit
 """
 import sys
-from pyqode.qt import QtCore, QtGui
-from pyqode.core import QGenericCodeEdit
-
-
-def leave():
-    app = QtGui.QApplication.instance()
-    app.exit(0)
+from pyqode.qt import QtGui
+import pyqode.core
 
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    editor = QGenericCodeEdit()
+    window = QtGui.QMainWindow()
+    editor = pyqode.core.QCodeEdit()
     editor.openFile(__file__)
-    editor.show()
-    QtCore.QTimer.singleShot(500, leave)
-    return app.exec_()
+    editor.installMode(pyqode.core.PygmentsSyntaxHighlighter(editor.document()))
+    editor.installPanel(pyqode.core.SearchAndReplacePanel(),
+                        position=pyqode.core.PanelPosition.TOP)
+    window.setCentralWidget(editor)
+    window.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

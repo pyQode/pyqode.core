@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This package contains the core classes of pyqode and an example of a generic
@@ -25,16 +30,28 @@ code editor widget
 #
 # exposes public core api
 #
+# modules
 from pyqode.core import constants
 from pyqode.core import logger
-from pyqode.core.constants import PanelPosition
-from pyqode.core.decoration import TextDecoration
+
+# core classes
 from pyqode.core.editor import QCodeEdit
+from pyqode.core.mode import Mode
+from pyqode.core.panel import Panel
+from pyqode.core.constants import PanelPosition
+from pyqode.core.properties import PropertyRegistry
+from pyqode.core.decoration import TextDecoration
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
 from pyqode.core.syntax_highlighter import CharBasedFoldDetector
-from pyqode.core.mode import Mode
+from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
+from pyqode.core.system import TextStyle
+from pyqode.core.system import JobRunner
+from pyqode.core.system import DelayJobRunner
+from pyqode.core.system import SubprocessServer
+
+# modes
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
@@ -49,27 +66,20 @@ from pyqode.core.modes import Completion
 from pyqode.core.modes import DocumentWordCompletionProvider
 from pyqode.core.modes import FileWatcherMode
 from pyqode.core.modes import IndenterMode
-from pyqode.core.panel import Panel
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
 from pyqode.core.modes import SymbolMatcherMode
 from pyqode.core.modes import ZoomMode
+
+# panels
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.panels import LineNumberPanel
 from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
-from pyqode.core.properties import PropertyRegistry
-from pyqode.core.system import indexByName
-from pyqode.core.system import indexMatching
-from pyqode.core.system import TextStyle
-from pyqode.core.system import JobRunner
-from pyqode.core.system import DelayJobRunner
-from pyqode.core.system import SubprocessServer
-from pyqode.core.system import memoized
 
 
 #: pyqode-core version
-__version__ = "1.0b2"
+__version__ = "1.0"
 
 
 #
@@ -80,12 +90,20 @@ class QGenericCodeEdit(QCodeEdit):
     Extends QCodeEdit with a hardcoded set of modes and panels.
 
     **Panels:**
-        * line number panel
-        * search and replace panel
+        * :class:`pyqode.core.FoldingPanel`
+        * :class:`pyqode.core.LineNumberPanel`
+        * :class:`pyqode.core.SearchAndReplacePanel`
 
     **Modes:**
-        * document word completion
-        * generic syntax highlighter (pygments)
+        * :class:`pyqode.core.FileWatcherMode`
+        * :class:`pyqode.core.CaretLineHighlighterMode`
+        * :class:`pyqode.core.RightMarginMode`
+        * :class:`pyqode.core.PygmentsSyntaxHighlighter`
+        * :class:`pyqode.core.ZoomMode`
+        * :class:`pyqode.core.AutoIndentMode`
+        * :class:`pyqode.core.CodeCompletionMode`
+        * :class:`pyqode.core.IndenterMode`
+        * :class:`pyqode.core.SymbolMatcherMode`
     """
     def __init__(self, parent=None):
         QCodeEdit.__init__(self, parent)
@@ -120,6 +138,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
-           "DelayJobRunner",
-           "PYGMENTS_STYLES", "indexByName", "indexMatching", "memoized",
-           "SubprocessServer", "SymbolMatcherMode"]
+           "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
+           "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]

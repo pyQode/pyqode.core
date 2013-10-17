@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2013 Colin Duquesnoy
+#The MIT License (MIT)
 #
-# This file is part of pyQode.
+#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
-# pyQode is free software: you can redistribute it and/or modify it under
-# the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
 #
-# pyQode is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-# details.
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
 #
-# You should have received a copy of the GNU Lesser General Public License along
-# with pyQode. If not, see http://www.gnu.org/licenses/.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 #
 """
 This module contains the search and replace panel
@@ -37,18 +42,34 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     It uses the QTextDocument API to search for some text. Search operation is
     performed in a background thread.
 
-    The search panel can also be used pragmatically. To do that, the client
-    code must first request a search (**requestSearch**) and connect to the
-    searchFinished signal. The results of the search can then be retrieved
-    using the cptOccurrences attribute and the getOccurrences method. The
-    client code may now navigates through occurrences
-    (**selectNext**/**selectionPrevious**) or replace the occurences with their
-    own text (**replaceOccurrence**/**replaceAll**).
+    The search panel can also be used programatically.
+
+    To do that, the client code first requests a search using
+    :meth:`requestSearch` and connects to
+    :attr:`searchFinished`.
+
+    The results of the search can then be retrieved using
+    :attr:`cptOccurrences` and :meth:`getOccurrences`.
+
+    The client code may now navigate through occurrences using :meth:`selectNext`
+    or :meth:`selectPrevious`, or replace the occurrences with a specific
+    text using :meth:`replaceOccurrence` or :meth:`replaceAll`.
+
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    =========================== ====================== ======= ====================== =====================
+    Key                         Section                Type    Default value          Description
+    =========================== ====================== ======= ====================== =====================
+    searchOccurrenceBackground  General                QColor  #FFFF00                Search occurrences background. Default is Yellow.
+    searchOccurrenceForeground  General                QColor  #000000                Search occurrences foreground. Default is Black.
+    =========================== ====================== ======= ====================== =====================
     """
+    #: The panel identifier
     IDENTIFIER = "searchAndReplacePanel"
+    #: The panel description
     DESCRIPTION = "Search and replace text in the editor"
 
-    #: Stylesheet
     STYLESHEET = """SearchAndReplacePanel
     {
         background-color: %(bck)s;
@@ -210,22 +231,20 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.lineEditReplace.textChanged.disconnect(self.__updateButtons)
             self.searchFinished.connect(self.__onSearchFinished)
 
-    @QtCore.Slot()
-    def on_pushButtonClose_clicked(self):
+    def closePanel(self):
         """
         Closes the panel
-        :return:
         """
         self.hide()
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
+    def on_pushButtonClose_clicked(self):
+        self.closePanel()
+
+    @QtCore.Slot()
     def on_actionSearch_triggered(self):
-        """
-        Executes the search action using the selected text of the editor
-        (Ctrl+F).
-        """
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -241,10 +260,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
-        """
-        Executes the search and replace action using the selected text of the
-        editor (ctrl+r)
-        """
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -258,17 +273,16 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.requestSearch(newText)
 
     def focusOutEvent(self, event):
-        """ Cancel jobs when leaving the widget """
         self.stopJob()
         self.cancelRequests()
         Panel.focusOutEvent(self, event)
 
     def requestSearch(self, txt=None):
         """
-        Request a search operation.
+        Requests a search operation.
 
         :param txt: The text to replace. If None, the content of lineEditSearch
-        is used instead.
+                    is used instead.
         """
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
@@ -303,7 +317,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Selects the next occurrence.
 
         :return: True in case of success, false if no occurrence could be
-        selected.
+                 selected.
         """
         cr = self.__getCurrentOccurrence()
         occurrences = self.getOccurrences()
@@ -327,7 +341,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Selects previous occurrence.
 
         :return: True in case of success, false if no occurrence could be
-        selected.
+                 selected.
         """
         cr = self.__getCurrentOccurrence()
         occurrences = self.getOccurrences()
@@ -351,10 +365,10 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Replaces the selected occurrence.
 
         :param text: The replacement text. If it is None, the lineEditReplace's
-        text is used instead.
+                     text is used instead.
 
         :return True if the text could be replace properly, False if there is
-        no more occurrences to replace.
+                no more occurrences to replace.
         """
         if text is None or isinstance(text, bool):
             text = self.lineEditReplace.text()

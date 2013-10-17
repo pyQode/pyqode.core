@@ -1,14 +1,7 @@
-.. pyQode - Python/Qt Code Editor widget
-.. Copyright 2013, Colin Duquesnoy <colin.duquesnoy@gmail.com>
+Download & Install
+=========================
 
-.. This document is released under the LGPLv3 license.
-.. You should have received a copy of the GNU Lesser General Public License
-.. along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-Download
-========
-
-Here you'll find all the necessary explanations for installing PCEF.
+Here you'll find all the necessary explanations for installing pyqode.core.
 
 
 Requirements:
@@ -16,34 +9,50 @@ Requirements:
 You will need to install the following packages yourself:
     - setuptools
     - pip
-    - PySide
+    - PySide or PyQt4
 
 The following packages will be installed automatically:
     - pygments
 
 
-Easy install
----------------
+.. note:: Optionally, you can install chardet or chardet2 to help pyQode detect
+          file encoding automatically.
 
-PCEF can be installed from pypi using easy_install or pip::
+.. note:: pyQode runs fine on all Windows version (from Windows XP to Windows 8)
+          and has been tested on the major GNU/Linux desktop environments
+          such as Unity, Gnome, Cinnamon and KDE.
 
-    pip install PCEF
+          It should run fine on Mac OS too but this has never been tested.
+          (Feedbacks are appreciated).
+
+Easy install (the recommended way)
+--------------------------------------
+
+pyQode can be installed from *pypi* using *easy_install* or *pip*:
+
+.. code-block:: bash
+
+    $ pip install pyqode.core
 
 From source
 ----------------
 
 You can download the `source archive`_ from the `github repository`_
 
-Then you can install the package by opening a terminal an typing the following commands::
+Then you can install the package by opening a terminal an typing the following commands:
 
-    cd path/to/source/
-    python setup.py install
+.. code-block:: bash
 
-Alternatively you can clone the repository using git::
+    $ cd path/to/source/
+    $ python setup.py install
 
-    git clone git@github.com:ColinDuquesnoy/PCEF.git
-    cd PCEF
-    python setup.py install
+Alternatively you can clone the repository using git:
 
-.. _source archive: https://github.com/ColinDuquesnoy/PCEF/archive/master.zip
-.. _github repository: https://github.com/ColinDuquesnoy/PCEF
+.. code-block:: bash
+
+    $ git clone git@github.com:ColinDuquesnoy/pyqode.core.git
+    $ cd pyqode.core
+    $ python setup.py install
+
+.. _source archive: https://github.com/ColinDuquesnoy/pyqode.core/archive/master.zip
+.. _github repository: https://github.com/ColinDuquesnoy/pyqode.core
