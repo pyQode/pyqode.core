@@ -8,10 +8,11 @@ include setup.py
 include LICENSE.txt
 include AUTHORS.txt
 include README.rst
+include CONTRIBUTING.md
 # ui sources and resources
 include pyqode/core/ui/*
 include pyqode/core/ui/rc/*
-# doc event if it is completely outdated
+# docs
 include doc/*
 include doc/source/*
 include doc/source/_static/*
