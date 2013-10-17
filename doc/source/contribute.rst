@@ -27,6 +27,8 @@ Pull Requests are great (on the dev branch)! Readme/Documentation changes are ok
 The master branch is used for the stable releases, following the
 `git workflow`_.
 
-Please use **PEP8** to style your code.
+Please use **PEP8** to style your code except for the naming conventions. We
+use the Qt naming conventions to remains coherent and homogeneous with the rest
+of the Qt API.
 
 .. _`git workflow`: http://nvie.com/posts/a-successful-git-branching-model/
