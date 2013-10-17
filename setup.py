@@ -24,9 +24,14 @@
 #THE SOFTWARE.
 #
 """
-This setup script packages the core package of pyQode: pyqode-core
+Setup script for pyqode.core
 """
-from setuptools import setup, find_packages
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    import ez_setup
+    ez_setup.use_setuptools()
+    from setuptools import setup, find_packages
 
 
 def read_version():
