@@ -5,6 +5,7 @@
 include MANIFEST.in
 # setup, license and readme
 include setup.py
+include ez_setup.py
 include LICENSE.txt
 include AUTHORS.txt
 include README.rst
