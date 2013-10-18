@@ -76,3 +76,9 @@ except TypeError:
 
     class QTextDocument(object):
         pass
+
+    class QTextCharFormat(object):
+        pass
+
+    class QFont(object):
+        pass
