@@ -170,7 +170,7 @@ class TextStyle(object):
         if style:
             self.from_string(style)
 
-    def __str__(self):
+    def __repr__(self):
         color = self.color.name()
         bold = "nbold"
         if self.bold:
