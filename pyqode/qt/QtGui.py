@@ -33,8 +33,9 @@ try:
     else:
         from PySide.QtGui import *
 except TypeError:
+
     class QColor(object):
-        def __init__(self, *args):
+        def __init__(self, *args, **kwargs):
             pass
 
     class QTextEdit(object):
@@ -81,4 +82,30 @@ except TypeError:
         pass
 
     class QFont(object):
+        pass
+
+    class QTableWidget(object):
+        pass
+
+    class QIcon(object):
+        pass
+
+    class Foo(object):
+        pass
+
+    class QTextEdit(object):
+        ExtraSelection = Foo
+        pass
+
+    class QColor(object):
+        def __init__(self, *args, **kwargs):
+            pass
+
+    class QDialog(object):
+        pass
+
+    class QTabBar(object):
+        pass
+
+    class QTabWidget:
         pass

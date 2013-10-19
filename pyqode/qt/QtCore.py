@@ -75,3 +75,7 @@ except TypeError:
 
     class QRegExp(object):
         pass
+
+    class Property(object):
+        def __init__(self, *args, **kwargs):
+            pass
