@@ -284,15 +284,24 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
-    def _onInstall(self, editor):
+    @classmethod
+    def startCompletionServer(cls):
+        """
+        Starts the code completion server. This is automatically called the
+        first time a code completion mode is isntalled on a QCodeEdit instance
+        but you can call it manually before if you need it.
+        """
         if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
             if CodeCompletionMode.SERVER is None:
                 s = SubprocessServer()
                 s.start()
-                CodeCompletionMode.SERVER = s
-            if CodeCompletionMode.SERVER:
-                CodeCompletionMode.SERVER.signals.workCompleted.connect(
-                    self.__onWorkFinished)
+                cls.SERVER = s
+
+    def _onInstall(self, editor):
+        CodeCompletionMode.startCompletionServer()
+        if CodeCompletionMode.SERVER:
+            CodeCompletionMode.SERVER.signals.workCompleted.connect(
+                self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
