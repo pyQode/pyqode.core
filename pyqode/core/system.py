@@ -540,7 +540,7 @@ class SubprocessServer(object):
         results will be available through the
         :attr:`pyqode.core.SubprocessServer.signals.workCompleted` signal.
 
-        :param caller: caller object$
+        :param caller: caller object
         :type caller: object
 
         :param worker: Callable **object**, must override __call__ with no
