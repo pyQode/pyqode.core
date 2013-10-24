@@ -31,6 +31,7 @@ class AutoCompleteMode(Mode):
     """
     Generic auto complete mode that automatically completes the following
     symbols:
+
         - " -> "
         - ' -> '
         - ( -> )
