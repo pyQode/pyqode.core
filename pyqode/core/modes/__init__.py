@@ -26,6 +26,7 @@
 """
 This package contains the core modes (language independant)
 """
+from pyqode.core.modes.autocomplete import AutoCompleteMode
 from pyqode.core.modes.caret_line_highlight import CaretLineHighlighterMode
 from pyqode.core.modes.checker import CheckerMode, CheckerMessage
 from pyqode.core.modes.checker import MSG_STATUS_ERROR

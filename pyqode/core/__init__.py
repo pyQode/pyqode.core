@@ -52,6 +52,7 @@ from pyqode.core.system import DelayJobRunner
 from pyqode.core.system import SubprocessServer
 
 # modes
+from pyqode.core.modes import AutoCompleteMode
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
@@ -95,6 +96,7 @@ class QGenericCodeEdit(QCodeEdit):
         * :class:`pyqode.core.SearchAndReplacePanel`
 
     **Modes:**
+        * :class:`pyqode.core.AutoCompleteMode`
         * :class:`pyqode.core.FileWatcherMode`
         * :class:`pyqode.core.CaretLineHighlighterMode`
         * :class:`pyqode.core.RightMarginMode`
@@ -109,9 +111,12 @@ class QGenericCodeEdit(QCodeEdit):
         QCodeEdit.__init__(self, parent)
         self.setLineWrapMode(self.NoWrap)
         self.setWindowTitle("pyQode - Generic Editor")
+
         self.installPanel(FoldingPanel(), PanelPosition.LEFT)
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
+
+        self.installMode(AutoCompleteMode())
         self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
