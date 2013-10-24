@@ -194,7 +194,7 @@ class CheckerMode(Mode, QtCore.QObject):
         self.__markerPanelId = markerPanelId
 
     # todo rename it to addMessages and remove the doc warning
-    def addMessage(self, messages, clear=True):
+    def addMessages(self, messages, clear=True):
         """
         Adds one message or a list of message.
 
@@ -260,7 +260,7 @@ class CheckerMode(Mode, QtCore.QObject):
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.connect(self.requestAnalysis)
                 self.editor.newTextSet.connect(self.requestAnalysis)
-            self.addMessagesRequested.connect(self.addMessage)
+            self.addMessagesRequested.connect(self.addMessages)
             self.clearMessagesRequested.connect(self.clearMessages)
         else:
             if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
@@ -268,7 +268,7 @@ class CheckerMode(Mode, QtCore.QObject):
             elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
                 self.editor.textSaved.disconnect(self.requestAnalysis)
                 self.editor.newTextSet.disconnect(self.requestAnalysis)
-            self.addMessagesRequested.disconnect(self.addMessage)
+            self.addMessagesRequested.disconnect(self.addMessages)
             self.clearMessagesRequested.disconnect(self.clearMessages)
 
     def __runAnalysis(self, code, filePath, fileEncoding):
