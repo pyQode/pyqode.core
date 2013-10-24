@@ -129,6 +129,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     unIndentRequested = QtCore.Signal()
 
     @property
+    def currentLineText(self):
+        return self.lineText(self.cursorPosition[0])
+
+    @property
     def dirty(self):
         """
         Gets/sets the dirty flag.
