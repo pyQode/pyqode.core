@@ -241,6 +241,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        self._lastMousePos = None
         self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()
         self.__cleaning = False
@@ -405,6 +406,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 tc.setPosition(end_pos)
         tc.setPosition(start_pos)
         tc.setPosition(end_pos, tc.KeepAnchor)
+        return tc
+
+    def selectWordUnderMouseCursor(self):
+        """
+        Selects the word under the **mouse** cursor.
+
+        :return: A QTextCursor with the word under mouse cursor selected.
+        """
+        tc = self.cursorForPosition(self._lastMousePos)
+        tc = self.selectWordUnderCursor(True, tc)
+        print(tc.selectedText())
         return tc
 
     def detectEncoding(self, data):
@@ -1104,6 +1116,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         the mouseMoved event.
         """
         c = self.cursorForPosition(event.pos())
+        self._lastMousePos = event.pos()
         blockFound = False
         for sel in self.__selections:
             if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
