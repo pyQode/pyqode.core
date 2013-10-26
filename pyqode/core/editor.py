@@ -420,7 +420,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         tc = self.cursorForPosition(self._lastMousePos)
         tc = self.selectWordUnderCursor(True, tc)
-        print(tc.selectedText())
+        #print(tc.selectedText())
         return tc
 
     def detectEncoding(self, data):
