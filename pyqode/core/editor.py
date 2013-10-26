@@ -334,8 +334,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the document line count """
         return self.document().blockCount()
 
-
-    def gotoLine(self, line=None, move=True):
+    def gotoLine(self, line=None, move=True, column=None):
         """
         Moves the text cursor to the specifed line.
 
@@ -358,6 +357,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         tc = self.textCursor()
         tc.movePosition(tc.Start, tc.MoveAnchor)
         tc.movePosition(tc.Down, tc.MoveAnchor, line-1)
+        if column:
+            tc.movePosition(tc.Right, tc.MoveAnchor, column)
         if move:
             self.setTextCursor(tc)
         return tc
