@@ -70,6 +70,7 @@ from pyqode.core.modes import IndenterMode
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
 from pyqode.core.modes import SymbolMatcherMode
+from pyqode.core.modes import WordClickMode
 from pyqode.core.modes import ZoomMode
 
 # panels
@@ -144,4 +145,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
+           "WordClickMode",
            "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]

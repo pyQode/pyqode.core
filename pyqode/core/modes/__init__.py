@@ -46,6 +46,7 @@ from pyqode.core.modes.pygments_syntax_highlighter import PygmentsSyntaxHighligh
 from pyqode.core.modes.pygments_syntax_highlighter import PYGMENTS_STYLES
 from pyqode.core.modes.autoindent import AutoIndentMode
 from pyqode.core.modes.indenter import IndenterMode
+from pyqode.core.modes.wordclick import WordClickMode
 
 
 __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
@@ -55,4 +56,5 @@ __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "DocumentWordCompletionProvider", "FileWatcherMode",
            "SymbolMatcherMode", "IndenterMode"
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "PYGMENTS_STYLES", "AutoIndentMode"]
+           "PYGMENTS_STYLES", "AutoIndentMode",
+           "WordClickMode"]
