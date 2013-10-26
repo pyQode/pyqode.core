@@ -344,6 +344,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param line: The line number to go (1 based)
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
+        :param column: Optional column number. Introduced in version 1.1
         :return: The new text cursor
         :rtype: QtGui.QTextCursor
         """
