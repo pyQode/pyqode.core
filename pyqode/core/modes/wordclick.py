@@ -82,7 +82,7 @@ class WordClickMode(Mode, QtCore.QObject):
             self._previous_cursor_end = -1
 
     def _onMousePressed(self, e):
-        if e.button() == 1:
+        if e.button() == 1 and self._deco:
             tc = self.editor.selectWordUnderMouseCursor()
             if tc and tc.selectedText():
                 self.wordClicked.emit(tc)
