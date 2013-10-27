@@ -40,7 +40,7 @@ From the command line using the **--PyQt** or **--PySide** options ::
 
     python pyqode_app.py --PyQt
 
-By settings the QT_API environment variable to "PyQt" or "PySide" at the first
+By settings the QT_API environment variable to "pyqt" or "pyside" at the first
 line of your main script::
 
     import os
@@ -73,7 +73,7 @@ Qt classes by QtGui. ::
     app.exec_()
 """
 import logging
-__logger = logging.getLogger("pyqode")
+_logger = logging.getLogger("pyqode")
 import os
 import sys
 
@@ -88,7 +88,7 @@ def read_args():
         argv = sys.argv
     except:
         argv = []
-    return argv
+    return [arg.lower() for arg in argv]
 
 
 def read_env():
@@ -98,10 +98,14 @@ def read_env():
     :return: QT_API value
     """
     try:
-        from_env = os.environ["QT_API"]
+        from_env = os.environ["QT_API"].lower()
     except KeyError:
         from_env = ""
     return from_env
+
+
+def check_pyside(argv, env):
+    return "PySide" in sys.modules or "--pyside" in argv or env == "pyside"
 
 
 def try_pyside():
@@ -114,10 +118,10 @@ def try_pyside():
         import PySide
     except ImportError:
         # Fatal error, no qt bindings found
-        __logger.critical("PySide not found!")
+        _logger.critical("PySide not found!")
         return False
     else:
-        os.environ.setdefault("QT_API", "PySide")
+        os.environ["QT_API"] = "PySide"
         return True
 
 
@@ -132,13 +136,18 @@ def setup_apiv2():
             sip.setapi("QString", 2)
             sip.setapi("QVariant", 2)
         except:
-            __logger.critical("pyQode: failed to set PyQt api to version 2"
+            _logger.critical("pyQode: failed to set PyQt api to version 2"
                               "\nTo solve this problem, import "
                               "pyqode before any other PyQt modules "
                               "in your main script...")
 
 
-def try_pyqt():
+def check_pyqt4(argv, env):
+    return ("PyQt4" in sys.modules or "--pyqt4" in argv or "--pyqt" in argv
+            or env == "pyqt" or env == "pyqt4")
+
+
+def try_pyqt4():
     """
     Tries to import pyqt and setup sip api v2 in case of success
 
@@ -148,10 +157,10 @@ def try_pyqt():
         import PyQt4
     except ImportError:
         # Fatal error, no qt bindings found
-        __logger.critical("PyQt not found!")
+        _logger.critical("PyQt not found!")
         return False
     else:
-        os.environ.setdefault("QT_API", "PyQt")
+        os.environ["QT_API"] = "PyQt4"
         setup_apiv2()
         return True
 
@@ -165,19 +174,17 @@ def select():
     """
     argv = read_args()
     env = read_env()
-    if "PyQt4" in sys.modules or "--PyQt" in argv or env == "PyQt":
-        os.environ.setdefault("QT_API", "PyQt")
-        return try_pyqt()
-    elif "PySide" in sys.modules or "--PySide" in argv or env == "PySide":
-        os.environ.setdefault("QT_API", "PySide")
+    if check_pyqt4(argv, env):
+        return try_pyqt4()
+    elif check_pyside(argv, env):
         return try_pyside()
     else:
-        __logger.warning("No qt bindings specified, pyqode will try to pick one "
+        _logger.warning("No qt bindings specified, pyqode will try to pick one "
                          "on its own")
-        if not try_pyqt():
-            __logger.warning("Cannot use PyQt, will try PySide")
+        if not try_pyqt4():
+            _logger.warning("Cannot use PyQt, will try PySide")
             return try_pyside()
-        __logger.warning("The chosen qt binding is %s" % os.environ["QT_API"])
+        _logger.warning("The chosen qt binding is %s" % os.environ["QT_API"])
         return True
 
 
@@ -185,7 +192,7 @@ def select():
 # Select a qt binding
 #
 if not select():
-    __logger.critical("Failed to find a qt bindings, please install "
+    _logger.critical("Failed to find a qt bindings, please install "
                       "PyQt or PySide to user pyqode. Returning with "
                       "error code.")
     raise RuntimeError("No Qt bindings found")
