@@ -43,7 +43,7 @@ def main():
     editor = pyqode.core.QGenericCodeEdit()
     editor.show()
     # show the api pyqode is currently using
-    editor.setPlainText("pyQode using the %s qt bindings" % os.environ["QT_API"])
+    editor.setPlainText("pyQode using %s" % os.environ["QT_API"])
     app.exec_()
 
 if __name__ == "__main__":
