@@ -164,7 +164,7 @@ class CheckerMode(Mode, QtCore.QObject):
                  delay=500,
                  markerPanelId="markerPanel",
                  clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
-                 showEditorTooltip=True):
+                 showEditorTooltip=False):
         """
         :param process_func: The process function that performs the code
                              analysis.
