@@ -73,3 +73,10 @@ def critical(msg):
     :param msg: Message tp log
     """
     logging.getLogger("pyqode").critical(msg)
+
+
+def exception(msg):
+    """
+    Logs an exception
+    """
+    logging.getLogger("pyqode").exception(msg)
