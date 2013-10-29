@@ -289,17 +289,16 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.blockHighlightStarted.emit(self, text)
         # setup user data
         userData = self.currentBlockUserData()
-        if userData is None:
+        if not isinstance(userData, TextBlockUserData):
             userData = TextBlockUserData()
             self.setCurrentBlockUserData(userData)
         # update user data
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        self._detectFolding(text, userData)
-        self._detectParentheses(text, userData)
-
         if os.environ["QT_API"] == "PyQt":
             self.__blocks.add(userData)
         self.setCurrentBlockUserData(userData)
+        self._detectFolding(text, userData)
+        self._detectParentheses(text, userData)
         self.doHighlightBlock(text)
         self.blockHighlightFinished.emit(self, text)
 

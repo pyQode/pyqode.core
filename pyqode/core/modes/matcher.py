@@ -28,6 +28,7 @@ This module contains the symbol matcher mode
 """
 from pyqode.core.mode import Mode
 from pyqode.core.decoration import TextDecoration
+from pyqode.core.textblockuserdata import TextBlockUserData
 from pyqode.qt import QtGui, QtCore
 
 
@@ -255,7 +256,7 @@ class SymbolMatcherMode(Mode):
             self.editor.removeDecoration(d)
         self.__decorations[:] = []
         data = self.editor.textCursor().block().userData()
-        if data:
+        if data and isinstance(data, TextBlockUserData):
             pos = self.editor.textCursor().block().position()
             self.matchParentheses(data.parentheses, pos)
             self.matchSquareBrackets(data.squareBrackets, pos)
