@@ -608,7 +608,7 @@ def workerThread(conn, caller_id, worker):
     try:
         results = worker()
     except Exception as e:
-        logger.critical(e)
+        logger.exception("SubprocessServer.Worker:")
         results = []
     if not conn.poll():
         conn.send([caller_id, worker, results])
