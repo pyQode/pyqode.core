@@ -547,10 +547,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__completer.setCompletionPrefix(self.completionPrefix)
             # compute size and pos
             cr = self.editor.cursorRect()
-            cr.setWidth(400)
             charWidth = self.editor.fontMetrics().width('A')
             prefixLen = (len(self.completionPrefix) * charWidth)
-            cr.setX(cr.x() + self.editor.marginSize() - prefixLen)
+            cr.translate(self.editor.marginSize() - prefixLen, 27)
             cr.setWidth(
                 self.__completer.popup().sizeHintForColumn(0) +
                 self.__completer.popup().verticalScrollBar().sizeHint().width())
