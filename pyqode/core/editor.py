@@ -55,6 +55,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     tabLength               General                int     4                      Tab length (number of spaces)
     useSpacesInsteadOfTab   General                bool    True                   Use spaces instead of spaces (be warry of this, most modes still use spaces heavily for internal computations)
     minIndentColumn         General                int     0                      Min column indent (some languages such as cobol requires to indent code at min col 7)
+    saveOnFrameDeactivation General                bool    True                   Auto save when editor loose focus.
     ======================= ====================== ======= ====================== ==============
 
     **Style** :attr:`pyqode.core.QCodeEdit.style`
@@ -1073,6 +1074,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.repaint()
         QtGui.QApplication.processEvents()
 
+    def focusOutEvent(self, QFocusEvent):
+        if self.settings.value("saveOnFrameDeactivation"):
+            self.saveToFile()
+
     def mousePressEvent(self, event):
         """
         Overrides mousePressEvent to emits mousePressed signal
@@ -1311,6 +1316,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.settings.addProperty("tabLength", constants.TAB_SIZE)
         self.settings.addProperty("useSpacesInsteadOfTab", True)
         self.settings.addProperty("minIndentColumn", 0)
+        self.settings.addProperty("saveOnFrameDeactivation", True)
 
     def __initStyle(self):
         """
