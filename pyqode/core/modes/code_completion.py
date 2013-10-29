@@ -290,12 +290,17 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Starts the code completion server. This is automatically called the
         first time a code completion mode is isntalled on a QCodeEdit instance
         but you can call it manually before if you need it.
+
+        :return The code completion server if created.
+        :rtype pyqode.core.SubprocessServer or None
         """
         if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
             if CodeCompletionMode.SERVER is None:
                 s = SubprocessServer()
                 s.start()
                 cls.SERVER = s
+                return s
+        return None
 
     def _onInstall(self, editor):
         CodeCompletionMode.startCompletionServer()
