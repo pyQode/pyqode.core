@@ -52,7 +52,7 @@ class PreLoadWorker(object):
         self.__providers = providers
         self.__args = args
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         """
         Do the work (this will be called in the child process by the
         SubprocessServer).
@@ -549,7 +549,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             cr = self.editor.cursorRect()
             charWidth = self.editor.fontMetrics().width('A')
             prefixLen = (len(self.completionPrefix) * charWidth)
-            cr.translate(self.editor.marginSize() - prefixLen, 27)
+            cr.translate(self.editor.marginSize() - prefixLen,
+                         self.editor.marginSize(0))
             cr.setWidth(
                 self.__completer.popup().sizeHintForColumn(0) +
                 self.__completer.popup().verticalScrollBar().sizeHint().width())
