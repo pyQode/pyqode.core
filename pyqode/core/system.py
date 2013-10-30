@@ -565,12 +565,14 @@ class SubprocessServer(object):
         if self.__parent_conn.poll():
             data = self.__parent_conn.recv()
             # print("CLIENT: Data received", data)
-            assert len(data) == 3
-            caller_id = data[0]
-            worker = data[1]
-            results = data[2]
-            # print(id, worker, results)
-            self.signals.workCompleted.emit(caller_id, worker, results)
+            if len(data) == 3:
+                caller_id = data[0]
+                worker = data[1]
+                results = data[2]
+                # print(id, worker, results)
+                self.signals.workCompleted.emit(caller_id, worker, results)
+            else:
+                logger.info(data)
 
 
 def childProcess(conn):
@@ -606,9 +608,9 @@ def workerThread(conn, caller_id, worker):
     :param worker: worker instance
     """
     try:
-        results = worker()
+        results = worker(conn)
     except Exception as e:
-        logger.exception("SubprocessServer.Worker:")
+        logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
     if not conn.poll():
         conn.send([caller_id, worker, results])
