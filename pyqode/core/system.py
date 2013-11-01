@@ -609,8 +609,10 @@ def execWorker(conn, caller_id, worker):
     except Exception as e:
         logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
-    if not conn.poll():
-        conn.send([caller_id, worker, results])
+    if conn.poll():
+        time.sleep(0.001)
+    logger.debug("Send result for worker %r" % worker)
+    conn.send([caller_id, worker, results])
 
 
 if __name__ == '__main__':
