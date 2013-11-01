@@ -57,11 +57,9 @@ class WordClickMode(Mode, QtCore.QObject):
         if state:
             self.editor.mouseMoved.connect(self._onMouseMoved)
             self.editor.mousePressed.connect(self._onMousePressed)
-            self.editor.keyPressed.connect(self._onKeyPressed)
         else:
             self.editor.mouseMoved.disconnect(self._onMouseMoved)
             self.editor.mousePressed.disconnect(self._onMousePressed)
-            self.editor.keyPressed.disconnect(self._onKeyPressed)
 
     def _selectWordUnderMouseCursor(self):
         tc = self.editor.selectWordUnderMouseCursor()
@@ -86,10 +84,6 @@ class WordClickMode(Mode, QtCore.QObject):
             tc = self.editor.selectWordUnderMouseCursor()
             if tc and tc.selectedText():
                 self.wordClicked.emit(tc)
-
-    def _onKeyPressed(self, e):
-        if e.key() == QtCore.Qt.Key_Control:
-            self._selectWordUnderMouseCursor()
 
     def _add_decoration(self, tc):
         #assert self._deco is None
