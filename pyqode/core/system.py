@@ -591,15 +591,12 @@ def childProcess(conn):
         caller_id = data[0]
         worker = data[1]
         setattr(worker, "processDict", dict)
-        if sys.platform == "win32":
-            workerThread(conn, caller_id, worker)
-        else:
-            thread.start_new_thread(workerThread, (conn, caller_id, worker))
+        execWorker(conn, caller_id, worker)
 
 
-def workerThread(conn, caller_id, worker):
+def execWorker(conn, caller_id, worker):
     """
-    This function call the worker object. It is meant to be executed in a thread
+    This function call the worker object.
 
     :param conn: connection
 
