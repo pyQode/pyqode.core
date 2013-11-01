@@ -252,7 +252,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
         self.top = self.left = self.right = self.bottom = -1
-        #self.setCenterOnScroll(True)
+        self.setCenterOnScroll(True)
 
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
@@ -616,7 +616,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :return: The operation status as a bool (True for success)
         """
         self.textSaving.emit(filePath)
-        self.cleanupDocument()
+        if len(self.toPlainText()):
+            self.cleanupDocument()
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
