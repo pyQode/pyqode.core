@@ -270,6 +270,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         if not self.__preloadFinished or self.__requestCnt:
             return
+        if self.editor.textCursor().block().userState():
+            return
         self.__requestCnt += 1
         self.__collectCompletions(
             self.editor.toPlainText(), self.editor.cursorPosition[0],
