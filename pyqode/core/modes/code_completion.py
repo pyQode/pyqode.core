@@ -270,7 +270,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         if not self.__preloadFinished or self.__requestCnt:
             return
-        if self.editor.textCursor().block().userState():
+        # only check first byte
+        state = self.editor.textCursor().block().userState() & 0x0F
+        if state >= 1:
             return
         self.__requestCnt += 1
         self.__collectCompletions(

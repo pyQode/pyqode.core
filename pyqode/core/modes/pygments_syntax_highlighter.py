@@ -350,7 +350,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         index = 0
         for token, text in self._lexer.get_tokens(text):
             length = len(text)
-            if "string" in str(token).lower() or "comment" in str(token):
+            if "string" in str(token).lower() or \
+                    "comment" in str(token).lower():
                 self.setCurrentBlockState(1)
             self.setFormat(index, length, self._get_format(token))
             index += length
