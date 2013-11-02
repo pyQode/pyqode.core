@@ -200,14 +200,14 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         self._spacesExpression = QtCore.QRegExp('\s+')
-        if os.environ["QT_API"] == "PyQt":
+        if os.environ["QT_API"] == "PyQt4":
             # there is a bug with QTextBlockUserData in PyQt4, we need to
             # keep a reference on them, otherwise they are removed from memory.
             self.__blocks = set()
         self._foldDetector = foldDetector
 
     def __del__(self):
-        if os.environ["QT_API"] == "PyQt":
+        if os.environ["QT_API"] == "PyQt4":
             self.__blocks.clear()
 
     def setFoldDetector(self, foldDetector):
@@ -294,7 +294,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setCurrentBlockUserData(userData)
         # update user data
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        if os.environ["QT_API"] == "PyQt":
+        if os.environ["QT_API"] == "PyQt4":
             self.__blocks.add(userData)
         self.setCurrentBlockUserData(userData)
         self._detectFolding(text, userData)
