@@ -124,8 +124,6 @@ class CheckerMessage(object):
             self.icon = self.ICONS[status]
         self.marker = None
         self.decoration = None
-        # todo not used anymore?
-        self.filename = filename
 
     def __repr__(self):
         return "{0} {1}".format(self.description, self.line)
