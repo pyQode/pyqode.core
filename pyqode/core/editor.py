@@ -557,15 +557,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.textCursor().beginEditBlock()
 
+        print(self.__modifiedLines)
         # cleanup whitespaces
         self.__cleaning = True
         eaten = 0
         for line in self.__modifiedLines:
-            txt = self.lineText(line)
-            stxt = txt.rstrip()
-            self.setLineText(line, stxt)
-            if pos[0] == line and atBlockEnd:
-                eaten = len(txt) - len(stxt)
+            for j in range(-1, 2):
+                if line + j != pos[0]:
+                    txt = self.lineText(line + j)
+                    stxt = txt.rstrip()
+                    self.setLineText(line + j, stxt)
 
         if self.lineText(self.lineCount()):
             self.appendPlainText("\n")
