@@ -533,19 +533,27 @@ class SubprocessServer(object):
                      connected to.
         """
         self.__process = multiprocessing.Process(target=childProcess,
-                                                 name=self.__name)
+                                                 name=self.__name,
+                                                 args=(port, ))
         self.__process.start()
         self.__running = False
         #time.sleep(2)
         try:
-            self._client = Client(('localhost', 8080))
+            if sys.platform == "win32":
+                self._client = Client(('localhost', port))
+            else:
+                try:
+                    self._client = Client(('', port))
+                except OSError:
+                    time.sleep(1)
+                    self._client = Client(('', port))
             logger.info("Connected to Code Completion Server on 127.0.0.1:%d" %
                         port)
             self.__running = True
             self.__pollTimer.start(self.__pollInterval)
         except OSError:
             logger.exception("Failed to connect to Code Completion Server on "
-                             "127.0.0.1:%d" % 8080)
+                             "127.0.0.1:%d" % port)
         return self.__running
 
     def is_process_alive(self):
@@ -589,39 +597,44 @@ class SubprocessServer(object):
                 self.start()
 
 
-def childProcess():
+def childProcess(port):
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
     dict = {}
     try:
-        listener = Listener(('localhost', 8080))
+        if sys.platform == "win32":
+            listener = Listener(('localhost', port))
+        else:
+            listener = Listener(('', port))
         #client = listener.accept()
     except OSError:
-        logger.warning("Failed to start process server. There is probably "
-                         "another server socket open on the same port")
+        logger.warning("Failed to start the code completion server process on "
+                       "port %d, there is probably another completion server "
+                       "already running with a socket open on the same port. "
+                       "\nThe existing server process will be used instead." % port)
         return 0
     else:
-        logger.info("Code Completion Server started on 127.0.0.1:%d" % 8080)
+        logger.info("Code Completion Server started on 127.0.0.1:%d" % port)
         clients = []
         while True:
             r, w, e = select.select((listener, ), (), (), 0.1)
             if listener in r:
                 cli = listener.accept()
                 clients.append(cli)
-                logger.info("Client accepted: %s" % cli)
-                logger.info("Nb clients connected: %s" % len(clients))
+                logger.debug("Client accepted: %s" % cli)
+                logger.debug("Nb clients connected: %s" % len(clients))
             for cli in clients:
-                if cli.poll():
-                    try:
+                try:
+                    if cli.poll():
                         data = cli.recv()
                         assert len(data) == 2
                         caller_id, worker = data[0], data[1]
                         setattr(worker, "processDict", dict)
                         execWorker(cli, caller_id, worker)
-                    except (IOError, OSError):
-                        clients.remove(cli)
+                except (IOError, OSError, EOFError):
+                    clients.remove(cli)
 
 
 
