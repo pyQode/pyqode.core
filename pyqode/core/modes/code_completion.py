@@ -183,7 +183,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               when the application is about to quit. You can use this process
               to run custom task on the completion process (e.g. setting up some :py:attr:`sys.modules`).
     """
-    sys.modules
     #: Mode identifier
     IDENTIFIER = "codeCompletionMode"
     #: Mode description
@@ -216,7 +215,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 pass
         return prefix.strip()
 
-    def __init__(self):
+    def __init__(self, server_port=5000):
+        """
+        :param server_port: Local TCP/IP port to use to start the code
+                            completion server process
+        """
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
@@ -231,6 +234,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preloadFinished = False
         self.__requestCnt = 0
         self.__lastCompletionPrefix = ""
+        self._server_port = server_port
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -291,7 +295,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
     @classmethod
-    def startCompletionServer(cls):
+    def startCompletionServer(cls, port=5000):
         """
         Starts the code completion server. This is automatically called the
         first time a code completion mode is isntalled on a QCodeEdit instance
@@ -303,13 +307,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
             if CodeCompletionMode.SERVER is None:
                 s = SubprocessServer()
-                s.start()
-                cls.SERVER = s
-                return s
+                if s.start(port):
+                    cls.SERVER = s
+                    return s
         return None
 
     def _onInstall(self, editor):
-        CodeCompletionMode.startCompletionServer()
+        CodeCompletionMode.startCompletionServer(self._server_port)
         if CodeCompletionMode.SERVER:
             CodeCompletionMode.SERVER.signals.workCompleted.connect(
                 self.__onWorkFinished)
