@@ -54,6 +54,28 @@ class SymbolMatcherMode(Mode):
         self.editor.style.addProperty("matchedBraceForeground",
                                       QtGui.QColor("#FF0000"))
 
+    def _onStyleChanged(self, section, key):
+        if not key or key in ["matchedBraceBackground",
+                              "matchedBraceForeground"]:
+            self._refreshDecorations()
+
+    def _refreshDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+            if d.match:
+                # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
+                f = self.editor.style.value("matchedBraceForeground")
+                if f:
+                    d.setForeground(f)
+                b = self.editor.style.value("matchedBraceBackground")
+                if b:
+                    d.setBackground(b)
+                else:
+                    d.setBackground(QtGui.QColor("transparent"))
+            else:
+                d.setForeground(QtCore.Qt.red)
+            self.editor.addDecoration(d)
+
     def _onStateChanged(self, state):
         if state:
             self.editor.cursorPositionChanged.connect(self.doSymbolsMatching)
@@ -267,6 +289,7 @@ class SymbolMatcherMode(Mode):
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
         d = TextDecoration(cursor, draw_order=10)
+        d.match = match
         if match:
             # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
             f = self.editor.style.value("matchedBraceForeground")
