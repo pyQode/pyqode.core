@@ -29,6 +29,12 @@ Contains utility functions
 import collections
 import functools
 import multiprocessing
+from multiprocessing.connection import Listener, Client
+import errno, socket
+Listener.fileno = lambda self: self._listener._socket.fileno()
+
+import select
+
 import os
 import sys
 import time
@@ -499,14 +505,7 @@ class SubprocessServer(object):
         #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
         self.signals = _ServerSignals()
         self.__pollInterval = pollInterval
-
-        # create a pipe to communicate with the child process.
-        self.__parent_conn = None
-        self.__child_conn = None
-        self.__parent_conn, self.__child_conn = multiprocessing.Pipe(True)
-        # create the process and pass the child connection for communication
-        self.__process = multiprocessing.Process(
-            target=childProcess, name=name, args=(self.__child_conn,))
+        self.__name = name
 
         # we poll the client socket every pollInterval
         self.__pollTimer = QtCore.QTimer()
@@ -522,17 +521,35 @@ class SubprocessServer(object):
         """
         logger.info("Close server")
         if self.__running:
+            self.__pollTimer.stop()
             self.__process.terminate()
             self.__running = False
 
-    def start(self):
+    def start(self, port=8080):
         """
         Starts the server. This will actually start the child process.
+
+        :param port: Local TCP/IP port to which the underlying socket is
+                     connected to.
         """
-        logger.info("Server started")
-        self.__pollTimer.start(self.__pollInterval)
+        self.__process = multiprocessing.Process(target=childProcess,
+                                                 name=self.__name)
         self.__process.start()
-        self.__running = True
+        self.__running = False
+        #time.sleep(2)
+        try:
+            self._client = Client(('localhost', 8080))
+            logger.info("Connected to Code Completion Server on 127.0.0.1:%d" %
+                        port)
+            self.__running = True
+            self.__pollTimer.start(self.__pollInterval)
+        except OSError:
+            logger.exception("Failed to connect to Code Completion Server on "
+                             "127.0.0.1:%d" % 8080)
+        return self.__running
+
+    def is_process_alive(self):
+        return self.__process.is_alive()
 
     def requestWork(self, caller, worker):
         """
@@ -550,48 +567,65 @@ class SubprocessServer(object):
         logger.debug("SubprocessServer requesting work: %s - %s" %
                      (caller, worker))
         caller_id = id(caller)
-        if not self.__poll():
-            self.__parent_conn.send([id(caller), worker])
-            self.signals.workRequested.emit(caller_id, worker)
-            logger.debug("SubprocessServer work requested : %s - %s" %
-                         (caller, worker))
-        else:
-            logger.debug("Subprocess server failed to request work")
+        self._client.send([caller_id, worker])
+        logger.debug("Subprocess server word requested")
 
     def __poll(self):
         """
         Poll the child process for any incoming results
         """
-        if self.__parent_conn.poll():
-            data = self.__parent_conn.recv()
-            # print("CLIENT: Data received", data)
-            if len(data) == 3:
-                caller_id = data[0]
-                worker = data[1]
-                results = data[2]
-                # print(id, worker, results)
-                self.signals.workCompleted.emit(caller_id, worker, results)
-            else:
-                logger.info(data)
+        if self._client.poll():
+            try:
+                data = self._client.recv()
+                if len(data) == 3:
+                    caller_id = data[0]
+                    worker = data[1]
+                    results = data[2]
+                    self.signals.workCompleted.emit(caller_id, worker, results)
+                else:
+                    logger.info(data)
+            except socket.error as e:
+                ec = e[0]
+                if ec == errno.ECONNRESET:
+                    self.__pollTimer.stop()
+            except EOFError:
+                self.__pollTimer.stop()
 
 
-def childProcess(conn):
+def childProcess():
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
-    if hasattr(sys, "frozen"):
-        sys.stdout = open('stdout.log', 'w')
-        sys.stderr = open('stderr.log', 'w')
-    dict = {}  # a global data dictionary
-    while True:  # run endlessly
-        time.sleep(0.1)
-        data = conn.recv()
-        assert len(data) == 2
-        caller_id = data[0]
-        worker = data[1]
-        setattr(worker, "processDict", dict)
-        execWorker(conn, caller_id, worker)
+    dict = {}
+    try:
+        listener = Listener(('localhost', 8080))
+        #client = listener.accept()
+    except OSError:
+        logger.warning("Failed to start process server. There is probably "
+                         "another server socket open on the same port")
+        return 0
+    else:
+        logger.info("Code Completion Server started on 127.0.0.1:%d" % 8080)
+        clients = []
+        while True:
+            r, w, e = select.select((listener, ), (), (), 0.1)
+            if listener in r:
+                cli = listener.accept()
+                clients.append(cli)
+                logger.info("Client accepted: %s" % cli)
+                logger.info("Nb clients connected: %s" % len(clients))
+            for cli in clients:
+                if cli.poll():
+                    try:
+                        data = cli.recv()
+                        assert len(data) == 2
+                        caller_id, worker = data[0], data[1]
+                        setattr(worker, "processDict", dict)
+                        execWorker(cli, caller_id, worker)
+                    except (IOError, OSError):
+                        clients.remove(cli)
+
 
 
 def execWorker(conn, caller_id, worker):
@@ -609,8 +643,6 @@ def execWorker(conn, caller_id, worker):
     except Exception as e:
         logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
-    if conn.poll():
-        time.sleep(0.001)
     logger.debug("Send result for worker %r" % worker)
     conn.send([caller_id, worker, results])
 
