@@ -639,7 +639,7 @@ def execWorker(conn, caller_id, worker):
     :param worker: worker instance
     """
     try:
-        results = worker(conn)
+        results = worker(conn, caller_id)
     except Exception as e:
         logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
