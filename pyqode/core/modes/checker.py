@@ -193,7 +193,6 @@ class CheckerMode(Mode, QtCore.QObject):
         self.__showTooltip = showEditorTooltip
         self.__markerPanelId = markerPanelId
 
-    # todo rename it to addMessages and remove the doc warning
     def addMessages(self, messages, clear=True):
         """
         Adds one message or a list of message.
