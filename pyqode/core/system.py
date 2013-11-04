@@ -584,12 +584,9 @@ class SubprocessServer(object):
                     self.signals.workCompleted.emit(caller_id, worker, results)
                 else:
                     logger.info(data)
-            except socket.error as e:
-                ec = e[0]
-                if ec == errno.ECONNRESET:
-                    self.__pollTimer.stop()
-            except EOFError:
-                self.__pollTimer.stop()
+            except (IOError, EOFError):
+                logger.warning("Lost completion server, restarting")
+                self.start()
 
 
 def childProcess():
