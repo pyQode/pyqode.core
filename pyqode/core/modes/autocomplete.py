@@ -47,11 +47,13 @@ class AutoCompleteMode(Mode):
 
     def _onStateChanged(self, state):
         if state:
-            self.editor.postKeyPressed.connect(self._onKeyPressed)
+            self.editor.postKeyPressed.connect(self._onPostKeyPressed)
+            self.editor.keyPressed.connect(self._onKeyPressed)
         else:
-            self.editor.postKeyPressed.disconnect(self._onKeyPressed)
+            self.editor.postKeyPressed.disconnect(self._onPostKeyPressed)
+            self.editor.keyPressed.disconnect(self._onKeyPressed)
 
-    def _onKeyPressed(self, e):
+    def _onPostKeyPressed(self, e):
         txt = e.text()
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
@@ -60,3 +62,14 @@ class AutoCompleteMode(Mode):
             tc.insertText(toInsert)
             tc.setPosition(p)
             self.editor.setTextCursor(tc)
+
+    def _onKeyPressed(self, e):
+        if e.text() == ')':
+            tc = self.editor.textCursor()
+            #assert isinstance(tc, QtGui.QTextCursor)
+            tc.movePosition(tc.Right, tc.KeepAnchor, 1)
+            if tc.selectedText() == ')':
+                tc.clearSelection()
+                self.editor.setTextCursor(tc)
+                e.accept()
+                print("Accept")
