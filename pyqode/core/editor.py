@@ -557,7 +557,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.textCursor().beginEditBlock()
 
-        print(self.__modifiedLines)
         # cleanup whitespaces
         self.__cleaning = True
         eaten = 0
