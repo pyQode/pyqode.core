@@ -80,8 +80,8 @@ from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
 
 
-#: pyqode-core version
-__version__ = "1.0"
+#: pyqode.core version
+__version__ = "1.1"
 
 
 #
