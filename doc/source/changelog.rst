@@ -5,6 +5,23 @@ Change Log
 
     These lists are not exhaustive.
 
+1.1
+---------
+
+New features:
+  - Improve code completion process performances and reliability
+  - Make QT_API case insensitive
+  - Wrap settings and style properties with python properties
+  - Allow user to start code completion server before a code editor instance is created.
+  - New mode: AutoComplete mode
+  - New mode: WordClickMode, add support for word under MOUSE cursor
+  - New setting: autoSave on focus out
+
+Bug fixed:
+  - Fix bug with subprocess intercomm (and improves performances)
+  - Fix Document cleanup bugs
+
+
 1.0
 ----------
 
