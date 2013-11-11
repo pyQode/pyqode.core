@@ -118,3 +118,9 @@ ZoomMode
 ---------------------
 .. autoclass:: pyqode.core.ZoomMode
     :members:
+
+
+WordClickedMode
+---------------------
+.. autoclass:: pyqode.core.WordClickedMode
+    :members:
