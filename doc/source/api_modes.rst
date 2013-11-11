@@ -120,7 +120,7 @@ ZoomMode
     :members:
 
 
-WordClickedMode
+WordClickMode
 ---------------------
-.. autoclass:: pyqode.core.WordClickedMode
+.. autoclass:: pyqode.core.WordClickMode
     :members:
