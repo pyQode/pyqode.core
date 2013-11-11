@@ -186,6 +186,15 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     """
     This mode enable syntax highlighting using the pygments library
 
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    ====================== ====================== ======= ====================== =====================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== =====================
+    pygmentsStyle          General                QColor  Computed.              Background color for matching symbols
+    ====================== ====================== ======= ====================== =====================
+
     .. warning:: There are some issues with multi-line comments, they are not
                  properly highlighted until a full re-highlight is triggered.
                  The text is automatically re-highlighted on save.
@@ -234,6 +243,14 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                        "detectors associations. Please upgrade your pygments "
                        "installation.")
         LEXERS_FOLD_DETECTORS = {}
+
+    @property
+    def pygmentsStyle(self):
+        return self.editor.style.value("pygmentsStyle")
+
+    @pygmentsStyle.setter
+    def pygmentsStyle(self, value):
+        return self.editor.style.setValue("pygmentsStyle", value)
 
     def __init__(self, document, lexer=None):
         super(PygmentsSyntaxHighlighter, self).__init__(document)

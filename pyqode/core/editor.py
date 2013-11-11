@@ -130,6 +130,125 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     unIndentRequested = QtCore.Signal()
 
     @property
+    def showWhiteSpaces(self):
+        """
+        Shows/Hides white spaces highlighting.
+
+        Gets/sets self.settings.value("showWhiteSpaces")
+        """
+        return self.settings.value("showWhiteSpaces")
+
+    @showWhiteSpaces.setter
+    def showWhiteSpaces(self, value):
+        assert isinstance(value, bool)
+        self.settings.setValue("showWhiteSpaces", value)
+
+    @property
+    def saveOnFrameDeactivation(self):
+        """
+        Enables auto save on focus out.
+
+        Gets/sets self.settings.value("saveOnFrameDeactivation")
+        """
+        return self.settings.value("saveOnFrameDeactivation")
+
+    @saveOnFrameDeactivation.setter
+    def saveOnFrameDeactivation(self, value):
+        assert isinstance(value, bool)
+        self.settings.setValue("saveOnFrameDeactivation", value)
+
+    @property
+    def editorFont(self):
+        """
+        The editor font.
+
+        Gets/sets self.style.value("font")
+        """
+        return self.style.value("font")
+
+    @editorFont.setter
+    def editorFont(self, value):
+        self.style.setValue("font", value)
+
+    @property
+    def fontSize(self):
+        """
+        The editor font size.
+
+        Gets/sets self.style.value("fontSize")
+        """
+        return self.style.value("fontSize")
+
+    @fontSize.setter
+    def fontSize(self, value):
+        self.style.setValue("fontSize", value)
+
+    @property
+    def background(self):
+        """
+        The editor background color.
+
+        Gets/sets self.style.value("background")
+        """
+        return self.style.value("background")
+
+    @background.setter
+    def background(self, value):
+        self.style.setValue("background", value)
+
+    @property
+    def foreground(self):
+        """
+        The editor foreground color.
+
+        Gets/sets self.style.value("foreground")
+        """
+        return self.style.value("foreground")
+
+    @foreground.setter
+    def foreground(self, value):
+        self.style.setValue("foreground", value)
+
+    @property
+    def whiteSpaceForeground(self):
+        """
+        The editor white spaces' foreground color.
+
+        Gets/sets self.style.value("whiteSpaceForeground")
+        """
+        return self.style.value("whiteSpaceForeground")
+
+    @whiteSpaceForeground.setter
+    def whiteSpaceForeground(self, value):
+        self.style.setValue("whiteSpaceForeground", value)
+
+    @property
+    def selectionBackground(self):
+        """
+        The editor selection's background color.
+
+        Gets/sets self.style.value("selectionBackground")
+        """
+        return self.style.value("selectionBackground")
+
+    @selectionBackground.setter
+    def selectionBackground(self, value):
+        self.style.setValue("selectionBackground", value)
+
+    @property
+    def selectionForeground(self):
+        """
+        The editor selection's foreground color.
+
+        Gets/sets self.style.value("selectionForeground")
+        """
+        return self.style.value("selectionForeground")
+
+    @selectionForeground.setter
+    def selectionForeground(self, value):
+        self.style.setValue("selectionForeground", value)
+
+    @property
     def currentLineText(self):
         return self.lineText(self.cursorPosition[0])
 
@@ -602,7 +721,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.textCursor().endEditBlock()
 
     @QtCore.Slot()
-    def saveToFile(self, filePath=None, encoding=None):
+    def saveToFile(self, filePath=None, encoding=None, force=False):
         """
         Saves the plain text to a file.
 
@@ -615,6 +734,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
+        if not self.dirty and not force:
+            return True
         self.textSaving.emit(filePath)
         if len(self.toPlainText()):
             self.cleanupDocument()

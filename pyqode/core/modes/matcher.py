@@ -36,12 +36,38 @@ class SymbolMatcherMode(Mode):
     """
     Do symbols matches highlighting (parenthesis, braces, ...).
 
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    ====================== ====================== ======= ====================== =====================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== =====================
+    matchedBraceBackground General                QColor  Computed.              Background color for matching symbols
+    matchedBraceForeground General                QColor  Computed.              Fpreground color for matching symbols
+    ====================== ====================== ======= ====================== =====================
+
     .. note:: This mode requires the document to be filled with :class:`pyqode.core.TextBlockUserData`,
               i.e. a :class:`pyqode.core.SyntaxHighlighter` must be installed on
               the editor instance.
     """
     IDENTIFIER = "symbolMatcherMode"
     DESCRIPTION = "Highlight matching symbols (paren, braces, brackets,...)"
+
+    @property
+    def matchedBraceBackground(self):
+        return self.editor.style.value("matchedBraceBackground")
+
+    @matchedBraceBackground.setter
+    def matchedBraceBackground(self, value):
+        self.editor.style.setValue("matchedBraceBackground", value)
+
+    @property
+    def matchedBraceForeground(self):
+        return self.editor.style.value("matchedBraceForeground")
+
+    @matchedBraceForeground.setter
+    def matchedBraceForeground(self, value):
+        self.editor.style.setValue("matchedBraceForeground", value)
 
     def __init__(self):
         Mode.__init__(self)

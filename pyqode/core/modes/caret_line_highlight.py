@@ -52,6 +52,14 @@ class CaretLineHighlighterMode(Mode):
     #: The mode description
     DESCRIPTION = "This mode highlights the caret line"
 
+    @property
+    def caretLineBackground(self):
+        return self.editor.style.value("caretLineBackground")
+
+    @caretLineBackground.setter
+    def caretLineBackground(self, value):
+        self.editor.style.setValue("caretLineBackground", value)
+
     def __init__(self):
         Mode.__init__(self)
         self.__decoration = None

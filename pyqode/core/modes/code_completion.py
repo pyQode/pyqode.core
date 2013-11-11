@@ -202,6 +202,46 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     preLoadCompleted = QtCore.Signal()
 
     @property
+    def triggerKey(self):
+        return self.editor.style.value("triggerKey", section="Code completion")
+
+    @triggerKey.setter
+    def triggerKey(self, value):
+        self.editor.style.setValue("triggerKey", value, section="Code Completion")
+
+    @property
+    def triggerLength(self):
+        return self.editor.style.value("triggerLength", section="Code completion")
+
+    @triggerLength.setter
+    def triggerLength(self, value):
+        self.editor.style.setValue("triggerLength", value, section="Code completion")
+
+    @property
+    def triggerSymbols(self):
+        return self.editor.style.value("triggerSymbols", section="Code completion")
+
+    @triggerSymbols.setter
+    def triggerSymbols(self, value):
+        self.editor.style.setValue("triggerSymbols", value, section="Code completion")
+
+    @property
+    def showTooltips(self):
+        return self.editor.style.value("showTooltips", section="Code completion")
+
+    @showTooltips.setter
+    def showTooltips(self, value):
+        self.editor.style.setValue("showTooltips", value, section="Code completion")
+
+    @property
+    def caseSensitive(self):
+        return self.editor.style.value("caseSensitive", section="Code completion")
+
+    @caseSensitive.setter
+    def caseSensitive(self, value):
+        self.editor.style.setValue("caseSensitive", value, section="Code completion")
+
+    @property
     def completionPrefix(self):
         """
         Returns the current completion prefix

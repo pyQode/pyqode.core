@@ -125,9 +125,17 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def background(self):
         return self.editor.style.value("searchOccurrenceBackground")
 
+    @background.setter
+    def background(self, value):
+        self.editor.setValue("searchOccurrenceBackground", value)
+
     @property
     def foreground(self):
         return self.editor.style.value("searchOccurrenceForeground")
+
+    @foreground.setter
+    def foreground(self, value):
+        self.editor.setValue("searchOccurrenceForeground", value)
 
     def __init__(self):
         Panel.__init__(self)
