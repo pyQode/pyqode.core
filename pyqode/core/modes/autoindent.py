@@ -58,18 +58,17 @@ class AutoIndentMode(Mode):
         # tc.movePosition(QTextCursor.StartOfLine)
         # tc.setPosition(tc.position() - 1)
         tc.movePosition(QTextCursor.StartOfLine)
-        tc.setPosition(tc.position() - 1)
         tc.select(QTextCursor.LineUnderCursor)
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
         tc.setPosition(pos)
         if len(indent) < len(self.minIndent):
             indent = self.minIndent
-        return indent
+        return "", indent
 
     def _onStateChanged(self, state):
         if state is True:
-            self.editor.postKeyPressed.connect(self.__onKeyPressed)
+            self.editor.keyPressed.connect(self.__onKeyPressed)
         else:
             self.editor.postKeyPressed.disconnect(self.__onKeyPressed)
 
@@ -82,5 +81,6 @@ class AutoIndentMode(Mode):
             return
         if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
             tc = self.editor.textCursor()
-            indent = self._getIndent(tc)
-            tc.insertText(indent)
+            pre, post = self._getIndent(tc)
+            tc.insertText("%s\n%s" % (pre, post))
+            keyEvent.accept()
