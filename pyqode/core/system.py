@@ -589,7 +589,7 @@ class SubprocessServer(object):
                     caller_id = data[0]
                     worker = data[1]
                     results = data[2]
-                    if results:
+                    if results is not None:
                         self.signals.workCompleted.emit(caller_id, worker, results)
                 else:
                     logger.info(data)
@@ -657,7 +657,7 @@ def execWorker(conn, caller_id, worker):
     except Exception as e:
         logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
-    logger.debug("Send result for worker %r" % worker)
+    logger.debug("Send result %r for worker %r" % (results, worker))
     # reset obj attributes before sending it back to the main process
     worker.__dict__ = {}
     conn.send([caller_id, worker, results])
