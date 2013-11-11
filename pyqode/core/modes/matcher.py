@@ -59,6 +59,22 @@ class SymbolMatcherMode(Mode):
                               "matchedBraceForeground"]:
             self._refreshDecorations()
 
+    def _clearDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+        self.__decorations[:] = []
+
+    def getOpeningSymbolPos(self, cursor, character='('):
+        retval = None, None
+        block = cursor.block()
+        self.matchBraces(block.userData().parentheses, block.position())
+        for d in self.__decorations:
+            if d.character == character:
+                retval = d.line, d.column
+                break
+        self._clearDecorations()
+        return retval
+
     def _refreshDecorations(self):
         for d in self.__decorations:
             self.editor.removeDecoration(d)
@@ -289,6 +305,9 @@ class SymbolMatcherMode(Mode):
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
         d = TextDecoration(cursor, draw_order=10)
+        d.line = cursor.blockNumber() + 1
+        d.column = cursor.columnNumber()
+        d.character = cursor.selectedText()
         d.match = match
         if match:
             # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
@@ -300,5 +319,7 @@ class SymbolMatcherMode(Mode):
                 d.setBackground(b)
         else:
             d.setForeground(QtCore.Qt.red)
+        assert isinstance(cursor, QtGui.QTextCursor)
         self.__decorations.append(d)
         self.editor.addDecoration(d)
+        return cursor
