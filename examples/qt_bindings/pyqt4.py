@@ -42,14 +42,12 @@ API. With python3 you're free to import any modules in the order you want**
 """
 import os
 import sys
-# we specify to pyqore that we wants to use pyqt, otherwise a warning
-# message is logged (if you don't have logger setup you end up with the
-# following message: "No handlers could be found for logger "pyqode")
-os.environ['QT_API'] = "PyQt"
+# tell pyqode to use PyQt4
+os.environ['QT_API'] = "PyQt4"
 if sys.version_info[0] == 2:
     # With python 2, the order of import matters!
-    # Import a pyqode package or class before PyQt to force the SIP API to version
-    #  2 automatically
+    # You must import a pyqode package or class before PyQt (to automatically
+    # set the sip API to version 2)
     import pyqode.core
     # then use PyQt as usually
     from PyQt4.QtGui import QApplication
@@ -64,7 +62,7 @@ def main():
     editor = pyqode.core.QGenericCodeEdit()
     editor.show()
     # show the api pyqode is currently using
-    editor.setPlainText("pyQode using the %s qt bindings" % os.environ["QT_API"])
+    editor.setPlainText("pyQode using %s " % os.environ["QT_API"])
     app.exec_()
 
 if __name__ == "__main__":

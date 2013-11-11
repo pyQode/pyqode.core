@@ -28,7 +28,7 @@ Bindings independant QtCore module
 """
 import os
 try:
-    if os.environ['QT_API'] == 'PyQt':
+    if os.environ['QT_API'] == 'PyQt4':
         from PyQt4.QtCore import *
         from PyQt4.Qt import Qt
         from PyQt4.QtCore import pyqtSignal as Signal
@@ -75,3 +75,7 @@ except TypeError:
 
     class QRegExp(object):
         pass
+
+    class Property(object):
+        def __init__(self, *args, **kwargs):
+            pass

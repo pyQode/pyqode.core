@@ -125,9 +125,17 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def background(self):
         return self.editor.style.value("searchOccurrenceBackground")
 
+    @background.setter
+    def background(self, value):
+        self.editor.setValue("searchOccurrenceBackground", value)
+
     @property
     def foreground(self):
         return self.editor.style.value("searchOccurrenceForeground")
+
+    @foreground.setter
+    def foreground(self, value):
+        self.editor.setValue("searchOccurrenceForeground", value)
 
     def __init__(self):
         Panel.__init__(self)
@@ -180,6 +188,16 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Panel._onStyleChanged(self, section, key)
         if key in self._KEYS or not key:
             self.__resetStylesheet()
+        if not key or key in ["searchOccurrenceBackground",
+                              "searchOccurrenceForeground"]:
+            self._refreshDecorations()
+
+    def _refreshDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+            d.setBackground(QtGui.QBrush(self.background))
+            d.setForeground(QtGui.QBrush(self.foreground))
+            self.editor.addDecoration(d)
 
     def _onStateChanged(self, state):
         Panel._onStateChanged(self, state)

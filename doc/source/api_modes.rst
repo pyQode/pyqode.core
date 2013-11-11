@@ -6,6 +6,12 @@ This page contains the documentation about the available modes. Most of them can
 be used directly without any additional work while some others require
 subclassing.
 
+AutoCompleteMode
+-------------------
+
+.. autoclass:: pyqode.core.AutoCompleteMode
+    :members:
+
 AutoIndentMode
 -------------------
 
@@ -111,4 +117,10 @@ SymbolMatcherMode
 ZoomMode
 ---------------------
 .. autoclass:: pyqode.core.ZoomMode
+    :members:
+
+
+WordClickMode
+---------------------
+.. autoclass:: pyqode.core.WordClickMode
     :members:

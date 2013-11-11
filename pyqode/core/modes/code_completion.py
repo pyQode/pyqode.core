@@ -52,7 +52,7 @@ class PreLoadWorker(object):
         self.__providers = providers
         self.__args = args
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         """
         Do the work (this will be called in the child process by the
         SubprocessServer).
@@ -183,7 +183,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               when the application is about to quit. You can use this process
               to run custom task on the completion process (e.g. setting up some :py:attr:`sys.modules`).
     """
-    sys.modules
     #: Mode identifier
     IDENTIFIER = "codeCompletionMode"
     #: Mode description
@@ -203,6 +202,46 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     preLoadCompleted = QtCore.Signal()
 
     @property
+    def triggerKey(self):
+        return self.editor.style.value("triggerKey", section="Code completion")
+
+    @triggerKey.setter
+    def triggerKey(self, value):
+        self.editor.style.setValue("triggerKey", value, section="Code Completion")
+
+    @property
+    def triggerLength(self):
+        return self.editor.style.value("triggerLength", section="Code completion")
+
+    @triggerLength.setter
+    def triggerLength(self, value):
+        self.editor.style.setValue("triggerLength", value, section="Code completion")
+
+    @property
+    def triggerSymbols(self):
+        return self.editor.style.value("triggerSymbols", section="Code completion")
+
+    @triggerSymbols.setter
+    def triggerSymbols(self, value):
+        self.editor.style.setValue("triggerSymbols", value, section="Code completion")
+
+    @property
+    def showTooltips(self):
+        return self.editor.style.value("showTooltips", section="Code completion")
+
+    @showTooltips.setter
+    def showTooltips(self, value):
+        self.editor.style.setValue("showTooltips", value, section="Code completion")
+
+    @property
+    def caseSensitive(self):
+        return self.editor.style.value("caseSensitive", section="Code completion")
+
+    @caseSensitive.setter
+    def caseSensitive(self, value):
+        self.editor.style.setValue("caseSensitive", value, section="Code completion")
+
+    @property
     def completionPrefix(self):
         """
         Returns the current completion prefix
@@ -216,7 +255,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 pass
         return prefix.strip()
 
-    def __init__(self):
+    def __init__(self, server_port=5000):
+        """
+        :param server_port: Local TCP/IP port to use to start the code
+                            completion server process
+        """
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self.__currentCompletion = ""
@@ -231,6 +274,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preloadFinished = False
         self.__requestCnt = 0
         self.__lastCompletionPrefix = ""
+        self._server_port = server_port
         self.waitCursorRequested.connect(self.__setWaitCursor)
 
     def addCompletionProvider(self, provider):
@@ -270,6 +314,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         if not self.__preloadFinished or self.__requestCnt:
             return
+        # only check first byte
+        state = self.editor.textCursor().block().userState()
+        if state > 0:
+            state &= 0x0F
+        if state >= 1:
+            return
         self.__requestCnt += 1
         self.__collectCompletions(
             self.editor.toPlainText(), self.editor.cursorPosition[0],
@@ -284,15 +334,29 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
-    def _onInstall(self, editor):
+    @classmethod
+    def startCompletionServer(cls, port=5000):
+        """
+        Starts the code completion server. This is automatically called the
+        first time a code completion mode is isntalled on a QCodeEdit instance
+        but you can call it manually before if you need it.
+
+        :return The code completion server if created.
+        :rtype pyqode.core.SubprocessServer or None
+        """
         if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
             if CodeCompletionMode.SERVER is None:
                 s = SubprocessServer()
-                s.start()
-                CodeCompletionMode.SERVER = s
-            if CodeCompletionMode.SERVER:
-                CodeCompletionMode.SERVER.signals.workCompleted.connect(
-                    self.__onWorkFinished)
+                if s.start(port):
+                    cls.SERVER = s
+                    return s
+        return None
+
+    def _onInstall(self, editor):
+        CodeCompletionMode.startCompletionServer(self._server_port)
+        if CodeCompletionMode.SERVER:
+            CodeCompletionMode.SERVER.signals.workCompleted.connect(
+                self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -533,10 +597,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__completer.setCompletionPrefix(self.completionPrefix)
             # compute size and pos
             cr = self.editor.cursorRect()
-            cr.setWidth(400)
             charWidth = self.editor.fontMetrics().width('A')
             prefixLen = (len(self.completionPrefix) * charWidth)
-            cr.setX(cr.x() + self.editor.marginSize() - prefixLen)
+            cr.translate(self.editor.marginSize() - prefixLen,
+                         self.editor.marginSize(0))
             cr.setWidth(
                 self.__completer.popup().sizeHintForColumn(0) +
                 self.__completer.popup().verticalScrollBar().sizeHint().width())

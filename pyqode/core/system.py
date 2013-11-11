@@ -29,6 +29,10 @@ Contains utility functions
 import collections
 import functools
 import multiprocessing
+from multiprocessing.connection import Listener, Client
+import errno, socket
+Listener.fileno = lambda self: self._listener._socket.fileno()
+import select
 import os
 import sys
 import time
@@ -170,7 +174,7 @@ class TextStyle(object):
         if style:
             self.from_string(style)
 
-    def __str__(self):
+    def __repr__(self):
         color = self.color.name()
         bold = "nbold"
         if self.bold:
@@ -494,25 +498,12 @@ class SubprocessServer(object):
     workCompleted signal when the job finished.
     """
 
-    def __init__(self, name="pyQodeSubprocessServer", pollInterval=500,
-                 autoCloseOnQuit=True):
+    def __init__(self, name="pyQodeSubprocessServer", autoCloseOnQuit=True):
         #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
         self.signals = _ServerSignals()
-        self.__pollInterval = pollInterval
-
-        # create a pipe to communicate with the child process.
-        self.__parent_conn = None
-        self.__child_conn = None
-        self.__parent_conn, self.__child_conn = multiprocessing.Pipe(True)
-        # create the process and pass the child connection for communication
-        self.__process = multiprocessing.Process(
-            target=childProcess, name=name, args=(self.__child_conn,))
-
-        # we poll the client socket every pollInterval
-        self.__pollTimer = QtCore.QTimer()
-        self.__pollTimer.timeout.connect(self.__poll)
+        self.__name = name
         self.__running = False
-
+        self._workQueue = []
         if autoCloseOnQuit:
             QtGui.QApplication.instance().aboutToQuit.connect(self.close)
 
@@ -522,17 +513,52 @@ class SubprocessServer(object):
         """
         logger.info("Close server")
         if self.__running:
-            self.__process.terminate()
             self.__running = False
+            self.__process.terminate()
 
-    def start(self):
+    def start(self, port=8080):
         """
         Starts the server. This will actually start the child process.
+
+        :param port: Local TCP/IP port to which the underlying socket is
+                     connected to.
         """
-        logger.info("Server started")
-        self.__pollTimer.start(self.__pollInterval)
+        self.__process = multiprocessing.Process(target=childProcess,
+                                                 name=self.__name,
+                                                 args=(port, ))
         self.__process.start()
-        self.__running = True
+        self.__running = False
+        try:
+            if sys.platform == "win32":
+                self._client = Client(('localhost', port))
+            else:
+                try:
+                    self._client = Client(('', port))
+                except OSError:
+                    # wait a second before starting, this occur if we were connected to
+                    # previously running server that has just closed (we need to wait a
+                    # little before starting a new one)
+                    time.sleep(1)
+                    self._client = Client(('', port))
+            logger.info("Connected to Code Completion Server on 127.0.0.1:%d" %
+                        port)
+            self.__running = True
+            self._lock = thread.allocate_lock()
+            thread.start_new_thread(self._threadFct, ())
+        except OSError:
+            logger.exception("Failed to connect to Code Completion Server on "
+                             "127.0.0.1:%d" % port)
+        return self.__running
+
+    def _threadFct(self, *args):
+        while self.__running:
+            with self._lock:
+                while len(self._workQueue):
+                    caller_id, worker = self._workQueue.pop(0)
+                    self._client.send([caller_id, worker])
+                    logger.debug("SubprocessServer work requested: %s " % worker)
+            self.__poll()
+            time.sleep(0.001)
 
     def requestWork(self, caller, worker):
         """
@@ -540,64 +566,85 @@ class SubprocessServer(object):
         results will be available through the
         :attr:`pyqode.core.SubprocessServer.signals.workCompleted` signal.
 
-        :param caller: caller object$
+        :param caller: caller object
         :type caller: object
 
         :param worker: Callable **object**, must override __call__ with no
                        parameters.
         :type worker: callable
         """
-        logger.debug("SubprocessServer requesting work: %s - %s" %
-                     (caller, worker))
+        logger.debug("SubprocessServer requesting work: %s " % worker)
         caller_id = id(caller)
-        if not self.__poll():
-            self.__parent_conn.send([id(caller), worker])
-            self.signals.workRequested.emit(caller_id, worker)
-            logger.debug("SubprocessServer work requested : %s - %s" %
-                         (caller, worker))
-        else:
-            logger.debug("Subprocess server failed to request work")
+        with self._lock:
+            self._workQueue.append((caller_id, worker))
 
     def __poll(self):
         """
         Poll the child process for any incoming results
         """
-        if self.__parent_conn.poll():
-            data = self.__parent_conn.recv()
-            # print("CLIENT: Data received", data)
-            assert len(data) == 3
-            caller_id = data[0]
-            worker = data[1]
-            results = data[2]
-            # print(id, worker, results)
-            self.signals.workCompleted.emit(caller_id, worker, results)
+        if self._client.poll():
+            try:
+                data = self._client.recv()
+                if len(data) == 3:
+                    caller_id = data[0]
+                    worker = data[1]
+                    results = data[2]
+                    if results is not None:
+                        self.signals.workCompleted.emit(caller_id, worker, results)
+                else:
+                    logger.info(data)
+            except (IOError, EOFError):
+                logger.warning("Lost completion server, restarting")
+                self.start()
 
 
-def childProcess(conn):
+def serverLoop(dict, listener):
+    clients = []
+    while True:
+        r, w, e = select.select((listener, ), (), (), 0.1)
+        if listener in r:
+            cli = listener.accept()
+            clients.append(cli)
+            logger.debug("Client accepted: %s" % cli)
+            logger.debug("Nb clients connected: %s" % len(clients))
+        for cli in clients:
+            try:
+                if cli.poll():
+                    data = cli.recv()
+                    assert len(data) == 2
+                    caller_id, worker = data[0], data[1]
+                    setattr(worker, "processDict", dict)
+                    execWorker(cli, caller_id, worker)
+            except (IOError, OSError, EOFError):
+                clients.remove(cli)
+
+
+def childProcess(port):
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
-    if hasattr(sys, "frozen"):
-        sys.stdout = open('stdout.log', 'w')
-        sys.stderr = open('stderr.log', 'w')
-    dict = {}  # a global data dictionary
-    while True:  # run endlessly
-        time.sleep(0.1)
-        data = conn.recv()
-        assert len(data) == 2
-        caller_id = data[0]
-        worker = data[1]
-        setattr(worker, "processDict", dict)
+    dict = {}
+    try:
         if sys.platform == "win32":
-            workerThread(conn, caller_id, worker)
+            listener = Listener(('localhost', port))
         else:
-            thread.start_new_thread(workerThread, (conn, caller_id, worker))
+            listener = Listener(('', port))
+        #client = listener.accept()
+    except OSError:
+        logger.warning("Failed to start the code completion server process on "
+                       "port %d, there is probably another completion server "
+                       "already running with a socket open on the same port. "
+                       "\nThe existing server process will be used instead." % port)
+        return 0
+    else:
+        logger.info("Code Completion Server started on 127.0.0.1:%d" % port)
+        serverLoop(dict, listener)
 
 
-def workerThread(conn, caller_id, worker):
+def execWorker(conn, caller_id, worker):
     """
-    This function call the worker object. It is meant to be executed in a thread
+    This function call the worker object.
 
     :param conn: connection
 
@@ -606,12 +653,14 @@ def workerThread(conn, caller_id, worker):
     :param worker: worker instance
     """
     try:
-        results = worker()
+        results = worker(conn, caller_id)
     except Exception as e:
-        logger.critical(e)
+        logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
-    if not conn.poll():
-        conn.send([caller_id, worker, results])
+    logger.debug("Send result %r for worker %r" % (results, worker))
+    # reset obj attributes before sending it back to the main process
+    worker.__dict__ = {}
+    conn.send([caller_id, worker, results])
 
 
 if __name__ == '__main__':

@@ -55,6 +55,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     tabLength               General                int     4                      Tab length (number of spaces)
     useSpacesInsteadOfTab   General                bool    True                   Use spaces instead of spaces (be warry of this, most modes still use spaces heavily for internal computations)
     minIndentColumn         General                int     0                      Min column indent (some languages such as cobol requires to indent code at min col 7)
+    saveOnFrameDeactivation General                bool    True                   Auto save when editor loose focus.
     ======================= ====================== ======= ====================== ==============
 
     **Style** :attr:`pyqode.core.QCodeEdit.style`
@@ -127,6 +128,129 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     indentRequested = QtCore.Signal()
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
     unIndentRequested = QtCore.Signal()
+
+    @property
+    def showWhiteSpaces(self):
+        """
+        Shows/Hides white spaces highlighting.
+
+        Gets/sets self.settings.value("showWhiteSpaces")
+        """
+        return self.settings.value("showWhiteSpaces")
+
+    @showWhiteSpaces.setter
+    def showWhiteSpaces(self, value):
+        assert isinstance(value, bool)
+        self.settings.setValue("showWhiteSpaces", value)
+
+    @property
+    def saveOnFrameDeactivation(self):
+        """
+        Enables auto save on focus out.
+
+        Gets/sets self.settings.value("saveOnFrameDeactivation")
+        """
+        return self.settings.value("saveOnFrameDeactivation")
+
+    @saveOnFrameDeactivation.setter
+    def saveOnFrameDeactivation(self, value):
+        assert isinstance(value, bool)
+        self.settings.setValue("saveOnFrameDeactivation", value)
+
+    @property
+    def editorFont(self):
+        """
+        The editor font.
+
+        Gets/sets self.style.value("font")
+        """
+        return self.style.value("font")
+
+    @editorFont.setter
+    def editorFont(self, value):
+        self.style.setValue("font", value)
+
+    @property
+    def fontSize(self):
+        """
+        The editor font size.
+
+        Gets/sets self.style.value("fontSize")
+        """
+        return self.style.value("fontSize")
+
+    @fontSize.setter
+    def fontSize(self, value):
+        self.style.setValue("fontSize", value)
+
+    @property
+    def background(self):
+        """
+        The editor background color.
+
+        Gets/sets self.style.value("background")
+        """
+        return self.style.value("background")
+
+    @background.setter
+    def background(self, value):
+        self.style.setValue("background", value)
+
+    @property
+    def foreground(self):
+        """
+        The editor foreground color.
+
+        Gets/sets self.style.value("foreground")
+        """
+        return self.style.value("foreground")
+
+    @foreground.setter
+    def foreground(self, value):
+        self.style.setValue("foreground", value)
+
+    @property
+    def whiteSpaceForeground(self):
+        """
+        The editor white spaces' foreground color.
+
+        Gets/sets self.style.value("whiteSpaceForeground")
+        """
+        return self.style.value("whiteSpaceForeground")
+
+    @whiteSpaceForeground.setter
+    def whiteSpaceForeground(self, value):
+        self.style.setValue("whiteSpaceForeground", value)
+
+    @property
+    def selectionBackground(self):
+        """
+        The editor selection's background color.
+
+        Gets/sets self.style.value("selectionBackground")
+        """
+        return self.style.value("selectionBackground")
+
+    @selectionBackground.setter
+    def selectionBackground(self, value):
+        self.style.setValue("selectionBackground", value)
+
+    @property
+    def selectionForeground(self):
+        """
+        The editor selection's foreground color.
+
+        Gets/sets self.style.value("selectionForeground")
+        """
+        return self.style.value("selectionForeground")
+
+    @selectionForeground.setter
+    def selectionForeground(self, value):
+        self.style.setValue("selectionForeground", value)
+
+    @property
+    def currentLineText(self):
+        return self.lineText(self.cursorPosition[0])
 
     @property
     def dirty(self):
@@ -241,12 +365,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        self._lastMousePos = None
         self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()
         self.__cleaning = False
         self.__marginSizes = (0, 0, 0, 0)
         self.top = self.left = self.right = self.bottom = -1
-        #self.setCenterOnScroll(True)
+        self.setCenterOnScroll(True)
 
         #: The list of visible blocks, update every paintEvent
         self.__blocks = []
@@ -329,8 +454,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """ Returns the document line count """
         return self.document().blockCount()
 
-
-    def gotoLine(self, line=None, move=True):
+    def gotoLine(self, line=None, move=True, column=None):
         """
         Moves the text cursor to the specifed line.
 
@@ -340,6 +464,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param line: The line number to go (1 based)
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
+        :param column: Optional column number. Introduced in version 1.1
         :return: The new text cursor
         :rtype: QtGui.QTextCursor
         """
@@ -353,6 +478,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         tc = self.textCursor()
         tc.movePosition(tc.Start, tc.MoveAnchor)
         tc.movePosition(tc.Down, tc.MoveAnchor, line-1)
+        if column:
+            tc.movePosition(tc.Right, tc.MoveAnchor, column)
         if move:
             self.setTextCursor(tc)
         return tc
@@ -405,6 +532,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 tc.setPosition(end_pos)
         tc.setPosition(start_pos)
         tc.setPosition(end_pos, tc.KeepAnchor)
+        return tc
+
+    def selectWordUnderMouseCursor(self):
+        """
+        Selects the word under the **mouse** cursor.
+
+        :return: A QTextCursor with the word under mouse cursor selected.
+        """
+        tc = self.cursorForPosition(self._lastMousePos)
+        tc = self.selectWordUnderCursor(True, tc)
+        #print(tc.selectedText())
         return tc
 
     def detectEncoding(self, data):
@@ -542,11 +680,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__cleaning = True
         eaten = 0
         for line in self.__modifiedLines:
-            txt = self.lineText(line)
-            stxt = txt.rstrip()
-            self.setLineText(line, stxt)
-            if pos[0] == line and atBlockEnd:
-                eaten = len(txt) - len(stxt)
+            for j in range(-1, 2):
+                if line + j != pos[0]:
+                    txt = self.lineText(line + j)
+                    stxt = txt.rstrip()
+                    self.setLineText(line + j, stxt)
 
         if self.lineText(self.lineCount()):
             self.appendPlainText("\n")
@@ -583,7 +721,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.textCursor().endEditBlock()
 
     @QtCore.Slot()
-    def saveToFile(self, filePath=None, encoding=None):
+    def saveToFile(self, filePath=None, encoding=None, force=False):
         """
         Saves the plain text to a file.
 
@@ -596,8 +734,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return: The operation status as a bool (True for success)
         """
+        if not self.dirty and not force:
+            return True
         self.textSaving.emit(filePath)
-        self.cleanupDocument()
+        if len(self.toPlainText()):
+            self.cleanupDocument()
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
@@ -1055,6 +1196,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.repaint()
         QtGui.QApplication.processEvents()
 
+    def focusOutEvent(self, QFocusEvent):
+        if self.settings.value("saveOnFrameDeactivation"):
+            self.saveToFile()
+
     def mousePressEvent(self, event):
         """
         Overrides mousePressEvent to emits mousePressed signal
@@ -1104,6 +1249,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         the mouseMoved event.
         """
         c = self.cursorForPosition(event.pos())
+        self._lastMousePos = event.pos()
         blockFound = False
         for sel in self.__selections:
             if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
@@ -1292,6 +1438,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.settings.addProperty("tabLength", constants.TAB_SIZE)
         self.settings.addProperty("useSpacesInsteadOfTab", True)
         self.settings.addProperty("minIndentColumn", 0)
+        self.settings.addProperty("saveOnFrameDeactivation", True)
 
     def __initStyle(self):
         """

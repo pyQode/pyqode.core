@@ -52,6 +52,7 @@ from pyqode.core.system import DelayJobRunner
 from pyqode.core.system import SubprocessServer
 
 # modes
+from pyqode.core.modes import AutoCompleteMode
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
@@ -69,6 +70,7 @@ from pyqode.core.modes import IndenterMode
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
 from pyqode.core.modes import RightMarginMode
 from pyqode.core.modes import SymbolMatcherMode
+from pyqode.core.modes import WordClickMode
 from pyqode.core.modes import ZoomMode
 
 # panels
@@ -78,8 +80,8 @@ from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
 
 
-#: pyqode-core version
-__version__ = "1.0"
+#: pyqode.core version
+__version__ = "1.1"
 
 
 #
@@ -95,6 +97,7 @@ class QGenericCodeEdit(QCodeEdit):
         * :class:`pyqode.core.SearchAndReplacePanel`
 
     **Modes:**
+        * :class:`pyqode.core.AutoCompleteMode`
         * :class:`pyqode.core.FileWatcherMode`
         * :class:`pyqode.core.CaretLineHighlighterMode`
         * :class:`pyqode.core.RightMarginMode`
@@ -109,9 +112,12 @@ class QGenericCodeEdit(QCodeEdit):
         QCodeEdit.__init__(self, parent)
         self.setLineWrapMode(self.NoWrap)
         self.setWindowTitle("pyQode - Generic Editor")
+
         self.installPanel(FoldingPanel(), PanelPosition.LEFT)
         self.installPanel(LineNumberPanel(), PanelPosition.LEFT)
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
+
+        self.installMode(AutoCompleteMode())
         self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
@@ -139,4 +145,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
+           "WordClickMode",
            "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]

@@ -59,6 +59,22 @@ class RightMarginMode(Mode):
     #: Mode description
     DESCRIPTION = "Draw the right margin on the text document"
 
+    @property
+    def marginColor(self):
+        return self.editor.style.value("margin")
+
+    @marginColor.setter
+    def marginColor(self, value):
+        return self.editor.style.setValue("margin", value)
+
+    @property
+    def rightMarginPos(self):
+        return self.editor.style.value("rightMarginPos")
+
+    @rightMarginPos.setter
+    def rightMarginPos(self, value):
+        return self.editor.style.setValue("rightMarginPos", value)
+
     def __init__(self):
         Mode.__init__(self)
         self.marginPos = constants.MARGIN_POS

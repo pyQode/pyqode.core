@@ -26,6 +26,7 @@
 """
 This package contains the core modes (language independant)
 """
+from pyqode.core.modes.autocomplete import AutoCompleteMode
 from pyqode.core.modes.caret_line_highlight import CaretLineHighlighterMode
 from pyqode.core.modes.checker import CheckerMode, CheckerMessage
 from pyqode.core.modes.checker import MSG_STATUS_ERROR
@@ -45,6 +46,7 @@ from pyqode.core.modes.pygments_syntax_highlighter import PygmentsSyntaxHighligh
 from pyqode.core.modes.pygments_syntax_highlighter import PYGMENTS_STYLES
 from pyqode.core.modes.autoindent import AutoIndentMode
 from pyqode.core.modes.indenter import IndenterMode
+from pyqode.core.modes.wordclick import WordClickMode
 
 
 __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
@@ -54,4 +56,5 @@ __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "DocumentWordCompletionProvider", "FileWatcherMode",
            "SymbolMatcherMode", "IndenterMode"
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "PYGMENTS_STYLES", "AutoIndentMode"]
+           "PYGMENTS_STYLES", "AutoIndentMode",
+           "WordClickMode"]

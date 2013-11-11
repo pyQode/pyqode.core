@@ -49,6 +49,14 @@ class FileWatcherMode(Mode):
     #: Mode description
     DESCRIPTION = "Watch the editor's file and take care of the reloading."
 
+    @property
+    def autoReloadChangedFiles(self):
+        return self.editor.settings.value("autoReloadChangedFiles")
+
+    @autoReloadChangedFiles.setter
+    def autoReloadChangedFiles(self, value):
+        self.editor.settings.setValue("autoReloadChangedFiles", value)
+
     def __init__(self):
         super(FileWatcherMode, self).__init__()
         self.__fileSystemWatcher = QtCore.QFileSystemWatcher()

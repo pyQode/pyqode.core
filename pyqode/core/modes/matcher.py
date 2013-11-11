@@ -28,6 +28,7 @@ This module contains the symbol matcher mode
 """
 from pyqode.core.mode import Mode
 from pyqode.core.decoration import TextDecoration
+from pyqode.core.textblockuserdata import TextBlockUserData
 from pyqode.qt import QtGui, QtCore
 
 
@@ -35,12 +36,38 @@ class SymbolMatcherMode(Mode):
     """
     Do symbols matches highlighting (parenthesis, braces, ...).
 
+    Here the properties added by the mode to
+    :attr:`pyqode.core.QCodeEdit.style`:
+
+    ====================== ====================== ======= ====================== =====================
+    Key                    Section                Type    Default value          Description
+    ====================== ====================== ======= ====================== =====================
+    matchedBraceBackground General                QColor  Computed.              Background color for matching symbols
+    matchedBraceForeground General                QColor  Computed.              Fpreground color for matching symbols
+    ====================== ====================== ======= ====================== =====================
+
     .. note:: This mode requires the document to be filled with :class:`pyqode.core.TextBlockUserData`,
               i.e. a :class:`pyqode.core.SyntaxHighlighter` must be installed on
               the editor instance.
     """
     IDENTIFIER = "symbolMatcherMode"
     DESCRIPTION = "Highlight matching symbols (paren, braces, brackets,...)"
+
+    @property
+    def matchedBraceBackground(self):
+        return self.editor.style.value("matchedBraceBackground")
+
+    @matchedBraceBackground.setter
+    def matchedBraceBackground(self, value):
+        self.editor.style.setValue("matchedBraceBackground", value)
+
+    @property
+    def matchedBraceForeground(self):
+        return self.editor.style.value("matchedBraceForeground")
+
+    @matchedBraceForeground.setter
+    def matchedBraceForeground(self, value):
+        self.editor.style.setValue("matchedBraceForeground", value)
 
     def __init__(self):
         Mode.__init__(self)
@@ -52,6 +79,44 @@ class SymbolMatcherMode(Mode):
                                       QtGui.QColor("#B4EEB4"))
         self.editor.style.addProperty("matchedBraceForeground",
                                       QtGui.QColor("#FF0000"))
+
+    def _onStyleChanged(self, section, key):
+        if not key or key in ["matchedBraceBackground",
+                              "matchedBraceForeground"]:
+            self._refreshDecorations()
+
+    def _clearDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+        self.__decorations[:] = []
+
+    def getOpeningSymbolPos(self, cursor, character='('):
+        retval = None, None
+        block = cursor.block()
+        self.matchBraces(block.userData().parentheses, block.position())
+        for d in self.__decorations:
+            if d.character == character:
+                retval = d.line, d.column
+                break
+        self._clearDecorations()
+        return retval
+
+    def _refreshDecorations(self):
+        for d in self.__decorations:
+            self.editor.removeDecoration(d)
+            if d.match:
+                # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
+                f = self.editor.style.value("matchedBraceForeground")
+                if f:
+                    d.setForeground(f)
+                b = self.editor.style.value("matchedBraceBackground")
+                if b:
+                    d.setBackground(b)
+                else:
+                    d.setBackground(QtGui.QColor("transparent"))
+            else:
+                d.setForeground(QtCore.Qt.red)
+            self.editor.addDecoration(d)
 
     def _onStateChanged(self, state):
         if state:
@@ -255,7 +320,7 @@ class SymbolMatcherMode(Mode):
             self.editor.removeDecoration(d)
         self.__decorations[:] = []
         data = self.editor.textCursor().block().userData()
-        if data:
+        if data and isinstance(data, TextBlockUserData):
             pos = self.editor.textCursor().block().position()
             self.matchParentheses(data.parentheses, pos)
             self.matchSquareBrackets(data.squareBrackets, pos)
@@ -266,6 +331,10 @@ class SymbolMatcherMode(Mode):
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
         d = TextDecoration(cursor, draw_order=10)
+        d.line = cursor.blockNumber() + 1
+        d.column = cursor.columnNumber()
+        d.character = cursor.selectedText()
+        d.match = match
         if match:
             # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
             f = self.editor.style.value("matchedBraceForeground")
@@ -276,5 +345,7 @@ class SymbolMatcherMode(Mode):
                 d.setBackground(b)
         else:
             d.setForeground(QtCore.Qt.red)
+        assert isinstance(cursor, QtGui.QTextCursor)
         self.__decorations.append(d)
         self.editor.addDecoration(d)
+        return cursor

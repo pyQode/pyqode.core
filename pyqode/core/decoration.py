@@ -138,6 +138,11 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             self.cursor.clearSelection()
         self.format.setProperty(QtGui.QTextFormat.FullWidthSelection, flag)
 
+    def underlined(self, color=QtCore.Qt.blue):
+        self.format.setUnderlineStyle(
+            QtGui.QTextCharFormat.SingleUnderline)
+        self.format.setUnderlineColor(color)
+
     def setSpellchecking(self, color=QtCore.Qt.blue):
         """ Underlines text as a spellcheck error.
 
