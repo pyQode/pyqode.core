@@ -8,10 +8,19 @@ accomplished, please visit the `issues page on github`_ and the
 Next Version
 ------------
 
-Version **1.1** will focus on adding PyQt5 support and improve the API stability.
+Version **1.2** will focus on adding PyQt5 support and improve the API stability.
 
 Milestones
 -------------
+
+1.1:
+++++++++++
+
+    - Add AutoComplete mode
+    - Add WordClickMode
+    - Add Auto save on focus out setting
+    - QT_API is now case insensitive
+    - Improve inter-process communication speed and reliability
 
 1.0:
 +++++++++
