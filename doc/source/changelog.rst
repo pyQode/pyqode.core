@@ -9,6 +9,7 @@ Change Log
 ---------
 
 New features:
+
   - Improve code completion process performances and reliability
   - Make QT_API case insensitive
   - Wrap settings and style properties with python properties
@@ -18,6 +19,7 @@ New features:
   - New setting: autoSave on focus out
 
 Bug fixed:
+
   - Fix bug with subprocess intercomm (and improves performances)
   - Fix Document cleanup bugs
 
