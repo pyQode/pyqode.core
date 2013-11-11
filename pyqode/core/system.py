@@ -514,7 +514,6 @@ class SubprocessServer(object):
         logger.info("Close server")
         if self.__running:
             self.__running = False
-            time.sleep(1)
             self.__process.terminate()
 
     def start(self, port=8080):
