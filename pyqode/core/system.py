@@ -513,8 +513,9 @@ class SubprocessServer(object):
         """
         logger.info("Close server")
         if self.__running:
-            self.__process.terminate()
             self.__running = False
+            time.sleep(1)
+            self.__process.terminate()
 
     def start(self, port=8080):
         """
@@ -589,7 +590,8 @@ class SubprocessServer(object):
                     caller_id = data[0]
                     worker = data[1]
                     results = data[2]
-                    self.signals.workCompleted.emit(caller_id, worker, results)
+                    if results:
+                        self.signals.workCompleted.emit(caller_id, worker, results)
                 else:
                     logger.info(data)
             except (IOError, EOFError):
