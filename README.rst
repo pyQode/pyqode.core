@@ -157,3 +157,9 @@ Here are a few screenshots of the gui integration example on several different p
 
 .. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/gnome.png
     :alt: Gnome
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/ColinDuquesnoy/pyqode.core/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
