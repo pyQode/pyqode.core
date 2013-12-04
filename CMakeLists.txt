@@ -83,6 +83,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
     set(DEB_LONG_DESCRIPTION
         " DESCRIPION\n ===========\n pyqode.core is the foundation package for pyqode. It provides a generic editor and set of builtin modes and panels")
     set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt)
+    set(CPACK_DEBIAN_CMAKE_OPTIONS "-DTARGET_PYTHON_3=${TARGET_PYTHON_3}")
 
     # base
     set(CPACK_DEBIAN_BUILD_DEPENDS_UBUNTU debhelper cmake ${CPACK_TARGET_INTERPRETER_VERSION})
@@ -110,7 +111,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
     endif()
     string(TOLOWER ${CPACK_DEBIAN_DISTRIBUTION_NAME} CPACK_DEBIAN_DISTRIBUTION_NAME)
     if( ${CPACK_DEBIAN_DISTRIBUTION_NAME} STREQUAL "ubuntu" )
-        set(CPACK_DEBIAN_DISTRIBUTION_RELEASES lucid precise quantal raring saucy CACHE STRING "Release code-names of the distrubiton release")
+        set(CPACK_DEBIAN_DISTRIBUTION_RELEASES precise quantal raring saucy CACHE STRING "Release code-names of the distrubiton release")
     endif()
     # The debian generator does not seem to use a correct name for the debian packages
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")

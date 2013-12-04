@@ -259,7 +259,7 @@ foreach(RELEASE ${CPACK_DEBIAN_DISTRIBUTION_RELEASES})
     "\n"
     "build:\n"
     "	mkdir $(BUILDDIR)\n"
-    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release ..\n"
+    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release ${CPACK_DEBIAN_CMAKE_OPTIONS} ..\n"
     "	$(MAKE) -C $(BUILDDIR) preinstall\n"
     "	touch build\n"
     "\n"
