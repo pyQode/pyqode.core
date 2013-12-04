@@ -62,38 +62,78 @@ class FileWatcherMode(Mode):
         self.__fileSystemWatcher = QtCore.QFileSystemWatcher()
         self.__flgNotify = False
         self.__changeWaiting = False
+        self.__changeWaiting = False
+
+    def __notify(self, settingsValue, title, message, dialogType=None, expectedType=None, expectedAction=None):
+        """
+        Notify user from external event
+        """
+        self.__flgNotify = True
+        dialogType = (QtGui.QMessageBox.Yes |
+                      QtGui.QMessageBox.No) if not dialogType else dialogType
+        expectedType = QtGui.QMessageBox.Yes if not expectedType else expectedType
+        expectedAction = (
+            lambda *x: None) if not expectedAction else expectedAction
+        auto = self.editor.settings.value(settingsValue)
+        if (auto or QtGui.QMessageBox.question(
+                self.editor, title, message,
+                dialogType) == expectedType):
+            expectedAction(self.editor.filePath)
+        self.__changeWaiting = False
+        self.__flgNotify = False
 
     def __notifyChange(self):
         """
         Notify user from external change if autoReloadChangedFiles is False then
         reload the changed file in the editor
         """
-        self.__flgNotify = True
-        auto = self.editor.settings.value("autoReloadChangedFiles")
-        if (auto or QtGui.QMessageBox.question(
-                self.editor, "File changed",
-                "The file <i>%s</i> has has changed externally.\n"
-                "Do you want reload it?" % os.path.basename(
-                    self.editor.filePath),
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No) ==
-                QtGui.QMessageBox.Yes):
+        def innerAction(*a):
             self.editor.openFile(self.editor.filePath)
-        self.__changeWaiting = False
-        self.__flgNotify = False
+        self.__notify("autoReloadChangedFiles", "File changed",
+                      "The file <i>%s</i> has changed externally.\n"
+                      "Do you want reload it?" % os.path.basename(
+                          self.editor.filePath), expectedAction=innerAction)
+
+    def __notifyDeletedFile(self):
+        """
+        Notify user from external file removal if autoReloadChangedFiles is False then
+        reload the changed file in the editor
+        """
+        self.__notify("autoReloadChangedFiles", "File deleted",
+                      "The file <i>%s</i> has deleted externally." % os.path.basename(
+                          self.editor.filePath), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
 
     def __onFileChanged(self, path):
         """
         On file changed, notify the user if we have focus, otherwise delay the
         notification to the focusIn event
         """
-        content, encoding = self.editor.readFile(
-            path, encoding=self.editor.fileEncoding)
+        if os.path.isfile(path):
+            content, encoding = self.editor.readFile(
+                path, encoding=self.editor.fileEncoding)
+        else:
+            self.__fileSystemWatcher.fileChanged.disconnect(self.__onFileChanged)
+            QtCore.QTimer.singleShot(500, self.__onPosibleFileDeleted)
+            return            
         if content == self.editor.toPlainText():
             logger.debug("FileWatcherMode: Internal change, skipping")
             return
         self.__changeWaiting = True
         if self.editor.hasFocus() and self.__flgNotify:
             self.__notifyChange()
+
+    @QtCore.Slot()
+    def __onPosibleFileDeleted(self, *evt):
+        path = self.editor.filePath
+        try:
+            content, encoding = self.editor.readFile(
+                path, encoding=self.editor.fileEncoding)
+        except IOError as e:
+            self.editor.dirty = True
+            self.__notifyDeletedFile()
+        else:
+            print("asdasdasdasdasd")
+        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
