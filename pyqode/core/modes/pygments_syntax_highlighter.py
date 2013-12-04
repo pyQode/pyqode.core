@@ -365,11 +365,15 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
         # Lex the text using Pygments
         index = 0
+        usd = self.currentBlock().userData()
+        usd.cc_disabled_zones[:] = []
         for token, text in self._lexer.get_tokens(text):
             length = len(text)
-            if "string" in str(token).lower() or \
-                    "comment" in str(token).lower():
-                self.setCurrentBlockState(1)
+            if "comment" in str(token).lower():
+                # to the end
+                usd.cc_disabled_zones.append((index, pow(2, 32)))
+            elif "string" in str(token).lower():
+                usd.cc_disabled_zones.append((index, index + length))
             self.setFormat(index, length, self._get_format(token))
             index += length
 
