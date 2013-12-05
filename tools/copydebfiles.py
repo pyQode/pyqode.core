@@ -14,5 +14,6 @@ if __name__ == '__main__':
         return ["build", ".git", "pyqode.core.egg-info",
                 "CMakeLists.txt.user", ".gitignore", ".gitbugtraq",
                 "travis.yml", "test.py" ".idea", "ez_setup.pyc",
-                "examples", "doc", "tools", "screenshots"]
+                "examples", "doc", "tools", "screenshots", "rc",
+                "pyqode_core.qrc", "search_panel.ui"]
     shutil.copytree(src_dir, dest_dir, ignore=ignorefiles)

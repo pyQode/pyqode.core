@@ -259,7 +259,7 @@ foreach(RELEASE ${CPACK_DEBIAN_DISTRIBUTION_RELEASES})
     "\n"
     "build:\n"
     "	mkdir $(BUILDDIR)\n"
-    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release ${CPACK_DEBIAN_CMAKE_OPTIONS} ..\n"
+    "	cd $(BUILDDIR); cmake -DCMAKE_BUILD_TYPE=Release ${CPACK_DEBIAN_CMAKE_OPTIONS} -DCMAKE_INSTALL_PREFIX=/usr ..\n"
     "	$(MAKE) -C $(BUILDDIR) preinstall\n"
     "	touch build\n"
     "\n"
@@ -270,6 +270,13 @@ foreach(RELEASE ${CPACK_DEBIAN_DISTRIBUTION_RELEASES})
     "binary-arch: build\n"
     "	cd $(BUILDDIR); cmake -DCOMPONENT=Unspecified -DCMAKE_INSTALL_PREFIX=../debian/tmp/usr -P cmake_install.cmake\n"
     "	mkdir -p debian/tmp/DEBIAN\n"
+    "	find . -type d -exec chmod 0755 {} \;\n"  # avoid non-standard-dir-perm
+    "	cp ./debian/changelog ./debian/changelog-save\n"
+    "	gzip -9 ./debian/changelog\n"
+    "	cp ./debian/changelog-save ./debian/changelog\n"
+    "	rm ./debian/changelog-save\n"
+    "	cp ./debian/changelog.gz ./debian/tmp/usr/share/doc/${CPACK_DEBIAN_PACKAGE_NAME}/changelog.Debian.gz\n"
+    "	chmod 644 ./debian/tmp/usr/share/doc/${CPACK_DEBIAN_PACKAGE_NAME}/changelog.Debian.gz\n"
     "	dpkg-gensymbols -p${CPACK_DEBIAN_PACKAGE_NAME}\n"
     )
 

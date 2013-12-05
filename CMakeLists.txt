@@ -23,7 +23,7 @@ set(PROJECT_NAME pyqode.core)
 project(pyqode.core)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 1)
-set(VERSION_PATCH 0)
+set(VERSION_PATCH 1)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 option(TARGET_PYTHON_3
        "ON to target Python >= 3, OFF to target Python 2.7" ON)
@@ -49,7 +49,7 @@ endif()
 # get python interpreter and determine install path
 
 
-execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[1])"
                   OUTPUT_VARIABLE _ABS_PYTHON_MODULE_PATH
                   OUTPUT_STRIP_TRAILING_WHITESPACE )
 
@@ -72,16 +72,38 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
 
     # Packing information
     set(CPACK_PACKAGE_NAME ${CPACK_TARGET_INTERPRETER_VERSION}-${PROJECT_NAME})
+
+    # trick to put the copyright to /usr/share/doc/<package>/
+    configure_file(
+      "${PROJECT_SOURCE_DIR}/LICENSE.txt"
+      "${PROJECT_BINARY_DIR}/copyright"
+      )
+    INSTALL(FILES "${PROJECT_BINARY_DIR}/copyright"
+            DESTINATION share/doc/${CPACK_PACKAGE_NAME}/)
+
     set(CPACK_PACKAGE_CONTACT "Colin Duquesnoy <colin.duquesnoy@gmail.com>" CACHE STRING "Package maintainer and PGP signer.")
-    set(CPACK_PACKAGE_VENDOR "Colin Duquesnoy")
+    set(CPACK_PACKAGE_VENDOR "https://github.com/ColinDuquesnoy/pyqode.core")
     set(CPACK_PACKAGE_DISPLAY_NAME "pyqode.core ${VERSION}")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Code editor widget for PyQt/PySide")
-    set(CPACK_PACKAGE_VERSION "${VERSION}")
+    set(CPACK_PACKAGE_VERSION "${VERSION}.3")
     set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
+    set(CPACK_DEBIAN_CHANGELOG
+        "  * See the homepage for a full change log:\n    https://github.com/ColinDuquesnoy/pyqode.core\n")
     set(DEB_LONG_DESCRIPTION
-        " DESCRIPION\n ===========\n pyqode.core is the foundation package for pyqode. It provides a generic editor and set of builtin modes and panels")
+        " pyQode is a *flexible source code editor widget* for Python Qt\n"
+        " applications. pyQode is a library/widget, not an IDE. You can\n"
+        " view it as an alternative to QScintilla.\n"
+        " .\n"
+        " pyQode is a namespace package made up of the following official packages:\n"
+        "   * pyqode.core\n"
+        "   * pyqode.python\n"
+        "   * pyqode.widgets\n"
+        "   * pyqode.designer\n")
+    string(REPLACE ";" "" DEB_LONG_DESCRIPTION ${DEB_LONG_DESCRIPTION})
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
+        "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n${DEB_LONG_DESCRIPTION}")
     set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt)
     set(CPACK_DEBIAN_CMAKE_OPTIONS "-DTARGET_PYTHON_3=${TARGET_PYTHON_3}")
 
@@ -93,7 +115,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
 
     # debian
     set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
-    set(CPACK_DEBIAN_PACKAGE_SECTION devel)
+    set(CPACK_DEBIAN_PACKAGE_SECTION python)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS})
     set(CPACK_DEBIAN_PACKAGE_SOURCE_COPY "${PYTHON_EXECUTABLE} /tools/copydebfiles.py")
     set(CPACK_DEBIAN_PACKAGE_REMOVE_SOURCE_FILES )
