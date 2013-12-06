@@ -64,7 +64,8 @@ class FileWatcherMode(Mode):
         self.__changeWaiting = False
         self.__changeWaiting = False
 
-    def __notify(self, settingsValue, title, message, dialogType=None, expectedType=None, expectedAction=None):
+    def __notify(self, settingsValue, title, message, dialogType=None,
+                 expectedType=None, expectedAction=None):
         """
         Notify user from external event
         """
@@ -127,8 +128,7 @@ class FileWatcherMode(Mode):
     def __onPosibleFileDeleted(self, *evt):
         path = self.editor.filePath
         try:
-            content, encoding = self.editor.readFile(
-                path, encoding=self.editor.fileEncoding)
+            self.editor.readFile(path, encoding=self.editor.fileEncoding)
         except IOError as e:
             self.editor.dirty = True
             self.__notifyDeletedFile()
@@ -168,14 +168,10 @@ class FileWatcherMode(Mode):
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """
         if state is True:
-            # self.editor.textSaved.connect(self.__onEditorTextSaved)
-            # self.editor.textSaving.connect(self.__onEditorTextSaving)
             self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
             self.editor.newTextSet.connect(self.__onEditorFilePathChanged)
             self.editor.focusedIn.connect(self.__onEditorFocusIn)
         else:
-            # self.editor.textSaved.disconnect(self.__onEditorTextSaved)
-            # self.editor.textSaving.connect(self.__onEditorTextSaving)
             self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
             self.editor.focusedIn.disconnect(self.__onEditorFocusIn)
             self.__fileSystemWatcher.removePath(self.editor.filePath)
