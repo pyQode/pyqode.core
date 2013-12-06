@@ -23,7 +23,7 @@ set(PROJECT_NAME pyqode.core)
 project(pyqode.core)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 1)
-set(VERSION_PATCH 1)
+set(VERSION_PATCH 0)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 option(TARGET_PYTHON_3
        "ON to target Python >= 3, OFF to target Python 2.7" ON)
@@ -68,7 +68,7 @@ install(DIRECTORY pyqode DESTINATION ${PYTHON_MODULE_PATH})
 # ##############################################################
 
 if(CMAKE_CPACK_COMMAND AND UNIX)
-    set(DPUT_HOST "ppa:colin-duquesnoy/pyqode" CACHE STRING "PPA repository to upload the debian sources")
+    set(DPUT_HOST "ppa:pyqode/unstable" CACHE STRING "PPA repository to upload the debian sources")
 
     # Packing information
     set(CPACK_PACKAGE_NAME ${CPACK_TARGET_INTERPRETER_VERSION}-${PROJECT_NAME})
@@ -85,7 +85,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
     set(CPACK_PACKAGE_VENDOR "https://github.com/ColinDuquesnoy/pyqode.core")
     set(CPACK_PACKAGE_DISPLAY_NAME "pyqode.core ${VERSION}")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Code editor widget for PyQt/PySide")
-    set(CPACK_PACKAGE_VERSION "${VERSION}.3")
+    set(CPACK_PACKAGE_VERSION "${VERSION}")
     set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
