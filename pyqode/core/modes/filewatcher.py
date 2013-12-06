@@ -80,6 +80,7 @@ class FileWatcherMode(Mode):
                 self.editor, title, message,
                 dialogType) == expectedType):
             expectedAction(self.editor.filePath)
+        self.__updateFilePath()
         self.__changeWaiting = False
         self.__flgNotify = False
 
@@ -124,6 +125,9 @@ class FileWatcherMode(Mode):
         if self.editor.hasFocus() and self.__flgNotify:
             self.__notifyChange()
 
+    def files(self):
+        return self.__fileSystemWatcher.files()
+
     @QtCore.Slot()
     def __onPosibleFileDeleted(self, *evt):
         path = self.editor.filePath
@@ -136,17 +140,20 @@ class FileWatcherMode(Mode):
             self.__onFileChanged(path)
         self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
 
+    def __updateFilePath(self):
+        path = self.editor.filePath
+        if path and path not in self.__fileSystemWatcher.files():
+            self.__fileSystemWatcher.addPath(path)
+
     @QtCore.Slot()
     def __onEditorFilePathChanged(self):
         """
         Change the watched file
         """
-        path = self.editor.filePath
         if len(self.__fileSystemWatcher.files()):
             self.__fileSystemWatcher.removePaths(
                 self.__fileSystemWatcher.files())
-        if path and path not in self.__fileSystemWatcher.files():
-            self.__fileSystemWatcher.addPath(path)
+        self.__updateFilePath()
 
     @QtCore.Slot()
     def __onEditorFocusIn(self):
