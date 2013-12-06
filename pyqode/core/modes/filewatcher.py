@@ -33,7 +33,6 @@ from pyqode.qt import QtCore, QtGui
 
 
 class FileWatcherMode(Mode):
-
     """
     FileWatcher mode. (Verify the external changes from opened file)
 
@@ -101,7 +100,7 @@ class FileWatcherMode(Mode):
         reload the changed file in the editor
         """
         self.__notify("autoReloadChangedFiles", "File deleted",
-                      "The file <i>%s</i> has deleted externally." % os.path.basename(
+                      "The file <i>%s</i> has been deleted externally." % os.path.basename(
                           self.editor.filePath), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
 
     def __onFileChanged(self, path):
