@@ -92,7 +92,7 @@ class FileWatcherMode(Mode):
             self.editor.openFile(self.editor.filePath)
         self.__notify("autoReloadChangedFiles", "File changed",
                       "The file <i>%s</i> has changed externally.\n"
-                      "Do you want reload it?" % os.path.basename(
+                      "Do you want to reload it?" % os.path.basename(
                           self.editor.filePath), expectedAction=innerAction)
 
     def __notifyDeletedFile(self):
