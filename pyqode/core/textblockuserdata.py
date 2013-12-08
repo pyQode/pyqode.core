@@ -70,6 +70,9 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         #: List of :class:`pyqode.core.ParenthesisInfo` for the "{" and "}"
         #: symbols
         self.braces = []
+        #: Zones were Code completion is disabled. List of tuple. Each tuple
+        #: contains the start column and the end column.
+        self.cc_disabled_zones = []
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"

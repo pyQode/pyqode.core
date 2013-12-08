@@ -72,4 +72,3 @@ class AutoCompleteMode(Mode):
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 e.accept()
-                print("Accept")
