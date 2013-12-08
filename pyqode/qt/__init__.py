@@ -201,3 +201,14 @@ if not select():
 
 from pyqode.qt import QtCore, QtGui
 __all__ = ["QtCore", "QtGui"]
+
+
+def isPyQt4Used():
+    """
+    Tells if pyqode is using PyQt4
+
+    :return: True if PyQt4 is currently used
+    """
+    return os.environ["QT_API"].lower().replace("4", "") == "pyqt"
+
+print(isPyQt4Used())
