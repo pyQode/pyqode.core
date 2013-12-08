@@ -210,5 +210,3 @@ def isPyQt4Used():
     :return: True if PyQt4 is currently used
     """
     return os.environ["QT_API"].lower().replace("4", "") == "pyqt"
-
-print(isPyQt4Used())
