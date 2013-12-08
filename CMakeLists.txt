@@ -61,14 +61,39 @@ message(STATUS "Target interpreter: ${CPACK_TARGET_INTERPRETER_VERSION}")
 message(STATUS "pyqode.core will be installed to ${CMAKE_INSTALL_PREFIX}/${PYTHON_MODULE_PATH}")
 
 # ##############################################################
+file(GLOB PY_FILES "pyqode/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode)
 
-install(DIRECTORY pyqode DESTINATION ${PYTHON_MODULE_PATH})
+file(GLOB PY_FILES "pyqode/core/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/core)
+
+file(GLOB PY_FILES "pyqode/qt/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/qt)
+
+file(GLOB PY_FILES "pyqode/core/modes/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/core/modes)
+
+file(GLOB PY_FILES "pyqode/core/panels/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/core/panels)
+
+file(GLOB PY_FILES "pyqode/core/plugins/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/core/plugins)
+
+file(GLOB PY_FILES "pyqode/core/ui/*.py")
+# message(STATUS ${PY_FILES})
+install(FILES ${PY_FILES} DESTINATION ${PYTHON_MODULE_PATH}/pyqode/core/ui)
 
 
 # ##############################################################
 
 if(CMAKE_CPACK_COMMAND AND UNIX)
-    set(DPUT_HOST "ppa:pyqode/unstable" CACHE STRING "PPA repository to upload the debian sources")
+    set(DPUT_HOST "ppa:pyqode/stable" CACHE STRING "PPA repository to upload the debian sources")
 
     # Packing information
     set(CPACK_PACKAGE_NAME ${CPACK_TARGET_INTERPRETER_VERSION}-${PROJECT_NAME})
@@ -137,6 +162,22 @@ if(CMAKE_CPACK_COMMAND AND UNIX)
     endif()
     # The debian generator does not seem to use a correct name for the debian packages
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+
+    if(CPACK_GENERATOR STREQUAL "DEB")
+        set(DEBIAN_CHANGELOG ${PROJECT_BINARY_DIR}/changelog)
+        set(RELEASE_PACKAGE_VERSION "${VERSION}")
+        set(RELEASE "all")
+        execute_process(COMMAND date -R  OUTPUT_VARIABLE DATE_TIME)
+        file(WRITE ${DEBIAN_CHANGELOG}
+            "${CPACK_PACKAGE_NAME} (${VERSION}) all; urgency=medium\n\n"
+            "${CPACK_DEBIAN_CHANGELOG}\n"
+            " -- ${CPACK_PACKAGE_CONTACT}  ${DATE_TIME}"
+            )
+        execute_process(COMMAND gzip -f -9 ${PROJECT_BINARY_DIR}/changelog)
+        install(FILES ${PROJECT_BINARY_DIR}/changelog.gz
+                DESTINATION share/doc/${CPACK_PACKAGE_NAME}/ )
+    endif()
 
     include(CPack)
     include(DebSourcePPA)
