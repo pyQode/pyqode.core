@@ -41,6 +41,7 @@ from pyqode.core.panel import Panel
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
 from pyqode.core.decoration import TextDecoration
+from pyqode.core.server import SubprocessServer
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
@@ -49,7 +50,6 @@ from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pyqode.core.system import TextStyle
 from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
-from pyqode.core.system import SubprocessServer
 
 # modes
 from pyqode.core.modes import AutoCompleteMode
