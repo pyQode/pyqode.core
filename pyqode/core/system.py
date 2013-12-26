@@ -657,7 +657,6 @@ def execWorker(conn, caller_id, worker):
     except Exception as e:
         logger.exception("SubprocessServer.Worker (%r)" % worker)
         results = []
-    logger.debug("Send result %r for worker %r" % (results, worker))
     # reset obj attributes before sending it back to the main process
     worker.__dict__ = {}
     conn.send([caller_id, worker, results])
