@@ -95,10 +95,8 @@ class Server(object):
     """
 
     class _AppendSlotWorker(Worker):
-        _slot = "__server__"
-
         def __init__(self, slot):
-            self.slot = slot
+            self._slot = slot
 
 
     def __init__(self, name="pyqode-server", autoCloseOnQuit=True,
@@ -233,8 +231,9 @@ def _serverLoop(dicts, threads, worker_queues, listener):
                         try:
                             dicts[worker._slot]
                         except KeyError:
-                            logger.warning("Unknown slot '%s' for worker '%r', the missing slot "
-                                           "will be created" % (worker._slot, worker))
+                            if not isinstance(worker, Server._AppendSlotWorker):
+                                logger.warning("Unknown slot '%s' for worker '%r', the missing slot "
+                                               "will be created" % (worker._slot, worker))
                             _create_slot(worker._slot, dicts, threads, worker_queues)
                             _execWorkerInSlot(caller_id, cli, dicts, worker, worker_queues)
                         except AttributeError:
