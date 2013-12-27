@@ -52,7 +52,7 @@ from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
 
 # server
-from pyqode.core.server import get_server, start_server, Server
+from pyqode.core.server import get_server, start_server, Server, Worker
 
 # modes
 from pyqode.core.modes import AutoCompleteMode
@@ -149,5 +149,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "WordClickMode",
-           "get_server", "start_server", "Server",
+           "get_server", "start_server", "Server", "Worker",
            "PYGMENTS_STYLES", "memoized", "Server", "SymbolMatcherMode"]

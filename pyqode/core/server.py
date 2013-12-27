@@ -75,6 +75,10 @@ class _ServerSignals(QtCore.QObject):
     workCompleted = QtCore.Signal(object, object, object)
 
 
+class Worker(object):
+    _slot = "default"
+
+
 class Server(object):
     """
     Utility class to run a child process use to execute heavy load computations
@@ -90,9 +94,20 @@ class Server(object):
     workCompleted signal when the job finished.
     """
 
-    def __init__(self, name="pyqode-server", autoCloseOnQuit=True):
+    class _AppendSlotWorker(Worker):
+        _slot = "__server__"
+
+        def __init__(self, slot):
+            self.slot = slot
+
+
+    def __init__(self, name="pyqode-server", autoCloseOnQuit=True,
+                 slots=None):
         #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
+        if slots is None:
+            slots = ["default", "__server__"]
         self.signals = _ServerSignals()
+        self._slots = slots
         self.__name = name
         self.__running = False
         self._workQueue = []
@@ -117,7 +132,7 @@ class Server(object):
         """
         self.__process = multiprocessing.Process(target=_childProcess,
                                                  name=self.__name,
-                                                 args=(port, ))
+                                                 args=(port, self._slots))
         self.__process.start()
         self.__running = False
         try:
@@ -143,15 +158,17 @@ class Server(object):
         return self.__running
 
     def add_slot(self, slot):
-        self.requestWork()
+        if self.__running:
+            self.requestWork(self, self._AppendSlotWorker(slot=slot))
+        else:
+            self._slots.append(slot)
 
     def _threadFct(self, *args):
         while self.__running:
             with self._lock:
                 while len(self._workQueue):
-                    caller_id, worker = self._workQueue.pop(0)
-                    self._client.send([caller_id, worker])
-                    logger.debug("SubprocessServer work requested: %s " % worker)
+                    msg = self._workQueue.pop(0)
+                    self._client.send(msg)
             self.__poll()
             time.sleep(0.001)
 
@@ -193,7 +210,12 @@ class Server(object):
                 self.start()
 
 
-def _serverLoop(dict, listener):
+def _execWorkerInSlot(caller_id, cli, dicts, worker, worker_queues):
+    setattr(worker, "slotDict", dicts[worker._slot])
+    worker_queues[worker._slot].append((cli, caller_id, worker))
+
+
+def _serverLoop(dicts, threads, worker_queues, listener):
     clients = []
     while True:
         r, w, e = select.select((listener, ), (), (), 0.1)
@@ -208,33 +230,63 @@ def _serverLoop(dict, listener):
                     data = cli.recv()
                     if len(data) == 2:
                         caller_id, worker = data[0], data[1]
-                        setattr(worker, "processDict", dict)
-                        _execWorker(cli, caller_id, worker)
+                        try:
+                            dicts[worker._slot]
+                        except KeyError:
+                            logger.warning("Unknown slot '%s' for worker '%r', the missing slot "
+                                           "will be created" % (worker._slot, worker))
+                            _create_slot(worker._slot, dicts, threads, worker_queues)
+                            _execWorkerInSlot(caller_id, cli, dicts, worker, worker_queues)
+                        except AttributeError:
+                            logger.warning("Worker '%r' has no _slot attribute" % worker)
+                        else:
+                            _execWorkerInSlot(caller_id, cli, dicts, worker, worker_queues)
             except (IOError, OSError, EOFError):
                 clients.remove(cli)
 
 
-def _childProcess(port):
+def _create_slot(slot, slot_dicts, slot_threads, slot_worker_queues):
+    slot_dicts[slot] = {}
+    slot_worker_queues[slot] = []
+    slot_threads[slot] = thread.start_new(slot_thread_fct, (slot, slot_worker_queues[slot]))
+
+
+def _childProcess(port, slots):
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
     """
-    dict = {}
+    slot_dicts = {}
+    slot_threads = {}
+    slot_worker_queues = {}
     try:
         if sys.platform == "win32":
             listener = Listener(('localhost', port))
         else:
             listener = Listener(('', port))
         #client = listener.accept()
-    except OSError:
+    except :
         logger.warning("Failed to start the code completion server process on "
                        "port %d, there is probably another completion server "
-                       "already running with a socket open on the same port. "
-                       "\nThe existing server process will be used instead." % port)
+                       "already running with a socket open on the same port..."
+                       "The existing server process will be used instead." % port)
         return 0
     else:
-        logger.info("Code Completion Server started on 127.0.0.1:%d" % port)
-        _serverLoop(dict, listener)
+        logger.debug("Code Completion Server started on 127.0.0.1:%d" % port)
+        for slot in slots:
+            _create_slot(slot, slot_dicts, slot_threads, slot_worker_queues)
+        _serverLoop(slot_dicts, slot_threads, slot_worker_queues, listener)
+
+
+def slot_thread_fct(slot, worker_queue):
+    while True:
+        if len(worker_queue):
+            cli, caller_id, worker = worker_queue.pop(0)
+            logger.debug("Running %r in slot '%s'" % (worker, slot))
+            _execWorker(cli, caller_id, worker)
+            logger.debug("Finished running %r in slot '%s'" % (worker, slot))
+        else:
+            time.sleep(0.001)
 
 
 def _execWorker(conn, caller_id, worker):
@@ -263,7 +315,7 @@ def _execWorker(conn, caller_id, worker):
 _SERVER = None
 
 
-def start_server(name="pyqode-server", port=8080):
+def start_server(name="pyqode-server", port=8080, slots=None):
     """
     Starts the global subprocess server
 
@@ -274,7 +326,7 @@ def start_server(name="pyqode-server", port=8080):
     if "PYQODE_NO_COMPLETION_SERVER" in os.environ:
         return
     if _SERVER is None:
-        _SERVER = Server(name=name)
+        _SERVER = Server(name=name, slots=slots)
         _SERVER.start(port=port)
 
 
