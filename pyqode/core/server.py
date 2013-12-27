@@ -39,6 +39,8 @@ dispatch them on the matching slot thread.
 """
 import multiprocessing
 from multiprocessing.connection import Client, Listener
+import os
+
 Listener.fileno = lambda self: self._listener._socket.fileno()
 import select
 import sys
@@ -252,5 +254,30 @@ def _execWorker(conn, caller_id, worker):
     conn.send([caller_id, worker, results])
 
 
-def start_server(*args):
-    pass
+#
+# Global server instance
+#
+_SERVER = None
+
+
+def start_server(name="pyqode-server", port=8080):
+    """
+    Starts the global subprocess server
+
+    :param name: Process name
+    :param port: Server port. Default is 8080
+    """
+    global _SERVER
+    if "PYQODE_NO_COMPLETION_SERVER" in os.environ:
+        return
+    if _SERVER is None:
+        _SERVER = Server(name=name)
+        _SERVER.start(port=port)
+
+
+def get_server():
+    """
+    Gets the global subprocess server
+    """
+    global _SERVER
+    return _SERVER

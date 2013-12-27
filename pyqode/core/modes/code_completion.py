@@ -33,6 +33,7 @@ from pyqode.core import constants, Server
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
 from pyqode.core.system import DelayJobRunner, memoized
+from pyqode.core.server import get_server
 from pyqode.qt import QtGui, QtCore
 from pyqode.core import logger
 
@@ -335,29 +336,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
-    @classmethod
-    def startCompletionServer(cls, port=5000):
-        """
-        Starts the code completion server. This is automatically called the
-        first time a code completion mode is isntalled on a QCodeEdit instance
-        but you can call it manually before if you need it.
-
-        :return The code completion server if created.
-        :rtype pyqode.core.SubprocessServer or None
-        """
-        if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
-            if CodeCompletionMode.SERVER is None:
-                s = Server()
-                if s.start(port):
-                    cls.SERVER = s
-                    return s
-        return None
-
     def _onInstall(self, editor):
-        CodeCompletionMode.startCompletionServer(self._server_port)
-        if CodeCompletionMode.SERVER:
-            CodeCompletionMode.SERVER.signals.workCompleted.connect(
-                self.__onWorkFinished)
+        get_server().signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -713,12 +693,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         logger.debug("Completion requested")
         self.__jobRunner.requestJob(self.__setWaitCursor, False)
         worker = CompletionWorker(self.__providers, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
+        get_server().requestWork(self, worker)
 
     def __preload(self, *args):
         self.preLoadStarted.emit()
         worker = PreLoadWorker(self.__providers, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
+        get_server().requestWork(self, worker)
 
 
 class DocumentWordCompletionProvider(CompletionProvider):
