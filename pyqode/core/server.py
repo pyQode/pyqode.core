@@ -52,7 +52,27 @@ from pyqode.core import logger
 from pyqode.qt import QtGui, QtCore
 
 
-class SubprocessServer(object):
+class _ServerSignals(QtCore.QObject):
+    """
+    Holds the server signals.
+    """
+    #: Signal emitted when a new work is requested.
+    #:
+    #: **Parameters**:
+    #:   * caller id
+    #:   * worker object
+    workRequested = QtCore.Signal(object, object)
+
+    #: Signal emitted when a new work is requested.
+    #:
+    #: **Parameters**:
+    #:   * caller id
+    #:   * worker object
+    #:   * worker results
+    workCompleted = QtCore.Signal(object, object, object)
+
+
+class Server(object):
     """
     Utility class to run a child process use to execute heavy load computations
     such as file layout analysis, code completion requests...
@@ -67,7 +87,7 @@ class SubprocessServer(object):
     workCompleted signal when the job finished.
     """
 
-    def __init__(self, name="pyQodeSubprocessServer", autoCloseOnQuit=True):
+    def __init__(self, name="pyqode-server", autoCloseOnQuit=True):
         #: Server signals; see :meth:`pyqode.core.system._ServerSignals`
         self.signals = _ServerSignals()
         self.__name = name
@@ -92,9 +112,10 @@ class SubprocessServer(object):
         :param port: Local TCP/IP port to which the underlying socket is
                      connected to.
         """
-        self.__process = multiprocessing.Process(target=childProcess,
+        self.__process = multiprocessing.Process(target=_childProcess,
                                                  name=self.__name,
                                                  args=(port, ))
+        print(self.__process._name)
         self.__process.start()
         self.__running = False
         try:
@@ -167,27 +188,7 @@ class SubprocessServer(object):
                 self.start()
 
 
-class _ServerSignals(QtCore.QObject):
-    """
-    Holds the server signals.
-    """
-    #: Signal emitted when a new work is requested.
-    #:
-    #: **Parameters**:
-    #:   * caller id
-    #:   * worker object
-    workRequested = QtCore.Signal(object, object)
-
-    #: Signal emitted when a new work is requested.
-    #:
-    #: **Parameters**:
-    #:   * caller id
-    #:   * worker object
-    #:   * worker results
-    workCompleted = QtCore.Signal(object, object, object)
-
-
-def serverLoop(dict, listener):
+def _serverLoop(dict, listener):
     clients = []
     while True:
         r, w, e = select.select((listener, ), (), (), 0.1)
@@ -200,15 +201,15 @@ def serverLoop(dict, listener):
             try:
                 if cli.poll():
                     data = cli.recv()
-                    assert len(data) == 2
-                    caller_id, worker = data[0], data[1]
-                    setattr(worker, "processDict", dict)
-                    execWorker(cli, caller_id, worker)
+                    if len(data) == 2:
+                        caller_id, worker = data[0], data[1]
+                        setattr(worker, "processDict", dict)
+                        _execWorker(cli, caller_id, worker)
             except (IOError, OSError, EOFError):
                 clients.remove(cli)
 
 
-def childProcess(port):
+def _childProcess(port):
     """
     This is the child process. It run endlessly waiting for incoming work
     requests.
@@ -228,10 +229,10 @@ def childProcess(port):
         return 0
     else:
         logger.info("Code Completion Server started on 127.0.0.1:%d" % port)
-        serverLoop(dict, listener)
+        _serverLoop(dict, listener)
 
 
-def execWorker(conn, caller_id, worker):
+def _execWorker(conn, caller_id, worker):
     """
     This function call the worker object.
 
@@ -249,3 +250,7 @@ def execWorker(conn, caller_id, worker):
     # reset obj attributes before sending it back to the main process
     worker.__dict__ = {}
     conn.send([caller_id, worker, results])
+
+
+def start_server(*args):
+    pass

@@ -29,7 +29,7 @@ This module contains the code completion mode and the related classes.
 import re
 import sys
 import os
-from pyqode.core import constants, SubprocessServer
+from pyqode.core import constants, Server
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
 from pyqode.core.system import DelayJobRunner, memoized
@@ -347,7 +347,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
             if CodeCompletionMode.SERVER is None:
-                s = SubprocessServer()
+                s = Server()
                 if s.start(port):
                     cls.SERVER = s
                     return s
