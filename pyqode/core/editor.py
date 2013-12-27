@@ -32,6 +32,7 @@ from pyqode.core import logger
 from pyqode.core import constants
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
+from pyqode.core.server import start_server
 from pyqode.core.system import DelayJobRunner
 from pyqode.core.decoration import TextDecoration
 from pyqode.qt import QtGui, QtCore
@@ -365,6 +366,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        # start the completion server with default parameters if not
+        # already started by the user
+        start_server()
         self._lastMousePos = None
         self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()

@@ -41,6 +41,7 @@ from pyqode.core.panel import Panel
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
 from pyqode.core.decoration import TextDecoration
+from pyqode.core.server import Server
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
@@ -49,7 +50,9 @@ from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pyqode.core.system import TextStyle
 from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
-from pyqode.core.system import SubprocessServer
+
+# server
+from pyqode.core.server import get_server, start_server, Server, Worker
 
 # modes
 from pyqode.core.modes import AutoCompleteMode
@@ -146,4 +149,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "WordClickMode",
-           "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]
+           "get_server", "start_server", "Server", "Worker",
+           "PYGMENTS_STYLES", "memoized", "Server", "SymbolMatcherMode"]
