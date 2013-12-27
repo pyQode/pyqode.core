@@ -27,15 +27,16 @@
 This module contains the subprocess server used to run heavy task such as
 code completion, code analysis,... in a background thread.
 
-The server will start automatically when you create your first pyqode widget but
-it can also be started manually with custom startup parameters (you can choose to
-reuse an existing local server or start a new one for your process). There can only
-be one server per process, the server is shared among all code editor instances.
+The server will start automatically when you create your first pyqode widget
+but it can also be started manually with custom startup parameters (you can
+choose to reuse an existing local server or start a new one for your process).
+There can only be one server per process, the server is shared among all code
+editor instances.
 
-The server is able to run multiple background worker in a dedicated worker slot.
-A worker slot is a named background thread that will be used to run a specific
-kind of worker. Worker object must define a _slot attribute that will be used to
-dispatch them on the matching slot thread.
+The server is able to run multiple background worker in a dedicated worker
+slot. A worker slot is a named background thread that will be used to run a
+specific kind of worker. Worker object must define a _slot attribute that will
+be used to dispatch them on the matching slot thread.
 """
 import multiprocessing
 from multiprocessing.connection import Client, Listener
@@ -117,7 +118,6 @@ class Server(object):
         self.__process = multiprocessing.Process(target=_childProcess,
                                                  name=self.__name,
                                                  args=(port, ))
-        print(self.__process._name)
         self.__process.start()
         self.__running = False
         try:
@@ -141,6 +141,9 @@ class Server(object):
             logger.exception("Failed to connect to Code Completion Server on "
                              "127.0.0.1:%d" % port)
         return self.__running
+
+    def add_slot(self, slot):
+        self.requestWork()
 
     def _threadFct(self, *args):
         while self.__running:
