@@ -641,6 +641,8 @@ class FoldingPanel(Panel):
             self.editor.updateVisibleBlocks(None)
             for top, line, block in self.editor.visibleBlocks:
                 usd = block.userData()
+                if not usd:
+                    continue  # empty document
                 if usd.foldStart and usd.folded:
                     self.editor.markWholeDocumentDirty()
 
