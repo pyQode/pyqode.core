@@ -29,7 +29,7 @@ This module contains the definition of the QCodeEdit
 import sys
 import weakref
 from pyqode.core import logger
-from pyqode.core import constants
+from pyqode.core import constants, dialogs
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
 from pyqode.core.server import start_server
@@ -473,8 +473,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :rtype: QtGui.QTextCursor
         """
         if line is None or isinstance(line, bool):
-            line, result = QtGui.QInputDialog.getInt(
-                self, "Go to line", "Line number:", 1, 1, self.lineCount())
+            line, result = dialogs.GoToLineDialog.getLine(
+                self, self.cursorPosition[0], self.lineCount())
             if not result:
                 return
             if not line:
