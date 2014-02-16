@@ -126,8 +126,8 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(RightMarginMode())
         self.installMode(PygmentsSyntaxHighlighter(self.document()))
         self.installMode(ZoomMode())
-        self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
+        self.installMode(AutoIndentMode())
         self.installMode(IndenterMode())
         self.codeCompletionMode.addCompletionProvider(
             DocumentWordCompletionProvider())
