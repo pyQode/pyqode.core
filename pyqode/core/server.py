@@ -192,20 +192,23 @@ class Server(object):
         """
         Poll the child process for any incoming results
         """
-        if self._client.poll():
-            try:
-                data = self._client.recv()
-                if len(data) == 3:
-                    caller_id = data[0]
-                    worker = data[1]
-                    results = data[2]
-                    if results is not None:
-                        self.signals.workCompleted.emit(caller_id, worker, results)
-                else:
-                    logger.info(data)
-            except (IOError, EOFError):
-                logger.warning("Lost completion server, restarting")
-                self.start()
+        try:
+            if self._client.poll():
+                try:
+                    data = self._client.recv()
+                    if len(data) == 3:
+                        caller_id = data[0]
+                        worker = data[1]
+                        results = data[2]
+                        if results is not None:
+                            self.signals.workCompleted.emit(caller_id, worker, results)
+                    else:
+                        logger.info(data)
+                except (IOError, EOFError):
+                    logger.warning("Lost completion server, restarting")
+                    self.start()
+        except InterruptedError:
+            pass
 
 
 def _execWorkerInSlot(caller_id, cli, dicts, worker, worker_queues):
