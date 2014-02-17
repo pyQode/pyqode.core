@@ -337,7 +337,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
     def _onInstall(self, editor):
-        get_server().signals.workCompleted.connect(self.__onWorkFinished)
+        srv = get_server()
+        if srv:
+            srv.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
