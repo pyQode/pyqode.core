@@ -111,6 +111,7 @@ class Server(object):
         self._workQueue = []
         if autoCloseOnQuit:
             QtGui.QApplication.instance().aboutToQuit.connect(self.close)
+        self._lock = thread.allocate_lock()
 
     def close(self):
         """
@@ -148,7 +149,6 @@ class Server(object):
             logger.info("Connected to Code Completion Server on 127.0.0.1:%d" %
                         port)
             self.__running = True
-            self._lock = thread.allocate_lock()
             thread.start_new_thread(self._threadFct, ())
         except OSError:
             logger.exception("Failed to connect to Code Completion Server on "
