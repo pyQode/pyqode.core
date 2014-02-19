@@ -192,6 +192,8 @@ class Server(object):
         """
         Poll the child process for any incoming results
         """
+        if sys.version_info[0] == 2:
+            InterruptedError = OSError
         try:
             if self._client.poll():
                 try:
