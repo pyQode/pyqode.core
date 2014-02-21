@@ -55,18 +55,19 @@ class AutoCompleteMode(Mode):
             self.editor.keyPressed.disconnect(self._onKeyPressed)
 
     def _onPostKeyPressed(self, e):
+        if e.isAccepted():
+            return
         txt = e.text()
         tc = self.editor.textCursor()
         tc.movePosition(QtGui.QTextCursor.Right,
                         QtGui.QTextCursor.KeepAnchor)
         next_char = tc.selectedText().strip()
-        print(next_char)
-        if txt and next_char:
-            tc.clearSelection()
-            self.editor.setTextCursor(tc)
-            return
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
+            if next_char == toInsert:
+                tc.clearSelection()
+                self.editor.setTextCursor(tc)
+                return
             tc = self.editor.textCursor()
             p = tc.position()
             tc.insertText(toInsert)
@@ -79,9 +80,10 @@ class AutoCompleteMode(Mode):
         tc.movePosition(QtGui.QTextCursor.Right,
                         QtGui.QTextCursor.KeepAnchor)
         next_char = tc.selectedText().strip()
-        print(next_char)
         if txt and next_char == txt:
             e.accept()
+            tc.clearSelection()
+            self.editor.setTextCursor(tc)
             return
         if e.text() == ')':
             tc = self.editor.textCursor()
