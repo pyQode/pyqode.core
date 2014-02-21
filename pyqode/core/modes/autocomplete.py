@@ -24,6 +24,7 @@
 #THE SOFTWARE.
 #
 """ Contains the AutoCompleteMode """
+from pyqode.qt import QtGui
 from pyqode.core.mode import Mode
 
 
@@ -55,6 +56,15 @@ class AutoCompleteMode(Mode):
 
     def _onPostKeyPressed(self, e):
         txt = e.text()
+        tc = self.editor.textCursor()
+        tc.movePosition(QtGui.QTextCursor.Right,
+                        QtGui.QTextCursor.KeepAnchor)
+        next_char = tc.selectedText().strip()
+        print(next_char)
+        if txt and next_char:
+            tc.clearSelection()
+            self.editor.setTextCursor(tc)
+            return
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
             tc = self.editor.textCursor()
@@ -64,6 +74,15 @@ class AutoCompleteMode(Mode):
             self.editor.setTextCursor(tc)
 
     def _onKeyPressed(self, e):
+        txt = e.text()
+        tc = self.editor.textCursor()
+        tc.movePosition(QtGui.QTextCursor.Right,
+                        QtGui.QTextCursor.KeepAnchor)
+        next_char = tc.selectedText().strip()
+        print(next_char)
+        if txt and next_char == txt:
+            e.accept()
+            return
         if e.text() == ')':
             tc = self.editor.textCursor()
             #assert isinstance(tc, QtGui.QTextCursor)
