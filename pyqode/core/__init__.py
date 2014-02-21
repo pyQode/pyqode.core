@@ -58,6 +58,7 @@ from pyqode.core.server import get_server, start_server, Server, Worker
 from pyqode.core.modes import AutoCompleteMode
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
+from pyqode.core.modes import CaseConverterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
 from pyqode.core.modes import MSG_STATUS_ERROR
 from pyqode.core.modes import MSG_STATUS_INFO
@@ -121,6 +122,7 @@ class QGenericCodeEdit(QCodeEdit):
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
 
         self.installMode(AutoCompleteMode())
+        self.installMode(CaseConverterMode())
         self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
