@@ -1644,13 +1644,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 key == "selectionBackground" or key == "selectionForeground"
                 or not key):
             p = self.palette()
-            c = self.style.value("background")
+            c = QtGui.QColor(self.style.value("background"))
             p.setColor(p.Base, c)
-            c = self.style.value("foreground")
+            c = QtGui.QColor(self.style.value("foreground"))
             p.setColor(p.Text, c)
-            c = self.style.value("selectionBackground")
+            c = QtGui.QColor(self.style.value("selectionBackground"))
             p.setColor(QtGui.QPalette.Highlight, c)
-            c = self.style.value("selectionForeground")
+            c = QtGui.QColor(self.style.value("selectionForeground"))
             p.setColor(QtGui.QPalette.HighlightedText, c)
             self.setPalette(p)
 
