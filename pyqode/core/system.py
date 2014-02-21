@@ -35,6 +35,22 @@ from pyqode.core import logger
 from pyqode.qt import QtCore, QtGui
 
 
+def keep_tc_pos(f):
+    """
+    Decorator. Cache text cursor position and restore it when the wrapped
+    function exits. This decorator can only be used on modes or panels.
+    """
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwds):
+        pos = self.editor.textCursor().position()
+        retval = f(self, *args, **kwds)
+        tc = self.editor.textCursor()
+        tc.setPosition(pos)
+        self.editor.setTextCursor(tc)
+        return  retval
+    return wrapper
+
+
 class memoized(object):
     """
     Decorator. Caches a function's return value each time it is called.
