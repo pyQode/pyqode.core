@@ -1346,7 +1346,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def refreshIcons(self, useTheme=True):
         for action in self.__actions:
             if action.text() in constants.ICONS:
-                print(constants.ACTIONS[action.text()])
                 icon, shortcut, theme = constants.ACTIONS[action.text()]
                 if useTheme:
                     action.setIcon(QtGui.QIcon.fromTheme(
