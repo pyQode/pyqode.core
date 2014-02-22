@@ -137,6 +137,25 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def foreground(self, value):
         self.editor.setValue("searchOccurrenceForeground", value)
 
+    def refreshIcons(self, useTheme=True):
+        values = [
+            ("edit-find", "Find", [self.actionSearch], [self.labelSearch]),
+            ("edit-find-replace", "Replace", [self.actionActionSearchAndReplace], [self.labelReplace]),
+            ("go-down", "Next", [self.actionFindNext, self.pushButtonNext], []),
+            ("go-up", "Previous", [self.actionFindPrevious, self.pushButtonPrevious], []),
+            ("application-exit", "Close", [self.pushButtonClose], []),
+        ]
+        for theme, name, actions, labels in values:
+            icon = constants.ICONS[name]
+            if useTheme:
+                icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+            else:
+                icon = QtGui.QIcon(icon)
+            for action in actions:
+                action.setIcon(icon)
+            for label in labels:
+                label.setPixmap(icon.pixmap(16, 16))
+
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
@@ -154,26 +173,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        findIcon = QtGui.QIcon.fromTheme(
-            "edit-find", QtGui.QIcon(":/pyqode-icons/rc/edit-find.png"))
-        replaceIcon = QtGui.QIcon.fromTheme(
-            "edit-find-replace",
-            QtGui.QIcon(":/pyqode-icons/rc/edit-find-replace.png"))
-        nextIcon = QtGui.QIcon.fromTheme(
-            "go-down", QtGui.QIcon(":/pyqode-icons/rc/go-down.png"))
-        previousIcon = QtGui.QIcon.fromTheme(
-            "go-up", QtGui.QIcon(":/pyqode-icons/rc/go-up.png"))
-        closeIcon = QtGui.QIcon.fromTheme(
-            "application-exit", QtGui.QIcon(":/pyqode-icons/rc/close.png"))
-        self.actionSearch.setIcon(findIcon)
-        self.labelSearch.setPixmap(findIcon.pixmap(16, 16))
-        self.actionActionSearchAndReplace.setIcon(replaceIcon)
-        self.labelReplace.setPixmap(replaceIcon.pixmap(16, 16))
-        self.actionFindNext.setIcon(nextIcon)
-        self.pushButtonNext.setIcon(nextIcon)
-        self.actionFindPrevious.setIcon(previousIcon)
-        self.pushButtonPrevious.setIcon(previousIcon)
-        self.pushButtonClose.setIcon(closeIcon)
+        self.refreshIcons()
 
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)

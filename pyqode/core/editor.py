@@ -1343,94 +1343,145 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.__actions.remove(action)
 
+    def refreshIcons(self, useTheme=True):
+        for action in self.__actions:
+            if action.text() in constants.ICONS:
+                print(constants.ACTIONS[action.text()])
+                icon, shortcut, theme = constants.ACTIONS[action.text()]
+                if useTheme:
+                    action.setIcon(QtGui.QIcon.fromTheme(
+                        theme, QtGui.QIcon(icon)))
+                else:
+                    action.setIcon(QtGui.QIcon(icon))
+        try:
+            self.searchAndReplacePanel.refreshIcons(useTheme=useTheme)
+        except AttributeError:
+            pass  # panel not installed
+
+
     def __createDefaultActions(self):
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-undo",
-                                  QtGui.QIcon(constants.ACTION_UNDO[0])),
-            "Undo", self)
-        a.setShortcut(constants.ACTION_UNDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.undo)
-        self.undoAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-redo",
-                                  QtGui.QIcon(constants.ACTION_REDO[0])),
-            "Redo", self)
-        a.setShortcut(constants.ACTION_REDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.redo)
-        self.redoAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme(
-                "edit-copy", QtGui.QIcon(constants.ACTION_COPY[0])),
-            "Copy", self)
-        a.setShortcut(constants.ACTION_COPY[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.copy)
-        self.copyAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-cut",
-                                  QtGui.QIcon(constants.ACTION_CUT[0])),
-            "Cut", self)
-        a.setShortcut(constants.ACTION_CUT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.cut)
-        self.copyAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-paste",
-                                  QtGui.QIcon(constants.ACTION_PASTE[0])),
-            "Paste", self)
-        a.setShortcut(constants.ACTION_PASTE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.paste)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-delete",
-                                  QtGui.QIcon(constants.ACTION_DELETE[0])),
-            "Delete", self)
-        a.setShortcut(constants.ACTION_DELETE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.delete)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-select-all",
-                                  QtGui.QIcon(constants.ACTION_SELECT_ALL[0])),
-            "Select all", self)
-        a.setShortcut(constants.ACTION_SELECT_ALL[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.selectAll)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("format-indent-more",
-                                  QtGui.QIcon(constants.ACTION_INDENT[0])),
-            "Indent", self)
-        a.setShortcut(constants.ACTION_INDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.indent)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("format-indent-less",
-                                  QtGui.QIcon(constants.ACTION_UNINDENT[0])),
-            "Un-indent", self)
-        a.setShortcut(constants.ACTION_UNINDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.unIndent)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("start-here",
-                                  QtGui.QIcon(constants.ACTION_GOTO_LINE[0])),
-            "Go to line", self)
-        a.setShortcut(constants.ACTION_GOTO_LINE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.gotoLine)
-        self.addAction(a)
+        values = [
+            ("Undo", self.undo, self.undoAvailable),
+            ("Redo", self.redo, self.redoAvailable),
+            None,
+            ("Copy", self.copy, self.copyAvailable),
+            ("Cut", self.cut, self.copyAvailable),
+            ("Paste", self.paste, None),
+            ("Delete", self.delete, None),
+            ("Select all", self.selectAll, None),
+            ("Indent", self.indent, None),
+            ("Un-indent", self.unIndent, None),
+            ("Go to line", self.gotoLine, None)
+        ]
+
+        for val in values:
+            if val:
+                name, trig_slot, enable_signal = val
+                icon, shortcut, theme = constants.ACTIONS[name]
+                a = QtGui.QAction(QtGui.QIcon.fromTheme(
+                    theme, QtGui.QIcon(icon)), name, self)
+                a.setShortcut(shortcut)
+                a.setIconVisibleInMenu(True)
+                a.triggered.connect(trig_slot)
+                if enable_signal:
+                    enable_signal.connect(a.setEnabled)
+                self.addAction(a)
+            else:
+                self.addSeparator()
+
+        # icon, shortcut = constants.ICONS["Undo"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-undo", QtGui.QIcon(icon)), "Undo", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.undo)
+        # self.undoAvailable.connect(a.setEnabled)
+        # self.addAction(a)
+        #
+        # icon, shortcut = constants.ICONS["Redo"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-redo", QtGui.QIcon(icon)),
+        #     "Redo", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.redo)
+        # self.redoAvailable.connect(a.setEnabled)
+        # self.addAction(a)
+        #
+        # self.addSeparator()
+        #
+        # icon, shortcut = constants.ICONS["Copy"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-copy", QtGui.QIcon(icon)), "Copy", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.copy)
+        # self.copyAvailable.connect(a.setEnabled)
+        # self.addAction(a)
+        #
+        # icon, shortcut = constants.ICONS["Cut"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-cut", QtGui.QIcon(icon)),
+        #     "Cut", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.cut)
+        # self.copyAvailable.connect(a.setEnabled)
+        # self.addAction(a)
+        #
+        # icon, shortcut = constants.ICONS["Paste"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-paste", QtGui.QIcon(icon)), "Paste", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.paste)
+        # self.addAction(a)
+        #
+        # icon, shortcut = constants.ICONS["Delete"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-delete", QtGui.QIcon(icon)), "Delete", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.delete)
+        # self.addAction(a)
+        #
+        # icon, shortcut = constants.ICONS["Select all"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "edit-select-all", QtGui.QIcon(icon)), "Select all", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.selectAll)
+        # self.addAction(a)
+        #
+        # self.addSeparator()
+        #
+        # icon, shortcut = constants.ICONS["Indent"]
+        # a = QtGui.QAction(QtGui.QIcon.fromTheme(
+        #     "format-indent-more", QtGui.QIcon(icon)), "Indent", self)
+        # a.setShortcut(shortcut)
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.indent)
+        # self.addAction(a)
+        #
+        # a = QtGui.QAction(
+        #     QtGui.QIcon.fromTheme("format-indent-less",
+        #                           QtGui.QIcon(constants.ACTION_UNINDENT[0])),
+        #     "Un-indent", self)
+        # a.setShortcut(constants.ACTION_UNINDENT[1])
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.unIndent)
+        # self.addAction(a)
+        #
+        # self.addSeparator()
+        #
+        # a = QtGui.QAction(
+        #     QtGui.QIcon.fromTheme("start-here",
+        #                           QtGui.QIcon(constants.ACTION_GOTO_LINE[0])),
+        #     "Go to line", self)
+        # a.setShortcut(constants.ACTION_GOTO_LINE[1])
+        # a.setIconVisibleInMenu(True)
+        # a.triggered.connect(self.gotoLine)
+        # self.addAction(a)
 
     def __initSettings(self):
         """
