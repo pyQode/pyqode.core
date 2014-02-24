@@ -431,9 +431,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         :param text: The replacement text. If None, the content of the lineEdit
                      replace will be used instead
         """
+        tc = self.editor.textCursor()
+        tc.beginEditBlock()
         remains = self.replaceCurrent(text=text)
         while remains:
             remains = self.replaceCurrent(text=text)
+        tc.endEditBlock()
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
