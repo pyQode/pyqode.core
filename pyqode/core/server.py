@@ -192,8 +192,6 @@ class Server(object):
         """
         Poll the child process for any incoming results
         """
-        if sys.version_info[0] == 2:
-            InterruptedError = OSError
         try:
             if self._client.poll():
                 try:
@@ -209,7 +207,7 @@ class Server(object):
                 except (IOError, EOFError):
                     logger.warning("Lost completion server, restarting")
                     self.start()
-        except InterruptedError:
+        except OSError:
             pass
 
 
