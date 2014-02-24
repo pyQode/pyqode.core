@@ -394,10 +394,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         occurrences = self.getOccurrences()
         if cr == -1:
             self.selectNext()
+            cr = self.__getCurrentOccurrence()
         try:
+            # prevent search request due to editor textChanged
             try:
                 self.editor.textChanged.disconnect(self.requestSearch)
-            except RuntimeError:
+            except (RuntimeError, TypeError):
+                # already disconnected
                 pass
             occ = occurrences[cr]
             tc = self.editor.textCursor()
@@ -408,8 +411,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             offset = len_replacement - len_to_replace
             tc.insertText(text)
             self.editor.setTextCursor(tc)
-            self.editor.textChanged.connect(self.requestSearch)
-            # prevent search request due to editor textChanged
             self.__removeOccurrence(cr, offset)
             cr -= 1
             self.__setCurrentOccurrence(cr)
@@ -420,6 +421,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             return True
         except IndexError:
             return False
+        finally:
+            self.editor.textChanged.connect(self.requestSearch)
 
     def replaceAll(self, text=None):
         """
