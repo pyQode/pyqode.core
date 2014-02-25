@@ -7,4 +7,4 @@ Each package (pyqode.core, pyqode.python,...) has its own issue tracker,
 if you're in doubt about which issue tracker to use, use the pyqode.core issue
 tracker.
 
-.. _`issue tracker`: https://github.com/ColinDuquesnoy/pyQode/issues?state=open
+.. _`issue tracker`: https://github.com/pyQode/pyqode.core/issues?state=open

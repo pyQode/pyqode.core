@@ -1,5 +1,5 @@
 Python/Qt Code Editor Widget library
-======================================================
+====================================
 
 .. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode.core.png?branch=master
     :target: https://travis-ci.org/ColinDuquesnoy/pyqode.core
@@ -14,7 +14,7 @@ Python/Qt Code Editor Widget library
     :alt: Latest PyPI version
 
 What is pyQode?
---------------------
+---------------
 
 pyQode is a *flexible source code editor widget* for Python Qt
 applications. **pyQode is a library/widget, not an IDE**. You can see it as an
@@ -31,10 +31,10 @@ pyQode is a **namespace package** made up of the following official packages:
 
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
-.. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
-.. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
-.. _pyqode.widgets: https://github.com/ColinDuquesnoy/pyqode.widgets
-.. _pyqode.designer: https://github.com/ColinDuquesnoy/pyqode.designer
+.. _pyqode.core: https://github.com/pyQode/pyqode.core
+.. _pyqode.python: https://github.com/pyQode/pyqode.python
+.. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
+.. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
 **pyqode.core** is the foundation package, it contains the pyqode base classes (QCodeEdit, Mode, Panel) 
 and a set of builtin modes and panels that are useful for any kind of code editor. With pyqode.core you 
@@ -118,13 +118,14 @@ Resources
 -  `Documentation`_
 -  `Wiki`_
 
-.. _Downloads: https://github.com/ColinDuquesnoy/pyqode.core/releases
-.. _Source repository: https://github.com/ColinDuquesnoy/pyqode.core/
+.. _Downloads: https://github.com/pyQode/pyqode.core/releases
+.. _Source repository: https://github.com/pyQode/pyqode.core/
 .. _Documentation : http://pyqodecore.readthedocs.org/en/latest/
-.. _Wiki: https://github.com/ColinDuquesnoy/pyqode.core/wiki
+.. _Wiki: https://github.com/pyQode/pyqode.core/wiki
+
 
 Screenshots
-------------
+-----------
 
 Here are a few screenshots of the gui integration example on several different platforms:
 
@@ -158,8 +159,4 @@ Here are a few screenshots of the gui integration example on several different p
 .. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/gnome.png
     :alt: Gnome
 
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/ColinDuquesnoy/pyqode.core/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
 

@@ -46,4 +46,4 @@ Milestones
 
 
 .. _`jedi`: https://github.com/davidhalter/jedi
-.. _`issues page on github`: https://github.com/ColinDuquesnoy/PCEF/issues
+.. _`issues page on github`: https://github.com/pyQode/pyqode.core/issues
