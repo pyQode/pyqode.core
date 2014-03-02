@@ -51,7 +51,7 @@ Force PyQt4
 
 This example shows you how you can force pyQode to use PyQt4.
 
-.. literalinclude:: /../../examples/qt_bindings/pyqt.py
+.. literalinclude:: /../../examples/qt_bindings/pyqt4.py
    :linenos:
 
 Force PySide

@@ -106,8 +106,8 @@ DelayJobRunner
 
 SubprocessServer
 ++++++++++++++++++
-.. autoclass:: pyqode.core.SubprocessServer
+.. autoclass:: pyqode.core.Server
     :members:
 
-.. autoclass:: pyqode.core.system._ServerSignals
+.. autoclass:: pyqode.core.server._ServerSignals
     :members:

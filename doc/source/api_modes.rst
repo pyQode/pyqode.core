@@ -25,6 +25,12 @@ CaretLineHighlighterMode
 .. autoclass:: pyqode.core.CaretLineHighlighterMode
     :members:
 
+CaseConverterMode
+-----------------
+
+.. autoclass:: pyqode.core.CaseConverterMode
+    :members:
+
 Code completion
 -----------------
 
