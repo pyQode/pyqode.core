@@ -53,6 +53,8 @@ class AutoIndentMode(Mode):
         Return the indentation text (a series of spaces or tabs)
 
         :param tc: QTextCursor
+
+        :returns: Tuple (text before new line, text after new line)
         """
         pos = tc.position()
         # tc.movePosition(QTextCursor.StartOfLine)
