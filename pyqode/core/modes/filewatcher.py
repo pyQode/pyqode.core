@@ -86,10 +86,14 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._timer.start()
             self.editor.newTextSet.connect(self._updateModTime)
             self.editor.textSaved.connect(self._updateModTime)
+            self.editor.textSaved.connect(self._timer.start)
+            self.editor.textSaving.connect(self._timer.stop)
         else:
             self._timer.stop()
             self.editor.newTextSet.disconnect(self._updateModTime)
             self.editor.textSaved.disconnect(self._updateModTime)
+            self.editor.textSaved.disconnect(self._timer.start)
+            self.editor.textSaving.disconnect(self._timer.stop)
 
     def _updateModTime(self):
         try:
