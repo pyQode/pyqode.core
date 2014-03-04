@@ -70,6 +70,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._timer.setInterval(200)
         self._timer.timeout.connect(self._checkModTime)
         self._mtime = 0
+        self._notificationPending = False
 
     def _onInstall(self, editor):
         """
@@ -88,12 +89,14 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self.editor.textSaved.connect(self._updateModTime)
             self.editor.textSaved.connect(self._timer.start)
             self.editor.textSaving.connect(self._timer.stop)
+            self.editor.focusedIn.connect(self._checkForPendingNotification)
         else:
             self._timer.stop()
             self.editor.newTextSet.disconnect(self._updateModTime)
             self.editor.textSaved.disconnect(self._updateModTime)
             self.editor.textSaved.disconnect(self._timer.start)
             self.editor.textSaving.disconnect(self._timer.stop)
+            self.editor.focusedIn.disconnect(self._checkForPendingNotification)
 
     def _updateModTime(self):
         try:
@@ -139,10 +142,22 @@ class FileWatcherMode(Mode, QtCore.QObject):
         def innerAction(*a):
             self.editor.openFile(self.editor.filePath)
 
-        self.__notify("autoReloadChangedFiles", "File changed",
-                      "The file <i>%s</i> has changed externally.\n"
-                      "Do you want to reload it?" % os.path.basename(
-                          self.editor.filePath), expectedAction=innerAction)
+        args = ("autoReloadChangedFiles", "File changed",
+                "The file <i>%s</i> has changed externally.\nDo you want to "
+                "reload it?" % os.path.basename(self.editor.filePath))
+        kwargs = {"expectedAction": innerAction}
+        if self.editor.hasFocus():
+            self.__notify(*args, **kwargs)
+        else:
+            self._notificationPending = True
+            self._args = args
+            self._kwargs = kwargs
+
+    def _checkForPendingNotification(self, *args, **kwargs):
+        if self._notificationPending:
+            self.__notify(*self._args, **self._kwargs)
+            self._notificationPending = False
+
 
     def __notifyDeletedFile(self):
         """
