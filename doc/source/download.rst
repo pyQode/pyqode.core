@@ -54,5 +54,5 @@ Alternatively you can clone the repository using git:
     $ cd pyqode.core
     $ python setup.py install
 
-.. _source archive: https://github.com/ColinDuquesnoy/pyqode.core/archive/master.zip
-.. _github repository: https://github.com/ColinDuquesnoy/pyqode.core
+.. _source archive: https://github.com/pyQode/pyqode.core/archive/master.zip
+.. _github repository: https://github.com/pyQode/pyqode.core

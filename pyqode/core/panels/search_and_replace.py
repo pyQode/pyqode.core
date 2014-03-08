@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -137,6 +137,25 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def foreground(self, value):
         self.editor.setValue("searchOccurrenceForeground", value)
 
+    def refreshIcons(self, useTheme=True):
+        values = [
+            ("edit-find", "Find", [self.actionSearch], [self.labelSearch]),
+            ("edit-find-replace", "Replace", [self.actionActionSearchAndReplace], [self.labelReplace]),
+            ("go-down", "Next", [self.actionFindNext, self.pushButtonNext], []),
+            ("go-up", "Previous", [self.actionFindPrevious, self.pushButtonPrevious], []),
+            ("application-exit", "Close", [self.pushButtonClose], []),
+        ]
+        for theme, name, actions, labels in values:
+            icon = constants.ICONS[name]
+            if useTheme:
+                icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+            else:
+                icon = QtGui.QIcon(icon)
+            for action in actions:
+                action.setIcon(icon)
+            for label in labels:
+                label.setPixmap(icon.pixmap(16, 16))
+
     def __init__(self):
         Panel.__init__(self)
         DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
@@ -154,26 +173,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.__updateButtons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        findIcon = QtGui.QIcon.fromTheme(
-            "edit-find", QtGui.QIcon(":/pyqode-icons/rc/edit-find.png"))
-        replaceIcon = QtGui.QIcon.fromTheme(
-            "edit-find-replace",
-            QtGui.QIcon(":/pyqode-icons/rc/edit-find-replace.png"))
-        nextIcon = QtGui.QIcon.fromTheme(
-            "go-down", QtGui.QIcon(":/pyqode-icons/rc/go-down.png"))
-        previousIcon = QtGui.QIcon.fromTheme(
-            "go-up", QtGui.QIcon(":/pyqode-icons/rc/go-up.png"))
-        closeIcon = QtGui.QIcon.fromTheme(
-            "application-exit", QtGui.QIcon(":/pyqode-icons/rc/close.png"))
-        self.actionSearch.setIcon(findIcon)
-        self.labelSearch.setPixmap(findIcon.pixmap(16, 16))
-        self.actionActionSearchAndReplace.setIcon(replaceIcon)
-        self.labelReplace.setPixmap(replaceIcon.pixmap(16, 16))
-        self.actionFindNext.setIcon(nextIcon)
-        self.pushButtonNext.setIcon(nextIcon)
-        self.actionFindPrevious.setIcon(previousIcon)
-        self.pushButtonPrevious.setIcon(previousIcon)
-        self.pushButtonClose.setIcon(closeIcon)
+        self.refreshIcons()
 
     def _onInstall(self, editor):
         Panel._onInstall(self, editor)
@@ -394,10 +394,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         occurrences = self.getOccurrences()
         if cr == -1:
             self.selectNext()
+            cr = self.__getCurrentOccurrence()
         try:
+            # prevent search request due to editor textChanged
             try:
                 self.editor.textChanged.disconnect(self.requestSearch)
-            except RuntimeError:
+            except (RuntimeError, TypeError):
+                # already disconnected
                 pass
             occ = occurrences[cr]
             tc = self.editor.textCursor()
@@ -408,8 +411,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             offset = len_replacement - len_to_replace
             tc.insertText(text)
             self.editor.setTextCursor(tc)
-            self.editor.textChanged.connect(self.requestSearch)
-            # prevent search request due to editor textChanged
             self.__removeOccurrence(cr, offset)
             cr -= 1
             self.__setCurrentOccurrence(cr)
@@ -420,6 +421,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             return True
         except IndexError:
             return False
+        finally:
+            self.editor.textChanged.connect(self.requestSearch)
 
     def replaceAll(self, text=None):
         """
@@ -428,9 +431,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         :param text: The replacement text. If None, the content of the lineEdit
                      replace will be used instead
         """
+        tc = self.editor.textCursor()
+        tc.beginEditBlock()
         remains = self.replaceCurrent(text=text)
         while remains:
             remains = self.replaceCurrent(text=text)
+        tc.endEditBlock()
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:

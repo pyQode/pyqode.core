@@ -12,9 +12,9 @@ You can contribute in many different ways:
 
 If you have any question, just open an issue on the issue tracker.
 
-.. _`issue tracker`: https://github.com/ColinDuquesnoy/pyqode.core/issues?state=open
-.. _`wiki`: https://github.com/ColinDuquesnoy/pyqode.core/wiki/Extensions
-.. _`here`: https://github.com/ColinDuquesnoy/pyqode.core/wiki/Projects
+.. _`issue tracker`: https://github.com/pyQode/pyqode.core/issues?state=open
+.. _`wiki`: https://github.com/pyQode/pyqode.core/wiki/Extensions
+.. _`here`: https://github.com/pyQode/pyqode.core/wiki/Projects
 
 Recommendation for submitting a post request:
 -------------------------------------------------

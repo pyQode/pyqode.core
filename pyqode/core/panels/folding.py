@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -641,6 +641,8 @@ class FoldingPanel(Panel):
             self.editor.updateVisibleBlocks(None)
             for top, line, block in self.editor.visibleBlocks:
                 usd = block.userData()
+                if not usd:
+                    continue  # empty document
                 if usd.foldStart and usd.folded:
                     self.editor.markWholeDocumentDirty()
 

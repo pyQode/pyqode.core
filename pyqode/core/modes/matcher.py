@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -90,14 +90,20 @@ class SymbolMatcherMode(Mode):
             self.editor.removeDecoration(d)
         self.__decorations[:] = []
 
-    def getOpeningSymbolPos(self, cursor, character='('):
+    def getSymbolPos(self, cursor, character='(', type=0):
         retval = None, None
+        originalCursor = self.editor.textCursor()
+        self.editor.setTextCursor(cursor)
         block = cursor.block()
-        self.matchBraces(block.userData().parentheses, block.position())
+        mapping = {0: block.userData().parentheses,
+                   1: block.userData().squareBrackets,
+                   2: block.userData().braces}
+        self.matchBraces(mapping[type], block.position())
         for d in self.__decorations:
             if d.character == character:
                 retval = d.line, d.column
                 break
+        self.editor.setTextCursor(originalCursor)
         self._clearDecorations()
         return retval
 

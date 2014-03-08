@@ -3,7 +3,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+# Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,11 +32,12 @@ from pyqode.core.mode import Mode
 from pyqode.qt import QtCore, QtGui
 
 
-class FileWatcherMode(Mode):
+class FileWatcherMode(Mode, QtCore.QObject):
     """
-    FileWatcher mode. (Verify the external changes from opened file)
+    FileWatcher mode, check if the opened file has changed externally.
 
-    This mode adds the following properties to :attr:`pyqode.core.QCodeEdit.settings`
+    This mode adds the following properties to
+    :attr:`pyqode.core.QCodeEdit.settings`
 
     ====================== ====================== ======= ====================== ================
     Key                    Section                Type    Default value          Description
@@ -49,6 +50,11 @@ class FileWatcherMode(Mode):
     #: Mode description
     DESCRIPTION = "Watch the editor's file and take care of the reloading."
 
+    #: Signal emitted when the file has been deleted. The signal is emitted
+    #: with the current editor instance so that user have a chance to close
+    #: the editor.
+    fileDeleted = QtCore.Signal(object)
+
     @property
     def autoReloadChangedFiles(self):
         return self.editor.settings.value("autoReloadChangedFiles")
@@ -58,11 +64,57 @@ class FileWatcherMode(Mode):
         self.editor.settings.setValue("autoReloadChangedFiles", value)
 
     def __init__(self):
-        super(FileWatcherMode, self).__init__()
-        self.__fileSystemWatcher = QtCore.QFileSystemWatcher()
-        self.__flgNotify = False
-        self.__changeWaiting = False
-        self.__changeWaiting = False
+        QtCore.QObject.__init__(self)
+        Mode.__init__(self)
+        self._timer = QtCore.QTimer()
+        self._timer.setInterval(200)
+        self._timer.timeout.connect(self._checkModTime)
+        self._mtime = 0
+        self._notificationPending = False
+
+    def _onInstall(self, editor):
+        """
+        Adds autoReloadChangedFiles settings on install.
+        """
+        Mode._onInstall(self, editor)
+        self.editor.settings.addProperty("autoReloadChangedFiles", False)
+
+    def _onStateChanged(self, state):
+        """
+        Connects/Disconnects to the mouseWheelActivated and keyPressed event
+        """
+        if state is True:
+            self._timer.start()
+            self.editor.newTextSet.connect(self._updateModTime)
+            self.editor.textSaved.connect(self._updateModTime)
+            self.editor.textSaved.connect(self._timer.start)
+            self.editor.textSaving.connect(self._timer.stop)
+            self.editor.focusedIn.connect(self._checkForPendingNotification)
+        else:
+            self._timer.stop()
+            self.editor.newTextSet.disconnect(self._updateModTime)
+            self.editor.textSaved.disconnect(self._updateModTime)
+            self.editor.textSaved.disconnect(self._timer.start)
+            self.editor.textSaving.disconnect(self._timer.stop)
+            self.editor.focusedIn.disconnect(self._checkForPendingNotification)
+
+    def _updateModTime(self):
+        try:
+            self._mtime = os.path.getmtime(self.editor.filePath)
+        except OSError:
+            self._mtime = 0
+            self._timer.stop()
+
+    def _checkModTime(self):
+        if not self.editor.filePath:
+            return
+        if not os.path.exists(self.editor.filePath) and self._mtime:
+            self.__notifyDeletedFile()
+        else:
+            mtime = os.path.getmtime(self.editor.filePath)
+            if mtime > self._mtime:
+                self._mtime = mtime
+                self.__notifyChange()
 
     def __notify(self, settingsValue, title, message, dialogType=None,
                  expectedType=None, expectedAction=None):
@@ -80,9 +132,7 @@ class FileWatcherMode(Mode):
                 self.editor, title, message,
                 dialogType) == expectedType):
             expectedAction(self.editor.filePath)
-        self.__updateFilePath()
-        self.__changeWaiting = False
-        self.__flgNotify = False
+        self._updateModTime()
 
     def __notifyChange(self):
         """
@@ -91,99 +141,30 @@ class FileWatcherMode(Mode):
         """
         def innerAction(*a):
             self.editor.openFile(self.editor.filePath)
-        self.__notify("autoReloadChangedFiles", "File changed",
-                      "The file <i>%s</i> has changed externally.\n"
-                      "Do you want to reload it?" % os.path.basename(
-                          self.editor.filePath), expectedAction=innerAction)
+
+        args = ("autoReloadChangedFiles", "File changed",
+                "The file <i>%s</i> has changed externally.\nDo you want to "
+                "reload it?" % os.path.basename(self.editor.filePath))
+        kwargs = {"expectedAction": innerAction}
+        if self.editor.hasFocus():
+            self.__notify(*args, **kwargs)
+        else:
+            self._notificationPending = True
+            self._args = args
+            self._kwargs = kwargs
+
+    def _checkForPendingNotification(self, *args, **kwargs):
+        if self._notificationPending:
+            self.__notify(*self._args, **self._kwargs)
+            self._notificationPending = False
+
 
     def __notifyDeletedFile(self):
         """
         Notify user from external file removal if autoReloadChangedFiles is False then
         reload the changed file in the editor
         """
-        self.__notify("autoReloadChangedFiles", "File deleted",
-                      "The file <i>%s</i> has been deleted externally." % os.path.basename(
-                          self.editor.filePath), QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
-
-    def __onFileChanged(self, path):
-        """
-        On file changed, notify the user if we have focus, otherwise delay the
-        notification to the focusIn event
-        """
-        if os.path.isfile(path):
-            content, encoding = self.editor.readFile(
-                path, encoding=self.editor.fileEncoding)
-        else:
-            self.__fileSystemWatcher.fileChanged.disconnect(
-                self.__onFileChanged)
-            QtCore.QTimer.singleShot(500, self.__onPosibleFileDeleted)
-            return
-        if content == self.editor.toPlainText():
-            logger.debug("FileWatcherMode: Internal change, skipping")
-            return
-        self.__changeWaiting = True
-        if self.editor.hasFocus() and self.__flgNotify:
-            self.__notifyChange()
-
-    def files(self):
-        return self.__fileSystemWatcher.files()
-
-    @QtCore.Slot()
-    def __onPosibleFileDeleted(self, *evt):
-        path = self.editor.filePath
-        try:
-            self.editor.readFile(path, encoding=self.editor.fileEncoding)
-        except IOError as e:
-            self.editor.dirty = True
-            self.__notifyDeletedFile()
-        else:
-            self.__onFileChanged(path)
-        self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
-
-    def __updateFilePath(self):
-        path = self.editor.filePath
-        if path and path not in self.__fileSystemWatcher.files():
-            self.__fileSystemWatcher.addPath(path)
-
-    @QtCore.Slot()
-    def __onEditorFilePathChanged(self):
-        """
-        Change the watched file
-        """
-        if len(self.__fileSystemWatcher.files()):
-            self.__fileSystemWatcher.removePaths(
-                self.__fileSystemWatcher.files())
-        self.__updateFilePath()
-
-    @QtCore.Slot()
-    def __onEditorFocusIn(self):
-        """
-        Notify if there are pending changes
-        """
-        if self.__changeWaiting:
-            self.__notifyChange()
-
-    def _onInstall(self, editor):
-        """
-        Adds autoReloadChangedFiles settings on install.
-        """
-        Mode._onInstall(self, editor)
-        self.editor.settings.addProperty("autoReloadChangedFiles", False)
-
-    def _onStateChanged(self, state):
-        """
-        Connects/Disconnects to the mouseWheelActivated and keyPressed event
-        """
-        if state is True:
-            self.__fileSystemWatcher.fileChanged.connect(self.__onFileChanged)
-            self.editor.newTextSet.connect(self.__onEditorFilePathChanged)
-            self.editor.focusedIn.connect(self.__onEditorFocusIn)
-        else:
-            self.editor.newTextSet.disconnect(self.__onEditorFilePathChanged)
-            self.editor.focusedIn.disconnect(self.__onEditorFocusIn)
-            self.__fileSystemWatcher.removePath(self.editor.filePath)
-            self.__fileSystemWatcher.fileChanged.disconnect(
-                self.__onFileChanged)
+        self.fileDeleted.emit(self.editor)
 
 
 if __name__ == '__main__':

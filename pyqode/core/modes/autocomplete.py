@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #THE SOFTWARE.
 #
 """ Contains the AutoCompleteMode """
+from pyqode.qt import QtGui
 from pyqode.core.mode import Mode
 
 
@@ -54,9 +55,19 @@ class AutoCompleteMode(Mode):
             self.editor.keyPressed.disconnect(self._onKeyPressed)
 
     def _onPostKeyPressed(self, e):
+        if e.isAccepted():
+            return
         txt = e.text()
+        tc = self.editor.textCursor()
+        tc.movePosition(QtGui.QTextCursor.Right,
+                        QtGui.QTextCursor.KeepAnchor)
+        next_char = tc.selectedText().strip()
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
+            if next_char == toInsert:
+                tc.clearSelection()
+                self.editor.setTextCursor(tc)
+                return
             tc = self.editor.textCursor()
             p = tc.position()
             tc.insertText(toInsert)
@@ -64,6 +75,16 @@ class AutoCompleteMode(Mode):
             self.editor.setTextCursor(tc)
 
     def _onKeyPressed(self, e):
+        txt = e.text()
+        tc = self.editor.textCursor()
+        tc.movePosition(QtGui.QTextCursor.Right,
+                        QtGui.QTextCursor.KeepAnchor)
+        next_char = tc.selectedText().strip()
+        if txt and next_char == txt:
+            e.accept()
+            tc.clearSelection()
+            self.editor.setTextCursor(tc)
+            return
         if e.text() == ')':
             tc = self.editor.textCursor()
             #assert isinstance(tc, QtGui.QTextCursor)

@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ from pyqode.core.panel import Panel
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
 from pyqode.core.decoration import TextDecoration
+from pyqode.core.server import Server
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
@@ -49,12 +50,15 @@ from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pyqode.core.system import TextStyle
 from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
-from pyqode.core.system import SubprocessServer
+
+# server
+from pyqode.core.server import get_server, start_server, Server, Worker
 
 # modes
 from pyqode.core.modes import AutoCompleteMode
 from pyqode.core.modes import AutoIndentMode
 from pyqode.core.modes import CaretLineHighlighterMode
+from pyqode.core.modes import CaseConverterMode
 from pyqode.core.modes import CheckerMode, CheckerMessage
 from pyqode.core.modes import MSG_STATUS_ERROR
 from pyqode.core.modes import MSG_STATUS_INFO
@@ -81,7 +85,7 @@ from pyqode.core.panels import SearchAndReplacePanel
 
 
 #: pyqode.core version
-__version__ = "1.2"
+__version__ = "1.3.0"
 
 
 #
@@ -118,13 +122,14 @@ class QGenericCodeEdit(QCodeEdit):
         self.installPanel(SearchAndReplacePanel(), PanelPosition.BOTTOM)
 
         self.installMode(AutoCompleteMode())
+        self.installMode(CaseConverterMode())
         self.installMode(FileWatcherMode())
         self.installMode(CaretLineHighlighterMode())
         self.installMode(RightMarginMode())
         self.installMode(PygmentsSyntaxHighlighter(self.document()))
         self.installMode(ZoomMode())
-        self.installMode(AutoIndentMode())
         self.installMode(CodeCompletionMode())
+        self.installMode(AutoIndentMode())
         self.installMode(IndenterMode())
         self.codeCompletionMode.addCompletionProvider(
             DocumentWordCompletionProvider())
@@ -146,4 +151,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "WordClickMode",
-           "PYGMENTS_STYLES", "memoized", "SubprocessServer", "SymbolMatcherMode"]
+           "get_server", "start_server", "Server", "Worker",
+           "PYGMENTS_STYLES", "memoized", "Server", "SymbolMatcherMode"]

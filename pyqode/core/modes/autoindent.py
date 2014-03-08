@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,8 @@ class AutoIndentMode(Mode):
         Return the indentation text (a series of spaces or tabs)
 
         :param tc: QTextCursor
+
+        :returns: Tuple (text before new line, text after new line)
         """
         pos = tc.position()
         # tc.movePosition(QTextCursor.StartOfLine)

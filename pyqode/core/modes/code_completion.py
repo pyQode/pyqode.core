@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,16 @@ This module contains the code completion mode and the related classes.
 import re
 import sys
 import os
-from pyqode.core import constants
+from pyqode.core import constants, Server, Worker
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
-from pyqode.core.system import DelayJobRunner, SubprocessServer, memoized
+from pyqode.core.system import DelayJobRunner, memoized
+from pyqode.core.server import get_server
 from pyqode.qt import QtGui, QtCore
 from pyqode.core import logger
 
 
-class PreLoadWorker(object):
+class PreLoadWorker(Worker):
     """
     A worker object that will run the preload method on all completion provider
     in the child process.
@@ -60,14 +61,14 @@ class PreLoadWorker(object):
         results = []
         for prov in self.__providers:
             # pass the process dict to every providers
-            setattr(prov, "processDict", self.processDict)
+            setattr(prov, "slotDict", self.slotDict)
             r = prov.preload(*self.__args)
             if r:
                 results.append(r)
         return results
 
 
-class CompletionWorker(object):
+class CompletionWorker(Worker):
     """
     A worker object that will run the complete method of every providers
     """
@@ -83,7 +84,7 @@ class CompletionWorker(object):
         completions = []
         for prov in self.__providers:
             # pass the process dict to every providers
-            setattr(prov, "processDict", self.processDict)
+            setattr(prov, "slotDict", self.slotDict)
             completions.append(prov.complete(*self.__args))
             if len(completions) > 20:
                 break
@@ -128,7 +129,7 @@ class CompletionProvider(object):
 
     .. note: As the provider is executed in a child process, your class instance
              will loose its data every time its run. To store persistent data
-             (such as the preload results), you may use the 'processDict'
+             (such as the preload results), you may use the 'slotDict'
              attribute. Care must be taken from the key, we suggest a
              combination of the file path and type(self).__name__.
 
@@ -285,7 +286,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Note that the provider instance will be pickled to be sent to the
         subprocess, this means that you cannot store data to keep results from
         run to run. Instead you may use
-        :attr:`pyqode.core.CompletionProvider.processDict` which is a regular
+        :attr:`pyqode.core.CompletionProvider.slotDict` which is a regular
         dict attribute that is set on every provider object when run in the
         subprocess.
 
@@ -335,29 +336,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         code = self.editor.toPlainText()
         self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
 
-    @classmethod
-    def startCompletionServer(cls, port=5000):
-        """
-        Starts the code completion server. This is automatically called the
-        first time a code completion mode is isntalled on a QCodeEdit instance
-        but you can call it manually before if you need it.
-
-        :return The code completion server if created.
-        :rtype pyqode.core.SubprocessServer or None
-        """
-        if not "PYQODE_NO_COMPLETION_SERVER" in os.environ:
-            if CodeCompletionMode.SERVER is None:
-                s = SubprocessServer()
-                if s.start(port):
-                    cls.SERVER = s
-                    return s
-        return None
-
     def _onInstall(self, editor):
-        CodeCompletionMode.startCompletionServer(self._server_port)
-        if CodeCompletionMode.SERVER:
-            CodeCompletionMode.SERVER.signals.workCompleted.connect(
-                self.__onWorkFinished)
+        srv = get_server()
+        if srv:
+            srv.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -713,12 +695,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         logger.debug("Completion requested")
         self.__jobRunner.requestJob(self.__setWaitCursor, False)
         worker = CompletionWorker(self.__providers, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
+        get_server().requestWork(self, worker)
 
     def __preload(self, *args):
         self.preLoadStarted.emit()
         worker = PreLoadWorker(self.__providers, *args)
-        CodeCompletionMode.SERVER.requestWork(self, worker)
+        get_server().requestWork(self, worker)
 
 
 class DocumentWordCompletionProvider(CompletionProvider):
@@ -747,8 +729,8 @@ class DocumentWordCompletionProvider(CompletionProvider):
         for w in self.split(code, wordSeparators):
             completions.append(Completion(w))
         # store results in the subprocess dict for later use
-        self.processDict["docWords%s-%s" %
-                         (filePath, type(self).__name__)] = completions
+        self.slotDict["docWords%s-%s" %
+                      (filePath, type(self).__name__)] = completions
         return completions
 
     @staticmethod
@@ -781,7 +763,7 @@ class DocumentWordCompletionProvider(CompletionProvider):
                  filePath, fileEncoding):
         # get previous result from the server process dict
         try:
-            words = self.processDict["docWords%s-%s"
+            words = self.slotDict["docWords%s-%s"
                                      % (filePath, type(self).__name__)]
         except KeyError:
             words = None

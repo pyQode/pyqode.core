@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,7 @@
 """
 Setup script for pyqode.core
 """
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    import ez_setup
-    ez_setup.use_setuptools()
-    from setuptools import setup, find_packages
+from setuptools import setup, find_packages
 
 
 def read_version():
@@ -41,31 +36,24 @@ def read_version():
             if "__version__" in l:
                 return l.split("=")[1].strip().replace('"', '')
 
-print(read_version())
 
 def readme():
     return str(open('README.rst').read())
 
 
-# get requirements
-requirements = ['pygments']
-
-packages = find_packages()
 setup(
     name='pyqode.core',
     namespace_packages=['pyqode'],
     version=read_version(),
-    packages=packages,
+    packages=find_packages(),
     keywords=["QCodeEdit PySide PyQt code editor widget"],
-    package_data={'pyqode.core.ui': ['*.ui', '*.qrc', 'rc/*']},
-    #package_dir={'pyqode': 'pyqode', "pyqode_designer":},
-    url='https://github.com/ColinDuquesnoy/pyqode.core',
+    url='https://github.com/pyQode/pyqode.core',
     license='MIT',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
     long_description=readme(),
-    install_requires=requirements,
+    install_requires=['pygments'],
     entry_points={'pyqode_plugins':
                   ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
     zip_safe=False,

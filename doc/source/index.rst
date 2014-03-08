@@ -111,7 +111,7 @@ Indices and tables:
 * :ref:`search`
 
 
-.. _pyqode.core: https://github.com/ColinDuquesnoy/pyqode.core
-.. _pyqode.python: https://github.com/ColinDuquesnoy/pyqode.python
-.. _pyqode.widgets: https://github.com/ColinDuquesnoy/pyqode.widgets
-.. _pyqode.designer: https://github.com/ColinDuquesnoy/pyqode.designer
+.. _pyqode.core: https://github.com/pyQode/pyqode.core
+.. _pyqode.python: https://github.com/pyQode/pyqode.python
+.. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
+.. _pyqode.designer: https://github.com/pyQode/pyqode.designer

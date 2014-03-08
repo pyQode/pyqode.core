@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,10 @@ This module contains the definition of the QCodeEdit
 import sys
 import weakref
 from pyqode.core import logger
-from pyqode.core import constants
+from pyqode.core import constants, dialogs
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
+from pyqode.core.server import start_server
 from pyqode.core.system import DelayJobRunner
 from pyqode.core.decoration import TextDecoration
 from pyqode.qt import QtGui, QtCore
@@ -365,6 +366,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        # start the completion server with default parameters if not
+        # already started by the user
+        start_server()
         self._lastMousePos = None
         self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()
@@ -469,8 +473,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :rtype: QtGui.QTextCursor
         """
         if line is None or isinstance(line, bool):
-            line, result = QtGui.QInputDialog.getInt(
-                self, "Go to line", "Line number:", 1, 1, self.lineCount())
+            line, result = dialogs.GoToLineDialog.getLine(
+                self, self.cursorPosition[0], self.lineCount())
             if not result:
                 return
             if not line:
@@ -1339,94 +1343,50 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.__actions.remove(action)
 
+    def refreshIcons(self, useTheme=True):
+        for action in self.__actions:
+            if action.text() in constants.ICONS:
+                icon, shortcut, theme = constants.ACTIONS[action.text()]
+                if useTheme:
+                    action.setIcon(QtGui.QIcon.fromTheme(
+                        theme, QtGui.QIcon(icon)))
+                else:
+                    action.setIcon(QtGui.QIcon(icon))
+        try:
+            self.searchAndReplacePanel.refreshIcons(useTheme=useTheme)
+        except AttributeError:
+            pass  # panel not installed
+
+
     def __createDefaultActions(self):
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-undo",
-                                  QtGui.QIcon(constants.ACTION_UNDO[0])),
-            "Undo", self)
-        a.setShortcut(constants.ACTION_UNDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.undo)
-        self.undoAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-redo",
-                                  QtGui.QIcon(constants.ACTION_REDO[0])),
-            "Redo", self)
-        a.setShortcut(constants.ACTION_REDO[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.redo)
-        self.redoAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme(
-                "edit-copy", QtGui.QIcon(constants.ACTION_COPY[0])),
-            "Copy", self)
-        a.setShortcut(constants.ACTION_COPY[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.copy)
-        self.copyAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-cut",
-                                  QtGui.QIcon(constants.ACTION_CUT[0])),
-            "Cut", self)
-        a.setShortcut(constants.ACTION_CUT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.cut)
-        self.copyAvailable.connect(a.setEnabled)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-paste",
-                                  QtGui.QIcon(constants.ACTION_PASTE[0])),
-            "Paste", self)
-        a.setShortcut(constants.ACTION_PASTE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.paste)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-delete",
-                                  QtGui.QIcon(constants.ACTION_DELETE[0])),
-            "Delete", self)
-        a.setShortcut(constants.ACTION_DELETE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.delete)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("edit-select-all",
-                                  QtGui.QIcon(constants.ACTION_SELECT_ALL[0])),
-            "Select all", self)
-        a.setShortcut(constants.ACTION_SELECT_ALL[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.selectAll)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("format-indent-more",
-                                  QtGui.QIcon(constants.ACTION_INDENT[0])),
-            "Indent", self)
-        a.setShortcut(constants.ACTION_INDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.indent)
-        self.addAction(a)
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("format-indent-less",
-                                  QtGui.QIcon(constants.ACTION_UNINDENT[0])),
-            "Un-indent", self)
-        a.setShortcut(constants.ACTION_UNINDENT[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.unIndent)
-        self.addAction(a)
-        self.addSeparator()
-        a = QtGui.QAction(
-            QtGui.QIcon.fromTheme("start-here",
-                                  QtGui.QIcon(constants.ACTION_GOTO_LINE[0])),
-            "Go to line", self)
-        a.setShortcut(constants.ACTION_GOTO_LINE[1])
-        a.setIconVisibleInMenu(True)
-        a.triggered.connect(self.gotoLine)
-        self.addAction(a)
+        values = [
+            ("Undo", self.undo, self.undoAvailable),
+            ("Redo", self.redo, self.redoAvailable),
+            None,
+            ("Copy", self.copy, self.copyAvailable),
+            ("Cut", self.cut, self.copyAvailable),
+            ("Paste", self.paste, None),
+            ("Delete", self.delete, None),
+            ("Select all", self.selectAll, None),
+            ("Indent", self.indent, None),
+            ("Un-indent", self.unIndent, None),
+            ("Go to line", self.gotoLine, None)
+        ]
+
+        for val in values:
+            if val:
+                name, trig_slot, enable_signal = val
+                icon, shortcut, theme = constants.ACTIONS[name]
+                a = QtGui.QAction(QtGui.QIcon.fromTheme(
+                    theme, QtGui.QIcon(icon)), name, self)
+                a.setShortcut(shortcut)
+                a.setIconVisibleInMenu(True)
+                a.triggered.connect(trig_slot)
+                if enable_signal:
+                    enable_signal.connect(a.setEnabled)
+                self.addAction(a)
+            else:
+                self.addSeparator()
 
     def __initSettings(self):
         """
@@ -1640,13 +1600,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 key == "selectionBackground" or key == "selectionForeground"
                 or not key):
             p = self.palette()
-            c = self.style.value("background")
+            c = QtGui.QColor(self.style.value("background"))
             p.setColor(p.Base, c)
-            c = self.style.value("foreground")
+            c = QtGui.QColor(self.style.value("foreground"))
             p.setColor(p.Text, c)
-            c = self.style.value("selectionBackground")
+            c = QtGui.QColor(self.style.value("selectionBackground"))
             p.setColor(QtGui.QPalette.Highlight, c)
-            c = self.style.value("selectionForeground")
+            c = QtGui.QColor(self.style.value("selectionForeground"))
             p.setColor(QtGui.QPalette.HighlightedText, c)
             self.setPalette(p)
 

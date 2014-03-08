@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #The MIT License (MIT)
@@ -24,30 +23,30 @@
 #THE SOFTWARE.
 #
 """
-This is a simple test script to that is meant to be run by Travis CI to ensure
-everything works properly foreach bindings on each supported python
-version (2.7, 3.2).
-
-It runs a QApplication and shows a QGenericCodeEdit for 500ms.
+Contains pyqode dialogs windows.
 """
-import sys
-from pyqode.qt import QtCore, QtGui
-from pyqode.core import QGenericCodeEdit
+from pyqode.qt import QtGui
+from pyqode.core.ui import dlg_goto_line_ui
 
 
-def leave():
-    app = QtGui.QApplication.instance()
-    app.exit(0)
+class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
+    def __init__(self, parent, currentLine, lineCount):
+        QtGui.QDialog.__init__(self, parent)
+        dlg_goto_line_ui.Ui_Dialog.__init__(self)
+        self.setupUi(self)
+        self.spinBox.setValue(currentLine)
+        self.spinBox.setMaximum(lineCount)
+        self.lblCurrentLine.setText("%d" % currentLine)
+        self.lblLineCount.setText("%d" % lineCount)
+        self.buttonBox.button(self.buttonBox.Ok).setText("Go")
+        self.buttonBox.button(self.buttonBox.Cancel).setText("I'm going nowhere")
+
+    @classmethod
+    def getLine(cls, parent, currentLine, lineCount):
+        dlg = GoToLineDialog(parent, currentLine, lineCount)
+        if dlg.exec_() == dlg.Accepted:
+            return dlg.spinBox.value(), True
+        return currentLine, False
 
 
-def main():
-    app = QtGui.QApplication(sys.argv)
-    editor = QGenericCodeEdit()
-    editor.openFile(__file__)
-    editor.show()
-    QtCore.QTimer.singleShot(500, leave)
-    return app.exec_()
 
-
-if __name__ == "__main__":
-    sys.exit(main())

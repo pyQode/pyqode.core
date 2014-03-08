@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -68,28 +68,32 @@ MARGIN_POS = 80
 #
 # Icons
 #
-ICONS = []
-ACTION_UNDO = (":/pyqode-icons/rc/edit-undo.png", "Ctrl+Z")
-ICONS.append(ACTION_UNDO)
-ACTION_REDO = (":/pyqode-icons/rc/edit-redo.png", "Ctrl+Y")
-ICONS.append(ACTION_REDO)
-ACTION_COPY = (":/pyqode-icons/rc/edit-copy.png", "Ctrl+C")
-ICONS.append(ACTION_COPY)
-ACTION_CUT = (":/pyqode-icons/rc/edit-cut.png", "Ctrl+X")
-ICONS.append(ACTION_CUT)
-ACTION_PASTE = (":/pyqode-icons/rc/edit-paste.png", "Ctrl+V")
-ICONS.append(ACTION_PASTE)
-ACTION_DELETE = (":/pyqode-icons/rc/edit-delete.png", "Delete")
-ICONS.append(ACTION_DELETE)
-ACTION_SELECT_ALL = (":/pyqode-icons/rc/edit-select-all.png", "Ctrl+A")
-ICONS.append(ACTION_SELECT_ALL)
-ACTION_INDENT = (":/pyqode-icons/rc/format-indent-more.png", "Tab")
-ICONS.append(ACTION_INDENT)
-ACTION_UNINDENT = (":/pyqode-icons/rc/format-indent-less.png", "Shift+Tab")
-ICONS.append(ACTION_UNINDENT)
-ACTION_GOTO_LINE = (":/pyqode-icons/rc/goto-line.png", "Ctrl+G")
-ICONS.append(ACTION_GOTO_LINE)
+ACTIONS = {
+    "Undo": (":/pyqode-icons/rc/edit-undo.png", "Ctrl+Z", "edit-undo"),
+    "Redo": (":/pyqode-icons/rc/edit-redo.png", "Ctrl+Y", "edit-redo"),
+    "Copy": (":/pyqode-icons/rc/edit-copy.png", "Ctrl+C", "edit-copy"),
+    "Cut": (":/pyqode-icons/rc/edit-cut.png", "Ctrl+X", "edit-cut"),
+    "Paste": (":/pyqode-icons/rc/edit-paste.png", "Ctrl+V", "edit-paste"),
+    "Delete": (":/pyqode-icons/rc/edit-delete.png", "Delete", "edit-delete"),
+    "Select all": (":/pyqode-icons/rc/edit-select-all.png", "Ctrl+A", "edit-select-all"),
+    "Indent": (":/pyqode-icons/rc/format-indent-more.png", "Tab", "format-indent-more"),
+    "Un-indent": (":/pyqode-icons/rc/format-indent-less.png", "Shift+Tab", "format-indent-less"),
+    "Go to line": (":/pyqode-icons/rc/goto-line.png", "Ctrl+G", "start-here")
+}
 
+ICONS = {
+    "Find": ":/pyqode-icons/rc/edit-find.png",
+    "Replace": ":/pyqode-icons/rc/edit-find-replace.png",
+    "Next": ":/pyqode-icons/rc/go-down.png",
+    "Previous": ":/pyqode-icons/rc/go-up.png",
+    "Close": ":/pyqode-icons/rc/close.png"
+}
+
+for k, v in ACTIONS.items():
+    ICONS[k] = v[0]
+
+
+# non native folding icons
 ICON_ARROW_RIGHT = (":/pyqode-icons/rc/arrow_right_off.png",
                     ":/pyqode-icons/rc/arrow_right_on.png")
 ICON_ARROW_DOWN = (":/pyqode-icons/rc/arrow_down_off.png",

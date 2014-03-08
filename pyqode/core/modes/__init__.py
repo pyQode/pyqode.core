@@ -3,7 +3,7 @@
 #
 #The MIT License (MIT)
 #
-#Copyright (c) <2013> <Colin Duquesnoy and others, see AUTHORS.txt>
+#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ This package contains the core modes (language independant)
 """
 from pyqode.core.modes.autocomplete import AutoCompleteMode
 from pyqode.core.modes.caret_line_highlight import CaretLineHighlighterMode
+from pyqode.core.modes.case_converter import CaseConverterMode
 from pyqode.core.modes.checker import CheckerMode, CheckerMessage
 from pyqode.core.modes.checker import MSG_STATUS_ERROR
 from pyqode.core.modes.checker import MSG_STATUS_INFO
@@ -56,5 +57,5 @@ __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "DocumentWordCompletionProvider", "FileWatcherMode",
            "SymbolMatcherMode", "IndenterMode"
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "PYGMENTS_STYLES", "AutoIndentMode",
+           "PYGMENTS_STYLES", "AutoIndentMode", "CaseConverterMode",
            "WordClickMode"]

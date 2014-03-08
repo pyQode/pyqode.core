@@ -1,12 +1,42 @@
 Change Log
-===========
+==========
 
 .. note::
 
     These lists are not exhaustive.
 
-1.1
----------
+1.3.0
+-----
+
+New features:
+
+    - case converter mode
+    - improve go to line dialog
+
+
+Fixed bugs:
+
+    - fix bugs with replace all
+    - Fix wrong behavious with auto completion
+    - Fix a bug where it was not possible to select a code completion using ENTER
+    - fix UnicodeEncodeError with python 2.7
+
+1.2.0
+-----
+
+New features:
+    - debian packages available on ppa:pyqode/stable and ppa:pyqode/unstable
+
+Fixed bugs:
+
+    - Code Completion does not trigger if there is a string or comment in the line
+    - Fix filewatcher bug with deleted files
+    - Fix filewatcher bug when user say no to file reload the first time
+    - Fix syntax highlighter bugs with old PyQt libraries.
+
+
+1.1.0
+-----
 
 New features:
 
@@ -18,14 +48,14 @@ New features:
   - New mode: WordClickMode, add support for word under MOUSE cursor
   - New setting: autoSave on focus out
 
-Bug fixed:
+Fixed bugs:
 
   - Fix bug with subprocess intercomm (and improves performances)
   - Fix Document cleanup bugs
 
 
-1.0
-----------
+1.0.0
+-----
 
 The API has been completely rewritten. Here are the major changes
 
@@ -40,14 +70,14 @@ The API has been completely rewritten. Here are the major changes
  * minimum travis ci integration (just to ensure pyqode remains importable for all supported interpreter/qt bingins, there is still no real test suite).
 
 0.1.1
-----------
+-----
 
-Bug fixes release:
+Fixed bugs:
     - better code completion popup show/hide
 
 
 0.1.0
--------
+-----
 
 First release. Brings the following features:
 
