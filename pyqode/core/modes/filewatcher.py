@@ -71,6 +71,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._timer.timeout.connect(self._checkModTime)
         self._mtime = 0
         self._notificationPending = False
+        self._processing = False
 
     def _onInstall(self, editor):
         """
@@ -154,9 +155,11 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._kwargs = kwargs
 
     def _checkForPendingNotification(self, *args, **kwargs):
-        if self._notificationPending:
+        if self._notificationPending and not self._processing:
+            self._processing = True
             self.__notify(*self._args, **self._kwargs)
             self._notificationPending = False
+            self._processing = False
 
 
     def __notifyDeletedFile(self):
