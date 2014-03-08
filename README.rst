@@ -1,8 +1,8 @@
 Python/Qt Code Editor Widget library
 ====================================
 
-.. image:: https://api.travis-ci.org/ColinDuquesnoy/pyqode.core.png?branch=master
-    :target: https://travis-ci.org/ColinDuquesnoy/pyqode.core
+.. image:: https://api.travis-ci.org/pyQode/pyqode.core.png?branch=master
+    :target: https://travis-ci.org/pyQode/pyqode.core
     :alt: Travis-CI build status
 
 .. image:: https://pypip.in/d/pyqode.core/badge.png
@@ -120,7 +120,7 @@ Resources
 
 .. _Downloads: https://github.com/pyQode/pyqode.core/releases
 .. _Source repository: https://github.com/pyQode/pyqode.core/
-.. _Documentation : http://pyqodecore.readthedocs.org/en/latest/
+.. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/pyQode/pyqode.core/wiki
 
 
