@@ -107,6 +107,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._timer.stop()
 
     def _checkModTime(self):
+        if self.editor is None:
+            return
         if not self.editor.filePath:
             return
         if not os.path.exists(self.editor.filePath) and self._mtime:
