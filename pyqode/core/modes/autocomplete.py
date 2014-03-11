@@ -59,27 +59,32 @@ class AutoCompleteMode(Mode):
             return
         txt = e.text()
         tc = self.editor.textCursor()
-        tc.movePosition(QtGui.QTextCursor.Right,
+        tc.movePosition(QtGui.QTextCursor.WordRight,
                         QtGui.QTextCursor.KeepAnchor)
-        next_char = tc.selectedText().strip()
+        next_char = tc.selectedText()
+        if len(next_char):
+            next_char = next_char[0]
+        else:
+            next_char = None
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
             if next_char == toInsert:
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 return
-            tc = self.editor.textCursor()
-            p = tc.position()
-            tc.insertText(toInsert)
-            tc.setPosition(p)
-            self.editor.setTextCursor(tc)
+            if not next_char or next_char.isspace():
+                tc = self.editor.textCursor()
+                p = tc.position()
+                tc.insertText(toInsert)
+                tc.setPosition(p)
+                self.editor.setTextCursor(tc)
 
     def _onKeyPressed(self, e):
         txt = e.text()
         tc = self.editor.textCursor()
         tc.movePosition(QtGui.QTextCursor.Right,
                         QtGui.QTextCursor.KeepAnchor)
-        next_char = tc.selectedText().strip()
+        next_char = tc.selectedText()[0]
         if txt and next_char == txt:
             e.accept()
             tc.clearSelection()
