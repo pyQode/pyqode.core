@@ -72,7 +72,6 @@ class AutoCompleteMode(Mode):
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 return
-            print(next_char)
             if (not next_char or next_char in self.MAPPING.keys() or
                     next_char in self.MAPPING.values() or
                     next_char.isspace()):
