@@ -72,7 +72,10 @@ class AutoCompleteMode(Mode):
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 return
-            if not next_char or next_char.isspace():
+            print(next_char)
+            if (not next_char or next_char in self.MAPPING.keys() or
+                    next_char in self.MAPPING.values() or
+                    next_char.isspace()):
                 tc = self.editor.textCursor()
                 p = tc.position()
                 tc.insertText(toInsert)
@@ -84,7 +87,10 @@ class AutoCompleteMode(Mode):
         tc = self.editor.textCursor()
         tc.movePosition(QtGui.QTextCursor.Right,
                         QtGui.QTextCursor.KeepAnchor)
-        next_char = tc.selectedText()[0]
+        try:
+            next_char = tc.selectedText()[0]
+        except IndexError:
+            next_char = ''
         if txt and next_char == txt:
             e.accept()
             tc.clearSelection()
