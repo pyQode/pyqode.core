@@ -89,8 +89,9 @@ class AutoIndentMode(Mode):
             # eats possible whitespaces
             tc.movePosition(tc.WordRight, tc.KeepAnchor)
             txt = tc.selectedText()
-            new_txt = txt.replace(" ", '')
-            if len(txt) > len(new_txt):
-                tc.insertText(new_txt)
+            if txt.startswith(' '):
+                new_txt = txt.replace(" ", '')
+                if len(txt) > len(new_txt):
+                    tc.insertText(new_txt)
 
             keyEvent.accept()
