@@ -24,30 +24,23 @@
 #THE SOFTWARE.
 #
 """
-This is a simple test script to that is meant to be run by Travis CI to ensure
-everything works properly foreach bindings on each supported python
-version (2.7, 3.2).
-
-It runs a QApplication and shows a QGenericCodeEdit for 500ms.
+This is a simple functional test, it runs a QApplication and shows a
+QGenericCodeEdit for 500ms than exit
 """
 import sys
 from pyqode.qt import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
 
 
-def leave():
+def _leave():
     app = QtGui.QApplication.instance()
     app.exit(0)
 
 
-def main():
+def test_functional():
     app = QtGui.QApplication(sys.argv)
     editor = QGenericCodeEdit()
     editor.openFile(__file__)
     editor.show()
-    QtCore.QTimer.singleShot(500, leave)
+    QtCore.QTimer.singleShot(500, _leave)
     return app.exec_()
-
-
-if __name__ == "__main__":
-    sys.exit(main())
