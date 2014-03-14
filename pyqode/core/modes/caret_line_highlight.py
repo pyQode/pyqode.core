@@ -30,7 +30,7 @@ from pyqode.core import constants
 from pyqode.core.mode import Mode
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.system import driftColor
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 
 
 class CaretLineHighlighterMode(Mode):

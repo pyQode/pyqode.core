@@ -26,7 +26,7 @@
 """
 This module contains the search and replace panel
 """
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from pyqode.core import constants
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.panel import Panel
@@ -118,8 +118,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     _KEYS = ["panelBackground", "background", "panelForeground",
              "panelHighlight"]
 
-    #: Signal emitted when a search operation finished
-    searchFinished = QtCore.Signal()
+    #: pyqtSignal emitted when a search operation finished
+    searchFinished = QtCore.pyqtSignal()
 
     @property
     def background(self):
@@ -257,11 +257,11 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def on_pushButtonClose_clicked(self):
         self.closePanel()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def on_actionSearch_triggered(self):
         self.widgetSearch.show()
         self.widgetReplace.hide()
@@ -276,7 +276,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         if not textChanged:
             self.requestSearch(newText)
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def on_actionActionSearchAndReplace_triggered(self):
         self.widgetSearch.show()
         self.widgetReplace.show()

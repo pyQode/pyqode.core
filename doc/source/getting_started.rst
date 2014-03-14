@@ -51,14 +51,14 @@ or
 .. warning:: The QT_API string is case sensitive (this will change with version 1.1)
 
 
-.. note:: You can also write a qt bindings independent application by using the **pyqode.qt** package.
+.. note:: You can also write a qt bindings independent application by using the **PyQt4** package.
           pyQode will pick up the first available bindings and expose it through the **qt** package.
-          Simply import QtGui and QtCore module from pyqode.qt to use the automatically chosen binding:
+          Simply import QtGui and QtCore module from PyQt4 to use the automatically chosen binding:
 
           .. code-block:: python
 
               import sys
-              from pyqode.qt import QtGui
+              from PyQt4 import QtGui
 
               app = QtGui.QApplication(sys.argv)
               win = QtGui.QMainWindow()
@@ -66,7 +66,7 @@ or
               print(app)
               app.exec_()
 
-**Most of the code samples of this documentation are bindings independent and use the pyqode.qt package.**
+**Most of the code samples of this documentation are bindings independent and use the PyQt4 package.**
 
 
 The editor widget: QCodeEdit
@@ -115,7 +115,7 @@ Here is a minimal example code:
 .. code-block:: python
 
     import sys
-    from pyqode.qt import QtGui
+    from PyQt4 import QtGui
     import pyqode.core
 
 
@@ -141,7 +141,7 @@ modes and panels:
 .. code-block:: python
 
     import sys
-    from pyqode.qt import QtGui
+    from PyQt4 import QtGui
     import pyqode.core
 
 

@@ -27,7 +27,7 @@
 This module contains the definition of the Mode class
 """
 import weakref
-from pyqode.qt import QtCore
+from PyQt4 import QtCore
 
 
 class Mode(object):

@@ -25,7 +25,7 @@
 """
 Contains pyqode dialogs windows.
 """
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 from pyqode.core.ui import dlg_goto_line_ui
 
 

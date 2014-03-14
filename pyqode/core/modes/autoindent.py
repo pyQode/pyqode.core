@@ -26,8 +26,8 @@
 """ Contains the automatic generic indenter """
 import re
 from pyqode.core.mode import Mode
-from pyqode.qt.QtCore import Qt
-from pyqode.qt.QtGui import QTextCursor, QKeyEvent
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QTextCursor, QKeyEvent
 
 
 class AutoIndentMode(Mode):

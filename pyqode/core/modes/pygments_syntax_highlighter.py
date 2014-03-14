@@ -32,8 +32,8 @@ on pygments.
 from pyqode.core import logger
 from pyqode.core.mode import Mode
 from pyqode.core.syntax_highlighter import SyntaxHighlighter, IndentBasedFoldDetector, CharBasedFoldDetector
-from pyqode.qt import QtGui, QtCore
-from pyqode.qt.QtCore import QRegExp
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer

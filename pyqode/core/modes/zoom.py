@@ -25,7 +25,7 @@
 #
 from pyqode.core import constants
 from pyqode.core.mode import Mode
-from pyqode.qt import QtCore
+from PyQt4 import QtCore
 
 
 class ZoomMode(Mode):

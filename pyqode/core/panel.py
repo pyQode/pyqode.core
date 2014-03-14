@@ -27,7 +27,7 @@
 This module contains the definition of a panel mode
 """
 from pyqode.core.mode import Mode
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 
 
 class Panel(QtGui.QWidget, Mode):

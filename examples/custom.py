@@ -28,7 +28,7 @@ A simple example that shows how to setup a custom code editor widget based on
 pyqode.core.QCodeEdit
 """
 import sys
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 import pyqode.core
 
 

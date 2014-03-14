@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):

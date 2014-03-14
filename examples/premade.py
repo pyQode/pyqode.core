@@ -27,8 +27,8 @@
 Simple example using a pre-made editor: pyqode.core.QGenericCodeEdit
 """
 import sys
-from pyqode.qt.QtGui import QApplication
-from pyqode.qt.QtGui import QMainWindow
+from PyQt4.QtGui import QApplication
+from PyQt4.QtGui import QMainWindow
 from pyqode.core import QGenericCodeEdit
 
 

@@ -30,7 +30,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 import pyqode.core
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from ui.simple_editor_ui import Ui_MainWindow
 
 
@@ -96,11 +96,11 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
                 a.panel = v
                 self.menuPanels.addAction(a)
 
-    @QtCore.Slot(QtGui.QAction)
+    @QtCore.pyqtSlot(QtGui.QAction)
     def onStyleTriggered(self, action):
         self.editor.style.setValue("pygmentsStyle", action.text())
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = QtGui.QFileDialog.getOpenFileName(
             self, "Choose a file", os.path.expanduser("~"))

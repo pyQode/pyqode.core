@@ -28,7 +28,7 @@ This module holds all the pyQode constants (enumerations, defines,...)
 """
 import sys
 from pyqode.core.system import TextStyle
-from pyqode.qt.QtGui import QColor
+from PyQt4.QtGui import QColor
 
 #
 # Default style values

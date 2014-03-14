@@ -35,7 +35,7 @@ from pyqode.core.properties import PropertyRegistry
 from pyqode.core.server import start_server
 from pyqode.core.system import DelayJobRunner
 from pyqode.core.decoration import TextDecoration
-from pyqode.qt import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -100,35 +100,35 @@ class QCodeEdit(QtGui.QPlainTextEdit):
               it manually depending on the nature of the text/code to edit).
     """
     #: Paint hook
-    painted = QtCore.Signal(QtGui.QPaintEvent)
-    #: Signal emitted when a new text is set on the widget
-    newTextSet = QtCore.Signal()
-    #: Signal emitted when the text is saved to file
-    textSaved = QtCore.Signal(str)
-    #: Signal emitted before the text is saved to file
-    textSaving = QtCore.Signal(str)
-    #: Signal emitted when the dirty state changed
-    dirtyChanged = QtCore.Signal(bool)
-    #: Signal emitted when a key is pressed
-    keyPressed = QtCore.Signal(QtGui.QKeyEvent)
-    #: Signal emitted when a key is released
-    keyReleased = QtCore.Signal(QtGui.QKeyEvent)
-    #: Signal emitted when a mouse button is pressed
-    mousePressed = QtCore.Signal(QtGui.QMouseEvent)
-    #: Signal emitted when a mouse button is released
-    mouseReleased = QtCore.Signal(QtGui.QMouseEvent)
-    #: Signal emitted on a wheel event
-    mouseWheelActivated = QtCore.Signal(QtGui.QWheelEvent)
-    #: Signal emitted at the end of the keyPressed event
-    postKeyPressed = QtCore.Signal(QtGui.QKeyEvent)
-    #: Signal emitted when focusInEvent is is called
-    focusedIn = QtCore.Signal(QtGui.QFocusEvent)
-    #: Signal emitted when the mouseMoved
-    mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
-    #: Signal emitted when the user press the TAB key
-    indentRequested = QtCore.Signal()
-    #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
-    unIndentRequested = QtCore.Signal()
+    painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
+    #: pyqtSignal emitted when a new text is set on the widget
+    newTextSet = QtCore.pyqtSignal()
+    #: pyqtSignal emitted when the text is saved to file
+    textSaved = QtCore.pyqtSignal(str)
+    #: pyqtSignal emitted before the text is saved to file
+    textSaving = QtCore.pyqtSignal(str)
+    #: pyqtSignal emitted when the dirty state changed
+    dirtyChanged = QtCore.pyqtSignal(bool)
+    #: pyqtSignal emitted when a key is pressed
+    keyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    #: pyqtSignal emitted when a key is released
+    keyReleased = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    #: pyqtSignal emitted when a mouse button is pressed
+    mousePressed = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    #: pyqtSignal emitted when a mouse button is released
+    mouseReleased = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    #: pyqtSignal emitted on a wheel event
+    mouseWheelActivated = QtCore.pyqtSignal(QtGui.QWheelEvent)
+    #: pyqtSignal emitted at the end of the keyPressed event
+    postKeyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    #: pyqtSignal emitted when focusInEvent is is called
+    focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
+    #: pyqtSignal emitted when the mouseMoved
+    mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    #: pyqtSignal emitted when the user press the TAB key
+    indentRequested = QtCore.pyqtSignal()
+    #: pyqtSignal emitted when the user press the BACK-TAB (Shift+TAB) key
+    unIndentRequested = QtCore.pyqtSignal()
 
     @property
     def showWhiteSpaces(self):
@@ -449,7 +449,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.mnu.addActions(self.__actions)
         self.mnu.popup(self.mapToGlobal(pt))
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def delete(self):
         """ Deletes the selected text """
         self.textCursor().removeSelectedText()
@@ -724,7 +724,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.textCursor().endEditBlock()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def saveToFile(self, filePath=None, encoding=None, force=False):
         """
         Saves the plain text to a file.
@@ -1070,7 +1070,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                              ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def duplicateLine(self):
         """
         Duplicates the line under the cursor. If multiple lines are selected,
@@ -1086,7 +1086,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setTextCursor(tc)
         self.__doHomeKey()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def indent(self):
         """
         Indents the text cursor or the selection.
@@ -1096,7 +1096,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.indentRequested.emit()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def unIndent(self):
         """
         Un-indents the text cursor or the selection.

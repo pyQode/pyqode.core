@@ -29,7 +29,7 @@ This module contains the symbol matcher mode
 from pyqode.core.mode import Mode
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.textblockuserdata import TextBlockUserData
-from pyqode.qt import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 
 class SymbolMatcherMode(Mode):

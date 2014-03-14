@@ -439,7 +439,7 @@ For that you need to create a python module for you plugin following this scheme
     import os
     if not 'QT_API' in os.environ:
         os.environ.setdefault("QT_API", "PyQt")
-    from pyqode.qt.QtGui import QIcon
+    from PyQt4.QtGui import QIcon
 
     # TODO import you widget module
     from your_package.your_widget import QYourWidget

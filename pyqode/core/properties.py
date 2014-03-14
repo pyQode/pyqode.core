@@ -31,7 +31,7 @@ import re
 import sys
 from pyqode.core.constants import TAB_SIZE
 from pyqode.core.system import TextStyle
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 class PropertyRegistry(QtCore.QObject):
@@ -61,10 +61,10 @@ class PropertyRegistry(QtCore.QObject):
                 - string
     """
 
-    #: Signal emitted when the value of a property changed. The first parameter
+    #: pyqtSignal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
-    valueChanged = QtCore.Signal(str, str)
+    valueChanged = QtCore.pyqtSignal(str, str)
 
     def __init__(self, copy=None):
         QtCore.QObject.__init__(self)

@@ -36,7 +36,7 @@ terminate.
 """
 import os
 import sys
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 import pyqode.core
 
 

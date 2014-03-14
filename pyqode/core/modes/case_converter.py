@@ -2,7 +2,7 @@
 Contains a case converter mode.
 """
 import sys
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from pyqode.core.mode import Mode
 from pyqode.core import system
 

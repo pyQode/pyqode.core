@@ -27,7 +27,7 @@
 This module contains the marker panel
 """
 from pyqode.core import logger
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from pyqode.core.panel import Panel
 from pyqode.core.system import DelayJobRunner, memoized
 
@@ -94,11 +94,11 @@ class MarkerPanel(Panel):
     #: The panel description
     IDENTIFIER = "markerPanel"
 
-    #: Signal emitted when the user clicked in a place where there is no marker.
-    addMarkerRequested = QtCore.Signal(int)
+    #: pyqtSignal emitted when the user clicked in a place where there is no marker.
+    addMarkerRequested = QtCore.pyqtSignal(int)
 
-    #: Signal emitted when the user clicked on an existing marker.
-    removeMarkerRequested = QtCore.Signal(int)
+    #: pyqtSignal emitted when the user clicked on an existing marker.
+    removeMarkerRequested = QtCore.pyqtSignal(int)
 
     def __init__(self):
         Panel.__init__(self)

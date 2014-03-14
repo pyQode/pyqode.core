@@ -32,7 +32,7 @@ import os
 import sys
 import weakref
 from pyqode.core import logger
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 def keep_tc_pos(f):
@@ -475,7 +475,7 @@ if __name__ == '__main__':
 
     class Example(QGenericCodeEdit):
 
-        addDecorationRequested = QtCore.Signal(str, int)
+        addDecorationRequested = QtCore.pyqtSignal(str, int)
 
         def __init__(self):
             QGenericCodeEdit.__init__(self, parent=None)

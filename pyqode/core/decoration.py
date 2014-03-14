@@ -26,11 +26,11 @@
 """
 This module defines text edit decorations
 """
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 class TextDecorationSignals(QtCore.QObject):
-    clicked = QtCore.Signal(object)
+    clicked = QtCore.pyqtSignal(object)
 
 
 class TextDecoration(QtGui.QTextEdit.ExtraSelection):

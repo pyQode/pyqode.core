@@ -24,7 +24,7 @@
 #THE SOFTWARE.
 #
 """ Contains the AutoCompleteMode """
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 from pyqode.core.mode import Mode
 
 

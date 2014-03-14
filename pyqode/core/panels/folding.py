@@ -26,7 +26,7 @@
 """
 This module contains the marker panel
 """
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 from pyqode.core import constants
 from pyqode.core.panel import Panel
 from pyqode.core.decoration import TextDecoration

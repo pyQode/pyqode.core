@@ -33,7 +33,7 @@ from pyqode.core.mode import Mode
 from pyqode.core.system import DelayJobRunner
 from pyqode.core.panels.marker import Marker
 from pyqode.core.decoration import TextDecoration
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 #: Status value for an information message.
@@ -154,9 +154,9 @@ class CheckerMode(Mode, QtCore.QObject):
     markers can be added to a :class:`pyqode.core.MarkerPanel`
     """
     #: Internal signal used to add a checker message from a background thread.
-    addMessagesRequested = QtCore.Signal(object, bool)
+    addMessagesRequested = QtCore.pyqtSignal(object, bool)
     #: Internal signal used to clear the checker messages.
-    clearMessagesRequested = QtCore.Signal()
+    clearMessagesRequested = QtCore.pyqtSignal()
 
     def __init__(self, process_func,
                  delay=500,

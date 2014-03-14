@@ -29,7 +29,7 @@ Base class for pyqode syntax hightlighters
 import os
 from pyqode.core.mode import Mode
 from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
-from pyqode.qt import QtGui, QtCore, isPyQt4Used
+from PyQt4 import QtGui, QtCore
 
 
 class FoldDetector(object):
@@ -188,27 +188,25 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     #: Mode identifier
     IDENTIFIER = "syntaxHighlighterMode"
 
-    #: Signal emitted at the start of highlightBlock. Parameters are the
+    #: pyqtSignal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    blockHighlightStarted = QtCore.Signal(object, object)
+    blockHighlightStarted = QtCore.pyqtSignal(object, object)
 
-    #: Signal emitted at the end of highlightBlock. Parameters are the
+    #: pyqtSignal emitted at the end of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    blockHighlightFinished = QtCore.Signal(object, object)
+    blockHighlightFinished = QtCore.pyqtSignal(object, object)
 
     def __init__(self, parent, foldDetector=None):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         self._spacesExpression = QtCore.QRegExp('\s+')
-        if isPyQt4Used():
-            # there is a bug with QTextBlockUserData in PyQt4, we need to
-            # keep a reference on them, otherwise they are removed from memory.
-            self.__blocks = set()
+        # there is a bug with QTextBlockUserData in PyQt4, we need to
+        # keep a reference on them, otherwise they are removed from memory.
+        self.__blocks = set()
         self._foldDetector = foldDetector
 
     def __del__(self):
-        if isPyQt4Used():
-            self.__blocks.clear()
+        self.__blocks.clear()
 
     def setFoldDetector(self, foldDetector):
         """
@@ -294,8 +292,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setCurrentBlockUserData(userData)
         # update user data
         userData.lineNumber = self.currentBlock().blockNumber() + 1
-        if isPyQt4Used():
-            self.__blocks.add(userData)
+        self.__blocks.add(userData)
         self.setCurrentBlockUserData(userData)
         self._detectFolding(text, userData)
         self._detectParentheses(text, userData)

@@ -26,7 +26,7 @@
 """
 Contains the text block user data structure
 """
-from pyqode.qt import QtGui
+from PyQt4 import QtGui
 
 
 class ParenthesisInfo(object):

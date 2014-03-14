@@ -29,7 +29,7 @@ Contains the mode that control the external changes of file.
 import os
 from pyqode.core import logger
 from pyqode.core.mode import Mode
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -50,10 +50,10 @@ class FileWatcherMode(Mode, QtCore.QObject):
     #: Mode description
     DESCRIPTION = "Watch the editor's file and take care of the reloading."
 
-    #: Signal emitted when the file has been deleted. The signal is emitted
+    #: pyqtSignal emitted when the file has been deleted. The signal is emitted
     #: with the current editor instance so that user have a chance to close
     #: the editor.
-    fileDeleted = QtCore.Signal(object)
+    fileDeleted = QtCore.pyqtSignal(object)
 
     @property
     def autoReloadChangedFiles(self):

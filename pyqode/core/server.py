@@ -52,27 +52,27 @@ else:
     import thread
 
 from pyqode.core import logger
-from pyqode.qt import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 
 class _ServerSignals(QtCore.QObject):
     """
     Holds the server signals.
     """
-    #: Signal emitted when a new work is requested.
+    #: pyqtSignal emitted when a new work is requested.
     #:
     #: **Parameters**:
     #:   * caller id
     #:   * worker object
-    workRequested = QtCore.Signal(object, object)
+    workRequested = QtCore.pyqtSignal(object, object)
 
-    #: Signal emitted when a new work is requested.
+    #: pyqtSignal emitted when a new work is requested.
     #:
     #: **Parameters**:
     #:   * caller id
     #:   * worker object
     #:   * worker results
-    workCompleted = QtCore.Signal(object, object, object)
+    workCompleted = QtCore.pyqtSignal(object, object, object)
 
 
 class Worker(object):

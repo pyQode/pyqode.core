@@ -34,7 +34,7 @@ from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
 from pyqode.core.system import DelayJobRunner, memoized
 from pyqode.core.server import get_server
-from pyqode.qt import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 from pyqode.core import logger
 
 
@@ -194,13 +194,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     #: installed on an editor widget and stopped when the app is about to quit.
     SERVER = None
 
-    completionsReady = QtCore.Signal(object)
-    waitCursorRequested = QtCore.Signal()
+    completionsReady = QtCore.pyqtSignal(object)
+    waitCursorRequested = QtCore.pyqtSignal()
 
-    #: Signal emitted when the preload operation has started.
-    preLoadStarted = QtCore.Signal()
-    #: Signal emitted when the preload operation has completed.
-    preLoadCompleted = QtCore.Signal()
+    #: pyqtSignal emitted when the preload operation has started.
+    preLoadStarted = QtCore.pyqtSignal()
+    #: pyqtSignal emitted when the preload operation has completed.
+    preLoadCompleted = QtCore.pyqtSignal()
 
     @property
     def triggerKey(self):
@@ -500,7 +500,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.__jobRunner.cancelRequests()
             self.__jobRunner.stopJob()
 
-    @QtCore.Slot()
+    @QtCore.pyqtSlot()
     def __setWaitCursor(self):
         self.editor.setCursor(QtCore.Qt.WaitCursor)
 

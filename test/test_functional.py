@@ -28,7 +28,12 @@ This is a simple functional test, it runs a QApplication and shows a
 QGenericCodeEdit for 500ms than exit
 """
 import sys
-from pyqode.qt import QtCore, QtGui
+if sys.version_info[0] == 2:
+    import sip
+    sip.setapi("QString", 2)
+    sip.setapi("QVariant", 2)
+
+from PyQt4 import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
 
 

@@ -25,7 +25,7 @@
 #
 from pyqode.core.decoration import TextDecoration
 from pyqode.core.mode import Mode
-from pyqode.qt import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 
 class WordClickMode(Mode, QtCore.QObject):
@@ -44,7 +44,7 @@ class WordClickMode(Mode, QtCore.QObject):
 
     #: signal emitted when a word is clicked. The parameter is a QTextCursor
     #: with the clicked word set as the selected text.
-    wordClicked = QtCore.Signal(QtGui.QTextCursor)
+    wordClicked = QtCore.pyqtSignal(QtGui.QTextCursor)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
