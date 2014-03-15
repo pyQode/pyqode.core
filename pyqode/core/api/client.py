@@ -243,11 +243,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 if self._to_read == 0:
                     data = self._data_buf.decode('utf-8')
                     obj = json.loads(data)
-                    try:
-                        self._cli_logger.debug('data received: %r' % obj['result'])
-                    except KeyError:
-                        # internal response
-                        self._cli_logger.debug('internal response: %r' % obj)
+                    self._cli_logger.debug('response received: %r' % obj)
                     try:
                         request_id = obj['request_id']
                         results = obj['results']
