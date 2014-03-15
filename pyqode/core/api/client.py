@@ -137,7 +137,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :param str server_script: Path to the server main script.
         :param str interpreter: The python interpreter to use to run the server
             script. If None, sys.executable is used unless we are in a frozen
-            application (cx_Freeze).
+            application (cx_Freeze). The executable is not used if the
+            executable scripts ends with '.exe' on Windows
         :param list args: list of additional command line args to use to start
             the server process.
         """
@@ -155,12 +156,18 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._process.readyReadStandardError.connect(
             self._on_process_stderr_ready)
         self._port = self._pick_free_port()
-        pgm_args = [server_script, str(self._port)]
+        if server_script.endswith('.exe'):
+            # frozen server script on windows does not need an interpreter
+            program = server_script
+            pgm_args = [str(self._port)]
+        else:
+            program = interpreter
+            pgm_args = [server_script, str(self._port)]
         if args:
             pgm_args += args
-        self._process.start(interpreter, pgm_args)
+        self._process.start(program, pgm_args)
         self._cli_logger.debug('starting server process: %s %s' %
-                               (interpreter, ' '.join(pgm_args)))
+                               (program, ' '.join(pgm_args)))
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
         """
