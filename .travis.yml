@@ -1,6 +1,8 @@
 language: python
+python:
+ - "3.2"
 env:
-    - TOXENV=py32
+ - TOXENV=py32
 virtualenv:
   system_site_packages: true
 before_install:
