@@ -27,12 +27,10 @@
 This module contains the code completion mode and the related classes.
 """
 import re
-import sys
-from pyqode.core import constants
+from pyqode.core.api import constants
 from pyqode.core.api import workers
-from pyqode.core.editor import QCodeEdit
-from pyqode.core.mode import Mode
-from pyqode.core.system import DelayJobRunner, memoized
+from pyqode.core.editor import Mode
+from pyqode.core.api.system import DelayJobRunner, memoized
 from PyQt4 import QtGui, QtCore
 from pyqode.core import logger
 

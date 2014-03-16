@@ -22,7 +22,7 @@
      <number>1</number>
     </property>
     <item row="0" column="0">
-     <widget class="QGenericCodeEdit" name="editor"/>
+     <widget class="QCodeEdit" name="editor"/>
     </item>
    </layout>
   </widget>
@@ -146,11 +146,6 @@
    <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
    <header>pyqode.core.editor</header>
-  </customwidget>
-  <customwidget>
-   <class>QGenericCodeEdit</class>
-   <extends>QCodeEdit</extends>
-   <header>pyqode.core</header>
   </customwidget>
  </customwidgets>
  <resources>

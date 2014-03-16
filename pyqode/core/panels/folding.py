@@ -27,10 +27,11 @@
 This module contains the marker panel
 """
 from PyQt4 import QtCore, QtGui
-from pyqode.core import constants
-from pyqode.core.panel import Panel
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.system import mergedColors, driftColor, DelayJobRunner
+
+from pyqode.core.api import constants
+from pyqode.core.editor import Panel
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.system import mergedColors, driftColor, DelayJobRunner
 
 
 class _FoldingIndicator(object):

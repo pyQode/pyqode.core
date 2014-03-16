@@ -26,10 +26,10 @@
 """
 Base class for pyqode syntax hightlighters
 """
-import os
-from pyqode.core.mode import Mode
-from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from PyQt4 import QtGui, QtCore
+
+from pyqode.core.editor import Mode
+from pyqode.core.api.textblockuserdata import TextBlockUserData, ParenthesisInfo
 
 
 class FoldDetector(object):

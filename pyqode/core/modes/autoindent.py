@@ -25,7 +25,7 @@
 #
 """ Contains the automatic generic indenter """
 import re
-from pyqode.core.mode import Mode
+from pyqode.core.editor import Mode
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QTextCursor, QKeyEvent
 

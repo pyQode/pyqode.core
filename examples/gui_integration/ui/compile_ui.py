@@ -39,8 +39,6 @@ def fix_script(script):
     for l in lines:
         if l.startswith("import "):
             l = "from . " + l
-        if "from PySide import" in l:
-            l = l.replace("from PySide import", "from PyQt4 import")
         new_lines.append(l)
     with open(script, 'w') as f_script:
         f_script.write("\n".join(new_lines))
@@ -51,7 +49,7 @@ def main():
     for ui_file in glob.glob("*.ui"):
         base_name = os.path.splitext(ui_file)[0]
         dst = "%s_ui.py" % base_name
-        cmd = "pyside-uic %s -o %s" % (ui_file, dst)
+        cmd = "pyuic4 %s -o %s" % (ui_file, dst)
         print(cmd)
         os.system(cmd)
         fix_script(dst)
@@ -60,7 +58,7 @@ def main():
     for rc_file in glob.glob("*.qrc"):
         base_name = os.path.splitext(rc_file)[0]
         dst = "%s_rc.py" % base_name
-        cmd = "pyside-rcc -py3 %s -o %s" % (rc_file, dst)
+        cmd = "pyrcc4 -py3 %s -o %s" % (rc_file, dst)
         print(cmd)
         os.system(cmd)
         fix_script(dst)

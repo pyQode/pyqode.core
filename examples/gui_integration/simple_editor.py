@@ -28,8 +28,10 @@ import sys
 # verbose mode
 import logging
 logging.basicConfig(level=logging.DEBUG)
-import pyqode.core
 from PyQt4 import QtCore, QtGui
+from pyqode.core import modes
+from pyqode.core import panels
+from pyqode.core.editor import Panel
 from ui.simple_editor_ui import Ui_MainWindow
 
 
@@ -38,7 +40,29 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+        # configure editor widget
+        self.editor.installPanel(panels.FoldingPanel(), Panel.Position.LEFT)
+        self.editor.installPanel(panels.LineNumberPanel(), Panel.Position.LEFT)
+        self.editor.installPanel(panels.SearchAndReplacePanel(),
+                                 Panel.Position.BOTTOM)
+
+        self.editor.installMode(modes.AutoCompleteMode())
+        self.editor.installMode(modes.CaseConverterMode())
+        self.editor.installMode(modes.FileWatcherMode())
+        self.editor.installMode(modes.CaretLineHighlighterMode())
+        self.editor.installMode(modes.RightMarginMode())
+        self.editor.installMode(modes.PygmentsSyntaxHighlighter(
+            self.editor.document()))
+        self.editor.installMode(modes.ZoomMode())
+        self.editor.installMode(modes.CodeCompletionMode())
+        self.editor.installMode(modes.AutoIndentMode())
+        self.editor.installMode(modes.IndenterMode())
+        self.editor.installMode(modes.SymbolMatcherMode())
+
+        # start pyqode server
         self.editor.start_server('../server.py')
+
+        # connect to editor signals
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         self.actionOpen.setIcon(
@@ -65,7 +89,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         group = QtGui.QActionGroup(self)
         currentStyle = self.editor.style.value("pygmentsStyle")
         group.triggered.connect(self.onStyleTriggered)
-        for style in sorted(pyqode.core.PYGMENTS_STYLES):
+        for style in sorted(modes.PYGMENTS_STYLES):
             a = QtGui.QAction(self.menuStyles)
             a.setText(style)
             a.setCheckable(True)

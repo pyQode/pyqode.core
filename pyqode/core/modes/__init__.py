@@ -24,7 +24,7 @@
 #THE SOFTWARE.
 #
 """
-This package contains the core modes (language independant)
+This package contains the core modes
 """
 from pyqode.core.modes.autocomplete import AutoCompleteMode
 from pyqode.core.modes.caret_line_highlight import CaretLineHighlighterMode

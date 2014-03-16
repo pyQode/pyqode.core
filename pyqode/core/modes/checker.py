@@ -28,12 +28,15 @@ This module contains the checker mode, a base class for code checker modes.
 """
 import os
 import multiprocessing
-from pyqode.core import logger
-from pyqode.core.mode import Mode
-from pyqode.core.system import DelayJobRunner
-from pyqode.core.panels.marker import Marker
-from pyqode.core.decoration import TextDecoration
+
 from PyQt4 import QtCore, QtGui
+
+from pyqode.core import logger
+from pyqode.core.editor import Mode
+from pyqode.core.api.system import DelayJobRunner
+from pyqode.core.panels.marker import Marker
+from pyqode.core.api.decoration import TextDecoration
+
 
 
 #: Status value for an information message.

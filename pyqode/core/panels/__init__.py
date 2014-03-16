@@ -24,7 +24,7 @@
 #THE SOFTWARE.
 #
 """
-This package contains the core panels (language independant)
+This package contains the core panels
 """
 from pyqode.core.panels.folding import FoldingPanel
 from pyqode.core.panels.line_number import LineNumberPanel

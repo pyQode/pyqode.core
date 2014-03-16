@@ -3,8 +3,8 @@ Contains a case converter mode.
 """
 import sys
 from PyQt4 import QtCore, QtGui
-from pyqode.core.mode import Mode
-from pyqode.core import system
+from pyqode.core.editor import Mode
+from pyqode.core.api import system
 
 
 class CaseConverterMode(Mode):

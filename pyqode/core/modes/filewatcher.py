@@ -28,7 +28,7 @@ Contains the mode that control the external changes of file.
 """
 import os
 from pyqode.core import logger
-from pyqode.core.mode import Mode
+from pyqode.core.editor import Mode
 from PyQt4 import QtCore, QtGui
 
 

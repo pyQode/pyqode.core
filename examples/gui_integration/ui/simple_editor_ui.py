@@ -2,68 +2,79 @@
 
 # Form implementation generated from reading ui file 'simple_editor.ui'
 #
-# Created: Sat Aug 31 18:34:17 2013
-#      by: pyside-uic 0.2.14 running on PySide 1.2.0
+# Created: Sun Mar 16 16:27:27 2014
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(1078, 831)
         self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
-        self.gridLayout.setContentsMargins(1, 1, 1, 1)
+        self.gridLayout.setMargin(1)
         self.gridLayout.setSpacing(1)
-        self.gridLayout.setObjectName("gridLayout")
-        self.editor = QGenericCodeEdit(self.centralwidget)
-        self.editor.setObjectName("editor")
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.editor = QCodeEdit(self.centralwidget)
+        self.editor.setObjectName(_fromUtf8("editor"))
         self.gridLayout.addWidget(self.editor, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1078, 21))
-        self.menubar.setObjectName("menubar")
+        self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
-        self.menuFile.setObjectName("menuFile")
+        self.menuFile.setObjectName(_fromUtf8("menuFile"))
         self.menuSettings = QtGui.QMenu(self.menubar)
-        self.menuSettings.setObjectName("menuSettings")
+        self.menuSettings.setObjectName(_fromUtf8("menuSettings"))
         self.menuPanels = QtGui.QMenu(self.menuSettings)
-        self.menuPanels.setObjectName("menuPanels")
+        self.menuPanels.setObjectName(_fromUtf8("menuPanels"))
         self.menuModes = QtGui.QMenu(self.menuSettings)
-        self.menuModes.setObjectName("menuModes")
+        self.menuModes.setObjectName(_fromUtf8("menuModes"))
         self.menuStyles = QtGui.QMenu(self.menuSettings)
-        self.menuStyles.setObjectName("menuStyles")
+        self.menuStyles.setObjectName(_fromUtf8("menuStyles"))
         MainWindow.setMenuBar(self.menubar)
         self.toolBar = QtGui.QToolBar(MainWindow)
-        self.toolBar.setObjectName("toolBar")
+        self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
         self.actionOpen = QtGui.QAction(MainWindow)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/example_icons/rc/folder.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("document-open"))
         self.actionOpen.setIcon(icon)
         self.actionOpen.setIconVisibleInMenu(True)
-        self.actionOpen.setObjectName("actionOpen")
+        self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
         self.actionSave = QtGui.QAction(MainWindow)
         self.actionSave.setEnabled(False)
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/example_icons/rc/document-save.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionSave.setIcon(icon1)
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("document-save"))
+        self.actionSave.setIcon(icon)
         self.actionSave.setIconVisibleInMenu(True)
-        self.actionSave.setObjectName("actionSave")
+        self.actionSave.setObjectName(_fromUtf8("actionSave"))
         self.actionPanel = QtGui.QAction(MainWindow)
-        self.actionPanel.setObjectName("actionPanel")
+        self.actionPanel.setObjectName(_fromUtf8("actionPanel"))
         self.actionModes = QtGui.QAction(MainWindow)
-        self.actionModes.setObjectName("actionModes")
+        self.actionModes.setObjectName(_fromUtf8("actionModes"))
         self.actionAbout = QtGui.QAction(MainWindow)
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionAbout.setIcon(icon2)
-        self.actionAbout.setObjectName("actionAbout")
+        icon = QtGui.QIcon.fromTheme(_fromUtf8("help-about"))
+        self.actionAbout.setIcon(icon)
+        self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
         self.actionD = QtGui.QAction(MainWindow)
-        self.actionD.setObjectName("actionD")
+        self.actionD.setObjectName(_fromUtf8("actionD"))
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
@@ -79,21 +90,21 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "pyQode - Simple Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuSettings.setTitle(QtGui.QApplication.translate("MainWindow", "Settings", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuPanels.setTitle(QtGui.QApplication.translate("MainWindow", "Panels", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuModes.setTitle(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuStyles.setTitle(QtGui.QApplication.translate("MainWindow", "Styles", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpen.setText(QtGui.QApplication.translate("MainWindow", "Open", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionOpen.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSave.setText(QtGui.QApplication.translate("MainWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionSave.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPanel.setText(QtGui.QApplication.translate("MainWindow", "Panel", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionModes.setText(QtGui.QApplication.translate("MainWindow", "Modes", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionD.setText(QtGui.QApplication.translate("MainWindow", "d", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "pyQode - Simple Editor", None))
+        self.menuFile.setTitle(_translate("MainWindow", "File", None))
+        self.menuSettings.setTitle(_translate("MainWindow", "Settings", None))
+        self.menuPanels.setTitle(_translate("MainWindow", "Panels", None))
+        self.menuModes.setTitle(_translate("MainWindow", "Modes", None))
+        self.menuStyles.setTitle(_translate("MainWindow", "Styles", None))
+        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar", None))
+        self.actionOpen.setText(_translate("MainWindow", "Open", None))
+        self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O", None))
+        self.actionSave.setText(_translate("MainWindow", "Save", None))
+        self.actionSave.setShortcut(_translate("MainWindow", "Ctrl+S", None))
+        self.actionPanel.setText(_translate("MainWindow", "Panel", None))
+        self.actionModes.setText(_translate("MainWindow", "Modes", None))
+        self.actionAbout.setText(_translate("MainWindow", "About", None))
+        self.actionD.setText(_translate("MainWindow", "d", None))
 
-from pyqode.core import QGenericCodeEdit
+from pyqode.core.editor import QCodeEdit
 from . import simple_editor_rc

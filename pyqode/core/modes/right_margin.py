@@ -26,9 +26,9 @@
 """
 This module contains the right margin mode.
 """
-from pyqode.core import constants
-from pyqode.core.mode import Mode
+from pyqode.core.editor import Mode
 from PyQt4 import QtGui
+from pyqode.core.api import constants
 
 
 class RightMarginMode(Mode):

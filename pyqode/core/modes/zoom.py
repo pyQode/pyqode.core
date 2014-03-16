@@ -23,8 +23,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #
-from pyqode.core import constants
-from pyqode.core.mode import Mode
+from pyqode.core.api import constants
+from pyqode.core.editor import Mode
 from PyQt4 import QtCore
 
 

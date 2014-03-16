@@ -26,10 +26,11 @@
 """
 This module contains the symbol matcher mode
 """
-from pyqode.core.mode import Mode
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.textblockuserdata import TextBlockUserData
 from PyQt4 import QtGui, QtCore
+
+from pyqode.core.editor import Mode
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.textblockuserdata import TextBlockUserData
 
 
 class SymbolMatcherMode(Mode):

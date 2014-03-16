@@ -26,7 +26,7 @@
 """
 Contains the default indenter.
 """
-from pyqode.core.mode import Mode
+from pyqode.core.editor import Mode
 from PyQt4 import QtGui
 
 

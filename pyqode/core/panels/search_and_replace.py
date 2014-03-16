@@ -27,10 +27,11 @@
 This module contains the search and replace panel
 """
 from PyQt4 import QtCore, QtGui
-from pyqode.core import constants
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.panel import Panel
-from pyqode.core.system import DelayJobRunner, driftColor
+
+from pyqode.core.api import constants
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.editor import Panel
+from pyqode.core.api.system import DelayJobRunner, driftColor
 from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
 
 

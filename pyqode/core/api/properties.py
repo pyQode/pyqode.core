@@ -29,8 +29,8 @@ This module contains the definition of the QCodeEdit settings
 import json
 import re
 import sys
-from pyqode.core.constants import TAB_SIZE
-from pyqode.core.system import TextStyle
+from pyqode.core.api.constants import TAB_SIZE
+from pyqode.core.api.system import TextStyle
 from PyQt4 import QtCore, QtGui
 
 

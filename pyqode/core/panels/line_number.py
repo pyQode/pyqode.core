@@ -26,7 +26,7 @@
 """
 This module contains the line number panel
 """
-from pyqode.core.panel import Panel
+from pyqode.core.editor import Panel
 from PyQt4 import QtCore, QtGui
 
 

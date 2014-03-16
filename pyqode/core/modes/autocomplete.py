@@ -25,7 +25,7 @@
 #
 """ Contains the AutoCompleteMode """
 from PyQt4 import QtGui
-from pyqode.core.mode import Mode
+from pyqode.core.editor import Mode
 
 
 class AutoCompleteMode(Mode):

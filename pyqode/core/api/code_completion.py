@@ -30,7 +30,7 @@ worker.
 This module basically defines the Provider interface and implements
 a simple provider based ib the document words.
 """
-from pyqode.core import constants
+from pyqode.core.api import constants
 
 
 class Provider(object):

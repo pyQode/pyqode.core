@@ -29,19 +29,18 @@ on pygments.
 
 .. note: This code is taken and adapted from the IPython project.
 """
-from pyqode.core import logger
-from pyqode.core.mode import Mode
-from pyqode.core.syntax_highlighter import SyntaxHighlighter, IndentBasedFoldDetector, CharBasedFoldDetector
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
-from pygments.lexers.compiled import CLexer, CppLexer
-from pygments.lexers.dotnet import CSharpLexer
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
+
+from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, \
+    IndentBasedFoldDetector, CharBasedFoldDetector
+
 
 try:
     from pygments.lexers.agile import PythonLexer

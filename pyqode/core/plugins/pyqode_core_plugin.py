@@ -36,12 +36,11 @@ in your path on Windows, pyqode-core must be installed)
 import os
 if not 'QT_API' in os.environ:
     os.environ.setdefault("QT_API", "PyQt")
-import pyqode.core
+import pyqode.core.editor
 
 # Define this mapping to help the PySide's form builder create the correct
 # widget
-PLUGINS_TYPES = {'QCodeEdit': pyqode.core.QCodeEdit,
-                 "QGenericCodeEdit": pyqode.core.QGenericCodeEdit}
+PLUGINS_TYPES = {'QCodeEdit': pyqode.core.editor.QCodeEdit}
 
 try:
     from PyQt4 import QtDesigner
@@ -95,14 +94,5 @@ try:
         def createWidget(self, parent):
             return pyqode.core.QCodeEdit(parent)
 
-    class QGenericCodeEditPlugin(QCodeEditPlugin):
-        _module = 'pyqode.core'        # path to the widget's module
-        _class = 'QGenericCodeEdit'    # name of the widget class
-        _name = "QGenericCodeEdit"
-        _icon = None
-        _type = pyqode.core.QGenericCodeEdit
-
-        def createWidget(self, parent):
-            return pyqode.core.QGenericCodeEdit(parent)
 except ImportError:
     print("Cannot use pyqode plugins without PyQt4")

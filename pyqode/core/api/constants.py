@@ -96,20 +96,3 @@ ICON_ARROW_RIGHT = (":/pyqode-icons/rc/arrow_right_off.png",
                     ":/pyqode-icons/rc/arrow_right_on.png")
 ICON_ARROW_DOWN = (":/pyqode-icons/rc/arrow_down_off.png",
                    ":/pyqode-icons/rc/arrow_down_on.png")
-
-
-#
-# Enumerations
-#
-class PanelPosition(object):
-    """
-    Enumerates the possible panel positions
-    """
-    #: Top margin
-    TOP = 0
-    #: Left margin
-    LEFT = 1
-    #: Right margin
-    RIGHT = 2
-    #: Bottom margin
-    BOTTOM = 3

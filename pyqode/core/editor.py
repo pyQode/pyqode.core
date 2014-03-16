@@ -27,13 +27,264 @@
 This module contains the definition of the QCodeEdit
 """
 import sys
-from pyqode.core import logger
-from pyqode.core import constants, dialogs
-from pyqode.core.constants import PanelPosition
-from pyqode.core.properties import PropertyRegistry
-from pyqode.core.api.client import JsonTcpClient
-from pyqode.core.system import DelayJobRunner
+import weakref
+
 from PyQt4 import QtGui, QtCore
+
+from pyqode.core import logger, dialogs
+from pyqode.core.api import constants
+from pyqode.core.api.properties import PropertyRegistry
+from pyqode.core.api.client import JsonTcpClient
+from pyqode.core.api.system import DelayJobRunner
+
+
+class Mode(object):
+    """
+    Base class for editor extensions. An extension is a "thing" that can be
+    installed on the QCodeEdit to add new behaviours or to modify the
+    appearance.
+
+    An extension is added to a QCodeEdit by using the
+    :meth:`pyqode.core.QCodeEdit.installMode` or
+    :meth:`pyqode.core.QCodeEdit.installPanel` methods.
+
+    Subclasses must/should override the following methods:
+        - :meth:`pyqode.core.Mode._onStateChanged`
+        - :meth:`pyqode.core.Mode._onStyleChanged`
+        - :meth:`pyqode.core.Mode._onSettingsChanged`
+
+    Uses :attr:`pyqode.core.Mode.IDENTIFIER` and
+    :attr:`pyqode.core.Mode.DESCRIPTION` to setup the mode name and
+    description:
+
+    .. code-block:: python
+
+        class MyMode(Mode):
+            IDENTIFIER = "myMode"
+            DESCRIPTION = "Describes your mode here"
+
+        m = MyMode()
+        print(m.name, m.description)
+
+        >>> ("myMode", "Describes your mode here" )
+    """
+    #: The mode identifier, must redefined for every subclasses
+    IDENTIFIER = ""
+    #: The mode description, must redefined for every subclasses
+    DESCRIPTION = ""
+
+    @property
+    def editor(self):
+        """
+        Provides easy access to the CodeEditorWidget weakref. **READ ONLY**
+
+        :type: pyqode.core.QCodeEdit
+        """
+        if self._editor is not None:
+            return self._editor()
+        else:
+            return None
+
+    @property
+    def enabled(self):
+        """
+        Tell if the mode is enabled, :meth:`pyqode.core.Mode._onStateChanged` is
+        called when the value changed.
+
+        :type: bool
+        """
+        return self.__enabled
+
+    @enabled.setter
+    def enabled(self, enabled):
+        if enabled != self.__enabled:
+            self.__enabled = enabled
+            self._onStateChanged(enabled)
+
+    def __init__(self):
+        #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
+        #: attribute key when you install a mode.
+        self.name = self.IDENTIFIER
+        #: Mode description
+        self.description = self.DESCRIPTION
+        self.__enabled = False
+        self._editor = None
+
+    def __str__(self):
+        """
+        Returns the extension name
+        """
+        return self.name
+
+    def _onInstall(self, editor):
+        """
+        Installs the extension on the editor. Subclasses might want to override
+        this method to add new style/settings properties to the editor.
+
+        .. note:: This method is called by QCodeEdit when you install a Mode.
+                  You should never call it yourself, even in a subclass.
+
+        .. warning:: Don't forget to call **super** when subclassing
+
+        :param editor: editor widget instance
+        :type editor: pyqode.core.QCodeEdit
+        """
+        self._editor = weakref.ref(editor)
+        self.enabled = True
+        editor.style.valueChanged.connect(self._onStyleChanged)
+        editor.settings.valueChanged.connect(self._onSettingsChanged)
+
+    def _onUninstall(self):
+        """
+        Uninstall the mode
+        """
+        self.enabled = False
+        self._editor = None
+
+    def _onStateChanged(self, state):
+        """
+        Called when the enable state changed.
+
+        This method does not do anything, you may override it if you need
+        to connect/disconnect to the editor's signals (connect when state is
+        true and disconnect when it is false).
+
+        :param state: True = enabled, False = disabled
+        :type state: bool
+        """
+        pass
+
+    def _onStyleChanged(self, section, key):
+        """
+        Automatically called when a style property changed.
+
+        .. note: If the editor style changed globally, key will be set to an
+                 empty string.
+
+        :param section: The section which contains the property that has changed
+        :type section: str
+
+        :param key: The property key
+        :type key: str
+        """
+        pass
+
+    def _onSettingsChanged(self, section, key):
+        """
+        Automatically called when a settings property changed
+
+        .. note: If the editor style changed globally, key will be set to an
+                 empty string.
+
+        :param section: The section which contains the property that has changed
+        :type section: str
+
+        :param key: The property key
+        :type key: str
+        """
+        pass
+
+
+class Panel(QtGui.QWidget, Mode):
+    """
+    Base class for editor panels.
+
+    A panel is a mode and a QWidget.
+
+    .. note:: A disabled panel will be hidden automatically.
+    """
+
+    # todo make it an enum when python 3.4 is available
+    class Position(object):
+        """
+        Enumerates the possible panel positions
+        """
+        #: Top margin
+        TOP = 0
+        #: Left margin
+        LEFT = 1
+        #: Right margin
+        RIGHT = 2
+        #: Bottom margin
+        BOTTOM = 3
+
+
+    @property
+    def scrollable(self):
+        """
+        A scrollable panel will follow the editor's scroll-bars. Left and right
+        panels follow the vertical scrollbar. Top and bottom panels follow the
+        horizontal scrollbar.
+
+        :type: bool
+        """
+        return self.__scrollable
+
+    @scrollable.setter
+    def scrollable(self, value):
+        self.__scrollable = value
+
+    def __init__(self):
+        Mode.__init__(self)
+        QtGui.QWidget.__init__(self)
+        #: Panel order into the zone it is installed to. This value is
+        #: automatically set when installing the panel but it can be changed
+        #: later (negative values can also be used).
+        self.zoneOrder = -1
+        self.__scrollable = False
+        self._backgroundBrush = None
+        self._foregroundPen = None
+
+    def _onInstall(self, editor):
+        """
+        Extends :meth:`pyqode.core.Mode._onInstall` method to set the editor
+        instance as the parent widget.
+
+        .. warning:: Don't forget to call **super** if you override this method!
+
+        :param editor: Editor instance
+        :type editor: pyqode.core.QCodeEdit
+        """
+        Mode._onInstall(self, editor)
+        self.setParent(editor)
+        self.editor.refreshPanels()
+        self._backgroundBrush = QtGui.QBrush(QtGui.QColor(
+            self.palette().window().color()))
+        self._foregroundPen = QtGui.QPen(QtGui.QColor(
+            self.palette().windowText().color()))
+
+    def _onStateChanged(self, state):
+        """
+        Shows/Hides the Panel
+
+        .. warning:: Don't forget to call **super** if you override this method!
+
+        :param state: True = enabled, False = disabled
+        :type state: bool
+        """
+        if not self.editor.isVisible():
+            return
+        if state is True:
+            self.show()
+        else:
+            self.hide()
+
+    def paintEvent(self, event):
+        if self.isVisible():
+            # fill background
+            self._backgroundBrush = QtGui.QBrush(QtGui.QColor(
+                self.palette().window().color()))
+            self._foregroundPen = QtGui.QPen(QtGui.QColor(
+                self.palette().windowText().color()))
+            painter = QtGui.QPainter(self)
+            painter.fillRect(event.rect(), self._backgroundBrush)
+
+    def showEvent(self, *args, **kwargs):
+        self.editor.refreshPanels()
+
+    def setVisible(self, visible):
+        QtGui.QWidget.setVisible(self, visible)
+        self.editor.refreshPanels()
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -390,10 +641,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         # panels and modes
         self.__modes = {}
-        self.__panels = {PanelPosition.TOP: {},
-                         PanelPosition.LEFT: {},
-                         PanelPosition.RIGHT: {},
-                         PanelPosition.BOTTOM: {}}
+        self.__panels = {Panel.Position.TOP: {},
+                         Panel.Position.LEFT: {},
+                         Panel.Position.RIGHT: {},
+                         Panel.Position.BOTTOM: {}}
 
         #: Path of the current file
         self.__filePath = None
@@ -809,7 +1060,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         The mode is set as an object attribute using the mode's name as the key.
 
         :param mode: The mode instance to install.
-        :type mode: pyqode.core.Mode
+        :type mode: pyqode.core.editor.Mode
         """
         self.__modes[mode.name] = mode
         mode._onInstall(self)
@@ -853,11 +1104,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self.__modes
 
-    def installPanel(self, panel, position=PanelPosition.LEFT):
+    def installPanel(self, panel, position=Panel.Position.LEFT):
         """
         Installs a panel on on the editor. You must specify the position of the
         panel (panels are rendered in one of the four document margins, see
-        :class:`pyqode.core.PanelPosition`.
+        :class:`pyqode.core.editor.Panel.Position`.
 
         The panel is set as an object attribute using the panel's name as the
         key.
@@ -865,7 +1116,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param panel: The panel instance to install
         :param position: The panel position
 
-        :type panel: pyqode.core.Panel
+        :type panel: pyqode.core.editor.Panel
         :type position: int
         """
         panel.zoneOrder = len(self.__panels[position])
@@ -934,11 +1185,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__selections[:] = []
         self.setExtraSelections(self.__selections)
 
-    def marginSize(self, position=PanelPosition.LEFT):
+    def marginSize(self, position=Panel.Position.LEFT):
         """
         Gets the size of a specific margin.
 
-        :param position: Margin position. See :class:`pyqode.core.PanelPosition`
+        :param position: Margin position. See
+            :class:`pyqode.core.Panel.Position`
 
         :return: The size of the specified margin
         :rtype: float
@@ -1493,28 +1745,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def __computeZonesSizes(self):
         # Left panels
         left = 0
-        for panel in self.__panels[PanelPosition.LEFT].values():
+        for panel in self.__panels[Panel.Position.LEFT].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             left += sh.width()
         # Right panels
         right = 0
-        for panel in self.__panels[PanelPosition.RIGHT].values():
+        for panel in self.__panels[Panel.Position.RIGHT].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             right += sh.width()
         # Top panels
         top = 0
-        for panel in self.__panels[PanelPosition.TOP].values():
+        for panel in self.__panels[Panel.Position.TOP].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             top += sh.height()
         # Bottom panels
         bottom = 0
-        for panel in self.__panels[PanelPosition.BOTTOM].values():
+        for panel in self.__panels[Panel.Position.BOTTOM].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
@@ -1532,7 +1784,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         w_offset = cr.width() - (vcr.width() + s_left + s_right)
         h_offset = cr.height() - (vcr.height() + s_bottom + s_top)
         left = 0
-        panels = list(self.__panels[PanelPosition.LEFT].values())
+        panels = list(self.__panels[Panel.Position.LEFT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
         for panel in panels:
             if not panel.isVisible():
@@ -1544,7 +1796,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.height() - s_bottom - s_top - h_offset)
             left += sh.width()
         right = 0
-        panels = list(self.__panels[PanelPosition.RIGHT].values())
+        panels = list(self.__panels[Panel.Position.RIGHT].values())
         panels.sort(key=lambda panel: panel.zoneOrder, reverse=True)
         for panel in panels:
             if not panel.isVisible():
@@ -1554,7 +1806,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.top(), sh.width(), cr.height() - h_offset)
             right += sh.width()
         top = 0
-        panels = list(self.__panels[PanelPosition.TOP].values())
+        panels = list(self.__panels[Panel.Position.TOP].values())
         panels.sort(key=lambda panel: panel.zoneOrder)
         for panel in panels:
             if not panel.isVisible():
@@ -1565,7 +1817,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               sh.height())
             top += sh.height()
         bottom = 0
-        panels = list(self.__panels[PanelPosition.BOTTOM].values())
+        panels = list(self.__panels[Panel.Position.BOTTOM].values())
         panels.sort(key=lambda panel: panel.zoneOrder)
         for panel in panels:
             if not panel.isVisible():
@@ -1581,8 +1833,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Updates the panel on update request. (Scroll, update clipping rect,...)
         """
         for zones_id, zone in self.__panels.items():
-            if zones_id == PanelPosition.TOP or \
-               zones_id == PanelPosition.BOTTOM:
+            if zones_id == Panel.Position.TOP or \
+               zones_id == Panel.Position.BOTTOM:
                 continue
             panels = list(zone.values())
             for panel in panels:
@@ -1616,16 +1868,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         left = 0
         right = 0
         bottom = 0
-        for panel in self.__panels[PanelPosition.LEFT].values():
+        for panel in self.__panels[Panel.Position.LEFT].values():
             if panel.isVisible():
                 left += panel.sizeHint().width()
-        for panel in self.__panels[PanelPosition.RIGHT].values():
+        for panel in self.__panels[Panel.Position.RIGHT].values():
             if panel.isVisible():
                 right += panel.sizeHint().width()
-        for panel in self.__panels[PanelPosition.TOP].values():
+        for panel in self.__panels[Panel.Position.TOP].values():
             if panel.isVisible():
                 top += panel.sizeHint().height()
-        for panel in self.__panels[PanelPosition.BOTTOM].values():
+        for panel in self.__panels[Panel.Position.BOTTOM].values():
             if panel.isVisible():
                 bottom += panel.sizeHint().height()
         self.__marginSizes = (top, left, right, bottom)

@@ -26,11 +26,12 @@
 """
 This module contains the care line highlighter mode
 """
-from pyqode.core import constants
-from pyqode.core.mode import Mode
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.system import driftColor
 from PyQt4 import QtGui
+
+from pyqode.core.api import constants
+from pyqode.core.editor import Mode
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.system import driftColor
 
 
 class CaretLineHighlighterMode(Mode):
