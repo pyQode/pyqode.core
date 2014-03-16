@@ -37,7 +37,7 @@ if sys.version_info[0] == 2:
 from PyQt4 import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
 from pyqode.core.api import client, server, workers
-from .helpers import cwd_at
+from .helpers import cwd_at, require_python2, python2_path
 
 
 client_socket = None
@@ -94,6 +94,30 @@ def test_client_server():
         client_socket.request_work(workers.echo, 'some data',
                                    on_receive=on_receive)
     client_socket.start(os.path.join(os.getcwd(), 'server.py'))
+    client_socket.connected.connect(send_request)
+    win.show()
+    app.exec_()
+    client_socket.close()
+    del client_socket
+    del win
+    del app
+
+
+@cwd_at('test')
+@require_python2()
+def test_client_server_py2():
+    """
+    Same test as above except we run the server with python2 if available
+    """
+    global client_socket
+    app = QtGui.QApplication(sys.argv)
+    win = QtGui.QMainWindow()
+    client_socket = client.JsonTcpClient(win)
+    with pytest.raises(client.NotConnectedError):
+        client_socket.request_work(workers.echo, 'some data',
+                                   on_receive=on_receive)
+    client_socket.start(os.path.join(os.getcwd(), 'server.py'),
+                        interpreter=python2_path())
     client_socket.connected.connect(send_request)
     win.show()
     app.exec_()
