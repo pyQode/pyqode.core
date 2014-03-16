@@ -170,6 +170,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         #: associate request uuid with a callback, popped once executed
         self._callbacks = {}
         self.is_connected = False
+        self._process = None
 
     def _terminate_server_process(self):
         if self._process.running:
