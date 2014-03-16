@@ -243,7 +243,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
         :raise:
         """
-        if not self._process.running or not self.is_connected:
+        if not self._process or not self._process.running or \
+                not self.is_connected:
             raise NotConnectedError()
         classname = '%s.%s' % (worker_class_or_function.__module__,
                                worker_class_or_function.__name__)
