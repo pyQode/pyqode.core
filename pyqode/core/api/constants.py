@@ -24,7 +24,8 @@
 #THE SOFTWARE.
 #
 """
-This module contains most of the constants of the api.
+This module contains most of the constants of the api (default colors, default
+icons, ...)
 """
 import sys
 

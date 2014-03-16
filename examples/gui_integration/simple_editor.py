@@ -41,7 +41,6 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         # configure editor widget
-        self.editor.installPanel(panels.FoldingPanel(), Panel.Position.LEFT)
         self.editor.installPanel(panels.LineNumberPanel(), Panel.Position.LEFT)
         self.editor.installPanel(panels.SearchAndReplacePanel(),
                                  Panel.Position.BOTTOM)
