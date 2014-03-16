@@ -153,7 +153,7 @@ def main():
     print(app)
     app.exec_()
     # cleanup
-    win.editor.close()  # ensure the server is properly closed.
+    win.editor.stop_server()  # ensure the server is properly closed.
     del win
     del app
 
