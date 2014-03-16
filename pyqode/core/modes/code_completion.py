@@ -482,23 +482,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def strip_control_characters(input):
         if input:
             # unicode invalid characters
-            if sys.version_info[0] == 2:
-                try:
-                    RE_ILLEGAL = eval("""u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                                 u'|' + \
-                                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                                 (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))""")
-                except SyntaxError:
-                    pass # This is horrible, I know but this is the only way I found to fool this damn python 3.2 interpreter wich hates u"..."
-            else:
-                RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             '|' + \
-                             '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                             (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
-                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
-                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
+            RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                         '|' + \
+                         '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                         (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                         chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                         chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
             input = re.sub(RE_ILLEGAL, "", input)
             # ascii control characters
             input = re.sub(r"[\x01-\x1F\x7F]", "", input)

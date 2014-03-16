@@ -387,8 +387,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def __set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
-        if (isinstance(style, str) or
-                isinstance(style, unicode)):
+        if isinstance(style, str):
             style = get_style_by_name(style)
         self._style = style
         self._clear_caches()

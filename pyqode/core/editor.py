@@ -608,10 +608,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         try:
             import chardet
-            if sys.version_info[0] == 3:
-                encoding = chardet.detect(bytes(data))['encoding']
-            else:
-                encoding = chardet.detect(data)['encoding']
+            encoding = chardet.detect(bytes(data))['encoding']
         except ImportError:
             logger.warning("chardet not available, using utf8 by default")
             encoding = self.getDefaultEncoding()
@@ -1465,10 +1462,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.__resetPalette("", "")
 
     def __encodePlainText(self, encoding):
-        if sys.version_info[0] == 3:
-            content = bytes(self.toPlainText().encode(encoding))
-        else:
-            content = unicode(self.toPlainText()).encode(encoding)
+        content = bytes(self.toPlainText().encode(encoding))
         return content
 
     def updateVisibleBlocks(self, event):

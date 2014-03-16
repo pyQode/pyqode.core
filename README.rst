@@ -45,8 +45,6 @@ Features
 
 Here are the core features:
 
--  supports PySide and/or PyQt4
--  supports Python 2 and/or Python 3
 -  simple widget based on QPlainTextEdit
 -  easily customisable (modes and panels)
 -  native look and feel close to Qt creator
@@ -66,8 +64,8 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  Python 2.7 or Python 3 (>= 3.2)
--  PyQt4 or PySide
+-  Python 3 (>= 3.2)
+-  PyQt4
 -  pygments
 
 
