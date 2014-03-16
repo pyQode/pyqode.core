@@ -129,6 +129,8 @@ def main():
     print(win.editor.style.dump())
     print(app)
     app.exec_()
+    # cleanup
+    win.editor.close()  # ensure the server is properly closed.
     del win
     del app
 
