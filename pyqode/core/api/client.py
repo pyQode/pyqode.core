@@ -89,6 +89,62 @@ class NotConnectedError(Exception):
             'Client socket not connected or server not started')
 
 
+class ServerProcess(QtCore.QProcess):
+    """
+    Extends QProcess with methods to easily manipulate the server process.
+
+    Also logs everything that is written to the process' stdout/stderr.
+    """
+    def __init__(self, parent):
+        super(ServerProcess, self).__init__(parent)
+        self.started.connect(self._on_process_started)
+        self.error.connect(self._on_process_error)
+        self.finished.connect(self._on_process_finished)
+        self.readyReadStandardOutput.connect(self._on_process_stdout_ready)
+        self.readyReadStandardError.connect(self._on_process_stderr_ready)
+        self.running = False
+        self._srv_logger = logging.getLogger('pyqode-server')
+        self._cli_logger = logging.getLogger('pyqode-client')
+
+    def _on_process_started(self):
+        self._cli_logger.debug('server process started')
+        self.running = True
+
+    def _on_process_error(self, error):
+        if not self.running:
+            return
+        if not error in PROCESS_ERROR_STRING:
+            error = -1
+        try:
+            self._test_not_deleted
+        except RuntimeError:
+            pass
+        else:
+            self._cli_logger.debug('server process error %s: %s' % (error,
+                                   PROCESS_ERROR_STRING[error]))
+
+    def _on_process_finished(self, exit_code):
+        self._cli_logger.debug('server process finished with exit code %d' %
+                               exit_code)
+        self.running = False
+
+    def _on_process_stdout_ready(self):
+        output = bytes(self.readAllStandardOutput()).decode('utf-8')
+        output = output[:output.rfind('\n')]
+        for l in output.splitlines():
+            self._srv_logger.debug(l)
+
+    def _on_process_stderr_ready(self):
+        output = bytes(self.readAllStandardError()).decode('utf-8')
+        output = output[:output.rfind('\n')]
+        for l in output.splitlines():
+            self._srv_logger.error(l)
+
+    def terminate(self):
+        self.running = False
+        super(ServerProcess, self).terminate()
+
+
 class JsonTcpClient(QtNetwork.QTcpSocket):
     """
     A json tcp client socket used to start and communicate with the pyqode
@@ -106,7 +162,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.error.connect(self._on_error)
         self.disconnected.connect(self._on_disconnected)
         self.readyRead.connect(self._on_ready_read)
-        self._srv_logger = logging.getLogger('pyqode-server')
         self._cli_logger = logging.getLogger('pyqode-client')
         self._header_complete = False
         self._header_buf = bytes()
@@ -115,20 +170,21 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         #: associate request uuid with a callback, popped once executed
         self._callbacks = {}
         self.is_connected = False
-        self.is_server_running = False
+
+    def _terminate_server_process(self):
+        if self._process.running:
+            self._process.terminate()
+            self._process.waitForFinished()
 
     def close(self):
         """
         Closes the socket and terminates the server process.
         """
-        if self.is_connected and self.is_server_running:
+        if self.is_connected and self._process.running:
             # send shutdown request
             self.send('shutdown')
         QtNetwork.QTcpSocket.close(self)
-        if self.is_server_running:
-            self.is_server_running = False
-            self._process.terminate()
-            self._process.waitForFinished()
+        self._terminate_server_process()
         self.is_connected = False
 
     def start(self, server_script, interpreter=sys.executable, args=None):
@@ -158,14 +214,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         assert os.path.exists(server_script)
         if not interpreter:
             interpreter = sys.executable
-        self._process = QtCore.QProcess(self.parent())
+        self._process = ServerProcess(self.parent())
         self._process.started.connect(self._on_process_started)
-        self._process.error.connect(self._on_process_error)
-        self._process.finished.connect(self._on_process_finished)
-        self._process.readyReadStandardOutput.connect(
-            self._on_process_stdout_ready)
-        self._process.readyReadStandardError.connect(
-            self._on_process_stderr_ready)
         self._port = self._pick_free_port()
         if server_script.endswith('.exe'):
             # frozen server script on windows does not need an interpreter
@@ -192,7 +242,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
         :raise:
         """
-        if not self.is_server_running or not self.is_connected:
+        if not self._process.running or not self.is_connected:
             raise NotConnectedError()
         classname = '%s.%s' % (worker_class_or_function.__module__,
                                worker_class_or_function.__name__)
@@ -217,6 +267,9 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         header = struct.pack('=I', len(msg))
         self.write(header)
         self.write(msg)
+
+    def _on_process_started(self):
+        QtCore.QTimer.singleShot(500, self._connect)
 
     def _pick_free_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -278,36 +331,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                             callback(status, results)
                     self._header_complete = False
                     self._data_buf = bytes()
-
-    def _on_process_started(self):
-        self._cli_logger.debug('server process started')
-        QtCore.QTimer.singleShot(500, self._connect)
-        self.is_server_running = True
-
-    def _on_process_error(self, error):
-        if not self.is_server_running:
-            return
-        if not error in PROCESS_ERROR_STRING:
-            socket_error = -1
-        self._cli_logger.debug('server process error %s: %s' % (error,
-                               PROCESS_ERROR_STRING[error]))
-
-    def _on_process_finished(self, exit_code):
-        self._cli_logger.debug('server process finished with exit code %d' %
-                               exit_code)
-        self.is_server_running = False
-
-    def _on_process_stdout_ready(self):
-        output = bytes(self._process.readAllStandardOutput()).decode('utf-8')
-        output = output[:output.rfind('\n')]
-        for l in output.splitlines():
-            self._srv_logger.debug(l)
-
-    def _on_process_stderr_ready(self):
-        output = bytes(self._process.readAllStandardError()).decode('utf-8')
-        output = output[:output.rfind('\n')]
-        for l in output.splitlines():
-            self._srv_logger.error(l)
 
 
 # Usage example
