@@ -37,8 +37,10 @@ if sys.version_info[0] == 2:
 from PyQt4 import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
 from pyqode.core.api import client, server, workers
-from .helpers import cwd_at, require_python2, python2_path
+from .helpers import cwd_at, require_python2, python2_path, not_py2
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 client_socket = None
 
@@ -105,6 +107,7 @@ def test_client_server():
 
 @cwd_at('test')
 @require_python2()
+@not_py2()
 def test_client_server_py2():
     """
     Same test as above except we run the server with python2 if available

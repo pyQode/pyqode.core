@@ -6,6 +6,7 @@ import os
 from os.path import abspath, dirname
 import functools
 import platform
+import sys
 
 test_dir = dirname(abspath(__file__))
 
@@ -48,5 +49,19 @@ def require_python2():
         def wrapper(*args, **kwds):
             if os.path.exists(python2_path()):
                 return func(*args, **kwds)
+        return wrapper
+    return decorator
+
+
+def not_py2():
+    """
+    Decorator that skips tests if the current interpreter is python2
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwds):
+            if sys.version_info[0] == 2:
+                return
+            return func(*args, **kwds)
         return wrapper
     return decorator
