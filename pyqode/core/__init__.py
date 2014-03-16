@@ -76,6 +76,7 @@ from pyqode.core.panels import LineNumberPanel
 from pyqode.core.panels import MarkerPanel, Marker
 from pyqode.core.panels import SearchAndReplacePanel
 
+from pyqode.core.api import server, client, workers, code_completion
 
 #: pyqode.core version
 __version__ = "1.3.0"
@@ -141,4 +142,5 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "WordClickMode",
+           'server', 'client', 'workers', 'code_completion',
            "PYGMENTS_STYLES", "memoized", "Server", "SymbolMatcherMode"]
