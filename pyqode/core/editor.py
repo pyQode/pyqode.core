@@ -428,7 +428,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Closes the socket when the editor is closed.
         """
-        self.client.close()
+        try:
+            self.client.close()
+        except RuntimeError:
+            pass
         super(QCodeEdit, self).close()
 
     def closeEvent(self, QCloseEvent):
@@ -436,7 +439,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.close()
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except RuntimeError:
+            pass  # wrapped C/C++ object  already deleted
 
     def start_server(self, script, interpreter=sys.executable, args=None):
         """
