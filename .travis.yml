@@ -11,6 +11,8 @@ install:
  - sudo apt-get update
  - sudo apt-get install -qq python-qt4 --fix-missing
  - sudo apt-get install -qq python3-pyqt4 --fix-missing
+ - sudo apt-get install -qq python-pygments --fix-missing
+ - sudo apt-get install -qq python3-pygments --fix-missing
  - pip install --quiet --use-mirrors tox
 script:
   - tox
