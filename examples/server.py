@@ -24,28 +24,14 @@
 #THE SOFTWARE.
 #
 """
-This is a simple functional test, it runs a QApplication and shows a
-QGenericCodeEdit for 500ms than exit
+Simple server which adds the code_completion.DocumentWordsProvider to the
+CodeCompletion worker.
 """
-import sys
-if sys.version_info[0] == 2:
-    import sip
-    sip.setapi("QString", 2)
-    sip.setapi("QVariant", 2)
+from pyqode.core.api import code_completion
+from pyqode.core.api import server
+from pyqode.core.api import workers
 
-from PyQt4 import QtCore, QtGui
-from pyqode.core import QGenericCodeEdit
-
-
-def _leave():
-    app = QtGui.QApplication.instance()
-    app.exit(0)
-
-
-def test_functional():
-    app = QtGui.QApplication(sys.argv)
-    editor = QGenericCodeEdit()
-    editor.openFile(__file__)
-    editor.show()
-    QtCore.QTimer.singleShot(500, _leave)
-    return app.exec_()
+if __name__ == '__main__':
+    workers.CodeCompletion.providers.append(
+        code_completion.DocumentWordsProvider())
+    server.run()

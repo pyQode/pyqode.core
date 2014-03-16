@@ -24,28 +24,17 @@
 #THE SOFTWARE.
 #
 """
-This example show the various way to force using the PySide bindings instead
-of PyQt4 which is the default.
+The public API consists of a series of modules that addresses a specific
+concern of pyqode:
+  - text: text manipulation functions (selection, insertion, cursor
+          manipulation, queries).
+  - server: api for writing/configuring the pyqode server.
+  - classes: the base classes needed to extend the code editor widget (mode,
+             panels, text decoration, textblock user data,...)
+  - utils: utitlies that might be useful when extending pyqode (
+    job runner, memoize,...)
 
-When using PySide the easiest way is just to import any PySide module/package
-before pyqode
+.. todo: At the moment the api is mostly empty, I have to move existing
+         pyqode.core classes here and refactor a lot of the internal to make
+         the new text api module.
 """
-import os
-import sys
-# first import something from PySide
-from PySide.QtGui import QApplication
-# then import any pyqode package
-import pyqode.core
-
-
-def main():
-    app = QApplication(sys.argv)
-    editor = pyqode.core.QGenericCodeEdit()
-    editor.show()
-    # show the api pyqode is currently using
-    editor.setPlainText("pyQode using %s" % os.environ["QT_API"])
-    app.exec_()
-
-if __name__ == "__main__":
-    main()
-

@@ -26,6 +26,8 @@
 """
 Simple example using a pre-made editor: pyqode.core.QGenericCodeEdit
 """
+import logging
+logging.basicConfig(level=logging.DEBUG)
 import sys
 from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
@@ -34,11 +36,10 @@ from pyqode.core import QGenericCodeEdit
 
 def main():
     app = QApplication(sys.argv)
-    window = QMainWindow()
     editor = QGenericCodeEdit()
+    editor.start_server('server.py')
     editor.openFile(__file__)
-    window.setCentralWidget(editor)
-    window.show()
+    editor.show()
     sys.exit(app.exec_())
 
 

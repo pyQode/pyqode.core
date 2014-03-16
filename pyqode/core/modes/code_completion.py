@@ -28,128 +28,13 @@ This module contains the code completion mode and the related classes.
 """
 import re
 import sys
-import os
-from pyqode.core import constants, Server, Worker
+from pyqode.core import constants
+from pyqode.core.api import workers
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.mode import Mode
 from pyqode.core.system import DelayJobRunner, memoized
-from pyqode.core.server import get_server
 from PyQt4 import QtGui, QtCore
 from pyqode.core import logger
-
-
-class PreLoadWorker(Worker):
-    """
-    A worker object that will run the preload method on all completion provider
-    in the child process.
-    """
-
-    def __init__(self, providers, *args):
-        """
-        :param providers: The list of completion providers
-
-        :param args: The preload method arguments
-        """
-        self.__providers = providers
-        self.__args = args
-
-    def __call__(self, *args, **kwargs):
-        """
-        Do the work (this will be called in the child process by the
-        SubprocessServer).
-        """
-        results = []
-        for prov in self.__providers:
-            # pass the process dict to every providers
-            setattr(prov, "slotDict", self.slotDict)
-            r = prov.preload(*self.__args)
-            if r:
-                results.append(r)
-        return results
-
-
-class CompletionWorker(Worker):
-    """
-    A worker object that will run the complete method of every providers
-    """
-    def __init__(self, providers, *args):
-        self.__providers = providers
-        self.__args = args
-
-    def __call__(self, *args, **kwargs):
-        """
-        Do the work (this will be called in the child process by the
-        SubprocessServer).
-        """
-        completions = []
-        for prov in self.__providers:
-            # pass the process dict to every providers
-            setattr(prov, "slotDict", self.slotDict)
-            completions.append(prov.complete(*self.__args))
-            if len(completions) > 20:
-                break
-        return completions
-
-
-class Completion(object):
-    """
-    Defines a code completion item.
-
-    A completion is made up of the following elements:
-        - the suggestion text
-        - the suggestion icon. Optional.
-        - the suggestion tooltip. Optional.
-    """
-
-    def __init__(self, text, icon=None, tooltip=None):
-        #: Displayed text.
-        self.text = text.strip()
-        #: filename/resource name of the icon used for the decoration role
-        self.icon = icon
-        # optional description
-        self.tooltip = tooltip
-
-    def isNull(self):
-        return self.text == ""
-
-    def __repr__(self):
-        return self.text
-
-
-class CompletionProvider(object):
-    """
-    Base class for code completion providers, objects that scan some code and
-    return a list of Completion objects.
-
-    There are two methods to override:
-        - preload: preload the list of Completions when a new text is set on the
-                   editor. Optional.
-        - complete: complete the current text. All subclasses needs to implement
-                    this method.
-
-    .. note: As the provider is executed in a child process, your class instance
-             will loose its data every time its run. To store persistent data
-             (such as the preload results), you may use the 'slotDict'
-             attribute. Care must be taken from the key, we suggest a
-             combination of the file path and type(self).__name__.
-
-    """
-    PRIORITY = 0
-
-    def preload(self, code, fileEncoding, filePath):
-        return None
-
-    def complete(self, code, line, column, completionPrefix,
-                 filePath, encodign):
-        """
-        :param code: code string
-        :param line: line number (1 based)
-        :param column: colum number (0 based)
-        :param completionPrefix: The prefix to complete
-        :param filePath: file path of the code to complete
-        :param fileEncoding: encoding of the code to complete
-        """
-        raise NotImplementedError()
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
@@ -272,7 +157,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.__tooltips = {}
         self.__cursorLine = -1
         self.__cancelNext = False
-        self.__preloadFinished = False
         self.__requestCnt = 0
         self.__lastCompletionPrefix = ""
         self._server_port = server_port
@@ -313,7 +197,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
-        if not self.__preloadFinished or self.__requestCnt:
+        if self.__requestCnt:
             return
         # only check first byte
         column = self.editor.cursorPosition[1]
@@ -328,18 +212,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.cursorPosition[1], self.completionPrefix,
             self.editor.filePath, self.editor.fileEncoding)
 
-    def requestPreload(self):
-        """
-        Requests a preload of the document.
-        """
-        self.__preloadFinished = False
-        code = self.editor.toPlainText()
-        self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
-
     def _onInstall(self, editor):
-        srv = get_server()
-        if srv:
-            srv.signals.workCompleted.connect(self.__onWorkFinished)
         self.__completer = QtGui.QCompleter([""], editor)
         self.__completer.setCompletionMode(self.__completer.PopupCompletion)
         self.__completer.activated.connect(self.__insertCompletion)
@@ -374,7 +247,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.__displayCompletionTooltip)
             self.editor.cursorPositionChanged.connect(
                 self.__onCursorPositionChanged)
-            self.editor.newTextSet.connect(self.requestPreload)
         else:
             self.editor.focusedIn.disconnect(self.__onFocusIn)
             self.editor.keyPressed.disconnect(self.__onKeyPressed)
@@ -394,19 +266,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         self.__completer.setWidget(self.editor)
 
-    def __onWorkFinished(self, caller_id, worker, results):
-        if caller_id == id(self) and isinstance(worker, CompletionWorker):
-            logger.debug("Completion request finished")
-            self.editor.setCursor(QtCore.Qt.IBeamCursor)
-            all_results = []
-            for res in results:
-                all_results += res
-            self.__requestCnt -= 1
-            self.__showCompletions(all_results)
-        elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
-            logger.debug("Preload request finished")
-            self.__preloadFinished = True
-            self.preLoadCompleted.emit()
+    def __onWorkFinished(self, status, results):
+        logger.debug("got completion results")
+        self.editor.setCursor(QtCore.Qt.IBeamCursor)
+        all_results = []
+        for res in results:
+            all_results += res
+        self.__requestCnt -= 1
+        self.__showCompletions(all_results)
 
     def __onKeyPressed(self, event):
         QtGui.QToolTip.hideText()
@@ -530,7 +397,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         # user typed too fast: the user already typed the only suggestion we
         # have
         elif (len(completions) == 1 and
-              completions[0].text == self.completionPrefix):
+              completions[0]['name'] == self.completionPrefix):
             return
         # a request cancel has been set
         if self.__cancelNext:
@@ -659,18 +526,19 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         displayedTexts = []
         self.__tooltips.clear()
         for completion in completions:
-            if completion.isNull():
+            name = completion['name']
+            if not name:
                 continue
             # skip redundant completion
-            if completion.text != self.completionPrefix and \
-                    not completion.text in displayedTexts:
-                displayedTexts.append(completion.text)
+            if name != self.completionPrefix and \
+                    not name in displayedTexts:
+                displayedTexts.append(name)
                 item = QtGui.QStandardItem()
-                item.setData(completion.text, QtCore.Qt.DisplayRole)
-                if completion.tooltip is not None:
-                    self.__tooltips[completion.text] = completion.tooltip
-                if completion.icon is not None:
-                    item.setData(self.__makeIcon(completion.icon),
+                item.setData(name, QtCore.Qt.DisplayRole)
+                if 'tooltip' in completion:
+                    self.__tooltips[name] = completion['tooltip']
+                if 'icon' in completion:
+                    item.setData(self.__makeIcon(completion['icon']),
                                  QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
         return cc_model
@@ -691,103 +559,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         else:
             QtGui.QToolTip.hideText()
 
-    def __collectCompletions(self, *args):
+    def __collectCompletions(self, code, line, column, prefix, path, encoding):
         logger.debug("Completion requested")
-        self.__jobRunner.requestJob(self.__setWaitCursor, False)
-        worker = CompletionWorker(self.__providers, *args)
-        get_server().requestWork(self, worker)
-
-    def __preload(self, *args):
-        self.preLoadStarted.emit()
-        worker = PreLoadWorker(self.__providers, *args)
-        get_server().requestWork(self, worker)
-
-
-class DocumentWordCompletionProvider(CompletionProvider):
-    """
-    Provides code completions using the document words.
-    """
-
-    def __init__(self):
-        CompletionProvider.__init__(self)
-
-    def preload(self, code, filePath, fileEncoding):
-        return self.parse(code, filePath=filePath)
-
-    def parse(self, code, wordSeparators=constants.WORD_SEPARATORS,
-              filePath=""):
-        """
-        Returns a list of completions based on the code passed as a parameter.
-
-        :param code: The code to parse/tokenize
-        :param wordSeparators: The list of words separators.
-        :param filePath:
-        :return: A list of :class:`pyqode.core.Completion`
-        :rtype: list
-        """
-        completions = []
-        for w in self.split(code, wordSeparators):
-            completions.append(Completion(w))
-        # store results in the subprocess dict for later use
-        self.slotDict["docWords%s-%s" %
-                      (filePath, type(self).__name__)] = completions
-        return completions
-
-    @staticmethod
-    def split(txt, seps):
-        """
-        Splits a text in a meaningful list of words.
-
-        :param txt: Text to split
-
-        :param seps: List of words separators
-
-        :return: A set of words found in the document (excluding punctuations,
-                 numbers, ...)
-        """
-        # replace all possible separators with a default sep
-        default_sep = seps[0]
-        for sep in seps[1:]:
-            if sep:
-                txt = txt.replace(sep, default_sep)
-        # now we can split using the default_sep
-        raw_words = txt.split(default_sep)
-        words = set()
-        for w in raw_words:
-            # w = w.strip()
-            if w.isalpha():
-                words.add(w)
-        return sorted(words)
-
-    def complete(self, code, line, column, completionPrefix,
-                 filePath, fileEncoding):
-        # get previous result from the server process dict
-        try:
-            words = self.slotDict["docWords%s-%s"
-                                     % (filePath, type(self).__name__)]
-        except KeyError:
-            words = None
-        if not words or not len(words):
-            return self.parse(code, filePath=filePath)
-        return words
-
-
-if __name__ == '__main__':
-
-    class Example(QCodeEdit):
-
-        def __init__(self):
-            QCodeEdit.__init__(self, parent=None)
-            self.resize(QtCore.QSize(1000, 600))
-            self.installMode(CodeCompletionMode())
-            self.codeCompletionMode.addCompletionProvider(
-                DocumentWordCompletionProvider())
-            self.openFile(__file__)
-
-    import sys
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    app = QtGui.QApplication(sys.argv)
-    e = Example()
-    e.show()
-    sys.exit(app.exec_())
+        data = {'code': code, 'line': line, 'column': column, 'prefix': prefix,
+                'path': path, 'encoding': encoding}
+        self.editor.request_work(workers.CodeCompletion, args=data,
+                                 on_receive=self.__onWorkFinished)
+        self.__setWaitCursor()

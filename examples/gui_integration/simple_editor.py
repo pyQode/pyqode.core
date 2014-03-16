@@ -28,7 +28,6 @@ import sys
 # verbose mode
 import logging
 logging.basicConfig(level=logging.DEBUG)
-
 import pyqode.core
 from PyQt4 import QtCore, QtGui
 from ui.simple_editor_ui import Ui_MainWindow
@@ -39,6 +38,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+        self.editor.start_server('../server.py')
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.saveToFile)
         self.actionOpen.setIcon(
@@ -55,7 +55,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setupPanelsMenu()
         self.setupStylesMenu()
         try:
-            self.editor.openFile(__file__)
+            self.editor.openFile(__file__, detectEncoding=True)
         except (OSError, IOError):
             pass
         except AttributeError:
@@ -104,12 +104,8 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def on_actionOpen_triggered(self):
         filePath = QtGui.QFileDialog.getOpenFileName(
             self, "Choose a file", os.path.expanduser("~"))
-        if os.environ['QT_API'] == 'PySide':
-            if filePath[0]:
-                self.editor.openFile(filePath[0])
-        else:
-            if filePath:
-                self.editor.openFile(filePath)
+        if filePath:
+            self.editor.openFile(filePath, detectEncoding=True)
 
     def onPanelCheckStateChanged(self):
         action = self.sender()
@@ -133,6 +129,10 @@ def main():
     print(win.editor.style.dump())
     print(app)
     app.exec_()
+    # cleanup
+    win.editor.close()  # ensure the server is properly closed.
+    del win
+    del app
 
 if __name__ == "__main__":
     main()
