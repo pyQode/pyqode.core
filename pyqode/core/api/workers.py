@@ -40,6 +40,8 @@ A worker is always tightly coupled with its caller, so are the data.
     python2, which might happen in pyqode.python to support python2 syntax).
 
 """
+import sys
+import traceback
 
 
 def echo(data):
@@ -83,9 +85,14 @@ class CodeCompletion(object):
         prefix = data['prefix']
         completions = []
         for prov in CodeCompletion.providers:
-            # pass the process dict to every providers
-            completions.append(prov.complete(
-                code, line, column, prefix, path, encoding))
-            if len(completions) > 20:
-                break
+            try:
+                completions.append(prov.complete(
+                    code, line, column, prefix, path, encoding))
+                if len(completions) > 20:
+                    break
+            except :
+                sys.stderr.write('Failed to get completions from provider %r'
+                                 % prov)
+                e1, e2, e3 = sys.exc_info()
+                traceback.print_exception(e1, e2, e3, file=sys.stderr)
         return True, completions

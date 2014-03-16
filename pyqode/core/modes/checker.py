@@ -26,30 +26,15 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
-import os
-import multiprocessing
-
 from PyQt4 import QtCore, QtGui
+from pyqode.core.api import client
 
-from pyqode.core import logger
 from pyqode.core.editor import Mode
 from pyqode.core.api.system import DelayJobRunner
-from pyqode.core.panels.marker import Marker
 from pyqode.core.api.decoration import TextDecoration
-
-
-
-#: Status value for an information message.
-MSG_STATUS_INFO = 0
-#: Status value for a warning message.
-MSG_STATUS_WARNING = 1
-#: Status value for an error message.
-MSG_STATUS_ERROR = 2
-
-#: Check is triggered when text has changed.
-CHECK_TRIGGER_TXT_CHANGED = 0
-#: Check is triggered when text has been saved.
-CHECK_TRIGGER_TXT_SAVED = 1
+from pyqode.core.api.constants import CheckerMessages
+from pyqode.core.api.constants import CheckerTriggers
+from pyqode.core.panels.marker import Marker
 
 
 class CheckerMessage(object):
@@ -57,17 +42,17 @@ class CheckerMessage(object):
     Holds data for a message displayed by the :class:`pyqode.core.CheckerMode`.
     """
     #: Default set of icons foreach message status
-    ICONS = {MSG_STATUS_INFO: ("marker-info",
+    ICONS = {CheckerMessages.INFO: ("marker-info",
                                ":/pyqode-icons/rc/dialog-info.png"),
-             MSG_STATUS_WARNING: ("marker-warning",
+             CheckerMessages.WARNING: ("marker-warning",
                                   ":/pyqode-icons/rc/dialog-warning.png"),
-             MSG_STATUS_ERROR: ("marker-error",
+             CheckerMessages.ERROR: ("marker-error",
                                 ":/pyqode-icons/rc/dialog-error.png")}
 
     #: Default colors foreach message status
-    COLORS = {MSG_STATUS_INFO: "#4040DD",
-              MSG_STATUS_WARNING: "#DDDD40",
-              MSG_STATUS_ERROR: "#DD4040"}
+    COLORS = {CheckerMessages.INFO: "#4040DD",
+              CheckerMessages.WARNING: "#DDDD40",
+              CheckerMessages.ERROR: "#DD4040"}
 
     @classmethod
     def statusToString(cls, status):
@@ -78,8 +63,9 @@ class CheckerMessage(object):
         :return: The status string.
         :rtype: str
         """
-        strings = {MSG_STATUS_INFO: "Info", MSG_STATUS_WARNING: "Warning",
-                   MSG_STATUS_ERROR: "Error"}
+        strings = {CheckerMessages.INFO: "Info",
+                   CheckerMessages.WARNING: "Warning",
+                   CheckerMessages.ERROR: "Error"}
         return strings[status]
 
     @property
@@ -156,19 +142,13 @@ class CheckerMode(Mode, QtCore.QObject):
     The messages are displayed as text decorations on the editor and optional
     markers can be added to a :class:`pyqode.core.MarkerPanel`
     """
-    #: Internal signal used to add a checker message from a background thread.
-    addMessagesRequested = QtCore.pyqtSignal(object, bool)
-    #: Internal signal used to clear the checker messages.
-    clearMessagesRequested = QtCore.pyqtSignal()
-
-    def __init__(self, process_func,
+    def __init__(self, worker,
                  delay=500,
                  markerPanelId="markerPanel",
-                 clearOnRequest=True, trigger=CHECK_TRIGGER_TXT_CHANGED,
+                 clearOnRequest=True, trigger=CheckerTriggers.TXT_CHANGED,
                  showEditorTooltip=False):
         """
-        :param process_func: The process function that performs the code
-                             analysis.
+        :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
                       trigger is set to
                       :const:pyqode.core.CHECK_TRIGGER_TXT_CHANGED`
@@ -187,7 +167,7 @@ class CheckerMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=delay)
         self.__messages = []
-        self.__process_func = process_func
+        self._worker = worker
         self.__trigger = trigger
         self.__mutex = QtCore.QMutex()
         self.__clearOnRequest = clearOnRequest
@@ -255,90 +235,34 @@ class CheckerMode(Mode, QtCore.QObject):
 
     def _onStateChanged(self, state):
         if state:
-            if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
+            if self.__trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.connect(self.requestAnalysis)
-            elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
+            elif self.__trigger == CheckerTriggers.TXT_SAVED:
                 self.editor.textSaved.connect(self.requestAnalysis)
                 self.editor.newTextSet.connect(self.requestAnalysis)
-            self.addMessagesRequested.connect(self.addMessages)
-            self.clearMessagesRequested.connect(self.clearMessages)
         else:
-            if self.__trigger == CHECK_TRIGGER_TXT_CHANGED:
+            if self.__trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.disconnect(self.requestAnalysis)
-            elif self.__trigger == CHECK_TRIGGER_TXT_SAVED:
+            elif self.__trigger == CheckerTriggers.TXT_SAVED:
                 self.editor.textSaved.disconnect(self.requestAnalysis)
                 self.editor.newTextSet.disconnect(self.requestAnalysis)
-            self.addMessagesRequested.disconnect(self.addMessages)
-            self.clearMessagesRequested.disconnect(self.clearMessages)
 
-    def __runAnalysis(self, code, filePath, fileEncoding):
-        """
-        Creates a subprocess. The subprocess receives a queue for storing
-        results, the code string, the file path and the file encoding as
-        input parameters.
-
-        The subprocess must fill the queue with a list of
-        :class:`pyqode.core.CheckerMessage`.
-        """
-        if "PYQODE_NO_COMPLETION_SERVER" in os.environ:
-            return
-        try:
-            q = multiprocessing.Queue()
-            p = multiprocessing.Process(
-                target=self.__process_func, name="%s process" % self.name,
-                args=(q, code, filePath, fileEncoding))
-            p.start()
-            try:
-                self.addMessagesRequested.emit(q.get(), True)
-            except IOError as e:
-                logger.warning("Failed to add messages: %s" % e)
-            p.join()
-        except OSError as e:
-            logger.error("%s: failed to run analysis, %s" % (self.name, e))
+    def _on_work_finished(self, status, messages):
+        if status:
+            messages = [CheckerMessage(*msg) for msg in messages]
+            self.addMessages(messages)
 
     def requestAnalysis(self):
         """ Requests an analysis job. """
         if self.__clearOnRequest:
             self.clearMessages()
-        self.__jobRunner.requestJob(self.__runAnalysis, True,
-                                    self.editor.toPlainText(),
-                                    self.editor.filePath,
-                                    self.editor.fileEncoding)
-
-
-if __name__ == "__main__":
-    import sys
-    import random
-    from pyqode.core import QGenericCodeEdit, MarkerPanel
-
-    def run(queue, code, document, filePath):
-        queue.put([CheckerMessage("A fancy info message",
-                                  MSG_STATUS_INFO, random.randint(1, 15)),
-                   CheckerMessage("A fancy warning message",
-                                  MSG_STATUS_WARNING, random.randint(1, 15)),
-                   CheckerMessage("A fancy error message", MSG_STATUS_ERROR,
-                                  random.randint(1, 15))])
-
-    class FancyChecker(CheckerMode):
-        """
-        Example checker. Clear messages and add a message of each status on a
-        randome line.
-        """
-        IDENTIFIER = "fancyChecker"
-        DESCRIPTION = "An example checker"
-
-        def __init__(self):
-            super(FancyChecker, self).__init__(run)
-
-    def main():
-        app = QtGui.QApplication(sys.argv)
-        win = QtGui.QMainWindow()
-        edit = QGenericCodeEdit()
-        win.setCentralWidget(edit)
-        edit.installMode(FancyChecker())
-        edit.installPanel(MarkerPanel())
-        edit.openFile(__file__)
-        win.show()
-        app.exec_()
-
-    sys.exit(main())
+        request_data = {
+            'code': self.editor.toPlainText(),
+            'path': self.editor.filePath,
+            'encoding': self.editor.fileEncoding
+        }
+        try:
+            self.editor.request_work(self._worker, request_data,
+                                     on_receive=self._on_work_finished)
+        except client.NotConnectedError:
+            QtCore.QTimer.singleShot(2000, self.requestAnalysis)

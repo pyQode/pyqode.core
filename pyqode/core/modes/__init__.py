@@ -30,11 +30,6 @@ from pyqode.core.modes.autocomplete import AutoCompleteMode
 from pyqode.core.modes.caret_line_highlight import CaretLineHighlighterMode
 from pyqode.core.modes.case_converter import CaseConverterMode
 from pyqode.core.modes.checker import CheckerMode, CheckerMessage
-from pyqode.core.modes.checker import MSG_STATUS_ERROR
-from pyqode.core.modes.checker import MSG_STATUS_INFO
-from pyqode.core.modes.checker import MSG_STATUS_WARNING
-from pyqode.core.modes.checker import CHECK_TRIGGER_TXT_CHANGED
-from pyqode.core.modes.checker import CHECK_TRIGGER_TXT_SAVED
 from pyqode.core.modes.code_completion import CodeCompletionMode
 from pyqode.core.modes.filewatcher import FileWatcherMode
 from pyqode.core.modes.matcher import SymbolMatcherMode

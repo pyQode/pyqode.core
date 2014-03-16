@@ -91,12 +91,11 @@ Here is the most simple and basic example of a server script:
     from pyqode.core.api import server
 
     if __name__ == '__main__':
-        # TODO; configure sys.path and your workers here
         server.run()
 
-.. warning:: The user can choose the python interpreter that will run the server
-    script. That means that classes and functions that run server side (workers)
-    **should fully support python2 syntax!**
+.. warning:: The user can choose the python interpreter that will run the
+    server. That means that classes and functions that run server side (
+    workers) **should fully support python2 syntax!**
 
 .. note:: print statements on the server side will be logged as debug messages
     on the client side. To have your messages logged as error message, use
