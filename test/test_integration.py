@@ -24,7 +24,7 @@
 #THE SOFTWARE.
 #
 """
-This is a simple functional test, it runs a QApplication and shows a
+A series of simple functional test, it runs a QApplication and shows a
 QGenericCodeEdit for 500ms than exit
 """
 import sys
@@ -35,6 +35,7 @@ if sys.version_info[0] == 2:
 
 from PyQt4 import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
+from pyqode.core.api import client, server, workers
 
 
 def _leave():
@@ -42,7 +43,7 @@ def _leave():
     app.exit(0)
 
 
-def test_functional_app():
+def test_app():
     """
     Test an entire app
     """
@@ -53,3 +54,12 @@ def test_functional_app():
     editor.show()
     QtCore.QTimer.singleShot(500, _leave)
     app.exec_()
+
+
+def test_client_server():
+    """
+    Checks that the client-server works as expected. We will send
+    a request using the echo worker and assert it has the same data as we send.
+
+    Those data will be generated randomly.
+    """
