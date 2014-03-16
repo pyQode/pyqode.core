@@ -350,33 +350,33 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     """
     #: Paint hook
     painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
-    #: pyqtSignal emitted when a new text is set on the widget
+    #: Signal emitted when a new text is set on the widget
     newTextSet = QtCore.pyqtSignal()
-    #: pyqtSignal emitted when the text is saved to file
+    #: Signal emitted when the text is saved to file
     textSaved = QtCore.pyqtSignal(str)
-    #: pyqtSignal emitted before the text is saved to file
+    #: Signal emitted before the text is saved to file
     textSaving = QtCore.pyqtSignal(str)
-    #: pyqtSignal emitted when the dirty state changed
+    #: Signal emitted when the dirty state changed
     dirtyChanged = QtCore.pyqtSignal(bool)
-    #: pyqtSignal emitted when a key is pressed
+    #: Signal emitted when a key is pressed
     keyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
-    #: pyqtSignal emitted when a key is released
+    #: Signal emitted when a key is released
     keyReleased = QtCore.pyqtSignal(QtGui.QKeyEvent)
-    #: pyqtSignal emitted when a mouse button is pressed
+    #: Signal emitted when a mouse button is pressed
     mousePressed = QtCore.pyqtSignal(QtGui.QMouseEvent)
-    #: pyqtSignal emitted when a mouse button is released
+    #: Signal emitted when a mouse button is released
     mouseReleased = QtCore.pyqtSignal(QtGui.QMouseEvent)
-    #: pyqtSignal emitted on a wheel event
+    #: Signal emitted on a wheel event
     mouseWheelActivated = QtCore.pyqtSignal(QtGui.QWheelEvent)
-    #: pyqtSignal emitted at the end of the keyPressed event
+    #: Signal emitted at the end of the keyPressed event
     postKeyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
-    #: pyqtSignal emitted when focusInEvent is is called
+    #: Signal emitted when focusInEvent is is called
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
-    #: pyqtSignal emitted when the mouseMoved
+    #: Signal emitted when the mouseMoved
     mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
-    #: pyqtSignal emitted when the user press the TAB key
+    #: Signal emitted when the user press the TAB key
     indentRequested = QtCore.pyqtSignal()
-    #: pyqtSignal emitted when the user press the BACK-TAB (Shift+TAB) key
+    #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
     unIndentRequested = QtCore.pyqtSignal()
 
     @property

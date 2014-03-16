@@ -119,7 +119,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     _KEYS = ["panelBackground", "background", "panelForeground",
              "panelHighlight"]
 
-    #: pyqtSignal emitted when a search operation finished
+    #: Signal emitted when a search operation finished
     searchFinished = QtCore.pyqtSignal()
 
     @property

@@ -50,7 +50,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
     #: Mode description
     DESCRIPTION = "Watch the editor's file and take care of the reloading."
 
-    #: pyqtSignal emitted when the file has been deleted. The signal is emitted
+    #: Signal emitted when the file has been deleted. The pyqtSignal is emitted
     #: with the current editor instance so that user have a chance to close
     #: the editor.
     fileDeleted = QtCore.pyqtSignal(object)

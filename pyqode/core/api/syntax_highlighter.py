@@ -178,7 +178,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     :meth:`pyqode.core.SyntaxHighlighter.doHighlight` method to apply custom
     highlighting.
 
-    **Signals**:
+    **signals**:
         - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightStarted`
         - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightFinished`
 
@@ -188,11 +188,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     #: Mode identifier
     IDENTIFIER = "syntaxHighlighterMode"
 
-    #: pyqtSignal emitted at the start of highlightBlock. Parameters are the
+    #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
     blockHighlightStarted = QtCore.pyqtSignal(object, object)
 
-    #: pyqtSignal emitted at the end of highlightBlock. Parameters are the
+    #: Signal emitted at the end of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
     blockHighlightFinished = QtCore.pyqtSignal(object, object)
 

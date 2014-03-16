@@ -61,7 +61,7 @@ class PropertyRegistry(QtCore.QObject):
                 - string
     """
 
-    #: pyqtSignal emitted when the value of a property changed. The first parameter
+    #: Signal emitted when the value of a property changed. The first parameter
     #: holds the property's section, the second parameter holds the property's
     #: key and the last parameter holds the property's value
     valueChanged = QtCore.pyqtSignal(str, str)

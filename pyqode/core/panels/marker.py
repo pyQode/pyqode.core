@@ -94,10 +94,10 @@ class MarkerPanel(Panel):
     #: The panel description
     IDENTIFIER = "markerPanel"
 
-    #: pyqtSignal emitted when the user clicked in a place where there is no marker.
+    #: Signal emitted when the user clicked in a place where there is no marker.
     addMarkerRequested = QtCore.pyqtSignal(int)
 
-    #: pyqtSignal emitted when the user clicked on an existing marker.
+    #: Signal emitted when the user clicked on an existing marker.
     removeMarkerRequested = QtCore.pyqtSignal(int)
 
     def __init__(self):

@@ -80,9 +80,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     completionsReady = QtCore.pyqtSignal(object)
     waitCursorRequested = QtCore.pyqtSignal()
 
-    #: pyqtSignal emitted when the preload operation has started.
+    #: Signal emitted when the preload operation has started.
     preLoadStarted = QtCore.pyqtSignal()
-    #: pyqtSignal emitted when the preload operation has completed.
+    #: Signal emitted when the preload operation has completed.
     preLoadCompleted = QtCore.pyqtSignal()
 
     @property
@@ -268,8 +268,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         logger.debug("got completion results")
         self.editor.setCursor(QtCore.Qt.IBeamCursor)
         all_results = []
-        for res in results:
-            all_results += res
+        if status:
+            for res in results:
+                all_results += res
         self.__requestCnt -= 1
         self.__showCompletions(all_results)
 
@@ -522,7 +523,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 displayedTexts.append(name)
                 item = QtGui.QStandardItem()
                 item.setData(name, QtCore.Qt.DisplayRole)
-                if 'tooltip' in completion:
+                if 'tooltip' in completion and completion['tooltip']:
                     self.__tooltips[name] = completion['tooltip']
                 if 'icon' in completion:
                     item.setData(self.__makeIcon(completion['icon']),
@@ -537,7 +538,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not completion in self.__tooltips:
             QtGui.QToolTip.hideText()
             return
-        tooltip = self.__tooltips[completion].strip()
+        if completion in self.__tooltips:
+            tooltip = self.__tooltips[completion].strip()
+        else:
+            tooltip = None
         if tooltip:
             pos = self.__completer.popup().pos()
             pos.setX(pos.x() + self.__completer.popup().size().width())
