@@ -34,6 +34,8 @@ class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
         QtGui.QDialog.__init__(self, parent)
         dlg_goto_line_ui.Ui_Dialog.__init__(self)
         self.setupUi(self)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
         self.spinBox.setValue(currentLine)
         self.spinBox.setMaximum(lineCount)
         self.lblCurrentLine.setText("%d" % currentLine)
