@@ -679,19 +679,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Closes the socket when the editor is closed.
         """
-        try:
-            self.client.close()
-        except RuntimeError:
-            pass
+        self.stop_server()
         super(QCodeEdit, self).close()
 
     def closeEvent(self, QCloseEvent):
         super(QCodeEdit, self).closeEvent(QCloseEvent)
-        self.close()
+        self.stop_server()
 
     def __del__(self):
         try:
-            self.close()
+            self.stop_server()
         except RuntimeError:
             pass  # wrapped C/C++ object  already deleted
 
@@ -716,6 +713,18 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             the server process.
         """
         self.client.start(script, interpreter=interpreter, args=args)
+
+    def stop_server(self):
+        """
+        Stops the server process and closes the associated client socket.
+
+        It is automatically called when the widgets is destroyed but you should
+        rather close it explicitly.
+        """
+        try:
+            self.client.close()
+        except RuntimeError:
+            pass
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
         """
