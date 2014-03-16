@@ -227,24 +227,6 @@ class JsonServer(socketserver.TCPServer):
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
 
-    def serve_forever(self, poll_interval=0.5):
-        """provides an override that can be shutdown from a request handler.
-        The threading code in the BaseSocketServer class prevented this from working
-        even for a non-threaded blocking server.
-        """
-        try:
-            while not self._shutdown_request:
-                # XXX: Consider using another file descriptor or
-                # connecting to the socket to wake this up instead of
-                # polling. Polling reduces our responsiveness to a
-                # shutdown request and wastes cpu at all other times.
-                r, w, e = socketserver._eintr_retry(
-                    select.select, [self], [], [], poll_interval)
-                if self in r:
-                    self._handle_request_noblock()
-        finally:
-            self._shutdown_request = False
-
 
 def default_parser():
     """
