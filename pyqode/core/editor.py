@@ -435,6 +435,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         super(QCodeEdit, self).closeEvent(QCloseEvent)
         self.close()
 
+    def __del__(self):
+        self.close()
+
     def start_server(self, script, interpreter=sys.executable, args=None):
         """
         Starts the server process.
