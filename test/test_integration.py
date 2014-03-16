@@ -35,7 +35,7 @@ if sys.version_info[0] == 2:
     sip.setapi("QString", 2)
     sip.setapi("QVariant", 2)
 from PyQt4 import QtCore, QtGui
-from pyqode.core import QGenericCodeEdit
+from pyqode.core.editor import QCodeEdit
 from pyqode.core.api import client, server, workers
 from .helpers import cwd_at, require_python2, python2_path, not_py2
 
@@ -56,7 +56,7 @@ def test_app():
     Test an entire app
     """
     app = QtGui.QApplication(sys.argv)
-    editor = QGenericCodeEdit()
+    editor = QCodeEdit()
     editor.start_server(os.path.join(os.getcwd(), 'server.py'))
     editor.openFile(__file__)
     editor.show()
