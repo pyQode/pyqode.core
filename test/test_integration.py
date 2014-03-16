@@ -24,18 +24,23 @@
 #THE SOFTWARE.
 #
 """
-A series of simple functional test, it runs a QApplication and shows a
-QGenericCodeEdit for 500ms than exit
+A series of simple integration test, we check that a simple pyqode application
+is running is working as expected, that the client server is respected,...
 """
+import os
+import pytest
 import sys
 if sys.version_info[0] == 2:
     import sip
     sip.setapi("QString", 2)
     sip.setapi("QVariant", 2)
-
 from PyQt4 import QtCore, QtGui
 from pyqode.core import QGenericCodeEdit
 from pyqode.core.api import client, server, workers
+from .helpers import cwd_at
+
+
+client_socket = None
 
 
 def _leave():
@@ -43,23 +48,56 @@ def _leave():
     app.exit(0)
 
 
+@cwd_at('test')
 def test_app():
     """
     Test an entire app
     """
     app = QtGui.QApplication(sys.argv)
     editor = QGenericCodeEdit()
-    editor.start_server('server.py')
+    editor.start_server(os.path.join(os.getcwd(), 'server.py'))
     editor.openFile(__file__)
     editor.show()
     QtCore.QTimer.singleShot(500, _leave)
     app.exec_()
+    del editor
+    del app
 
 
+def on_receive(status, results):
+    assert status is True
+    assert results == 'some data'
+    app = QtGui.QApplication.instance()
+    app.exit(0)
+
+
+def send_request():
+    global client_socket
+    client_socket.request_work(workers.echo, 'some data',
+                               on_receive=on_receive)
+
+
+@cwd_at('test')
 def test_client_server():
     """
     Checks that the client-server works as expected. We will send
-    a request using the echo worker and assert it has the same data as we send.
+    a request using the echo worker and assert it has the same data as we send,
+    providing assurance that the client-server communication and protocol is OK.
 
-    Those data will be generated randomly.
+    Once the result has been received we quit the qt app.
     """
+    global client_socket
+    app = QtGui.QApplication(sys.argv)
+    win = QtGui.QMainWindow()
+    client_socket = client.JsonTcpClient(win)
+    with pytest.raises(client.NotConnectedError):
+        client_socket.request_work(workers.echo, 'some data',
+                                   on_receive=on_receive)
+    client_socket.start(os.path.join(os.getcwd(), 'server.py'))
+    client_socket.connected.connect(send_request)
+    win.show()
+    app.exec_()
+    client_socket.close()
+    del client_socket
+    del win
+    del app
