@@ -24,11 +24,9 @@
 #THE SOFTWARE.
 #
 """
-This module holds all the pyQode constants (enumerations, defines,...)
+This module contains most of the constants of the api.
 """
 import sys
-from pyqode.core.system import TextStyle
-from PyQt4.QtGui import QColor
 
 #
 # Default style values
@@ -42,17 +40,17 @@ elif sys.platform == "darwin":
 #: Default editor font size
 FONT_SIZE = 10
 # Colors
-EDITOR_BACKGROUND = QColor("#FFFFFF")
-EDITOR_FOREGROUND = QColor("#000000")
-EDITOR_WS_FOREGROUND = QColor("#dddddd")
-SELECTION_BACKGROUND = QColor("#6182F3")
-SELECTION_FOREGROUND = QColor("#ffffff")
-PANEL_BACKGROUND = QColor("#F2F1F0")
-PANEL_FOREGROUND = QColor("#888888")
-PANEL_HIGHLIGHT = QColor("#dddddd")
-CARET_LINE_BACKGROUND = QColor("#E4EDF8")
-SEARCH_OCCURRENCES_BACKGROUND = QColor("#FFFF00")
-SEARCH_OCCURRENCES_FOREGROUND = QColor("#000000")
+EDITOR_BACKGROUND = "#FFFFFF"
+EDITOR_FOREGROUND = "#000000"
+EDITOR_WS_FOREGROUND = "#dddddd"
+SELECTION_BACKGROUND = "#6182F3"
+SELECTION_FOREGROUND = "#ffffff"
+PANEL_BACKGROUND = "#F2F1F0"
+PANEL_FOREGROUND = "#888888"
+PANEL_HIGHLIGHT = "#dddddd"
+CARET_LINE_BACKGROUND = "#E4EDF8"
+SEARCH_OCCURRENCES_BACKGROUND = "#FFFF00"
+SEARCH_OCCURRENCES_FOREGROUND = "#000000"
 
 WORD_SEPARATORS = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
                    '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",

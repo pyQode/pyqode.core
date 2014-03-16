@@ -50,3 +50,42 @@ def echo(data):
     """
     print('echo worker running')
     return True, data
+
+
+class CodeCompletion(object):
+    """
+    This is the worker associated with the code completion mode.
+
+    The worker does not actually do anything smart, the real work of collecting
+    code completions is accomplished by the completion providers (see the
+    :class:`pyqode.core.api.code_completion.Provider` interface)
+    listed in :attr:`pyqode.core.api.workers.CompletionWorker.providers`.
+
+    Those completion providers must be installed on the CodeCompletionWorker
+    at the beginning of the main server script, e.g.::
+
+        from pyqode.core.api import workers
+        workers.CodeCompletion.providers.insert(0, MyProvider())
+    """
+    #: The list of code completion provider to run on each completion request.
+    providers = []
+
+    def __call__(self, data):
+        """
+        Do the work (this will be called in the child process by the
+        SubprocessServer).
+        """
+        code = data['code']
+        line = data['line']
+        column = data['column']
+        path = data['path']
+        encoding = data['encoding']
+        prefix = data['prefix']
+        completions = []
+        for prov in CodeCompletion.providers:
+            # pass the process dict to every providers
+            completions.append(prov.complete(
+                code, line, column, prefix, path, encoding))
+            if len(completions) > 20:
+                break
+        return True, completions

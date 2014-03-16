@@ -41,7 +41,6 @@ from pyqode.core.panel import Panel
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
 from pyqode.core.decoration import TextDecoration
-from pyqode.core.server import Server
 from pyqode.core.syntax_highlighter import SyntaxHighlighter
 from pyqode.core.syntax_highlighter import FoldDetector
 from pyqode.core.syntax_highlighter import IndentBasedFoldDetector
@@ -50,9 +49,6 @@ from pyqode.core.textblockuserdata import TextBlockUserData, ParenthesisInfo
 from pyqode.core.system import TextStyle
 from pyqode.core.system import JobRunner
 from pyqode.core.system import DelayJobRunner
-
-# server
-from pyqode.core.server import get_server, start_server, Server, Worker
 
 # modes
 from pyqode.core.modes import AutoCompleteMode
@@ -66,9 +62,6 @@ from pyqode.core.modes import MSG_STATUS_WARNING
 from pyqode.core.modes import CHECK_TRIGGER_TXT_CHANGED
 from pyqode.core.modes import CHECK_TRIGGER_TXT_SAVED
 from pyqode.core.modes import CodeCompletionMode
-from pyqode.core.modes import CompletionProvider
-from pyqode.core.modes import Completion
-from pyqode.core.modes import DocumentWordCompletionProvider
 from pyqode.core.modes import FileWatcherMode
 from pyqode.core.modes import IndenterMode
 from pyqode.core.modes import PygmentsSyntaxHighlighter, PYGMENTS_STYLES
@@ -131,8 +124,6 @@ class QGenericCodeEdit(QCodeEdit):
         self.installMode(CodeCompletionMode())
         self.installMode(AutoIndentMode())
         self.installMode(IndenterMode())
-        self.codeCompletionMode.addCompletionProvider(
-            DocumentWordCompletionProvider())
         self.installMode(SymbolMatcherMode())
 
 
@@ -144,12 +135,10 @@ __all__ = ["__version__", "constants", "logger", "Mode", "Panel", "QCodeEdit",
            "MSG_STATUS_WARNING", "FoldDetector", "IndentBasedFoldDetector",
            "CharBasedFoldDetector",
            "CHECK_TRIGGER_TXT_CHANGED", "CHECK_TRIGGER_TXT_SAVED",
-           "CodeCompletionMode", "CompletionProvider", "Completion",
-           "DocumentWordCompletionProvider", "FileWatcherMode",
+           "CodeCompletionMode", "FileWatcherMode",
            "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
            "AutoIndentMode", "PanelPosition", "TextDecoration", "IndenterMode",
            "PropertyRegistry", "TextStyle", "QGenericCodeEdit", "JobRunner",
            "DelayJobRunner", "TextBlockUserData", "ParenthesisInfo",
            "WordClickMode",
-           "get_server", "start_server", "Server", "Worker",
            "PYGMENTS_STYLES", "memoized", "Server", "SymbolMatcherMode"]

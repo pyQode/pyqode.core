@@ -36,9 +36,6 @@ from pyqode.core.modes.checker import MSG_STATUS_WARNING
 from pyqode.core.modes.checker import CHECK_TRIGGER_TXT_CHANGED
 from pyqode.core.modes.checker import CHECK_TRIGGER_TXT_SAVED
 from pyqode.core.modes.code_completion import CodeCompletionMode
-from pyqode.core.modes.code_completion import CompletionProvider
-from pyqode.core.modes.code_completion import Completion
-from pyqode.core.modes.code_completion import DocumentWordCompletionProvider
 from pyqode.core.modes.filewatcher import FileWatcherMode
 from pyqode.core.modes.matcher import SymbolMatcherMode
 from pyqode.core.modes.right_margin import RightMarginMode
@@ -53,9 +50,7 @@ from pyqode.core.modes.wordclick import WordClickMode
 __all__ = ["CaretLineHighlighterMode", "CheckerMode", "CheckerMessage",
            "MSG_STATUS_ERROR", "MSG_STATUS_WARNING", "MSG_STATUS_INFO",
            "CHECK_TRIGGER_TXT_SAVED", "CHECK_TRIGGER_TXT_CHANGED",
-           "CodeCompletionMode", "CompletionProvider", "Completion",
-           "DocumentWordCompletionProvider", "FileWatcherMode",
-           "SymbolMatcherMode", "IndenterMode"
-           "RightMarginMode", "ZoomMode", "PygmentsSyntaxHighlighter",
-           "PYGMENTS_STYLES", "AutoIndentMode", "CaseConverterMode",
-           "WordClickMode"]
+           "CodeCompletionMode", "FileWatcherMode", "SymbolMatcherMode",
+           "IndenterMode", "RightMarginMode", "ZoomMode",
+           "PygmentsSyntaxHighlighter", "PYGMENTS_STYLES", "AutoIndentMode",
+           "CaseConverterMode", "WordClickMode"]

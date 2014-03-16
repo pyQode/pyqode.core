@@ -107,6 +107,7 @@ import inspect
 import logging
 import json
 import struct
+import sys
 import traceback
 import select
 
@@ -222,6 +223,7 @@ class JsonServer(socketserver.TCPServer):
             args = default_parser().parse_args()
         self.port = args.port
         self._shutdown_request = False
+        # print('server running on port %s' % args.port)
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
 

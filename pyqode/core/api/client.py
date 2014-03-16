@@ -36,6 +36,7 @@ python2 syntax in a python3 based application. This also simplify and open up
 more possiblities when freezing a pyqode application.
 """
 import json
+import logging
 import os
 import socket
 import struct
@@ -76,6 +77,16 @@ PROCESS_ERROR_STRING = {
        'For example, the process may not be running.',
     5: 'an unknown error occurred. This is the default return value of error().'
 }
+
+
+class NotConnectedError(Exception):
+    """
+    Raised if the client is not connected to the server when an operation is
+    requested.
+    """
+    def __init__(self):
+        super(NotConnectedError, self).__init__(
+            'Client socket not connected or server not started')
 
 
 class JsonTcpClient(QtNetwork.QTcpSocket):
@@ -173,13 +184,16 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         Request a work on the server.
 
-        :param worker_class_or_function: fully qualified name of the worker
-            class/function to execute remotely.
+        :param worker_class_or_function: Class or function to execute remotely.
         :param args: worker args, any Json serializable objects
         :param on_receive: an optional callback executed when we receive the
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
+
+        :raise:
         """
+        if not self.is_server_running or not self.is_connected:
+            raise NotConnectedError()
         classname = '%s.%s' % (worker_class_or_function.__module__,
                                worker_class_or_function.__name__)
         request_id = str(uuid.uuid4())
@@ -230,7 +244,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         try:
             self._cli_logger.debug('disconnected from server: %s:%d' %
                                    (self.peerName(), self.peerPort()))
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             pass   # logger might be None if for some reason qt deletes the
                    # socket after python global exit
         self.is_connected = False
@@ -267,7 +281,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _on_process_started(self):
         self._cli_logger.debug('server process started')
-        QtCore.QTimer.singleShot(100, self._connect)
+        QtCore.QTimer.singleShot(500, self._connect)
         self.is_server_running = True
 
     def _on_process_error(self, error):

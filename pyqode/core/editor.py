@@ -27,14 +27,12 @@
 This module contains the definition of the QCodeEdit
 """
 import sys
-import weakref
 from pyqode.core import logger
 from pyqode.core import constants, dialogs
 from pyqode.core.constants import PanelPosition
 from pyqode.core.properties import PropertyRegistry
-from pyqode.core.server import start_server
+from pyqode.core.api.client import JsonTcpClient
 from pyqode.core.system import DelayJobRunner
-from pyqode.core.decoration import TextDecoration
 from PyQt4 import QtGui, QtCore
 
 
@@ -366,9 +364,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
-        # start the completion server with default parameters if not
-        # already started by the user
-        start_server()
+        self.client = JsonTcpClient(self)
         self._lastMousePos = None
         self.__cachedCursorPos = (-1, -1)
         self.__modifiedLines = set()
@@ -428,10 +424,49 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         self.mnu = None
 
-    def __del__(self):
-        pass
-        # todo fix it
-        # self.uninstallAll()
+    def close(self):
+        """
+        Closes the socket when the editor is closed.
+        """
+        self.client.close()
+        super(QCodeEdit, self).close()
+
+    def closeEvent(self, QCloseEvent):
+        super(QCodeEdit, self).closeEvent(QCloseEvent)
+        self.close()
+
+    def start_server(self, script, interpreter=sys.executable, args=None):
+        """
+        Starts the server process.
+
+        The server is a python script that starts a
+        :class:`pyqode.core.api.server.JsonServer`. You (the user) must write
+        the server script so that you can apply your own configuration
+        server side.
+
+        The script can be run with a custom interpreter. The default is to use
+        sys.executable.
+
+        :param str script: Path to the server main script.
+        :param str interpreter: The python interpreter to use to run the server
+            script. If None, sys.executable is used unless we are in a frozen
+            application (cx_Freeze). The executable is not used if the
+            executable scripts ends with '.exe' on Windows
+        :param list args: list of additional command line args to use to start
+            the server process.
+        """
+        self.client.start(script, interpreter=interpreter, args=args)
+
+    def request_work(self, worker_class_or_function, args, on_receive=None):
+        """
+        Requests some work on the server process.
+
+        :param worker_class_or_function: Worker class or function
+        """
+        fully_qualified_name = '%s.%s' % (worker_class_or_function.__module__,
+                                          worker_class_or_function.__name__)
+        self.client.request_work(worker_class_or_function, args,
+                                 on_receive=on_receive)
 
     def uninstallAll(self):
         while len(self.__modes):
@@ -440,7 +475,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         while len(self.__panels):
             zone = list(self.__panels.keys())[0]
             while len(self.__panels[zone]):
-                k = self.__panels[zone].keys()[0]
+                k = list(self.__panels[zone].keys())[0]
                 self.uninstallPanel(k, zone)
             self.__panels.pop(zone, None)
 
@@ -782,6 +817,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return:
         """
+        logger.debug('Uninstalling mode %s' % name)
         m = self.mode(name)
         if m:
             m._onUninstall()
@@ -840,6 +876,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :return:
         """
+        logger.debug('Uninstalling panel %s' % name)
         m = self.__panels[zone][name]
         if m:
             try:

@@ -24,28 +24,14 @@
 #THE SOFTWARE.
 #
 """
-This example show the various way to force using the PySide bindings instead
-of PyQt4 which is the default.
-
-When using PySide the easiest way is just to import any PySide module/package
-before pyqode
+Simple server which adds the code_completion.DocumentWordsProvider to the
+CodeCompletion worker.
 """
-import os
-import sys
-# first import something from PySide
-from PySide.QtGui import QApplication
-# then import any pyqode package
-import pyqode.core
+from pyqode.core.api import code_completion
+from pyqode.core.api import server
+from pyqode.core.api import workers
 
-
-def main():
-    app = QApplication(sys.argv)
-    editor = pyqode.core.QGenericCodeEdit()
-    editor.show()
-    # show the api pyqode is currently using
-    editor.setPlainText("pyQode using %s" % os.environ["QT_API"])
-    app.exec_()
-
-if __name__ == "__main__":
-    main()
-
+if __name__ == '__main__':
+    workers.CodeCompletion.providers.append(
+        code_completion.DocumentWordsProvider())
+    server.run()
