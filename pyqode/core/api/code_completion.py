@@ -42,7 +42,7 @@ class Provider(object):
     completions and have correct signature.
     """
 
-    def complete(self, code, line, column, prefix, path, encoding):
+    def complete(self, code, line, column, path, encoding):
         """
         Returns a list of completions.
 
@@ -55,7 +55,6 @@ class Provider(object):
         :param code: code string
         :param line: line number (1 based)
         :param column: column number (0 based)
-        :param prefix: prefix to complete
         :param path: file path
         :param encoding: file encoding
 
@@ -99,7 +98,7 @@ class DocumentWordsProvider(object):
                 words.add(w)
         return sorted(words)
 
-    def complete(self, code, line, column, prefix, path, encoding):
+    def complete(self, code, line, column, path, encoding):
         completions = []
         for w in self.split(code, constants.WORD_SEPARATORS):
             completions.append({'name': w})

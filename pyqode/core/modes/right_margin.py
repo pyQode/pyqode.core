@@ -35,23 +35,6 @@ class RightMarginMode(Mode):
     """
     Display a right margin at column 80 by default.
 
-
-    This mode adds the following properties to
-    :attr:`pyqode.core.QCodeEdit.settings`
-
-    ====================== ====================== ======= ====================== ================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== ================
-    rightMarginPos         General                int     80                     Column where the margin must be painted.
-    ====================== ====================== ======= ====================== ================
-
-    and to :attr:`pyqode.core.QCodeEdit.style`
-
-    ====================== ====================== ======= ====================== ================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== ================
-    margin                 General                QColor  #FF0000                Color of the margin.
-    ====================== ====================== ======= ====================== ================
     """
     #: Mode identifier
     IDENTIFIER = "rightMarginMode"
@@ -60,43 +43,43 @@ class RightMarginMode(Mode):
     DESCRIPTION = "Draw the right margin on the text document"
 
     @property
-    def marginColor(self):
+    def color(self):
         return self.editor.style.value("margin")
 
-    @marginColor.setter
-    def marginColor(self, value):
-        return self.editor.style.setValue("margin", value)
+    @color.setter
+    def color(self, value):
+        return self.editor.style.set_value("margin", value)
 
     @property
-    def rightMarginPos(self):
+    def position(self):
         return self.editor.style.value("rightMarginPos")
 
-    @rightMarginPos.setter
-    def rightMarginPos(self, value):
-        return self.editor.style.setValue("rightMarginPos", value)
+    @position.setter
+    def position(self, value):
+        return self.editor.style.set_value("rightMarginPos", value)
 
     def __init__(self):
         Mode.__init__(self)
-        self.marginPos = constants.MARGIN_POS
+        self._margin_pos = constants.MARGIN_POS
         self.__pen = QtGui.QPen()
 
-    def _onInstall(self, editor):
+    def _on_install(self, editor):
         """
         Installs the mode on the editor and setup drawing tools
 
         :param editor: The editor instance
         """
-        Mode._onInstall(self, editor)
-        color = self.editor.style.addProperty("margin", "#FF0000")
+        Mode._on_install(self, editor)
+        color = self.editor.style.add_property("margin", "#FF0000")
         self.__pen = QtGui.QPen(QtGui.QColor(color))
-        self.marginPos = self.editor.settings.addProperty(
+        self._margin_pos = self.editor.settings.add_property(
             "rightMarginPos", "80")
 
-    def _onSettingsChanged(self, section, key):
+    def _on_settings_changed(self, section, key):
         if key == "rightMarginPos" or not key:
-            self.marginPos = self.editor.settings.value("rightMarginPos")
+            self._margin_pos = self.editor.settings.value("rightMarginPos")
 
-    def _onStyleChanged(self, section, key):
+    def _on_style_changed(self, section, key):
         """
         Changes the margin color
 
@@ -106,27 +89,27 @@ class RightMarginMode(Mode):
         """
         if key == "margin" or not key:
             self.__pen = self.editor.style.value("margin")
-            self.editor.markWholeDocumentDirty()
+            self.editor.mark_whole_doc_dirty()
             self.editor.repaint()
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         """
         Connects/Disconnects to the painted event of the editor
 
         :param state: Enable state
         """
         if state:
-            self.editor.painted.connect(self.__paintMargin)
+            self.editor.painted.connect(self._paint_margin)
             self.editor.repaint()
         else:
-            self.editor.painted.disconnect(self.__paintMargin)
+            self.editor.painted.disconnect(self._paint_margin)
             self.editor.repaint()
 
-    def __paintMargin(self, event):
+    def _paint_margin(self, event):
         """ Paints the right margin after editor paint event. """
         font = self.editor.currentCharFormat().font()
         fm = QtGui.QFontMetricsF(font)
-        pos = self.marginPos
+        pos = self._margin_pos
         offset = self.editor.contentOffset().x() + \
             self.editor.document().documentMargin()
         x80 = round(fm.width(' ') * pos) + offset

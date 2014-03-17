@@ -49,10 +49,10 @@ def main():
     # Editor 01: change its style than save it to a file
     editor_01 = pyqode.core.QCodeEdit()
     editor_01.setWindowTitle("Editor 01")
-    editor_01.style.setValue("background", "#222222")
-    editor_01.style.setValue("foreground", "#888888")
+    editor_01.style.set_value("background", "#222222")
+    editor_01.style.set_value("foreground", "#888888")
     editor_01.style.save(file_path)
-    print(editor_01.style.dump())
+    print(editor_01.style.dumps())
     editor_01.show()
 
     # Editor 02: style loaded from the file we just saved

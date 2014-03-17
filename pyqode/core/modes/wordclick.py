@@ -54,35 +54,37 @@ class WordClickMode(Mode, QtCore.QObject):
         self._previous_cursor_end = -1
         self._deco = None
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         if state:
-            self.editor.mouseMoved.connect(self._onMouseMoved)
-            self.editor.mousePressed.connect(self._onMousePressed)
+            self.editor.mouseMoved.connect(self._on_mouse_moved)
+            self.editor.mousePressed.connect(self._on_mouse_pressed)
         else:
-            self.editor.mouseMoved.disconnect(self._onMouseMoved)
-            self.editor.mousePressed.disconnect(self._onMousePressed)
+            self.editor.mouseMoved.disconnect(self._on_mouse_moved)
+            self.editor.mousePressed.disconnect(self._on_mouse_pressed)
 
-    def _selectWordUnderMouseCursor(self):
-        tc = self.editor.selectWordUnderMouseCursor()
+    def _select_word_under_mouse_cursor(self):
+        # todo this already exists in QCodeEdit, check if there are any
+        # differences
+        tc = self.editor.select_word_under_mouse_cursor()
         if (self._previous_cursor_start != tc.selectionStart() and
-                    self._previous_cursor_end != tc.selectionEnd()):
+                self._previous_cursor_end != tc.selectionEnd()):
             self._remove_decoration()
             self._add_decoration(tc)
         self._previous_cursor_start = tc.selectionStart()
         self._previous_cursor_end = tc.selectionEnd()
 
-    def _onMouseMoved(self, e):
+    def _on_mouse_moved(self, e):
         if e.modifiers() & QtCore.Qt.ControlModifier:
-            self._selectWordUnderMouseCursor()
+            self._select_word_under_mouse_cursor()
         else:
             self._remove_decoration()
-            self.editor.setCursor(QtCore.Qt.IBeamCursor)
+            self.editor.set_cursor(QtCore.Qt.IBeamCursor)
             self._previous_cursor_start = -1
             self._previous_cursor_end = -1
 
-    def _onMousePressed(self, e):
+    def _on_mouse_pressed(self, e):
         if e.button() == 1 and self._deco:
-            tc = self.editor.selectWordUnderMouseCursor()
+            tc = self.editor.select_word_under_mouse_cursor()
             if tc and tc.selectedText():
                 self.wordClicked.emit(tc)
 
@@ -91,14 +93,14 @@ class WordClickMode(Mode, QtCore.QObject):
         if self._deco is None:
             if tc.selectedText():
                 self._deco = TextDecoration(tc)
-                self._deco.setForeground(QtCore.Qt.blue)
-                self._deco.underlined()
-                self.editor.addDecoration(self._deco)
-                self.editor.setCursor(QtCore.Qt.PointingHandCursor)
+                self._deco.set_foreground(QtCore.Qt.blue)
+                self._deco.set_as_underlined()
+                self.editor.add_decoration(self._deco)
+                self.editor.set_cursor(QtCore.Qt.PointingHandCursor)
             else:
-                self.editor.setCursor(QtCore.Qt.IBeamCursor)
+                self.editor.set_cursor(QtCore.Qt.IBeamCursor)
 
     def _remove_decoration(self):
         if self._deco is not None:
-            self.editor.removeDecoration(self._deco)
+            self.editor.remove_decoration(self._deco)
             self._deco = None

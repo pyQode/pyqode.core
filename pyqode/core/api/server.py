@@ -140,7 +140,7 @@ class JsonServer(socketserver.TCPServer):
             else:
                 data = ''
             while len(data) < size:
-                tmp = self.request.recv(size-len(data))
+                tmp = self.request.recv(size - len(data))
                 data += tmp
                 if tmp == '':
                     raise RuntimeError("socket connection broken")
@@ -184,10 +184,10 @@ class JsonServer(socketserver.TCPServer):
             :return: The corresponding class
             """
             d = cl.rfind(".")
-            classname = cl[d+1:len(cl)]
+            class_name = cl[d + 1: len(cl)]
             try:
-                m = __import__(cl[0:d], globals(), locals(), [classname])
-                klass = getattr(m, classname)
+                m = __import__(cl[0:d], globals(), locals(), [class_name])
+                klass = getattr(m, class_name)
             except (ImportError, AttributeError):
                 raise ImportError(cl)
             else:
@@ -208,7 +208,7 @@ class JsonServer(socketserver.TCPServer):
                             'results': result}
                 print('sending response: %r' % response)
                 self.send(response)
-            except :
+            except:
                 e1, e2, e3 = sys.exc_info()
                 traceback.print_exception(e1, e2, e3, file=sys.stderr)
 

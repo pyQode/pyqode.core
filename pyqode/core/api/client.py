@@ -60,22 +60,24 @@ SOCKET_ERROR_STRINGS = {
     7: 'an error occurred with the network (e.g., the network cable was '
        'accidentally plugged out).',
     # 9 and 10 are UDP only, we only care about TCP.
-    # all others erros are unlikely to happen in our case (proxy related errors)
+    # all others erros are unlikely to happen in our case (proxy related
+    # errors)
     -1: 'an unidentified error occurred.',
 }
 
 PROCESS_ERROR_STRING = {
-    0: 'the process failed to start. Either the invoked program is missing, or '
-       'you may have insufficient permissions to invoke the program.',
+    0: 'the process failed to start. Either the invoked program is missing, '
+       'or you may have insufficient permissions to invoke the program.',
     1: 'the process crashed some time after starting successfully.',
     2: 'the last waitFor...() function timed out. The state of QProcess is '
        'unchanged, and you can try calling waitFor...() again.',
     4: 'an error occurred when attempting to write to the process. '
-       'For example, the process may not be running, or it may have closed its '
-       'input channel.',
+       'For example, the process may not be running, or it may have closed '
+       'its input channel.',
     3: 'an error occurred when attempting to read from the process. '
        'For example, the process may not be running.',
-    5: 'an unknown error occurred. This is the default return value of error().'
+    5: 'an unknown error occurred. This is the default return value of '
+       'error().'
 }
 
 
@@ -173,7 +175,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._process = None
 
     def _terminate_server_process(self):
-        if self._process.running:
+        if self._process and self._process.running:
             self._process.terminate()
             self._process.waitForFinished()
 

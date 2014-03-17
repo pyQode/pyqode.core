@@ -83,8 +83,8 @@ class MarkerPanel(Panel):
     Use addMarker, removeMarker and clearMarkers to manage the collection of
     displayed makers.
 
-    You can create a user editable panel (e.g. a breakpoints panel) by using the
-    following signals:
+    You can create a user editable panel (e.g. a breakpoints panel) by using
+    the following signals:
 
         - :attr:`pyqode.core.MarkerPanel.addMarkerRequested`
         - :attr:`pyqode.core.MarkerPanel.removeMarkerRequested`
@@ -94,7 +94,8 @@ class MarkerPanel(Panel):
     #: The panel description
     IDENTIFIER = "markerPanel"
 
-    #: Signal emitted when the user clicked in a place where there is no marker.
+    #: Signal emitted when the user clicked in a place where there is no
+    #: marker.
     addMarkerRequested = QtCore.pyqtSignal(int)
 
     #: Signal emitted when the user clicked on an existing marker.
@@ -106,32 +107,32 @@ class MarkerPanel(Panel):
         self.__icons = {}
         self.__previousLine = -1
         self.scrollable = True
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=100)
+        self.__jobRunner = DelayJobRunner(self, nb_threads_max=1, delay=100)
         self.setMouseTracking(True)
         self.__toRemove = []
 
-    def addMarker(self, marker):
+    def add_marker(self, marker):
         """
         Adds the marker to the panel.
 
         :param marker: Marker to add
         :type marker: pyqode.core.Marker
         """
-        key, val = self.makeMarkerIcon(marker.icon)
+        key, val = self.make_marker_icon(marker.icon)
         if key and val:
             self.__icons[key] = val
         self.__markers.append(marker)
         doc = self.editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker.position - 1)
-        usrData = block.userData()
-        if hasattr(usrData, "marker"):
-            usrData.marker = marker
+        user_data = block.userData()
+        if hasattr(user_data, "marker"):
+            user_data.marker = marker
         self.repaint()
 
     @staticmethod
     @memoized
-    def makeMarkerIcon(icon):
+    def make_marker_icon(icon):
         if isinstance(icon, tuple):
             return icon[0], QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
@@ -140,7 +141,7 @@ class MarkerPanel(Panel):
         else:
             return None, None
 
-    def removeMarker(self, marker):
+    def remove_marker(self, marker):
         """
         Removes a marker from the panel
 
@@ -151,12 +152,12 @@ class MarkerPanel(Panel):
         self.__toRemove.append(marker)
         self.repaint()
 
-    def clearMarkers(self):
+    def clear_markers(self):
         """ Clears the markers list """
         while len(self.__markers):
-            self.removeMarker(self.__markers[0])
+            self.remove_marker(self.__markers[0])
 
-    def getMarkerForLine(self, line):
+    def marker_for_line(self, line):
         """
         Returns the marker that is displayed at the specified line number if
         any.
@@ -180,12 +181,12 @@ class MarkerPanel(Panel):
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
-        for top, blockNumber, block in self.editor.visibleBlocks:
-            usrData = block.userData()
-            if hasattr(usrData, "marker"):
-                marker = usrData.marker
+        for top, blockNumber, block in self.editor.visible_blocks:
+            user_data = block.userData()
+            if hasattr(user_data, "marker"):
+                marker = user_data.marker
                 if marker in self.__toRemove:
-                    usrData.marker = None
+                    user_data.marker = None
                     self.__toRemove.remove(marker)
                     continue
                 if marker and marker.icon:
@@ -201,8 +202,8 @@ class MarkerPanel(Panel):
                     self.__icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):
-        line = self.editor.lineNumber(event.pos().y())
-        if self.getMarkerForLine(line):
+        line = self.editor.line_nbr_from_position(event.pos().y())
+        if self.marker_for_line(line):
             logger.debug("Remove marker requested")
             self.removeMarkerRequested.emit(line)
         else:
@@ -210,23 +211,23 @@ class MarkerPanel(Panel):
             self.addMarkerRequested.emit(line)
 
     def mouseMoveEvent(self, event):
-        line = self.editor.lineNumber(event.pos().y())
-        marker = self.getMarkerForLine(line)
+        line = self.editor.line_nbr_from_position(event.pos().y())
+        marker = self.marker_for_line(line)
         if marker and marker.description:
             if self.__previousLine != line:
-                self.__jobRunner.requestJob(self.__displayTooltip, False,
-                                            marker.description,
-                                            self.editor.linePos(
-                                                marker.position - 2))
+                self.__jobRunner.request_job(self._display_tooltip, False,
+                                             marker.description,
+                                             self.editor.line_pos_from_number(
+                                                 marker.position - 2))
         else:
-            self.__jobRunner.cancelRequests()
+            self.__jobRunner.cancel_requests()
         self.__previousLine = line
 
     def leaveEvent(self, *args, **kwargs):
         QtGui.QToolTip.hideText()
         self.__previousLine = -1
 
-    def __displayTooltip(self, tooltip, top):
+    def _display_tooltip(self, tooltip, top):
         QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)
 
@@ -243,18 +244,18 @@ if __name__ == '__main__':
             self.installPanel(MarkerPanel())
             marker = Marker(5, icon=constants.ACTION_GOTO_LINE[0],
                             description="First marker")
-            self.markerPanel.addMarker(marker)
+            self.markerPanel.add_marker(marker)
             # add another action in 5s
-            QtCore.QTimer.singleShot(1000, self.addOtherMarker)
+            QtCore.QTimer.singleShot(1000, self.add_marker)
 
-        def addOtherMarker(self):
-            m = self.markerPanel.getMarkerForLine(5)
+        def add_marker(self):
+            m = self.markerPanel.marker_for_line(5)
             m.position = 7
             marker = Marker(15, icon=constants.ACTION_PASTE[0],
                             description="Second marker")
-            self.markerPanel.addMarker(marker)
+            self.markerPanel.add_marker(marker)
             # clear all in 2s
-            QtCore.QTimer.singleShot(2000, self.markerPanel.clearMarkers)
+            QtCore.QTimer.singleShot(2000, self.markerPanel.clear_markers)
 
     import sys
     app = QtGui.QApplication(sys.argv)

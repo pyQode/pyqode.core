@@ -28,20 +28,25 @@ A series of simple integration test, we check that a simple pyqode application
 is running is working as expected, that the client server is respected,...
 """
 import os
-import pytest
 import sys
+import pytest
 if sys.version_info[0] == 2:
     import sip
     sip.setapi("QString", 2)
     sip.setapi("QVariant", 2)
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 from pyqode.core.editor import QCodeEdit
-from pyqode.core.api import client, server, workers
-from .helpers import cwd_at, require_python2, python2_path, not_py2
-
+from pyqode.core.api import client
+from pyqode.core.api import workers
+from .helpers import cwd_at
+from .helpers import require_python2
+from .helpers import python2_path
+from .helpers import not_py2
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
+
+logging.basicConfig(level=logging.DEBUG)
 client_socket = None
 
 
@@ -58,7 +63,7 @@ def test_app():
     app = QtGui.QApplication(sys.argv)
     editor = QCodeEdit()
     editor.start_server(os.path.join(os.getcwd(), 'server.py'))
-    editor.openFile(__file__)
+    editor.open_file(__file__)
     editor.show()
     QtCore.QTimer.singleShot(500, _leave)
     app.exec_()
@@ -84,7 +89,8 @@ def test_client_server():
     """
     Checks that the client-server works as expected. We will send
     a request using the echo worker and assert it has the same data as we send,
-    providing assurance that the client-server communication and protocol is OK.
+    providing assurance that the client-server communication and protocol is
+    OK.
 
     Once the result has been received we quit the qt app.
     """

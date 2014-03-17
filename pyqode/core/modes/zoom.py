@@ -47,20 +47,20 @@ class ZoomMode(Mode):
         self.prev_delta = 0
         self.default_font_size = constants.FONT_SIZE
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         """
         Connects/Disconnects to the mouseWheelActivated and keyPressed event
         """
         if state:
             self.editor.mouseWheelActivated.connect(
-                self.__onWheelEvent)
-            self.editor.keyPressed.connect(self.__onKeyPressed)
+                self._on_wheel_event)
+            self.editor.keyPressed.connect(self._on_key_pressed)
         else:
             self.editor.mouseWheelActivated.disconnect(
-                self.__onWheelEvent)
-            self.editor.keyPressed.disconnect(self.__onKeyPressed)
+                self._on_wheel_event)
+            self.editor.keyPressed.disconnect(self._on_key_pressed)
 
-    def __onKeyPressed(self, event):
+    def _on_key_pressed(self, event):
         """
         Resets editor font size to the default font size
 
@@ -69,16 +69,16 @@ class ZoomMode(Mode):
         """
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if event.key() == QtCore.Qt.Key_0:
-                self.editor.resetZoom()
+                self.editor.reset_zoom()
                 event.accept()
             if event.key() == QtCore.Qt.Key_Plus:
-                self.editor.zoomIn()
+                self.editor.zoom_in()
                 event.accept()
             if event.key() == QtCore.Qt.Key_Minus:
-                self.editor.zoomOut()
+                self.editor.zoom_out()
                 event.accept()
 
-    def __onWheelEvent(self, event):
+    def _on_wheel_event(self, event):
         """
         Increments or decrements editor fonts settings on mouse wheel event
         if ctrl modifier is on.
@@ -89,8 +89,8 @@ class ZoomMode(Mode):
         delta = event.delta()
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if delta < self.prev_delta:
-                self.editor.zoomOut()
+                self.editor.zoom_out()
                 event.accept()
             else:
-                self.editor.zoomIn()
+                self.editor.zoom_in()
                 event.accept()

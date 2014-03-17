@@ -45,17 +45,17 @@ class LineNumberPanel(Panel):
         self.__selecting = False
         self.__selStart = -1
 
-    def _onInstall(self, editor):
-        Panel._onInstall(self, editor)
+    def _on_install(self, editor):
+        Panel._on_install(self, editor)
 
     def sizeHint(self):
         """
         Returns the panel size hint (as the panel is on the left, we only need
         to compute the width
         """
-        return QtCore.QSize(self.lineNumberAreaWidth(), 50)
+        return QtCore.QSize(self.line_number_area_width(), 50)
 
-    def lineNumberAreaWidth(self):
+    def line_number_area_width(self):
         """
         Computes the lineNumber area width depending on the number of lines
         in the document
@@ -76,22 +76,22 @@ class LineNumberPanel(Panel):
         """
         self.__selecting = True
         self.__selStart = e.pos().y()
-        start = end = self.editor.lineNumber(self.__selStart)
-        self.editor.selectFullLines(start, end)
+        start = end = self.editor.line_nbr_from_position(self.__selStart)
+        self.editor.select_full_lines(start, end)
 
-    def cancelSelection(self):
+    def cancel_selection(self):
         self.__selecting = False
         self.__selStart = -1
 
     def mouseReleaseEvent(self, e):
         """ Cancels selection """
-        self.cancelSelection()
+        self.cancel_selection()
 
-    def leaveEvent(self, QEvent):
+    def leaveEvent(self, event):
         """
         Cancels selection
         """
-        self.cancelSelection()
+        self.cancel_selection()
 
     def mouseMoveEvent(self, e):
         """
@@ -99,9 +99,9 @@ class LineNumberPanel(Panel):
         """
         if self.__selecting:
             end_pos = e.pos().y()
-            start_line = self.editor.lineNumber(self.__selStart)
-            end_line = self.editor.lineNumber(end_pos)
-            self.editor.selectFullLines(start_line, end_line)
+            start_line = self.editor.line_nbr_from_position(self.__selStart)
+            end_line = self.editor.line_nbr_from_position(end_pos)
+            self.editor.select_full_lines(start_line, end_line)
 
     def paintEvent(self, event):
         """
@@ -121,17 +121,17 @@ class LineNumberPanel(Panel):
             bold_font = self.editor.font()
             bold_font.setBold(True)
             pen = QtGui.QPen(self._lineColorU)
-            penSelected = QtGui.QPen(self._lineColorS)
+            pen_selected = QtGui.QPen(self._lineColorS)
             painter.setFont(font)
             # get selection range
-            sel_start, sel_end = self.editor.selectionRange()
+            sel_start, sel_end = self.editor.selection_range()
             has_sel = sel_start != sel_end
-            cl = self.editor.cursorPosition[0]
+            cl = self.editor.cursor_position[0]
             # draw every visible blocks
-            for top, blockNumber, block in self.editor.visibleBlocks:
+            for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):
-                    painter.setPen(penSelected)
+                    painter.setPen(pen_selected)
                     painter.setFont(bold_font)
                 else:
                     painter.setPen(pen)

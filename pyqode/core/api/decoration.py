@@ -53,17 +53,17 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             print(decoration)
     """
 
-    def __init__(self, cursorOrBlockOrDoc, startPos=None, endPos=None,
-                 startLine=None, endLine=None, draw_order=0, tooltip=None):
+    def __init__(self, cursor_or_bloc_or_doc, start_pos=None, end_pos=None,
+                 start_line=None, end_line=None, draw_order=0, tooltip=None):
         """
         Creates a text decoration
 
-        :param cursorOrBlockOrDoc: Selection
-        :type cursorOrBlockOrDoc: QTextCursor or QTextBlock or QTextDocument
+        :param cursor_or_bloc_or_doc: Selection
+        :type cursor_or_bloc_or_doc: QTextCursor or QTextBlock or QTextDocument
 
-        :param startPos: Selection start pos
+        :param start_pos: Selection start pos
 
-        :param endPos: Selection end pos
+        :param end_pos: Selection end pos
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
@@ -71,41 +71,41 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.signals = TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip
-        cursor = QtGui.QTextCursor(cursorOrBlockOrDoc)
-        if startPos is not None:
-            cursor.setPosition(startPos)
-        if endPos is not None:
-            cursor.setPosition(endPos, QtGui.QTextCursor.KeepAnchor)
-        if startLine is not None:
+        cursor = QtGui.QTextCursor(cursor_or_bloc_or_doc)
+        if start_pos is not None:
+            cursor.setPosition(start_pos)
+        if end_pos is not None:
+            cursor.setPosition(end_pos, QtGui.QTextCursor.KeepAnchor)
+        if start_line is not None:
             cursor.movePosition(cursor.Start, cursor.MoveAnchor)
-            cursor.movePosition(cursor.Down, cursor.MoveAnchor, startLine - 1)
-        if endLine is not None:
+            cursor.movePosition(cursor.Down, cursor.MoveAnchor, start_line - 1)
+        if end_line is not None:
             cursor.movePosition(cursor.Down, cursor.KeepAnchor,
-                                endLine - startLine)
+                                end_line - start_line)
         self.cursor = cursor
 
-    def containsCursor(self, textCursor):
+    def contains_cursor(self, cursor):
         """
         Checks if the textCursor is in the decoration
 
-        :param textCursor: The text cursor to test
-        :type textCursor: QtGui.QTextCursor
+        :param cursor: The text cursor to test
+        :type cursor: QtGui.QTextCursor
         """
-        return self.cursor.selectionStart() <= textCursor.position() < \
+        return self.cursor.selectionStart() <= cursor.position() < \
             self.cursor.selectionEnd()
 
-    def setBold(self):
+    def set_as_bold(self):
         """ Uses bold text """
         self.format.setFontWeight(QtGui.QFont.Bold)
 
-    def setForeground(self, color):
+    def set_foreground(self, color):
         """ Sets the foreground color.
         :param color: Color
         :type color: QtGui.QColor
         """
         self.format.setForeground(color)
 
-    def setBackground(self, brush):
+    def set_background(self, brush):
         """
         Sets the background brush.
 
@@ -114,7 +114,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         """
         self.format.setBackground(brush)
 
-    def setOutline(self, color):
+    def set_outline(self, color):
         """
         Uses an outline rectangle.
 
@@ -124,7 +124,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.format.setProperty(QtGui.QTextFormat.OutlinePen,
                                 QtGui.QPen(color))
 
-    def setFullWidth(self, flag=True, clear=True):
+    def set_full_width(self, flag=True, clear=True):
         """
         Sets full width selection.
 
@@ -138,12 +138,12 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             self.cursor.clearSelection()
         self.format.setProperty(QtGui.QTextFormat.FullWidthSelection, flag)
 
-    def underlined(self, color=QtCore.Qt.blue):
+    def set_as_underlined(self, color=QtCore.Qt.blue):
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SingleUnderline)
         self.format.setUnderlineColor(color)
 
-    def setSpellchecking(self, color=QtCore.Qt.blue):
+    def set_as_spell_check(self, color=QtCore.Qt.blue):
         """ Underlines text as a spellcheck error.
 
         :param color: Underline color
@@ -153,7 +153,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
-    def setError(self, color=QtCore.Qt.red):
+    def set_as_error(self, color=QtCore.Qt.red):
         """ Highlights text as a syntax error.
 
         :param color: Underline color
@@ -163,7 +163,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
             QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
 
-    def setWarning(self, color=QtGui.QColor("orange")):
+    def set_as_warning(self, color=QtGui.QColor("orange")):
         """
         Highlights text as a syntax warning
 

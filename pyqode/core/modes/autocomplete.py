@@ -46,15 +46,15 @@ class AutoCompleteMode(Mode):
     #: Auto complete mapping, maps input key with completion text.
     MAPPING = {'"': '"', "'": "'", "(": ")", "{": "}", "[": "]"}
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         if state:
-            self.editor.postKeyPressed.connect(self._onPostKeyPressed)
-            self.editor.keyPressed.connect(self._onKeyPressed)
+            self.editor.postKeyPressed.connect(self._on_post_key_pressed)
+            self.editor.keyPressed.connect(self._on_key_pressed)
         else:
-            self.editor.postKeyPressed.disconnect(self._onPostKeyPressed)
-            self.editor.keyPressed.disconnect(self._onKeyPressed)
+            self.editor.postKeyPressed.disconnect(self._on_post_key_pressed)
+            self.editor.keyPressed.disconnect(self._on_key_pressed)
 
-    def _onPostKeyPressed(self, e):
+    def _on_post_key_pressed(self, e):
         if e.isAccepted():
             return
         txt = e.text()
@@ -67,8 +67,8 @@ class AutoCompleteMode(Mode):
         else:
             next_char = None
         if txt in self.MAPPING:
-            toInsert = self.MAPPING[txt]
-            if next_char == toInsert:
+            to_insert = self.MAPPING[txt]
+            if next_char == to_insert:
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 return
@@ -77,11 +77,11 @@ class AutoCompleteMode(Mode):
                     next_char.isspace()):
                 tc = self.editor.textCursor()
                 p = tc.position()
-                tc.insertText(toInsert)
+                tc.insertText(to_insert)
                 tc.setPosition(p)
                 self.editor.setTextCursor(tc)
 
-    def _onKeyPressed(self, e):
+    def _on_key_pressed(self, e):
         txt = e.text()
         tc = self.editor.textCursor()
         tc.movePosition(QtGui.QTextCursor.Right,

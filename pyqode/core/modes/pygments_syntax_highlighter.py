@@ -37,7 +37,7 @@ from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-
+from pyqode.core import logger
 from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, \
     IndentBasedFoldDetector, CharBasedFoldDetector
 
@@ -185,18 +185,10 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     """
     This mode enable syntax highlighting using the pygments library
 
-    Here the properties added by the mode to
-    :attr:`pyqode.core.QCodeEdit.style`:
-
-    ====================== ====================== ======= ====================== =====================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== =====================
-    pygmentsStyle          General                QColor  Computed.              Background color for matching symbols
-    ====================== ====================== ======= ====================== =====================
-
     .. warning:: There are some issues with multi-line comments, they are not
                  properly highlighted until a full re-highlight is triggered.
                  The text is automatically re-highlighted on save.
+
     """
     #: Mode description
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
@@ -244,12 +236,12 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         LEXERS_FOLD_DETECTORS = {}
 
     @property
-    def pygmentsStyle(self):
+    def pygments_style(self):
         return self.editor.style.value("pygmentsStyle")
 
-    @pygmentsStyle.setter
-    def pygmentsStyle(self, value):
-        return self.editor.style.setValue("pygmentsStyle", value)
+    @pygments_style.setter
+    def pygments_style(self, value):
+        return self.editor.style.set_value("pygmentsStyle", value)
 
     def __init__(self, document, lexer=None):
         super(PygmentsSyntaxHighlighter, self).__init__(document)
@@ -259,26 +251,26 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self.__previousFilename = ""
         self.style = "default"
 
-    def _onInstall(self, editor):
+    def _on_install(self, editor):
         """
         :type editor: pyqode.code.QCodeEdit
         """
-        SyntaxHighlighter._onInstall(self, editor)
+        SyntaxHighlighter._on_install(self, editor)
         self.triggers = ["*", '**', '"', "'", "/"]
         self._clear_caches()
         self.prev_txt = ""
-        style = editor.style.addProperty("pygmentsStyle", "default")
+        style = editor.style.add_property("pygmentsStyle", "default")
         self.style = style
-        self.editor.style.setValue(
-                    "background",
-                    QtGui.QColor(self.style.background_color))
+        self.editor.style.set_value(
+            "background",
+            QtGui.QColor(self.style.background_color))
         c = self.style.style_for_token(Text)['color']
         if c is None:
             c = '000000'
-        self.editor.style.setValue(
+        self.editor.style.set_value(
             "foreground", QtGui.QColor("#{0}".format(c)))
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         self.enabled = state
         if state is True:
             self.editor.textSaved.connect(self.rehighlight)
@@ -286,35 +278,35 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         else:
             self.editor.textSaved.disconnect(self.rehighlight)
 
-    def __updateLexer(self):
-        self.setLexerFromFilename(self.editor.fileName)
+    def _update_lexer(self):
+        self.set_lexer_from_file_name(self.editor.file_name)
         if hasattr(self.editor, "foldingPanel"):
             if type(self._lexer) in self.LEXERS_FOLD_DETECTORS:
-                self.setFoldDetector(
+                self.set_fold_detector(
                     self.LEXERS_FOLD_DETECTORS[type(self._lexer)])
                 self.editor.foldingPanel.enabled = True
             else:
                 self.editor.foldingPanel.enabled = False
 
-    def __onTextSaved(self):
+    def _on_text_saved(self):
         self.rehighlight()
 
-    def _onStyleChanged(self, section, key):
+    def _on_style_changed(self, section, key):
         """ Updates the pygments style """
         if key == "pygmentsStyle" or not key:
             self.style = self.editor.style.value(
                 "pygmentsStyle")
             self.rehighlight()
-            self.editor.style.setValue(
+            self.editor.style.set_value(
                 "background",
                 QtGui.QColor(self.style.background_color))
             c = self.style.style_for_token(Text)['color']
             if c is None:
                 c = '000000'
-            self.editor.style.setValue(
+            self.editor.style.set_value(
                 "foreground", QtGui.QColor("#{0}".format(c)))
 
-    def setLexerFromFilename(self, filename):
+    def set_lexer_from_file_name(self, filename):
         """
         Change the lexer based on the filename (actually only the extension is
         needed)
@@ -329,18 +321,18 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             logger.warning("Failed to find lexer from filename %s" % filename)
             self._lexer = None
 
-    def setLexerFromMimeType(self, mime, **options):
+    def set_lexer_from_mime_type(self, mime, **options):
         try:
             self._lexer = get_lexer_for_mimetype(mime, **options)
         except ClassNotFound:
             logger.warning("Failed to find lexer from mime type %s" % mime)
             self._lexer = None
 
-    def doHighlightBlock(self, text):
-        fn = self.editor.fileName
+    def highlight_block(self, text):
+        fn = self.editor.file_name
         if fn != self.__previousFilename:
             self.__previousFilename = fn
-            self.__updateLexer()
+            self._update_lexer()
         if self._lexer is None:
             return
 

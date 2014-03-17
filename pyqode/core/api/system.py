@@ -47,7 +47,7 @@ def keep_tc_pos(f):
         tc = self.editor.textCursor()
         tc.setPosition(pos)
         self.editor.setTextCursor(tc)
-        return  retval
+        return retval
     return wrapper
 
 
@@ -85,53 +85,53 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def findSettingsDirectory(appName="pyQode"):
+def find_settings_dir(app_name="pyQode"):
     """
-    Creates and returns the path to a directory that suits well to store app/lib
-    settings on Windows and Linux.
+    Creates and returns the path to a directory that suits well to store
+    app/lib settings on Windows and Linux.
     """
     home = os.path.expanduser("~")
     if sys.platform == "win32":
-        pth = os.path.join(home, appName)
+        pth = os.path.join(home, app_name)
     else:
-        pth = os.path.join(home, ".%s" % appName)
+        pth = os.path.join(home, ".%s" % app_name)
     if not os.path.exists(pth):
         os.mkdir(pth)
     return pth
 
 
-def mergedColors(colorA, colorB, factor):
-    maxFactor = 100
-    colorA = QtGui.QColor(colorA)
-    colorB = QtGui.QColor(colorB)
-    tmp = colorA
-    tmp.setRed((tmp.red() * factor) / maxFactor +
-               (colorB.red() * (maxFactor - factor)) / maxFactor)
-    tmp.setGreen((tmp.green() * factor) / maxFactor +
-                 (colorB.green() * (maxFactor - factor)) / maxFactor)
-    tmp.setBlue((tmp.blue() * factor) / maxFactor +
-                (colorB.blue() * (maxFactor - factor)) / maxFactor)
+def merged_colors(color_a, color_b, factor):
+    max_factor = 100
+    color_a = QtGui.QColor(color_a)
+    color_b = QtGui.QColor(color_b)
+    tmp = color_a
+    tmp.setRed((tmp.red() * factor) / max_factor +
+               (color_b.red() * (max_factor - factor)) / max_factor)
+    tmp.setGreen((tmp.green() * factor) / max_factor +
+                 (color_b.green() * (max_factor - factor)) / max_factor)
+    tmp.setBlue((tmp.blue() * factor) / max_factor +
+                (color_b.blue() * (max_factor - factor)) / max_factor)
     return tmp
 
 
-def driftColor(baseColor, factor=110):
+def drift_color(base_color, factor=110):
     """
     Return a near color that is lighter or darker than the base color.
 
     If baseColor.lightness is higher than 128 than darker is used else lighter
     is used.
 
-    :param baseColor: The base color to drift.
+    :param base_color: The base color to drift.
 
     :return A lighter or darker color.
     """
-    if baseColor.lightness() > 128:
-        return baseColor.darker(factor)
+    if base_color.lightness() > 128:
+        return base_color.darker(factor)
     else:
-        return baseColor.lighter(factor+10)
+        return base_color.lighter(factor + 10)
 
 
-def indexMatching(seq, condition):
+def index_matching(seq, condition):
     """
     Returns the index of the element that match condition.
 
@@ -141,13 +141,13 @@ def indexMatching(seq, condition):
 
     :return: Index of the element that mathc the condition of -1
     """
-    for i,x in enumerate(seq):
+    for i, x in enumerate(seq):
         if condition(x):
             return i
     return -1
 
 
-def indexByName(seq, name):
+def index_by_name(seq, name):
     """
     Search an element by "name".
 
@@ -157,7 +157,7 @@ def indexByName(seq, name):
 
     :return: Index of the element of -1
     """
-    return indexMatching(seq, lambda x: x.name == name)
+    return index_matching(seq, lambda x: x.name == name)
 
 
 class TextStyle(object):
@@ -259,51 +259,51 @@ class _JobThread(QtCore.QThread):
         self.used = False
         self.args = ()
         self.kwargs = {}
-        self.executeOnRun = None
-        self.executeOnFinish = None
+        self.execute_on_run = None
+        self.execute_on_finish = None
 
     @staticmethod
-    def stopJobThreadInstance(caller, method, *args, **kwargs):
+    def stop_job_thread(caller, method, *args, **kwargs):
         caller.invoker = _Invoker()
-        caller.invokeEvent = _InvokeEvent(method, *args, **kwargs)
-        QtCore.QCoreApplication.postEvent(caller.invoker, caller.invokeEvent)
+        caller.invoke_event = _InvokeEvent(method, *args, **kwargs)
+        QtCore.QCoreApplication.postEvent(caller.invoker, caller.invoke_event)
 
     def __repr__(self):
         if hasattr(self, "executeOnRun"):
-            name = self.executeOnRun.__name__
+            name = self.execute_on_run.__name__
         else:
             name = hex(id(self))
         return self.__name.format(name, self.args, self.kwargs)
 
-    def stopRun(self):
-        self.onFinish()
+    def stop_run(self):
+        self.on_finish()
         self.terminate()
         self.used = False
-        self.setMethods(None, None)
+        self.set_methods(None, None)
 
-    def setMethods(self, onRun, onFinish):
-        self.executeOnRun = onRun
-        self.executeOnFinish = onFinish
+    def set_methods(self, on_run, on_finish):
+        self.execute_on_run = on_run
+        self.execute_on_finish = on_finish
 
-    def setParameters(self, *a, **kw):
+    def set_parameters(self, *a, **kw):
         self.args = a
         self.kwargs = kw
 
-    def onFinish(self):
-        if (hasattr(self, "executeOnFinish") and self.executeOnFinish
-                and hasattr(self.executeOnFinish, '__call__')):
-            self.executeOnFinish()
+    def on_finish(self):
+        if (hasattr(self, "execute_on_finish") and self.execute_on_finish
+                and hasattr(self.execute_on_finish, '__call__')):
+            self.execute_on_finish()
 
     def run(self):
-        if (hasattr(self, "executeOnRun") and self.executeOnRun
-                and hasattr(self.executeOnRun, '__call__')):
-            self.executeOnRun(*self.args, **self.kwargs)
-            self.onFinish()
-            self.used = False
-            self.setMethods(None, None)
-        else:
+        try:
+            self.execute_on_run(*self.args, **self.kwargs)
+        except AttributeError:
             logger.warning("Executing not callable statement: %s" %
-                            self.executeOnRun)
+                           self.execute_on_run)
+        else:
+            self.on_finish()
+            self.used = False
+            self.set_methods(None, None)
 
 
 class JobRunner(object):
@@ -328,34 +328,34 @@ class JobRunner(object):
     """
     @property
     def caller(self):
-        return self.__caller()
+        return self._caller()
 
     @property
-    def jobRunning(self):
-        return self.__jobRunning
+    def job_running(self):
+        return self._job_running
 
-    def __init__(self, caller, nbThreadsMax=3):
+    def __init__(self, caller, nb_threads_max=3):
         """
         :param caller: The object that will ask for a job to be run. This must
         be a subclass of QObject.
         """
-        self.__caller = weakref.ref(caller)
-        self.__jobQueue = []
-        self.__threads = []
-        self.__jobRunning = False
-        for i in range(nbThreadsMax):
-            self.__threads.append(_JobThread())
+        self._caller = weakref.ref(caller)
+        self._job_queue = []
+        self._threads = []
+        self._job_running = False
+        for i in range(nb_threads_max):
+            self._threads.append(_JobThread())
 
     def __repr__(self):
-        return repr(self.__jobQueue[0] if len(self.__jobQueue) > 0 else "None")
+        return repr(self._job_queue[0] if len(self._job_queue) > 0 else "None")
 
-    def findUnusedThread(self):
-        for thread in self.__threads:
+    def find_unused_threads(self):
+        for thread in self._threads:
             if not thread.used:
                 return thread
         return None
 
-    def startJob(self, job, force, *args, **kwargs):
+    def start_job(self, job, force, *args, **kwargs):
         """
         Starts a job in a background thread.
 
@@ -369,42 +369,42 @@ class JobRunner(object):
         :param args: args
         :param kwargs: kwargs
         """
-        thread = self.findUnusedThread()
+        thread = self.find_unused_threads()
         if thread:
-            thread.setMethods(job, self.__executeNext)
-            thread.setParameters(*args, **kwargs)
+            thread.set_methods(job, self._execute_next)
+            thread.set_parameters(*args, **kwargs)
             thread.used = True
             if force:
-                self.__jobQueue.append(thread)
-                self.stopJob()
+                self._job_queue.append(thread)
+                self.stop_job()
             else:
-                self.__jobQueue.append(thread)
-            if not self.__jobRunning:
-                self.__jobQueue[0].setMethods(job, self.__executeNext)
-                self.__jobQueue[0].setParameters(*args, **kwargs)
-                self.__jobRunning = True
-                self.__jobQueue[0].start()
+                self._job_queue.append(thread)
+            if not self._job_running:
+                self._job_queue[0].set_methods(job, self._execute_next)
+                self._job_queue[0].set_parameters(*args, **kwargs)
+                self._job_running = True
+                self._job_queue[0].start()
             return True
         else:
             logger.debug("Failed to queue job. All threads are used")
             return False
 
-    def __executeNext(self):
-        self.__jobRunning = False
-        if len(self.__jobQueue) > 0:
-            self.__jobQueue.pop(0)
-        if len(self.__jobQueue) > 0:
-            self.__jobQueue[0].start()
-            self.__jobRunning = True
-            self.__jobQueue[0].used = True
+    def _execute_next(self):
+        self._job_running = False
+        if len(self._job_queue) > 0:
+            self._job_queue.pop(0)
+        if len(self._job_queue) > 0:
+            self._job_queue[0].start()
+            self._job_running = True
+            self._job_queue[0].used = True
 
-    def stopJob(self):
+    def stop_job(self):
         """
         Stops the current job
         """
-        if len(self.__jobQueue) > 0:
-            _JobThread.stopJobThreadInstance(
-                self.caller, self.__jobQueue[0].stopRun)
+        if len(self._job_queue) > 0:
+            _JobThread.stop_job_thread(
+                self.caller, self._job_queue[0].stop_run)
 
 
 class DelayJobRunner(JobRunner):
@@ -416,13 +416,13 @@ class DelayJobRunner(JobRunner):
     This is heavily used internally for situations where the user can cancel a
     job (code completion, calltips,...).
     """
-    def __init__(self, caller, nbThreadsMax=3, delay=500):
-        JobRunner.__init__(self, caller, nbThreadsMax=nbThreadsMax)
+    def __init__(self, caller, nb_threads_max=3, delay=500):
+        JobRunner.__init__(self, caller, nb_threads_max=nb_threads_max)
         self.__timer = QtCore.QTimer()
         self.__interval = delay
-        self.__timer.timeout.connect(self.__execRequestedJob)
+        self.__timer.timeout.connect(self._exec_requested_job)
 
-    def requestJob(self, job, async, *args, **kwargs):
+    def request_job(self, job, async, *args, **kwargs):
         """
         Request a job execution. The job will be executed after the delay
         specified in the DelayJobRunner contructor elapsed if no other job is
@@ -448,19 +448,19 @@ class DelayJobRunner(JobRunner):
         self.__async = async
         self.__timer.start(self.__interval)
 
-    def cancelRequests(self):
+    def cancel_requests(self):
         """
         Cancels pending requests.
         """
         self.__timer.stop()
 
-    def __execRequestedJob(self):
+    def _exec_requested_job(self):
         """
         Execute the requested job after the timer has timeout.
         """
         self.__timer.stop()
         if self.__async:
-            self.startJob(self.__job, False, *self.__args, **self.__kwargs)
+            self.start_job(self.__job, False, *self.__args, **self.__kwargs)
         else:
             self.__job(*self.__args, **self.__kwargs)
         self.__job = None
@@ -471,35 +471,36 @@ class DelayJobRunner(JobRunner):
 
 if __name__ == '__main__':
     import time
-    from pyqode.core import QGenericCodeEdit, TextDecoration
+    from pyqode.core.editor import QCodeEdit
+    from pyqode.core.api.decoration import TextDecoration
 
-    class Example(QGenericCodeEdit):
+    class Example(QCodeEdit):
 
         addDecorationRequested = QtCore.pyqtSignal(str, int)
 
         def __init__(self):
-            QGenericCodeEdit.__init__(self, parent=None)
-            self.openFile(__file__)
+            QCodeEdit.__init__(self, parent=None)
+            self.open_file(__file__)
             self.resize(QtCore.QSize(1000, 600))
-            self.addDecorationRequested.connect(self.decorateLine)
+            self.addDecorationRequested.connect(self.decorate_line)
 
-        def showEvent(self, QShowEvent):
-            QGenericCodeEdit.showEvent(self, QShowEvent)
-            self.jobRunner = JobRunner(self, nbThreadsMax=3)
-            self.jobRunner.startJob(self.xxx, False, "#FF0000", 0)
-            self.jobRunner.startJob(self.xxx, False, "#00FF00", 10)
-            self.jobRunner.startJob(self.xxx, False, "#0000FF", 20)
+        def showEvent(self, event):
+            QCodeEdit.showEvent(self, event)
+            self.job_runner = JobRunner(self, nb_threads_max=3)
+            self.job_runner.start_job(self.xxx, False, "#FF0000", 0)
+            self.job_runner.start_job(self.xxx, False, "#00FF00", 10)
+            self.job_runner.start_job(self.xxx, False, "#0000FF", 20)
 
-        def decorateLine(self, color, line):
+        def decorate_line(self, color, line):
             tc = self.textCursor()
             tc.setPosition(0)
             tc.movePosition(QtGui.QTextCursor.Down,
                             QtGui.QTextCursor.MoveAnchor,
                             line)
             d = TextDecoration(tc)
-            d.setError(QtGui.QColor(color))
-            d.setFullWidth(True)
-            self.addDecoration(d)
+            d.set_as_error(QtGui.QColor(color))
+            d.set_full_width(True)
+            self.add_decoration(d)
 
         def xxx(self, color, offset):
             for i in range(10):
@@ -509,7 +510,7 @@ if __name__ == '__main__':
                 self.addDecorationRequested.emit(color, line)
                 time.sleep(0.1)
             if offset == 10:
-                self.jobRunner.startJob(self.xxx, False, "#FF00FF", 30)
+                self.job_runner.start_job(self.xxx, False, "#FF00FF", 30)
             print("Finished")
 
     app = QtGui.QApplication(sys.argv)

@@ -82,15 +82,14 @@ class CodeCompletion(object):
         column = data['column']
         path = data['path']
         encoding = data['encoding']
-        prefix = data['prefix']
         completions = []
         for prov in CodeCompletion.providers:
             try:
                 completions.append(prov.complete(
-                    code, line, column, prefix, path, encoding))
+                    code, line, column, path, encoding))
                 if len(completions) > 20:
                     break
-            except :
+            except:
                 sys.stderr.write('Failed to get completions from provider %r'
                                  % prov)
                 e1, e2, e3 = sys.exc_info()

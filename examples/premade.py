@@ -38,7 +38,7 @@ def main():
     app = QApplication(sys.argv)
     editor = QGenericCodeEdit()
     editor.start_server('server.py')
-    editor.openFile(__file__)
+    editor.open_file(__file__)
     editor.show()
     sys.exit(app.exec_())
 

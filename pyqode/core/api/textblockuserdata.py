@@ -52,13 +52,13 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         #: Line number of the data, for convenience
-        self.lineNumber = -1
+        self.line_number = -1
         #: Specify if the block is folded
         self.folded = False
         #: Specify if the block is a fold start
-        self.foldStart = False
+        self.fold_start = False
         #: The block's fold indent
-        self.foldIndent = -1
+        self.fold_indent = -1
         #: The :class:`pyqode.core.Marker` associated with the text block
         self.marker = None
         #: List of :class:`pyqode.core.ParenthesisInfo` for the "(" and ")"
@@ -66,7 +66,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.parentheses = []
         #: List of :class:`pyqode.core.ParenthesisInfo` for the "[" and "]"
         #: symbols
-        self.squareBrackets = []
+        self.square_brackets = []
         #: List of :class:`pyqode.core.ParenthesisInfo` for the "{" and "}"
         #: symbols
         self.braces = []
@@ -76,5 +76,5 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
 
     def __repr__(self):
         return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
-                "".format(self.lineNumber, self.folded, self.foldIndent,
-                          self.foldStart))
+                "".format(self.line_number, self.folded, self.fold_indent,
+                          self.fold_start))

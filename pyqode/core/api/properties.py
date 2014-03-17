@@ -36,7 +36,8 @@ from PyQt4 import QtCore, QtGui
 
 class PropertyRegistry(QtCore.QObject):
     """
-    PropertyRegistry is a class that manage a registry/dictionary of properties.
+    PropertyRegistry is a class that manage a registry/dictionary of
+    properties.
 
     For a better organisation, properties are grouped by sections.
 
@@ -80,7 +81,7 @@ class PropertyRegistry(QtCore.QObject):
         for k in sorted(self.__dict.keys()):
             yield k
 
-    def allProperties(self):
+    def all_properties(self):
         """
         Generates the list of properties dictionaries.
         """
@@ -96,18 +97,19 @@ class PropertyRegistry(QtCore.QObject):
         """
         return self.__dict[section]
 
-    def update(self, propertyRegistry):
+    def update(self, other):
         """
         Updates the values of the current instance from the value of the
         registry passed as a parameter.
 
-        .. note:: This will emit the :attr:`pyqode.core.PropertyRegistry.valueChanged` signal
-                  with a key and section parameter set to an empty string.
+        .. note:: This will emit the
+            :attr:`pyqode.core.PropertyRegistry.valueChanged` signal
+            with a key and section parameter set to an empty string.
 
-        :param propertyRegistry: The source of the update.
-        :type propertyRegistry: pyqode.core.PropertyRegistry
+        :param other: The source of the update.
+        :type other: pyqode.core.PropertyRegistry
         """
-        for sk, sv in propertyRegistry.__dict.items():
+        for sk, sv in other.__dict.items():
             for pk, pv in sv.items():
                 if sk in self.__dict:
                     if pk in self.__dict[sk]:
@@ -117,13 +119,14 @@ class PropertyRegistry(QtCore.QObject):
     def clone(self):
         return PropertyRegistry(copy=self)
 
-    def addProperty(self, key, value, section="General"):
+    def add_property(self, key, value, section="General"):
         """
         Adds a property with a default value.
 
         .. note:: If the property already exists in the given section,
-                  the original value is kept and returned as a result. To change
-                  a value use :meth:`pyqode.core.PropertyRegistry.setValue`.
+                  the original value is kept and returned as a result.
+                  To change a value use
+                  :meth:`pyqode.core.PropertyRegistry.setValue`.
 
         :param key: The name/key of the property
         :type key: str
@@ -133,7 +136,7 @@ class PropertyRegistry(QtCore.QObject):
         :return: The original value if the property does not already exists,
                  else it return the existing value.
         """
-        value = self.__value_to_str(value)
+        value = self._value_to_str(value)
         if section in self.__dict:
             if key in self.__dict[section]:
                 value = self.value(key, section)
@@ -142,9 +145,9 @@ class PropertyRegistry(QtCore.QObject):
                 self.__dict[section][key] = value
         else:
             self.__dict[section] = {key: value}
-        return self.__value_from_str(value)
+        return self._value_from_str(value)
 
-    def removeProperty(self, key, section="General"):
+    def remove_property(self, key, section="General"):
         """
         Remove a property from the registry.
 
@@ -158,7 +161,7 @@ class PropertyRegistry(QtCore.QObject):
             if key in self.__dict[section]:
                 self.__dict.pop(key)
 
-    def setValue(self, key, value, section="General"):
+    def set_value(self, key, value, section="General"):
         """
         Sets the value of a property
 
@@ -170,7 +173,7 @@ class PropertyRegistry(QtCore.QObject):
         :return: The value string. Because this might be the old property value
                  that is used if the property already exists
         """
-        value = self.__value_to_str(value)
+        value = self._value_to_str(value)
         if self.__dict[section][key] != value:
             self.__dict[section][key] = value
             self.valueChanged.emit(section, key)
@@ -190,11 +193,11 @@ class PropertyRegistry(QtCore.QObject):
         """
         if section in self.__dict:
             if key in self.__dict[section]:
-                return self.__value_from_str(self.__dict[section][key])
+                return self._value_from_str(self.__dict[section][key])
         return default
 
     @staticmethod
-    def __value_to_str(value):
+    def _value_to_str(value):
         """
         Convert a value to a string
 
@@ -218,9 +221,10 @@ class PropertyRegistry(QtCore.QObject):
             return str(value)
 
     @staticmethod
-    def __value_from_str(value_str):
+    def _value_from_str(value_str):
         """
-        Get a value from a string, try to cast the value_str to the proper type.
+        Get a value from a string, try to cast the value_str to the proper
+        type.
 
         :param value_str: Value string to convert
 
@@ -229,7 +233,8 @@ class PropertyRegistry(QtCore.QObject):
         value_str = str(value_str)
         # color or format
         if value_str.isnumeric():
-            if value_str.isdecimal() and ("." in value_str or "," in value_str):
+            if value_str.isdecimal() and ("." in value_str or
+                                          "," in value_str):
                 return float(value_str)
             else:
                 return int(value_str)
@@ -242,7 +247,7 @@ class PropertyRegistry(QtCore.QObject):
         elif value_str.startswith('#'):
             return TextStyle(value_str)
         elif value_str.startswith("[") and value_str.endswith("]"):
-            value_str = value_str[1:len(value_str)-1]
+            value_str = value_str[1:len(value_str) - 1]
             lst = value_str.split("²")
             try:
                 lst.remove("")
@@ -254,7 +259,7 @@ class PropertyRegistry(QtCore.QObject):
         else:
             return value_str
 
-    def dump(self):
+    def dumps(self):
         """
         Dumps the settings dictionary to a json **string**.
 
@@ -262,7 +267,7 @@ class PropertyRegistry(QtCore.QObject):
         """
         return json.dumps(self.__dict, indent=TAB_SIZE, sort_keys=True)
 
-    def load(self, data):
+    def loads(self, data):
         """
         Loads the registry from a json **string**.
 
@@ -277,7 +282,7 @@ class PropertyRegistry(QtCore.QObject):
         :param filepath: Path to the property registry JSON file.
         """
         with open(filepath, 'r') as f:
-            self.load(f.read())
+            self.loads(f.read())
         for section in self.__dict:
             for key in self.__dict[section]:
                 self.valueChanged.emit(section, key)
@@ -289,4 +294,4 @@ class PropertyRegistry(QtCore.QObject):
         :param filepath: Save path
         """
         with open(filepath, 'w') as f:
-            f.write(self.dump())
+            f.write(self.dumps())

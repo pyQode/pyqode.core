@@ -35,7 +35,8 @@ from pyqode.core.modes.filewatcher import FileWatcherMode
 from pyqode.core.modes.matcher import SymbolMatcherMode
 from pyqode.core.modes.right_margin import RightMarginMode
 from pyqode.core.modes.zoom import ZoomMode
-from pyqode.core.modes.pygments_syntax_highlighter import PygmentsSyntaxHighlighter
+from pyqode.core.modes.pygments_syntax_highlighter import \
+    PygmentsSyntaxHighlighter
 from pyqode.core.modes.pygments_syntax_highlighter import PYGMENTS_STYLES
 from pyqode.core.modes.autoindent import AutoIndentMode
 from pyqode.core.modes.indenter import IndenterMode

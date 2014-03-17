@@ -23,39 +23,38 @@ class CaseConverterMode(Mode):
         self._actions_created = False
 
     @system.keep_tc_pos
-    def toLower(self, *args):
+    def to_lower(self, *args):
         tc = self.editor.textCursor()
         tc.insertText(tc.selectedText().lower())
         self.editor.setTextCursor(tc)
 
     @system.keep_tc_pos
-    def toUpper(self, *args):
+    def to_upper(self, *args):
         tc = self.editor.textCursor()
         tc.insertText(tc.selectedText().upper())
         self.editor.setTextCursor(tc)
 
     def _create_actions(self):
-        self.aToLower = QtGui.QAction(self.editor)
-        self.aToLower.setText("Convert to lower case")
-        self.aToLower.setShortcut("Ctrl+U")
-        self.aToLower.triggered.connect(self.toLower)
+        self.action_to_lower = QtGui.QAction(self.editor)
+        self.action_to_lower.setText("Convert to lower case")
+        self.action_to_lower.setShortcut("Ctrl+U")
+        self.action_to_lower.triggered.connect(self.to_lower)
 
-        self.aToUpper = QtGui.QAction(self.editor)
-        self.aToUpper.setText("Convert to UPPER CASE")
-        self.aToUpper.setShortcut("Ctrl+Shift+U")
-        self.aToUpper.triggered.connect(self.toUpper)
+        self.action_to_upper = QtGui.QAction(self.editor)
+        self.action_to_upper.setText("Convert to UPPER CASE")
+        self.action_to_upper.setShortcut("Ctrl+Shift+U")
+        self.action_to_upper.triggered.connect(self.to_upper)
 
         self._actions_created = True
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         if state:
             if not self._actions_created:
                 self._create_actions()
-            self.separator = self.editor.addSeparator()
-            self.editor.addAction(self.aToLower)
-            self.editor.addAction(self.aToUpper)
+            self.separator = self.editor.add_separator()
+            self.editor.add_action(self.action_to_lower)
+            self.editor.add_action(self.action_to_upper)
         else:
-            self.editor.removeAction(self.aToLower)
-            self.editor.removeAction(self.aToUpper)
-            self.editor.removeAction(self.separator)
-
+            self.editor.remove_action(self.action_to_lower)
+            self.editor.remove_action(self.action_to_upper)
+            self.editor.remove_action(self.separator)

@@ -41,29 +41,29 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         # configure editor widget
-        self.editor.installPanel(panels.LineNumberPanel(), Panel.Position.LEFT)
-        self.editor.installPanel(panels.SearchAndReplacePanel(),
+        self.editor.install_panel(panels.LineNumberPanel(), Panel.Position.LEFT)
+        self.editor.install_panel(panels.SearchAndReplacePanel(),
                                  Panel.Position.BOTTOM)
 
-        self.editor.installMode(modes.AutoCompleteMode())
-        self.editor.installMode(modes.CaseConverterMode())
-        self.editor.installMode(modes.FileWatcherMode())
-        self.editor.installMode(modes.CaretLineHighlighterMode())
-        self.editor.installMode(modes.RightMarginMode())
-        self.editor.installMode(modes.PygmentsSyntaxHighlighter(
+        self.editor.install_mode(modes.AutoCompleteMode())
+        self.editor.install_mode(modes.CaseConverterMode())
+        self.editor.install_mode(modes.FileWatcherMode())
+        self.editor.install_mode(modes.CaretLineHighlighterMode())
+        self.editor.install_mode(modes.RightMarginMode())
+        self.editor.install_mode(modes.PygmentsSyntaxHighlighter(
             self.editor.document()))
-        self.editor.installMode(modes.ZoomMode())
-        self.editor.installMode(modes.CodeCompletionMode())
-        self.editor.installMode(modes.AutoIndentMode())
-        self.editor.installMode(modes.IndenterMode())
-        self.editor.installMode(modes.SymbolMatcherMode())
+        self.editor.install_mode(modes.ZoomMode())
+        self.editor.install_mode(modes.CodeCompletionMode())
+        self.editor.install_mode(modes.AutoIndentMode())
+        self.editor.install_mode(modes.IndenterMode())
+        self.editor.install_mode(modes.SymbolMatcherMode())
 
         # start pyqode server
         self.editor.start_server('../server.py')
 
         # connect to editor signals
         self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
-        self.actionSave.triggered.connect(self.editor.saveToFile)
+        self.actionSave.triggered.connect(self.editor.save_to_file)
         self.actionOpen.setIcon(
             QtGui.QIcon.fromTheme("document-open", QtGui.QIcon(
                 ":/example_icons/rc/folder.png")))
@@ -78,7 +78,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setupPanelsMenu()
         self.setupStylesMenu()
         try:
-            self.editor.openFile(__file__, detectEncoding=True)
+            self.editor.open_file(__file__, detect_encoding=True)
         except (OSError, IOError):
             pass
         except AttributeError:
@@ -95,7 +95,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             if style == currentStyle:
                 a.setChecked(True)
             group.addAction(a)
-            self.menuStyles.addAction(a)
+            self.menuStyles.add_action(a)
 
     def setupModesMenu(self):
         # Add modes to the modes menu
@@ -106,7 +106,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             a.setChecked(True)
             a.changed.connect(self.onModeCheckStateChanged)
             a.mode = v
-            self.menuModes.addAction(a)
+            self.menuModes.add_action(a)
 
     def setupPanelsMenu(self):
         for zones, panel_dic in sorted(self.editor.panels().items()):
@@ -117,18 +117,18 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
                 a.setChecked(True)
                 a.changed.connect(self.onPanelCheckStateChanged)
                 a.panel = v
-                self.menuPanels.addAction(a)
+                self.menuPanels.add_action(a)
 
     @QtCore.pyqtSlot(QtGui.QAction)
     def onStyleTriggered(self, action):
-        self.editor.style.setValue("pygmentsStyle", action.text())
+        self.editor.style.set_value("pygmentsStyle", action.text())
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
         filePath = QtGui.QFileDialog.getOpenFileName(
             self, "Choose a file", os.path.expanduser("~"))
         if filePath:
-            self.editor.openFile(filePath, detectEncoding=True)
+            self.editor.open_file(filePath, detect_encoding=True)
 
     def onPanelCheckStateChanged(self):
         action = self.sender()
@@ -148,8 +148,8 @@ def main():
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
     win.show()
-    print(win.editor.settings.dump())
-    print(win.editor.style.dump())
+    print(win.editor.settings.dumps())
+    print(win.editor.style.dumps())
     print(app)
     app.exec_()
     # cleanup

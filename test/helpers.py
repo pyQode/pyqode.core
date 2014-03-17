@@ -3,10 +3,12 @@ A helper module for testing, introducing some helper functions. Inspired by
 the jedi helper module for their testing package
 """
 import os
-from os.path import abspath, dirname
+from os.path import abspath
+from os.path import dirname
 import functools
 import platform
 import sys
+
 
 test_dir = dirname(abspath(__file__))
 

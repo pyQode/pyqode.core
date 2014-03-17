@@ -60,7 +60,7 @@ try:
                                                               parent=parent)
             self.initialized = False
 
-        def initialize(self, formEditor):
+        def initialize(self, form_editor):
             self.initialized = True
 
         def isInitialized(self):

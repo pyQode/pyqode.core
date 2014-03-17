@@ -32,16 +32,16 @@ def main():
     code_edit = pyqode.core.QCodeEdit()
     print("QCodeEdit:")
     print("-------------------")
-    print(code_edit.settings.dump())
-    print(code_edit.style.dump())
+    print(code_edit.settings.dumps())
+    print(code_edit.style.dumps())
 
     print()
 
     print("QGenericCodeEdit:")
     print("-------------------")
     generic_code_edit = pyqode.core.QGenericCodeEdit()
-    print(generic_code_edit.settings.dump())
-    print(generic_code_edit.style.dump())
+    print(generic_code_edit.settings.dumps())
+    print(generic_code_edit.style.dumps())
 
 
 if __name__ == "__main__":

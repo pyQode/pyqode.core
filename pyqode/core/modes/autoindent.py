@@ -46,9 +46,9 @@ class AutoIndentMode(Mode):
 
     def __init__(self):
         super(AutoIndentMode, self).__init__()
-        self.minIndent = ""
+        self.min_indent = ""
 
-    def _getIndent(self, tc):
+    def _get_indent(self, tc):
         """
         Return the indentation text (a series of spaces or tabs)
 
@@ -64,26 +64,26 @@ class AutoIndentMode(Mode):
         s = tc.selectedText()
         indent = re.match(r"\s*", s).group()
         tc.setPosition(pos)
-        if len(indent) < len(self.minIndent):
-            indent = self.minIndent
+        if len(indent) < len(self.min_indent):
+            indent = self.min_indent
         return "", indent
 
-    def _onStateChanged(self, state):
+    def _on_state_changed(self, state):
         if state is True:
-            self.editor.keyPressed.connect(self.__onKeyPressed)
+            self.editor.keyPressed.connect(self.__on_key_pressed)
         else:
-            self.editor.keyPressed.disconnect(self.__onKeyPressed)
+            self.editor.keyPressed.disconnect(self.__on_key_pressed)
 
-    def __onKeyPressed(self, keyEvent):
+    def __on_key_pressed(self, event):
         """
         Auto indent if the released key is the return key.
-        :param keyEvent: the key event
+        :param event: the key event
         """
-        if keyEvent.isAccepted():
+        if event.isAccepted():
             return
-        if keyEvent.key() == Qt.Key_Return or keyEvent.key() == Qt.Key_Enter:
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             tc = self.editor.textCursor()
-            pre, post = self._getIndent(tc)
+            pre, post = self._get_indent(tc)
             tc.insertText("%s\n%s" % (pre, post))
 
             # eats possible whitespaces
@@ -94,4 +94,4 @@ class AutoIndentMode(Mode):
                 if len(txt) > len(new_txt):
                     tc.insertText(new_txt)
 
-            keyEvent.accept()
+            event.accept()

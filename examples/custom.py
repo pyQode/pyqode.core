@@ -36,9 +36,10 @@ def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = pyqode.core.QCodeEdit()
-    editor.openFile(__file__)
-    editor.installMode(pyqode.core.PygmentsSyntaxHighlighter(editor.document()))
-    editor.installPanel(pyqode.core.SearchAndReplacePanel(),
+    editor.open_file(__file__)
+    editor.install_mode(pyqode.core.PygmentsSyntaxHighlighter(
+        editor.document()))
+    editor.install_panel(pyqode.core.SearchAndReplacePanel(),
                         position=pyqode.core.PanelPosition.TOP)
     window.setCentralWidget(editor)
     window.show()
