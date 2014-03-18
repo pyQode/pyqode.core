@@ -994,7 +994,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         else:
             tc.setPosition(p)
         self.setTextCursor(tc)
-        self.verticalScrollBar().set_value(value)
+        self.verticalScrollBar().setValue(value)
 
         self.textCursor().endEditBlock()
 
