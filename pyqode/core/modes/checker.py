@@ -240,14 +240,14 @@ class CheckerMode(Mode, QtCore.QObject):
             if self.__trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.connect(self.request_checking)
             elif self.__trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.textSaved.connect(self.request_checking)
-                self.editor.newTextSet.connect(self.request_checking)
+                self.editor.text_saved.connect(self.request_checking)
+                self.editor.new_text_set.connect(self.request_checking)
         else:
             if self.__trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.disconnect(self.request_checking)
             elif self.__trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.textSaved.disconnect(self.request_checking)
-                self.editor.newTextSet.disconnect(self.request_checking)
+                self.editor.text_saved.disconnect(self.request_checking)
+                self.editor.new_text_set.disconnect(self.request_checking)
 
     def _on_work_finished(self, status, messages):
         if status:

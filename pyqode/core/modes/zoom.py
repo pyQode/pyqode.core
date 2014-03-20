@@ -49,16 +49,16 @@ class ZoomMode(Mode):
 
     def _on_state_changed(self, state):
         """
-        Connects/Disconnects to the mouseWheelActivated and keyPressed event
+        Connects/Disconnects to the mouse_wheel_activated and key_pressed event
         """
         if state:
-            self.editor.mouseWheelActivated.connect(
+            self.editor.mouse_wheel_activated.connect(
                 self._on_wheel_event)
-            self.editor.keyPressed.connect(self._on_key_pressed)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            self.editor.mouseWheelActivated.disconnect(
+            self.editor.mouse_wheel_activated.disconnect(
                 self._on_wheel_event)
-            self.editor.keyPressed.disconnect(self._on_key_pressed)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_key_pressed(self, event):
         """

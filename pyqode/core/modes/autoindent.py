@@ -70,9 +70,9 @@ class AutoIndentMode(Mode):
 
     def _on_state_changed(self, state):
         if state is True:
-            self.editor.keyPressed.connect(self.__on_key_pressed)
+            self.editor.key_pressed.connect(self.__on_key_pressed)
         else:
-            self.editor.keyPressed.disconnect(self.__on_key_pressed)
+            self.editor.key_pressed.disconnect(self.__on_key_pressed)
 
     def __on_key_pressed(self, event):
         """

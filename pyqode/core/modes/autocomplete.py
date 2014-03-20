@@ -48,11 +48,11 @@ class AutoCompleteMode(Mode):
 
     def _on_state_changed(self, state):
         if state:
-            self.editor.postKeyPressed.connect(self._on_post_key_pressed)
-            self.editor.keyPressed.connect(self._on_key_pressed)
+            self.editor.post_key_pressed.connect(self._on_post_key_pressed)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            self.editor.postKeyPressed.disconnect(self._on_post_key_pressed)
-            self.editor.keyPressed.disconnect(self._on_key_pressed)
+            self.editor.post_key_pressed.disconnect(self._on_post_key_pressed)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_post_key_pressed(self, e):
         if e.isAccepted():

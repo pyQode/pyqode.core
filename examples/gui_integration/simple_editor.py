@@ -62,7 +62,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.editor.start_server('../server.py')
 
         # connect to editor signals
-        self.editor.dirtyChanged.connect(self.actionSave.setEnabled)
+        self.editor.dirty_changed.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.save_to_file)
         self.actionOpen.setIcon(
             QtGui.QIcon.fromTheme("document-open", QtGui.QIcon(

@@ -48,7 +48,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
     #: Signal emitted when the file has been deleted. The pyqtSignal is emitted
     #: with the current editor instance so that user have a chance to close
     #: the editor.
-    fileDeleted = QtCore.pyqtSignal(object)
+    file_deleted = QtCore.pyqtSignal(object)
 
     @property
     def auto_reload_changed_files(self):
@@ -77,22 +77,22 @@ class FileWatcherMode(Mode, QtCore.QObject):
 
     def _on_state_changed(self, state):
         """
-        Connects/Disconnects to the mouseWheelActivated and keyPressed event
+        Connects/Disconnects to the mouse_wheel_activated and key_pressed event
         """
         if state is True:
             self._timer.start()
-            self.editor.newTextSet.connect(self._update_mtime)
-            self.editor.textSaved.connect(self._update_mtime)
-            self.editor.textSaved.connect(self._timer.start)
-            self.editor.textSaving.connect(self._timer.stop)
-            self.editor.focusedIn.connect(self._check_for_pending)
+            self.editor.new_text_set.connect(self._update_mtime)
+            self.editor.text_saved.connect(self._update_mtime)
+            self.editor.text_saved.connect(self._timer.start)
+            self.editor.text_saving.connect(self._timer.stop)
+            self.editor.focused_in.connect(self._check_for_pending)
         else:
             self._timer.stop()
-            self.editor.newTextSet.disconnect(self._update_mtime)
-            self.editor.textSaved.disconnect(self._update_mtime)
-            self.editor.textSaved.disconnect(self._timer.start)
-            self.editor.textSaving.disconnect(self._timer.stop)
-            self.editor.focusedIn.disconnect(self._check_for_pending)
+            self.editor.new_text_set.disconnect(self._update_mtime)
+            self.editor.text_saved.disconnect(self._update_mtime)
+            self.editor.text_saved.disconnect(self._timer.start)
+            self.editor.text_saving.disconnect(self._timer.stop)
+            self.editor.focused_in.disconnect(self._check_for_pending)
 
     def _update_mtime(self):
         try:
@@ -164,4 +164,4 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Notify user from external file removal if autoReloadChangedFiles is
         False then reload the changed file in the editor
         """
-        self.fileDeleted.emit(self.editor)
+        self.file_deleted.emit(self.editor)

@@ -63,11 +63,11 @@ class CaretLineHighlighterMode(Mode):
         """
         if state:
             self.editor.cursorPositionChanged.connect(self._update_highlight)
-            self.editor.newTextSet.connect(self._update_highlight)
+            self.editor.new_text_set.connect(self._update_highlight)
         else:
             self.editor.cursorPositionChanged.disconnect(
                 self._update_highlight)
-            self.editor.newTextSet.disconnect(self._update_highlight)
+            self.editor.new_text_set.disconnect(self._update_highlight)
             self._clear_deco()
 
     def _on_install(self, editor):
@@ -78,7 +78,7 @@ class CaretLineHighlighterMode(Mode):
         Mode._on_install(self, editor)
         color = self.editor.style.add_property(
             "caretLineBackground",
-            driftColor(constants.EDITOR_BACKGROUND, 110))
+            drift_color(constants.EDITOR_BACKGROUND, 110))
         self._brush = QtGui.QBrush(QtGui.QColor(color))
         self._update_highlight()
 

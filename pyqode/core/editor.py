@@ -301,21 +301,21 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     **Signals:**
         - :attr:`pyqode.core.QCodeEdit.painted`
-        - :attr:`pyqode.core.QCodeEdit.newTextSet`
+        - :attr:`pyqode.core.QCodeEdit.new_text_set`
         - :attr:`pyqode.core.QCodeEdit.painted`
-        - :attr:`pyqode.core.QCodeEdit.textSaved`
-        - :attr:`pyqode.core.QCodeEdit.textSaving`
-        - :attr:`pyqode.core.QCodeEdit.dirtyChanged`
-        - :attr:`pyqode.core.QCodeEdit.keyPressed`
-        - :attr:`pyqode.core.QCodeEdit.keyReleased`
-        - :attr:`pyqode.core.QCodeEdit.mousePressed`
-        - :attr:`pyqode.core.QCodeEdit.mouseReleased`
-        - :attr:`pyqode.core.QCodeEdit.mouseWheelActivated`
-        - :attr:`pyqode.core.QCodeEdit.postKeyPressed`
-        - :attr:`pyqode.core.QCodeEdit.focusedIn`
-        - :attr:`pyqode.core.QCodeEdit.mouseMoved`
-        - :attr:`pyqode.core.QCodeEdit.indentRequested`
-        - :attr:`pyqode.core.QCodeEdit.unIndentRequested`
+        - :attr:`pyqode.core.QCodeEdit.text_saved`
+        - :attr:`pyqode.core.QCodeEdit.text_saving`
+        - :attr:`pyqode.core.QCodeEdit.dirty_changed`
+        - :attr:`pyqode.core.QCodeEdit.key_pressed`
+        - :attr:`pyqode.core.QCodeEdit.key_released`
+        - :attr:`pyqode.core.QCodeEdit.mouse_pressed`
+        - :attr:`pyqode.core.QCodeEdit.mouse_released`
+        - :attr:`pyqode.core.QCodeEdit.mouse_wheel_activated`
+        - :attr:`pyqode.core.QCodeEdit.post_key_pressed`
+        - :attr:`pyqode.core.QCodeEdit.focused_in`
+        - :attr:`pyqode.core.QCodeEdit.mouse_moved`
+        - :attr:`pyqode.core.QCodeEdit.indent_requested`
+        - :attr:`pyqode.core.QCodeEdit.unindent_requested`
 
     .. note:: QCodeEdit has been designed to work with files (
               :meth:`pyqode.core.QCodeEdit.openFile`,
@@ -329,33 +329,33 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     #: Paint hook
     painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
-    newTextSet = QtCore.pyqtSignal()
+    new_text_set = QtCore.pyqtSignal()
     #: Signal emitted when the text is saved to file
-    textSaved = QtCore.pyqtSignal(str)
+    text_saved = QtCore.pyqtSignal(str)
     #: Signal emitted before the text is saved to file
-    textSaving = QtCore.pyqtSignal(str)
+    text_saving = QtCore.pyqtSignal(str)
     #: Signal emitted when the dirty state changed
-    dirtyChanged = QtCore.pyqtSignal(bool)
+    dirty_changed = QtCore.pyqtSignal(bool)
     #: Signal emitted when a key is pressed
-    keyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    key_pressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
     #: Signal emitted when a key is released
-    keyReleased = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    key_released = QtCore.pyqtSignal(QtGui.QKeyEvent)
     #: Signal emitted when a mouse button is pressed
-    mousePressed = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    mouse_pressed = QtCore.pyqtSignal(QtGui.QMouseEvent)
     #: Signal emitted when a mouse button is released
-    mouseReleased = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    mouse_released = QtCore.pyqtSignal(QtGui.QMouseEvent)
     #: Signal emitted on a wheel event
-    mouseWheelActivated = QtCore.pyqtSignal(QtGui.QWheelEvent)
-    #: Signal emitted at the end of the keyPressed event
-    postKeyPressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    mouse_wheel_activated = QtCore.pyqtSignal(QtGui.QWheelEvent)
+    #: Signal emitted at the end of the key_pressed event
+    post_key_pressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
     #: Signal emitted when focusInEvent is is called
-    focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
-    #: Signal emitted when the mouseMoved
-    mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    focused_in = QtCore.pyqtSignal(QtGui.QFocusEvent)
+    #: Signal emitted when the mouse_moved
+    mouse_moved = QtCore.pyqtSignal(QtGui.QMouseEvent)
     #: Signal emitted when the user press the TAB key
-    indentRequested = QtCore.pyqtSignal()
+    indent_requested = QtCore.pyqtSignal()
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
-    unIndentRequested = QtCore.pyqtSignal()
+    unindent_requested = QtCore.pyqtSignal()
 
     @property
     def show_whitespaces(self):
@@ -493,7 +493,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def dirty(self, value):
         if self._dirty != value:
             self._dirty = value
-            self.dirtyChanged.emit(value)
+            self.dirty_changed.emit(value)
 
     @property
     def cursor_position(self):
@@ -1016,7 +1016,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if not self.dirty and not force:
             return True
-        self.textSaving.emit(path)
+        self.text_saving.emit(path)
         if len(self.toPlainText()):
             self.clean_document()
         if not path:
@@ -1034,7 +1034,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             f.write(content)
         self.dirty = False
         self._fpath = path
-        self.textSaved.emit(path)
+        self.text_saved.emit(path)
         return True
 
     def install_mode(self, mode):
@@ -1372,21 +1372,21 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.QCodeEdit.indentRequested` signal, the
+        Emits the :attr:`pyqode.core.QCodeEdit.indent_requested` signal, the
         :class:`pyqode.core.IndenterMode` will perform the actual indentation.
         """
-        self.indentRequested.emit()
+        self.indent_requested.emit()
 
     @QtCore.pyqtSlot()
     def un_indent(self):
         """
         Un-indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.QCodeEdit.unIndentRequested` signal, the
+        Emits the :attr:`pyqode.core.QCodeEdit.unindent_requested` signal, the
         :class:`pyqode.core.IndenterMode` will perform the actual
         un-indentation.
         """
-        self.unIndentRequested.emit()
+        self.unindent_requested.emit()
 
     def set_cursor(self, cursor):
         """
@@ -1427,7 +1427,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def keyPressEvent(self, event):
         """
-        Overrides the keyPressEvent to emit the keyPressed signal.
+        Overrides the keyPressEvent to emit the key_pressed signal.
 
         Also takes care of indenting and handling smarter home key.
 
@@ -1449,34 +1449,34 @@ class QCodeEdit(QtGui.QPlainTextEdit):
               event.modifiers() & QtCore.Qt.ControlModifier):
             self.duplicate_line()
             event.accept()
-        self.keyPressed.emit(event)
+        self.key_pressed.emit(event)
         state = event.isAccepted()
         if not event.isAccepted():
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.keyPressEvent(self, event)
         event.setAccepted(state)
-        self.postKeyPressed.emit(event)
+        self.post_key_pressed.emit(event)
 
     def keyReleaseEvent(self, event):
         """
-        Overrides keyReleaseEvent to emit the keyReleased signal.
+        Overrides keyReleaseEvent to emit the key_released signal.
 
         :param event: QKeyEvent
         """
         initial_state = event.isAccepted()
         event.ignore()
-        self.keyReleased.emit(event)
+        self.key_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
     def focusInEvent(self, event):
         """
-        Overrides focusInEvent to emits the focusedIn signal
+        Overrides focusInEvent to emits the focused_in signal
 
         :param event: QFocusEvent
         """
-        self.focusedIn.emit(event)
+        self.focused_in.emit(event)
         QtGui.QPlainTextEdit.focusInEvent(self, event)
         self.repaint()
         QtGui.QApplication.processEvents()
@@ -1487,13 +1487,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def mousePressEvent(self, event):
         """
-        Overrides mousePressEvent to emits mousePressed signal
+        Overrides mousePressEvent to emits mouse_pressed signal
 
         :param event: QMouseEvent
         """
         initial_state = event.isAccepted()
         event.ignore()
-        self.mousePressed.emit(event)
+        self.mouse_pressed.emit(event)
         c = self.cursorForPosition(event.pos())
         for sel in self._selections:
             if sel.cursor.blockNumber() == c.blockNumber():
@@ -1504,26 +1504,26 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def mouseReleaseEvent(self, event):
         """
-        Emits mouseReleased signal.
+        Emits mouse_released signal.
 
         :param event: QMouseEvent
         """
         initial_state = event.isAccepted()
         event.ignore()
-        self.mouseReleased.emit(event)
+        self.mouse_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
         """
-        Emits the mouseWheelActivated signal.
+        Emits the mouse_wheel_activated signal.
 
         :param event: QMouseEvent
         """
         initial_state = event.isAccepted()
         event.ignore()
-        self.mouseWheelActivated.emit(event)
+        self.mouse_wheel_activated.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.wheelEvent(self, event)
@@ -1531,7 +1531,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def mouseMoveEvent(self, event):
         """
         Overrides mouseMovedEvent to display any decoration tooltip and emits
-        the mouseMoved event.
+        the mouse_moved event.
         """
         c = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
@@ -1550,7 +1550,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 QtGui.QToolTip.hideText()
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
-        self.mouseMoved.emit(event)
+        self.mouse_moved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
     def show_tooltip(self, pos, tooltip):
@@ -1573,7 +1573,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Overrides the setPlainText method to keep track of the original text.
 
-        Emits the newTextSet signal.
+        Emits the new_text_set signal.
 
         :param txt: The new text to set.
         """
@@ -1581,7 +1581,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._original_text = txt
         self._modified_lines.clear()
         self._on_settings_changed("", "")
-        self.newTextSet.emit()
+        self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
         title = QtCore.QFileInfo(self.file_path).fileName()

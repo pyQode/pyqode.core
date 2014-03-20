@@ -47,7 +47,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     To do that, the client code first requests a search using
     :meth:`requestSearch` and connects to
-    :attr:`searchFinished`.
+    :attr:`search_finished`.
 
     The results of the search can then be retrieved using
     :attr:`cptOccurrences` and :meth:`getOccurrences`.
@@ -110,7 +110,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
              "panelHighlight"]
 
     #: Signal emitted when a search operation finished
-    searchFinished = QtCore.pyqtSignal()
+    search_finished = QtCore.pyqtSignal()
 
     @property
     def background(self):
@@ -218,7 +218,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.pushButtonReplaceAll.clicked.connect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.connect(self._update_buttons)
-            self.searchFinished.connect(self._on_search_finished)
+            self.search_finished.connect(self._on_search_finished)
         else:
             # remove menus
             if self.__separator is not None:
@@ -243,7 +243,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.pushButtonReplaceAll.clicked.disconnect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.disconnect(self._update_buttons)
-            self.searchFinished.connect(self._on_search_finished)
+            self.search_finished.connect(self._on_search_finished)
 
     def close_panel(self):
         """
@@ -478,7 +478,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
                 cursor = doc.find(text, cursor, flags)
                 matches += 1
         self.__mutex.unlock()
-        self.searchFinished.emit()
+        self.search_finished.emit()
 
     def _update_label_matches(self):
         self.labelMatches.setText("{0} matches".format(self.cpt_occurences))

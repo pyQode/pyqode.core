@@ -189,22 +189,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _on_state_changed(self, state):
         if state:
-            self.editor.focusedIn.connect(self._on_focus_in)
-            self.editor.keyPressed.connect(self._on_key_pressed)
-            self.editor.postKeyPressed.connect(self._on_key_released)
+            self.editor.focused_in.connect(self._on_focus_in)
+            self.editor.key_pressed.connect(self._on_key_pressed)
+            self.editor.post_key_pressed.connect(self._on_key_released)
             self._completer.highlighted.connect(
                 self._display_completion_tooltip)
             self.editor.cursorPositionChanged.connect(
                 self._on_cursor_position_changed)
         else:
-            self.editor.focusedIn.disconnect(self._on_focus_in)
-            self.editor.keyPressed.disconnect(self._on_key_pressed)
-            self.editor.postKeyPressed.disconnect(self._on_key_released)
+            self.editor.focused_in.disconnect(self._on_focus_in)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
+            self.editor.post_key_pressed.disconnect(self._on_key_released)
             self._completer.highlighted.disconnect(
                 self._display_completion_tooltip)
             self.editor.cursorPositionChanged.disconnect(
                 self._on_cursor_position_changed)
-            self.editor.newTextSet.disconnect(self.requestPreload)
+            self.editor.new_text_set.disconnect(self.requestPreload)
 
     def _on_focus_in(self, event):
         """

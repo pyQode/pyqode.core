@@ -273,10 +273,10 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def _on_state_changed(self, state):
         self.enabled = state
         if state is True:
-            self.editor.textSaved.connect(self.rehighlight)
+            self.editor.text_saved.connect(self.rehighlight)
             self.rehighlight()
         else:
-            self.editor.textSaved.disconnect(self.rehighlight)
+            self.editor.text_saved.disconnect(self.rehighlight)
 
     def _update_lexer(self):
         self.set_lexer_from_file_name(self.editor.file_name)

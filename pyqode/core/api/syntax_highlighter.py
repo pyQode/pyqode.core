@@ -182,8 +182,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     highlighting.
 
     **signals**:
-        - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightStarted`
-        - :attr:`pyqode.core.SyntaxHighlighter.blockHighlightFinished`
+        - :attr:`pyqode.core.SyntaxHighlighter.block_highlight_started`
+        - :attr:`pyqode.core.SyntaxHighlighter.block_highlight_finished`
 
     .. warning:: You should always inherit from this class to create a new
                  syntax. **Never inherit directly from QSyntaxHighlighter.**
@@ -193,11 +193,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    blockHighlightStarted = QtCore.pyqtSignal(object, object)
+    block_highlight_started = QtCore.pyqtSignal(object, object)
 
     #: Signal emitted at the end of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    blockHighlightFinished = QtCore.pyqtSignal(object, object)
+    block_highlight_finished = QtCore.pyqtSignal(object, object)
 
     def __init__(self, parent, fold_detector=None):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
@@ -268,16 +268,16 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             info = ParenthesisInfo(right_pos, "}")
             user_data.braces.append(info)
             right_pos = text.find("}", right_pos + 1)
-        # squareBrackets
+        # square_brackets
         left_pos = text.find("[", 0)
         while left_pos != -1:
             info = ParenthesisInfo(left_pos, "[")
-            user_data.squareBrackets.append(info)
+            user_data.square_brackets.append(info)
             left_pos = text.find("[", left_pos + 1)
         right_pos = text.find("]", 0)
         while right_pos != -1:
             info = ParenthesisInfo(right_pos, "]")
-            user_data.squareBrackets.append(info)
+            user_data.square_brackets.append(info)
             right_pos = text.find("]", right_pos + 1)
         user_data.parentheses[:] = sorted(
             user_data.parentheses, key=lambda x: x.position)
@@ -287,7 +287,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             user_data.braces, key=lambda x: x.position)
 
     def highlightBlock(self, text):
-        self.blockHighlightStarted.emit(self, text)
+        self.block_highlight_started.emit(self, text)
         # setup user data
         user_data = self.currentBlockUserData()
         if not isinstance(user_data, TextBlockUserData):
@@ -300,7 +300,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self._detect_folding(text, user_data)
         self._detect_parentheses(text, user_data)
         self.highlight_block(text)
-        self.blockHighlightFinished.emit(self, text)
+        self.block_highlight_finished.emit(self, text)
 
     def highlight_block(self, text):
         """

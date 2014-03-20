@@ -36,16 +36,16 @@ class WordClickMode(Mode, QtCore.QObject):
     It will highlight the click-able word when the user press control and move
     the mouse over a word.
 
-    :attr:`pyqode.core.WordClickMode.wordClicked` is emitted when the word is
+    :attr:`pyqode.core.WordClickMode.word_clicked` is emitted when the word is
     clicked by the user (while keeping control pressed).
     """
     IDENTIFIER = "wordClickMode"
-    DESCRIPTION = "Emits wordClicked signal when user click on a word in the" \
-                  "document while keeping control pressed"
+    DESCRIPTION = "Emits word_clicked signal when user click on a word in " \
+                  "the document while keeping control pressed"
 
     #: Signal emitted when a word is clicked. The parameter is a
     #: QTextCursor with the clicked word set as the selected text.
-    wordClicked = QtCore.pyqtSignal(QtGui.QTextCursor)
+    word_clicked = QtCore.pyqtSignal(QtGui.QTextCursor)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -56,11 +56,11 @@ class WordClickMode(Mode, QtCore.QObject):
 
     def _on_state_changed(self, state):
         if state:
-            self.editor.mouseMoved.connect(self._on_mouse_moved)
-            self.editor.mousePressed.connect(self._on_mouse_pressed)
+            self.editor.mouse_moved.connect(self._on_mouse_moved)
+            self.editor.mouse_pressed.connect(self._on_mouse_pressed)
         else:
-            self.editor.mouseMoved.disconnect(self._on_mouse_moved)
-            self.editor.mousePressed.disconnect(self._on_mouse_pressed)
+            self.editor.mouse_moved.disconnect(self._on_mouse_moved)
+            self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
 
     def _select_word_under_mouse_cursor(self):
         # todo this already exists in QCodeEdit, check if there are any
@@ -86,7 +86,7 @@ class WordClickMode(Mode, QtCore.QObject):
         if e.button() == 1 and self._deco:
             tc = self.editor.select_word_under_mouse_cursor()
             if tc and tc.selectedText():
-                self.wordClicked.emit(tc)
+                self.word_clicked.emit(tc)
 
     def _add_decoration(self, tc):
         #assert self._deco is None

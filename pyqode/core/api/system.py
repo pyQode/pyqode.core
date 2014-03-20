@@ -125,6 +125,7 @@ def drift_color(base_color, factor=110):
 
     :return A lighter or darker color.
     """
+    base_color = QtGui.QColor(base_color)
     if base_color.lightness() > 128:
         return base_color.darker(factor)
     else:

@@ -86,8 +86,8 @@ class MarkerPanel(Panel):
     You can create a user editable panel (e.g. a breakpoints panel) by using
     the following signals:
 
-        - :attr:`pyqode.core.MarkerPanel.addMarkerRequested`
-        - :attr:`pyqode.core.MarkerPanel.removeMarkerRequested`
+        - :attr:`pyqode.core.MarkerPanel.add_marker_requested`
+        - :attr:`pyqode.core.MarkerPanel.remove_marker_requested`
     """
     #: The panel identifier
     DESCRIPTION = "Draw icons in a side panel"
@@ -96,10 +96,9 @@ class MarkerPanel(Panel):
 
     #: Signal emitted when the user clicked in a place where there is no
     #: marker.
-    addMarkerRequested = QtCore.pyqtSignal(int)
-
+    add_marker_requested = QtCore.pyqtSignal(int)
     #: Signal emitted when the user clicked on an existing marker.
-    removeMarkerRequested = QtCore.pyqtSignal(int)
+    remove_marker_requested = QtCore.pyqtSignal(int)
 
     def __init__(self):
         Panel.__init__(self)
@@ -205,10 +204,10 @@ class MarkerPanel(Panel):
         line = self.editor.line_nbr_from_position(event.pos().y())
         if self.marker_for_line(line):
             logger.debug("Remove marker requested")
-            self.removeMarkerRequested.emit(line)
+            self.remove_marker_requested.emit(line)
         else:
             logger.debug("Add marker requested")
-            self.addMarkerRequested.emit(line)
+            self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):
         line = self.editor.line_nbr_from_position(event.pos().y())
