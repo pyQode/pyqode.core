@@ -29,5 +29,6 @@ nosetests.xml
 .pydevproject
 # pycharm
 .idea
+.cache
 /*.json
 __pycache__
