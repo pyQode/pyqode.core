@@ -173,6 +173,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._callbacks = {}
         self.is_connected = False
         self._process = None
+        self._connection_attempts = 0
 
     def _terminate_server_process(self):
         if self._process and self._process.running:
@@ -273,7 +274,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.write(msg)
 
     def _on_process_started(self):
-        QtCore.QTimer.singleShot(500, self._connect)
+        QtCore.QTimer.singleShot(1000, self._connect)
 
     def _pick_free_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -283,6 +284,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         return free_port
 
     def _connect(self):
+        self._connection_attempts += 1
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
 
@@ -296,6 +298,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             socket_error = -1
         self._cli_logger.error('socket error %d: %s' % (socket_error,
                                SOCKET_ERROR_STRINGS[socket_error]))
+        if socket_error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
+            # try again, sometimes the server process might not have started
+            # its socket yet.
+            if self._connection_attempts < 10:
+                QtCore.QTimer.singleShot(100, self._connect)
+            else:
+                raise RuntimeError('Failed to connect to the server after 10 '
+                                   'unsuccessful attempts.')
 
     def _on_disconnected(self):
         try:
@@ -351,7 +361,7 @@ if __name__ == "__main__":
                              'encoding': 'utf-8',
                              'path': '/a/path/to/a/file'},
                             on_receive=callback)
-        QtCore.QTimer.singleShot(1000, send_request)
+        QtCore.QTimer.singleShot(500, send_request)
 
     def callback(status, results):
         logging.debug('Yeah I got results from the server: '
