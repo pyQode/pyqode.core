@@ -95,7 +95,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             if style == currentStyle:
                 a.setChecked(True)
             group.addAction(a)
-            self.menuStyles.add_action(a)
+            self.menuStyles.addAction(a)
 
     def setupModesMenu(self):
         # Add modes to the modes menu
@@ -106,7 +106,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             a.setChecked(True)
             a.changed.connect(self.onModeCheckStateChanged)
             a.mode = v
-            self.menuModes.add_action(a)
+            self.menuModes.addAction(a)
 
     def setupPanelsMenu(self):
         for zones, panel_dic in sorted(self.editor.panels().items()):
@@ -117,7 +117,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
                 a.setChecked(True)
                 a.changed.connect(self.onPanelCheckStateChanged)
                 a.panel = v
-                self.menuPanels.add_action(a)
+                self.menuPanels.addAction(a)
 
     @QtCore.pyqtSlot(QtGui.QAction)
     def onStyleTriggered(self, action):
