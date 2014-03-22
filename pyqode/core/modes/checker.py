@@ -255,6 +255,9 @@ class CheckerMode(Mode, QtCore.QObject):
             self.add_messages(messages)
 
     def request_checking(self):
+        self.__jobRunner.request_job(self._request, False)
+
+    def _request(self):
         """ Requests a checking of the editor content. """
         if self.__clearOnRequest:
             self.clear_messages()
@@ -267,4 +270,4 @@ class CheckerMode(Mode, QtCore.QObject):
             self.editor.request_work(self._worker, request_data,
                                      on_receive=self._on_work_finished)
         except client.NotConnectedError:
-            QtCore.QTimer.singleShot(2000, self.request_checking)
+            QtCore.QTimer.singleShot(2000, self._request)
