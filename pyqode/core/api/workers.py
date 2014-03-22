@@ -82,11 +82,12 @@ class CodeCompletion(object):
         column = data['column']
         path = data['path']
         encoding = data['encoding']
+        prefix = data['prefix']
         completions = []
         for prov in CodeCompletion.providers:
             try:
                 completions.append(prov.complete(
-                    code, line, column, path, encoding))
+                    code, line, column, path, encoding, prefix))
                 if len(completions) > 20:
                     break
             except:

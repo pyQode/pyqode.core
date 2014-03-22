@@ -159,7 +159,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._collect_completions(
             self.editor.toPlainText(), self.editor.cursor_position[0],
             self.editor.cursor_position[1], self.editor.file_path,
-            self.editor.file_encoding)
+            self.editor.file_encoding, self.completion_prefix)
 
     def _on_install(self, editor):
         self._completer = QtGui.QCompleter([""], editor)
@@ -500,10 +500,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         else:
             QtGui.QToolTip.hideText()
 
-    def _collect_completions(self, code, line, column, path, encoding):
+    def _collect_completions(self, code, line, column, path, encoding,
+                             completion_prefix):
         logger.debug("Completion requested")
         data = {'code': code, 'line': line, 'column': column,
-                'path': path, 'encoding': encoding}
+                'path': path, 'encoding': encoding,
+                'prefix': completion_prefix}
         self.editor.request_work(workers.CodeCompletion, args=data,
                                  on_receive=self._on_results_available)
         self._set_wait_cursor()
