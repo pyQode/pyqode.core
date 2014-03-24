@@ -1235,7 +1235,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.textCursor().selectionStart()).blockNumber() + 1
         end = doc.findBlock(
             self.textCursor().selectionEnd()).blockNumber() + 1
-        if start != end and self.textCursor().columnNumber() == 0:
+        print(start, end, )
+        tc = QtGui.QTextCursor(self.textCursor())
+        tc.setPosition(self.textCursor().selectionEnd())
+        if tc.columnNumber() == 0:
             end -= 1
         return start, end
 
