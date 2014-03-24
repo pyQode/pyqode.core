@@ -91,11 +91,11 @@ class AutoCompleteMode(Mode):
             tc.clearSelection()
             self.editor.setTextCursor(tc)
             return
-        if e.text() == ')':
+        if e.text() == ')' or e.text() == ']' or e.text() == '}':
             tc = self.editor.textCursor()
-            #assert isinstance(tc, QtGui.QTextCursor)
             tc.movePosition(tc.Right, tc.KeepAnchor, 1)
-            if tc.selectedText() == ')':
+            if (tc.selectedText() == ')' or tc.selectedText() == ']' or
+                    tc.selectedText() == '}'):
                 tc.clearSelection()
                 self.editor.setTextCursor(tc)
                 e.accept()
