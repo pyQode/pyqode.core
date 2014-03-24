@@ -89,11 +89,6 @@ class MarkerPanel(Panel):
         - :attr:`pyqode.core.MarkerPanel.add_marker_requested`
         - :attr:`pyqode.core.MarkerPanel.remove_marker_requested`
     """
-    #: The panel identifier
-    DESCRIPTION = "Draw icons in a side panel"
-    #: The panel description
-    IDENTIFIER = "markerPanel"
-
     #: Signal emitted when the user clicked in a place where there is no
     #: marker.
     add_marker_requested = QtCore.pyqtSignal(int)

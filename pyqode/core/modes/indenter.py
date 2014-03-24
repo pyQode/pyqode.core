@@ -42,12 +42,6 @@ class IndenterMode(Mode):
     :attr:`pyqode.core.QCodeEdit.indent_requested` or
     :attr:`pyqode.core.QCodeEdit.unindent_requested`.
     """
-    #: Mode identifier
-    IDENTIFIER = "indenterMode"
-
-    #: Mode description
-    DESCRIPTION = "Implements classic indentation"
-
     def _on_state_changed(self, state):
         if state:
             self.editor.indent_requested.connect(self.indent)

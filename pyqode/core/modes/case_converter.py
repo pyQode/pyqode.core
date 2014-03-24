@@ -15,9 +15,6 @@ class CaseConverterMode(Mode):
       - *Convert to lower case*: ctrl-u
       - *Convert to UPPER CASE*: ctrl+shift+u
     """
-    IDENTIFIER = "caseConverterMode"
-    DESCRIPTION = __doc__
-
     def __init__(self):
         Mode.__init__(self)
         self._actions_created = False

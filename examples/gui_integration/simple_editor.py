@@ -99,7 +99,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def setupModesMenu(self):
         # Add modes to the modes menu
-        for k, v in sorted(self.editor.modes().items()):
+        for k, v in sorted(self.editor.get_modes().items()):
             a = QtGui.QAction(self.menuModes)
             a.setText(k)
             a.setCheckable(True)
@@ -109,7 +109,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.menuModes.addAction(a)
 
     def setupPanelsMenu(self):
-        for zones, panel_dic in sorted(self.editor.panels().items()):
+        for zones, panel_dic in sorted(self.editor.get_panels().items()):
             for k, v in panel_dic.items():
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
@@ -136,7 +136,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def onModeCheckStateChanged(self):
         action = self.sender()
-        action.mode.enabled = action.isChecked()
+        action.get_mode.enabled = action.isChecked()
 
 
 def main():

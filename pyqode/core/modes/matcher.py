@@ -43,10 +43,7 @@ class SymbolMatcherMode(Mode):
         the editor instance.
 
     """
-    IDENTIFIER = "symbolMatcherMode"
-    DESCRIPTION = "Highlight matching symbols (paren, braces, brackets,...)"
-
-    # todo why isn't there style settings for unmatached parenthesis?
+    # todo why isn't there style settings for unmatched parenthesis?
 
     @property
     def match_background(self):

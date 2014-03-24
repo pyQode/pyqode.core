@@ -39,10 +39,6 @@ class AutoCompleteMode(Mode):
         - [ -> ]
         - { -> }
     """
-    #: Mode identifier
-    IDENTIFIER = "autoCompleteMode"
-    #: Mode description
-    DESCRIPTION = "Automatically complete symbols"
     #: Auto complete mapping, maps input key with completion text.
     MAPPING = {'"': '"', "'": "'", "(": ")", "{": "}", "[": "]"}
 

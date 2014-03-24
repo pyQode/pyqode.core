@@ -56,11 +56,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     :meth:`selectNext` or :meth:`selectPrevious`, or replace the occurrences
     with a specific text using :meth:`replaceOccurrence` or :meth:`replaceAll`.
     """
-    #: The panel identifier
-    IDENTIFIER = "searchAndReplacePanel"
-    #: The panel description
-    DESCRIPTION = "Search and replace text in the editor"
-
     STYLESHEET = """SearchAndReplacePanel
     {
         background-color: %(bck)s;

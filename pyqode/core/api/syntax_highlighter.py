@@ -188,9 +188,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     .. warning:: You should always inherit from this class to create a new
                  syntax. **Never inherit directly from QSyntaxHighlighter.**
     """
-    #: Mode identifier
-    IDENTIFIER = "syntaxHighlighterMode"
-
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
     block_highlight_started = QtCore.pyqtSignal(object, object)

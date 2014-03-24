@@ -39,10 +39,6 @@ class WordClickMode(Mode, QtCore.QObject):
     :attr:`pyqode.core.WordClickMode.word_clicked` is emitted when the word is
     clicked by the user (while keeping control pressed).
     """
-    IDENTIFIER = "wordClickMode"
-    DESCRIPTION = "Emits word_clicked signal when user click on a word in " \
-                  "the document while keeping control pressed"
-
     #: Signal emitted when a word is clicked. The parameter is a
     #: QTextCursor with the clicked word set as the selected text.
     word_clicked = QtCore.pyqtSignal(QtGui.QTextCursor)

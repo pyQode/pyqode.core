@@ -38,11 +38,6 @@ class CaretLineHighlighterMode(Mode):
     """
     This mode highlights the caret line (active line).
     """
-    #: The mode identifier
-    IDENTIFIER = "caretLineHighlighterMode"
-    #: The mode description
-    DESCRIPTION = "This mode highlights the caret line"
-
     @property
     def background(self):
         return self.editor.style.value("caretLineBackground")

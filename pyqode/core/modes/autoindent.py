@@ -37,13 +37,6 @@ class AutoIndentMode(Mode):
     You can customize this mode by overriding
     :meth:`pyqode.core.AutoIndentMode._getIndent`
     """
-    #: Identifier
-    IDENTIFIER = "autoIndentMode"
-    #: Description
-    DESCRIPTION = """ A basic auto indent mode that provides a basic auto
-    indentation based on the previous line indentation.
-    """
-
     def __init__(self):
         super(AutoIndentMode, self).__init__()
         self.min_indent = ""

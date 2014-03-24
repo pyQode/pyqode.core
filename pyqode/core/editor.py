@@ -41,38 +41,21 @@ from pyqode.core.api.system import DelayJobRunner
 class Mode(object):
     """
     Base class for editor extensions. An extension is a "thing" that can be
-    installed on the QCodeEdit to add new behaviours or to modify the
+    installed on a QCodeEdit to add new behaviours or to modify the
     appearance.
 
-    An extension is added to a QCodeEdit by using the
+    A mode is added to a QCodeEdit by using the
     :meth:`pyqode.core.QCodeEdit.installMode` or
     :meth:`pyqode.core.QCodeEdit.installPanel` methods.
 
     Subclasses must/should override the following methods:
-        - :meth:`pyqode.core.Mode._onStateChanged`
-        - :meth:`pyqode.core.Mode._onStyleChanged`
-        - :meth:`pyqode.core.Mode._onSettingsChanged`
+        - :meth:`pyqode.core.Mode._on_state_changed`
+        - :meth:`pyqode.core.Mode._on_style_changed`
+        - :meth:`pyqode.core.Mode._on_settings_changed`
 
-    Uses :attr:`pyqode.core.Mode.IDENTIFIER` and
-    :attr:`pyqode.core.Mode.DESCRIPTION` to setup the mode name and
-    description:
-
-    .. code-block:: python
-
-        class MyMode(Mode):
-            IDENTIFIER = "myMode"
-            DESCRIPTION = "Describes your mode here"
-
-        m = MyMode()
-        print(m.name, m.description)
-
-        >>> ("myMode", "Describes your mode here" )
+    The mode will be identified by its class name, this means that there cannot
+    be two modes of the same type on a QCodeEdit (you have to subclass it)
     """
-    #: The mode identifier, must redefined for every subclasses
-    IDENTIFIER = ""
-    #: The mode description, must redefined for every subclasses
-    DESCRIPTION = ""
-
     @property
     def editor(self):
         """
@@ -104,9 +87,9 @@ class Mode(object):
     def __init__(self):
         #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
         #: attribute key when you install a mode.
-        self.name = self.IDENTIFIER
+        self.name = self.__class__.__name__
         #: Mode description
-        self.description = self.DESCRIPTION
+        self.description = self.__doc__
         self._enabled = False
         self._editor = None
 
@@ -1041,49 +1024,36 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Installs a mode on the editor.
 
-        The mode is set as an object attribute using the mode's name as the
-        key.
-
         :param mode: The mode instance to install.
         :type mode: pyqode.core.editor.Mode
         """
+        logger.debug('installing mode %s' % mode)
         self._modes[mode.name] = mode
         mode._on_install(self)
-        setattr(self, mode.name, mode)
 
     def uninstall_mode(self, name):
         """
         Uninstalls a previously installed mode.
 
-        :param name: The name of the mode to uninstall
-
-        :return:
+        :param name: The name of the mode to uninstall.
         """
         logger.debug('Uninstalling mode %s' % name)
-        m = self.mode(name)
+        m = self.get_mode(name)
         if m:
             m._on_uninstall()
-            self._modes.pop(name, None)
-        self.__dict__.pop(name, None)
+            return self._modes.pop(name, None)
 
-    def mode(self, name):
+    def get_mode(self, name):
         """
         Gets a mode by name.
 
-        .. deprecated:: 1.0
-            Use :py:func:`getattr` instead. This method will be remove in the
-            next version.
-
-        :raise: KeyError if the mode has not been installed.
-
         :param name: The name of the mode to get
         :type name: str
-
-        :rtype: pyqode.Mode
+        :rtype: pyqode.core.editor.Mode
         """
         return self._modes[name]
 
-    def modes(self):
+    def get_modes(self):
         """
         Returns the dictionary of modes.
         """
@@ -1108,27 +1078,42 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._panels[position][panel.name] = panel
         panel._on_install(self)
         self._update_viewport_margins()
-        setattr(self, panel.name, panel)
 
-    def uninstall_panel(self, name, zone):
+    def uninstall_panel(self, name):
         """
         Uninstalls a previously installed panel.
 
         :param name: The name of the panel to uninstall
 
-        :return:
+        :return: The uninstalled mode instance
         """
         logger.debug('Uninstalling panel %s' % name)
-        m = self._panels[zone][name]
-        if m:
-            try:
-                m._on_uninstall()
-            except (RuntimeError, AttributeError):
-                pass
-            self._panels[zone].pop(name, None)
-        self.__dict__.pop(name, None)
+        p, zone = self.get_panel(name, get_zone=True)
+        if p:
+            p._on_uninstall()
+            return self._panels[zone].pop(name, None)
 
-    def panels(self):
+    def get_panel(self, name, get_zone=False):
+        """
+        Gets a panel by name
+
+        :param name: Name of the panel to get
+        :param get_zone: True to also return the zone in which the panel has
+            been installed.
+        """
+        for i in range(4):
+            try:
+                panel = self._panels[i][name]
+            except KeyError:
+                pass
+            else:
+                if get_zone:
+                    return panel, i
+                else:
+                    return panel
+        return None, -1
+
+    def get_panels(self):
         """
         Returns the panels dictionary.
 

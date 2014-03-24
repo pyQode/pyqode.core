@@ -37,11 +37,6 @@ class ZoomMode(Mode):
       * **zoom in**: *ctrl++* or *ctrl+mouse wheel forward*
       * **reset**: *ctrl + 0*
     """
-    #: Mode identifier
-    IDENTIFIER = "zoomMode"
-    #: Mode description
-    DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
-
     def __init__(self):
         super(ZoomMode, self).__init__()
         self.prev_delta = 0

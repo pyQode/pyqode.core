@@ -55,11 +55,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               process to run custom task on the completion process (e.g.
               setting up some :py:attr:`sys.modules`).
     """
-    #: Mode identifier
-    IDENTIFIER = "codeCompletionMode"
-    #: Mode description
-    DESCRIPTION = "Provides a code completion/suggestion system"
-
     @property
     def trigger_key(self):
         return self.editor.style.value("triggerKey", section="Code completion")

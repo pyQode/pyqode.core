@@ -36,12 +36,6 @@ class RightMarginMode(Mode):
     Display a right margin at column 80 by default.
 
     """
-    #: Mode identifier
-    IDENTIFIER = "rightMarginMode"
-
-    #: Mode description
-    DESCRIPTION = "Draw the right margin on the text document"
-
     @property
     def color(self):
         return self.editor.style.value("margin")
