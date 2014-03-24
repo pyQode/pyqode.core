@@ -1,6 +1,3 @@
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=ready&title=Ready 
- :target: https://waffle.io/pyqode/pyqode.core
- :alt: 'Stories in Ready'
 Python/Qt Code Editor Widget library
 ====================================
 
@@ -15,6 +12,10 @@ Python/Qt Code Editor Widget library
 .. image:: https://pypip.in/v/pyqode.core/badge.png
     :target: https://crate.io/packages/pyqode.core/
     :alt: Latest PyPI version
+
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=ready&title=Ready 
+    :target: https://waffle.io/pyqode/pyqode.core
+    :alt: 'Stories in Ready'
 
 What is pyQode?
 ---------------
