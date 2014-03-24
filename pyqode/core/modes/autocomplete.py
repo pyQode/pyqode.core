@@ -68,10 +68,6 @@ class AutoCompleteMode(Mode):
             next_char = None
         if txt in self.MAPPING:
             toInsert = self.MAPPING[txt]
-            if next_char == toInsert:
-                tc.clearSelection()
-                self.editor.setTextCursor(tc)
-                return
             if (not next_char or next_char in self.MAPPING.keys() or
                     next_char in self.MAPPING.values() or
                     next_char.isspace()):
