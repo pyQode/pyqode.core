@@ -61,7 +61,7 @@ class RightMarginMode(Mode):
     def __init__(self):
         Mode.__init__(self)
         self._margin_pos = constants.MARGIN_POS
-        self.__pen = QtGui.QPen()
+        self._pen = QtGui.QPen()
 
     def _on_install(self, editor):
         """
@@ -71,7 +71,7 @@ class RightMarginMode(Mode):
         """
         Mode._on_install(self, editor)
         color = self.editor.style.add_property("margin", "#FF0000")
-        self.__pen = QtGui.QPen(QtGui.QColor(color))
+        self._pen = QtGui.QPen(QtGui.QColor(color))
         self._margin_pos = self.editor.settings.add_property(
             "rightMarginPos", "80")
 
@@ -88,7 +88,7 @@ class RightMarginMode(Mode):
         :param value:
         """
         if key == "margin" or not key:
-            self.__pen = self.editor.style.value("margin")
+            self._pen = self.editor.style.value("margin")
             self.editor.mark_whole_doc_dirty()
             self.editor.repaint()
 
@@ -114,5 +114,5 @@ class RightMarginMode(Mode):
             self.editor.document().documentMargin()
         x80 = round(fm.width(' ') * pos) + offset
         p = QtGui.QPainter(self.editor.viewport())
-        p.setPen(self.__pen)
+        p.setPen(self._pen)
         p.drawLine(x80, 0, x80, 2 ** 16)

@@ -114,7 +114,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 self._mtime = mtime
                 self._notify_change()
 
-    def __notify(self, settings_val, title, message, dlg_type=None,
+    def _notify(self, settings_val, title, message, dlg_type=None,
                  expected_type=None, expected_action=None):
         """
         Notify user from external event
@@ -146,7 +146,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 "reload it?" % os.path.basename(self.editor.file_path))
         kwargs = {"expectedAction": inner_action}
         if self.editor.hasFocus():
-            self.__notify(*args, **kwargs)
+            self._notify(*args, **kwargs)
         else:
             self._notification_pending = True
             self._args = args
@@ -155,7 +155,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
     def _check_for_pending(self, *args, **kwargs):
         if self._notification_pending and not self._processing:
             self._processing = True
-            self.__notify(*self._args, **self._kwargs)
+            self._notify(*self._args, **self._kwargs)
             self._notification_pending = False
             self._processing = False
 

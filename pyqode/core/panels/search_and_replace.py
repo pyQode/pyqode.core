@@ -159,12 +159,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
         #: Occurrences counter
         self.cpt_occurences = 0
-        self.__previousStylesheet = ""
-        self.__separator = None
-        self.__decorations = []
-        self.__mutex = QtCore.QMutex()
-        self.__occurrences = []
-        self.__current_occurrence = -1
+        self._previous_stylesheet = ""
+        self._separator = None
+        self._decorations = []
+        self._mutex = QtCore.QMutex()
+        self._occurrences = []
+        self._current_occurrence = -1
         self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -188,7 +188,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self._refresh_decorations()
 
     def _refresh_decorations(self):
-        for d in self.__decorations:
+        for d in self._decorations:
             self.editor.remove_decoration(d)
             d.set_background(QtGui.QBrush(self.background))
             d.set_foreground(QtGui.QBrush(self.foreground))
@@ -198,7 +198,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         Panel._on_state_changed(self, state)
         if state:
             # add menus
-            self.__separator = self.editor.add_separator()
+            self._separator = self.editor.add_separator()
             self.editor.add_action(self.actionSearch)
             self.editor.add_action(self.actionActionSearchAndReplace)
             self.editor.add_action(self.actionFindNext)
@@ -221,8 +221,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.search_finished.connect(self._on_search_finished)
         else:
             # remove menus
-            if self.__separator is not None:
-                self.editor.remove_action(self.__separator)
+            if self._separator is not None:
+                self.editor.remove_action(self._separator)
             self.editor.remove_action(self.actionSearch)
             self.editor.remove_action(
                 self.actionActionSearchAndReplace)
@@ -319,11 +319,11 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
         :return: List of tuple(int, int)
         """
-        self.__mutex.lock()
+        self._mutex.lock()
         retval = []
-        for occ in self.__occurrences:
+        for occ in self._occurrences:
             retval.append(occ)
-        self.__mutex.unlock()
+        self._mutex.unlock()
         return retval
 
     def select_next(self):
@@ -463,21 +463,21 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         return flags
 
     def _exec_search(self, text, doc, original_cursor, flags):
-        self.__mutex.lock()
-        self.__occurrences[:] = []
-        self.__current_occurrence = -1
+        self._mutex.lock()
+        self._occurrences[:] = []
+        self._current_occurrence = -1
         if text:
             matches = 0
             cursor = doc.find(text, 0, flags)
             while not cursor.isNull():
                 if self._compare_cursors(cursor, original_cursor):
-                    self.__current_occurrence = matches
-                self.__occurrences.append((cursor.selectionStart(),
+                    self._current_occurrence = matches
+                self._occurrences.append((cursor.selectionStart(),
                                           cursor.selectionEnd()))
                 cursor.setPosition(cursor.position() + 1)
                 cursor = doc.find(text, cursor, flags)
                 matches += 1
-        self.__mutex.unlock()
+        self._mutex.unlock()
         self.search_finished.emit()
 
     def _update_label_matches(self):
@@ -495,11 +495,11 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         for occurrence in occurrences:
             deco = self._create_decoration(occurrence[0],
                                            occurrence[1])
-            self.__decorations.append(deco)
+            self._decorations.append(deco)
             self.editor.add_decoration(deco)
         self.cpt_occurences = len(occurrences)
         if not self.cpt_occurences:
-            self.__current_occurrence = -1
+            self._current_occurrence = -1
         self._update_label_matches()
         self._update_buttons(txt=self.lineEditReplace.text())
 
@@ -509,24 +509,24 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             "bck": self.editor.palette().window().color().name(),
             "color": self.editor.palette().windowText().color().name(),
             "highlight": highlight.name()}
-        if stylesheet != self.__previousStylesheet:
+        if stylesheet != self._previous_stylesheet:
             self.setStyleSheet(stylesheet)
-            self.__previousStylesheet = stylesheet
+            self._previous_stylesheet = stylesheet
 
     def paintEvent(self, event):
         Panel.paintEvent(self, event)
         self._reset_stylesheet()
 
     def _current_occurrence(self):
-        self.__mutex.lock()
-        ret_val = self.__current_occurrence
-        self.__mutex.unlock()
+        self._mutex.lock()
+        ret_val = self._current_occurrence
+        self._mutex.unlock()
         return ret_val
 
     def _clear_occurrences(self):
-        self.__mutex.lock()
-        self.__occurrences[:] = []
-        self.__mutex.unlock()
+        self._mutex.lock()
+        self._occurrences[:] = []
+        self._mutex.unlock()
 
     def _create_decoration(self, selection_start, selection_end):
         """ Creates the text occurences decoration """
@@ -539,14 +539,14 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     def _clear_decorations(self):
         """ Remove all decorations """
-        for deco in self.__decorations:
+        for deco in self._decorations:
             self.editor.remove_decoration(deco)
-        self.__decorations[:] = []
+        self._decorations[:] = []
 
     def _set_current_occurrence(self, cr):
-        self.__mutex.lock()
-        self.__current_occurrence = cr
-        self.__mutex.unlock()
+        self._mutex.lock()
+        self._current_occurrence = cr
+        self._mutex.unlock()
 
     @staticmethod
     def _compare_cursors(a, b):
@@ -554,18 +554,18 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
                 a.selectionEnd() == b.selectionEnd())
 
     def _remove_occurrence(self, i, offset=0):
-        self.__mutex.lock()
-        self.__occurrences.pop(i)
+        self._mutex.lock()
+        self._occurrences.pop(i)
         if offset:
             updated_occurences = []
-            for j, occ in enumerate(self.__occurrences):
+            for j, occ in enumerate(self._occurrences):
                 if j >= i:
                     updated_occurences.append(
                         (occ[0] + offset, occ[1] + offset))
                 else:
                     updated_occurences.append((occ[0], occ[1]))
-            self.__occurrences = updated_occurences
-        self.__mutex.unlock()
+            self._occurrences = updated_occurences
+        self._mutex.unlock()
 
     def _update_buttons(self, txt=""):
         enable = self.cpt_occurences > 1

@@ -171,7 +171,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode._on_install(self, editor)
         self.editor.settings.add_property(
             "triggerKey", int(QtCore.Qt.Key_Space), section="Code completion")
-        self.__triggerLength = self.editor.settings.add_property(
+        self._trigger_len = self.editor.settings.add_property(
             "triggerLength", 1, section="Code completion")
         self.editor.settings.add_property(
             "triggerSymbols", ["."], section="Code completion")
@@ -449,7 +449,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @staticmethod
     @memoized
-    def __make_icon(icon):
+    def _make_icon(icon):
         return QtGui.QIcon(icon)
 
     def _update_model(self, completions, cc_model):
@@ -476,7 +476,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 if 'tooltip' in completion and completion['tooltip']:
                     self._tooltips[name] = completion['tooltip']
                 if 'icon' in completion:
-                    item.setData(self.__make_icon(completion['icon']),
+                    item.setData(self._make_icon(completion['icon']),
                                  QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
         return cc_model

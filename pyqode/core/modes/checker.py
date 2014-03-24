@@ -166,14 +166,14 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        self.__jobRunner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
-        self.__messages = []
+        self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
+        self._messages = []
         self._worker = worker
-        self.__trigger = trigger
-        self.__mutex = QtCore.QMutex()
-        self.__clearOnRequest = clear_on_request
-        self.__showTooltip = show_tooltip
-        self.__markerPanelId = marker_panel_id
+        self._trigger = trigger
+        self._mutex = QtCore.QMutex()
+        self._clear_on_request = clear_on_request
+        self._show_tooltip = show_tooltip
+        self._marker_panel_id = marker_panel_id
 
     def add_messages(self, messages, clear=True):
         """
@@ -194,14 +194,14 @@ class CheckerMode(Mode, QtCore.QObject):
         if nb_msg > 20:
             nb_msg = 20
         for message in messages[0:nb_msg]:
-            self.__messages.append(message)
+            self._messages.append(message)
             if message.line:
-                if hasattr(self.editor, self.__markerPanelId):
+                if hasattr(self.editor, self._marker_panel_id):
                     message.marker = Marker(message.line, message.icon,
                                             message.description)
                     self.editor.markerPanel.add_marker(message.marker)
                 tooltip = None
-                if self.__showTooltip:
+                if self._show_tooltip:
                     tooltip = message.description
                 message.decoration = TextDecoration(self.editor.textCursor(),
                                                     start_line=message.line,
@@ -220,7 +220,7 @@ class CheckerMode(Mode, QtCore.QObject):
 
         :param message: Message to remove
         """
-        self.__messages.remove(message)
+        self._messages.remove(message)
         if message.marker:
             self.editor.markerPanel.remove_marker(message.marker)
         if message.decoration:
@@ -230,22 +230,22 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         Clears all messages.
         """
-        while len(self.__messages):
-            self.remove_message(self.__messages[0])
+        while len(self._messages):
+            self.remove_message(self._messages[0])
         if hasattr(self.editor, "markerPanel"):
             self.editor.markerPanel.repaint()
 
     def _on_state_changed(self, state):
         if state:
-            if self.__trigger == CheckerTriggers.TXT_CHANGED:
+            if self._trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.connect(self.request_checking)
-            elif self.__trigger == CheckerTriggers.TXT_SAVED:
+            elif self._trigger == CheckerTriggers.TXT_SAVED:
                 self.editor.text_saved.connect(self.request_checking)
                 self.editor.new_text_set.connect(self.request_checking)
         else:
-            if self.__trigger == CheckerTriggers.TXT_CHANGED:
+            if self._trigger == CheckerTriggers.TXT_CHANGED:
                 self.editor.textChanged.disconnect(self.request_checking)
-            elif self.__trigger == CheckerTriggers.TXT_SAVED:
+            elif self._trigger == CheckerTriggers.TXT_SAVED:
                 self.editor.text_saved.disconnect(self.request_checking)
                 self.editor.new_text_set.disconnect(self.request_checking)
 
@@ -255,11 +255,11 @@ class CheckerMode(Mode, QtCore.QObject):
             self.add_messages(messages)
 
     def request_checking(self):
-        self.__jobRunner.request_job(self._request, False)
+        self._job_runner.request_job(self._request, False)
 
     def _request(self):
         """ Requests a checking of the editor content. """
-        if self.__clearOnRequest:
+        if self._clear_on_request:
             self.clear_messages()
         request_data = {
             'code': self.editor.toPlainText(),

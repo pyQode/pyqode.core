@@ -93,12 +93,12 @@ class Mode(object):
 
         :type: bool
         """
-        return self.__enabled
+        return self._enabled
 
     @enabled.setter
     def enabled(self, enabled):
-        if enabled != self.__enabled:
-            self.__enabled = enabled
+        if enabled != self._enabled:
+            self._enabled = enabled
             self._on_state_changed(enabled)
 
     def __init__(self):
@@ -107,7 +107,7 @@ class Mode(object):
         self.name = self.IDENTIFIER
         #: Mode description
         self.description = self.DESCRIPTION
-        self.__enabled = False
+        self._enabled = False
         self._editor = None
 
     def __str__(self):
@@ -219,11 +219,11 @@ class Panel(QtGui.QWidget, Mode):
 
         :type: bool
         """
-        return self.__scrollable
+        return self._scrollable
 
     @scrollable.setter
     def scrollable(self, value):
-        self.__scrollable = value
+        self._scrollable = value
 
     def __init__(self):
         Mode.__init__(self)
@@ -232,7 +232,7 @@ class Panel(QtGui.QWidget, Mode):
         #: automatically set when installing the panel but it can be changed
         #: later (negative values can also be used).
         self.order_in_zone = -1
-        self.__scrollable = False
+        self._scrollable = False
         self._background_brush = None
         self._foreground_pen = None
 
@@ -566,11 +566,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :type: pyqode.core.QPropertyRegistry
         """
-        return self.__style
+        return self._style
 
     @style.setter
     def style(self, value):
-        self.__style.update(value)
+        self._style.update(value)
 
     @property
     def settings(self):
@@ -579,11 +579,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :type: pyqode.core.QPropertyRegistry
         """
-        return self.__settings
+        return self._settings
 
     @settings.setter
     def settings(self, value):
-        self.__settings.update(value)
+        self._settings.update(value)
 
     @property
     def line_count(self):
@@ -625,11 +625,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.customContextMenuRequested.connect(self.show_context_menu)
 
         # panels and modes
-        self.__modes = {}
-        self.__panels = {Panel.Position.TOP: {},
-                         Panel.Position.LEFT: {},
-                         Panel.Position.RIGHT: {},
-                         Panel.Position.BOTTOM: {}}
+        self._modes = {}
+        self._panels = {Panel.Position.TOP: {},
+                        Panel.Position.LEFT: {},
+                        Panel.Position.RIGHT: {},
+                        Panel.Position.BOTTOM: {}}
 
         #: Path of the current file
         self._fpath = None
@@ -717,15 +717,15 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Uninstalls all modes and panels.
         """
-        while len(self.__modes):
-            k = list(self.__modes.keys())[0]
+        while len(self._modes):
+            k = list(self._modes.keys())[0]
             self.uninstall_mode(k)
-        while len(self.__panels):
-            zone = list(self.__panels.keys())[0]
-            while len(self.__panels[zone]):
-                k = list(self.__panels[zone].keys())[0]
+        while len(self._panels):
+            zone = list(self._panels.keys())[0]
+            while len(self._panels[zone]):
+                k = list(self._panels[zone].keys())[0]
                 self.uninstall_panel(k, zone)
-            self.__panels.pop(zone, None)
+            self._panels.pop(zone, None)
 
     def show_context_menu(self, pt):
         self.mnu = QtGui.QMenu()
@@ -1047,7 +1047,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param mode: The mode instance to install.
         :type mode: pyqode.core.editor.Mode
         """
-        self.__modes[mode.name] = mode
+        self._modes[mode.name] = mode
         mode._on_install(self)
         setattr(self, mode.name, mode)
 
@@ -1063,7 +1063,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         m = self.mode(name)
         if m:
             m._on_uninstall()
-            self.__modes.pop(name, None)
+            self._modes.pop(name, None)
         self.__dict__.pop(name, None)
 
     def mode(self, name):
@@ -1081,13 +1081,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :rtype: pyqode.Mode
         """
-        return self.__modes[name]
+        return self._modes[name]
 
     def modes(self):
         """
         Returns the dictionary of modes.
         """
-        return self.__modes
+        return self._modes
 
     def install_panel(self, panel, position=Panel.Position.LEFT):
         """
@@ -1104,8 +1104,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :type panel: pyqode.core.editor.Panel
         :type position: int
         """
-        panel.order_in_zone = len(self.__panels[position])
-        self.__panels[position][panel.name] = panel
+        panel.order_in_zone = len(self._panels[position])
+        self._panels[position][panel.name] = panel
         panel._on_install(self)
         self._update_viewport_margins()
         setattr(self, panel.name, panel)
@@ -1119,13 +1119,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :return:
         """
         logger.debug('Uninstalling panel %s' % name)
-        m = self.__panels[zone][name]
+        m = self._panels[zone][name]
         if m:
             try:
                 m._on_uninstall()
             except (RuntimeError, AttributeError):
                 pass
-            self.__panels[zone].pop(name, None)
+            self._panels[zone].pop(name, None)
         self.__dict__.pop(name, None)
 
     def panels(self):
@@ -1135,7 +1135,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :return: A dictionary of :class:`pyqode.core.Panel`
         :rtype: dict
         """
-        return self.__panels
+        return self._panels
 
     def add_decoration(self, decoration):
         """
@@ -1672,7 +1672,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Init the settings PropertyRegistry
         """
-        self.__settings = PropertyRegistry()
+        self._settings = PropertyRegistry()
         self.settings.valueChanged.connect(self._on_settings_changed)
         self.settings.add_property("showWhiteSpaces", False)
         self.settings.add_property("tabLength", constants.TAB_SIZE)
@@ -1684,7 +1684,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Init the style PropertyRegistry
         """
-        self.__style = PropertyRegistry()
+        self._style = PropertyRegistry()
         self.style.valueChanged.connect(self._reset_palette)
         self.style.add_property("font", constants.FONT)
         self.style.add_property("fontSize", constants.FONT_SIZE)
@@ -1730,28 +1730,28 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def _compute_zones_sizes(self):
         # Left panels
         left = 0
-        for panel in self.__panels[Panel.Position.LEFT].values():
+        for panel in self._panels[Panel.Position.LEFT].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             left += sh.width()
         # Right panels
         right = 0
-        for panel in self.__panels[Panel.Position.RIGHT].values():
+        for panel in self._panels[Panel.Position.RIGHT].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             right += sh.width()
         # Top panels
         top = 0
-        for panel in self.__panels[Panel.Position.TOP].values():
+        for panel in self._panels[Panel.Position.TOP].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
             top += sh.height()
         # Bottom panels
         bottom = 0
-        for panel in self.__panels[Panel.Position.BOTTOM].values():
+        for panel in self._panels[Panel.Position.BOTTOM].values():
             if not panel.isVisible():
                 continue
             sh = panel.sizeHint()
@@ -1769,7 +1769,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         w_offset = cr.width() - (vcr.width() + s_left + s_right)
         h_offset = cr.height() - (vcr.height() + s_bottom + s_top)
         left = 0
-        panels = list(self.__panels[Panel.Position.LEFT].values())
+        panels = list(self._panels[Panel.Position.LEFT].values())
         panels.sort(key=lambda panel: panel.order_in_zone, reverse=True)
         for panel in panels:
             if not panel.isVisible():
@@ -1781,7 +1781,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.height() - s_bottom - s_top - h_offset)
             left += sh.width()
         right = 0
-        panels = list(self.__panels[Panel.Position.RIGHT].values())
+        panels = list(self._panels[Panel.Position.RIGHT].values())
         panels.sort(key=lambda panel: panel.order_in_zone, reverse=True)
         for panel in panels:
             if not panel.isVisible():
@@ -1791,7 +1791,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.top(), sh.width(), cr.height() - h_offset)
             right += sh.width()
         top = 0
-        panels = list(self.__panels[Panel.Position.TOP].values())
+        panels = list(self._panels[Panel.Position.TOP].values())
         panels.sort(key=lambda panel: panel.order_in_zone)
         for panel in panels:
             if not panel.isVisible():
@@ -1802,7 +1802,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               sh.height())
             top += sh.height()
         bottom = 0
-        panels = list(self.__panels[Panel.Position.BOTTOM].values())
+        panels = list(self._panels[Panel.Position.BOTTOM].values())
         panels.sort(key=lambda panel: panel.order_in_zone)
         for panel in panels:
             if not panel.isVisible():
@@ -1817,7 +1817,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Updates the panel on update request. (Scroll, update clipping rect,...)
         """
-        for zones_id, zone in self.__panels.items():
+        for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
                zones_id == Panel.Position.BOTTOM:
                 continue
@@ -1853,16 +1853,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         left = 0
         right = 0
         bottom = 0
-        for panel in self.__panels[Panel.Position.LEFT].values():
+        for panel in self._panels[Panel.Position.LEFT].values():
             if panel.isVisible():
                 left += panel.sizeHint().width()
-        for panel in self.__panels[Panel.Position.RIGHT].values():
+        for panel in self._panels[Panel.Position.RIGHT].values():
             if panel.isVisible():
                 right += panel.sizeHint().width()
-        for panel in self.__panels[Panel.Position.TOP].values():
+        for panel in self._panels[Panel.Position.TOP].values():
             if panel.isVisible():
                 top += panel.sizeHint().height()
-        for panel in self.__panels[Panel.Position.BOTTOM].values():
+        for panel in self._panels[Panel.Position.BOTTOM].values():
             if panel.isVisible():
                 bottom += panel.sizeHint().height()
         self._margin_sizes = (top, left, right, bottom)

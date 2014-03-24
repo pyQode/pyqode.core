@@ -252,11 +252,11 @@ class _JobThread(QtCore.QThread):
     the stopJobThreadInstance static method.
     """
 
-    __name = "JobThread({}{}{})"
+    _name = "JobThread({}{}{})"
 
     def __init__(self):
         QtCore.QThread.__init__(self)
-        self.__jobResults = None
+        self._job_results = None
         self.used = False
         self.args = ()
         self.kwargs = {}
@@ -274,7 +274,7 @@ class _JobThread(QtCore.QThread):
             name = self.execute_on_run.__name__
         else:
             name = hex(id(self))
-        return self.__name.format(name, self.args, self.kwargs)
+        return self._name.format(name, self.args, self.kwargs)
 
     def stop_run(self):
         self.on_finish()
@@ -419,9 +419,11 @@ class DelayJobRunner(JobRunner):
     """
     def __init__(self, caller, nb_threads_max=3, delay=500):
         JobRunner.__init__(self, caller, nb_threads_max=nb_threads_max)
-        self.__timer = QtCore.QTimer()
-        self.__interval = delay
-        self.__timer.timeout.connect(self._exec_requested_job)
+        self._timer = QtCore.QTimer()
+        self._interval = delay
+        self._timer.timeout.connect(self._exec_requested_job)
+        self._args = []
+        self._kwargs = {}
 
     def request_job(self, job, async, *args, **kwargs):
         """
@@ -442,32 +444,32 @@ class DelayJobRunner(JobRunner):
         :param args: args
         :param kwargs: kwargs
         """
-        self.__timer.stop()
-        self.__job = job
-        self.__args = args
-        self.__kwargs = kwargs
-        self.__async = async
-        self.__timer.start(self.__interval)
+        self._timer.stop()
+        self._job = job
+        self._args = args
+        self._kwargs = kwargs
+        self._async = async
+        self._timer.start(self._interval)
 
     def cancel_requests(self):
         """
         Cancels pending requests.
         """
-        self.__timer.stop()
+        self._timer.stop()
 
     def _exec_requested_job(self):
         """
         Execute the requested job after the timer has timeout.
         """
-        self.__timer.stop()
-        if self.__async:
-            self.start_job(self.__job, False, *self.__args, **self.__kwargs)
+        self._timer.stop()
+        if self._async:
+            self.start_job(self._job, False, *self._args, **self._kwargs)
         else:
-            self.__job(*self.__args, **self.__kwargs)
-        self.__job = None
-        self.__args = None
-        self.__kwargs = None
-        self.__async = None
+            self._job(*self._args, **self._kwargs)
+        # self._job = None
+        # self._args = None
+        # self._kwargs = None
+        # self._async = None
 
 
 if __name__ == '__main__':

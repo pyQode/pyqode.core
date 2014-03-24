@@ -42,8 +42,8 @@ class LineNumberPanel(Panel):
     def __init__(self):
         Panel.__init__(self)
         self.scrollable = True
-        self.__selecting = False
-        self.__selStart = -1
+        self._selecting = False
+        self._sel_start = -1
 
     def _on_install(self, editor):
         Panel._on_install(self, editor)
@@ -74,14 +74,14 @@ class LineNumberPanel(Panel):
         """
         Starts selecting
         """
-        self.__selecting = True
-        self.__selStart = e.pos().y()
-        start = end = self.editor.line_nbr_from_position(self.__selStart)
+        self._selecting = True
+        self._sel_start = e.pos().y()
+        start = end = self.editor.line_nbr_from_position(self._sel_start)
         self.editor.select_full_lines(start, end)
 
     def cancel_selection(self):
-        self.__selecting = False
-        self.__selStart = -1
+        self._selecting = False
+        self._sel_start = -1
 
     def mouseReleaseEvent(self, e):
         """ Cancels selection """
@@ -97,9 +97,9 @@ class LineNumberPanel(Panel):
         """
         Updates end of selection if we are currently selecting
         """
-        if self.__selecting:
+        if self._selecting:
             end_pos = e.pos().y()
-            start_line = self.editor.line_nbr_from_position(self.__selStart)
+            start_line = self.editor.line_nbr_from_position(self._sel_start)
             end_line = self.editor.line_nbr_from_position(end_pos)
             self.editor.select_full_lines(start_line, end_line)
 

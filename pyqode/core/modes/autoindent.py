@@ -70,11 +70,11 @@ class AutoIndentMode(Mode):
 
     def _on_state_changed(self, state):
         if state is True:
-            self.editor.key_pressed.connect(self.__on_key_pressed)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            self.editor.key_pressed.disconnect(self.__on_key_pressed)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
 
-    def __on_key_pressed(self, event):
+    def _on_key_pressed(self, event):
         """
         Auto indent if the released key is the return key.
         :param event: the key event

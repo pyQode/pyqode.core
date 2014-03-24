@@ -44,19 +44,19 @@ class Marker(QtCore.QObject):
         Gets the marker position (line number)
         :type: int
         """
-        return self.__position
+        return self._position
 
     @property
     def icon(self):
         """
         Gets the icon file name. Read-only.
         """
-        return self.__icon
+        return self._icon
 
     @property
     def description(self):
         """ Gets the marker description. """
-        return self.__description
+        return self._description
 
     def __init__(self, position, icon="", description="", parent=None):
         """
@@ -71,9 +71,9 @@ class Marker(QtCore.QObject):
         """
         QtCore.QObject.__init__(self, parent)
         #: The position of the marker (line number)
-        self.__position = position
-        self.__icon = icon
-        self.__description = description
+        self._position = position
+        self._icon = icon
+        self._description = description
 
 
 class MarkerPanel(Panel):
@@ -102,13 +102,13 @@ class MarkerPanel(Panel):
 
     def __init__(self):
         Panel.__init__(self)
-        self.__markers = []
-        self.__icons = {}
-        self.__previousLine = -1
+        self._markers = []
+        self._icons = {}
+        self._previous_line = -1
         self.scrollable = True
-        self.__jobRunner = DelayJobRunner(self, nb_threads_max=1, delay=100)
+        self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=100)
         self.setMouseTracking(True)
-        self.__toRemove = []
+        self._to_remove = []
 
     def add_marker(self, marker):
         """
@@ -119,8 +119,8 @@ class MarkerPanel(Panel):
         """
         key, val = self.make_marker_icon(marker.icon)
         if key and val:
-            self.__icons[key] = val
-        self.__markers.append(marker)
+            self._icons[key] = val
+        self._markers.append(marker)
         doc = self.editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker.position - 1)
@@ -147,14 +147,14 @@ class MarkerPanel(Panel):
         :param marker: Marker to remove
         :type marker: pyqode.core.Marker
         """
-        self.__markers.remove(marker)
-        self.__toRemove.append(marker)
+        self._markers.remove(marker)
+        self._to_remove.append(marker)
         self.repaint()
 
     def clear_markers(self):
         """ Clears the markers list """
-        while len(self.__markers):
-            self.remove_marker(self.__markers[0])
+        while len(self._markers):
+            self.remove_marker(self._markers[0])
 
     def marker_for_line(self, line):
         """
@@ -166,7 +166,7 @@ class MarkerPanel(Panel):
         :return: Marker of None
         :rtype: pyqode.core.Marker
         """
-        for marker in self.__markers:
+        for marker in self._markers:
             if line == marker.position:
                 return marker
 
@@ -184,9 +184,9 @@ class MarkerPanel(Panel):
             user_data = block.userData()
             if hasattr(user_data, "marker"):
                 marker = user_data.marker
-                if marker in self.__toRemove:
+                if marker in self._to_remove:
                     user_data.marker = None
-                    self.__toRemove.remove(marker)
+                    self._to_remove.remove(marker)
                     continue
                 if marker and marker.icon:
                     r = QtCore.QRect()
@@ -198,7 +198,7 @@ class MarkerPanel(Panel):
                         key = marker.icon[0]
                     else:
                         key = marker.icon
-                    self.__icons[key].paint(painter, r)
+                    self._icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):
         line = self.editor.line_nbr_from_position(event.pos().y())
@@ -213,18 +213,18 @@ class MarkerPanel(Panel):
         line = self.editor.line_nbr_from_position(event.pos().y())
         marker = self.marker_for_line(line)
         if marker and marker.description:
-            if self.__previousLine != line:
-                self.__jobRunner.request_job(self._display_tooltip, False,
+            if self._previous_line != line:
+                self._job_runner.request_job(self._display_tooltip, False,
                                              marker.description,
                                              self.editor.line_pos_from_number(
                                                  marker.position - 2))
         else:
-            self.__jobRunner.cancel_requests()
-        self.__previousLine = line
+            self._job_runner.cancel_requests()
+        self._previous_line = line
 
     def leaveEvent(self, *args, **kwargs):
         QtGui.QToolTip.hideText()
-        self.__previousLine = -1
+        self._previous_line = -1
 
     def _display_tooltip(self, tooltip, top):
         QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(

@@ -70,22 +70,22 @@ class PropertyRegistry(QtCore.QObject):
     def __init__(self, copy=None):
         QtCore.QObject.__init__(self)
         if copy:
-            self.__dict = copy.__dict
+            self._dict = copy.__dict
         else:
-            self.__dict = {"General": {}}
+            self._dict = {"General": {}}
 
     def sections(self):
         """
         Generates the list of sections
         """
-        for k in sorted(self.__dict.keys()):
+        for k in sorted(self._dict.keys()):
             yield k
 
     def all_properties(self):
         """
         Generates the list of properties dictionaries.
         """
-        for k, v in self.__dict.items():
+        for k, v in self._dict.items():
             yield v
 
     def properties(self, section):
@@ -95,7 +95,7 @@ class PropertyRegistry(QtCore.QObject):
         :param section: The properties' section
         :return: dict of properties
         """
-        return self.__dict[section]
+        return self._dict[section]
 
     def update(self, other):
         """
@@ -111,9 +111,9 @@ class PropertyRegistry(QtCore.QObject):
         """
         for sk, sv in other.__dict.items():
             for pk, pv in sv.items():
-                if sk in self.__dict:
-                    if pk in self.__dict[sk]:
-                        self.__dict[sk][pk] = pv
+                if sk in self._dict:
+                    if pk in self._dict[sk]:
+                        self._dict[sk][pk] = pv
         self.valueChanged.emit("", "")
 
     def clone(self):
@@ -137,14 +137,14 @@ class PropertyRegistry(QtCore.QObject):
                  else it return the existing value.
         """
         value = self._value_to_str(value)
-        if section in self.__dict:
-            if key in self.__dict[section]:
+        if section in self._dict:
+            if key in self._dict[section]:
                 value = self.value(key, section)
                 return value
             else:
-                self.__dict[section][key] = value
+                self._dict[section][key] = value
         else:
-            self.__dict[section] = {key: value}
+            self._dict[section] = {key: value}
         return self._value_from_str(value)
 
     def remove_property(self, key, section="General"):
@@ -157,9 +157,9 @@ class PropertyRegistry(QtCore.QObject):
         :param key: The name/key of the property to remove
         :type key: str
         """
-        if section in self.__dict:
-            if key in self.__dict[section]:
-                self.__dict.pop(key)
+        if section in self._dict:
+            if key in self._dict[section]:
+                self._dict.pop(key)
 
     def set_value(self, key, value, section="General"):
         """
@@ -174,8 +174,8 @@ class PropertyRegistry(QtCore.QObject):
                  that is used if the property already exists
         """
         value = self._value_to_str(value)
-        if self.__dict[section][key] != value:
-            self.__dict[section][key] = value
+        if self._dict[section][key] != value:
+            self._dict[section][key] = value
             self.valueChanged.emit(section, key)
 
     def value(self, key, section="General", default=""):
@@ -191,9 +191,9 @@ class PropertyRegistry(QtCore.QObject):
 
         :return: The property's value
         """
-        if section in self.__dict:
-            if key in self.__dict[section]:
-                return self._value_from_str(self.__dict[section][key])
+        if section in self._dict:
+            if key in self._dict[section]:
+                return self._value_from_str(self._dict[section][key])
         return default
 
     @staticmethod
@@ -265,7 +265,7 @@ class PropertyRegistry(QtCore.QObject):
 
         :return: str
         """
-        return json.dumps(self.__dict, indent=TAB_SIZE, sort_keys=True)
+        return json.dumps(self._dict, indent=TAB_SIZE, sort_keys=True)
 
     def loads(self, data):
         """
@@ -273,7 +273,7 @@ class PropertyRegistry(QtCore.QObject):
 
         :param data: Json data string
         """
-        self.__dict = json.loads(data)
+        self._dict = json.loads(data)
 
     def open(self, filepath):
         """
@@ -283,8 +283,8 @@ class PropertyRegistry(QtCore.QObject):
         """
         with open(filepath, 'r') as f:
             self.loads(f.read())
-        for section in self.__dict:
-            for key in self.__dict[section]:
+        for section in self._dict:
+            for key in self._dict[section]:
                 self.valueChanged.emit(section, key)
 
     def save(self, filepath):

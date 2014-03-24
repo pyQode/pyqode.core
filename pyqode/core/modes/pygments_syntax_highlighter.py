@@ -248,7 +248,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self.__previousFilename = ""
+        self._previous_filename = ""
         self.style = "default"
 
     def _on_install(self, editor):
@@ -330,8 +330,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def highlight_block(self, text):
         fn = self.editor.file_name
-        if fn != self.__previousFilename:
-            self.__previousFilename = fn
+        if fn != self._previous_filename:
+            self._previous_filename = fn
             self._update_lexer()
         if self._lexer is None:
             return
@@ -375,7 +375,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 
-    def __set_style(self, style):
+    def _set_style(self, style):
         """ Sets the style to the specified Pygments style.
         """
         if isinstance(style, str):
@@ -383,11 +383,11 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._style = style
         self._clear_caches()
 
-    def __get_style(self):
+    def _get_style(self):
         return self._style
 
     #: gets/sets the **pygments** style.
-    style = property(__get_style, __set_style)
+    style = property(_get_style, _set_style)
 
     def _clear_caches(self):
         """ Clear caches for brushes and formats.
