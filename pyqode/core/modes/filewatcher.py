@@ -115,7 +115,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 self._notify_change()
 
     def _notify(self, settings_val, title, message, dlg_type=None,
-                 expected_type=None, expected_action=None):
+                expected_type=None, expected_action=None):
         """
         Notify user from external event
         """
