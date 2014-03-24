@@ -90,7 +90,7 @@ class AutoCompleteMode(Mode):
             next_char = tc.selectedText()[0]
         except IndexError:
             next_char = ''
-        if txt and next_char == txt:
+        if txt and next_char == txt and next_char in self.MAPPING:
             e.accept()
             tc.clearSelection()
             self.editor.setTextCursor(tc)
