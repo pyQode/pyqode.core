@@ -952,7 +952,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         else:
             # remove last blank line (except one)
             i = 0
-            while True:
+            while self.line_count - i > 0:
                 l = self.line_text(self.line_count - i)
                 if l:
                     break
@@ -1000,8 +1000,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if not self.dirty and not force:
             return True
         self.text_saving.emit(path)
-        if len(self.toPlainText()):
-            self.clean_document()
+        self.clean_document()
         if not path:
             if self.file_path:
                 path = self.file_path
