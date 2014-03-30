@@ -8,9 +8,23 @@ from pyqode.core.api import client
 from pyqode.core.editor import Mode
 from pyqode.core.api.system import DelayJobRunner
 from pyqode.core.api.decoration import TextDecoration
-from pyqode.core.api.constants import CheckerMessages
-from pyqode.core.api.constants import CheckerTriggers
-from pyqode.core.panels.marker import Marker
+from pyqode.core.panels.marker import Marker, MarkerPanel
+
+
+class CheckerMessages:
+    #: Status value for an information message.
+    INFO = 0
+    #: Status value for a warning message.
+    WARNING = 1
+    #: Status value for an error message.
+    ERROR = 2
+
+
+class CheckerTriggers:
+    #: Check is triggered when text has changed.
+    TXT_CHANGED = 0
+    #: Check is triggered when text has been saved.
+    TXT_SAVED = 1
 
 
 class CheckerMessage(object):
@@ -172,10 +186,14 @@ class CheckerMode(Mode, QtCore.QObject):
         for message in messages[0:nb_msg]:
             self._messages.append(message)
             if message.line:
-                if hasattr(self.editor, self._marker_panel_id):
+                try:
+                    marker_panel = self.editor.get_panel(MarkerPanel)
+                except KeyError:
+                    pass
+                else:
                     message.marker = Marker(message.line, message.icon,
                                             message.description)
-                    self.editor.markerPanel.add_marker(message.marker)
+                    marker_panel.add_marker(message.marker)
                 tooltip = None
                 if self._show_tooltip:
                     tooltip = message.description
@@ -198,7 +216,12 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         self._messages.remove(message)
         if message.marker:
-            self.editor.markerPanel.remove_marker(message.marker)
+            try:
+                pnl = self.editor.get_panel(MarkerPanel)
+            except KeyError:
+                pass
+            else:
+                pnl.remove_marker(message.marker)
         if message.decoration:
             self.editor.remove_decoration(message.decoration)
 

@@ -6,7 +6,7 @@ worker.
 This module basically defines the Provider interface and implements
 a simple provider based ib the document words.
 """
-from pyqode.core.api import constants
+from pyqode.core import settings
 
 
 class Provider(object):
@@ -77,6 +77,6 @@ class DocumentWordsProvider(object):
 
     def complete(self, code, line, column, path, encoding, prefix):
         completions = []
-        for w in self.split(code, constants.WORD_SEPARATORS):
+        for w in self.split(code, settings.word_separators):
             completions.append({'name': w})
         return completions

@@ -212,8 +212,7 @@ if __name__ == '__main__':
             self.openFile(__file__)
             self.resize(QtCore.QSize(1000, 600))
             self.installPanel(MarkerPanel())
-            marker = Marker(5, icon=constants.ACTION_GOTO_LINE[0],
-                            description="First marker")
+            marker = Marker(5, description="First marker")
             self.markerPanel.add_marker(marker)
             # add another action in 5s
             QtCore.QTimer.singleShot(1000, self.add_marker)
@@ -221,8 +220,7 @@ if __name__ == '__main__':
         def add_marker(self):
             m = self.markerPanel.marker_for_line(5)
             m.position = 7
-            marker = Marker(15, icon=constants.ACTION_PASTE[0],
-                            description="Second marker")
+            marker = Marker(15, description="Second marker")
             self.markerPanel.add_marker(marker)
             # clear all in 2s
             QtCore.QTimer.singleShot(2000, self.markerPanel.clear_markers)

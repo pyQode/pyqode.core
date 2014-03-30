@@ -5,7 +5,6 @@ This module contains the search and replace panel
 from PyQt4 import QtCore, QtGui
 from pyqode.core import style
 
-from pyqode.core.api import constants
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.editor import Panel
 from pyqode.core.api.system import DelayJobRunner, drift_color
@@ -115,7 +114,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             ("application-exit", "Close", [self.pushButtonClose], []),
         ]
         for theme, name, actions, labels in values:
-            icon = constants.ICONS[name]
+            icon = style.icons[name]
             if use_theme:
                 icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
             else:
@@ -138,7 +137,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self._decorations = []
         self._mutex = QtCore.QMutex()
         self._occurrences = []
-        self._current_occurrence = -1
+        self._current_occurrence_index = -1
         self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -438,13 +437,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def _exec_search(self, text, doc, original_cursor, flags):
         self._mutex.lock()
         self._occurrences[:] = []
-        self._current_occurrence = -1
+        self._current_occurrence_index = -1
         if text:
             matches = 0
             cursor = doc.find(text, 0, flags)
             while not cursor.isNull():
                 if self._compare_cursors(cursor, original_cursor):
-                    self._current_occurrence = matches
+                    self._current_occurrence_index = matches
                 self._occurrences.append((cursor.selectionStart(),
                                           cursor.selectionEnd()))
                 cursor.setPosition(cursor.position() + 1)
@@ -472,7 +471,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             self.editor.add_decoration(deco)
         self.cpt_occurences = len(occurrences)
         if not self.cpt_occurences:
-            self._current_occurrence = -1
+            self._current_occurrence_index = -1
         self._update_label_matches()
         self._update_buttons(txt=self.lineEditReplace.text())
 
@@ -492,7 +491,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     def _current_occurrence(self):
         self._mutex.lock()
-        ret_val = self._current_occurrence
+        ret_val = self._current_occurrence_index
         self._mutex.unlock()
         return ret_val
 
@@ -518,7 +517,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     def _set_current_occurrence(self, cr):
         self._mutex.lock()
-        self._current_occurrence = cr
+        self._current_occurrence_index = cr
         self._mutex.unlock()
 
     @staticmethod

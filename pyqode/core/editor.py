@@ -7,7 +7,6 @@ import weakref
 
 from PyQt4 import QtGui, QtCore
 from pyqode.core import logger, dialogs, settings, style
-from pyqode.core.api import constants
 from pyqode.core.api.client import JsonTcpClient
 from pyqode.core.api.system import DelayJobRunner
 
@@ -682,14 +681,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if not tc:
             tc = self.textCursor()
-        word_separators = constants.WORD_SEPARATORS
+        word_separators = settings.word_separators
         end_pos = start_pos = tc.position()
         while not tc.atStart():
             # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
             tc.movePosition(tc.Left, tc.KeepAnchor, 1)
             try:
                 ch = tc.selectedText()[0]
-                word_separators = constants.WORD_SEPARATORS
+                word_separators = settings.word_separators
                 st = tc.selectedText()
                 if (st in word_separators and (st != "n" and st != "t")
                         or ch.isspace()):
@@ -1538,8 +1537,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def refresh_icons(self, use_theme=True):
         for action in self._actions:
-            if action.text() in constants.ICONS:
-                icon, shortcut, theme = constants.ACTIONS[action.text()]
+            if action.text() in settings.actions:
+                icon, theme = style.icons[action.text()]
                 if use_theme:
                     action.setIcon(QtGui.QIcon.fromTheme(
                         theme, QtGui.QIcon(icon)))
@@ -1588,7 +1587,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         for val in values:
             if val:
                 name, trig_slot, enable_signal = val
-                icon, shortcut, theme = constants.ACTIONS[name]
+                shortcut = settings.actions[name]
+                icon, theme = style.icons[name]
                 a = QtGui.QAction(QtGui.QIcon.fromTheme(
                     theme, QtGui.QIcon(icon)), name, self)
                 a.setShortcut(shortcut)

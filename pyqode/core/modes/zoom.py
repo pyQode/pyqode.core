@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pyqode.core.api import constants
 from pyqode.core.editor import Mode
 from PyQt4 import QtCore
 

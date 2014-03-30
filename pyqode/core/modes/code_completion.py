@@ -4,7 +4,6 @@ This module contains the code completion mode and the related classes.
 """
 import re
 from pyqode.core import settings
-from pyqode.core.api import constants
 from pyqode.core.api import workers
 from pyqode.core.editor import Mode
 from pyqode.core.api.system import DelayJobRunner, memoized
@@ -208,7 +207,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         ret_val = False
         if is_printable and symbols:
             k = event.text()
-            seps = constants.WORD_SEPARATORS
+            seps = settings.word_separators
             ret_val = (k in seps and k not in symbols)
         return ret_val
 
@@ -282,7 +281,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             last_char = l[len(l) - 1]
             if last_char != ' ':
                 symbols = self._trigger_symbols
-                seps = constants.WORD_SEPARATORS
+                seps = settings.word_separators
                 return last_char in seps and last_char not in symbols
             return False
         except IndexError:
