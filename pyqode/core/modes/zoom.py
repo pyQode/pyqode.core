@@ -16,7 +16,7 @@ class ZoomMode(Mode):
     def __init__(self):
         super(ZoomMode, self).__init__()
         self.prev_delta = 0
-        self.default_font_size = constants.FONT_SIZE
+        self.default_font_size = 10
 
     def _on_state_changed(self, state):
         """

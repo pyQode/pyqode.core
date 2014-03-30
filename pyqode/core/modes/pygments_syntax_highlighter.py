@@ -13,7 +13,7 @@ from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core import logger
+from pyqode.core import logger, style
 from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, \
     IndentBasedFoldDetector, CharBasedFoldDetector
 
@@ -213,11 +213,12 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     @property
     def pygments_style(self):
-        return self.editor.style.value("pygmentsStyle")
+        return self._pygments_style
 
     @pygments_style.setter
     def pygments_style(self, value):
-        return self.editor.style.set_value("pygmentsStyle", value)
+        self._pygments_style = value
+        self._update_style()
 
     def __init__(self, document, lexer=None):
         super(PygmentsSyntaxHighlighter, self).__init__(document)
@@ -225,26 +226,22 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
         self._previous_filename = ""
-        self.style = "default"
+        self._pygments_style = style.pygments_style
+        self._brushes = {}
+        self._formats = {}
+        self._init_style()
+
+    def _init_style(self):
+        self._pygments_style = style.pygments_style
+        self._update_style()
 
     def _on_install(self, editor):
         """
         :type editor: pyqode.code.QCodeEdit
         """
         SyntaxHighlighter._on_install(self, editor)
-        self.triggers = ["*", '**', '"', "'", "/"]
         self._clear_caches()
-        self.prev_txt = ""
-        style = editor.style.add_property("pygmentsStyle", "default")
-        self.style = style
-        self.editor.style.set_value(
-            "background",
-            QtGui.QColor(self.style.background_color))
-        c = self.style.style_for_token(Text)['color']
-        if c is None:
-            c = '000000'
-        self.editor.style.set_value(
-            "foreground", QtGui.QColor("#{0}".format(c)))
+        self._update_style()
 
     def _on_state_changed(self, state):
         self.enabled = state
@@ -267,20 +264,9 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def _on_text_saved(self):
         self.rehighlight()
 
-    def _on_style_changed(self, section, key):
-        """ Updates the pygments style """
-        if key == "pygmentsStyle" or not key:
-            self.style = self.editor.style.value(
-                "pygmentsStyle")
-            self.rehighlight()
-            self.editor.style.set_value(
-                "background",
-                QtGui.QColor(self.style.background_color))
-            c = self.style.style_for_token(Text)['color']
-            if c is None:
-                c = '000000'
-            self.editor.style.set_value(
-                "foreground", QtGui.QColor("#{0}".format(c)))
+    def refresh_style(self):
+        self._pygments_style = style.pygments_style
+        self._update_style()
 
     def set_lexer_from_file_name(self, filename):
         """
@@ -305,6 +291,10 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self._lexer = None
 
     def highlight_block(self, text):
+        original_text = text
+        if not self.editor:
+            return
+
         fn = self.editor.file_name
         if fn != self._previous_filename:
             self._previous_filename = fn
@@ -312,17 +302,9 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if self._lexer is None:
             return
 
-        # spaces
-        expression = QRegExp('\s+')
-        index = expression.indexIn(text, 0)
-        while index >= 0:
-            index = expression.pos(0)
-            length = len(expression.cap(0))
-            self.setFormat(index, length, self._get_format(Whitespace))
-            index = expression.indexIn(text, index + length)
-
         if self.enabled is False:
             return
+
         prev_data = self.currentBlock().previous().userData()
 
         if hasattr(prev_data, "syntax_stack"):
@@ -351,29 +333,61 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             # Clean up for the next go-round.
             del self._lexer._saved_state_stack
 
-    def _set_style(self, style):
+        # spaces
+        text = original_text
+        expression = QRegExp('\s+')
+        index = expression.indexIn(text, 0)
+        while index >= 0:
+            index = expression.pos(0)
+            length = len(expression.cap(0))
+            self.setFormat(index, length, self._get_format(Whitespace))
+            index = expression.indexIn(text, index + length)
+
+    def _update_style(self):
         """ Sets the style to the specified Pygments style.
         """
-        if isinstance(style, str):
-            style = get_style_by_name(style)
+        style = get_style_by_name(self._pygments_style)
         self._style = style
         self._clear_caches()
-
-    def _get_style(self):
-        return self._style
-
-    #: gets/sets the **pygments** style.
-    style = property(_get_style, _set_style)
+        # update editor bg and fg from pygments style.
+        fgc = self._style.style_for_token(Text)['color']
+        bgc = self._style.background_color
+        if fgc is None:
+            fgc = QtGui.QColor('#000000')
+        elif isinstance(fgc, str):
+            if not fgc.startswith('#'):
+                fgc = '#%s' % fgc
+            fgc = QtGui.QColor(fgc)
+        if bgc is None:
+            bgc = QtGui.QColor('#ffffff')
+        elif isinstance(bgc, str):
+            if not bgc.startswith('#'):
+                bgc = '#%s' % fgc
+            bgc = QtGui.QColor(bgc)
+        if self.editor:
+            self.editor.background = bgc
+            self.editor.foreground = fgc
+            self.editor._reset_palette()
+            try:
+                m = self.editor.get_mode('CaretLineHighlighterMode')
+            except KeyError:
+                pass
+            else:
+                m.refresh_style()
+        self.rehighlight()
 
     def _clear_caches(self):
         """ Clear caches for brushes and formats.
         """
-        self._brushes = {}
-        self._formats = {}
+        self._brushes.clear()
+        self._formats.clear()
 
     def _get_format(self, token):
         """ Returns a QTextCharFormat for token or None.
         """
+        if token == Whitespace:
+            return style.whitespaces_foreground
+
         if token in self._formats:
             return self._formats[token]
 

@@ -5,40 +5,9 @@ icons, ...)
 """
 import sys
 
-#
-# Default style values
-#
-#: Default editor font (monospace on GNU/Linux, Courier New on windows)
-FONT = "monospace"
-if sys.platform == "win32":
-    FONT = "Consolas"
-elif sys.platform == "darwin":
-    FONT = "Monaco"
-#: Default editor font size
-FONT_SIZE = 10
-# Colors
-EDITOR_BACKGROUND = "#FFFFFF"
-EDITOR_FOREGROUND = "#000000"
-EDITOR_WS_FOREGROUND = "#dddddd"
-SELECTION_BACKGROUND = "#6182F3"
-SELECTION_FOREGROUND = "#ffffff"
-PANEL_BACKGROUND = "#F2F1F0"
-PANEL_FOREGROUND = "#888888"
-PANEL_HIGHLIGHT = "#dddddd"
-CARET_LINE_BACKGROUND = "#E4EDF8"
-SEARCH_OCCURRENCES_BACKGROUND = "#FFFF00"
-SEARCH_OCCURRENCES_FOREGROUND = "#000000"
-
 WORD_SEPARATORS = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
                    '+', '{', '}', '|', ':', '"', "'", "<", ">", "?", ",",
                    ".", "/", ";", '[', ']', '\\', '\n', '\t', '=', '-', ' ']
-
-#
-# Default settings value
-#
-#: Default tab size
-TAB_SIZE = 4
-MARGIN_POS = 80
 
 #
 # Icons

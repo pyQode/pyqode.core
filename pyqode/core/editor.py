@@ -6,10 +6,8 @@ import sys
 import weakref
 
 from PyQt4 import QtGui, QtCore
-
-from pyqode.core import logger, dialogs
+from pyqode.core import logger, dialogs, settings, style
 from pyqode.core.api import constants
-from pyqode.core.api.properties import PropertyRegistry
 from pyqode.core.api.client import JsonTcpClient
 from pyqode.core.api.system import DelayJobRunner
 
@@ -26,8 +24,8 @@ class Mode(object):
 
     Subclasses must/should override the following methods:
         - :meth:`pyqode.core.Mode._on_state_changed`
-        - :meth:`pyqode.core.Mode._on_style_changed`
-        - :meth:`pyqode.core.Mode._on_settings_changed`
+        - :meth:`pyqode.core.Mode.refresh_style`
+        - :meth:`pyqode.core.Mode.refresh_settings`
 
     The mode will be identified by its class name, this means that there cannot
     be two modes of the same type on a QCodeEdit (you have to subclass it)
@@ -90,8 +88,6 @@ class Mode(object):
         """
         self._editor = weakref.ref(editor)
         self.enabled = True
-        editor.style.valueChanged.connect(self._on_style_changed)
-        editor.settings.valueChanged.connect(self._on_settings_changed)
 
     def _on_uninstall(self):
         """
@@ -113,35 +109,15 @@ class Mode(object):
         """
         pass
 
-    def _on_style_changed(self, section, key):
+    def refresh_style(self):
         """
-        Automatically called when a style property changed.
-
-        .. note: If the editor style changed globally, key will be set to an
-                 empty string.
-
-        :param section: The section which contains the property that has
-            changed.
-        :type section: str
-
-        :param key: The property key
-        :type key: str
+        Called by QCodeEdit when the user wants to refresh style options.
         """
         pass
 
-    def _on_settings_changed(self, section, key):
+    def refresh_settings(self):
         """
-        Automatically called when a settings property changed
-
-        .. note: If the editor style changed globally, key will be set to an
-                 empty string.
-
-        :param section: The section which contains the property that has
-            changed.
-        :type section: str
-
-        :param key: The property key
-        :type key: str
+        Called by QCodeEdit when the user wants to refresh settings.
         """
         pass
 
@@ -320,120 +296,108 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def show_whitespaces(self):
         """
         Shows/Hides white spaces highlighting.
-
-        Gets/sets self.settings.value("showWhiteSpaces")
         """
-        return self.settings.value("showWhiteSpaces")
+        return self._show_whitespaces
 
     @show_whitespaces.setter
     def show_whitespaces(self, value):
-        assert isinstance(value, bool)
-        self.settings.set_value("showWhiteSpaces", value)
+        self._show_whitespaces = value
 
     @property
     def save_on_focus_out(self):
         """
         Enables auto save on focus out.
-
-        Gets/sets self.settings.value("saveOnFrameDeactivation")
         """
-        return self.settings.value("saveOnFrameDeactivation")
+        return self._save_on_focus_out
 
     @save_on_focus_out.setter
     def save_on_focus_out(self, value):
-        assert isinstance(value, bool)
-        self.settings.set_value("saveOnFrameDeactivation", value)
+        self._save_on_focus_out = value
 
     @property
     def font_name(self):
         """
         The editor font.
-
-        Gets/sets self.style.value("font")
         """
-        return self.style.value("font")
+        return self._font_family
 
     @font_name.setter
     def font_name(self, value):
-        self.style.set_value("font", value)
+        self._font_family = value
+        self._reset_palette()
 
     @property
     def font_size(self):
         """
         The editor font size.
-
-        Gets/sets self.style.value("fontSize")
         """
-        return self.style.value("fontSize")
+        return self._font_size
 
     @font_size.setter
     def font_size(self, value):
-        self.style.set_value("fontSize", value)
+        self._font_size = value
+        self._reset_palette()
 
     @property
     def background(self):
         """
         The editor background color.
-
-        Gets/sets self.style.value("background")
         """
-        return self.style.value("background")
+        return self._background
 
     @background.setter
     def background(self, value):
-        self.style.set_value("background", value)
+        self._background = value
+        self._reset_palette()
 
     @property
     def foreground(self):
         """
         The editor foreground color.
-
-        Gets/sets self.style.value("foreground")
         """
-        return self.style.value("foreground")
+        return self._foreground
 
     @foreground.setter
     def foreground(self, value):
-        self.style.set_value("foreground", value)
+        self._foreground = value
+        self._reset_palette()
 
     @property
     def whitespaces_foreground(self):
         """
         The editor white spaces' foreground color.
-
-        Gets/sets self.style.value("whiteSpaceForeground")
         """
-        return self.style.value("whiteSpaceForeground")
+        return self._whitespaces_foreground
 
     @whitespaces_foreground.setter
     def whitespaces_foreground(self, value):
-        self.style.set_value("whiteSpaceForeground", value)
+        self._whitespaces_foreground = value
+        # highlighted by syntax highlighter
+        self.rehighlight()
 
     @property
     def selection_background(self):
         """
         The editor selection's background color.
-
-        Gets/sets self.style.value("selectionBackground")
         """
-        return self.style.value("selectionBackground")
+        return self._sel_background
 
     @selection_background.setter
     def selection_background(self, value):
-        self.style.set_value("selectionBackground", value)
+        self._sel_background = value
+        self._reset_palette()
 
     @property
     def selection_foreground(self):
         """
         The editor selection's foreground color.
-
-        Gets/sets self.style.value("selectionForeground")
         """
-        return self.style.value("selectionForeground")
+        return self._sel_foreground
 
     @selection_foreground.setter
     def selection_foreground(self, value):
-        self.style.set_value("selectionForeground", value)
+        self._sel_foreground = value
+        self.rehighlight()
 
     @property
     def current_line_text(self):
@@ -517,32 +481,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :rtype: List of tuple(int, int, QtGui.QTextBlock)
         """
         return self._blocks
-
-    @property
-    def style(self):
-        """
-        Gets/Sets the editor style properties.
-
-        :type: pyqode.core.QPropertyRegistry
-        """
-        return self._style
-
-    @style.setter
-    def style(self, value):
-        self._style.update(value)
-
-    @property
-    def settings(self):
-        """
-        Gets/Sets the editor settings properties.
-
-        :type: pyqode.core.QPropertyRegistry
-        """
-        return self._settings
-
-    @settings.setter
-    def settings(self, value):
-        self._settings.update(value)
 
     @property
     def line_count(self):
@@ -786,6 +724,16 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         tc = self.select_word_under_cursor(True, tc)
         return tc
 
+    def rehighlight(self):
+        """
+        Convenience method that calls rehighlight on the syntax highlighter
+        mode.
+
+        """
+        for mode in self._modes.values():
+            if hasattr('rehighlight', mode):
+                mode.rehighlight()
+
     def detect_encoding(self, data):
         """
         Detects file encoding.
@@ -828,7 +776,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             content = data.decode(encoding)
         if replace_tabs_by_spaces:
             content = content.replace(
-                "\t", " " * self.settings.value("tabLength"))
+                "\t", " " * self._tab_length)
         return content, encoding
 
     def open_file(self, path, replace_tabs_by_spaces=True, encoding=None,
@@ -840,7 +788,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :type path: str
 
         :param replace_tabs_by_spaces: True to replace tabs by spaces
-               (settings.value("tabSpace") * " ")
         :type replace_tabs_by_spaces: bool
 
         :param encoding: The encoding to use. If no encoding is provided and
@@ -1240,7 +1187,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Resets the zoom value.
         """
-        self.style.set_value("fontSize", constants.FONT_SIZE)
+        self._font_size = style.font_size
+        self._reset_palette()
 
     def mark_whole_doc_dirty(self):
         """
@@ -1261,9 +1209,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged.
         """
-        self.style.set_value("fontSize",
-                             self.style.value("fontSize") + increment)
+        self._font_size += increment
         self.mark_whole_doc_dirty()
+        self._reset_palette()
 
     def zoom_out(self, increment=1):
         """
@@ -1275,11 +1223,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged and trigger an update.
         """
-        value = self.style.value("fontSize") - increment
-        if value <= 0:
-            value = increment
-        self.style.set_value("fontSize", value)
+        self._font_size -= increment
+        if self._font_size <= 0:
+            self._font_size = increment
         self.mark_whole_doc_dirty()
+        self._reset_palette()
 
     def line_indent(self):
         """
@@ -1299,7 +1247,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setTextCursor(original_cursor)
         return indentation
 
-    def _show_whitespaces(self, show):
+    def _set_whitespaces_flags(self, show):
         """
         Shows/Hides whitespaces.
 
@@ -1400,7 +1348,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         initial_state = event.isAccepted()
         event.ignore()
-        replace = self.settings.value("useSpacesInsteadOfTab")
+        replace = self._use_spaces_instead_of_tabs
         if replace and event.key() == QtCore.Qt.Key_Tab:
             self.indent()
             event.accept()
@@ -1447,7 +1395,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QApplication.processEvents()
 
     def focusOutEvent(self, event):
-        if self.settings.value("saveOnFrameDeactivation"):
+        if self._save_on_focus_out:
             self.save_to_file()
 
     def mousePressEvent(self, event):
@@ -1545,7 +1493,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self._original_text = txt
         self._modified_lines.clear()
-        self._on_settings_changed("", "")
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -1603,6 +1550,26 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         except AttributeError:
             pass  # panel not installed
 
+    def refresh_settings(self,):
+        """
+        Refresh all settings, every installed mode/panel will be refreshed too.
+
+        """
+        self._init_settings()
+        for m in self._modes.values():
+            m.refresh_settings()
+        for zone in self._panels.values():
+            for panel in zone.values():
+                panel.refresh_settings()
+
+    def refresh_style(self):
+        self._init_style()
+        for m in self._modes.values():
+            m.refresh_style()
+        for zone in self._panels.values():
+            for panel in zone.values():
+                panel.refresh_style()
+
     def _create_default_actions(self):
         values = [
             ("Undo", self.undo, self.undoAvailable),
@@ -1634,34 +1601,39 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 self.add_separator()
 
     def _init_settings(self):
-        """
-        Init the settings PropertyRegistry
-        """
-        self._settings = PropertyRegistry()
-        self.settings.valueChanged.connect(self._on_settings_changed)
-        self.settings.add_property("showWhiteSpaces", False)
-        self.settings.add_property("tabLength", constants.TAB_SIZE)
-        self.settings.add_property("useSpacesInsteadOfTab", True)
-        self.settings.add_property("minIndentColumn", 0)
-        self.settings.add_property("saveOnFrameDeactivation", True)
+        self._show_whitespaces = settings.show_white_spaces
+        self._tab_length = settings.tab_length
+        self._use_spaces_instead_of_tabs = settings.use_spaces_instead_of_tabs
+        self._save_on_focus_out = settings.save_on_focus_out
+        self.setTabStopWidth(self._tab_length *
+                             self.fontMetrics().widthChar(" "))
+        self._set_whitespaces_flags(self._show_whitespaces)
 
     def _init_style(self):
         """
         Init the style PropertyRegistry
         """
-        self._style = PropertyRegistry()
-        self.style.valueChanged.connect(self._reset_palette)
-        self.style.add_property("font", constants.FONT)
-        self.style.add_property("fontSize", constants.FONT_SIZE)
-        self.style.add_property("background", constants.EDITOR_BACKGROUND)
-        self.style.add_property("foreground", constants.EDITOR_FOREGROUND)
-        self.style.add_property("whiteSpaceForeground",
-                                constants.EDITOR_WS_FOREGROUND)
-        self.style.add_property("selectionBackground",
-                                self.palette().highlight().color())
-        self.style.add_property("selectionForeground",
-                                self.palette().highlightedText().color())
-        self._reset_palette("", "")
+        if style.font is None:
+            self._font_family = "monospace"
+            if sys.platform == "win32":
+                self._font_family = "Consolas"
+            elif sys.platform == "darwin":
+                self._font_family = 'Monaco'
+        else:
+            self._font_family = style.font
+        self._font_size = style.font_size
+        self._background = style.background
+        self._foreground = style.foreground
+        self._whitespaces_foreground = style.whitespaces_foreground
+        if style.selection_background is None:
+            self._sel_background = self.palette().highlight().color()
+        else:
+            self._sel_background = style.selection_background
+        if style.selection_foreground is None:
+            self._sel_foreground = self.palette().highlightedText().color()
+        else:
+            self._sel_foreground = style.selection_foreground
+        self._reset_palette()
 
     def _encode_plain_text(self, encoding):
         content = bytes(self.toPlainText().encode(encoding))
@@ -1833,29 +1805,23 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._margin_sizes = (top, left, right, bottom)
         self.setViewportMargins(left, top, right, bottom)
 
-    def _reset_palette(self, section, key):
-        """ Resets stylesheet. """
-        if key == "font" or key == "fontSize" or not key:
-            font = self.style.value("font")
-            self.setFont(QtGui.QFont(font, self.style.value("fontSize")))
-        if (key == "background" or key == "foreground" or
-                key == "selectionBackground" or key == "selectionForeground"
-                or not key):
-            p = self.palette()
-            c = QtGui.QColor(self.style.value("background"))
-            p.setColor(p.Base, c)
-            c = QtGui.QColor(self.style.value("foreground"))
-            p.setColor(p.Text, c)
-            c = QtGui.QColor(self.style.value("selectionBackground"))
-            p.setColor(QtGui.QPalette.Highlight, c)
-            c = QtGui.QColor(self.style.value("selectionForeground"))
-            p.setColor(QtGui.QPalette.HighlightedText, c)
-            self.setPalette(p)
+    def _reset_palette(self):
+        """
+        Resets palette and font.
 
-    def _on_settings_changed(self, section, key):
-        self.setTabStopWidth(int(self.settings.value("tabLength")) *
-                             self.fontMetrics().widthChar(" "))
-        self._show_whitespaces(self.settings.value("showWhiteSpaces"))
+        Sets the following attributes on the palette:
+            - background
+            - foreground
+            - sel background
+            - sel foreground
+        """
+        self.setFont(QtGui.QFont(self._font_family, self._font_size))
+        p = self.palette()
+        p.setColor(p.Base, self._background)
+        p.setColor(p.Text, self._foreground)
+        p.setColor(QtGui.QPalette.Highlight, self._sel_background)
+        p.setColor(QtGui.QPalette.HighlightedText, self._sel_foreground)
+        self.setPalette(p)
 
     def _do_home_key(self, event=None, select=False):
         # get nb char to first significative char

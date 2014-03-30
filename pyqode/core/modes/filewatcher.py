@@ -3,7 +3,7 @@
 Contains the mode that control the external changes of file.
 """
 import os
-from pyqode.core import logger
+from pyqode.core import settings
 from pyqode.core.editor import Mode
 from PyQt4 import QtCore, QtGui
 
@@ -22,12 +22,15 @@ class FileWatcherMode(Mode, QtCore.QObject):
     file_deleted = QtCore.pyqtSignal(object)
 
     @property
-    def auto_reload_changed_files(self):
-        return self.editor.settings.value("autoReloadChangedFiles")
+    def auto_reload(self):
+        """
+        Automatically reloads changed files
+        """
+        return self._auto_reload
 
-    @auto_reload_changed_files.setter
-    def auto_reload_changed_files(self, value):
-        self.editor.settings.set_value("autoReloadChangedFiles", value)
+    @auto_reload.setter
+    def auto_reload(self, value):
+        self._auto_reload = value
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -38,13 +41,10 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._mtime = 0
         self._notification_pending = False
         self._processing = False
+        self.refresh_settings()
 
-    def _on_install(self, editor):
-        """
-        Adds autoReloadChangedFiles settings on install.
-        """
-        Mode._on_install(self, editor)
-        self.editor.settings.add_property("autoReloadChangedFiles", False)
+    def refresh_settings(self):
+        self._auto_reload = settings.file_watcher_auto_reload
 
     def _on_state_changed(self, state):
         """
@@ -97,8 +97,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             else expected_type
         expected_action = (
             lambda *x: None) if not expected_action else expected_action
-        auto = self.editor.settings.value(settings_val)
-        if (auto or QtGui.QMessageBox.question(
+        if (self._auto_reload or QtGui.QMessageBox.question(
                 self.editor, title, message,
                 dlg_type) == expected_type):
             expected_action(self.editor.file_path)

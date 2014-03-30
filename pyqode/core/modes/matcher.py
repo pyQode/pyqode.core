@@ -3,6 +3,7 @@
 This module contains the symbol matcher mode
 """
 from PyQt4 import QtGui, QtCore
+from pyqode.core import style
 
 from pyqode.core.editor import Mode
 from pyqode.core.api.decoration import TextDecoration
@@ -23,35 +24,55 @@ class SymbolMatcherMode(Mode):
 
     @property
     def match_background(self):
-        return self.editor.style.value("matchedBraceBackground")
+        return self._match_background
 
     @match_background.setter
     def match_background(self, value):
-        self.editor.style.set_value("matchedBraceBackground", value)
+        self._match_background = value
+        self._refresh_decorations()
 
     @property
     def match_foreground(self):
-        return self.editor.style.value("matchedBraceForeground")
+        return self._match_foreground
 
     @match_foreground.setter
     def match_foreground(self, value):
-        self.editor.style.set_value("matchedBraceForeground", value)
+        self._match_foreground = value
+        self._refresh_decorations()
+
+    @property
+    def unmatch_background(self):
+        return self._unmatch_background
+
+    @match_background.setter
+    def unmatch_background(self, value):
+        self._unmatch_background = value
+        self._refresh_decorations()
+
+    @property
+    def unmatch_foreground(self):
+        return self._unmatch_foreground
+
+    @match_foreground.setter
+    def unmatch_foreground(self, value):
+        self._unmatch_foreground = value
+        self._refresh_decorations()
+
 
     def __init__(self):
         Mode.__init__(self)
         self._decorations = []
+        self._init_style()
 
-    def _on_install(self, editor):
-        Mode._on_install(self, editor)
-        self.editor.style.add_property("matchedBraceBackground",
-                                       QtGui.QColor("#B4EEB4"))
-        self.editor.style.add_property("matchedBraceForeground",
-                                       QtGui.QColor("#FF0000"))
+    def _init_style(self):
+        self._match_background = style.matching_braces_background
+        self._match_foreground = style.matching_braces_foreground
+        self._unmatch_background = style.not_matching_braces_background
+        self._unmatch_foreground = style.not_matching_brace_foreground
 
-    def _on_style_changed(self, section, key):
-        if not key or key in ["matchedBraceBackground",
-                              "matchedBraceForeground"]:
-            self._refresh_decorations()
+    def refresh_style(self):
+        self._init_style()
+        self._refresh_decorations()
 
     def _clear_decorations(self):
         for d in self._decorations:
@@ -79,17 +100,11 @@ class SymbolMatcherMode(Mode):
         for d in self._decorations:
             self.editor.remove_decoration(d)
             if d.match:
-                # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
-                f = self.editor.style.value("matchedBraceForeground")
-                if f:
-                    d.set_foreground(f)
-                b = self.editor.style.value("matchedBraceBackground")
-                if b:
-                    d.set_background(b)
-                else:
-                    d.set_background(QtGui.QColor("transparent"))
+                d.set_foreground(self._match_foreground)
+                d.set_background(self._match_background)
             else:
-                d.set_foreground(QtCore.Qt.red)
+                d.set_foreground(self._unmatch_foreground)
+                d.set_background(self._unmatch_background)
             self.editor.add_decoration(d)
 
     def _on_state_changed(self, state):
@@ -312,16 +327,11 @@ class SymbolMatcherMode(Mode):
         d.character = cursor.selectedText()
         d.match = match
         if match:
-            # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
-            f = self.editor.style.value("matchedBraceForeground")
-            if f:
-                d.set_foreground(f)
-            b = self.editor.style.value("matchedBraceBackground")
-            if b:
-                d.set_background(b)
+            d.set_foreground(self._match_foreground)
+            d.set_background(self._match_background)
         else:
-            d.set_foreground(QtCore.Qt.red)
-        assert isinstance(cursor, QtGui.QTextCursor)
+            d.set_foreground(self._unmatch_foreground)
+            d.set_background(self._unmatch_background)
         self._decorations.append(d)
         self.editor.add_decoration(d)
         return cursor

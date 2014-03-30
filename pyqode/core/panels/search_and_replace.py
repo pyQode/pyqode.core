@@ -3,6 +3,7 @@
 This module contains the search and replace panel
 """
 from PyQt4 import QtCore, QtGui
+from pyqode.core import style
 
 from pyqode.core.api import constants
 from pyqode.core.api.decoration import TextDecoration
@@ -85,19 +86,21 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     @property
     def background(self):
-        return self.editor.style.value("searchOccurrenceBackground")
+        return self._bg
 
     @background.setter
     def background(self, value):
-        self.editor.style.set_value("searchOccurrenceBackground", value)
+        self._bg = value
+        self._refresh_decorations()
 
     @property
     def foreground(self):
-        return self.editor.style.value("searchOccurrenceForeground")
+        return self._fg
 
     @foreground.setter
     def foreground(self, value):
-        self.editor.set_value("searchOccurrenceForeground", value)
+        self._fg = value
+        self._refresh_decorations()
 
     def refresh_icons(self, use_theme=True):
         values = [
@@ -140,23 +143,22 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
         self.refresh_icons()
+        self._init_style()
+
+    def _init_style(self):
+        self._bg = style.search_occurrence_background
+        self._fg = style.search_occurrence_foreground
 
     def _on_install(self, editor):
         Panel._on_install(self, editor)
         self._reset_stylesheet()
         self.on_pushButtonClose_clicked()
-        self.editor.style.add_property("searchOccurrenceBackground",
-                                       constants.SEARCH_OCCURRENCES_BACKGROUND)
-        self.editor.style.add_property("searchOccurrenceForeground",
-                                       constants.SEARCH_OCCURRENCES_FOREGROUND)
 
-    def _on_style_changed(self, section, key):
-        Panel._on_style_changed(self, section, key)
-        if key in self._KEYS or not key:
-            self._reset_stylesheet()
-        if not key or key in ["searchOccurrenceBackground",
-                              "searchOccurrenceForeground"]:
-            self._refresh_decorations()
+    def refresh_style(self):
+        self._bg = style.search_occurrence_background
+        self._fg = style.search_occurrence_foreground
+        self._reset_stylesheet()
+        self._refresh_decorations()
 
     def _refresh_decorations(self):
         for d in self._decorations:

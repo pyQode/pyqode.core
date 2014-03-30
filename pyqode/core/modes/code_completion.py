@@ -3,6 +3,7 @@
 This module contains the code completion mode and the related classes.
 """
 import re
+from pyqode.core import settings
 from pyqode.core.api import constants
 from pyqode.core.api import workers
 from pyqode.core.editor import Mode
@@ -33,52 +34,43 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     """
     @property
     def trigger_key(self):
-        return self.editor.style.value("triggerKey", section="Code completion")
+        return self._trigger_key
 
     @trigger_key.setter
     def trigger_key(self, value):
-        self.editor.style.set_value(
-            "triggerKey", value, section="Code Completion")
+        self._trigger_key = value
 
     @property
     def trigger_length(self):
-        return self.editor.style.value(
-            "triggerLength", section="Code completion")
+        return self._trigger_len
 
     @trigger_length.setter
     def trigger_length(self, value):
-        self.editor.style.set_value(
-            "triggerLength", value, section="Code completion")
+        self._trigger_len = value
 
     @property
     def trigger_symbols(self):
-        return self.editor.style.value(
-            "triggerSymbols", section="Code completion")
+        return self._trigger_symbols
 
     @trigger_symbols.setter
     def trigger_symbols(self, value):
-        self.editor.style.set_value(
-            "triggerSymbols", value, section="Code completion")
+        self._trigger_symbols = value
 
     @property
     def show_tooltips(self):
-        return self.editor.style.value(
-            "showTooltips", section="Code completion")
+        return self._show_tooltips
 
     @show_tooltips.setter
     def show_tooltips(self, value):
-        self.editor.style.set_value(
-            "showTooltips", value, section="Code completion")
+        self._show_tooltips = value
 
     @property
     def case_sensitive(self):
-        return self.editor.style.value(
-            "caseSensitive", section="Code completion")
+        return self._case_sensitive
 
     @case_sensitive.setter
     def case_sensitive(self, value):
-        self.editor.style.set_value(
-            "caseSensitive", value, section="Code completion")
+        self._case_sensitive = value
 
     @property
     def completion_prefix(self):
@@ -94,15 +86,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 pass
         return prefix.strip()
 
-    def __init__(self, server_port=5000):
-        """
-        :param server_port: Local TCP/IP port to use to start the code
-                            completion server process
-        """
+    def __init__(self):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self._current_completion = ""
-        self._trigger_key = None
         # use to display a waiting cursor if completion provider takes too much
         # time
         self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=1000)
@@ -111,7 +98,17 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._cancel_next = False
         self._request_cnt = 0
         self._last_completion_prefix = ""
-        self._server_port = server_port
+        self._init_settings()
+
+    def _init_settings(self):
+        self._trigger_key = settings.cc_trigger_key
+        self._trigger_len = settings.cc_trigger_len
+        self._trigger_symbols = settings.cc_trigger_symbols
+        self._show_tooltips = settings.cc_show_tooltips
+        self._case_sensitive = settings.cc_case_sensitive
+
+    def refresh_settings(self):
+        self._init_settings()
 
     def request_completion(self):
         """
@@ -140,20 +137,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._on_selected_completion_changed)
         self._completer.setModel(QtGui.QStandardItemModel())
         Mode._on_install(self, editor)
-        self.editor.settings.add_property(
-            "triggerKey", int(QtCore.Qt.Key_Space), section="Code completion")
-        self._trigger_len = self.editor.settings.add_property(
-            "triggerLength", 1, section="Code completion")
-        self.editor.settings.add_property(
-            "triggerSymbols", ["."], section="Code completion")
-        # todo to removed, replaced by trigger symbols
-        self.editor.settings.add_property(
-            "triggerKeys", [int(QtCore.Qt.Key_Period)],
-            section="Code completion")
-        self.editor.settings.add_property("showTooltips", True,
-                                          section="Code completion")
-        self.editor.settings.add_property("caseSensitive", False,
-                                          section="Code completion")
 
     def _on_uninstall(self):
         self._completer = None
@@ -234,8 +217,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
-        symbols = self.editor.settings.value(
-            "triggerSymbols", section="Code completion")
+        symbols = self._trigger_symbols
         is_end_of_word = self._is_end_of_word_char(
             event, is_printable, symbols)
         if self._completer.popup().isVisible():
@@ -269,8 +251,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 # trigger length
                 if not self._completer.popup().isVisible():
                     prefix_len = len(self.completion_prefix)
-                    if prefix_len == self.editor.settings.value(
-                            "triggerLength", section="Code completion"):
+                    if prefix_len == self._trigger_len:
                         logger.debug("CC: Len trigger")
                         self.request_completion()
                         return
@@ -300,8 +281,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             l = tc.selectedText()
             last_char = l[len(l) - 1]
             if last_char != ' ':
-                symbols = self.editor.settings.value(
-                    "triggerSymbols", section="Code completion")
+                symbols = self._trigger_symbols
                 seps = constants.WORD_SEPARATORS
                 return last_char in seps and last_char not in symbols
             return False
@@ -358,8 +338,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if (full_prefix == self._current_completion) and cnt == 1:
             self._hide_popup()
         else:
-            if self.editor.settings.value("caseSensitive",
-                                          section="Code completion"):
+            if self._case_sensitive:
                 self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
             else:
                 self._completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -393,9 +372,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         :return: bool
         """
         val = int(event.modifiers() & QtCore.Qt.ControlModifier)
-        trigger_key = int(self.editor.settings.value(
-            "triggerKey", section="Code completion"))
-        return val and event.key() == trigger_key
+        return val and event.key() == self._trigger_key
 
     @staticmethod
     def strip_control_characters(input):
@@ -452,8 +429,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return cc_model
 
     def _display_completion_tooltip(self, completion):
-        if not self.editor.settings.value("showTooltips",
-                                          section="Code completion"):
+        if not self._show_tooltips:
             return
         if completion not in self._tooltips:
             QtGui.QToolTip.hideText()

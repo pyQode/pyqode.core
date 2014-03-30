@@ -2,10 +2,17 @@
 # -*- coding: utf-8 -*-
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import os
+import sys
+
 from PyQt4 import QtCore, QtGui
+
 from pyqode.core import modes
 from pyqode.core import panels
+from pyqode.core import style
 from pyqode.core.editor import Panel
+from pyqode.core.modes import PygmentsSyntaxHighlighter
+
 from ui.simple_editor_ui import Ui_MainWindow
 
 
@@ -14,11 +21,12 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
-        # configure editor widget
-        self.editor.install_panel(panels.LineNumberPanel(), Panel.Position.LEFT)
+        # add panels
+        self.editor.install_panel(panels.LineNumberPanel(),
+                                  Panel.Position.LEFT)
         self.editor.install_panel(panels.SearchAndReplacePanel(),
-                                 Panel.Position.BOTTOM)
-
+                                  Panel.Position.BOTTOM)
+        # add moes
         self.editor.install_mode(modes.AutoCompleteMode())
         self.editor.install_mode(modes.CaseConverterMode())
         self.editor.install_mode(modes.FileWatcherMode())
@@ -38,30 +46,23 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
         self.actionSave.triggered.connect(self.editor.save_to_file)
-        self.actionOpen.setIcon(
-            QtGui.QIcon.fromTheme("document-open", QtGui.QIcon(
-                ":/example_icons/rc/folder.png")))
-        self.actionSave.setIcon(
-            QtGui.QIcon.fromTheme("document-save", QtGui.QIcon(
-                ":/example_icons/rc/document-save.png")))
-        # edit menu
+
+        # create edit menu
         mnu = QtGui.QMenu("Edit", self.menubar)
         mnu.addActions(self.editor.actions())
         self.menubar.addMenu(mnu)
         self.setupModesMenu()
         self.setupPanelsMenu()
         self.setupStylesMenu()
-        try:
-            self.editor.open_file(__file__, detect_encoding=True)
-        except (OSError, IOError):
-            pass
-        except AttributeError:
-            pass
+
+        # open a this module in the editor
+        self.editor.open_file(__file__, detect_encoding=True)
 
     def setupStylesMenu(self):
         group = QtGui.QActionGroup(self)
-        currentStyle = self.editor.style.value("pygmentsStyle")
-        group.triggered.connect(self.onStyleTriggered)
+        currentStyle = self.editor.get_mode(
+            PygmentsSyntaxHighlighter).pygments_style
+        group.triggered.connect(self.on_style_changed)
         for style in sorted(modes.PYGMENTS_STYLES):
             a = QtGui.QAction(self.menuStyles)
             a.setText(style)
@@ -78,7 +79,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             a.setText(k)
             a.setCheckable(True)
             a.setChecked(True)
-            a.changed.connect(self.onModeCheckStateChanged)
+            a.changed.connect(self.on_mode_state_changed)
             a.mode = v
             self.menuModes.addAction(a)
 
@@ -89,13 +90,14 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
                 a.setText(k)
                 a.setCheckable(True)
                 a.setChecked(True)
-                a.changed.connect(self.onPanelCheckStateChanged)
+                a.changed.connect(self.on_panel_state_changed)
                 a.panel = v
                 self.menuPanels.addAction(a)
 
     @QtCore.pyqtSlot(QtGui.QAction)
-    def onStyleTriggered(self, action):
-        self.editor.style.set_value("pygmentsStyle", action.text())
+    def on_style_changed(self, action):
+        style.pygments_style = action.text()
+        self.editor.refresh_style()
 
     @QtCore.pyqtSlot()
     def on_actionOpen_triggered(self):
@@ -104,27 +106,19 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         if filePath:
             self.editor.open_file(filePath, detect_encoding=True)
 
-    def onPanelCheckStateChanged(self):
+    def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
 
-    def onModeCheckStateChanged(self):
+    def on_mode_state_changed(self):
         action = self.sender()
         action.mode.enabled = action.isChecked()
 
 
 def main():
-    try:
-        import faulthandler
-        faulthandler.enable()
-    except ImportError:
-        pass
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
     win.show()
-    print(win.editor.settings.dumps())
-    print(win.editor.style.dumps())
-    print(app)
     app.exec_()
     # cleanup
     win.editor.stop_server()  # ensure the server is properly closed.

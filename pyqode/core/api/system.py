@@ -105,7 +105,10 @@ def drift_color(base_color, factor=110):
     if base_color.lightness() > 128:
         return base_color.darker(factor)
     else:
-        return base_color.lighter(factor + 10)
+        if base_color == QtGui.QColor('#000000'):
+            return QtGui.QColor('#202020')
+        else:
+            return base_color.lighter(factor + 10)
 
 
 def index_matching(seq, condition):
@@ -139,11 +142,21 @@ def index_by_name(seq, name):
 
 class TextStyle(object):
     """
-    Defines a text style: a color associated with text style options (bold,
-    italic and underline).
+    Helper class to define a text format. This class has methods to set the
+    text style from a string and to easily be created from a string, making
+    serialisation extremely easy.
 
-    This class has methods to set the text style from a string and to easily
-    be created from a string.
+    A text style is made up of a text color and a series of text attributes:
+
+        - bold/nbold
+        - italic/nitalic
+        - underlined/nunderlined.
+
+    Example of usage::
+
+        style = TextStyle('#808000 nbold nitalic nunderlined')
+        print(style)  #should print '#808000 nbold nitalic nunderlined'
+
     """
 
     def __init__(self, style=None):

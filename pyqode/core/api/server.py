@@ -185,6 +185,7 @@ class JsonServer(socketserver.TCPServer):
                 print('sending response: %r' % response)
                 self.send(response)
             except:
+                print('error with data=%r' % data)
                 e1, e2, e3 = sys.exc_info()
                 traceback.print_exception(e1, e2, e3, file=sys.stderr)
 

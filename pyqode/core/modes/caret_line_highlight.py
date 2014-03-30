@@ -3,6 +3,7 @@
 This module contains the care line highlighter mode
 """
 from PyQt4 import QtGui
+from pyqode.core import style
 
 from pyqode.core.api import constants
 from pyqode.core.editor import Mode
@@ -16,17 +17,29 @@ class CaretLineHighlighterMode(Mode):
     """
     @property
     def background(self):
-        return self.editor.style.value("caretLineBackground")
+        return self._color
 
     @background.setter
     def background(self, value):
-        self.editor.style.set_value("caretLineBackground", value)
+        self._color = value
+        self._update_highlight()
 
     def __init__(self):
         Mode.__init__(self)
         self._decoration = None
         self._brush = None
         self._pos = -1
+        self._init_style()
+
+    def _init_style(self):
+        if style.caret_line_background is None:
+            if self.editor:
+                self._color = drift_color(self.editor.background, 110)
+            else:
+                self._color = drift_color(style.background, 110)
+        else:
+            self._color = style.caret_line_background
+        self._brush = QtGui.QBrush(QtGui.QColor(self._color))
 
     def _on_state_changed(self, state):
         """
@@ -47,32 +60,11 @@ class CaretLineHighlighterMode(Mode):
             - caretLineBackground
         """
         Mode._on_install(self, editor)
-        color = self.editor.style.add_property(
-            "caretLineBackground",
-            drift_color(constants.EDITOR_BACKGROUND, 110))
-        self._brush = QtGui.QBrush(QtGui.QColor(color))
         self._update_highlight()
 
-    def _on_style_changed(self, section, key):
-        """
-        Changes the highlight brush color and refresh highlighting
-        """
-        if key == "caretLineBackground":
-            self._brush = QtGui.QBrush(
-                self.editor.style.value("caretLineBackground"))
-            self._update_highlight()
-        if not key or key == "background":
-            b = self.editor.style.value("background")
-            factor = 104
-            if b.lightness() < 128:
-                factor = 150
-            if b.lightness() == 0:
-                b = QtGui.QColor("#101010")
-            self._brush = QtGui.QBrush(
-                self.editor.style.value("caretLineBackground"))
-            self._update_highlight()
-            self.editor.style.set_value("caretLineBackground",
-                                        drift_color(b, factor))
+    def refresh_style(self):
+        self._init_style()
+        self._update_highlight()
 
     def _clear_deco(self):
         if self._decoration:

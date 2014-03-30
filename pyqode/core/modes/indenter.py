@@ -2,6 +2,7 @@
 """
 Contains the default indenter.
 """
+from pyqode.core import settings
 from pyqode.core.editor import Mode
 from PyQt4 import QtGui
 
@@ -28,8 +29,8 @@ class IndenterMode(Mode):
 
     def indent_selection(self, cursor):
         doc = self.editor.document()
-        min_indent = self.editor.settings.value("minIndentColumn")
-        tab_len = self.editor.settings.value("tabLength")
+        min_indent = settings.min_indent_column
+        tab_len = settings.tab_length
         cursor.beginEditBlock()
         nb_lines = len(cursor.selection().toPlainText().splitlines())
         if nb_lines == 0:
@@ -52,8 +53,8 @@ class IndenterMode(Mode):
 
     def unindent_selection(self, cursor):
         doc = self.editor.document()
-        min_indent = self.editor.settings.value("minIndentColumn")
-        tab_len = self.editor.settings.value("tabLength")
+        min_indent = settings.min_indent_column
+        tab_len = settings.tab_length
         cursor.beginEditBlock()
         if not cursor.hasSelection():
             cursor.select(cursor.LineUnderCursor)
@@ -85,7 +86,7 @@ class IndenterMode(Mode):
         if cursor.hasSelection():
             self.indent_selection(cursor)
         else:
-            tab_len = self.editor.settings.value("tabLength")
+            tab_len = settings.tab_length
             cursor.beginEditBlock()
             cursor.insertText(tab_len * " ")
             cursor.endEditBlock()
@@ -99,7 +100,7 @@ class IndenterMode(Mode):
         if cursor.hasSelection():
             self.unindent_selection(cursor)
         else:
-            tab_len = self.editor.settings.value("tabLength")
+            tab_len = settings.tab_length
             cursor.beginEditBlock()
             # count the number of spaces deletable, stop at tab len
             spaces = 0

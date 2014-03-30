@@ -2,9 +2,9 @@
 """
 This module contains the right margin mode.
 """
+from pyqode.core import settings, style
 from pyqode.core.editor import Mode
 from PyQt4 import QtGui
-from pyqode.core.api import constants
 
 
 class RightMarginMode(Mode):
@@ -14,53 +14,45 @@ class RightMarginMode(Mode):
     """
     @property
     def color(self):
-        return self.editor.style.value("margin")
+        return self._color
 
     @color.setter
     def color(self, value):
-        return self.editor.style.set_value("margin", value)
+        self._color = value
+        self._pen = QtGui.QPen(self._color)
+        self.editor.mark_whole_doc_dirty()
+        self.editor.repaint()
 
     @property
     def position(self):
-        return self.editor.style.value("rightMarginPos")
+        return self._margin_pos
 
     @position.setter
     def position(self, value):
-        return self.editor.style.set_value("rightMarginPos", value)
+        self._margin_pos = value
 
     def __init__(self):
         Mode.__init__(self)
-        self._margin_pos = constants.MARGIN_POS
         self._pen = QtGui.QPen()
+        self._init_settings()
+        self._init_style()
 
-    def _on_install(self, editor):
-        """
-        Installs the mode on the editor and setup drawing tools
+    def _init_settings(self):
+        self._margin_pos = settings.right_margin_pos
 
-        :param editor: The editor instance
-        """
-        Mode._on_install(self, editor)
-        color = self.editor.style.add_property("margin", "#FF0000")
-        self._pen = QtGui.QPen(QtGui.QColor(color))
-        self._margin_pos = self.editor.settings.add_property(
-            "rightMarginPos", "80")
+    def _init_style(self):
+        self._color = style.right_margin_color
+        self._pen = QtGui.QPen(self._color)
 
-    def _on_settings_changed(self, section, key):
-        if key == "rightMarginPos" or not key:
-            self._margin_pos = self.editor.settings.value("rightMarginPos")
+    def refresh_settings(self):
+        self._init_settings()
+        self.editor.repaint()
 
-    def _on_style_changed(self, section, key):
-        """
-        Changes the margin color
-
-        :param section:
-        :param key:
-        :param value:
-        """
-        if key == "margin" or not key:
-            self._pen = self.editor.style.value("margin")
-            self.editor.mark_whole_doc_dirty()
-            self.editor.repaint()
+    def refresh_style(self):
+        self._init_style()
+        self._pen = QtGui.QPen(self._color)
+        self.editor.mark_whole_doc_dirty()
+        self.editor.repaint()
 
     def _on_state_changed(self, state):
         """
