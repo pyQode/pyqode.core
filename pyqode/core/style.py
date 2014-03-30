@@ -174,10 +174,9 @@ search_occurrence_foreground = QColor('black')
 Foreground color of search occurences. Default is yellow.
 """
 
-
-#-----------------
+# ----------------
 # Icons
-#-----------------
+# ----------------
 icons = {
     # QCodeEdit
     "Undo": (":/pyqode-icons/rc/edit-undo.png", "edit-undo"),
@@ -187,7 +186,8 @@ icons = {
     "Paste": (":/pyqode-icons/rc/edit-paste.png", "edit-paste"),
     "Delete": (":/pyqode-icons/rc/edit-delete.png", "edit-delete"),
     "Select all": (":/pyqode-icons/rc/edit-select-all.png", "edit-select-all"),
-    "Indent": (":/pyqode-icons/rc/format-indent-more.png", "format-indent-more"),
+    "Indent": (":/pyqode-icons/rc/format-indent-more.png",
+               "format-indent-more"),
     "Un-indent": (":/pyqode-icons/rc/format-indent-less.png",
                   "format-indent-less"),
     "Go to line": (":/pyqode-icons/rc/goto-line.png", "start-here"),

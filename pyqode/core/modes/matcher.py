@@ -58,7 +58,6 @@ class SymbolMatcherMode(Mode):
         self._unmatch_foreground = value
         self._refresh_decorations()
 
-
     def __init__(self):
         Mode.__init__(self)
         self._decorations = []
