@@ -3,7 +3,7 @@
 """
 Setup script for pyqode.core
 """
-from setuptools imporst setup, find_packages
+from setuptools import setup, find_packages
 
 
 def read_version():
