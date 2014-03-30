@@ -110,7 +110,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def onModeCheckStateChanged(self):
         action = self.sender()
-        action.get_mode.enabled = action.isChecked()
+        action.mode.enabled = action.isChecked()
 
 
 def main():
