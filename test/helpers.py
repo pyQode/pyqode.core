@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 A helper module for testing, introducing some helper functions. Inspired by
 the jedi helper module for their testing package
