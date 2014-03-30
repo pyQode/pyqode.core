@@ -1017,15 +1017,17 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             m._on_uninstall()
             return self._modes.pop(name, None)
 
-    def get_mode(self, name):
+    def get_mode(self, name_or_klass):
         """
         Gets a mode by name.
 
-        :param name: The name of the mode to get
-        :type name: str
+        :param name_or_klass: The name or the class of the mode to get
+        :type name_or_klass: str or type
         :rtype: pyqode.core.editor.Mode
         """
-        return self._modes[name]
+        if not isinstance(name_or_klass, str):
+            name_or_klass = name_or_klass.__name__
+        return self._modes[name_or_klass]
 
     def get_modes(self):
         """
@@ -1067,17 +1069,19 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             p._on_uninstall()
             return self._panels[zone].pop(name, None)
 
-    def get_panel(self, name, get_zone=False):
+    def get_panel(self, name_or_klass, get_zone=False):
         """
         Gets a panel by name
 
-        :param name: Name of the panel to get
+        :param name_or_klass: Name or class of the panel to get
         :param get_zone: True to also return the zone in which the panel has
             been installed.
         """
+        if not isinstance(name_or_klass, str):
+            name_or_klass = name_or_klass.__name__
         for i in range(4):
             try:
-                panel = self._panels[i][name]
+                panel = self._panels[i][name_or_klass]
             except KeyError:
                 pass
             else:
