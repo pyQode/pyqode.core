@@ -312,7 +312,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if self._lexer is None:
             return
 
-        #Spaces
+        # spaces
         expression = QRegExp('\s+')
         index = expression.indexIn(text, 0)
         while index >= 0:

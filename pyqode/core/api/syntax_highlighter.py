@@ -121,14 +121,14 @@ class CharBasedFoldDetector(FoldDetector):
                 return usd.fold_indent + 1
             else:
                 # fold start
-                if self._start in txt and not self._end in txt:
+                if self._start in txt and self._end not in txt:
                     stext = txt.strip()
                     if not stext.startswith(self._start):
                         return usd.fold_indent + 1
                     else:
                         return usd.fold_indent
                 # fold end
-                elif self._end in txt and not self._start in txt:
+                elif self._end in txt and self._start not in txt:
                     usd = pb.userData()
                     return usd.fold_indent - 1
                 else:

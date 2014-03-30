@@ -226,7 +226,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if is_printable and symbols:
             k = event.text()
             seps = constants.WORD_SEPARATORS
-            ret_val = (k in seps and not k in symbols)
+            ret_val = (k in seps and k not in symbols)
         return ret_val
 
     def _on_key_released(self, event):
@@ -303,7 +303,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 symbols = self.editor.settings.value(
                     "triggerSymbols", section="Code completion")
                 seps = constants.WORD_SEPARATORS
-                return last_char in seps and not last_char in symbols
+                return last_char in seps and last_char not in symbols
             return False
         except IndexError:
             return False
@@ -439,8 +439,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if not name:
                 continue
             # skip redundant completion
-            if name != self.completion_prefix and \
-                    not name in displayed_texts:
+            if name != self.completion_prefix and name not in displayed_texts:
                 displayed_texts.append(name)
                 item = QtGui.QStandardItem()
                 item.setData(name, QtCore.Qt.DisplayRole)
@@ -456,7 +455,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not self.editor.settings.value("showTooltips",
                                           section="Code completion"):
             return
-        if not completion in self._tooltips:
+        if completion not in self._tooltips:
             QtGui.QToolTip.hideText()
             return
         if completion in self._tooltips:

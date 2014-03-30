@@ -91,7 +91,7 @@ class ServerProcess(QtCore.QProcess):
     def _on_process_error(self, error):
         if not self.running:
             return
-        if not error in PROCESS_ERROR_STRING:
+        if error not in PROCESS_ERROR_STRING:
             error = -1
         try:
             self._test_not_deleted
@@ -150,6 +150,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.is_connected = False
         self._process = None
         self._connection_attempts = 0
+        self._port = -1
 
     def _terminate_server_process(self):
         if self._process and self._process.running:
@@ -270,7 +271,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.is_connected = True
 
     def _on_error(self, socket_error):
-        if not socket_error in SOCKET_ERROR_STRINGS:
+        if socket_error not in SOCKET_ERROR_STRINGS:
             socket_error = -1
         self._cli_logger.error('socket error %d: %s' % (socket_error,
                                SOCKET_ERROR_STRINGS[socket_error]))
@@ -288,8 +289,9 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             self._cli_logger.debug('disconnected from server: %s:%d' %
                                    (self.peerName(), self.peerPort()))
         except (AttributeError, RuntimeError):
-            pass   # logger might be None if for some reason qt deletes the
-                   # socket after python global exit
+            # logger might be None if for some reason qt deletes the socket
+            # after python global exit
+            pass
         self.is_connected = False
 
     def _on_ready_read(self):
@@ -303,7 +305,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                     self._header_buf = bytes()
             else:
                 self._data_buf += self.read(self._to_read)
-                self._to_read = self._to_read - len(self._data_buf)
+                self._to_read -= len(self._data_buf)
                 if self._to_read == 0:
                     data = self._data_buf.decode('utf-8')
                     obj = json.loads(data)
@@ -325,7 +327,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
 # Usage example
 if __name__ == "__main__":
-    import logging
     logging.basicConfig(level=logging.DEBUG)
     from pyqode.core.api import server, workers
 
@@ -336,10 +337,10 @@ if __name__ == "__main__":
                              'column': 8,
                              'encoding': 'utf-8',
                              'path': '/a/path/to/a/file'},
-                            on_receive=callback)
+                            on_receive=my_callback)
         QtCore.QTimer.singleShot(500, send_request)
 
-    def callback(status, results):
+    def my_callback(status, results):
         logging.debug('Yeah I got results from the server: '
                       '(status=%r, results=%r)' % (status, results))
 

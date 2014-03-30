@@ -133,8 +133,8 @@ class SymbolMatcherMode(Mode):
             if current_block.isValid():
                 return self.match_left_parenthesis(current_block, 0, cpt)
             return False
-        except RuntimeError:  # recursion limit exceeded when working with
-                              # big files
+        except RuntimeError:
+            # recursion limit exceeded when working with big files
             return False
 
     def match_right_parenthesis(self, current_block, i, nb_right_paren):

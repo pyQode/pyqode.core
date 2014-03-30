@@ -8,10 +8,6 @@ Installation:
 run designer.py (Qt Designer must be installed on your system and must be
 in your path on Windows, pyqode-core must be installed)
 """
-# This only works with PyQt, PySide does not support the QtDesigner module
-import os
-if not 'QT_API' in os.environ:
-    os.environ.setdefault("QT_API", "PyQt")
 import pyqode.core.editor
 
 # Define this mapping to help the PySide's form builder create the correct

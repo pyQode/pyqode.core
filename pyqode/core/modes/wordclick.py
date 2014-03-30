@@ -61,7 +61,6 @@ class WordClickMode(Mode, QtCore.QObject):
                 self.word_clicked.emit(tc)
 
     def _add_decoration(self, tc):
-        #assert self._deco is None
         if self._deco is None:
             if tc.selectedText():
                 self._deco = TextDecoration(tc)
