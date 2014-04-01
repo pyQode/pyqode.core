@@ -14,6 +14,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from pyqode.core.editor import QCodeEdit
 from pyqode.core import client
+from pyqode.core._internal.client import JsonTcpClient
 from pyqode.core import workers
 from .helpers import cwd_at
 from .helpers import require_python2
@@ -73,7 +74,7 @@ def test_client_server():
     global client_socket
     app = QtGui.QApplication(sys.argv)
     win = QtGui.QMainWindow()
-    client_socket = client.JsonTcpClient(win)
+    client_socket = JsonTcpClient(win)
     with pytest.raises(client.NotConnectedError):
         client_socket.request_work(workers.echo, 'some data',
                                    on_receive=on_receive)
@@ -97,7 +98,7 @@ def test_client_server_py2():
     global client_socket
     app = QtGui.QApplication(sys.argv)
     win = QtGui.QMainWindow()
-    client_socket = client.JsonTcpClient(win)
+    client_socket = JsonTcpClient(win)
     with pytest.raises(client.NotConnectedError):
         client_socket.request_work(workers.echo, 'some data',
                                    on_receive=on_receive)
