@@ -464,7 +464,7 @@ class DelayJobRunner(JobRunner):
 if __name__ == '__main__':
     import time
     from pyqode.core.editor import QCodeEdit
-    from pyqode.core.api.decoration import TextDecoration
+    from pyqode.core.decoration import TextDecoration
 
     class Example(QCodeEdit):
 

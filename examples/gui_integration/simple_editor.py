@@ -7,11 +7,10 @@ import sys
 
 from PyQt4 import QtCore, QtGui
 
+from pyqode.core import client
 from pyqode.core import modes
 from pyqode.core import panels
 from pyqode.core import style
-from pyqode.core.editor import Panel
-from pyqode.core.modes import PygmentsSyntaxHighlighter
 
 from ui.simple_editor_ui import Ui_MainWindow
 
@@ -22,11 +21,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         # add panels
-        self.editor.install_panel(panels.LineNumberPanel(),
-                                  Panel.Position.LEFT)
+        self.editor.install_panel(panels.LineNumberPanel())
         self.editor.install_panel(panels.SearchAndReplacePanel(),
-                                  Panel.Position.BOTTOM)
-        # add moes
+                                  panels.SearchAndReplacePanel.Position.BOTTOM)
+        # add modes
         self.editor.install_mode(modes.AutoCompleteMode())
         self.editor.install_mode(modes.CaseConverterMode())
         self.editor.install_mode(modes.FileWatcherMode())
@@ -40,8 +38,8 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.editor.install_mode(modes.IndenterMode())
         self.editor.install_mode(modes.SymbolMatcherMode())
 
-        # start pyqode server
-        self.editor.start_server('../server.py')
+        # start pyqode server for our code editor widget
+        client.start_server(self.editor, '../server.py')
 
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
@@ -61,7 +59,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def setupStylesMenu(self):
         group = QtGui.QActionGroup(self)
         currentStyle = self.editor.get_mode(
-            PygmentsSyntaxHighlighter).pygments_style
+            modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
         for style in sorted(modes.PYGMENTS_STYLES):
             a = QtGui.QAction(self.menuStyles)
@@ -121,7 +119,7 @@ def main():
     win.show()
     app.exec_()
     # cleanup
-    win.editor.stop_server()  # ensure the server is properly closed.
+    client.stop_server(win.editor)  # ensure the server is properly closed.
     del win
     del app
 

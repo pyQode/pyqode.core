@@ -14,7 +14,7 @@ from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 from pyqode.core import logger, style
-from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, \
+from pyqode.core.syntax_highlighter import SyntaxHighlighter, \
     IndentBasedFoldDetector, CharBasedFoldDetector
 
 

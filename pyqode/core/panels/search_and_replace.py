@@ -5,10 +5,10 @@ This module contains the search and replace panel
 from PyQt4 import QtCore, QtGui
 from pyqode.core import style
 
-from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.decoration import TextDecoration
 from pyqode.core.editor import Panel
-from pyqode.core.api.system import DelayJobRunner, drift_color
-from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
+from pyqode.core.utils import DelayJobRunner, drift_color
+from pyqode.core._internal.ui.search_panel_ui import Ui_SearchPanel
 
 
 class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):

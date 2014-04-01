@@ -10,8 +10,7 @@ the whitespaces.
 """
 import sys
 from PyQt4 import QtGui
-from pyqode.core import settings
-from pyqode.core import style
+from pyqode.core import settings, style
 from pyqode.core.editor import QCodeEdit
 from pyqode.core.modes import PygmentsSyntaxHighlighter
 from pyqode.core.modes import CaretLineHighlighterMode

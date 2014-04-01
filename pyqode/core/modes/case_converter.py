@@ -5,7 +5,7 @@ Contains a case converter mode.
 import sys
 from PyQt4 import QtCore, QtGui
 from pyqode.core.editor import Mode
-from pyqode.core.api import system
+from pyqode.core import utils
 
 
 class CaseConverterMode(Mode):
@@ -20,13 +20,13 @@ class CaseConverterMode(Mode):
         Mode.__init__(self)
         self._actions_created = False
 
-    @system.keep_tc_pos
+    @utils.keep_tc_pos
     def to_lower(self, *args):
         tc = self.editor.textCursor()
         tc.insertText(tc.selectedText().lower())
         self.editor.setTextCursor(tc)
 
-    @system.keep_tc_pos
+    @utils.keep_tc_pos
     def to_upper(self, *args):
         tc = self.editor.textCursor()
         tc.insertText(tc.selectedText().upper())

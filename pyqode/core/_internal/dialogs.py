@@ -3,7 +3,7 @@
 Contains pyqode dialogs windows.
 """
 from PyQt4 import QtGui
-from pyqode.core.ui import dlg_goto_line_ui
+from pyqode.core._internal.ui import dlg_goto_line_ui
 
 
 class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):

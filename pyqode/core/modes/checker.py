@@ -3,11 +3,11 @@
 This module contains the checker mode, a base class for code checker modes.
 """
 from PyQt4 import QtCore, QtGui
-from pyqode.core.api import client
+from pyqode.core import client
 
 from pyqode.core.editor import Mode
-from pyqode.core.api.system import DelayJobRunner
-from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.utils import DelayJobRunner
+from pyqode.core.decoration import TextDecoration
 from pyqode.core.panels.marker import Marker, MarkerPanel
 
 
@@ -266,7 +266,7 @@ class CheckerMode(Mode, QtCore.QObject):
             'encoding': self.editor.file_encoding
         }
         try:
-            self.editor.request_work(self._worker, request_data,
-                                     on_receive=self._on_work_finished)
+            client.request_work(self.editor, self._worker, request_data,
+                                on_receive=self._on_work_finished)
         except client.NotConnectedError:
             QtCore.QTimer.singleShot(2000, self._request)

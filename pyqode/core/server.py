@@ -23,13 +23,13 @@ For a request, the object will contains the following fields:
 
   - 'request_id': uuid generated client side
   - 'worker': fully qualified name to the worker callable (class or function),
-    e.g. 'pyqode.core.api.server.echo'
+    e.g. 'pyqode.core.server.echo'
   - 'data': data specific to the chose worker.
 
 E.g::
 
     {
-        'worker': 'pyqode.core.api.workers.echo',
+        'worker': 'pyqode.core.workers.echo',
         'request_id': 'a97285af-cc88-48a4-ac69-7459b9c7fa66',
         'data': ('some code', 0)
     }
@@ -64,7 +64,7 @@ linux using setup.py and will be frozen on windows using cx_Freeze.
 Here is the most simple and basic example of a server script:
 
 .. code-block: python
-    from pyqode.core.api import server
+    from pyqode.core import server
 
     if __name__ == '__main__':
         server.run()
@@ -193,7 +193,7 @@ class JsonServer(socketserver.TCPServer):
         """
         :param args: Argument parser args. If None, the server will setup and
             use its own argument parser (using
-            :meth:`pyqode.core.api.server.default_parser`)
+            :meth:`pyqode.core.server.default_parser`)
         """
         if not args:
             args = default_parser().parse_args()

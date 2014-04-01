@@ -2,7 +2,7 @@
 from PyQt4 import QtCore, QtGui
 
 from pyqode.core.editor import Mode
-from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.decoration import TextDecoration
 
 
 class WordClickMode(Mode, QtCore.QObject):

@@ -6,8 +6,8 @@ from PyQt4 import QtGui
 from pyqode.core import style
 
 from pyqode.core.editor import Mode
-from pyqode.core.api.decoration import TextDecoration
-from pyqode.core.api.system import drift_color
+from pyqode.core.decoration import TextDecoration
+from pyqode.core.utils import drift_color
 
 
 class CaretLineHighlighterMode(Mode):

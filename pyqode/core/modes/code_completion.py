@@ -4,9 +4,10 @@ This module contains the code completion mode and the related classes.
 """
 import re
 from pyqode.core import settings
-from pyqode.core.api import workers
+from pyqode.core import client
+from pyqode.core import workers
 from pyqode.core.editor import Mode
-from pyqode.core.api.system import DelayJobRunner, memoized
+from pyqode.core.utils import DelayJobRunner, memoized
 from PyQt4 import QtGui, QtCore
 from pyqode.core import logger
 
@@ -451,6 +452,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,
                 'prefix': completion_prefix}
-        self.editor.request_work(workers.CodeCompletion, args=data,
-                                 on_receive=self._on_results_available)
-        self._set_wait_cursor()
+        try:
+            client.request_work(self.editor,
+                                workers.CodeCompletion, args=data,
+                                on_receive=self._on_results_available)
+        except client.NotConnectedError:
+            pass
+        else:
+            self._set_wait_cursor()

@@ -4,10 +4,10 @@ This module contains the symbol matcher mode
 """
 from PyQt4 import QtGui, QtCore
 from pyqode.core import style
+from pyqode.core.syntax_highlighter import TextBlockUserData
 
 from pyqode.core.editor import Mode
-from pyqode.core.api.decoration import TextDecoration
-from pyqode.core.api.textblockuserdata import TextBlockUserData
+from pyqode.core.decoration import TextDecoration
 
 
 class SymbolMatcherMode(Mode):

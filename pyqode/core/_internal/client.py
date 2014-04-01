@@ -18,7 +18,10 @@ import socket
 import struct
 import sys
 import uuid
+
 from PyQt4 import QtCore, QtNetwork, QtGui
+
+from pyqode.core import client
 
 
 #: Maps QAbstractSocket::SocketError to string to easily get descriptive error
@@ -55,16 +58,6 @@ PROCESS_ERROR_STRING = {
     5: 'an unknown error occurred. This is the default return value of '
        'error().'
 }
-
-
-class NotConnectedError(Exception):
-    """
-    Raised if the client is not connected to the server when an operation is
-    requested.
-    """
-    def __init__(self):
-        super(NotConnectedError, self).__init__(
-            'Client socket not connected or server not started')
 
 
 class ServerProcess(QtCore.QProcess):
@@ -175,7 +168,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         on local host (the port number is defined by command line args).
 
         The server is a python script that starts a
-        :class:`pyqode.core.api.server.JsonServer`. You (the user) must write
+        :class:`pyqode.core.server.JsonServer`. You (the user) must write
         the server script so that you can apply your own configuration
         server side.
 
@@ -221,11 +214,12 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
 
-        :raise:
+        :raise: pyqode.core.client.NotCOnnectedError if the server cannot
+            be reached.
         """
         if not self._process or not self._process.running or \
                 not self.is_connected:
-            raise NotConnectedError()
+            raise client.NotConnectedError()
         classname = '%s.%s' % (worker_class_or_function.__module__,
                                worker_class_or_function.__name__)
         request_id = str(uuid.uuid4())
@@ -328,16 +322,16 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 # Usage example
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    from pyqode.core.api import server, workers
+    from pyqode.core import server, workers
 
     def send_request():
-        client.request_work(workers.echo,
-                            {'code': 'print("Python is nice")',
-                             'line': 1,
-                             'column': 8,
-                             'encoding': 'utf-8',
-                             'path': '/a/path/to/a/file'},
-                            on_receive=my_callback)
+        cli.request_work(workers.echo,
+                         {'code': 'print("Python is nice")',
+                          'line': 1,
+                          'column': 8,
+                          'encoding': 'utf-8',
+                          'path': '/a/path/to/a/file'},
+                          on_receive=my_callback)
         QtCore.QTimer.singleShot(500, send_request)
 
     def my_callback(status, results):
@@ -346,9 +340,9 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QPlainTextEdit()
-    client = JsonTcpClient(window)
-    client.start(server.__file__, 'python')
-    client.connected.connect(send_request)
+    cli = JsonTcpClient(window)
+    cli.start(server.__file__, 'python')
+    cli.connected.connect(send_request)
     window.show()
     app.exec_()
-    client.close()
+    cli.close()

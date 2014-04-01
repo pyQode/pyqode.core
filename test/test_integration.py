@@ -13,8 +13,8 @@ if sys.version_info[0] == 2:
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from pyqode.core.editor import QCodeEdit
-from pyqode.core.api import client
-from pyqode.core.api import workers
+from pyqode.core import client
+from pyqode.core import workers
 from .helpers import cwd_at
 from .helpers import require_python2
 from .helpers import python2_path

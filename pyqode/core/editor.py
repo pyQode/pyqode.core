@@ -6,9 +6,10 @@ import sys
 import weakref
 
 from PyQt4 import QtGui, QtCore
-from pyqode.core import logger, dialogs, settings, style
-from pyqode.core.api.client import JsonTcpClient
-from pyqode.core.api.system import DelayJobRunner
+from pyqode.core import logger, settings, style, text
+from pyqode.core._internal import dialogs
+from pyqode.core._internal.client import JsonTcpClient
+from pyqode.core.utils import DelayJobRunner
 
 
 class Mode(object):
@@ -32,9 +33,11 @@ class Mode(object):
     @property
     def editor(self):
         """
-        Provides easy access to the CodeEditorWidget weakref. **READ ONLY**
+        Provides easy access to the parent editor widget (weakref)
 
-        :type: pyqode.core.QCodeEdit
+        **READ ONLY**
+
+        :type: pyqode.core.editor.QCodeEdit
         """
         if self._editor is not None:
             return self._editor()
@@ -301,6 +304,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @show_whitespaces.setter
     def show_whitespaces(self, value):
         self._show_whitespaces = value
+        self._set_whitespaces_flags(value)
 
     @property
     def save_on_focus_out(self):
@@ -479,7 +483,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :return: A list of tuple(top position, line number, block)
         :rtype: List of tuple(int, int, QtGui.QTextBlock)
         """
-        return self._blocks
+        return self._visible_blocks
 
     @property
     def line_count(self):
@@ -495,54 +499,40 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                                      Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
-        self.client = None
+        self._client = JsonTcpClient(self)
         self._last_mouse_pos = None
         self._cached_cursor_pos = (-1, -1)
         self._modified_lines = set()
         self._cleaning = False
         self._margin_sizes = (0, 0, 0, 0)
         self.top = self.left = self.right = self.bottom = -1
-        self.setCenterOnScroll(True)
-
-        #: The list of visible blocks, update every paintEvent
-        self._blocks = []
-
+        self._visible_blocks = []
+        self._extra_selections = []
         self._parenthesis_selections = []
-
         self._tooltips_runner = DelayJobRunner(
             self, nb_threads_max=1, delay=700)
         self._prev_tooltip_block_nbr = -1
-
-        #: The list of actions, (none is a separator)
-        self._actions = []
-        if create_default_actions:
-            self._create_default_actions()
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.show_context_menu)
-
-        # panels and modes
+        self._fpath = None
+        self._fencoding = None
+        self._original_text = ""
         self._modes = {}
         self._panels = {Panel.Position.TOP: {},
                         Panel.Position.LEFT: {},
                         Panel.Position.RIGHT: {},
                         Panel.Position.BOTTOM: {}}
-
-        #: Path of the current file
-        self._fpath = None
-        #: Encoding of the current file
-        self._fencoding = None
-        #: Original text, used to compute the control flag
-        self._original_text = ""
-
-        #: Dirty flag; tells if the widget text content is different from the
-        #: file content
         self._dirty = False
 
+        # setup context menu
+        self._actions = []
+        if create_default_actions:
+            self._create_default_actions()
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_context_menu)
+        self._mnu = None  # bug with PySide (github #63)
+
+        # init settings and styles from global settings/style modules
         self._init_settings()
         self._init_style()
-
-        #: The list of active extra-selections (TextDecoration)
-        self._selections = []
 
         # connect slots
         self.blockCountChanged.connect(self._update_viewport_margins)
@@ -553,61 +543,13 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
-
-        self.mnu = None
+        self.setCenterOnScroll(True)
 
     def __del__(self):
         try:
             self.stop_server()
         except RuntimeError:
             pass  # wrapped C/C++ object  already deleted
-
-    def start_server(self, script, interpreter=sys.executable, args=None):
-        """
-        Starts the server process.
-
-        The server is a python script that starts a
-        :class:`pyqode.core.api.server.JsonServer`. You (the user) must write
-        the server script so that you can apply your own configuration
-        server side.
-
-        The script can be run with a custom interpreter. The default is to use
-        sys.executable.
-
-        :param str script: Path to the server main script.
-        :param str interpreter: The python interpreter to use to run the server
-            script. If None, sys.executable is used unless we are in a frozen
-            application (cx_Freeze). The executable is not used if the
-            executable scripts ends with '.exe' on Windows
-        :param list args: list of additional command line args to use to start
-            the server process.
-        """
-        self.client = JsonTcpClient(self)
-        self.client.start(script, interpreter=interpreter, args=args)
-
-    def stop_server(self):
-        """
-        Stops the server process and closes the associated client socket.
-
-        It is automatically called when the widgets is destroyed but you should
-        rather close it explicitly.
-        """
-        try:
-            if self.client:
-                self.client.close()
-        except RuntimeError:
-            pass
-
-    def request_work(self, worker_class_or_function, args, on_receive=None):
-        """
-        Requests some work on the server process.
-
-        :param worker_class_or_function: Worker class or function
-        """
-        fully_qualified_name = '%s.%s' % (worker_class_or_function.__module__,
-                                          worker_class_or_function.__name__)
-        self.client.request_work(worker_class_or_function, args,
-                                 on_receive=on_receive)
 
     def uninstall_all(self):
         """
@@ -623,45 +565,23 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 self.uninstall_panel(k, zone)
             self._panels.pop(zone, None)
 
-    def show_context_menu(self, pt):
-        self.mnu = QtGui.QMenu()
-        self.mnu.addActions(self._actions)
-        self.mnu.popup(self.mapToGlobal(pt))
-
     @QtCore.pyqtSlot()
     def delete(self):
         """ Deletes the selected text """
         self.textCursor().removeSelectedText()
 
-    def goto_line(self, line=None, move=True, column=None):
+    @QtCore.pyqtSlot()
+    def goto_line(self):
         """
-        Moves the text cursor to the specifed line.
-
-        If line is None, a QInputDialog will pop up to ask the line number to
-        the user.
-
-        :param line: The line number to go (1 based)
-        :param move: True to move the cursor. False will return the cursor
-                     without setting it on the editor.
-        :param column: Optional column number. Introduced in version 1.1
-        :return: The new text cursor
-        :rtype: QtGui.QTextCursor
+        Shows goto line dialog and go to the selected line.
         """
-        if line is None or isinstance(line, bool):
-            line, result = dialogs.GoToLineDialog.get_line(
-                self, self.cursor_position[0], self.line_count)
-            if not result:
-                return
-            if not line:
-                line = 1
-        tc = self.textCursor()
-        tc.movePosition(tc.Start, tc.MoveAnchor)
-        tc.movePosition(tc.Down, tc.MoveAnchor, line - 1)
-        if column:
-            tc.movePosition(tc.Right, tc.MoveAnchor, column)
-        if move:
-            self.setTextCursor(tc)
-        return tc
+        line, result = dialogs.GoToLineDialog.get_line(
+            self, self.cursor_position[0], self.line_count)
+        if not result:
+            return
+        if not line:
+            line = 1
+        return text.goto_line(self, line, move=True)
 
     def selected_text(self):
         """ Returns the selected text. """
@@ -1053,11 +973,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :param decoration: Text decoration
         :type decoration: pyqode.core.TextDecoration
         """
-        if decoration not in self._selections:
-            self._selections.append(decoration)
-            self._selections = sorted(self._selections,
+        if decoration not in self._extra_selections:
+            self._extra_selections.append(decoration)
+            self._extra_selections = sorted(self._extra_selections,
                                       key=lambda sel: sel.draw_order)
-            self.setExtraSelections(self._selections)
+            self.setExtraSelections(self._extra_selections)
 
     def remove_decoration(self, decoration):
         """
@@ -1067,8 +987,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :type decoration: pyqode.core.TextDecoration
         """
         try:
-            self._selections.remove(decoration)
-            self.setExtraSelections(self._selections)
+            self._extra_selections.remove(decoration)
+            self.setExtraSelections(self._extra_selections)
         except ValueError:
             pass
 
@@ -1076,8 +996,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         Clears all text decorations
         """
-        self._selections[:] = []
-        self.setExtraSelections(self._selections)
+        self._extra_selections[:] = []
+        self.setExtraSelections(self._extra_selections)
 
     def margin_size(self, position=Panel.Position.LEFT):
         """
@@ -1177,7 +1097,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :rtype: int
         """
         height = self.fontMetrics().height()
-        for top, l, block in self._blocks:
+        for top, l, block in self._visible_blocks:
             if top <= y_pos <= top + height:
                 return l
         return None
@@ -1245,23 +1165,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         indentation = len(line) - len(line.lstrip())
         self.setTextCursor(original_cursor)
         return indentation
-
-    def _set_whitespaces_flags(self, show):
-        """
-        Shows/Hides whitespaces.
-
-        :param show: True to show whitespaces, False to hide them
-        :type show: bool
-        """
-        doc = self.document()
-        options = doc.defaultTextOption()
-        if show:
-            options.setFlags(options.flags() |
-                             QtGui.QTextOption.ShowTabsAndSpaces)
-        else:
-            options.setFlags(options.flags() &
-                             ~QtGui.QTextOption.ShowTabsAndSpaces)
-        doc.setDefaultTextOption(options)
 
     @QtCore.pyqtSlot()
     def duplicate_line(self):
@@ -1407,7 +1310,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         event.ignore()
         self.mouse_pressed.emit(event)
         c = self.cursorForPosition(event.pos())
-        for sel in self._selections:
+        for sel in self._extra_selections:
             if sel.cursor.blockNumber() == c.blockNumber():
                 sel.signals.clicked.emit(sel)
         if not event.isAccepted():
@@ -1448,7 +1351,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         c = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
         block_found = False
-        for sel in self._selections:
+        for sel in self._extra_selections:
             if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
                 if self._prev_tooltip_block_nbr != c.blockNumber():
                     self._tooltips_runner.request_job(
@@ -1562,12 +1465,39 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 panel.refresh_settings()
 
     def refresh_style(self):
+        """
+        Refreshes the editor style, every installed mode/panel will be
+        refreshed too.
+
+        """
         self._init_style()
         for m in self._modes.values():
             m.refresh_style()
         for zone in self._panels.values():
             for panel in zone.values():
                 panel.refresh_style()
+
+    def _show_context_menu(self, pt):
+        self._mnu = QtGui.QMenu()
+        self._mnu.addActions(self._actions)
+        self._mnu.popup(self.mapToGlobal(pt))
+
+    def _set_whitespaces_flags(self, show):
+        """
+        Shows/Hides whitespaces.
+
+        :param show: True to show whitespaces, False to hide them
+        :type show: bool
+        """
+        doc = self.document()
+        options = doc.defaultTextOption()
+        if show:
+            options.setFlags(options.flags() |
+                             QtGui.QTextOption.ShowTabsAndSpaces)
+        else:
+            options.setFlags(options.flags() &
+                             ~QtGui.QTextOption.ShowTabsAndSpaces)
+        doc.setDefaultTextOption(options)
 
     def _create_default_actions(self):
         values = [
@@ -1645,7 +1575,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param event: QtGui.QPaintEvent
         """
-        self._blocks[:] = []
+        self._visible_blocks[:] = []
         block = self.firstVisibleBlock()
         block_nbr = block.blockNumber()
         top = int(self.blockBoundingGeometry(block).translated(
@@ -1658,7 +1588,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if not visible:
                 break
             if block.isVisible():
-                self._blocks.append((top, block_nbr + 1, block))
+                self._visible_blocks.append((top, block_nbr + 1, block))
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
