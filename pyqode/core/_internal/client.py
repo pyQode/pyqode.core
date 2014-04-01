@@ -331,7 +331,7 @@ if __name__ == "__main__":
                           'column': 8,
                           'encoding': 'utf-8',
                           'path': '/a/path/to/a/file'},
-                          on_receive=my_callback)
+                         on_receive=my_callback)
         QtCore.QTimer.singleShot(500, send_request)
 
     def my_callback(status, results):

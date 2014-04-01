@@ -975,8 +975,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         if decoration not in self._extra_selections:
             self._extra_selections.append(decoration)
-            self._extra_selections = sorted(self._extra_selections,
-                                      key=lambda sel: sel.draw_order)
+            self._extra_selections = sorted(
+                self._extra_selections, key=lambda sel: sel.draw_order)
             self.setExtraSelections(self._extra_selections)
 
     def remove_decoration(self, decoration):
