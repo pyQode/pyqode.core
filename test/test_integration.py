@@ -39,7 +39,7 @@ def test_app():
     """
     app = QtGui.QApplication(sys.argv)
     editor = QCodeEdit()
-    client.start_server(os.path.join(os.getcwd(), 'server.py'))
+    client.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     editor.open_file(__file__)
     editor.show()
     QtCore.QTimer.singleShot(500, _leave)
