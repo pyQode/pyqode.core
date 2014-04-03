@@ -60,6 +60,12 @@ PROCESS_ERROR_STRING = {
 }
 
 
+#: Delay before retrying to connect to server [ms]
+TIMEOUT_BEFORE_RETRY = 100
+#: Max retry
+MAX_RETRY = 100
+
+
 class ServerProcess(QtCore.QProcess):
     """
     Extends QProcess with methods to easily manipulate the server process.
@@ -245,7 +251,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.write(msg)
 
     def _on_process_started(self):
-        QtCore.QTimer.singleShot(1000, self._connect)
+        # give time to the server to starts its socket
+        QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
 
     def _pick_free_port(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -255,6 +262,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         return free_port
 
     def _connect(self):
+        self._cli_logger.debug('Connecting to 127.0.0.1:%d' % self._port)
         self._connection_attempts += 1
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
@@ -272,10 +280,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if socket_error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
             # try again, sometimes the server process might not have started
             # its socket yet.
-            if self._connection_attempts < 10:
-                QtCore.QTimer.singleShot(100, self._connect)
+            if self._connection_attempts < MAX_RETRY:
+                QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
             else:
-                raise RuntimeError('Failed to connect to the server after 10 '
+                raise RuntimeError('Failed to connect to the server after 100 '
                                    'unsuccessful attempts.')
 
     def _on_disconnected(self):
