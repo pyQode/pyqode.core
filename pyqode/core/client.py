@@ -5,7 +5,6 @@ client side. It is made up of 3 functions:
     - start_server()
     - stop_server()
     - request_work()
-
 """
 import sys
 
@@ -77,3 +76,10 @@ def request_work(editor, worker_class_or_function, args, on_receive=None):
     """
     editor._client.request_work(worker_class_or_function, args,
                                 on_receive=on_receive)
+
+
+def connected(editor):
+    """
+    Cheks if the client socket is connected to a server
+    """
+    return editor._client.is_connected
