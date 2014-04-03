@@ -4,7 +4,7 @@ Server used for tests
 """
 import sys
 import os
-# ensure sys knows about pyqode.core
+# ensure sys knows about pyqode.core in the test env
 sys.path.insert(0, os.path.abspath('..'))
 from pyqode.core import server
 from pyqode.core import workers
