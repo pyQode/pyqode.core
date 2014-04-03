@@ -49,8 +49,8 @@ def stop_server(editor):
     Stops the server process for a specific QCodeEdit and closes the
     associated client socket.
 
-    It is automatically called when the widgets is destroyed but you should
-    rather close it explicitly.
+    You have to explicitly call this method when you're done with the editor
+    widget, just before calling del on the widget.
 
     :param: editor: QCodeEdit instance
     """

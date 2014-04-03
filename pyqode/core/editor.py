@@ -545,12 +545,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setMouseTracking(True)
         self.setCenterOnScroll(True)
 
-    def __del__(self):
-        try:
-            self.stop_server()
-        except RuntimeError:
-            pass  # wrapped C/C++ object  already deleted
-
     def uninstall_all(self):
         """
         Uninstalls all modes and panels.
