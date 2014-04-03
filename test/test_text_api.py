@@ -71,7 +71,6 @@ def test_goto_line():
 
 def test_selected_text():
     global editor
-    print(editor.toPlainText())
     text.goto_line(editor, 2, 1, move=True)
     process_events()
     assert text.word_under_cursor(editor).selectedText() == 'T'
