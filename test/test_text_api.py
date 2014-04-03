@@ -28,22 +28,24 @@ def setup_module():
     """
     Setup a QApplication and QCodeEdit which open the client module code
     """
+    print('setup')
     global app, editor, window
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = QCodeEdit(window)
     window.setCentralWidget(editor)
-    editor.open_file(client.__file__)
+    editor.open_file(__file__)
     window.show()
     client.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     while not client.connected(editor):
         QTest.qWait(100)
 
 
-def teardown():
+def teardown_module():
     """
     Close server and exit QApplication
     """
+    print('teardown')
     global editor, app
     client.stop_server(editor)
     app.exit(0)
@@ -66,3 +68,12 @@ def test_goto_line():
     assert editor.textCursor().blockNumber() == cursor.blockNumber() == 1
     assert editor.textCursor().columnNumber() == cursor.columnNumber()
 
+
+def test_selected_text():
+    global editor
+    print(editor.toPlainText())
+    text.goto_line(editor, 2, 1, move=True)
+    process_events()
+    assert text.word_under_cursor(editor).selectedText() == 'T'
+    assert text.word_under_cursor(
+        editor, select_whole_word=True).selectedText() == 'This'

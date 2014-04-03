@@ -577,66 +577,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             line = 1
         return text.goto_line(self, line, move=True)
 
-    def selected_text(self):
-        """ Returns the selected text. """
-        return self.textCursor().selectedText()
-
-    def select_word_under_cursor(self, select_whole_word=False, tc=None):
-        """
-        Selects the word under cursor using the separators defined in the
-        the constants module.
-
-        :param select_whole_word: If set to true the whole word is selected,
-         else the selection stops at the cursor position.
-
-        :param tc: Custom text cursor (e.g. from a QTextDocument clone)
-
-        :return The QTextCursor that contains the selected word.
-        """
-        if not tc:
-            tc = self.textCursor()
-        word_separators = settings.word_separators
-        end_pos = start_pos = tc.position()
-        while not tc.atStart():
-            # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
-            tc.movePosition(tc.Left, tc.KeepAnchor, 1)
-            try:
-                ch = tc.selectedText()[0]
-                word_separators = settings.word_separators
-                st = tc.selectedText()
-                if (st in word_separators and (st != "n" and st != "t")
-                        or ch.isspace()):
-                    break  # start boundary found
-            except IndexError:
-                break  # nothing selectable
-            start_pos = tc.position()
-            tc.setPosition(start_pos)
-        if select_whole_word:
-            tc.setPosition(end_pos)
-            while not tc.atEnd():
-                # tc.movePosition(tc.Left, tc.MoveAnchor, 1)
-                tc.movePosition(tc.Right, tc.KeepAnchor, 1)
-                ch = tc.selectedText()[0]
-                st = tc.selectedText()
-                if (st in word_separators and (st != "n" and st != "t")
-                        or ch.isspace()):
-                    break  # end boundary found
-                end_pos = tc.position()
-                tc.setPosition(end_pos)
-        tc.setPosition(start_pos)
-        tc.setPosition(end_pos, tc.KeepAnchor)
-        return tc
-
-    def select_word_under_mouse_cursor(self):
-        """
-        Selects the word under the **mouse** cursor.
-
-        :return: A QTextCursor with the word under mouse cursor selected.
-        """
-        tc = self.cursorForPosition(self._last_mouse_pos)
-        tc = self.select_word_under_cursor(True, tc)
-        return tc
-
     def rehighlight(self):
         """
         Convenience method that calls rehighlight on the syntax highlighter

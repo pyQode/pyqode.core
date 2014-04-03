@@ -4,6 +4,7 @@ This module contains the code completion mode and the related classes.
 """
 import re
 from pyqode.core import settings
+from pyqode.core import text
 from pyqode.core import client
 from pyqode.core import workers
 from pyqode.core.editor import Mode
@@ -77,11 +78,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Returns the current completion prefix
         """
-        prefix = self.editor.select_word_under_cursor().selectedText()
+        prefix = text.word_under_cursor(self.editor).selectedText()
         if prefix == "":
             try:
-                prefix = self.editor.select_word_under_cursor(
-                    select_whole_word=True).selectedText()[0]
+                prefix = text.word_under_cursor(
+                    self.editor, select_whole_word=True).selectedText()[0]
             except IndexError:
                 pass
         return prefix.strip()
@@ -238,7 +239,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 # trigger symbols
                 if symbols:
-                    tc = self.editor.select_word_under_cursor()
+                    tc = text.word_under_cursor(self.editor)
                     tc.setPosition(tc.position())
                     tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
                     text_to_cursor = tc.selectedText()
@@ -275,7 +276,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _is_last_char_end_of_word(self):
         try:
-            tc = self.editor.select_word_under_cursor()
+            tc = text.word_under_cursor(self.editor)
             tc.setPosition(tc.position())
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
             l = tc.selectedText()
@@ -333,8 +334,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _show_popup(self):
         cnt = self._completer.completionCount()
-        full_prefix = self.editor.select_word_under_cursor(
-            select_whole_word=True).selectedText()
+        full_prefix = text.word_under_cursor(
+            self.editor, select_whole_word=True).selectedText()
         if (full_prefix == self._current_completion) and cnt == 1:
             self._hide_popup()
         else:
@@ -358,14 +359,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._completer.completionModel().index(0, 0))
 
     def _insert_completion(self, completion):
-        tc = self.editor.select_word_under_cursor(select_whole_word=True)
+        tc = text.word_under_cursor(self.editor, select_whole_word=True)
         tc.insertText(completion)
         self.editor.setTextCursor(tc)
 
     def _is_shortcut(self, event):
         """
         Checks if the event's key and modifiers make the completion shortcut
-        (Ctrl+M)
+        (Ctrl+Space)
 
         :param event: QKeyEvent
 
