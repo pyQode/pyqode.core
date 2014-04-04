@@ -71,6 +71,11 @@ class FileWatcherMode(Mode, QtCore.QObject):
         except OSError:
             self._mtime = 0
             self._timer.stop()
+        except TypeError:
+            # file path is none, this happen if you use setPlainText instead of
+            # openFile. This is perfectly fine, we just do not have anything to
+            # watch
+            self._timer.stop()
 
     def _check_mtime(self):
         if self.editor is None:
