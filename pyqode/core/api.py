@@ -1,18 +1,18 @@
 """
-This module contains the public API for interacting with QCodeEdit, client
+This module contains the public API for interacting with editor, client
 side.
 
-The API is a mostly procedural API that works on QCodeEdit instance.
+The API is a mostly procedural API that works on editor instance.
 
-Originally most of those functions were methods of QCodeEdit, we moved them
+Originally most of those functions were methods of editor, we moved them
 in separates modules for the sake of readability.
 
 The API can be subdivised into several parts:
 
     1) Extension API:
 
-        Base classes for extending QCodeEdit: Mode and panel and functions to
-        add/remove/query modes and panels on QCodeEdit
+        Base classes for extending editor: Mode and panel and functions to
+        add/remove/query modes and panels on editor
 
     2) QTextCursor/QTextDocument API
 
@@ -25,7 +25,7 @@ The API can be subdivised into several parts:
 
     4) Text decorations API
 
-        Classes and function to easily add decoration to the qcodeedit.
+        Classes and function to easily add decoration to the editor.
 
 
     5) Syntax highlighter API
@@ -46,13 +46,13 @@ from pyqode.core import settings
 # ----------------
 class Mode(object):
     """
-    Base class for qcodeedit extensions. An extension is a "thing" that can be
-    installed on a QCodeEdit to add new behaviours or to modify the
+    Base class for editor extensions. An extension is a "thing" that can be
+    installed on a editor to add new behaviours or to modify the
     appearance.
 
-    A mode is added to a QCodeEdit by using the
-    :meth:`pyqode.core.QCodeEdit.installMode` or
-    :meth:`pyqode.core.QCodeEdit.installPanel` methods.
+    A mode is added to a editor by using the
+    :meth:`pyqode.core.editor.installMode` or
+    :meth:`pyqode.core.editor.installPanel` methods.
 
     Subclasses must/should override the following methods:
         - :meth:`pyqode.core.Mode._on_state_changed`
@@ -60,19 +60,19 @@ class Mode(object):
         - :meth:`pyqode.core.Mode.refresh_settings`
 
     The mode will be identified by its class name, this means that there cannot
-    be two modes of the same type on a QCodeEdit (you have to subclass it)
+    be two modes of the same type on a editor (you have to subclass it)
     """
     @property
-    def qcodeedit(self):
+    def editor(self):
         """
-        Provides easy access to the parent qcodeedit widget (weakref)
+        Provides easy access to the parent editor widget (weakref)
 
         **READ ONLY**
 
-        :type: pyqode.core.qcodeedit.QCodeEdit
+        :type: pyqode.core.editor.editor
         """
-        if self._qcodeedit is not None:
-            return self._qcodeedit()
+        if self._editor is not None:
+            return self._editor()
         else:
             return None
 
@@ -93,13 +93,13 @@ class Mode(object):
             self._on_state_changed(enabled)
 
     def __init__(self):
-        #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
+        #: Mode name/identifier. :class:`pyqode.core.editor` use it as the
         #: attribute key when you install a mode.
         self.name = self.__class__.__name__
         #: Mode description
         self.description = self.__doc__
         self._enabled = False
-        self._qcodeedit = None
+        self._editor = None
 
     def __str__(self):
         """
@@ -107,20 +107,20 @@ class Mode(object):
         """
         return self.name
 
-    def _on_install(self, qcodeedit):
+    def _on_install(self, editor):
         """
         Installs the extension on the editor. Subclasses might want to override
         this method to add new style/settings properties to the editor.
 
-        .. note:: This method is called by QCodeEdit when you install a Mode.
+        .. note:: This method is called by editor when you install a Mode.
                   You should never call it yourself, even in a subclass.
 
         .. warning:: Don't forget to call **super** when subclassing
 
-        :param qcodeedit: qcodeedit widget instance
-        :type qcodeedit: pyqode.core.QCodeEdit
+        :param editor: editor widget instance
+        :type editor: pyqode.core.editor
         """
-        self._qcodeedit = weakref.ref(qcodeedit)
+        self._editor = weakref.ref(editor)
         self.enabled = True
 
     def _on_uninstall(self):
@@ -128,14 +128,14 @@ class Mode(object):
         Uninstall the mode
         """
         self.enabled = False
-        self._qcodeedit = None
+        self._editor = None
 
     def _on_state_changed(self, state):
         """
         Called when the enable state changed.
 
         This method does not do anything, you may override it if you need
-        to connect/disconnect to the qcodeedit's signals (connect when state is
+        to connect/disconnect to the editor's signals (connect when state is
         true and disconnect when it is false).
 
         :param state: True = enabled, False = disabled
@@ -145,44 +145,46 @@ class Mode(object):
 
     def refresh_style(self):
         """
-        Called by QCodeEdit when the user wants to refresh style options.
+        Called by editor when the user wants to refresh style options.
         """
         pass
 
     def refresh_settings(self):
         """
-        Called by QCodeEdit when the user wants to refresh settings.
+        Called by editor when the user wants to refresh settings.
         """
         pass
 
 
-def install_mode(qcodeedit, mode):
+def install_mode(editor, mode):
     """
-    Installs a mode on the qcodeedit.
+    Installs a mode on the editor.
 
-    :param qcodeedit: QCodeEdit instance on which the mode will be installed.
+    :param editor: editor instance on which the mode will be installed.
     :param mode: The mode instance to install.
     :type mode: pyqode.core.api.Mode
     """
     logger.debug('installing mode %s' % mode)
-    qcodeedit._modes[mode.name] = mode
-    mode._on_install(qcodeedit)
+    editor._modes[mode.name] = mode
+    mode._on_install(editor)
 
 
-def uninstall_mode(qcodeedit, name):
+def uninstall_mode(editor, name):
     """
     Uninstalls a previously installed mode.
 
     :param name: The name of the mode to uninstall.
     """
     logger.debug('Uninstalling mode %s' % name)
-    m = qcodeedit.get_mode(name)
+    m = get_mode(editor, name)
     if m:
         m._on_uninstall()
-        return qcodeedit._modes.pop(name, None)
+        editor._modes.pop(m.name)
+        return m
+    return None
 
 
-def get_mode(qcodeedit, name_or_klass):
+def get_mode(editor, name_or_klass):
     """
     Gets a mode by name.
 
@@ -192,19 +194,19 @@ def get_mode(qcodeedit, name_or_klass):
     """
     if not isinstance(name_or_klass, str):
         name_or_klass = name_or_klass.__name__
-    return qcodeedit._modes[name_or_klass]
+    return editor._modes[name_or_klass]
 
 
-def get_modes(qcodeedit):
+def get_modes(editor):
     """
     Returns the dictionary of modes.
     """
-    return qcodeedit._modes
+    return editor._modes
 
 
 class Panel(QtGui.QWidget, Mode):
     """
-    Base class for qcodeedit panels.
+    Base class for editor panels.
 
     A panel is a mode and a QWidget.
 
@@ -251,20 +253,20 @@ class Panel(QtGui.QWidget, Mode):
         self._background_brush = None
         self._foreground_pen = None
 
-    def _on_install(self, qcodeedit):
+    def _on_install(self, editor):
         """
-        Extends :meth:`pyqode.core.Mode._onInstall` method to set the qcodeedit
+        Extends :meth:`pyqode.core.Mode._onInstall` method to set the editor
         instance as the parent widget.
 
         .. warning:: Don't forget to call **super** if you override this
             method!
 
-        :param qcodeedit: qcodeedit instance
-        :type qcodeedit: pyqode.core.code_edit.QCodeEdit
+        :param editor: editor instance
+        :type editor: pyqode.core.code_edit.editor
         """
-        Mode._on_install(self, qcodeedit)
-        self.setParent(qcodeedit)
-        self.qcodeedit.refresh_panels()
+        Mode._on_install(self, editor)
+        self.setParent(editor)
+        self.editor.refresh_panels()
         self._background_brush = QtGui.QBrush(QtGui.QColor(
             self.palette().window().color()))
         self._foreground_pen = QtGui.QPen(QtGui.QColor(
@@ -280,7 +282,7 @@ class Panel(QtGui.QWidget, Mode):
         :param state: True = enabled, False = disabled
         :type state: bool
         """
-        if not self.qcodeedit.isVisible():
+        if not self.editor.isVisible():
             return
         if state is True:
             self.show()
@@ -298,18 +300,18 @@ class Panel(QtGui.QWidget, Mode):
             painter.fillRect(event.rect(), self._background_brush)
 
     def showEvent(self, *args, **kwargs):
-        self.qcodeedit.refresh_panels()
+        self.editor.refresh_panels()
 
     def setVisible(self, visible):
         QtGui.QWidget.setVisible(self, visible)
-        self.qcodeedit.refresh_panels()
+        self.editor.refresh_panels()
 
 
-def install_panel(qcodeedit, panel, position=Panel.Position.LEFT):
+def install_panel(editor, panel, position=Panel.Position.LEFT):
     """
-    Installs a panel on on the qcodeedit. You must specify the position of the
+    Installs a panel on on the editor. You must specify the position of the
     panel (panels are rendered in one of the four document margins, see
-    :class:`pyqode.core.qcodeedit.Panel.Position`.
+    :class:`pyqode.core.editor.Panel.Position`.
 
     The panel is set as an object attribute using the panel's name as the
     key.
@@ -320,13 +322,13 @@ def install_panel(qcodeedit, panel, position=Panel.Position.LEFT):
     :type panel: pyqode.core.api.Panel
     :type position: int
     """
-    panel.order_in_zone = len(qcodeedit._panels[position])
-    qcodeedit._panels[position][panel.name] = panel
-    panel._on_install(qcodeedit)
-    qcodeedit._update_viewport_margins()
+    panel.order_in_zone = len(editor._panels[position])
+    editor._panels[position][panel.name] = panel
+    panel._on_install(editor)
+    editor._update_viewport_margins()
 
 
-def uninstall_panel(qcodeedit, name):
+def uninstall_panel(editor, name):
     """
     Uninstalls a previously installed panel.
 
@@ -335,13 +337,15 @@ def uninstall_panel(qcodeedit, name):
     :return: The uninstalled mode instance
     """
     logger.debug('Uninstalling panel %s' % name)
-    p, zone = get_panel(qcodeedit, name, get_zone=True)
+    p, zone = get_panel(editor, name, get_zone=True)
     if p:
         p._on_uninstall()
-        return qcodeedit._panels[zone].pop(name, None)
+        return editor._panels[zone].pop(p.name, None)
+    else:
+        raise KeyError(name)
 
 
-def get_panel(qcodeedit, name_or_klass, get_zone=False):
+def get_panel(editor, name_or_klass, get_zone=False):
     """
     Gets a panel by name
 
@@ -353,7 +357,7 @@ def get_panel(qcodeedit, name_or_klass, get_zone=False):
         name_or_klass = name_or_klass.__name__
     for i in range(4):
         try:
-            panel = qcodeedit._panels[i][name_or_klass]
+            panel = editor._panels[i][name_or_klass]
         except KeyError:
             pass
         else:
@@ -364,51 +368,51 @@ def get_panel(qcodeedit, name_or_klass, get_zone=False):
     return None, -1
 
 
-def get_panels(qcodeedit):
+def get_panels(editor):
     """
     Returns the panels dictionary.
 
     :return: A dictionary of :class:`pyqode.core.Panel`
     :rtype: dict
     """
-    return qcodeedit._panels
+    return editor._panels
 
 
 # ----------------
 # Text cursor manipulations
 # ----------------
-def goto_line(qcodeedit, line, column=0, move=True):
+def goto_line(editor, line, column=0, move=True):
     """
     Moves the text cursor to the specified line (and column).
 
-    :param qcodeedit: QCodeEdit instance.
+    :param editor: editor instance.
     :param line: Number of the line to go to (1 based)
     :param column: Optional column number. Default start of line.
     :param move: True to move the cursor. False will return the cursor
-                 without setting it on the qcodeedit.
+                 without setting it on the editor.
     :return: The new text cursor
     :rtype: QtGui.QTextCursor
     """
-    tc = qcodeedit.textCursor()
+    tc = editor.textCursor()
     tc.movePosition(tc.Start, tc.MoveAnchor)
     tc.movePosition(tc.Down, tc.MoveAnchor, line - 1)
     if column:
         tc.movePosition(tc.Right, tc.MoveAnchor, column)
     if move:
-        qcodeedit.setTextCursor(tc)
+        editor.setTextCursor(tc)
     return tc
 
 
-def selected_text(qcodeedit):
+def selected_text(editor):
     """
     Returns the selected text.
 
-    :param qcodeedit: QCodeEdit instance.
+    :param editor: editor instance.
     """
-    return qcodeedit.textCursor().selectedText()
+    return editor.textCursor().selectedText()
 
 
-def word_under_cursor(qcodeedit, select_whole_word=False, tc=None):
+def word_under_cursor(editor, select_whole_word=False, tc=None):
     """
     Gets the word under cursor using the separators defined by
     :attr:`pyqode.core.settings.word_separators`.
@@ -418,14 +422,14 @@ def word_under_cursor(qcodeedit, select_whole_word=False, tc=None):
         string. To get the word, just call ``selectedText`` on the return
         value.
 
-    :param qcodeedit: QCodeEdit instance.
+    :param editor: editor instance.
     :param select_whole_word: If set to true the whole word is selected,
      else the selection stops at the cursor position.
     :param tc: Optional custom text cursor (e.g. from a QTextDocument clone)
     :return The QTextCursor that contains the selected word.
     """
     if not tc:
-        tc = qcodeedit.textCursor()
+        tc = editor.textCursor()
     word_separators = settings.word_separators
     end_pos = start_pos = tc.position()
     # select char by char until we are at the original cursor position.
@@ -460,159 +464,159 @@ def word_under_cursor(qcodeedit, select_whole_word=False, tc=None):
     return tc
 
 
-def select_word_under_mouse_cursor(qcodeedit):
+def select_word_under_mouse_cursor(editor):
     """
     Selects the word under the **mouse** cursor.
 
     :return: A QTextCursor with the word under mouse cursor selected.
     """
-    tc = qcodeedit.cursorForPosition(qcodeedit._last_mouse_pos)
-    tc = word_under_cursor(qcodeedit, True, tc)
+    tc = editor.cursorForPosition(editor._last_mouse_pos)
+    tc = word_under_cursor(editor, True, tc)
     return tc
 
 
-def cursor_position(qcodeedit):
+def cursor_position(editor):
     """
     Returns the QTextCursor position. The position is a tuple made up of the
     line number (1 based) and the column number (0 based).
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
     :return: tuple(line, column)
     """
-    return (qcodeedit.textCursor().blockNumber() + 1,
-            qcodeedit.textCursor().columnNumber())
+    return (editor.textCursor().blockNumber() + 1,
+            editor.textCursor().columnNumber())
 
 
-def cursor_line_nbr(qcodeedit):
+def cursor_line_nbr(editor):
     """
     Returns the text cursor's line number.
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
 
     :return: Line number
     """
-    return cursor_position(qcodeedit)[0]
+    return cursor_position(editor)[0]
 
 
-def cursor_column_nbr(qcodeedit):
+def cursor_column_nbr(editor):
     """
     Returns the text cursor's column number.
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
 
     :return: Column number
     """
-    return cursor_position(qcodeedit)[1]
+    return cursor_position(editor)[1]
 
 
-def line_count(qcodeedit):
+def line_count(editor):
     """
-    Returns the line count of the specified qcodeedit
+    Returns the line count of the specified editor
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
     :return: number of lines in the document.
     """
-    return qcodeedit.document().blockCount()
+    return editor.document().blockCount()
 
 
-def line_text(qcodeedit, line_nbr):
+def line_text(editor, line_nbr):
     """
     Gets the text of the specified line
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
     :param line_nbr: The line number of the text to get
 
     :return: Entire line's text
     :rtype: str
     """
-    tc = qcodeedit.textCursor()
+    tc = editor.textCursor()
     tc.movePosition(tc.Start)
     tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
     tc.select(tc.LineUnderCursor)
     return tc.selectedText()
 
 
-def current_line_text(qcodeedit):
+def current_line_text(editor):
     """
     Returns the text of the current line.
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
 
     :return: Text of the current line
     """
-    return line_text(qcodeedit, cursor_line_nbr(qcodeedit))
+    return line_text(editor, cursor_line_nbr(editor))
 
 
-def set_line_text(qcodeedit, line_nbr, new_text):
+def set_line_text(editor, line_nbr, new_text):
     """
     Replace an entire line with ``new_text``.
 
-    :param qcodeedit: QCodeEdit instance
+    :param editor: editor instance
     :param new_text: The replacement text.
 
     """
-    tc = qcodeedit.textCursor()
+    tc = editor.textCursor()
     tc.movePosition(tc.Start)
     tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
     tc.select(tc.LineUnderCursor)
     tc.insertText(new_text)
-    qcodeedit.setTextCursor(tc)
+    editor.setTextCursor(tc)
 
 
-def remove_last_line(qcodeedit):
+def remove_last_line(editor):
     """
     Removes the last line of the document.
     """
-    tc = qcodeedit.textCursor()
+    tc = editor.textCursor()
     tc.movePosition(tc.End, tc.MoveAnchor)
     tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
     tc.movePosition(tc.End, tc.KeepAnchor)
     tc.removeSelectedText()
     tc.deletePreviousChar()
-    qcodeedit.setTextCursor(tc)
+    editor.setTextCursor(tc)
 
 
-def clean_document(qcodeedit):
+def clean_document(editor):
     """
     Removes trailing whitespaces and ensure one single blank line at the
     end of the QTextDocument.
     """
-    value = qcodeedit.verticalScrollBar().value()
-    pos = cursor_position(qcodeedit)
+    value = editor.verticalScrollBar().value()
+    pos = cursor_position(editor)
 
-    qcodeedit.textCursor().beginEditBlock()
+    editor.textCursor().beginEditBlock()
 
     # cleanup whitespaces
-    qcodeedit._cleaning = True
+    editor._cleaning = True
     eaten = 0
     removed = set()
-    for line in qcodeedit._modified_lines:
+    for line in editor._modified_lines:
         for j in range(-1, 2):
             # skip current line
             if line + j != pos[0]:
-                txt = line_text(qcodeedit, line + j)
+                txt = line_text(editor, line + j)
                 stxt = txt.rstrip()
-                set_line_text(qcodeedit, line + j, stxt)
+                set_line_text(editor, line + j, stxt)
                 removed.add(line + j)
-    qcodeedit._modified_lines -= removed
-    if line_text(qcodeedit, line_count(qcodeedit)):
-        qcodeedit.appendPlainText("\n")
+    editor._modified_lines -= removed
+    if line_text(editor, line_count(editor)):
+        editor.appendPlainText("\n")
     else:
         # remove last blank line (except one)
         i = 0
-        while line_count(qcodeedit) - i > 0:
-            l = line_text(qcodeedit, line_count(qcodeedit) - i)
+        while line_count(editor) - i > 0:
+            l = line_text(editor, line_count(editor) - i)
             if l:
                 break
             i += 1
         for j in range(i - 1):
-            remove_last_line(qcodeedit)
+            remove_last_line(editor)
 
-    qcodeedit._cleaning = False
-    qcodeedit._original_text = qcodeedit.toPlainText()
+    editor._cleaning = False
+    editor._original_text = editor.toPlainText()
 
     # restore cursor and scrollbars
-    tc = qcodeedit.textCursor()
+    tc = editor.textCursor()
     tc.movePosition(tc.Start)
     tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
     tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
@@ -624,22 +628,22 @@ def clean_document(qcodeedit):
         tc.movePosition(tc.Right, tc.MoveAnchor, offset)
     else:
         tc.setPosition(p)
-    qcodeedit.setTextCursor(tc)
-    qcodeedit.verticalScrollBar().setValue(value)
+    editor.setTextCursor(tc)
+    editor.verticalScrollBar().setValue(value)
 
-    qcodeedit.textCursor().endEditBlock()
+    editor.textCursor().endEditBlock()
 
 
-def select_lines(qcodeedit, start, end, apply_selection=True):
+def select_lines(editor, start, end, apply_selection=True):
     """
     Select entire lines between start and end.
 
     This functions returned the text cursor that contains the selection.
 
     Optionally it is possible to prevent the selection from being applied on
-    the code qcodeedit widget by setting ``apply_selection`` to False.
+    the code editor widget by setting ``apply_selection`` to False.
 
-    :param qcodeedit: QCodeEdit instance.
+    :param editor: editor instance.
     :param start: Start line number (1 based)
     :type start: int
     :param end: End line number (1 based)
@@ -651,7 +655,7 @@ def select_lines(qcodeedit, start, end, apply_selection=True):
     :return A QTextCursor that holds the requested selection
     """
     if start and end:
-        tc = qcodeedit.textCursor()
+        tc = editor.textCursor()
         tc.movePosition(tc.Start, tc.MoveAnchor)
         tc.movePosition(tc.Down, tc.MoveAnchor, start - 1)
         if end > start:  # Going down
@@ -665,28 +669,28 @@ def select_lines(qcodeedit, start, end, apply_selection=True):
         else:
             tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
         if apply_selection:
-            qcodeedit.setTextCursor(tc)
+            editor.setTextCursor(tc)
 
 
-def selection_range(qcodeedit):
+def selection_range(editor):
     """
     Returns the selected lines boundaries (start line, end line)
 
     :return: tuple(int, int)
     """
-    doc = qcodeedit.document()
+    doc = editor.document()
     start = doc.findBlock(
-        qcodeedit.textCursor().selectionStart()).blockNumber() + 1
+        editor.textCursor().selectionStart()).blockNumber() + 1
     end = doc.findBlock(
-        qcodeedit.textCursor().selectionEnd()).blockNumber() + 1
-    tc = QtGui.QTextCursor(qcodeedit.textCursor())
-    tc.setPosition(qcodeedit.textCursor().selectionEnd())
+        editor.textCursor().selectionEnd()).blockNumber() + 1
+    tc = QtGui.QTextCursor(editor.textCursor())
+    tc.setPosition(editor.textCursor().selectionEnd())
     if tc.columnNumber() == 0 and start != end:
         end -= 1
     return start, end
 
 
-def line_pos_from_number(qcodeedit, line_number):
+def line_pos_from_number(editor, line_number):
     """
     Gets the line pos on the Y-Axis (at the center of the line) from a
     line number (1 based).
@@ -697,24 +701,24 @@ def line_pos_from_number(qcodeedit, line_number):
     :return: The center position of the line.
     :rtype: int or None
     """
-    block = qcodeedit.document().findBlockByNumber(line_number)
+    block = editor.document().findBlockByNumber(line_number)
     if block:
-        return int(qcodeedit.blockBoundingGeometry(block).translated(
-                   qcodeedit.contentOffset()).top())
+        return int(editor.blockBoundingGeometry(block).translated(
+                   editor.contentOffset()).top())
     return None
 
 
-def line_nbr_from_position(qcodeedit, y_pos):
+def line_nbr_from_position(editor, y_pos):
     """
     Returns the line number from the y_pos
 
-    :param y_pos: Y pos in the QCodeEdit
+    :param y_pos: Y pos in the editor
 
     :return: Line number (1 based)
     :rtype: int
     """
-    height = qcodeedit.fontMetrics().height()
-    for top, l, block in qcodeedit.visible_blocks:
+    height = editor.fontMetrics().height()
+    for top, l, block in editor.visible_blocks:
         if top <= y_pos <= top + height:
             return l
     return None
@@ -733,9 +737,9 @@ class NotConnectedError(Exception):
             'Client socket not connected or server not started')
 
 
-def start_server(qcodeedit, script, interpreter=sys.executable, args=None):
+def start_server(editor, script, interpreter=sys.executable, args=None):
     """
-    Starts a pyqode server, specific to a QCodeEdit instance.
+    Starts a pyqode server, specific to a editor instance.
 
     The server is a python script that starts a
     :class:`pyqode.core.server.JsonServer`. You (the user) must write
@@ -745,7 +749,7 @@ def start_server(qcodeedit, script, interpreter=sys.executable, args=None):
     The script can be run with a custom interpreter. The default is to use
     sys.executable.
 
-    :param: qcodeedit: QCodeEdit instance
+    :param: editor: editor instance
     :param str script: Path to the server main script.
     :param str interpreter: The python interpreter to use to run the server
         script. If None, sys.executable is used unless we are in a frozen
@@ -754,31 +758,31 @@ def start_server(qcodeedit, script, interpreter=sys.executable, args=None):
     :param list args: list of additional command line args to use to start
         the server process.
     """
-    qcodeedit._client.start(script, interpreter=interpreter, args=args)
+    editor._client.start(script, interpreter=interpreter, args=args)
 
 
-def stop_server(qcodeedit):
+def stop_server(editor):
     """
-    Stops the server process for a specific QCodeEdit and closes the
+    Stops the server process for a specific editor and closes the
     associated client socket.
 
-    You have to explicitly call this method when you're done with the qcodeedit
+    You have to explicitly call this method when you're done with the editor
     widget, just before calling del on the widget.
 
-    :param: qcodeedit: QCodeEdit instance
+    :param: editor: editor instance
     """
     try:
-        if qcodeedit._client:
-            qcodeedit._client.close()
+        if editor._client:
+            editor._client.close()
     except RuntimeError:
         pass
 
 
-def request_work(qcodeedit, worker_class_or_function, args, on_receive=None):
+def request_work(editor, worker_class_or_function, args, on_receive=None):
     """
-    Requests some work on the server process of a specific QCodeEdit instance.
+    Requests some work on the server process of a specific editor instance.
 
-    :param: qcodeedit: QCodeEdit instance
+    :param: editor: editor instance
     :param worker_class_or_function: Worker class or function
     :param args: worker args, any Json serializable objects
     :param on_receive: an optional callback executed when we receive the
@@ -788,15 +792,15 @@ def request_work(qcodeedit, worker_class_or_function, args, on_receive=None):
     :raise: NotConnectedError if the server cannot be reached.
 
     """
-    qcodeedit._client.request_work(worker_class_or_function, args,
-                                   on_receive=on_receive)
+    editor._client.request_work(worker_class_or_function, args,
+                                on_receive=on_receive)
 
 
-def connected_to_server(qcodeedit):
+def connected_to_server(editor):
     """
     Cheks if the client socket is connected to a server
     """
-    return qcodeedit._client.is_connected
+    return editor._client.is_connected
 
 
 # ----------------

@@ -5,6 +5,7 @@ import os
 from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
 import sys
+import pytest
 
 
 from pyqode.core.code_edit import QCodeEdit
@@ -117,8 +118,10 @@ def test_clean_document():
 
 def test_select_lines():
     global editor
-    api.select_lines(editor, 1, 10)
-    assert api.selection_range(editor) == (1, 10)
+    api.select_lines(editor, 1, 5)
+    process_events()
+    QTest.qWait(1000)
+    assert api.selection_range(editor) == (1, 5)
 
 
 def test_line_pos_line_nbr():
@@ -130,3 +133,39 @@ def test_line_pos_line_nbr():
     assert pos is not None
     nbr = api.line_nbr_from_position(editor, pos)
     assert nbr == 2
+
+
+def test_modes():
+    """
+    Test to install, retrieve and remove a mode.
+
+    """
+    from pyqode.core.modes import CaseConverterMode
+    global editor
+    mode = CaseConverterMode()
+    api.install_mode(editor, mode)
+    m = api.get_mode(editor, CaseConverterMode)
+    assert m == mode
+    m = api.uninstall_mode(editor, CaseConverterMode)
+    assert m == mode
+    with pytest.raises(KeyError):
+        api.uninstall_mode(editor, CaseConverterMode)
+
+
+def test_panels():
+    """
+    Test to install, retrieve and remove a panel
+
+    """
+    from pyqode.core.panels import LineNumberPanel
+    global editor
+    panel = LineNumberPanel()
+    api.install_panel(editor, panel, panel.Position.LEFT)
+    QTest.qWait(1000)
+    p, zone = api.get_panel(editor, LineNumberPanel, get_zone=True)
+    assert p == panel
+    assert zone == panel.Position.LEFT
+    p = api.uninstall_panel(editor, LineNumberPanel)
+    assert p == panel
+    with pytest.raises(KeyError):
+        api.uninstall_panel(editor, LineNumberPanel)
