@@ -8,11 +8,11 @@ Installation:
 run designer.py (Qt Designer must be installed on your system and must be
 in your path on Windows, pyqode-core must be installed)
 """
-import pyqode.core.editor
+import pyqode.core.code_edit
 
 # Define this mapping to help the PySide's form builder create the correct
 # widget
-PLUGINS_TYPES = {'QCodeEdit': pyqode.core.editor.QCodeEdit}
+PLUGINS_TYPES = {'QCodeEdit': pyqode.core.code_edit.QCodeEdit}
 
 try:
     from PyQt4 import QtDesigner

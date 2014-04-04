@@ -2,7 +2,8 @@
 """
 This module contains the line number panel
 """
-from pyqode.core.editor import Panel
+from pyqode.core import api
+from pyqode.core.api import Panel
 from PyQt4 import QtCore, QtGui
 
 
@@ -48,7 +49,7 @@ class LineNumberPanel(Panel):
         self._selecting = True
         self._sel_start = e.pos().y()
         start = end = self.editor.line_nbr_from_position(self._sel_start)
-        self.editor.select_full_lines(start, end)
+        api.select_lines(self.editor, start, end)
 
     def cancel_selection(self):
         self._selecting = False
@@ -72,16 +73,16 @@ class LineNumberPanel(Panel):
             end_pos = e.pos().y()
             start_line = self.editor.line_nbr_from_position(self._sel_start)
             end_line = self.editor.line_nbr_from_position(end_pos)
-            self.editor.select_full_lines(start_line, end_line)
+            api.select_lines(self.editor, start_line, end_line)
 
     def paintEvent(self, event):
         """
         Paints the line numbers
         """
         Panel.paintEvent(self, event)
-        self._lineColorU = self.palette().color(
+        self._line_color_u = self.palette().color(
             QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
-        self._lineColorS = self.palette().color(
+        self._line_color_s = self.palette().color(
             QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
         if self.isVisible():
             painter = QtGui.QPainter(self)
@@ -91,13 +92,13 @@ class LineNumberPanel(Panel):
             font = self.editor.font()
             bold_font = self.editor.font()
             bold_font.setBold(True)
-            pen = QtGui.QPen(self._lineColorU)
-            pen_selected = QtGui.QPen(self._lineColorS)
+            pen = QtGui.QPen(self._line_color_u)
+            pen_selected = QtGui.QPen(self._line_color_s)
             painter.setFont(font)
             # get selection range
-            sel_start, sel_end = self.editor.selection_range()
+            sel_start, sel_end = api.selection_range(self.editor)
             has_sel = sel_start != sel_end
-            cl = self.editor.cursor_position[0]
+            cl = api.cursor_line_nbr(self.editor)
             # draw every visible blocks
             for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or

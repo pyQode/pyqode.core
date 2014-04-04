@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import logging
+from pyqode.core.api import start_server, stop_server
+
 logging.basicConfig(level=logging.DEBUG)
 import os
 import sys
 
 from PyQt4 import QtCore, QtGui
 
-from pyqode.core import client
+from pyqode.core import api
 from pyqode.core import modes
 from pyqode.core import panels
 from pyqode.core import style
@@ -21,25 +23,25 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         # add panels
-        self.editor.install_panel(panels.LineNumberPanel())
-        self.editor.install_panel(panels.SearchAndReplacePanel(),
-                                  panels.SearchAndReplacePanel.Position.BOTTOM)
+        api.install_panel(self.editor, panels.LineNumberPanel())
+        api.install_panel(self.editor, panels.SearchAndReplacePanel(),
+                          panels.SearchAndReplacePanel.Position.BOTTOM)
         # add modes
-        self.editor.install_mode(modes.AutoCompleteMode())
-        self.editor.install_mode(modes.CaseConverterMode())
-        self.editor.install_mode(modes.FileWatcherMode())
-        self.editor.install_mode(modes.CaretLineHighlighterMode())
-        self.editor.install_mode(modes.RightMarginMode())
-        self.editor.install_mode(modes.PygmentsSyntaxHighlighter(
+        api.install_mode(self.editor, modes.AutoCompleteMode())
+        api.install_mode(self.editor, modes.CaseConverterMode())
+        api.install_mode(self.editor, modes.FileWatcherMode())
+        api.install_mode(self.editor, modes.CaretLineHighlighterMode())
+        api.install_mode(self.editor, modes.RightMarginMode())
+        api.install_mode(self.editor, modes.PygmentsSyntaxHighlighter(
             self.editor.document()))
-        self.editor.install_mode(modes.ZoomMode())
-        self.editor.install_mode(modes.CodeCompletionMode())
-        self.editor.install_mode(modes.AutoIndentMode())
-        self.editor.install_mode(modes.IndenterMode())
-        self.editor.install_mode(modes.SymbolMatcherMode())
+        api.install_mode(self.editor, modes.ZoomMode())
+        api.install_mode(self.editor, modes.CodeCompletionMode())
+        api.install_mode(self.editor, modes.AutoIndentMode())
+        api.install_mode(self.editor, modes.IndenterMode())
+        api.install_mode(self.editor, modes.SymbolMatcherMode())
 
         # start pyqode server for our code editor widget
-        client.start_server(self.editor, '../server.py')
+        api.start_server(self.editor, '../server.py')
 
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
@@ -53,12 +55,12 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setupPanelsMenu()
         self.setupStylesMenu()
 
-        # open a this module in the editor
+        # open this module file in the editor
         self.editor.open_file(__file__, detect_encoding=True)
 
     def setupStylesMenu(self):
         group = QtGui.QActionGroup(self)
-        currentStyle = self.editor.get_mode(
+        currentStyle = api.get_mode(self.editor,
             modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
         for style in sorted(modes.PYGMENTS_STYLES):
@@ -72,7 +74,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def setupModesMenu(self):
         # Add modes to the modes menu
-        for k, v in sorted(self.editor.get_modes().items()):
+        for k, v in sorted(api.get_modes(self.editor).items()):
             a = QtGui.QAction(self.menuModes)
             a.setText(k)
             a.setCheckable(True)
@@ -82,7 +84,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.menuModes.addAction(a)
 
     def setupPanelsMenu(self):
-        for zones, panel_dic in sorted(self.editor.get_panels().items()):
+        for zones, panel_dic in sorted(api.get_panels(self.editor).items()):
             for k, v in panel_dic.items():
                 a = QtGui.QAction(self.menuModes)
                 a.setText(k)
@@ -119,7 +121,7 @@ def main():
     win.show()
     app.exec_()
     # cleanup
-    client.stop_server(win.editor)  # ensure the server is properly closed.
+    api.stop_server(win.editor)  # ensure the server is properly closed.
     del win
     del app
 

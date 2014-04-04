@@ -4,7 +4,7 @@ Contains a case converter mode.
 """
 import sys
 from PyQt4 import QtCore, QtGui
-from pyqode.core.editor import Mode
+from pyqode.core.api import Mode
 from pyqode.core import utils
 
 

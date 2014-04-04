@@ -4,10 +4,9 @@ This module contains the search and replace panel
 """
 from PyQt4 import QtCore, QtGui
 from pyqode.core import style
-from pyqode.core import text
+from pyqode.core import api
+from pyqode.core.api import TextDecoration, Panel
 
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.editor import Panel
 from pyqode.core.utils import DelayJobRunner, drift_color
 from pyqode.core._internal.ui.search_panel_ui import Ui_SearchPanel
 
@@ -235,7 +234,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
-        new_text = text.selected_text(self.editor)
+        new_text = api.selected_text(self.editor)
         old_text = self.lineEditSearch.text()
         text_changed = new_text != old_text
         self.lineEditSearch.setText(new_text)
@@ -250,7 +249,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
-        new_txt = text.selected_text(self.editor)
+        new_txt = api.selected_text(self.editor)
         old_txt = self.lineEditSearch.text()
         txt_changed = new_txt != old_txt
         self.lineEditSearch.setText(new_txt)

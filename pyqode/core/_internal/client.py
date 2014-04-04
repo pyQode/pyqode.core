@@ -21,11 +21,11 @@ import uuid
 
 from PyQt4 import QtCore, QtNetwork, QtGui
 
-from pyqode.core import client
-
 
 #: Maps QAbstractSocket::SocketError to string to easily get descriptive error
 #: message out of error numbers.
+from pyqode.core.api import NotConnectedError
+
 SOCKET_ERROR_STRINGS = {
     0: 'the connection was refused by the peer (or timed out).',
     1: 'the remote host closed the connection.',
@@ -220,12 +220,12 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
 
-        :raise: pyqode.core.client.NotCOnnectedError if the server cannot
+        :raise: pyqode.core.api.NotConnectedError if the server cannot
             be reached.
         """
         if not self._process or not self._process.running or \
                 not self.is_connected:
-            raise client.NotConnectedError()
+            raise NotConnectedError()
         classname = '%s.%s' % (worker_class_or_function.__module__,
                                worker_class_or_function.__name__)
         request_id = str(uuid.uuid4())

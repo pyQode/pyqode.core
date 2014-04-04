@@ -13,7 +13,7 @@ from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core import logger, style
+from pyqode.core import api, logger, style
 from pyqode.core.syntax_highlighter import SyntaxHighlighter, \
     IndentBasedFoldDetector, CharBasedFoldDetector
 
@@ -253,13 +253,13 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def _update_lexer(self):
         self.set_lexer_from_file_name(self.editor.file_name)
-        if hasattr(self.editor, "foldingPanel"):
-            if type(self._lexer) in self.LEXERS_FOLD_DETECTORS:
-                self.set_fold_detector(
-                    self.LEXERS_FOLD_DETECTORS[type(self._lexer)])
-                self.editor.foldingPanel.enabled = True
-            else:
-                self.editor.foldingPanel.enabled = False
+        # if hasattr(self.editor, "foldingPanel"):
+        #     if type(self._lexer) in self.LEXERS_FOLD_DETECTORS:
+        #         self.set_fold_detector(
+        #             self.LEXERS_FOLD_DETECTORS[type(self._lexer)])
+        #         self.editor.foldingPanel.enabled = True
+        #     else:
+        #         self.editor.foldingPanel.enabled = False
 
     def _on_text_saved(self):
         self.rehighlight()
@@ -369,7 +369,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self.editor.foreground = fgc
             self.editor._reset_palette()
             try:
-                m = self.editor.get_mode('CaretLineHighlighterMode')
+                m = api.get_mode(self.editor,
+                                 'CaretLineHighlighterMode')
             except KeyError:
                 pass
             else:

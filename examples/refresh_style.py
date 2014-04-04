@@ -7,9 +7,11 @@ the settings and styles after QCodeEdit has been shown.
 """
 import sys
 from PyQt4 import QtGui
+from pyqode.core import api
 from pyqode.core import settings
 from pyqode.core import style
-from pyqode.core.editor import QCodeEdit
+from pyqode.core.code_edit import QCodeEdit
+
 from pyqode.core.modes import PygmentsSyntaxHighlighter
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.panels import SearchAndReplacePanel
@@ -22,14 +24,14 @@ def main():
     # code from the simple example
     editor = QCodeEdit()
     editor.open_file(__file__)
-    editor.install_mode(CaretLineHighlighterMode())
-    editor.install_mode(PygmentsSyntaxHighlighter(editor.document()))
-    editor.install_panel(SearchAndReplacePanel(),
-                         position=SearchAndReplacePanel.Position.TOP)
+    api.install_mode(editor, CaretLineHighlighterMode())
+    api.install_mode(editor, PygmentsSyntaxHighlighter(editor.document()))
+    api.install_panel(editor, SearchAndReplacePanel(),
+                      position=SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
 
-    # make the code edit show whitespaces in dark gray
+    # make qcodeedit show whitespaces in dark gray
     settings.show_white_spaces = True
     style.whitespaces_foreground = QtGui.QColor('#606020')
 

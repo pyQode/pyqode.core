@@ -9,6 +9,7 @@ import sys
 import weakref
 from pyqode.core import logger
 from PyQt4 import QtCore, QtGui
+from pyqode.core.api import TextDecoration
 
 
 def keep_tc_pos(f):
@@ -463,8 +464,7 @@ class DelayJobRunner(JobRunner):
 
 if __name__ == '__main__':
     import time
-    from pyqode.core.editor import QCodeEdit
-    from pyqode.core.decoration import TextDecoration
+    from pyqode.core.code_edit import QCodeEdit
 
     class Example(QCodeEdit):
 

@@ -3,228 +3,14 @@
 This module contains the definition of the QCodeEdit
 """
 import sys
-import weakref
 
 from PyQt4 import QtGui, QtCore
-from pyqode.core import logger, settings, style, text
+
+from pyqode.core import logger, settings, style, api
 from pyqode.core._internal import dialogs
 from pyqode.core._internal.client import JsonTcpClient
+from pyqode.core.api import Panel
 from pyqode.core.utils import DelayJobRunner
-
-
-class Mode(object):
-    """
-    Base class for editor extensions. An extension is a "thing" that can be
-    installed on a QCodeEdit to add new behaviours or to modify the
-    appearance.
-
-    A mode is added to a QCodeEdit by using the
-    :meth:`pyqode.core.QCodeEdit.installMode` or
-    :meth:`pyqode.core.QCodeEdit.installPanel` methods.
-
-    Subclasses must/should override the following methods:
-        - :meth:`pyqode.core.Mode._on_state_changed`
-        - :meth:`pyqode.core.Mode.refresh_style`
-        - :meth:`pyqode.core.Mode.refresh_settings`
-
-    The mode will be identified by its class name, this means that there cannot
-    be two modes of the same type on a QCodeEdit (you have to subclass it)
-    """
-    @property
-    def editor(self):
-        """
-        Provides easy access to the parent editor widget (weakref)
-
-        **READ ONLY**
-
-        :type: pyqode.core.editor.QCodeEdit
-        """
-        if self._editor is not None:
-            return self._editor()
-        else:
-            return None
-
-    @property
-    def enabled(self):
-        """
-        Tell if the mode is enabled, :meth:`pyqode.core.Mode._onStateChanged`
-        is called when the value changed.
-
-        :type: bool
-        """
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled):
-        if enabled != self._enabled:
-            self._enabled = enabled
-            self._on_state_changed(enabled)
-
-    def __init__(self):
-        #: Mode name/identifier. :class:`pyqode.core.QCodeEdit` use it as the
-        #: attribute key when you install a mode.
-        self.name = self.__class__.__name__
-        #: Mode description
-        self.description = self.__doc__
-        self._enabled = False
-        self._editor = None
-
-    def __str__(self):
-        """
-        Returns the extension name
-        """
-        return self.name
-
-    def _on_install(self, editor):
-        """
-        Installs the extension on the editor. Subclasses might want to override
-        this method to add new style/settings properties to the editor.
-
-        .. note:: This method is called by QCodeEdit when you install a Mode.
-                  You should never call it yourself, even in a subclass.
-
-        .. warning:: Don't forget to call **super** when subclassing
-
-        :param editor: editor widget instance
-        :type editor: pyqode.core.QCodeEdit
-        """
-        self._editor = weakref.ref(editor)
-        self.enabled = True
-
-    def _on_uninstall(self):
-        """
-        Uninstall the mode
-        """
-        self.enabled = False
-        self._editor = None
-
-    def _on_state_changed(self, state):
-        """
-        Called when the enable state changed.
-
-        This method does not do anything, you may override it if you need
-        to connect/disconnect to the editor's signals (connect when state is
-        true and disconnect when it is false).
-
-        :param state: True = enabled, False = disabled
-        :type state: bool
-        """
-        pass
-
-    def refresh_style(self):
-        """
-        Called by QCodeEdit when the user wants to refresh style options.
-        """
-        pass
-
-    def refresh_settings(self):
-        """
-        Called by QCodeEdit when the user wants to refresh settings.
-        """
-        pass
-
-
-class Panel(QtGui.QWidget, Mode):
-    """
-    Base class for editor panels.
-
-    A panel is a mode and a QWidget.
-
-    .. note:: A disabled panel will be hidden automatically.
-    """
-
-    # todo make it an enum when python 3.4 is available
-    class Position(object):
-        """
-        Enumerates the possible panel positions
-        """
-        #: Top margin
-        TOP = 0
-        #: Left margin
-        LEFT = 1
-        #: Right margin
-        RIGHT = 2
-        #: Bottom margin
-        BOTTOM = 3
-
-    @property
-    def scrollable(self):
-        """
-        A scrollable panel will follow the editor's scroll-bars. Left and right
-        panels follow the vertical scrollbar. Top and bottom panels follow the
-        horizontal scrollbar.
-
-        :type: bool
-        """
-        return self._scrollable
-
-    @scrollable.setter
-    def scrollable(self, value):
-        self._scrollable = value
-
-    def __init__(self):
-        Mode.__init__(self)
-        QtGui.QWidget.__init__(self)
-        #: Panel order into the zone it is installed to. This value is
-        #: automatically set when installing the panel but it can be changed
-        #: later (negative values can also be used).
-        self.order_in_zone = -1
-        self._scrollable = False
-        self._background_brush = None
-        self._foreground_pen = None
-
-    def _on_install(self, editor):
-        """
-        Extends :meth:`pyqode.core.Mode._onInstall` method to set the editor
-        instance as the parent widget.
-
-        .. warning:: Don't forget to call **super** if you override this
-            method!
-
-        :param editor: Editor instance
-        :type editor: pyqode.core.editor.QCodeEdit
-        """
-        Mode._on_install(self, editor)
-        self.setParent(editor)
-        self.editor.refresh_panels()
-        self._background_brush = QtGui.QBrush(QtGui.QColor(
-            self.palette().window().color()))
-        self._foreground_pen = QtGui.QPen(QtGui.QColor(
-            self.palette().windowText().color()))
-
-    def _on_state_changed(self, state):
-        """
-        Shows/Hides the Panel
-
-        .. warning:: Don't forget to call **super** if you override this
-            method!
-
-        :param state: True = enabled, False = disabled
-        :type state: bool
-        """
-        if not self.editor.isVisible():
-            return
-        if state is True:
-            self.show()
-        else:
-            self.hide()
-
-    def paintEvent(self, event):
-        if self.isVisible():
-            # fill background
-            self._background_brush = QtGui.QBrush(QtGui.QColor(
-                self.palette().window().color()))
-            self._foreground_pen = QtGui.QPen(QtGui.QColor(
-                self.palette().windowText().color()))
-            painter = QtGui.QPainter(self)
-            painter.fillRect(event.rect(), self._background_brush)
-
-    def showEvent(self, *args, **kwargs):
-        self.editor.refresh_panels()
-
-    def setVisible(self, visible):
-        QtGui.QWidget.setVisible(self, visible)
-        self.editor.refresh_panels()
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -403,10 +189,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.rehighlight()
 
     @property
-    def current_line_text(self):
-        return self.line_text(self.cursor_position[0])
-
-    @property
     def dirty(self):
         """
         Gets/sets the dirty flag.
@@ -420,20 +202,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if self._dirty != value:
             self._dirty = value
             self.dirty_changed.emit(value)
-
-    @property
-    def cursor_position(self):
-        """
-        Returns the text cursor position (line, column).
-
-        .. note:: The line number is 1 based while the column number is 0
-            based.
-
-        :return: The cursor position (line, column)
-        :rtype: tuple(int, int)
-        """
-        return (self.textCursor().blockNumber() + 1,
-                self.textCursor().columnNumber())
 
     @property
     def file_name(self):
@@ -480,15 +248,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Each element in the list is a tuple made up of the line top position,
         the line number (already 1 based), and the QTextBlock itself.
 
-        :return: A list of tuple(top position, line number, block)
+        :return: A list of tuple(top_position, line_number, block)
         :rtype: List of tuple(int, int, QtGui.QTextBlock)
         """
         return self._visible_blocks
-
-    @property
-    def line_count(self):
-        """ Returns the document line count """
-        return self.document().blockCount()
 
     def __init__(self, parent=None, create_default_actions=True):
         """
@@ -570,12 +333,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         line, result = dialogs.GoToLineDialog.get_line(
-            self, self.cursor_position[0], self.line_count)
+            self, api.cursor_line_nbr(self), api.line_count(self))
         if not result:
             return
         if not line:
             line = 1
-        return text.goto_line(self, line, move=True)
+        return api.goto_line(self, line, move=True)
 
     def rehighlight(self):
         """
@@ -659,103 +422,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setPlainText(content)
         self.dirty = False
 
-    def line_text(self, line_nbr):
-        """
-        Gets the current line text.
-
-        :param line_nbr: The line number of the text to get
-
-        :return: Entire line's text
-        :rtype: str
-        """
-        tc = self.textCursor()
-        tc.movePosition(tc.Start)
-        tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
-        tc.select(tc.LineUnderCursor)
-        return tc.selectedText()
-
-    def set_line_text(self, line_nbr, text):
-        """
-        Replace the text of a single line by the supplied text.
-
-        :param line_nbr: The line number of the text to remove
-        :type: lineNbr: int
-
-        :param text: Replacement text
-        :type: text: str
-        """
-        tc = self.textCursor()
-        tc.movePosition(tc.Start)
-        tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
-        tc.select(tc.LineUnderCursor)
-        tc.insertText(text)
-
-    def remove_last_line(self):
-        """
-        Removes the last line of the document.
-        """
-        tc = self.textCursor()
-        tc.movePosition(tc.End, tc.MoveAnchor)
-        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
-        tc.movePosition(tc.End, tc.KeepAnchor)
-        tc.removeSelectedText()
-        tc.deletePreviousChar()
-        self.setTextCursor(tc)
-
-    def clean_document(self):
-        """
-        Removes trailing whitespaces and ensure one single blank line at the
-        end of the QTextDocument. (call setPlainText to update the text).
-        """
-        value = self.verticalScrollBar().value()
-        pos = self.cursor_position
-
-        self.textCursor().beginEditBlock()
-
-        # cleanup whitespaces
-        self._cleaning = True
-        eaten = 0
-        for line in self._modified_lines:
-            for j in range(-1, 2):
-                if line + j != pos[0]:
-                    txt = self.line_text(line + j)
-                    stxt = txt.rstrip()
-                    self.set_line_text(line + j, stxt)
-
-        if self.line_text(self.line_count):
-            self.appendPlainText("\n")
-        else:
-            # remove last blank line (except one)
-            i = 0
-            while self.line_count - i > 0:
-                l = self.line_text(self.line_count - i)
-                if l:
-                    break
-                i += 1
-            for j in range(i - 1):
-                self.remove_last_line()
-
-        self._cleaning = False
-        self._original_text = self.toPlainText()
-
-        # restore cursor and scrollbars
-        tc = self.textCursor()
-        tc.movePosition(tc.Start)
-        tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
-        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
-        p = tc.position()
-        tc.select(tc.LineUnderCursor)
-        if tc.selectedText():
-            tc.setPosition(p)
-            offset = pos[1] - eaten
-            tc.movePosition(tc.Right, tc.MoveAnchor, offset)
-        else:
-            tc.setPosition(p)
-        self.setTextCursor(tc)
-        self.verticalScrollBar().setValue(value)
-
-        self.textCursor().endEditBlock()
-
     @QtCore.pyqtSlot()
     def save_to_file(self, path=None, encoding=None, force=False):
         """
@@ -775,7 +441,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if not self.dirty and not force:
             return True
         self.text_saving.emit(path)
-        self.clean_document()
+        api.clean_document(self)
         if not path:
             if self.file_path:
                 path = self.file_path
@@ -793,112 +459,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._fpath = path
         self.text_saved.emit(path)
         return True
-
-    def install_mode(self, mode):
-        """
-        Installs a mode on the editor.
-
-        :param mode: The mode instance to install.
-        :type mode: pyqode.core.editor.Mode
-        """
-        logger.debug('installing mode %s' % mode)
-        self._modes[mode.name] = mode
-        mode._on_install(self)
-
-    def uninstall_mode(self, name):
-        """
-        Uninstalls a previously installed mode.
-
-        :param name: The name of the mode to uninstall.
-        """
-        logger.debug('Uninstalling mode %s' % name)
-        m = self.get_mode(name)
-        if m:
-            m._on_uninstall()
-            return self._modes.pop(name, None)
-
-    def get_mode(self, name_or_klass):
-        """
-        Gets a mode by name.
-
-        :param name_or_klass: The name or the class of the mode to get
-        :type name_or_klass: str or type
-        :rtype: pyqode.core.editor.Mode
-        """
-        if not isinstance(name_or_klass, str):
-            name_or_klass = name_or_klass.__name__
-        return self._modes[name_or_klass]
-
-    def get_modes(self):
-        """
-        Returns the dictionary of modes.
-        """
-        return self._modes
-
-    def install_panel(self, panel, position=Panel.Position.LEFT):
-        """
-        Installs a panel on on the editor. You must specify the position of the
-        panel (panels are rendered in one of the four document margins, see
-        :class:`pyqode.core.editor.Panel.Position`.
-
-        The panel is set as an object attribute using the panel's name as the
-        key.
-
-        :param panel: The panel instance to install
-        :param position: The panel position
-
-        :type panel: pyqode.core.editor.Panel
-        :type position: int
-        """
-        panel.order_in_zone = len(self._panels[position])
-        self._panels[position][panel.name] = panel
-        panel._on_install(self)
-        self._update_viewport_margins()
-
-    def uninstall_panel(self, name):
-        """
-        Uninstalls a previously installed panel.
-
-        :param name: The name of the panel to uninstall
-
-        :return: The uninstalled mode instance
-        """
-        logger.debug('Uninstalling panel %s' % name)
-        p, zone = self.get_panel(name, get_zone=True)
-        if p:
-            p._on_uninstall()
-            return self._panels[zone].pop(name, None)
-
-    def get_panel(self, name_or_klass, get_zone=False):
-        """
-        Gets a panel by name
-
-        :param name_or_klass: Name or class of the panel to get
-        :param get_zone: True to also return the zone in which the panel has
-            been installed.
-        """
-        if not isinstance(name_or_klass, str):
-            name_or_klass = name_or_klass.__name__
-        for i in range(4):
-            try:
-                panel = self._panels[i][name_or_klass]
-            except KeyError:
-                pass
-            else:
-                if get_zone:
-                    return panel, i
-                else:
-                    return panel
-        return None, -1
-
-    def get_panels(self):
-        """
-        Returns the panels dictionary.
-
-        :return: A dictionary of :class:`pyqode.core.Panel`
-        :rtype: dict
-        """
-        return self._panels
 
     def add_decoration(self, decoration):
         """
@@ -944,97 +504,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         :rtype: float
         """
         return self._margin_sizes[position]
-
-    def select_full_lines(self, start, end, apply_selection=True):
-        """
-        Select entire lines between start and end.
-
-        :param start: Start line number (1 based)
-        :type start: int
-        :param end: End line number (1 based)
-        :type end: int
-
-        :param apply_selection: True to apply the selection before returning
-         the QTextCursor.
-        :type apply_selection: bool
-
-        :return A QTextCursor that holds the requested selection
-        """
-        if start and end:
-            tc = self.textCursor()
-            tc.movePosition(QtGui.QTextCursor.Start,
-                            QtGui.QTextCursor.MoveAnchor)
-            tc.movePosition(QtGui.QTextCursor.Down,
-                            QtGui.QTextCursor.MoveAnchor, start - 1)
-            if end > start:  # Going down
-                tc.movePosition(QtGui.QTextCursor.Down,
-                                QtGui.QTextCursor.KeepAnchor,
-                                end - start)
-                tc.movePosition(QtGui.QTextCursor.EndOfLine,
-                                QtGui.QTextCursor.KeepAnchor)
-            elif end < start:  # going up
-                # don't miss end of line !
-                tc.movePosition(QtGui.QTextCursor.EndOfLine,
-                                QtGui.QTextCursor.MoveAnchor)
-                tc.movePosition(QtGui.QTextCursor.Up,
-                                QtGui.QTextCursor.KeepAnchor,
-                                start - end)
-                tc.movePosition(QtGui.QTextCursor.StartOfLine,
-                                QtGui.QTextCursor.KeepAnchor)
-            else:
-                tc.movePosition(QtGui.QTextCursor.EndOfLine,
-                                QtGui.QTextCursor.KeepAnchor)
-            if apply_selection:
-                self.setTextCursor(tc)
-
-    def selection_range(self):
-        """
-        Returns the selected lines boundaries (start line, end line)
-
-        :return: tuple(int, int)
-        """
-        doc = self.document()
-        start = doc.findBlock(
-            self.textCursor().selectionStart()).blockNumber() + 1
-        end = doc.findBlock(
-            self.textCursor().selectionEnd()).blockNumber() + 1
-        tc = QtGui.QTextCursor(self.textCursor())
-        tc.setPosition(self.textCursor().selectionEnd())
-        if tc.columnNumber() == 0 and start != end:
-            end -= 1
-        return start, end
-
-    def line_pos_from_number(self, line_number):
-        """
-        Gets the line pos on the Y-Axis (at the center of the line) from a
-        line number (1 based).
-
-        :param line_number: The line number for which we want to know the
-                            position in pixels.
-
-        :return: The center position of the line.
-        :rtype: int or None
-        """
-        block = self.document().findBlockByNumber(line_number)
-        if block:
-            return int(self.blockBoundingGeometry(block).translated(
-                self.contentOffset()).top())
-        return None
-
-    def line_nbr_from_position(self, y_pos):
-        """
-        Returns the line number from the y_pos
-
-        :param y_pos: Y pos in the QCodeEdit
-
-        :return: Line number (1 based)
-        :rtype: int
-        """
-        height = self.fontMetrics().height()
-        for top, l, block in self._visible_blocks:
-            if top <= y_pos <= top + height:
-                return l
-        return None
 
     def reset_zoom(self):
         """
@@ -1629,11 +1098,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 if dy:
                     panel.scroll(0, dy)
                 else:
-                    l, c = self.cursor_position
+                    l, c = api.cursor_position(self)
                     ol, oc = self._cached_cursor_pos
                     if l != ol or c != oc:
                         panel.update(0, rect.y(), panel.width(), rect.height())
-                    self._cached_cursor_pos = self.cursor_position
+                    self._cached_cursor_pos = api.cursor_position(self)
         if rect.contains(self.viewport().rect()):
             self._update_viewport_margins()
 
@@ -1642,7 +1111,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Updates dirty flag on text changed.
         """
         if not self._cleaning:
-            self._modified_lines.add(self.cursor_position[0])
+            self._modified_lines.add(api.cursor_position(self)[0])
             txt = self.toPlainText()
             self.dirty = (txt != self._original_text)
 

@@ -4,7 +4,7 @@ Contains the mode that control the external changes of file.
 """
 import os
 from pyqode.core import settings
-from pyqode.core.editor import Mode
+from pyqode.core.api import Mode
 from PyQt4 import QtCore, QtGui
 
 

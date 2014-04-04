@@ -4,7 +4,7 @@ This module contains the marker panel
 """
 from pyqode.core import logger
 from PyQt4 import QtCore, QtGui
-from pyqode.core.editor import Panel
+from pyqode.core.api import Panel
 from pyqode.core.utils import DelayJobRunner, memoized
 
 

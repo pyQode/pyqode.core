@@ -10,8 +10,8 @@ the whitespaces.
 """
 import sys
 from PyQt4 import QtGui
-from pyqode.core import settings, style
-from pyqode.core.editor import QCodeEdit
+from pyqode.core import api, settings, style
+from pyqode.core.code_edit import QCodeEdit
 from pyqode.core.modes import PygmentsSyntaxHighlighter
 from pyqode.core.modes import CaretLineHighlighterMode
 from pyqode.core.panels import SearchAndReplacePanel
@@ -31,10 +31,10 @@ def main():
     # code from the simple example
     editor = QCodeEdit()
     editor.open_file(__file__)
-    editor.install_mode(CaretLineHighlighterMode())
-    editor.install_mode(PygmentsSyntaxHighlighter(editor.document()))
-    editor.install_panel(SearchAndReplacePanel(),
-                         position=SearchAndReplacePanel.Position.TOP)
+    api.install_mode(editor, CaretLineHighlighterMode())
+    api.install_mode(editor, PygmentsSyntaxHighlighter(editor.document()))
+    api.install_panel(editor, SearchAndReplacePanel(),
+                      position=SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
     sys.exit(app.exec_())

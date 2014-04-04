@@ -3,11 +3,11 @@
 This module contains the checker mode, a base class for code checker modes.
 """
 from PyQt4 import QtCore, QtGui
-from pyqode.core import client
+from pyqode.core import api
+# NotConnectedError, request_work, TextDecoration, \
+#     Mode
 
-from pyqode.core.editor import Mode
 from pyqode.core.utils import DelayJobRunner
-from pyqode.core.decoration import TextDecoration
 from pyqode.core.panels.marker import Marker, MarkerPanel
 
 
@@ -108,7 +108,7 @@ class CheckerMessage(object):
         return "{0} {1}".format(self.description, self.line)
 
 
-class CheckerMode(Mode, QtCore.QObject):
+class CheckerMode(api.Mode, QtCore.QObject):
     """
     Performs a user defined code analysis job in a background process and
     display the results on the editor instance.
@@ -154,7 +154,7 @@ class CheckerMode(Mode, QtCore.QObject):
         :param show_tooltip: Specify if a tooltip must be displayed when the
                              mouse is over a checker message decoration.
         """
-        Mode.__init__(self)
+        api.Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
         self._messages = []
@@ -180,6 +180,7 @@ class CheckerMode(Mode, QtCore.QObject):
             self.clear_messages()
         if isinstance(messages, CheckerMessage):
             messages = [messages]
+        marker_panel = None
         nb_msg = len(messages)
         if nb_msg > 20:
             nb_msg = 20
@@ -187,7 +188,7 @@ class CheckerMode(Mode, QtCore.QObject):
             self._messages.append(message)
             if message.line:
                 try:
-                    marker_panel = self.editor.get_panel(MarkerPanel)
+                    marker_panel = api.get_panel(self.editor, MarkerPanel)
                 except KeyError:
                     pass
                 else:
@@ -197,16 +198,15 @@ class CheckerMode(Mode, QtCore.QObject):
                 tooltip = None
                 if self._show_tooltip:
                     tooltip = message.description
-                message.decoration = TextDecoration(self.editor.textCursor(),
-                                                    start_line=message.line,
-                                                    tooltip=tooltip,
-                                                    draw_order=3)
+                message.decoration = api.TextDecoration(
+                    self.editor.textCursor(), start_line=message.line,
+                    tooltip=tooltip, draw_order=3)
                 message.decoration.set_full_width(True)
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
                 self.editor.add_decoration(message.decoration)
-        if hasattr(self.editor, "markerPanel"):
-            self.editor.markerPanel.repaint()
+        if marker_panel:
+            marker_panel.repaint()
 
     def remove_message(self, message):
         """
@@ -217,7 +217,7 @@ class CheckerMode(Mode, QtCore.QObject):
         self._messages.remove(message)
         if message.marker:
             try:
-                pnl = self.editor.get_panel(MarkerPanel)
+                pnl = api.get_panel(self.editor, MarkerPanel)
             except KeyError:
                 pass
             else:
@@ -231,8 +231,12 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         while len(self._messages):
             self.remove_message(self._messages[0])
-        if hasattr(self.editor, "markerPanel"):
-            self.editor.markerPanel.repaint()
+        try:
+            m = api.get_mode(self.editor, MarkerPanel)
+        except KeyError:
+            pass
+        else:
+            m.repaint()
 
     def _on_state_changed(self, state):
         if state:
@@ -266,7 +270,7 @@ class CheckerMode(Mode, QtCore.QObject):
             'encoding': self.editor.file_encoding
         }
         try:
-            client.request_work(self.editor, self._worker, request_data,
-                                on_receive=self._on_work_finished)
-        except client.NotConnectedError:
+            api.request_work(self.editor, self._worker, request_data,
+                             on_receive=self._on_work_finished)
+        except api.NotConnectedError:
             QtCore.QTimer.singleShot(2000, self._request)

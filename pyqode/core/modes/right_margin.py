@@ -3,7 +3,7 @@
 This module contains the right margin mode.
 """
 from pyqode.core import settings, style
-from pyqode.core.editor import Mode
+from pyqode.core.api import Mode
 from PyQt4 import QtGui
 
 

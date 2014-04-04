@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-
-from pyqode.core.editor import Mode
-from pyqode.core.decoration import TextDecoration
+from pyqode.core.api import TextDecoration, Mode
 
 
 class WordClickMode(Mode, QtCore.QObject):

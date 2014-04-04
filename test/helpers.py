@@ -4,11 +4,15 @@ A helper module for testing, introducing some helper functions. Inspired by
 the jedi helper module for their testing package
 """
 import os
-from os.path import abspath
-from os.path import dirname
 import functools
 import platform
 import sys
+from os.path import abspath
+from os.path import dirname
+
+from PyQt4.QtTest import QTest
+
+from pyqode.core import api
 
 
 test_dir = dirname(abspath(__file__))
@@ -68,3 +72,8 @@ def not_py2():
             return func(*args, **kwds)
         return wrapper
     return decorator
+
+
+def wait_for_connected(editor):
+    while not api.connected_to_server(editor):
+        QTest.qWait(100)
