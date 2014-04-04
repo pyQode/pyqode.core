@@ -464,7 +464,7 @@ def word_under_cursor(editor, select_whole_word=False, tc=None):
     return tc
 
 
-def select_word_under_mouse_cursor(editor):
+def word_under_mouse_cursor(editor):
     """
     Selects the word under the **mouse** cursor.
 

@@ -48,7 +48,7 @@ class LineNumberPanel(Panel):
         """
         self._selecting = True
         self._sel_start = e.pos().y()
-        start = end = self.editor.line_nbr_from_position(self._sel_start)
+        start = end = api.line_nbr_from_position(self.editor, self._sel_start)
         api.select_lines(self.editor, start, end)
 
     def cancel_selection(self):
@@ -71,8 +71,9 @@ class LineNumberPanel(Panel):
         """
         if self._selecting:
             end_pos = e.pos().y()
-            start_line = self.editor.line_nbr_from_position(self._sel_start)
-            end_line = self.editor.line_nbr_from_position(end_pos)
+            start_line = api.line_nbr_from_position(self.editor,
+                                                    self._sel_start)
+            end_line = api.line_nbr_from_position(self.editor, end_pos)
             api.select_lines(self.editor, start_line, end_line)
 
     def paintEvent(self, event):
