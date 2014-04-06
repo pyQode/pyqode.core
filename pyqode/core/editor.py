@@ -695,7 +695,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         else:
             # remove last blank line (except one)
             i = 0
-            while True:
+            while self.lineCount() - i > 0:
                 l = self.lineText(self.lineCount() - i)
                 if l:
                     break
@@ -741,8 +741,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if not self.dirty and not force:
             return True
         self.textSaving.emit(filePath)
-        if len(self.toPlainText()):
-            self.cleanupDocument()
+        self.cleanupDocument()
         if not filePath:
             if self.filePath:
                 filePath = self.filePath
@@ -955,7 +954,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.textCursor().selectionStart()).blockNumber() + 1
         end = doc.findBlock(
             self.textCursor().selectionEnd()).blockNumber() + 1
-        if start != end and self.textCursor().columnNumber() == 0:
+        tc = QtGui.QTextCursor(self.textCursor())
+        tc.setPosition(self.textCursor().selectionEnd())
+        if tc.columnNumber() == 0 and start != end:
             end -= 1
         return start, end
 

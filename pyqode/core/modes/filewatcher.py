@@ -71,6 +71,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._timer.timeout.connect(self._checkModTime)
         self._mtime = 0
         self._notificationPending = False
+        self._processing = False
 
     def _onInstall(self, editor):
         """
@@ -104,8 +105,15 @@ class FileWatcherMode(Mode, QtCore.QObject):
         except OSError:
             self._mtime = 0
             self._timer.stop()
+        except TypeError:
+            # file path is none, this happen if you use setPlainText instead of
+            # openFile. This is perfectly fine, we just do not have anything to
+            # watch
+            self._timer.stop()
 
     def _checkModTime(self):
+        if self.editor is None:
+            return
         if not self.editor.filePath:
             return
         if not os.path.exists(self.editor.filePath) and self._mtime:
@@ -154,9 +162,11 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._kwargs = kwargs
 
     def _checkForPendingNotification(self, *args, **kwargs):
-        if self._notificationPending:
+        if self._notificationPending and not self._processing:
+            self._processing = True
             self.__notify(*self._args, **self._kwargs)
             self._notificationPending = False
+            self._processing = False
 
 
     def __notifyDeletedFile(self):

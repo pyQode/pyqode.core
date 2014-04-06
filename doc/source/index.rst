@@ -23,7 +23,7 @@ This documentation will only cover the `pyqode.core`_ package.
     :align: center
 
 Parts of the documentation:
-============================
+===========================
 
 .. toctree::
     :maxdepth: 1

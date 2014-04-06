@@ -40,6 +40,7 @@ class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
         self.lblLineCount.setText("%d" % lineCount)
         self.buttonBox.button(self.buttonBox.Ok).setText("Go")
         self.buttonBox.button(self.buttonBox.Cancel).setText("I'm going nowhere")
+        self.spinBox.setFocus()
 
     @classmethod
     def getLine(cls, parent, currentLine, lineCount):
