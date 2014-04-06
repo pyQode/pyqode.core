@@ -5,6 +5,16 @@ Change Log
 
     These lists are not exhaustive.
 
+1.3.1
+-----
+
+Fixed bugs:
+    - improve auto complete, many small bug fixes
+    - fix infinite loop when saving an empty document
+    - fix file watcher when filePath is None
+    - fix a small bug with line panel where the last line was not
+      highlighted as selected.
+
 1.3.0
 -----
 
