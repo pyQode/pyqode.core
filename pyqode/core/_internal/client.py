@@ -41,7 +41,7 @@ SOCKET_ERROR_STRINGS = {
     # 9 and 10 are UDP only, we only care about TCP.
     # all others erros are unlikely to happen in our case (proxy related
     # errors)
-    -1: 'an unidentified error occurred.',
+    - 1: 'an unidentified error occurred.',
 }
 
 PROCESS_ERROR_STRING = {
