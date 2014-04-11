@@ -8,9 +8,9 @@ from PyQt4 import QtGui, QtCore
 
 from pyqode.core import settings
 from pyqode.core import api
-from pyqode.core import workers
 from pyqode.core.api.utils import DelayJobRunner, memoized
 from pyqode.core import logger
+from pyqode.core import server_api
 
 
 class CodeCompletionMode(api.Mode, QtCore.QObject):
@@ -454,7 +454,8 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
                 'path': path, 'encoding': encoding,
                 'prefix': completion_prefix}
         try:
-            api.request_work(self.editor, workers.CodeCompletion, args=data,
+            api.request_work(self.editor,
+                             server_api.CodeCompletionWorker, args=data,
                              on_receive=self._on_results_available)
         except api.NotConnectedError:
             pass

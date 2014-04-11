@@ -4,10 +4,9 @@
 Simple server which adds the code_completion.DocumentWordsProvider to the
 CodeCompletion worker.
 """
-from pyqode.core import server
-from pyqode.core import workers
+from pyqode.core import server_api
 
 if __name__ == '__main__':
-    workers.CodeCompletion.providers.append(
-        workers.DocumentWordsProvider())
-    server.run()
+    server_api.CodeCompletionWorker.providers.append(
+        server_api.DocumentWordsProvider())
+    server_api.run()

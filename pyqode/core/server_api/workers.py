@@ -21,7 +21,7 @@ import traceback
 from pyqode.core import settings
 
 
-def echo(data):
+def echo_worker(data):
     """
     Example of worker that simply echoes back the received data.
 
@@ -31,7 +31,7 @@ def echo(data):
     return True, data
 
 
-class CodeCompletion(object):
+class CodeCompletionWorker(object):
     """
     This is the worker associated with the code completion mode.
 
@@ -97,7 +97,7 @@ class CodeCompletion(object):
         encoding = data['encoding']
         prefix = data['prefix']
         completions = []
-        for prov in CodeCompletion.providers:
+        for prov in CodeCompletionWorker.providers:
             try:
                 completions.append(prov.complete(
                     code, line, column, path, encoding, prefix))
