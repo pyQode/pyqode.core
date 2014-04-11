@@ -3,11 +3,11 @@
 This module contains the symbol matcher mode
 """
 from pyqode.core import style
-from pyqode.core.frontend import TextDecoration, Mode
+from pyqode.core import frontend
 from pyqode.core.frontend.syntax_highlighter import TextBlockUserData
 
 
-class SymbolMatcherMode(Mode):
+class SymbolMatcherMode(frontend.Mode):
     """
     Do symbols matches highlighting (parenthesis, braces, ...).
 
@@ -56,7 +56,7 @@ class SymbolMatcherMode(Mode):
         self._refresh_decorations()
 
     def __init__(self):
-        Mode.__init__(self)
+        super().__init__()
         self._decorations = []
         self._init_style()
 
@@ -72,7 +72,7 @@ class SymbolMatcherMode(Mode):
 
     def _clear_decorations(self):
         for d in self._decorations:
-            self.editor.remove_decoration(d)
+            frontend.remove_decoration(self.editor, d)
         self._decorations[:] = []
 
     def symbol_pos(self, cursor, character='(', type=0):
@@ -94,14 +94,14 @@ class SymbolMatcherMode(Mode):
 
     def _refresh_decorations(self):
         for d in self._decorations:
-            self.editor.remove_decoration(d)
+            frontend.remove_decoration(self.editor, d)
             if d.match:
                 d.set_foreground(self._match_foreground)
                 d.set_background(self._match_background)
             else:
                 d.set_foreground(self._unmatch_foreground)
                 d.set_background(self._unmatch_background)
-            self.editor.add_decoration(d)
+            frontend.add_decoration(self.editor, d)
 
     def _on_state_changed(self, state):
         if state:
@@ -304,7 +304,7 @@ class SymbolMatcherMode(Mode):
 
     def do_symbols_matching(self):
         for d in self._decorations:
-            self.editor.remove_decoration(d)
+            frontend.remove_decoration(self.editor, d)
         self._decorations[:] = []
         data = self.editor.textCursor().block().userData()
         if data and isinstance(data, TextBlockUserData):
@@ -317,7 +317,7 @@ class SymbolMatcherMode(Mode):
         cursor = self.editor.textCursor()
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
-        d = TextDecoration(cursor, draw_order=10)
+        d = frontend.TextDecoration(cursor, draw_order=10)
         d.line = cursor.blockNumber() + 1
         d.column = cursor.columnNumber()
         d.character = cursor.selectedText()
@@ -329,5 +329,5 @@ class SymbolMatcherMode(Mode):
             d.set_foreground(self._unmatch_foreground)
             d.set_background(self._unmatch_background)
         self._decorations.append(d)
-        self.editor.add_decoration(d)
+        frontend.add_decoration(self.editor, d)
         return cursor

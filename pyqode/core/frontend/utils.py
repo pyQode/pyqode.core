@@ -435,20 +435,20 @@ class DelayJobRunner(JobRunner):
 
 if __name__ == '__main__':
     import time
-    from pyqode.core.frontend import QCodeEdit
+    from pyqode.core import frontend
 
-    class Example(QCodeEdit):
+    class Example(frontend.QCodeEdit):
 
         addDecorationRequested = QtCore.pyqtSignal(str, int)
 
         def __init__(self):
-            QCodeEdit.__init__(self, parent=None)
+            frontend.QCodeEdit.__init__(self, parent=None)
             self.open_file(__file__)
             self.resize(QtCore.QSize(1000, 600))
             self.addDecorationRequested.connect(self.decorate_line)
 
         def showEvent(self, event):
-            QCodeEdit.showEvent(self, event)
+            frontend.QCodeEdit.showEvent(self, event)
             self.job_runner = JobRunner(self, nb_threads_max=3)
             self.job_runner.start_job(self.xxx, False, "#FF0000", 0)
             self.job_runner.start_job(self.xxx, False, "#00FF00", 10)
@@ -463,7 +463,7 @@ if __name__ == '__main__':
             d = TextDecoration(tc)
             d.set_as_error(QtGui.QColor(color))
             d.set_full_width(True)
-            self.add_decoration(d)
+            frontend.add_decoration(self, d)
 
         def xxx(self, color, offset):
             for i in range(10):

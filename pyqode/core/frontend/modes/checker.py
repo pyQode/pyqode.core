@@ -201,7 +201,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
                 message.decoration.set_full_width(True)
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
-                self.editor.add_decoration(message.decoration)
+                frontend.add_decoration(self.editor, message.decoration)
         if marker_panel:
             marker_panel.repaint()
 
@@ -220,7 +220,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             else:
                 pnl.remove_marker(message.marker)
         if message.decoration:
-            self.editor.remove_decoration(message.decoration)
+            frontend.remove_decoration(self.editor, message.decoration)
 
     def clear_messages(self):
         """

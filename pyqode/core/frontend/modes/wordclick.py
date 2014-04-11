@@ -65,12 +65,12 @@ class WordClickMode(Mode, QtCore.QObject):
                 self._deco = TextDecoration(tc)
                 self._deco.set_foreground(QtCore.Qt.blue)
                 self._deco.set_as_underlined()
-                self.editor.add_decoration(self._deco)
+                frontend.add_decoration(self.editor, self._deco)
                 self.editor.set_cursor(QtCore.Qt.PointingHandCursor)
             else:
                 self.editor.set_cursor(QtCore.Qt.IBeamCursor)
 
     def _remove_decoration(self):
         if self._deco is not None:
-            self.editor.remove_decoration(self._deco)
+            frontend.remove_decoration(self.editor, self._deco)
             self._deco = None

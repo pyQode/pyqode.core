@@ -98,9 +98,12 @@ from pyqode.core.frontend.client import request_work
 from pyqode.core.frontend.client import start_server
 from pyqode.core.frontend.client import stop_server
 
-# Decorations API
+# Text decorations API
 from pyqode.core.frontend.decoration import TextDecoration
-from pyqode.core.frontend.decoration import TextDecorationSignals
+from pyqode.core.frontend.decoration import _TextDecorationSignals
+from pyqode.core.frontend.decoration import add_decoration
+from pyqode.core.frontend.decoration import remove_decoration
+from pyqode.core.frontend.decoration import clear_decorations
 
 
 # Utils API

@@ -5,11 +5,11 @@ This module contains the care line highlighter mode
 from PyQt4 import QtGui
 
 from pyqode.core import style
-from pyqode.core.frontend import TextDecoration, Mode
+from pyqode.core import frontend
 from pyqode.core.frontend.utils import drift_color
 
 
-class CaretLineHighlighterMode(Mode):
+class CaretLineHighlighterMode(frontend.Mode):
     """
     This mode highlights the caret line (active line).
     """
@@ -23,7 +23,7 @@ class CaretLineHighlighterMode(Mode):
         self._update_highlight()
 
     def __init__(self):
-        Mode.__init__(self)
+        super().__init__()
         self._decoration = None
         self._brush = None
         self._pos = -1
@@ -57,7 +57,7 @@ class CaretLineHighlighterMode(Mode):
         Installs the mode on the editor and add a style property:
             - caretLineBackground
         """
-        Mode._on_install(self, editor)
+        super()._on_install(editor)
         self._update_highlight()
 
     def refresh_style(self):
@@ -66,14 +66,14 @@ class CaretLineHighlighterMode(Mode):
 
     def _clear_deco(self):
         if self._decoration:
-            self.editor.remove_decoration(self._decoration)
+            frontend.remove_decoration(self.editor, self._decoration)
 
     def _update_highlight(self):
         """
         Updates the current line decoration
         """
         self._clear_deco()
-        self._decoration = TextDecoration(self.editor.textCursor())
+        self._decoration = frontend.TextDecoration(self.editor.textCursor())
         self._decoration.set_background(self._brush)
         self._decoration.set_full_width()
-        self.editor.add_decoration(self._decoration)
+        frontend.add_decoration(self.editor, self._decoration)

@@ -161,10 +161,10 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     def _refresh_decorations(self):
         for d in self._decorations:
-            self.editor.remove_decoration(d)
+            frontend.remove_decoration(self.editor, d)
             d.set_background(QtGui.QBrush(self.background))
             d.set_foreground(QtGui.QBrush(self.foreground))
-            self.editor.add_decoration(d)
+            frontend.add_decoration(self.editor, d)
 
     def _on_state_changed(self, state):
         Panel._on_state_changed(self, state)
@@ -468,7 +468,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             deco = self._create_decoration(occurrence[0],
                                            occurrence[1])
             self._decorations.append(deco)
-            self.editor.add_decoration(deco)
+            frontend.add_decoration(self.editor, deco)
         self.cpt_occurences = len(occurrences)
         if not self.cpt_occurences:
             self._current_occurrence_index = -1
@@ -512,7 +512,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
     def _clear_decorations(self):
         """ Remove all decorations """
         for deco in self._decorations:
-            self.editor.remove_decoration(deco)
+            frontend.remove_decoration(self.editor, deco)
         self._decorations[:] = []
 
     def _set_current_occurrence(self, cr):

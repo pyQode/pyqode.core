@@ -1,7 +1,12 @@
 from PyQt4 import QtGui, QtCore
+from pyqode.core import logger
 
 
-class TextDecorationSignals(QtCore.QObject):
+class _TextDecorationSignals(QtCore.QObject):
+    """
+    Holds the signals for a TextDecoration (as we cannot make it a QObject we
+    need to store its signals in an external QObject).
+    """
     clicked = QtCore.pyqtSignal(object)
 
 
@@ -40,7 +45,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
         QtGui.QTextEdit.ExtraSelection.__init__(self)
-        self.signals = TextDecorationSignals()
+        self.signals = _TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip
         cursor = QtGui.QTextCursor(cursor_or_bloc_or_doc)
@@ -145,3 +150,43 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SpellCheckUnderline)
         self.format.setUnderlineColor(color)
+
+
+def add_decoration(editor, decoration):
+    """
+    Adds a text decoration on a QCodeEdit instance
+
+    :param editor: QCodeEdit instance
+    :param decoration: Text decoration
+    :type decoration: pyqode.core.TextDecoration
+    """
+    if decoration not in editor._extra_selections:
+        editor._extra_selections.append(decoration)
+        editor._extra_selections = sorted(
+            editor._extra_selections, key=lambda sel: sel.draw_order)
+        editor.setExtraSelections(editor._extra_selections)
+
+
+def remove_decoration(editor, decoration):
+    """
+    Remove text decoration from a QCodeEdit instance.
+
+    :param editor: QCodeEdit instance
+    :param decoration: The decoration to remove
+    :type decoration: pyqode.core.TextDecoration
+    """
+    try:
+        editor._extra_selections.remove(decoration)
+        editor.setExtraSelections(editor._extra_selections)
+    except ValueError:
+        logger.exception('cannot remove decoration %r' % decoration)
+
+
+def clear_decorations(editor):
+    """
+    Clears all text decorations from a QCodeEdit instance.
+
+    :param editor: QCodeEdit instance
+    """
+    editor._extra_selections[:] = []
+    editor.setExtraSelections(editor._extra_selections)

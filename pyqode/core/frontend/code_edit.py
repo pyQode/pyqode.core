@@ -461,39 +461,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.text_saved.emit(path)
         return True
 
-    def add_decoration(self, decoration):
-        """
-        Adds a text decoration.
-
-        :param decoration: Text decoration
-        :type decoration: pyqode.core.TextDecoration
-        """
-        if decoration not in self._extra_selections:
-            self._extra_selections.append(decoration)
-            self._extra_selections = sorted(
-                self._extra_selections, key=lambda sel: sel.draw_order)
-            self.setExtraSelections(self._extra_selections)
-
-    def remove_decoration(self, decoration):
-        """
-        Remove text decoration.
-
-        :param decoration: The decoration to remove
-        :type decoration: pyqode.core.TextDecoration
-        """
-        try:
-            self._extra_selections.remove(decoration)
-            self.setExtraSelections(self._extra_selections)
-        except ValueError:
-            pass
-
-    def clear_decorations(self):
-        """
-        Clears all text decorations
-        """
-        self._extra_selections[:] = []
-        self.setExtraSelections(self._extra_selections)
-
     def margin_size(self, position=Panel.Position.LEFT):
         """
         Gets the size of a specific margin.
