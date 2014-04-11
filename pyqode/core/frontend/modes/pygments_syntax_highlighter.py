@@ -51,8 +51,8 @@ try:
     from pygments.lexers.compiled import ObjectiveCppLexer
     from pygments.lexers.compiled import ValaLexer
 except ImportError as e:  # too new on some systems
-    logger.error("Faile to import pygments lexer, please update your pygments "
-                 "installation. %s" % e)
+    logger.exception("failed to import pygments lexers, please update your "
+                     "pygments installation. %s" % e)
 
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
@@ -207,9 +207,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             ValaLexer: CharBasedFoldDetector(),
         }
     except NameError:
-        logger.warning("PygmentsSyntaxHighlighter: Failed to setup fold "
-                       "detectors associations. Please upgrade your pygments "
-                       "installation.")
+        logger.exception("failed to setup fold detectors associations.")
         LEXERS_FOLD_DETECTORS = {}
 
     @property
@@ -281,14 +279,15 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                 filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
-            logger.warning("Failed to find lexer from filename %s" % filename)
+            logger.exception("failed to find lexer from filename %s" %
+                             filename)
             self._lexer = None
 
     def set_lexer_from_mime_type(self, mime, **options):
         try:
             self._lexer = get_lexer_for_mimetype(mime, **options)
         except ClassNotFound:
-            logger.warning("Failed to find lexer from mime type %s" % mime)
+            logger.exception("failed to find lexer from mime type %s" % mime)
             self._lexer = None
 
     def highlight_block(self, text):

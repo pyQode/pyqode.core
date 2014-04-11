@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import logging
-
-
 logging.basicConfig(level=logging.DEBUG)
 import os
 import sys
@@ -15,7 +13,6 @@ from pyqode.core.frontend import panels
 from pyqode.core import style
 
 from ui.simple_editor_ui import Ui_MainWindow
-
 
 class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):

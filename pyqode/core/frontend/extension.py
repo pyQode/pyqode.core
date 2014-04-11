@@ -126,7 +126,7 @@ def install_mode(editor, mode):
     :param mode: The mode instance to install.
     :type mode: pyqode.core.api.Mode
     """
-    logger.debug('installing mode %s' % mode)
+    logger.info('installing mode %r' % mode.name)
     editor._modes[mode.name] = mode
     mode._on_install(editor)
 
@@ -137,7 +137,7 @@ def uninstall_mode(editor, name):
 
     :param name: The name of the mode to uninstall.
     """
-    logger.debug('Uninstalling mode %s' % name)
+    logger.info('uninstalling mode %r' % name)
     m = get_mode(editor, name)
     if m:
         m._on_uninstall()
@@ -284,6 +284,14 @@ def install_panel(editor, panel, position=Panel.Position.LEFT):
     :type panel: pyqode.core.api.Panel
     :type position: int
     """
+    pos_to_string = {
+        Panel.Position.BOTTOM: 'bottom',
+        Panel.Position.LEFT: 'left',
+        Panel.Position.RIGHT: 'right',
+        Panel.Position.TOP: 'top'
+    }
+    logger.info('installing panel %r at %r' %
+                (panel.name, pos_to_string[position]))
     panel.order_in_zone = len(editor._panels[position])
     editor._panels[position][panel.name] = panel
     panel._on_install(editor)
@@ -298,7 +306,7 @@ def uninstall_panel(editor, name):
 
     :return: The uninstalled mode instance
     """
-    logger.debug('Uninstalling panel %s' % name)
+    logger.info('Uninstalling panel %s' % name)
     p, zone = get_panel(editor, name, get_zone=True)
     if p:
         p._on_uninstall()

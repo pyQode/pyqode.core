@@ -176,10 +176,10 @@ class MarkerPanel(Panel):
     def mousePressEvent(self, event):
         line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         if self.marker_for_line(line):
-            logger.debug("Remove marker requested")
+            logger.debug("remove marker requested")
             self.remove_marker_requested.emit(line)
         else:
-            logger.debug("Add marker requested")
+            logger.debug("add marker requested")
             self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):

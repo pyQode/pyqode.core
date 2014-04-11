@@ -21,6 +21,8 @@ import uuid
 
 from PyQt4 import QtCore, QtNetwork, QtGui
 
+from pyqode.core import logger
+
 
 #: Maps QAbstractSocket::SocketError to string to easily get descriptive error
 #: message out of error numbers.
@@ -80,11 +82,10 @@ class ServerProcess(QtCore.QProcess):
         self.readyReadStandardOutput.connect(self._on_process_stdout_ready)
         self.readyReadStandardError.connect(self._on_process_stderr_ready)
         self.running = False
-        self._srv_logger = logging.getLogger('pyqode-server')
-        self._cli_logger = logging.getLogger('pyqode-client')
+        self._srv_logger = logging.getLogger('pyqode.server')
 
     def _on_process_started(self):
-        self._cli_logger.debug('server process started')
+        logger.info('server process started')
         self.running = True
 
     def _on_process_error(self, error):
@@ -97,12 +98,12 @@ class ServerProcess(QtCore.QProcess):
         except RuntimeError:
             pass
         else:
-            self._cli_logger.debug('server process error %s: %s' % (error,
-                                   PROCESS_ERROR_STRING[error]))
+            logger.error('server process error %s: %s' % (error,
+                         PROCESS_ERROR_STRING[error]))
 
     def _on_process_finished(self, exit_code):
-        self._cli_logger.debug('server process finished with exit code %d' %
-                               exit_code)
+        logger.info('server process finished with exit code %d' %
+                    exit_code)
         self.running = False
 
     def _on_process_stdout_ready(self):
@@ -139,7 +140,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.error.connect(self._on_error)
         self.disconnected.connect(self._on_disconnected)
         self.readyRead.connect(self._on_ready_read)
-        self._cli_logger = logging.getLogger('pyqode-client')
+        logger = logging.getLogger('pyqode.core-client')
         self._header_complete = False
         self._header_buf = bytes()
         self._to_read = 0
@@ -189,8 +190,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :param list args: list of additional command line args to use to start
             the server process.
         """
-        self._cli_logger.debug('running with python %d.%d.%d' %
-                               sys.version_info[:3])
+        logger.debug('running with python %d.%d.%d' % sys.version_info[:3])
         assert os.path.exists(server_script)
         if not interpreter:
             interpreter = sys.executable
@@ -207,8 +207,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if args:
             pgm_args += args
         self._process.start(program, pgm_args)
-        self._cli_logger.debug('starting server process: %s %s' %
-                               (program, ' '.join(pgm_args)))
+        logger.info('starting server process: %s %s' %
+                    (program, ' '.join(pgm_args)))
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
         """
@@ -243,7 +243,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :param encoding: encoding used to encode the json message into a
             bytes array, this should match QCodeEdit.file_encoding.
         """
-        self._cli_logger.debug('sending request: %r' % obj)
+        logger.debug('sending request: %r' % obj)
         msg = json.dumps(obj)
         msg = msg.encode(encoding)
         header = struct.pack('=I', len(msg))
@@ -262,21 +262,21 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         return free_port
 
     def _connect(self):
-        self._cli_logger.debug('Connecting to 127.0.0.1:%d' % self._port)
+        logger.debug('connecting to 127.0.0.1:%d' % self._port)
         self._connection_attempts += 1
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
 
     def _on_connected(self):
-        self._cli_logger.debug('connected to server: %s:%d' %
-                               (self.peerName(), self.peerPort()))
+        logger.info('connected to server: %s:%d' %
+                    (self.peerName(), self.peerPort()))
         self.is_connected = True
 
     def _on_error(self, socket_error):
         if socket_error not in SOCKET_ERROR_STRINGS:
             socket_error = -1
-        self._cli_logger.error('socket error %d: %s' % (socket_error,
-                               SOCKET_ERROR_STRINGS[socket_error]))
+        logger.error('socket error %d: %s' % (socket_error,
+                     SOCKET_ERROR_STRINGS[socket_error]))
         if socket_error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
             # try again, sometimes the server process might not have started
             # its socket yet.
@@ -288,8 +288,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _on_disconnected(self):
         try:
-            self._cli_logger.debug('disconnected from server: %s:%d' %
-                                   (self.peerName(), self.peerPort()))
+            logger.info('disconnected from server: %s:%d' %
+                        (self.peerName(), self.peerPort()))
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
@@ -311,7 +311,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 if self._to_read == 0:
                     data = self._data_buf.decode('utf-8')
                     obj = json.loads(data)
-                    self._cli_logger.debug('response received: %r' % obj)
+                    logger.debug('response received: %r' % obj)
                     try:
                         request_id = obj['request_id']
                         results = obj['results']

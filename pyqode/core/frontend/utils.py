@@ -259,7 +259,7 @@ class _JobThread(QtCore.QThread):
         try:
             self.execute_on_run(*self.args, **self.kwargs)
         except AttributeError:
-            logger.warning("Executing not callable statement: %s" %
+            logger.warning("_JobThread: executing not callable statement: %s" %
                            self.execute_on_run)
         else:
             self.on_finish()
@@ -347,7 +347,8 @@ class JobRunner(object):
                 self._job_queue[0].start()
             return True
         else:
-            logger.debug("Failed to queue job. All threads are used")
+            logger.debug("JobRunner: failed to queue job, all threads are "
+                         "busy")
             return False
 
     def _execute_next(self):

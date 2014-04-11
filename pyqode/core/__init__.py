@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 The core package contains the core components for writing a pyqode based
-application. It is the defacto requirement for any pyqode extension.
+application. It is the "de facto" requirement for any pyqode extension.
 
-It contains the code editor widget and the frontend needed to extend it.
+It contains the base classes for both the backend and the frontend and provides
+a series of modes and panels that might be useful for any kind of code editor
+widget, i.e. pyqode.core is a generic code editor widget.
 """
 
 __version__ = "2.0-dev"

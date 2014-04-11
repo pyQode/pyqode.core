@@ -122,7 +122,8 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         usd = self.editor.textCursor().block().userData()
         for start, end in usd.cc_disabled_zones:
             if start <= column < end:
-                logger.debug("Cancel request, cursor is in a disabled zone")
+                logger.debug(
+                    "cc: cancel request, cursor is in a disabled zone")
                 return
         self._request_cnt += 1
         self._collect_completions(
@@ -170,7 +171,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, status, results):
-        logger.debug("got completion results")
+        logger.debug("cc: got completion results")
         self.editor.set_cursor(QtCore.Qt.IBeamCursor)
         all_results = []
         if status:
@@ -245,7 +246,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                     text_to_cursor = tc.selectedText()
                     for symbol in symbols:
                         if text_to_cursor.endswith(symbol):
-                            logger.debug("CC: Symbols trigger")
+                            logger.debug("cc: symbols trigger")
                             self._hide_popup()
                             self.request_completion()
                             return
@@ -253,7 +254,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 if not self._completer.popup().isVisible():
                     prefix_len = len(self.completion_prefix)
                     if prefix_len == self._trigger_len:
-                        logger.debug("CC: Len trigger")
+                        logger.debug("cc: Len trigger")
                         self.request_completion()
                         return
             if self.completion_prefix == "":
@@ -449,7 +450,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
-        logger.debug("Completion requested")
+        logger.debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,
                 'prefix': completion_prefix}
