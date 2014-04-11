@@ -1,5 +1,5 @@
 """
-This module tests the text api module (pyqode.core.text)
+This module tests the text frontend module ((pyqode.core.frontend.text)
 """
 import os
 import sys
@@ -9,7 +9,7 @@ from PyQt4.QtTest import QTest
 
 import pytest
 from pyqode.core import frontend
-from .helpers import cwd_at, wait_for_connected
+from ..helpers import cwd_at, wait_for_connected
 
 
 app = None
@@ -131,39 +131,3 @@ def test_line_pos_line_nbr():
     assert pos is not None
     nbr = frontend.line_nbr_from_position(editor, pos)
     assert nbr == 2
-
-
-def test_modes():
-    """
-    Test to install, retrieve and remove a mode.
-
-    """
-    from pyqode.core.frontend.modes import CaseConverterMode
-    global editor
-    mode = CaseConverterMode()
-    frontend.install_mode(editor, mode)
-    m = frontend.get_mode(editor, CaseConverterMode)
-    assert m == mode
-    m = frontend.uninstall_mode(editor, CaseConverterMode)
-    assert m == mode
-    with pytest.raises(KeyError):
-        frontend.uninstall_mode(editor, CaseConverterMode)
-
-
-def test_panels():
-    """
-    Test to install, retrieve and remove a panel
-
-    """
-    from pyqode.core.frontend.panels import LineNumberPanel
-    global editor
-    panel = LineNumberPanel()
-    frontend.install_panel(editor, panel, panel.Position.LEFT)
-    QTest.qWait(1000)
-    p, zone = frontend.get_panel(editor, LineNumberPanel, get_zone=True)
-    assert p == panel
-    assert zone == panel.Position.LEFT
-    p = frontend.uninstall_panel(editor, LineNumberPanel)
-    assert p == panel
-    with pytest.raises(KeyError):
-        frontend.uninstall_panel(editor, LineNumberPanel)

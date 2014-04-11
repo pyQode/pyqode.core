@@ -68,7 +68,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         :param cursor: The text cursor to test
         :type cursor: QtGui.QTextCursor
         """
-        return self.cursor.selectionStart() <= cursor.position() < \
+        return self.cursor.selectionStart() <= cursor.position() <= \
             self.cursor.selectionEnd()
 
     def set_as_bold(self):
@@ -165,6 +165,8 @@ def add_decoration(editor, decoration):
         editor._extra_selections = sorted(
             editor._extra_selections, key=lambda sel: sel.draw_order)
         editor.setExtraSelections(editor._extra_selections)
+        return True
+    return False
 
 
 def remove_decoration(editor, decoration):
@@ -178,8 +180,10 @@ def remove_decoration(editor, decoration):
     try:
         editor._extra_selections.remove(decoration)
         editor.setExtraSelections(editor._extra_selections)
+        return True
     except ValueError:
         logger.exception('cannot remove decoration %r' % decoration)
+        return False
 
 
 def clear_decorations(editor):
