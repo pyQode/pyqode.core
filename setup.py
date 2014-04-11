@@ -31,8 +31,10 @@ setup(
     description='Python/Qt Code Editor widget',
     long_description=readme(),
     install_requires=['pygments'],
-    entry_points={'pyqode_plugins':
-                  ['pyqode_core = pyqode.core.plugins.pyqode_core_plugin']},
+    entry_points={
+        'pyqode_plugins':
+            ['pyqode_core = pyqode.core.designer_plugins.core']
+    },
     zip_safe=False,
     classifiers=[
         'Development Status :: 5 - Production/Stable',

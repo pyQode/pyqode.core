@@ -4,8 +4,8 @@ Contains a case converter mode.
 """
 from PyQt4 import QtGui
 
-from pyqode.core.api import Mode
-from pyqode.core.api.text import keep_tc_pos
+from pyqode.core.frontend import Mode
+from pyqode.core.frontend.text import keep_tc_pos
 
 
 class CaseConverterMode(Mode):

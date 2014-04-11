@@ -6,15 +6,14 @@ the settings and styles after QCodeEdit has been shown.
 
 """
 import sys
+
 from PyQt4 import QtGui
-from pyqode.core import api
+
+from pyqode.core import frontend
 from pyqode.core import settings
 from pyqode.core import style
-from pyqode.core.code_edit import QCodeEdit
-
-from pyqode.core.modes import PygmentsSyntaxHighlighter
-from pyqode.core.modes import CaretLineHighlighterMode
-from pyqode.core.panels import SearchAndReplacePanel
+from pyqode.core.frontend import modes
+from pyqode.core.frontend import panels
 
 
 def main():
@@ -22,12 +21,14 @@ def main():
     window = QtGui.QMainWindow()
 
     # code from the simple example
-    editor = QCodeEdit()
+    editor = frontend.QCodeEdit()
     editor.open_file(__file__)
-    api.install_mode(editor, CaretLineHighlighterMode())
-    api.install_mode(editor, PygmentsSyntaxHighlighter(editor.document()))
-    api.install_panel(editor, SearchAndReplacePanel(),
-                      position=SearchAndReplacePanel.Position.TOP)
+    frontend.install_mode(editor, modes.CaretLineHighlighterMode())
+    frontend.install_mode(editor, modes.PygmentsSyntaxHighlighter(
+        editor.document()))
+    frontend.install_panel(
+        editor, panels.SearchAndReplacePanel(),
+        position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
 

@@ -6,23 +6,20 @@ as intended
 """
 import os
 import sys
-import pytest
+import logging
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-from pyqode.core.code_edit import QCodeEdit
-from pyqode.core import api
-from pyqode.core import server_api
+import pytest
+from pyqode.core import frontend
+from pyqode.core import backend
 from pyqode.core._internal.client import JsonTcpClient
-
 from .helpers import cwd_at
 from .helpers import require_python2
 from .helpers import python2_path
 from .helpers import not_py2
 
-
-import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -42,13 +39,13 @@ def test_app():
         app.exit(0)
 
     app = QtGui.QApplication(sys.argv)
-    editor = QCodeEdit()
-    api.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
+    editor = frontend.QCodeEdit()
+    frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     editor.open_file(__file__)
     editor.show()
     QtCore.QTimer.singleShot(2000, _leave)
     app.exec_()
-    api.stop_server(editor)
+    frontend.stop_server(editor)
     del editor
     del app
 
@@ -76,7 +73,7 @@ def _send_request():
     contains 'some data'.
     """
     global client_socket
-    client_socket.request_work(server_api.echo_worker, 'some data',
+    client_socket.request_work(backend.echo_worker, 'some data',
                                on_receive=_on_receive)
 
 
@@ -94,8 +91,8 @@ def test_client_server():
     app = QtGui.QApplication(sys.argv)
     win = QtGui.QMainWindow()
     client_socket = JsonTcpClient(win)
-    with pytest.raises(api.NotConnectedError):
-        client_socket.request_work(server_api.echo_worker, 'some data',
+    with pytest.raises(frontend.NotConnectedError):
+        client_socket.request_work(backend.echo_worker, 'some data',
                                    on_receive=_on_receive)
     client_socket.start(os.path.join(os.getcwd(), 'server.py'))
     client_socket.connected.connect(_send_request)
@@ -118,8 +115,8 @@ def test_client_server_py2():
     app = QtGui.QApplication(sys.argv)
     win = QtGui.QMainWindow()
     client_socket = JsonTcpClient(win)
-    with pytest.raises(api.NotConnectedError):
-        client_socket.request_work(server_api.echo_worker, 'some data',
+    with pytest.raises(frontend.NotConnectedError):
+        client_socket.request_work(backend.echo_worker, 'some data',
                                    on_receive=_on_receive)
     client_socket.start(os.path.join(os.getcwd(), 'server.py'),
                         interpreter=python2_path())

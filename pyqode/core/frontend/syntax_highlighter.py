@@ -3,7 +3,7 @@
 Base class for pyqode syntax hightlighters
 """
 from PyQt4 import QtGui, QtCore
-from pyqode.core.api import Mode
+from pyqode.core.frontend import Mode
 
 
 class FoldDetector(object):

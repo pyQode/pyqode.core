@@ -5,9 +5,9 @@ This module contains the marker panel
 from PyQt4 import QtCore, QtGui
 
 from pyqode.core import logger
-from pyqode.core.api import Panel
-from pyqode.core import api
-from pyqode.core.api.utils import DelayJobRunner, memoized
+from pyqode.core.frontend import Panel
+from pyqode.core import frontend
+from pyqode.core.frontend.utils import DelayJobRunner, memoized
 
 
 class Marker(QtCore.QObject):
@@ -174,7 +174,7 @@ class MarkerPanel(Panel):
                     self._icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):
-        line = api.line_nbr_from_position(self.editor, event.pos().y())
+        line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         if self.marker_for_line(line):
             logger.debug("Remove marker requested")
             self.remove_marker_requested.emit(line)
@@ -183,13 +183,13 @@ class MarkerPanel(Panel):
             self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):
-        line = api.line_nbr_from_position(self.editor, event.pos().y())
+        line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         marker = self.marker_for_line(line)
         if marker and marker.description:
             if self._previous_line != line:
                 self._job_runner.request_job(self._display_tooltip, False,
                                              marker.description,
-                                             api.line_pos_from_number(
+                                             frontend.line_pos_from_number(
                                                  self.editor,
                                                  marker.position - 2))
         else:

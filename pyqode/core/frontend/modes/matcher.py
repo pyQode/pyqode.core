@@ -3,8 +3,8 @@
 This module contains the symbol matcher mode
 """
 from pyqode.core import style
-from pyqode.core.api import TextDecoration, Mode
-from pyqode.core.api.syntax_highlighter import TextBlockUserData
+from pyqode.core.frontend import TextDecoration, Mode
+from pyqode.core.frontend.syntax_highlighter import TextBlockUserData
 
 
 class SymbolMatcherMode(Mode):

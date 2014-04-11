@@ -3,14 +3,9 @@
 This module contains the checker mode, a base class for code checker modes.
 """
 from PyQt4 import QtCore, QtGui
-
-from pyqode.core import api
-
-# NotConnectedError, request_work, TextDecoration, \
-#     Mode
-
-from pyqode.core.api.utils import DelayJobRunner
-from pyqode.core.panels.marker import Marker, MarkerPanel
+from pyqode.core import frontend
+from pyqode.core.frontend.utils import DelayJobRunner
+from pyqode.core.frontend.panels.marker import Marker, MarkerPanel
 
 
 class CheckerMessages:
@@ -110,7 +105,7 @@ class CheckerMessage(object):
         return "{0} {1}".format(self.description, self.line)
 
 
-class CheckerMode(api.Mode, QtCore.QObject):
+class CheckerMode(frontend.Mode, QtCore.QObject):
     """
     Performs a user defined code analysis job in a background process and
     display the results on the editor instance.
@@ -156,7 +151,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
         :param show_tooltip: Specify if a tooltip must be displayed when the
                              mouse is over a checker message decoration.
         """
-        api.Mode.__init__(self)
+        frontend.Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
         self._messages = []
@@ -190,7 +185,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
             self._messages.append(message)
             if message.line:
                 try:
-                    marker_panel = api.get_panel(self.editor, MarkerPanel)
+                    marker_panel = frontend.get_panel(self.editor, MarkerPanel)
                 except KeyError:
                     pass
                 else:
@@ -200,7 +195,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
                 tooltip = None
                 if self._show_tooltip:
                     tooltip = message.description
-                message.decoration = api.TextDecoration(
+                message.decoration = frontend.TextDecoration(
                     self.editor.textCursor(), start_line=message.line,
                     tooltip=tooltip, draw_order=3)
                 message.decoration.set_full_width(True)
@@ -219,7 +214,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
         self._messages.remove(message)
         if message.marker:
             try:
-                pnl = api.get_panel(self.editor, MarkerPanel)
+                pnl = frontend.get_panel(self.editor, MarkerPanel)
             except KeyError:
                 pass
             else:
@@ -234,7 +229,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
         while len(self._messages):
             self.remove_message(self._messages[0])
         try:
-            m = api.get_mode(self.editor, MarkerPanel)
+            m = frontend.get_mode(self.editor, MarkerPanel)
         except KeyError:
             pass
         else:
@@ -272,7 +267,7 @@ class CheckerMode(api.Mode, QtCore.QObject):
             'encoding': self.editor.file_encoding
         }
         try:
-            api.request_work(self.editor, self._worker, request_data,
-                             on_receive=self._on_work_finished)
-        except api.NotConnectedError:
+            frontend.request_work(self.editor, self._worker, request_data,
+                                  on_receive=self._on_work_finished)
+        except frontend.NotConnectedError:
             QtCore.QTimer.singleShot(2000, self._request)

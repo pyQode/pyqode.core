@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the api for implementing a pyqode server.
+This module contains the frontend for implementing a pyqode server.
 
 pyqode uses a client-server architecture for running heavy tasks such as code
 analysis (lint), code completion,...
@@ -228,7 +228,7 @@ def default_parser():
     return parser
 
 
-def run(args=None):
+def serve_forever(args=None):
     """
     Creates the server and serves forever
 
@@ -244,4 +244,4 @@ def run(args=None):
 if __name__ == '__main__':
     import sys
     print("running with python %d.%d.%d" % (sys.version_info[:3]))
-    run()
+    serve_forever()

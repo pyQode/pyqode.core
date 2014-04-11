@@ -145,7 +145,7 @@
   <customwidget>
    <class>QCodeEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>pyqode.core.frontend</header>
+   <header>pyqode.core.editor</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -12,7 +12,7 @@ from os.path import dirname
 
 from PyQt4.QtTest import QTest
 
-from pyqode.core import api
+from pyqode.core import frontend
 
 
 test_dir = dirname(abspath(__file__))
@@ -75,5 +75,5 @@ def not_py2():
 
 
 def wait_for_connected(editor):
-    while not api.connected_to_server(editor):
+    while not frontend.connected_to_server(editor):
         QTest.qWait(100)

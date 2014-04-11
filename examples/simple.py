@@ -9,23 +9,24 @@ There are many other modes and panels, feel free to use this example as a
 starting point and experiment!
 """
 import sys
+
 from PyQt4 import QtGui
-from pyqode.core import api
-from pyqode.core.code_edit import QCodeEdit
-from pyqode.core.modes import PygmentsSyntaxHighlighter
-from pyqode.core.modes import CaretLineHighlighterMode
-from pyqode.core.panels import SearchAndReplacePanel
+
+from pyqode.core import frontend
+from pyqode.core.frontend import modes
+from pyqode.core.frontend import panels
 
 
 def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
-    editor = QCodeEdit()
+    editor = frontend.QCodeEdit()
     editor.open_file(__file__)
-    api.install_mode(editor, PygmentsSyntaxHighlighter(editor.document()))
-    api.install_mode(editor, CaretLineHighlighterMode())
-    api.install_panel(editor, SearchAndReplacePanel(),
-                      position=SearchAndReplacePanel.Position.TOP)
+    frontend.install_mode(editor,
+                          modes.PygmentsSyntaxHighlighter(editor.document()))
+    frontend.install_mode(editor, modes.CaretLineHighlighterMode())
+    frontend.install_panel(editor, panels.SearchAndReplacePanel(),
+                           position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
     sys.exit(app.exec_())

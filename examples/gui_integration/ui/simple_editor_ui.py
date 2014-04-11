@@ -106,5 +106,4 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About", None))
         self.actionD.setText(_translate("MainWindow", "d", None))
 
-from pyqode.core.code_edit import QCodeEdit
-from . import simple_editor_rc
+from pyqode.core.frontend import QCodeEdit

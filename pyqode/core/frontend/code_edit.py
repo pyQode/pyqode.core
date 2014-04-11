@@ -6,11 +6,12 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-from pyqode.core import logger, settings, style, api
+from pyqode.core import logger, settings, style
 from pyqode.core._internal import dialogs
 from pyqode.core._internal.client import JsonTcpClient
-from pyqode.core.api import Panel
-from pyqode.core.api.utils import DelayJobRunner
+from pyqode.core.frontend import text
+from pyqode.core.frontend.extension import Panel
+from pyqode.core.frontend.utils import DelayJobRunner
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -333,12 +334,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         line, result = dialogs.GoToLineDialog.get_line(
-            self, api.cursor_line_nbr(self), api.line_count(self))
+            self, text.cursor_line_nbr(self), text.line_count(self))
         if not result:
             return
         if not line:
             line = 1
-        return api.goto_line(self, line, move=True)
+        return text.goto_line(self, line, move=True)
 
     def rehighlight(self):
         """
@@ -441,7 +442,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         if not self.dirty and not force:
             return True
         self.text_saving.emit(path)
-        api.clean_document(self)
+        text.clean_document(self)
         if not path:
             if self.file_path:
                 path = self.file_path
@@ -1098,11 +1099,11 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 if dy:
                     panel.scroll(0, dy)
                 else:
-                    l, c = api.cursor_position(self)
+                    l, c = text.cursor_position(self)
                     ol, oc = self._cached_cursor_pos
                     if l != ol or c != oc:
                         panel.update(0, rect.y(), panel.width(), rect.height())
-                    self._cached_cursor_pos = api.cursor_position(self)
+                    self._cached_cursor_pos = text.cursor_position(self)
         if rect.contains(self.viewport().rect()):
             self._update_viewport_margins()
 
@@ -1111,7 +1112,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Updates dirty flag on text changed.
         """
         if not self._cleaning:
-            self._modified_lines.add(api.cursor_position(self)[0])
+            self._modified_lines.add(text.cursor_position(self)[0])
             txt = self.toPlainText()
             self.dirty = (txt != self._original_text)
 

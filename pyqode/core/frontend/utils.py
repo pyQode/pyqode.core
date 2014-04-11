@@ -4,14 +4,13 @@ Contains utility functions
 """
 import collections
 import functools
-import os
 import sys
 import weakref
 
 from PyQt4 import QtCore, QtGui
 
 from pyqode.core import logger
-from pyqode.core.api import TextDecoration
+from pyqode.core.frontend.decoration import TextDecoration
 
 
 class memoized(object):
@@ -435,7 +434,7 @@ class DelayJobRunner(JobRunner):
 
 if __name__ == '__main__':
     import time
-    from pyqode.core.code_edit import QCodeEdit
+    from pyqode.core.frontend import QCodeEdit
 
     class Example(QCodeEdit):
 

@@ -2,15 +2,13 @@
 This module tests the text api module (pyqode.core.text)
 """
 import os
+import sys
+
 from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
-import sys
+
 import pytest
-
-
-from pyqode.core.code_edit import QCodeEdit
-from pyqode.core import api
-
+from pyqode.core import frontend
 from .helpers import cwd_at, wait_for_connected
 
 
@@ -32,12 +30,12 @@ def setup_module():
     global app, editor, window
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
-    editor = QCodeEdit(window)
+    editor = frontend.QCodeEdit(window)
     window.setCentralWidget(editor)
     window.resize(800, 600)
     editor.open_file(__file__)
     window.show()
-    api.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
+    frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     wait_for_connected(editor)
 
 
@@ -46,7 +44,7 @@ def teardown_module():
     Close server and exit QApplication
     """
     global editor, app
-    api.stop_server(editor)
+    frontend.stop_server(editor)
     app.exit(0)
     QTest.qWait(1000)
     del editor
@@ -57,7 +55,7 @@ def test_line_count():
     global editor
     with open(__file__, 'r') as f:
         nb_lines = len(f.read().splitlines()) + 1
-    assert api.line_count(editor) == nb_lines
+    assert frontend.line_count(editor) == nb_lines
 
 
 def test_goto_line():
@@ -65,73 +63,73 @@ def test_goto_line():
     QTest.qWaitForWindowShown(window)
     assert editor.textCursor().blockNumber() == 0
     assert editor.textCursor().columnNumber() == 0
-    cursor = api.goto_line(editor, 2, 0, move=False)
+    cursor = frontend.goto_line(editor, 2, 0, move=False)
     process_events()
     assert editor.textCursor().blockNumber() != cursor.blockNumber()
     assert editor.textCursor().columnNumber() == cursor.columnNumber()
-    cursor = api.goto_line(editor, 10, move=True)
+    cursor = frontend.goto_line(editor, 10, move=True)
     process_events()
     assert editor.textCursor().blockNumber() == cursor.blockNumber() == 9
     assert editor.textCursor().columnNumber() == cursor.columnNumber() == 0
-    assert api.cursor_line_nbr(editor) == 10
-    assert api.cursor_column_nbr(editor) == 0
+    assert frontend.cursor_line_nbr(editor) == 10
+    assert frontend.cursor_column_nbr(editor) == 0
 
 
 def test_selected_text():
     global editor
-    api.goto_line(editor, 2, 1, move=True)
+    frontend.goto_line(editor, 2, 1, move=True)
     process_events()
-    assert api.word_under_cursor(editor).selectedText() == 'T'
-    assert api.word_under_cursor(
+    assert frontend.word_under_cursor(editor).selectedText() == 'T'
+    assert frontend.word_under_cursor(
         editor, select_whole_word=True).selectedText() == 'This'
 
 
 def test_line_text():
     global editor
-    api.goto_line(editor, 2, 0, move=True)
-    assert api.current_line_text(editor) == __doc__.splitlines()[1]
+    frontend.goto_line(editor, 2, 0, move=True)
+    assert frontend.current_line_text(editor) == __doc__.splitlines()[1]
 
 
 def test_set_line_text():
     global editor
-    api.set_line_text(editor, 2, 'haha')
-    api.goto_line(editor, 2, 0, move=True)
-    assert api.current_line_text(editor) == 'haha'
+    frontend.set_line_text(editor, 2, 'haha')
+    frontend.goto_line(editor, 2, 0, move=True)
+    assert frontend.current_line_text(editor) == 'haha'
 
 
 def test_remove_last_line():
     global editor
-    count = api.line_count(editor)
-    api.remove_last_line(editor)
-    assert api.line_count(editor) == count - 1
+    count = frontend.line_count(editor)
+    frontend.remove_last_line(editor)
+    assert frontend.line_count(editor) == count - 1
 
 
 def test_clean_document():
     global editor
-    count = api.line_count(editor) + 1
+    count = frontend.line_count(editor) + 1
     editor.appendPlainText("\n\n\n")
-    assert api.line_count(editor) == count + 3
-    api.clean_document(editor)
+    assert frontend.line_count(editor) == count + 3
+    frontend.clean_document(editor)
     process_events()
-    assert api.line_count(editor) == count
+    assert frontend.line_count(editor) == count
 
 
 def test_select_lines():
     global editor
-    api.select_lines(editor, 1, 5)
+    frontend.select_lines(editor, 1, 5)
     process_events()
     QTest.qWait(1000)
-    assert api.selection_range(editor) == (1, 5)
+    assert frontend.selection_range(editor) == (1, 5)
 
 
 def test_line_pos_line_nbr():
     global editor
     # ensure we are at the top of the document
-    api.goto_line(editor, 1, 0, move=True)
+    frontend.goto_line(editor, 1, 0, move=True)
     process_events()
-    pos = api.line_pos_from_number(editor, 2)
+    pos = frontend.line_pos_from_number(editor, 2)
     assert pos is not None
-    nbr = api.line_nbr_from_position(editor, pos)
+    nbr = frontend.line_nbr_from_position(editor, pos)
     assert nbr == 2
 
 
@@ -140,16 +138,16 @@ def test_modes():
     Test to install, retrieve and remove a mode.
 
     """
-    from pyqode.core.modes import CaseConverterMode
+    from pyqode.core.frontend.modes import CaseConverterMode
     global editor
     mode = CaseConverterMode()
-    api.install_mode(editor, mode)
-    m = api.get_mode(editor, CaseConverterMode)
+    frontend.install_mode(editor, mode)
+    m = frontend.get_mode(editor, CaseConverterMode)
     assert m == mode
-    m = api.uninstall_mode(editor, CaseConverterMode)
+    m = frontend.uninstall_mode(editor, CaseConverterMode)
     assert m == mode
     with pytest.raises(KeyError):
-        api.uninstall_mode(editor, CaseConverterMode)
+        frontend.uninstall_mode(editor, CaseConverterMode)
 
 
 def test_panels():
@@ -157,15 +155,15 @@ def test_panels():
     Test to install, retrieve and remove a panel
 
     """
-    from pyqode.core.panels import LineNumberPanel
+    from pyqode.core.frontend.panels import LineNumberPanel
     global editor
     panel = LineNumberPanel()
-    api.install_panel(editor, panel, panel.Position.LEFT)
+    frontend.install_panel(editor, panel, panel.Position.LEFT)
     QTest.qWait(1000)
-    p, zone = api.get_panel(editor, LineNumberPanel, get_zone=True)
+    p, zone = frontend.get_panel(editor, LineNumberPanel, get_zone=True)
     assert p == panel
     assert zone == panel.Position.LEFT
-    p = api.uninstall_panel(editor, LineNumberPanel)
+    p = frontend.uninstall_panel(editor, LineNumberPanel)
     assert p == panel
     with pytest.raises(KeyError):
-        api.uninstall_panel(editor, LineNumberPanel)
+        frontend.uninstall_panel(editor, LineNumberPanel)

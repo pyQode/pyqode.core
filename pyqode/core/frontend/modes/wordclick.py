@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from pyqode.core import api
-from pyqode.core.api import TextDecoration, Mode
+from pyqode.core import frontend
+from pyqode.core.frontend import TextDecoration, Mode
 
 
 class WordClickMode(Mode, QtCore.QObject):
@@ -36,7 +36,7 @@ class WordClickMode(Mode, QtCore.QObject):
     def _select_word_under_mouse_cursor(self):
         # todo this already exists in QCodeEdit, check if there are any
         # differences
-        tc = api.word_under_mouse_cursor(self.editor)
+        tc = frontend.word_under_mouse_cursor(self.editor)
         if (self._previous_cursor_start != tc.selectionStart() and
                 self._previous_cursor_end != tc.selectionEnd()):
             self._remove_decoration()
@@ -55,7 +55,7 @@ class WordClickMode(Mode, QtCore.QObject):
 
     def _on_mouse_pressed(self, e):
         if e.button() == 1 and self._deco:
-            tc = api.word_under_mouse_cursor(self.editor)
+            tc = frontend.word_under_mouse_cursor(self.editor)
             if tc and tc.selectedText():
                 self.word_clicked.emit(tc)
 

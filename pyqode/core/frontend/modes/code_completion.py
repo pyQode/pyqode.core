@@ -7,13 +7,13 @@ import re
 from PyQt4 import QtGui, QtCore
 
 from pyqode.core import settings
-from pyqode.core import api
-from pyqode.core.api.utils import DelayJobRunner, memoized
+from pyqode.core import frontend
+from pyqode.core.frontend.utils import DelayJobRunner, memoized
 from pyqode.core import logger
-from pyqode.core import server_api
+from pyqode.core import backend
 
 
-class CodeCompletionMode(api.Mode, QtCore.QObject):
+class CodeCompletionMode(frontend.Mode, QtCore.QObject):
     """
     This mode provides code completion system wich is extensible. It takes care
     of running the completion request in a background process using one or more
@@ -78,17 +78,17 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
         """
         Returns the current completion prefix
         """
-        prefix = api.word_under_cursor(self.editor).selectedText()
+        prefix = frontend.word_under_cursor(self.editor).selectedText()
         if prefix == "":
             try:
-                prefix = api.word_under_cursor(
+                prefix = frontend.word_under_cursor(
                     self.editor, select_whole_word=True).selectedText()[0]
             except IndexError:
                 pass
         return prefix.strip()
 
     def __init__(self):
-        api.Mode.__init__(self)
+        frontend.Mode.__init__(self)
         QtCore.QObject.__init__(self)
         self._current_completion = ""
         # use to display a waiting cursor if completion provider takes too much
@@ -118,7 +118,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
         if self._request_cnt:
             return
         # only check first byte
-        column = api.cursor_column_nbr(self.editor)
+        column = frontend.cursor_column_nbr(self.editor)
         usd = self.editor.textCursor().block().userData()
         for start, end in usd.cc_disabled_zones:
             if start <= column < end:
@@ -126,8 +126,8 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
                 return
         self._request_cnt += 1
         self._collect_completions(
-            self.editor.toPlainText(), api.cursor_line_nbr(self.editor),
-            api.cursor_column_nbr(self.editor), self.editor.file_path,
+            self.editor.toPlainText(), frontend.cursor_line_nbr(self.editor),
+            frontend.cursor_column_nbr(self.editor), self.editor.file_path,
             self.editor.file_encoding, self.completion_prefix)
 
     def _on_install(self, editor):
@@ -137,7 +137,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
         self._completer.setModel(QtGui.QStandardItemModel())
-        api.Mode._on_install(self, editor)
+        frontend.Mode._on_install(self, editor)
 
     def _on_uninstall(self):
         self._completer = None
@@ -239,7 +239,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
             else:
                 # trigger symbols
                 if symbols:
-                    tc = api.word_under_cursor(self.editor)
+                    tc = frontend.word_under_cursor(self.editor)
                     tc.setPosition(tc.position())
                     tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
                     text_to_cursor = tc.selectedText()
@@ -263,7 +263,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
         self._current_completion = completion
 
     def _on_cursor_position_changed(self):
-        cl = api.cursor_line_nbr(self.editor)
+        cl = frontend.cursor_line_nbr(self.editor)
         if cl != self._cursor_line:
             self._cursor_line = cl
             self._hide_popup()
@@ -276,7 +276,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
 
     def _is_last_char_end_of_word(self):
         try:
-            tc = api.word_under_cursor(self.editor)
+            tc = frontend.word_under_cursor(self.editor)
             tc.setPosition(tc.position())
             tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
             l = tc.selectedText()
@@ -334,7 +334,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
 
     def _show_popup(self):
         cnt = self._completer.completionCount()
-        full_prefix = api.word_under_cursor(
+        full_prefix = frontend.word_under_cursor(
             self.editor, select_whole_word=True).selectedText()
         if (full_prefix == self._current_completion) and cnt == 1:
             self._hide_popup()
@@ -359,7 +359,7 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
                 self._completer.completionModel().index(0, 0))
 
     def _insert_completion(self, completion):
-        tc = api.word_under_cursor(self.editor, select_whole_word=True)
+        tc = frontend.word_under_cursor(self.editor, select_whole_word=True)
         tc.insertText(completion)
         self.editor.setTextCursor(tc)
 
@@ -454,10 +454,10 @@ class CodeCompletionMode(api.Mode, QtCore.QObject):
                 'path': path, 'encoding': encoding,
                 'prefix': completion_prefix}
         try:
-            api.request_work(self.editor,
-                             server_api.CodeCompletionWorker, args=data,
-                             on_receive=self._on_results_available)
-        except api.NotConnectedError:
+            frontend.request_work(self.editor,
+                                  backend.CodeCompletionWorker, args=data,
+                                  on_receive=self._on_results_available)
+        except frontend.NotConnectedError:
             pass
         else:
             self._set_wait_cursor()

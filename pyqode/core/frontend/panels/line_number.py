@@ -2,8 +2,8 @@
 """
 This module contains the line number panel
 """
-from pyqode.core import api
-from pyqode.core.api import Panel
+from pyqode.core import frontend
+from pyqode.core.frontend import Panel
 from PyQt4 import QtCore, QtGui
 
 
@@ -48,8 +48,9 @@ class LineNumberPanel(Panel):
         """
         self._selecting = True
         self._sel_start = e.pos().y()
-        start = end = api.line_nbr_from_position(self.editor, self._sel_start)
-        api.select_lines(self.editor, start, end)
+        start = end = frontend.line_nbr_from_position(
+            self.editor, self._sel_start)
+        frontend.select_lines(self.editor, start, end)
 
     def cancel_selection(self):
         self._selecting = False
@@ -71,10 +72,10 @@ class LineNumberPanel(Panel):
         """
         if self._selecting:
             end_pos = e.pos().y()
-            start_line = api.line_nbr_from_position(self.editor,
-                                                    self._sel_start)
-            end_line = api.line_nbr_from_position(self.editor, end_pos)
-            api.select_lines(self.editor, start_line, end_line)
+            start_line = frontend.line_nbr_from_position(
+                self.editor, self._sel_start)
+            end_line = frontend.line_nbr_from_position(self.editor, end_pos)
+            frontend.select_lines(self.editor, start_line, end_line)
 
     def paintEvent(self, event):
         """
@@ -97,9 +98,9 @@ class LineNumberPanel(Panel):
             pen_selected = QtGui.QPen(self._line_color_s)
             painter.setFont(font)
             # get selection range
-            sel_start, sel_end = api.selection_range(self.editor)
+            sel_start, sel_end = frontend.selection_range(self.editor)
             has_sel = sel_start != sel_end
-            cl = api.cursor_line_nbr(self.editor)
+            cl = frontend.cursor_line_nbr(self.editor)
             # draw every visible blocks
             for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or

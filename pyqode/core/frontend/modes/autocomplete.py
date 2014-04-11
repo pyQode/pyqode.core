@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Contains the AutoCompleteMode """
 from PyQt4 import QtGui
-from pyqode.core.api import Mode
+from pyqode.core.frontend import Mode
 
 
 class AutoCompleteMode(Mode):

@@ -24,7 +24,7 @@ from PyQt4 import QtCore, QtNetwork, QtGui
 
 #: Maps QAbstractSocket::SocketError to string to easily get descriptive error
 #: message out of error numbers.
-from pyqode.core.api import NotConnectedError
+from pyqode.core.frontend.client import NotConnectedError
 
 SOCKET_ERROR_STRINGS = {
     0: 'the connection was refused by the peer (or timed out).',
@@ -220,7 +220,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
 
-        :raise: pyqode.core.api.NotConnectedError if the server cannot
+        :raise: pyqode.core.frontend.NotConnectedError if the server cannot
             be reached.
         """
         if not self._process or not self._process.running or \
