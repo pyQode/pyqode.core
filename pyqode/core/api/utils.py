@@ -7,25 +7,11 @@ import functools
 import os
 import sys
 import weakref
-from pyqode.core import logger
+
 from PyQt4 import QtCore, QtGui
+
+from pyqode.core import logger
 from pyqode.core.api import TextDecoration
-
-
-def keep_tc_pos(f):
-    """
-    Decorator. Cache text cursor position and restore it when the wrapped
-    function exits. This decorator can only be used on modes or panels.
-    """
-    @functools.wraps(f)
-    def wrapper(self, *args, **kwds):
-        pos = self.editor.textCursor().position()
-        retval = f(self, *args, **kwds)
-        tc = self.editor.textCursor()
-        tc.setPosition(pos)
-        self.editor.setTextCursor(tc)
-        return retval
-    return wrapper
 
 
 class memoized(object):
@@ -60,21 +46,6 @@ class memoized(object):
     def __get__(self, obj, objtype):
         """ Support instance methods. """
         return functools.partial(self.__call__, obj)
-
-
-def find_settings_dir(app_name="pyQode"):
-    """
-    Creates and returns the path to a directory that suits well to store
-    app/lib settings on Windows and Linux.
-    """
-    home = os.path.expanduser("~")
-    if sys.platform == "win32":
-        pth = os.path.join(home, app_name)
-    else:
-        pth = os.path.join(home, ".%s" % app_name)
-    if not os.path.exists(pth):
-        os.mkdir(pth)
-    return pth
 
 
 def merged_colors(color_a, color_b, factor):

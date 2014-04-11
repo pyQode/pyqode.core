@@ -10,7 +10,7 @@ from pyqode.core import logger, settings, style, api
 from pyqode.core._internal import dialogs
 from pyqode.core._internal.client import JsonTcpClient
 from pyqode.core.api import Panel
-from pyqode.core.utils import DelayJobRunner
+from pyqode.core.api.utils import DelayJobRunner
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):

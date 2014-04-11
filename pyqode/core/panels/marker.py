@@ -2,11 +2,12 @@
 """
 This module contains the marker panel
 """
-from pyqode.core import logger
 from PyQt4 import QtCore, QtGui
+
+from pyqode.core import logger
 from pyqode.core.api import Panel
 from pyqode.core import api
-from pyqode.core.utils import DelayJobRunner, memoized
+from pyqode.core.api.utils import DelayJobRunner, memoized
 
 
 class Marker(QtCore.QObject):
@@ -205,8 +206,6 @@ class MarkerPanel(Panel):
 
 
 if __name__ == '__main__':
-    from pyqode.core import QGenericCodeEdit, constants
-
     class Example(QGenericCodeEdit):
 
         def __init__(self):

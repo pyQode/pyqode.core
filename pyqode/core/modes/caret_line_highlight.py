@@ -3,10 +3,10 @@
 This module contains the care line highlighter mode
 """
 from PyQt4 import QtGui
+
 from pyqode.core import style
 from pyqode.core.api import TextDecoration, Mode
-
-from pyqode.core.utils import drift_color
+from pyqode.core.api.utils import drift_color
 
 
 class CaretLineHighlighterMode(Mode):

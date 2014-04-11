@@ -3,11 +3,13 @@
 This module contains the checker mode, a base class for code checker modes.
 """
 from PyQt4 import QtCore, QtGui
+
 from pyqode.core import api
+
 # NotConnectedError, request_work, TextDecoration, \
 #     Mode
 
-from pyqode.core.utils import DelayJobRunner
+from pyqode.core.api.utils import DelayJobRunner
 from pyqode.core.panels.marker import Marker, MarkerPanel
 
 

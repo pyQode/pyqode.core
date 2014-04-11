@@ -3,11 +3,13 @@
 This module contains the code completion mode and the related classes.
 """
 import re
+
+from PyQt4 import QtGui, QtCore
+
 from pyqode.core import settings
 from pyqode.core import api
 from pyqode.core import workers
-from pyqode.core.utils import DelayJobRunner, memoized
-from PyQt4 import QtGui, QtCore
+from pyqode.core.api.utils import DelayJobRunner, memoized
 from pyqode.core import logger
 
 
