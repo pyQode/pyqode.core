@@ -6,11 +6,10 @@ import sys
 import os
 # ensure sys knows about pyqode.core in the test env
 sys.path.insert(0, os.path.abspath('..'))
-from pyqode.core.server_api import server
-from pyqode.core.server_api import workers
+from pyqode.core import server_api
 
 
 if __name__ == '__main__':
-    workers.CodeCompletionWorker.providers.append(
-        workers.DocumentWordsProvider())
-    server.run()
+    server_api.CodeCompletionWorker.providers.append(
+        server_api.DocumentWordsProvider())
+    server_api.run()

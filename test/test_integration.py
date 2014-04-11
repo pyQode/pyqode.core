@@ -76,7 +76,7 @@ def _send_request():
     contains 'some data'.
     """
     global client_socket
-    client_socket.request_work(workers.echo, 'some data',
+    client_socket.request_work(server_api.echo_worker, 'some data',
                                on_receive=_on_receive)
 
 
