@@ -1,8 +1,10 @@
 import functools
 import mimetypes
 import os
-from PyQt4 import QtCore, QtGui
 import sys
+
+from PyQt4 import QtCore, QtGui
+
 from pyqode.core import logger
 from pyqode.core import settings
 
@@ -521,3 +523,76 @@ def line_indent(editor, line_nbr=None):
     line = line_text(editor, line_nbr)
     indentation = len(line) - len(line.lstrip())
     return indentation
+
+
+def get_right_word(editor):
+    """
+    Gets the character on the right of the text cursor.
+
+    :param editor: QCodeEdit instance.
+    :return: The word that is on the right of the text cursor.
+    """
+    tc = editor.textCursor()
+    tc.movePosition(QtGui.QTextCursor.WordRight,
+                    QtGui.QTextCursor.KeepAnchor)
+    return tc.selectedText()
+
+
+def get_right_character(editor):
+    """
+    Get the character that is on the right of the text cursor.
+
+    :param editor: QCodeEdit instance
+
+    :return:
+    """
+    next_char = get_right_word(editor)
+    if len(next_char):
+        next_char = next_char[0]
+    else:
+        next_char = None
+    return next_char
+
+
+def insert_text(editor, text, keep_position=True):
+    """
+    Insertes text at the cursor position.
+
+    :param editor: QCodeEdit instance
+    :param text: text to insert
+    :param keep_position: Flag that specifies if the cursor position must be
+        kept. Pass False for a regular insert (the cursor will be at the end
+        of the inserted text).
+    """
+    tc = editor.textCursor()
+    if keep_position:
+        p = tc.position()
+    tc.insertText(text)
+    if keep_position:
+        tc.setPosition(p)
+    editor.setTextCursor(tc)
+
+
+def clear_selection(editor):
+    """
+    Clear text cursor selection
+    :param editor: QCodeEdit instance
+    """
+    tc = editor.textCursor()
+    tc.clearSelection()
+    editor.setTextCursor(tc)
+
+
+def move_right(editor, keep_anchor=False, nb_chars=1):
+    """
+    Move the cursor on the right
+
+    :param editor: QCodeEdit instance
+    :param keep_anchor: True to keep anchor (to select text) or False to move
+        the anchor (no selection)
+    :param nb_chars: Number of characters to move.
+    """
+    tc = editor.textCursor()
+    tc.movePosition(tc.Right, tc.KeepAnchor if keep_anchor else tc.MoveAnchor,
+                    nb_chars)
+    editor.setTextCursor(tc)
