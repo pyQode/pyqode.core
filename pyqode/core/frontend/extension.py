@@ -1,9 +1,13 @@
 """
 This module contains API base classes.
 """
+import logging
 import weakref
 from PyQt4 import QtGui
-from pyqode.core import logger
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class Mode(object):
@@ -126,7 +130,7 @@ def install_mode(editor, mode):
     :param mode: The mode instance to install.
     :type mode: pyqode.core.api.Mode
     """
-    logger.info('installing mode %r' % mode.name)
+    _logger().info('installing mode %r' % mode.name)
     editor._modes[mode.name] = mode
     mode._on_install(editor)
 
@@ -137,7 +141,7 @@ def uninstall_mode(editor, name):
 
     :param name: The name of the mode to uninstall.
     """
-    logger.info('uninstalling mode %r' % name)
+    _logger().info('uninstalling mode %r' % name)
     m = get_mode(editor, name)
     if m:
         m._on_uninstall()
@@ -290,8 +294,8 @@ def install_panel(editor, panel, position=Panel.Position.LEFT):
         Panel.Position.RIGHT: 'right',
         Panel.Position.TOP: 'top'
     }
-    logger.info('installing panel %r at %r' %
-                (panel.name, pos_to_string[position]))
+    _logger().info('installing panel %r at %r' %
+                   (panel.name, pos_to_string[position]))
     panel.order_in_zone = len(editor._panels[position])
     editor._panels[position][panel.name] = panel
     panel._on_install(editor)
@@ -306,7 +310,7 @@ def uninstall_panel(editor, name):
 
     :return: The uninstalled mode instance
     """
-    logger.info('Uninstalling panel %s' % name)
+    _logger().info('Uninstalling panel %s' % name)
     p, zone = get_panel(editor, name, get_zone=True)
     if p:
         p._on_uninstall()

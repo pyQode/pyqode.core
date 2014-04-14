@@ -1,5 +1,12 @@
+import logging
 from PyQt4 import QtGui, QtCore
-from pyqode.core import logger
+
+
+def _logger():
+    """
+    Returns the module logger.
+    """
+    return logging.getLogger(__name__)
 
 
 class _TextDecorationSignals(QtCore.QObject):
@@ -182,7 +189,7 @@ def remove_decoration(editor, decoration):
         editor.setExtraSelections(editor._extra_selections)
         return True
     except ValueError:
-        logger.exception('cannot remove decoration %r' % decoration)
+        _logger().exception('cannot remove decoration %r' % decoration)
         return False
 
 

@@ -5,6 +5,7 @@ on pygments.
 
 .. note: This code is taken and adapted from the IPython project.
 """
+import logging
 from PyQt4 import QtGui
 from PyQt4.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
@@ -14,9 +15,13 @@ from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 
-from pyqode.core import frontend, logger, style
+from pyqode.core import frontend, style
 from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter, \
     IndentBasedFoldDetector, CharBasedFoldDetector
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 try:
@@ -51,8 +56,8 @@ try:
     from pygments.lexers.compiled import ObjectiveCppLexer
     from pygments.lexers.compiled import ValaLexer
 except ImportError as e:  # too new on some systems
-    logger.exception("failed to import pygments lexers, please update your "
-                     "pygments installation. %s" % e)
+    _logger().exception("failed to import pygments lexers, please update your "
+                        "pygments installation. %s" % e)
 
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
@@ -207,7 +212,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             ValaLexer: CharBasedFoldDetector(),
         }
     except NameError:
-        logger.exception("failed to setup fold detectors associations.")
+        _logger().exception("failed to setup fold detectors associations.")
         LEXERS_FOLD_DETECTORS = {}
 
     @property
@@ -272,18 +277,20 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                 filename = filename[0:len(filename) - 1]
             self._lexer = get_lexer_for_filename(filename)
         except ClassNotFound:
-            logger.exception("failed to find lexer from filename %s" %
-                             filename)
+            _logger().exception("failed to find lexer from filename %s" %
+                                filename)
             self._lexer = None
 
     def set_lexer_from_mime_type(self, mime, **options):
         try:
             self._lexer = get_lexer_for_mimetype(mime, **options)
         except ClassNotFound:
-            logger.exception("failed to find lexer from mime type %s" % mime)
+            _logger().exception("failed to find lexer from mime type %s" %
+                                mime)
             self._lexer = None
         else:
-            logger.debug('lexer for mimetype (%s): %r' % (mime, self._lexer))
+            _logger().debug('lexer for mimetype (%s): %r' %
+                            (mime, self._lexer))
 
     def highlight_block(self, text):
         original_text = text

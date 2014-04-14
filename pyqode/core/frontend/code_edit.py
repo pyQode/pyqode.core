@@ -6,7 +6,7 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-from pyqode.core import logger, settings, style
+from pyqode.core import settings, style
 from pyqode.core._internal import dialogs
 from pyqode.core._internal.client import JsonTcpClient
 from pyqode.core.frontend import text

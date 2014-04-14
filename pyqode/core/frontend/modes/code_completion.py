@@ -2,6 +2,7 @@
 """
 This module contains the code completion mode and the related classes.
 """
+import logging
 import re
 
 from PyQt4 import QtGui, QtCore
@@ -9,8 +10,11 @@ from PyQt4 import QtGui, QtCore
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
-from pyqode.core import logger
 from pyqode.core import backend
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class CodeCompletionMode(frontend.Mode, QtCore.QObject):
@@ -122,7 +126,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         usd = self.editor.textCursor().block().userData()
         for start, end in usd.cc_disabled_zones:
             if start <= column < end:
-                logger.debug(
+                _logger().debug(
                     "cc: cancel request, cursor is in a disabled zone")
                 return
         self._request_cnt += 1
@@ -171,7 +175,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, status, results):
-        logger.debug("cc: got completion results")
+        _logger().debug("cc: got completion results")
         self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
         all_results = []
         if status:
@@ -246,7 +250,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                     text_to_cursor = tc.selectedText()
                     for symbol in symbols:
                         if text_to_cursor.endswith(symbol):
-                            logger.debug("cc: symbols trigger")
+                            _logger().debug("cc: symbols trigger")
                             self._hide_popup()
                             self.request_completion()
                             return
@@ -254,7 +258,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 if not self._completer.popup().isVisible():
                     prefix_len = len(self.completion_prefix)
                     if prefix_len == self._trigger_len:
-                        logger.debug("cc: Len trigger")
+                        _logger().debug("cc: Len trigger")
                         self.request_completion()
                         return
             if self.completion_prefix == "":
@@ -450,7 +454,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
-        logger.debug("cc: completion requested")
+        _logger().debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,
                 'prefix': completion_prefix}

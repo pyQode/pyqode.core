@@ -4,13 +4,13 @@ Contains utility functions
 """
 import collections
 import functools
-import sys
+import logging
 import weakref
-
 from PyQt4 import QtCore, QtGui
 
-from pyqode.core import logger
-from pyqode.core.frontend.decoration import TextDecoration
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class memoized(object):
@@ -259,8 +259,9 @@ class _JobThread(QtCore.QThread):
         try:
             self.execute_on_run(*self.args, **self.kwargs)
         except AttributeError:
-            logger.warning("_JobThread: executing not callable statement: %s" %
-                           self.execute_on_run)
+            _logger().warning(
+                "_JobThread: executing not callable statement: %s" %
+                self.execute_on_run)
         else:
             self.on_finish()
             self.used = False
@@ -347,8 +348,8 @@ class JobRunner(object):
                 self._job_queue[0].start()
             return True
         else:
-            logger.debug("JobRunner: failed to queue job, all threads are "
-                         "busy")
+            _logger().debug(
+                "JobRunner: failed to queue job, all threads are busy")
             return False
 
     def _execute_next(self):

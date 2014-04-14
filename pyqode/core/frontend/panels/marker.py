@@ -2,12 +2,16 @@
 """
 This module contains the marker panel
 """
+import logging
 from PyQt4 import QtCore, QtGui
 
-from pyqode.core import logger
 from pyqode.core.frontend import Panel
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class Marker(QtCore.QObject):
@@ -176,10 +180,10 @@ class MarkerPanel(Panel):
     def mousePressEvent(self, event):
         line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         if self.marker_for_line(line):
-            logger.debug("remove marker requested")
+            _logger().debug("remove marker requested")
             self.remove_marker_requested.emit(line)
         else:
-            logger.debug("add marker requested")
+            _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):
