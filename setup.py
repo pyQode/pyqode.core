@@ -23,7 +23,7 @@ setup(
     namespace_packages=['pyqode'],
     version=read_version(),
     packages=find_packages(),
-    keywords=["QCodeEdit PySide PyQt code editor widget"],
+    keywords=["QCodeEdit PyQt source code editor widget qt"],
     url='https://github.com/pyQode/pyqode.core',
     license='MIT',
     author='Colin Duquesnoy',
@@ -33,7 +33,7 @@ setup(
     install_requires=['pygments'],
     entry_points={
         'pyqode_plugins':
-            ['pyqode_core = pyqode.core.designer_plugins.core']
+            ['pyqode_core = pyqode.core.designer_plugin']
     },
     zip_safe=False,
     classifiers=[
@@ -44,9 +44,9 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Topic :: Software Development :: Widget Sets',
         'Topic :: Text Editors :: Integrated Development Environments (IDE)'])
