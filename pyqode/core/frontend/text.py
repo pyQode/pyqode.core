@@ -113,7 +113,7 @@ def cursor_position(editor):
             editor.textCursor().columnNumber())
 
 
-def cursor_line_nbr(editor):
+def current_line_nbr(editor):
     """
     Returns the text cursor's line number.
 
@@ -124,7 +124,7 @@ def cursor_line_nbr(editor):
     return cursor_position(editor)[0]
 
 
-def cursor_column_nbr(editor):
+def current_column_nbr(editor):
     """
     Returns the text cursor's column number.
 
@@ -170,7 +170,7 @@ def current_line_text(editor):
 
     :return: Text of the current line
     """
-    return line_text(editor, cursor_line_nbr(editor))
+    return line_text(editor, current_line_nbr(editor))
 
 
 def set_line_text(editor, line_nbr, new_text):
@@ -503,4 +503,21 @@ def mark_whole_doc_dirty(editor):
     tc = editor.textCursor()
     tc.select(tc.Document)
     editor.document().markContentsDirty(tc.selectionStart(),
-                                      tc.selectionEnd())
+                                        tc.selectionEnd())
+
+
+def line_indent(editor, line_nbr=None):
+    """
+    Returns the indent level of the specified line
+
+    :param editor: QCodeEdit instance
+    :param line_nbr: Number of the line to get indentation (1 base). Pass None
+        to use the current line number.
+    :return: Number of spaces that makes the indentation level of the
+             current line
+    """
+    if line_nbr is None:
+        line_nbr = current_line_nbr(editor)
+    line = line_text(editor, line_nbr)
+    indentation = len(line) - len(line.lstrip())
+    return indentation

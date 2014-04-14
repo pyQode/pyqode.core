@@ -75,8 +75,8 @@ from pyqode.core.frontend.extension import uninstall_panel
 # Text API
 from pyqode.core.frontend.text import clean_document
 from pyqode.core.frontend.text import current_line_text
-from pyqode.core.frontend.text import cursor_column_nbr
-from pyqode.core.frontend.text import cursor_line_nbr
+from pyqode.core.frontend.text import current_column_nbr
+from pyqode.core.frontend.text import current_line_nbr
 from pyqode.core.frontend.text import cursor_position
 from pyqode.core.frontend.text import goto_line
 from pyqode.core.frontend.text import line_count
@@ -94,6 +94,7 @@ from pyqode.core.frontend.text import open_file
 from pyqode.core.frontend.text import detect_encoding
 from pyqode.core.frontend.text import save_to_file
 from pyqode.core.frontend.text import mark_whole_doc_dirty
+from pyqode.core.frontend.text import line_indent
 
 # Client API
 from pyqode.core.frontend.client import connected_to_server

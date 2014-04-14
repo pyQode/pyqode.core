@@ -325,7 +325,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         line, result = dialogs.GoToLineDialog.get_line(
-            self, text.cursor_line_nbr(self), text.line_count(self))
+            self, text.current_line_nbr(self), text.line_count(self))
         if not result:
             return
         if not line:
@@ -400,24 +400,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self._font_size = increment
         text.mark_whole_doc_dirty(self)
         self._reset_palette()
-
-    def line_indent(self):
-        """
-        Returns the current line indentation
-
-        :return: Number of spaces that makes the indentation level of the
-                 current line
-        """
-        # todo rewrite this using line_text
-        original_cursor = self.textCursor()
-        cursor = QtGui.QTextCursor(original_cursor)
-        cursor.movePosition(QtGui.QTextCursor.StartOfLine)
-        cursor.movePosition(QtGui.QTextCursor.EndOfLine,
-                            QtGui.QTextCursor.KeepAnchor)
-        line = cursor.selectedText()
-        indentation = len(line) - len(line.lstrip())
-        self.setTextCursor(original_cursor)
-        return indentation
 
     @QtCore.pyqtSlot()
     def duplicate_line(self):
@@ -1008,7 +990,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def _do_home_key(self, event=None, select=False):
         # get nb char to first significative char
-        delta = self.textCursor().positionInBlock() - self.line_indent()
+        delta = self.textCursor().positionInBlock() - text.line_indent(self)
         if delta:
             tc = self.textCursor()
             move = QtGui.QTextCursor.MoveAnchor

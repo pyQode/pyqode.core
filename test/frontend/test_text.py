@@ -71,8 +71,8 @@ def test_goto_line():
     process_events()
     assert editor.textCursor().blockNumber() == cursor.blockNumber() == 9
     assert editor.textCursor().columnNumber() == cursor.columnNumber() == 0
-    assert frontend.cursor_line_nbr(editor) == 10
-    assert frontend.cursor_column_nbr(editor) == 0
+    assert frontend.current_line_nbr(editor) == 10
+    assert frontend.current_column_nbr(editor) == 0
 
 
 def test_selected_text():
@@ -162,3 +162,18 @@ def test_save_file():
 def test_mark_whole_doc_dirty():
     global editor
     frontend.mark_whole_doc_dirty(editor)
+
+
+src = """def test_mark_whole_doc_dirty():
+    global editor
+    frontend.mark_whole_doc_dirty(editor)
+"""
+
+
+def test_line_indent():
+    global editor
+    editor.setPlainText(src, 'text/x-python', 'utf-8')
+    assert frontend.line_indent(editor, 1) == 0
+    assert frontend.line_indent(editor, 2) == 4
+    frontend.open_file(editor, __file__)
+    assert frontend.line_indent(editor, frontend.line_count(editor) - 1) == 4

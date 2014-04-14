@@ -118,7 +118,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         if self._request_cnt:
             return
         # only check first byte
-        column = frontend.cursor_column_nbr(self.editor)
+        column = frontend.current_column_nbr(self.editor)
         usd = self.editor.textCursor().block().userData()
         for start, end in usd.cc_disabled_zones:
             if start <= column < end:
@@ -127,8 +127,8 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 return
         self._request_cnt += 1
         self._collect_completions(
-            self.editor.toPlainText(), frontend.cursor_line_nbr(self.editor),
-            frontend.cursor_column_nbr(self.editor), self.editor.file_path,
+            self.editor.toPlainText(), frontend.current_line_nbr(self.editor),
+            frontend.current_column_nbr(self.editor), self.editor.file_path,
             self.editor.file_encoding, self.completion_prefix)
 
     def _on_install(self, editor):
@@ -264,7 +264,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._current_completion = completion
 
     def _on_cursor_position_changed(self):
-        cl = frontend.cursor_line_nbr(self.editor)
+        cl = frontend.current_line_nbr(self.editor)
         if cl != self._cursor_line:
             self._cursor_line = cl
             self._hide_popup()

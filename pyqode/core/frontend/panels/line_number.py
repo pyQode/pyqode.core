@@ -100,7 +100,7 @@ class LineNumberPanel(Panel):
             # get selection range
             sel_start, sel_end = frontend.selection_range(self.editor)
             has_sel = sel_start != sel_end
-            cl = frontend.cursor_line_nbr(self.editor)
+            cl = frontend.current_line_nbr(self.editor)
             # draw every visible blocks
             for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
