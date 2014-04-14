@@ -224,7 +224,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._document = QtGui.QTextDocument()
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self._previous_filename = ""
         self._pygments_style = style.pygments_style
         self._brushes = {}
         self._formats = {}
@@ -250,15 +249,9 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         else:
             self.editor.text_saved.disconnect(self.rehighlight)
 
-    def _update_lexer(self):
-        self.set_lexer_from_file_name(self.editor.file_name)
-        # if hasattr(self.editor, "foldingPanel"):
-        #     if type(self._lexer) in self.LEXERS_FOLD_DETECTORS:
-        #         self.set_fold_detector(
-        #             self.LEXERS_FOLD_DETECTORS[type(self._lexer)])
-        #         self.editor.foldingPanel.enabled = True
-        #     else:
-        #         self.editor.foldingPanel.enabled = False
+    def set_mime_type(self, mime_type):
+        self.set_lexer_from_mime_type(mime_type)
+        self.rehighlight()
 
     def _on_text_saved(self):
         self.rehighlight()
@@ -289,16 +282,14 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         except ClassNotFound:
             logger.exception("failed to find lexer from mime type %s" % mime)
             self._lexer = None
+        else:
+            logger.debug('lexer for mimetype (%s): %r' % (mime, self._lexer))
 
     def highlight_block(self, text):
         original_text = text
         if not self.editor:
             return
 
-        fn = self.editor.file_name
-        if fn != self._previous_filename:
-            self._previous_filename = fn
-            self._update_lexer()
         if self._lexer is None:
             return
 

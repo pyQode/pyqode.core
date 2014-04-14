@@ -1,5 +1,5 @@
 """
-The backend package contains the API for to use server side:
+The backend package contains the API to use on the server side:
     - server + methods for running it
     - workers definitions
 """

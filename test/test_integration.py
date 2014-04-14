@@ -41,7 +41,7 @@ def test_app():
     app = QtGui.QApplication(sys.argv)
     editor = frontend.QCodeEdit()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
-    editor.open_file(__file__)
+    frontend.open_file(editor, __file__)
     editor.show()
     QtCore.QTimer.singleShot(2000, _leave)
     app.exec_()

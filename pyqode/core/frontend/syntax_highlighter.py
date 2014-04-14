@@ -181,6 +181,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def __del__(self):
         self._blocks.clear()
 
+    def set_mime_type(self, mime_type):
+        pass
+
     def set_fold_detector(self, fold_detector):
         """
         Setup the fold detector object to use to detect fold indents.

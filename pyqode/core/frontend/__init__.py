@@ -90,6 +90,8 @@ from pyqode.core.frontend.text import selection_range
 from pyqode.core.frontend.text import set_line_text
 from pyqode.core.frontend.text import word_under_cursor
 from pyqode.core.frontend.text import word_under_mouse_cursor
+from pyqode.core.frontend.text import open_file
+from pyqode.core.frontend.text import detect_encoding
 
 # Client API
 from pyqode.core.frontend.client import connected_to_server

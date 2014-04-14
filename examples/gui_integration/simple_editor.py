@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import mimetypes
 import os
 import sys
 
@@ -13,6 +14,7 @@ from pyqode.core.frontend import panels
 from pyqode.core import style
 
 from ui.simple_editor_ui import Ui_MainWindow
+
 
 class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -53,7 +55,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setupStylesMenu()
 
         # open this module file in the editor
-        self.editor.open_file(__file__, detect_encoding=True)
+        frontend.open_file(self.editor, __file__)
 
     def setupStylesMenu(self):
         group = QtGui.QActionGroup(self)
@@ -101,7 +103,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         filePath = QtGui.QFileDialog.getOpenFileName(
             self, "Choose a file", os.path.expanduser("~"))
         if filePath:
-            self.editor.open_file(filePath, detect_encoding=True)
+            frontend.open_file(self.editor, filePath)
 
     def on_panel_state_changed(self):
         action = self.sender()
@@ -113,6 +115,12 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
 def main():
+    # setup some specific mimetypes
+    mimetypes.add_type('text/xml', '.ui')  # qt designer ui forms
+    mimetypes.add_type('text/x-rst', '.rst')  # rst docs
+    mimetypes.add_type('text/x-cython', '.pyx')  # rst docs
+    mimetypes.add_type('text/x-cython', '.pxd')  # rst docs
+
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
     win.show()

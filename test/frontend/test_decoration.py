@@ -34,7 +34,7 @@ def setup_module():
     editor = frontend.QCodeEdit(window)
     window.setCentralWidget(editor)
     window.resize(800, 600)
-    editor.open_file(__file__)
+    frontend.open_file(editor, __file__)
     window.show()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     wait_for_connected(editor)

@@ -346,3 +346,20 @@ def get_panels(editor):
     :rtype: dict
     """
     return editor._panels
+
+
+def uninstall_all(editor):
+    """
+    Uninstalls all modes and panels.
+
+    :param editor: QCodeEdit instance.
+    """
+    while len(editor._modes):
+        k = list(editor._modes.keys())[0]
+        editor.uninstall_mode(k)
+    while len(editor._panels):
+        zone = list(editor._panels.keys())[0]
+        while len(editor._panels[zone]):
+            k = list(editor._panels[zone].keys())[0]
+            editor.uninstall_panel(k, zone)
+        editor._panels.pop(zone, None)

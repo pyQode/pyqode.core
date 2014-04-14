@@ -254,6 +254,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         return self._visible_blocks
 
+    @property
+    def mime_type(self):
+        return self._mime_type
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
@@ -278,6 +282,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._prev_tooltip_block_nbr = -1
         self._fpath = None
         self._fencoding = None
+        self._mime_type = None
         self._original_text = ""
         self._modes = {}
         self._panels = {Panel.Position.TOP: {},
@@ -309,20 +314,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setMouseTracking(True)
         self.setCenterOnScroll(True)
 
-    def uninstall_all(self):
-        """
-        Uninstalls all modes and panels.
-        """
-        while len(self._modes):
-            k = list(self._modes.keys())[0]
-            self.uninstall_mode(k)
-        while len(self._panels):
-            zone = list(self._panels.keys())[0]
-            while len(self._panels[zone]):
-                k = list(self._panels[zone].keys())[0]
-                self.uninstall_panel(k, zone)
-            self._panels.pop(zone, None)
-
     @QtCore.pyqtSlot()
     def delete(self):
         """ Deletes the selected text """
@@ -341,6 +332,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             line = 1
         return text.goto_line(self, line, move=True)
 
+    @QtCore.pyqtSlot()
     def rehighlight(self):
         """
         Convenience method that calls rehighlight on the syntax highlighter
@@ -348,80 +340,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         """
         for mode in self._modes.values():
-            if hasattr('rehighlight', mode):
+            if hasattr(mode, 'rehighlight'):
                 mode.rehighlight()
-
-    def detect_encoding(self, data):
-        """
-        Detects file encoding.
-
-        This implementation tries to use chardet to detect encoding.
-
-        :param data: Data from which we want to detect the encoding.
-        :type data: bytes
-
-        :return: The detected encoding. Returns the result of
-                 :meth:`pyqode.core.QCodeEdit.getDefaultEncoding` if chardet is
-                 not available.
-        """
-        try:
-            import chardet
-            encoding = chardet.detect(bytes(data))['encoding']
-        except ImportError:
-            logger.warning("chardet not available, using utf8 by default")
-            encoding = self.default_encoding()
-        return encoding
-
-    @staticmethod
-    def default_encoding():
-        """ Returns the result of :py:func:`sys.getfilesystemencoding` """
-        return sys.getfilesystemencoding()
-
-    def _read_file(self, path, replace_tabs_by_spaces=True, encoding=None,
-                   auto_detect_encoding=False):
-        # encoding = "utf-8"
-        with open(path, 'rb') as f:
-            data = f.read()
-            if not encoding and auto_detect_encoding:
-                try:
-                    encoding = self.detect_encoding(data)
-                except UnicodeEncodeError:
-                    QtGui.QMessageBox.warning(self, "Failed to open file",
-                                              "Failed to detect encoding")
-            if not encoding:
-                encoding = self.default_encoding()
-            content = data.decode(encoding)
-        if replace_tabs_by_spaces:
-            content = content.replace(
-                "\t", " " * self._tab_length)
-        return content, encoding
-
-    def open_file(self, path, replace_tabs_by_spaces=True, encoding=None,
-                  detect_encoding=False):
-        """
-        Helper method to open a file in the editor.
-
-        :param path: The file path to open
-        :type path: str
-
-        :param replace_tabs_by_spaces: True to replace tabs by spaces
-        :type replace_tabs_by_spaces: bool
-
-        :param encoding: The encoding to use. If no encoding is provided and
-                         detectEncoding is false, pyqode will try to decode the
-                         content using the system default encoding.
-        :type encoding: str
-
-        :param detect_encoding: If true and no encoding is specified, pyqode
-            will try to detect encoding using chardet2.
-        :type detect_encoding: bool
-        """
-        content, encoding = self._read_file(path, replace_tabs_by_spaces,
-                                            encoding, detect_encoding)
-        self._fpath = path
-        self._fencoding = encoding
-        self.setPlainText(content)
-        self.dirty = False
 
     @QtCore.pyqtSlot()
     def save_to_file(self, path=None, encoding=None, force=False):
@@ -755,23 +675,27 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.showEvent(self, event)
         self._update_viewport_margins()
 
-    def setPlainText(self, txt):
+    def setPlainText(self, txt, mime_type, encoding):
         """
-        Overrides the setPlainText method to keep track of the original text.
+        Extends setPlainText to force the user to set an encoding and a
+        mime type.
 
         Emits the new_text_set signal.
 
         :param txt: The new text to set.
         """
+        self._fencoding = encoding
+        self._mime_type = mime_type
         QtGui.QPlainTextEdit.setPlainText(self, txt)
         self._original_text = txt
         self._modified_lines.clear()
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
-        title = QtCore.QFileInfo(self.file_path).fileName()
-        self.setDocumentTitle(title)
-        self.setWindowTitle(title)
+        self.dirty = False
+        for mode in self._modes.values():
+            if hasattr(mode, 'set_mime_type'):
+                mode.set_mime_type(self.mime_type)
 
     def add_action(self, action):
         """

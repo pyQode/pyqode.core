@@ -1,5 +1,9 @@
 import functools
-from PyQt4 import QtGui
+import mimetypes
+import os
+from PyQt4 import QtCore, QtGui
+import sys
+from pyqode.core import logger
 from pyqode.core import settings
 
 
@@ -360,3 +364,88 @@ def keep_tc_pos(f):
         self.editor.setTextCursor(tc)
         return retval
     return wrapper
+
+
+def detect_encoding(path, default_encoding):
+    """
+    Detects the file encoding using chardet. If chardet is not available, the
+    default system encoding is used instead.
+
+    :param path: path of the file to detect encoding
+
+    :return: File encoding
+    """
+    logger.debug('detecting file encoding for file: %s' % path)
+    with open(path, 'rb') as f:
+        data = f.read()
+    try:
+        import chardet
+        encoding = chardet.detect(bytes(data))['encoding']
+    except ImportError:
+        logger.warning("chardet not available, using default encoding by "
+                       "default: %s" % default_encoding)
+        encoding = default_encoding
+    else:
+        logger.debug('encoding detected using chardet: %s' % encoding)
+    return encoding
+
+
+def get_mimetype(path):
+    """
+    Guesses the mime type of a file. If mime type cannot be detected, plain
+    text is assumed.
+
+    :param path: path of the file
+    :return: the corresponding mime type.
+    """
+    logger.debug('detecting mimetype for %s' % path)
+    mimetype = mimetypes.guess_type(path)[0]
+    if mimetype is None:
+        mimetype = mimetypes.guess_type('file.txt')[0]
+    logger.debug('mimetype detected: %s' % mimetype)
+    return mimetype
+
+
+def open_file(editor, path, replace_tabs_by_spaces=True,
+              detect_encoding_func=detect_encoding,
+              default_encoding=sys.getfilesystemencoding()):
+    """
+    Open a file on a QCodeEdit instance.
+
+    .. note:: This functions uses the :mod:`mimetypes` module to detect the
+        file's mime type. You might need to add custom mime types using
+        :meth:`mimetypes.add_type`.
+
+        E.g., for cobol, you would need to the following::
+
+            import mimetypes
+            for ext in ['.cbl', '.CBL', '.cob', '.COB',
+                        '.cpy', '.CPY', '.pco', '.PCO']:
+                mimetypes.add_type('text/x-cobol', ext)
+
+    :param editor: Editor instance
+    :param path: path of the file to open
+    :param replace_tabs_by_spaces: True to replace tabs by spaces, False to
+        leave it as it is. Default is True.
+    :param detect_encoding_func: Function to execute to detect encoding.
+        Default is to detect encoding with chardet.
+    :param default_encoding: Default encoding to use in case
+        detect_encoding_func failed.
+    """
+    # detect encoding
+    encoding = (detect_encoding_func(path, default_encoding)
+                if detect_encoding_func else default_encoding)
+    logger.debug('file encoding: %s' % encoding)
+    # open file and get its content
+    with open(path, 'r', encoding=encoding) as f:
+        content = f.read()
+    # replace tabs by spaces
+    if replace_tabs_by_spaces:
+        content = content.replace(
+            "\t", " " * settings.tab_length)
+    # set plain text
+    editor._fpath = path
+    editor.setPlainText(content, get_mimetype(path), encoding)
+    title = QtCore.QFileInfo(editor.file_path).fileName()
+    editor.setDocumentTitle(title)
+    editor.setWindowTitle(title)

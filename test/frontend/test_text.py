@@ -1,5 +1,5 @@
 """
-This module tests the text frontend module ((pyqode.core.frontend.text)
+This module tests the text frontend module (pyqode.core.frontend.text)
 """
 import os
 import sys
@@ -33,7 +33,7 @@ def setup_module():
     editor = frontend.QCodeEdit(window)
     window.setCentralWidget(editor)
     window.resize(800, 600)
-    editor.open_file(__file__)
+    frontend.open_file(editor, __file__)
     window.show()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     wait_for_connected(editor)
@@ -131,3 +131,12 @@ def test_line_pos_line_nbr():
     assert pos is not None
     nbr = frontend.line_nbr_from_position(editor, pos)
     assert nbr == 2
+
+def test_open_file():
+    global editor
+    frontend.open_file(editor, __file__)
+    assert editor.file_path == __file__
+    assert editor.file_encoding == 'ascii'
+    assert editor.mime_type == 'text/x-python'
+    with open(__file__, 'r') as f:
+        assert editor.toPlainText() == f.read()
