@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This module tests the text frontend module (pyqode.core.frontend.text)
 """
@@ -63,7 +64,7 @@ def test_goto_line():
     QTest.qWaitForWindowShown(window)
     assert editor.textCursor().blockNumber() == 0
     assert editor.textCursor().columnNumber() == 0
-    cursor = frontend.goto_line(editor, 2, 0, move=False)
+    cursor = frontend.goto_line(editor, 3, 0, move=False)
     process_events()
     assert editor.textCursor().blockNumber() != cursor.blockNumber()
     assert editor.textCursor().columnNumber() == cursor.columnNumber()
@@ -77,7 +78,7 @@ def test_goto_line():
 
 def test_selected_text():
     global editor
-    frontend.goto_line(editor, 2, 1, move=True)
+    frontend.goto_line(editor, 3, 1, move=True)
     process_events()
     assert frontend.word_under_cursor(editor).selectedText() == 'T'
     assert frontend.word_under_cursor(
@@ -86,14 +87,14 @@ def test_selected_text():
 
 def test_line_text():
     global editor
-    frontend.goto_line(editor, 2, 0, move=True)
+    frontend.goto_line(editor, 3, 0, move=True)
     assert frontend.current_line_text(editor) == __doc__.splitlines()[1]
 
 
 def test_set_line_text():
     global editor
-    frontend.set_line_text(editor, 2, 'haha')
-    frontend.goto_line(editor, 2, 0, move=True)
+    frontend.set_line_text(editor, 3, 'haha')
+    frontend.goto_line(editor, 3, 0, move=True)
     assert frontend.current_line_text(editor) == 'haha'
 
 
@@ -127,10 +128,10 @@ def test_line_pos_line_nbr():
     # ensure we are at the top of the document
     frontend.goto_line(editor, 1, 0, move=True)
     process_events()
-    pos = frontend.line_pos_from_number(editor, 2)
+    pos = frontend.line_pos_from_number(editor, 3)
     assert pos is not None
     nbr = frontend.line_nbr_from_position(editor, pos)
-    assert nbr == 2
+    assert nbr == 3
 
 
 def test_open_file():
@@ -144,7 +145,7 @@ def test_save_file():
     global editor
     path = os.path.join(os.getcwd(), 'tmp.py')
     # set line text to force change encoding
-    frontend.set_line_text(editor, 2, 'éêà')
+    frontend.set_line_text(editor, 3, 'éêê')
     QTest.qWait(1000)
     frontend.save_to_file(editor, path=path, encoding='utf-8')
     assert os.path.exists(path)
@@ -182,34 +183,34 @@ def test_line_indent():
 def test_right_word():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_word(editor) == 'This'
 
 
 def test_right_char():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_character(editor) == 'T'
 
 
 def test_insert_text():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     frontend.insert_text(editor, 'haha', keep_position=True)
     assert frontend.get_right_word(editor) == 'hahaThis'
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     frontend.insert_text(editor, 'haha', keep_position=False)
     assert frontend.get_right_word(editor) == 'This'
-    assert frontend.line_text(editor, 2).startswith('hahaThis')
+    assert frontend.line_text(editor, 3).startswith('hahaThis')
 
 
 def test_clear_selection():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.select_lines(editor, 1, 2)
+    frontend.select_lines(editor, 1, 3)
     assert frontend.selected_text(editor) != ''
     frontend.clear_selection(editor)
     assert frontend.selected_text(editor) == ''
@@ -218,7 +219,7 @@ def test_clear_selection():
 def test_move_right():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     frontend.move_right(editor)
     assert frontend.get_right_character(editor) == 'h'
 
@@ -226,20 +227,31 @@ def test_move_right():
 def test_to_upper():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_word(editor) == 'This'
-    frontend.select_lines(editor, 2, 2)
+    frontend.select_lines(editor, 3, 2)
     frontend.selected_text_to_upper(editor)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_word(editor) == 'THIS'
 
 
 def test_to_lower():
     global editor
     frontend.open_file(editor, __file__)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_word(editor) == 'This'
-    frontend.select_lines(editor, 2, 2)
+    frontend.select_lines(editor, 3, 2)
     frontend.selected_text_to_lower(editor)
-    frontend.goto_line(editor, 2)
+    frontend.goto_line(editor, 3)
     assert frontend.get_right_word(editor) == 'this'
+
+
+def test_search_text():
+    global editor
+    import os.path
+    frontend.open_file(editor, os.path.__file__)
+    occurences, index = frontend.search_text(
+        editor.document(), editor.textCursor(),
+        'import', QtGui.QTextDocument.FindCaseSensitively)
+    assert index == -1
+    assert len(occurences) == 11
