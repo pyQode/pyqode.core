@@ -642,7 +642,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     def focusOutEvent(self, event):
         if self._save_on_focus_out:
-            text.save_to_file(self)
+            QtCore.QTimer.singleShot(500, self._save)
 
     def mousePressEvent(self, event):
         """
@@ -969,3 +969,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self.setTextCursor(tc)
             if event:
                 event.accept()
+
+    def _save(self):
+        text.save_to_file(self)
