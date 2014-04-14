@@ -100,6 +100,8 @@ from pyqode.core.frontend.text import get_right_character
 from pyqode.core.frontend.text import insert_text
 from pyqode.core.frontend.text import clear_selection
 from pyqode.core.frontend.text import move_right
+from pyqode.core.frontend.text import selected_text_to_upper
+from pyqode.core.frontend.text import selected_text_to_lower
 
 
 # Client API

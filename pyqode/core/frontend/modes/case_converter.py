@@ -2,9 +2,9 @@
 """
 Contains a case converter mode.
 """
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 
-from pyqode.core.frontend import Mode
+from pyqode.core.frontend import Mode, text
 from pyqode.core.frontend.text import keep_tc_pos
 
 
@@ -20,17 +20,13 @@ class CaseConverterMode(Mode):
         Mode.__init__(self)
         self._actions_created = False
 
-    @keep_tc_pos
-    def to_lower(self, *args):
-        tc = self.editor.textCursor()
-        tc.insertText(tc.selectedText().lower())
-        self.editor.setTextCursor(tc)
-
-    @keep_tc_pos
+    @QtCore.pyqtSlot()
     def to_upper(self, *args):
-        tc = self.editor.textCursor()
-        tc.insertText(tc.selectedText().upper())
-        self.editor.setTextCursor(tc)
+        text.selected_text_to_upper(self.editor)
+
+    @QtCore.pyqtSlot()
+    def to_lower(self, *args):
+        text.selected_text_to_lower(self.editor)
 
     def _create_actions(self):
         self.action_to_lower = QtGui.QAction(self.editor)

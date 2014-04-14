@@ -358,12 +358,12 @@ def keep_tc_pos(f):
     function exits. This decorator can only be used on modes or panels.
     """
     @functools.wraps(f)
-    def wrapper(self, *args, **kwds):
-        pos = self.editor.textCursor().position()
-        retval = f(self, *args, **kwds)
-        tc = self.editor.textCursor()
+    def wrapper(editor, *args, **kwds):
+        pos = editor.textCursor().position()
+        retval = f(editor, *args, **kwds)
+        tc = editor.textCursor()
         tc.setPosition(pos)
-        self.editor.setTextCursor(tc)
+        editor.setTextCursor(tc)
         return retval
     return wrapper
 
@@ -455,6 +455,8 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
 
 def save_to_file(editor, path=None, encoding=None):
     editor.text_saving.emit(path)
+    sel_start = editor.textCursor().selectionStart()
+    sel_end = editor.textCursor().selectionEnd()
     clean_document(editor)
     if path is None:
         if editor.file_path:
@@ -493,6 +495,13 @@ def save_to_file(editor, path=None, encoding=None):
         editor.dirty = False
         editor._fpath = path
         editor.text_saved.emit(path)
+
+        if sel_start != sel_end:
+            # reset selection
+            tc = editor.textCursor()
+            tc.setPosition(sel_start)
+            tc.setPosition(sel_end, tc.KeepAnchor)
+            editor.setTextCursor(tc)
         return True
 
 
@@ -596,3 +605,25 @@ def move_right(editor, keep_anchor=False, nb_chars=1):
     tc.movePosition(tc.Right, tc.KeepAnchor if keep_anchor else tc.MoveAnchor,
                     nb_chars)
     editor.setTextCursor(tc)
+
+
+def selected_text_to_lower(editor):
+    """
+    Replace the selected text by its lower version
+
+    :param editor: QCodeEdit instance
+    """
+    tc = editor.textCursor()
+    tc.insertText(tc.selectedText().lower())
+    editor.setTextCursor(tc)
+
+
+def selected_text_to_upper(editor):
+    """
+    Replace the selected text by its upper version
+
+    :param editor: QCodeEdit instance
+    """
+    txt = selected_text(editor)
+    print("To replace: %s" % txt)
+    insert_text(editor, txt.upper())
