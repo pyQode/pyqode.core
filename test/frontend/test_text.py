@@ -221,3 +221,25 @@ def test_move_right():
     frontend.goto_line(editor, 2)
     frontend.move_right(editor)
     assert frontend.get_right_character(editor) == 'h'
+
+
+def test_to_upper():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_word(editor) == 'This'
+    frontend.select_lines(editor, 2, 2)
+    frontend.selected_text_to_upper(editor)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_word(editor) == 'THIS'
+
+
+def test_to_lower():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_word(editor) == 'This'
+    frontend.select_lines(editor, 2, 2)
+    frontend.selected_text_to_lower(editor)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_word(editor) == 'this'
