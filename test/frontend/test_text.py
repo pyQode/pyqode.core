@@ -144,7 +144,7 @@ def test_save_file():
     global editor
     path = os.path.join(os.getcwd(), 'tmp.py')
     # set line text to force change encoding
-    frontend.set_line_text(editor, 2, 'éàê')
+    frontend.set_line_text(editor, 2, 'éêà')
     QTest.qWait(1000)
     frontend.save_to_file(editor, path=path, encoding='utf-8')
     assert os.path.exists(path)
@@ -177,3 +177,47 @@ def test_line_indent():
     assert frontend.line_indent(editor, 2) == 4
     frontend.open_file(editor, __file__)
     assert frontend.line_indent(editor, frontend.line_count(editor) - 1) == 4
+
+
+def test_right_word():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_word(editor) == 'This'
+
+
+def test_right_char():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    assert frontend.get_right_character(editor) == 'T'
+
+
+def test_insert_text():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    frontend.insert_text(editor, 'haha', keep_position=True)
+    assert frontend.get_right_word(editor) == 'hahaThis'
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    frontend.insert_text(editor, 'haha', keep_position=False)
+    assert frontend.get_right_word(editor) == 'This'
+    assert frontend.line_text(editor, 2).startswith('hahaThis')
+
+
+def test_clear_selection():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.select_lines(editor, 1, 2)
+    assert frontend.selected_text(editor) != ''
+    frontend.clear_selection(editor)
+    assert frontend.selected_text(editor) == ''
+
+
+def test_move_right():
+    global editor
+    frontend.open_file(editor, __file__)
+    frontend.goto_line(editor, 2)
+    frontend.move_right(editor)
+    assert frontend.get_right_character(editor) == 'h'
