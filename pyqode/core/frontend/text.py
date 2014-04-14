@@ -1,12 +1,16 @@
 import functools
+import logging
 import mimetypes
 import os
 import sys
 
 from PyQt4 import QtCore, QtGui
 
-from pyqode.core import logger
 from pyqode.core import settings
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 def goto_line(editor, line, column=0, move=True):
@@ -377,18 +381,18 @@ def detect_encoding(path, default_encoding):
 
     :return: File encoding
     """
-    logger.debug('detecting file encoding for file: %s' % path)
+    _logger().debug('detecting file encoding for file: %s' % path)
     with open(path, 'rb') as f:
         data = f.read()
     try:
         import chardet
         encoding = chardet.detect(bytes(data))['encoding']
     except ImportError:
-        logger.warning("chardet not available, using default encoding by "
+        _logger().warning("chardet not available, using default encoding by "
                        "default: %s" % default_encoding)
         encoding = default_encoding
     else:
-        logger.debug('encoding detected using chardet: %s' % encoding)
+        _logger().debug('encoding detected using chardet: %s' % encoding)
     return encoding
 
 
@@ -400,11 +404,11 @@ def get_mimetype(path):
     :param path: path of the file
     :return: the corresponding mime type.
     """
-    logger.debug('detecting mimetype for %s' % path)
+    _logger().debug('detecting mimetype for %s' % path)
     mimetype = mimetypes.guess_type(path)[0]
     if mimetype is None:
         mimetype = mimetypes.guess_type('file.txt')[0]
-    logger.debug('mimetype detected: %s' % mimetype)
+    _logger().debug('mimetype detected: %s' % mimetype)
     return mimetype
 
 
@@ -437,7 +441,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
     # detect encoding
     encoding = (detect_encoding_func(path, default_encoding)
                 if detect_encoding_func else default_encoding)
-    logger.debug('file encoding: %s' % encoding)
+    _logger().debug('file encoding: %s' % encoding)
     # open file and get its content
     with open(path, 'r', encoding=encoding) as f:
         content = f.read()
@@ -462,7 +466,7 @@ def save_to_file(editor, path=None, encoding=None):
         if editor.file_path:
             path = editor.file_path
         else:
-            logger.warning('failed to save file. Path cannot be None if '
+            _logger().warning('failed to save file. Path cannot be None if '
                            'editor.file_path is None')
             return False
     # change encoding ?
@@ -472,7 +476,7 @@ def save_to_file(editor, path=None, encoding=None):
     # succeeded we just rename it to the final file name.
     tmp_path = path + '~'
     try:
-        logger.debug('saving editor content to temp file: %s' % tmp_path)
+        _logger().debug('saving editor content to temp file: %s' % tmp_path)
         with open(tmp_path, 'w', encoding=editor.file_encoding) as f:
             f.write(editor.toPlainText())
     except (IOError, OSError):
@@ -480,17 +484,17 @@ def save_to_file(editor, path=None, encoding=None):
             os.remove(tmp_path)
         except OSError:
             pass
-        logger.exception('failed to save file: %s' % path)
+        _logger().exception('failed to save file: %s' % path)
         return False
     else:
-        logger.debug('save to temp file succeeded')
+        _logger().debug('save to temp file succeeded')
         # remove path and rename temp file
-        logger.debug('remove file: %s' % path)
+        _logger().debug('remove file: %s' % path)
         try:
             os.remove(path)
         except (OSError, IOError):
             pass
-        logger.debug('rename %s to %s' % (tmp_path, path))
+        _logger().debug('rename %s to %s' % (tmp_path, path))
         os.rename(tmp_path, path)
         editor.dirty = False
         editor._fpath = path
@@ -627,3 +631,42 @@ def selected_text_to_upper(editor):
     txt = selected_text(editor)
     print("To replace: %s" % txt)
     insert_text(editor, txt.upper())
+
+
+def compare_cursors(cursor_a, cursor_b):
+    """
+    Compares two text cursor (take selection into account).
+
+    :param cursor_a: First cursor to compare
+    :param cursor_b: Second cursor to compare
+    :return: True if the cursors are identical (same start and end pos)
+    """
+    return (cursor_b.selectionStart() >= cursor_a.selectionStart() and
+            cursor_b.selectionEnd() <= cursor_a.selectionEnd())
+
+
+def search_text(text_document, text_cursor, search_txt, search_flags):
+    """
+    Search a text in a text document.
+
+    :param text_document: QTextDocument
+    :param text_cursor: Current text cursor
+    :param search_txt: Text to search
+    :param search_flags: QTextDocument.FindFlags
+    :return: the list of occurences, the current occurence index
+    :returns tuple([], int)
+    """
+    occurrences = []
+    index = -1
+    cursor = text_document.find(search_txt, 0, search_flags)
+    original_cursor = text_cursor
+    while not cursor.isNull():
+        if compare_cursors(cursor, original_cursor):
+            index = len(occurrences)
+        occurrences.append((cursor.selectionStart(),
+                            cursor.selectionEnd()))
+        cursor.setPosition(cursor.position() + 1)
+        cursor = text_document.find(search_txt, cursor, search_flags)
+    _logger().debug('search occurences: %r' % occurrences)
+    _logger().debug('occurence index: %d' % index)
+    return occurrences, index
