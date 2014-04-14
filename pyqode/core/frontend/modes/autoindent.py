@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Contains the automatic generic indenter """
 import re
-from pyqode.core.frontend import Mode
+from pyqode.core.frontend import Mode, text
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QTextCursor, QKeyEvent
 
@@ -25,14 +25,7 @@ class AutoIndentMode(Mode):
 
         :returns: Tuple (text before new line, text after new line)
         """
-        pos = tc.position()
-        # tc.movePosition(QTextCursor.StartOfLine)
-        # tc.setPosition(tc.position() - 1)
-        tc.movePosition(QTextCursor.StartOfLine)
-        tc.select(QTextCursor.LineUnderCursor)
-        s = tc.selectedText()
-        indent = re.match(r"\s*", s).group()
-        tc.setPosition(pos)
+        indent = text.line_indent(self.editor) * ' '
         if len(indent) < len(self.min_indent):
             indent = self.min_indent
         return "", indent
