@@ -92,6 +92,7 @@ from pyqode.core.frontend.text import word_under_cursor
 from pyqode.core.frontend.text import word_under_mouse_cursor
 from pyqode.core.frontend.text import open_file
 from pyqode.core.frontend.text import detect_encoding
+from pyqode.core.frontend.text import save_to_file
 
 # Client API
 from pyqode.core.frontend.client import connected_to_server

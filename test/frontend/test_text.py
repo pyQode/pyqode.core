@@ -132,11 +132,28 @@ def test_line_pos_line_nbr():
     nbr = frontend.line_nbr_from_position(editor, pos)
     assert nbr == 2
 
+
 def test_open_file():
     global editor
     frontend.open_file(editor, __file__)
     assert editor.file_path == __file__
-    assert editor.file_encoding == 'ascii'
     assert editor.mime_type == 'text/x-python'
-    with open(__file__, 'r') as f:
-        assert editor.toPlainText() == f.read()
+
+
+def test_save_file():
+    global editor
+    path = os.path.join(os.getcwd(), 'tmp.py')
+    # set line text to force change encoding
+    frontend.set_line_text(editor, 2, 'éàê')
+    QTest.qWait(1000)
+    frontend.save_to_file(editor, path=path, encoding='utf-8')
+    assert os.path.exists(path)
+    assert editor.file_encoding == 'utf-8'
+    frontend.save_to_file(editor, path=path, encoding='latin-1')
+    assert editor.file_encoding == 'latin-1'
+    frontend.open_file(editor, path, detect_encoding_func=None,
+                       default_encoding='latin-1')
+    QTest.qWait(1000)
+    assert editor.file_encoding == 'latin-1'
+    os.remove('tmp.py')
+    frontend.open_file(editor, __file__)

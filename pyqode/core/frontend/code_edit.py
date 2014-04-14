@@ -343,44 +343,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if hasattr(mode, 'rehighlight'):
                 mode.rehighlight()
 
-    @QtCore.pyqtSlot()
-    def save_to_file(self, path=None, encoding=None, force=False):
-        """
-        Saves the plain text to a file.
-
-        :param path: Optional file path. If None, we use the current file
-                         path (set by openFile).
-        :type path: str or None
-
-        :param encoding: Optional encoding. If None, the method will use the
-                         last encoding used to open/save the file.
-
-        :param force: Bypass the dirty flag and force the save.
-
-        :return: The operation status as a bool (True for success)
-        """
-        if not self.dirty and not force:
-            return True
-        self.text_saving.emit(path)
-        text.clean_document(self)
-        if not path:
-            if self.file_path:
-                path = self.file_path
-            else:
-                return False
-        if encoding:
-            self._fencoding = encoding
-        try:
-            content = self._encode_plain_text(self.file_encoding)
-        except UnicodeEncodeError:
-            content = self._encode_plain_text(self.default_encoding())
-        with open(path, "wb") as f:
-            f.write(content)
-        self.dirty = False
-        self._fpath = path
-        self.text_saved.emit(path)
-        return True
-
     def margin_size(self, position=Panel.Position.LEFT):
         """
         Gets the size of a specific margin.
@@ -859,10 +821,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         else:
             self._sel_foreground = style.selection_foreground
         self._reset_palette()
-
-    def _encode_plain_text(self, encoding):
-        content = bytes(self.toPlainText().encode(encoding))
-        return content
 
     def update_visible_blocks(self, event):
         """

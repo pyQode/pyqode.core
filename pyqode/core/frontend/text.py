@@ -449,3 +449,46 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
     title = QtCore.QFileInfo(editor.file_path).fileName()
     editor.setDocumentTitle(title)
     editor.setWindowTitle(title)
+
+
+def save_to_file(editor, path=None, encoding=None):
+    editor.text_saving.emit(path)
+    clean_document(editor)
+    if path is None:
+        if editor.file_path:
+            path = editor.file_path
+        else:
+            logger.warning('failed to save file. Path cannot be None if '
+                           'editor.file_path is None')
+            return False
+    # change encoding ?
+    if encoding:
+        editor._fencoding = encoding
+    # perform a safe save: we first save to a temporary file, if the save
+    # succeeded we just rename it to the final file name.
+    tmp_path = path + '~'
+    try:
+        logger.debug('saving editor content to temp file: %s' % tmp_path)
+        with open(tmp_path, 'w', encoding=editor.file_encoding) as f:
+            f.write(editor.toPlainText())
+    except (IOError, OSError):
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        logger.exception('failed to save file: %s' % path)
+        return False
+    else:
+        logger.debug('save to temp file succeeded')
+        # remove path and rename temp file
+        logger.debug('remove file: %s' % path)
+        try:
+            os.remove(path)
+        except (OSError, IOError):
+            pass
+        logger.debug('rename %s to %s' % (tmp_path, path))
+        os.rename(tmp_path, path)
+        editor.dirty = False
+        editor._fpath = path
+        editor.text_saved.emit(path)
+        return True
