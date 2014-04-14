@@ -157,3 +157,8 @@ def test_save_file():
     assert editor.file_encoding == 'latin-1'
     os.remove('tmp.py')
     frontend.open_file(editor, __file__)
+
+
+def test_mark_whole_doc_dirty():
+    global editor
+    frontend.mark_whole_doc_dirty(editor)

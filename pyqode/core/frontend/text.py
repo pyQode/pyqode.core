@@ -492,3 +492,15 @@ def save_to_file(editor, path=None, encoding=None):
         editor._fpath = path
         editor.text_saved.emit(path)
         return True
+
+
+def mark_whole_doc_dirty(editor):
+    """
+    Marks the whole document as dirty to force a full refresh. **SLOW**
+
+    :param editor: QCodeEdit instance
+    """
+    tc = editor.textCursor()
+    tc.select(tc.Document)
+    editor.document().markContentsDirty(tc.selectionStart(),
+                                      tc.selectionEnd())

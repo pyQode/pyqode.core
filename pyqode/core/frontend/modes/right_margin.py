@@ -3,7 +3,7 @@
 This module contains the right margin mode.
 """
 from pyqode.core import settings, style
-from pyqode.core.frontend import Mode
+from pyqode.core.frontend import Mode, mark_whole_doc_dirty
 from PyQt4 import QtGui
 
 
@@ -20,7 +20,7 @@ class RightMarginMode(Mode):
     def color(self, value):
         self._color = value
         self._pen = QtGui.QPen(self._color)
-        self.editor.mark_whole_doc_dirty()
+        mark_whole_doc_dirty(self.editor)
         self.editor.repaint()
 
     @property
@@ -51,7 +51,7 @@ class RightMarginMode(Mode):
     def refresh_style(self):
         self._init_style()
         self._pen = QtGui.QPen(self._color)
-        self.editor.mark_whole_doc_dirty()
+        mark_whole_doc_dirty(self.editor)
         self.editor.repaint()
 
     def _on_state_changed(self, state):

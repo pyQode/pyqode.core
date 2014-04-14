@@ -382,7 +382,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         implement onStyleChanged.
         """
         self._font_size += increment
-        self.mark_whole_doc_dirty()
+        text.mark_whole_doc_dirty(self)
         self._reset_palette()
 
     def zoom_out(self, increment=1):
@@ -398,7 +398,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._font_size -= increment
         if self._font_size <= 0:
             self._font_size = increment
-        self.mark_whole_doc_dirty()
+        text.mark_whole_doc_dirty(self)
         self._reset_palette()
 
     def line_indent(self):
