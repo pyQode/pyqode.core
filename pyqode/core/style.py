@@ -173,34 +173,3 @@ search_occurrence_foreground = QColor('black')
 """
 Foreground color of search occurences. Default is yellow.
 """
-
-# ----------------
-# Icons
-# ----------------
-icons = {
-    # QCodeEdit
-    "Undo": (":/pyqode-icons/rc/edit-undo.png", "edit-undo"),
-    "Redo": (":/pyqode-icons/rc/edit-redo.png", "edit-redo"),
-    "Copy": (":/pyqode-icons/rc/edit-copy.png", "edit-copy"),
-    "Cut": (":/pyqode-icons/rc/edit-cut.png", "edit-cut"),
-    "Paste": (":/pyqode-icons/rc/edit-paste.png", "edit-paste"),
-    "Delete": (":/pyqode-icons/rc/edit-delete.png", "edit-delete"),
-    "Select all": (":/pyqode-icons/rc/edit-select-all.png", "edit-select-all"),
-    "Indent": (":/pyqode-icons/rc/format-indent-more.png",
-               "format-indent-more"),
-    "Un-indent": (":/pyqode-icons/rc/format-indent-less.png",
-                  "format-indent-less"),
-    "Go to line": (":/pyqode-icons/rc/goto-line.png", "start-here"),
-
-    # Search And replace panel
-    "Find": ":/pyqode-icons/rc/edit-find.png",
-    "Replace": ":/pyqode-icons/rc/edit-find-replace.png",
-    "Next": ":/pyqode-icons/rc/go-down.png",
-    "Previous": ":/pyqode-icons/rc/go-up.png",
-    "Close": ":/pyqode-icons/rc/close.png"
-}
-"""
-The dictionary of default icons. Each entry is either a path to an icon
-or a tuple made up of the icon path and the icon name in the desktop theme (
-Linux only).
-"""

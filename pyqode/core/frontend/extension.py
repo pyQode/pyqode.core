@@ -121,6 +121,13 @@ class Mode(object):
         """
         pass
 
+    def refresh_actions(self):
+        """
+        Called by editor when the user wants to refresh actions shortcuts and
+        icons.
+        """
+        pass
+
 
 def install_mode(editor, mode):
     """

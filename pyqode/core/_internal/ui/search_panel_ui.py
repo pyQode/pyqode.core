@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Sun Mar 16 16:23:37 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Mon Apr 14 22:10:32 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 

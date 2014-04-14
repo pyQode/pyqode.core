@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'dlg_goto_line.ui'
 #
-# Created: Sun Mar 16 16:23:37 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Mon Apr 14 22:10:32 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,7 +23,6 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-# noinspection PyPep8,PyPep8
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
@@ -59,6 +58,8 @@ class Ui_Dialog(object):
         self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 1)
 
         self.retranslateUi(Dialog)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), Dialog.accept)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), Dialog.reject)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
@@ -68,3 +69,4 @@ class Ui_Dialog(object):
         self.label_3.setText(_translate("Dialog", "You want to go:", None))
         self.label_4.setText(_translate("Dialog", "You can\'t go further than:", None))
         self.lblLineCount.setText(_translate("Dialog", "1", None))
+

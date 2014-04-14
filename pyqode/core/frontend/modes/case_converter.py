@@ -4,8 +4,8 @@ Contains a case converter mode.
 """
 from PyQt4 import QtCore, QtGui
 
+from pyqode.core import actions
 from pyqode.core.frontend import Mode, text
-from pyqode.core.frontend.text import keep_tc_pos
 
 
 class CaseConverterMode(Mode):
@@ -30,16 +30,17 @@ class CaseConverterMode(Mode):
 
     def _create_actions(self):
         self.action_to_lower = QtGui.QAction(self.editor)
-        self.action_to_lower.setText("Convert to lower case")
-        self.action_to_lower.setShortcut("Ctrl+U")
         self.action_to_lower.triggered.connect(self.to_lower)
-
         self.action_to_upper = QtGui.QAction(self.editor)
-        self.action_to_upper.setText("Convert to UPPER CASE")
-        self.action_to_upper.setShortcut("Ctrl+Shift+U")
         self.action_to_upper.triggered.connect(self.to_upper)
-
         self._actions_created = True
+        self.refresh_actions()
+
+    def refresh_actions(self):
+        self.action_to_lower.setText(actions.to_lower.text)
+        self.action_to_lower.setShortcut(actions.to_upper.shortcut)
+        self.action_to_upper.setText(actions.to_upper.text)
+        self.action_to_upper.setShortcut(actions.to_upper.shortcut)
 
     def _on_state_changed(self, state):
         if state:

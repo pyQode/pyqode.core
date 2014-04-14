@@ -4,6 +4,7 @@ This module contains the search and replace panel
 """
 from PyQt4 import QtCore, QtGui
 
+from pyqode.core import actions
 from pyqode.core import style
 from pyqode.core import frontend
 from pyqode.core.frontend import TextDecoration, Panel, text as text_api
@@ -43,6 +44,8 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         color: %(color)s;
         background-color: transparent;
         padding: 5px;
+        min-height: 24px;
+        min-width: 24px;
         border: none;
     }
 
@@ -101,26 +104,28 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self._fg = value
         self._refresh_decorations()
 
-    def refresh_icons(self, use_theme=True):
+    def refresh_actions(self):
         values = [
-            ("edit-find", "Find",
-             [self.actionSearch], [self.labelSearch]),
-            ("edit-find-replace", "Replace",
-             [self.actionActionSearchAndReplace], [self.labelReplace]),
-            ("go-down", "Next",
-             [self.actionFindNext, self.pushButtonNext], []),
-            ("go-up", "Previous",
+            (actions.find, [self.actionSearch], [self.labelSearch]),
+            (actions.replace, [self.actionActionSearchAndReplace],
+             [self.labelReplace]),
+            (actions.find_next, [self.actionFindNext, self.pushButtonNext],
+             []),
+            (actions.find_previous,
              [self.actionFindPrevious, self.pushButtonPrevious], []),
-            ("application-exit", "Close", [self.pushButtonClose], []),
+            (actions.close_search_panel, [self.pushButtonClose], []),
         ]
-        for theme, name, actions, labels in values:
-            icon = style.icons[name]
-            if use_theme:
-                icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
-            else:
+        for action_def, qactions, labels in values:
+            icon = action_def.icon
+            try:
+                icon = QtGui.QIcon.fromTheme(icon[0], QtGui.QIcon(icon[1]))
+            except TypeError:
                 icon = QtGui.QIcon(icon)
-            for action in actions:
+            for action in qactions:
                 action.setIcon(icon)
+                if isinstance(action, QtGui.QAction):
+                    action.setShortcut(action_def.shortcut)
+                    action.setText(action_def.text)
             for label in labels:
                 label.setPixmap(icon.pixmap(16, 16))
 
@@ -141,7 +146,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        self.refresh_icons()
+        self.refresh_actions()
         self._init_style()
 
     def _init_style(self):

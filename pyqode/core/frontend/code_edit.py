@@ -6,12 +6,13 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-from pyqode.core import settings, style
+from pyqode.core import actions, settings, style
 from pyqode.core._internal import dialogs
 from pyqode.core._internal.client import JsonTcpClient
 from pyqode.core.frontend import text
 from pyqode.core.frontend.extension import Panel
 from pyqode.core.frontend.utils import DelayJobRunner
+from pyqode.core._internal.ui import pyqode_core_rc
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -294,7 +295,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         # setup context menu
         self._actions = []
         if create_default_actions:
-            self._create_default_actions()
+            self._init_actions()
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self._mnu = None  # bug with PySide (github #63)
@@ -407,20 +408,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self._actions.remove(action)
 
-    def refresh_icons(self, use_theme=True):
-        for action in self._actions:
-            if action.text() in settings.actions:
-                icon, theme = style.icons[action.text()]
-                if use_theme:
-                    action.setIcon(QtGui.QIcon.fromTheme(
-                        theme, QtGui.QIcon(icon)))
-                else:
-                    action.setIcon(QtGui.QIcon(icon))
-        try:
-            self.searchAndReplacePanel.refresh_icons(use_theme=use_theme)
-        except AttributeError:
-            pass  # panel not installed
-
     def refresh_settings(self,):
         """
         Refresh all settings, every installed mode/panel will be refreshed too.
@@ -445,6 +432,14 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         for zone in self._panels.values():
             for panel in zone.values():
                 panel.refresh_style()
+
+    def refresh_actions(self):
+        self._refresh_actions()
+        for m in self._modes.values():
+            m.refresh_actions()
+        for zone in self._panels.values():
+            for panel in zone.values():
+                panel.refresh_actions()
 
     # Public slots
     # ------------
@@ -604,10 +599,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         elif event.key() == QtCore.Qt.Key_Home:
             self._do_home_key(
                 event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
-        elif (event.key() == QtCore.Qt.Key_D and
-              event.modifiers() & QtCore.Qt.ControlModifier):
-            self.duplicate_line()
-            event.accept()
         self.key_pressed.emit(event)
         state = event.isAccepted()
         if not event.isAccepted():
@@ -735,29 +726,34 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                              ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
-    def _create_default_actions(self):
+    def _init_actions(self):
         values = [
-            ("Undo", self.undo, self.undoAvailable),
-            ("Redo", self.redo, self.redoAvailable),
+            (actions.undo, self.undo, self.undoAvailable),
+            (actions.redo, self.redo, self.redoAvailable),
             None,
-            ("Copy", self.copy, self.copyAvailable),
-            ("Cut", self.cut, self.copyAvailable),
-            ("Paste", self.paste, None),
-            ("Delete", self.delete, None),
-            ("Select all", self.selectAll, None),
-            ("Indent", self.indent, None),
-            ("Un-indent", self.un_indent, None),
-            ("Go to line", self.goto_line, None)
+            (actions.copy, self.copy, self.copyAvailable),
+            (actions.cut, self.cut, self.copyAvailable),
+            (actions.paste, self.paste, None),
+            (actions.delete, self.delete, None),
+            (actions.duplicate_line, self.duplicate_line, None),
+            (actions.select_all, self.selectAll, None),
+            (actions.indent, self.indent, None),
+            (actions.unindent, self.un_indent, None),
+            None,
+            (actions.goto_line, self.goto_line, None)
         ]
 
         for val in values:
             if val:
-                name, trig_slot, enable_signal = val
-                shortcut = settings.actions[name]
-                icon, theme = style.icons[name]
-                a = QtGui.QAction(QtGui.QIcon.fromTheme(
-                    theme, QtGui.QIcon(icon)), name, self)
-                a.setShortcut(shortcut)
+                action, trig_slot, enable_signal = val
+                if action.icon:
+                    theme, icon = action.icon
+                    a = QtGui.QAction(QtGui.QIcon.fromTheme(
+                        theme, QtGui.QIcon(icon)), action.text, self)
+                else:
+                    a = QtGui.QAction(action.text, self)
+                a.setShortcut(action.shortcut)
+                a.setText(action.text)
                 a.setIconVisibleInMenu(True)
                 a.triggered.connect(trig_slot)
                 if enable_signal:
@@ -765,6 +761,32 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 self.add_action(a)
             else:
                 self.add_separator()
+
+    def _refresh_actions(self):
+        actions_defs = [
+            actions.undo,
+            actions.redo,
+            None,
+            actions.copy,
+            actions.cut,
+            actions.paste,
+            actions.delete,
+            actions.duplicate_line,
+            actions.select_all,
+            actions.indent,
+            actions.unindent,
+            None,
+            actions.goto_line
+        ]
+
+        for adef, action in zip(actions_defs, self._actions):
+            if adef:
+                action.setText(adef.text)
+                action.setShortcut(adef.shortcut)
+                if adef.icon:
+                    theme, icon = adef.icon
+                    icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+                    action.setIcon(icon)
 
     def _init_settings(self):
         self._show_whitespaces = settings.show_white_spaces

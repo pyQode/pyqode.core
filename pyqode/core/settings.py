@@ -79,24 +79,6 @@ to split the document words (code completion).
 
 """
 
-actions = {
-    'Undo': 'Ctrl+Z',
-    'Redo': 'Ctrl+Y',
-    'Copy': 'Ctrl+C',
-    'Cut': 'Ctrl+X',
-    'Paste': 'Ctrl+V',
-    'Delete': 'Delete',
-    'Select all': 'Ctrl+A',
-    'Indent': 'Tab',
-    'Un-indent': 'Shift+Tab',
-    'Go to line': 'Ctrl+G'
-}
-"""
-The dictionary of action shortcuts.
-Each entry in the dict is key sequence that correspond to an action
-
-"""
-
 # ----------------
 # Code completion settings
 # ----------------
