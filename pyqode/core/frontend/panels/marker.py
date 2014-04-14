@@ -203,31 +203,3 @@ class MarkerPanel(Panel):
     def _display_tooltip(self, tooltip, top):
         QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)
-
-
-if __name__ == '__main__':
-    class Example(QGenericCodeEdit):
-
-        def __init__(self):
-            QGenericCodeEdit.__init__(self, parent=None)
-            self.openFile(__file__)
-            self.resize(QtCore.QSize(1000, 600))
-            self.installPanel(MarkerPanel())
-            marker = Marker(5, description="First marker")
-            self.markerPanel.add_marker(marker)
-            # add another action in 5s
-            QtCore.QTimer.singleShot(1000, self.add_marker)
-
-        def add_marker(self):
-            m = self.markerPanel.marker_for_line(5)
-            m.position = 7
-            marker = Marker(15, description="Second marker")
-            self.markerPanel.add_marker(marker)
-            # clear all in 2s
-            QtCore.QTimer.singleShot(2000, self.markerPanel.clear_markers)
-
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    e = Example()
-    e.show()
-    sys.exit(app.exec_())

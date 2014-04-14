@@ -86,6 +86,7 @@ class IndenterMode(Mode):
         if cursor.hasSelection():
             self.indent_selection(cursor)
         else:
+            # simply insert indentation at the cursor position
             tab_len = settings.tab_length
             cursor.beginEditBlock()
             cursor.insertText(tab_len * " ")
