@@ -6,7 +6,7 @@ from PyQt4 import QtCore, QtGui
 
 from pyqode.core import style
 from pyqode.core import frontend
-from pyqode.core.frontend import TextDecoration, Panel
+from pyqode.core.frontend import TextDecoration, Panel, text as text_api
 from pyqode.core.frontend.utils import DelayJobRunner, drift_color
 from pyqode.core._internal.ui.search_panel_ui import Ui_SearchPanel
 
@@ -273,9 +273,11 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
+            cursor = text_api.word_under_cursor(self.editor,
+                                                select_whole_word=True)
             self.request_job(self._exec_search, True,
                              txt, self.editor.document().clone(),
-                             self.editor.textCursor(),
+                             cursor,
                              self._search_flags())
         else:
             self.cancel_requests()
@@ -434,21 +436,13 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
             flags |= QtGui.QTextDocument.FindWholeWords
         return flags
 
-    def _exec_search(self, text, doc, original_cursor, flags):
+    def _exec_search(self, search_txt, doc, original_cursor, flags):
         self._mutex.lock()
         self._occurrences[:] = []
         self._current_occurrence_index = -1
-        if text:
-            matches = 0
-            cursor = doc.find(text, 0, flags)
-            while not cursor.isNull():
-                if self._compare_cursors(cursor, original_cursor):
-                    self._current_occurrence_index = matches
-                self._occurrences.append((cursor.selectionStart(),
-                                          cursor.selectionEnd()))
-                cursor.setPosition(cursor.position() + 1)
-                cursor = doc.find(text, cursor, flags)
-                matches += 1
+        if search_txt:
+            self._occurrences, self._current_occurrence_index = \
+                text_api.search_text(doc, original_cursor, search_txt, flags)
         self._mutex.unlock()
         self.search_finished.emit()
 
@@ -519,11 +513,6 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self._mutex.lock()
         self._current_occurrence_index = cr
         self._mutex.unlock()
-
-    @staticmethod
-    def _compare_cursors(a, b):
-        return (a.selectionStart() == b.selectionStart() and
-                a.selectionEnd() == b.selectionEnd())
 
     def _remove_occurrence(self, i, offset=0):
         self._mutex.lock()

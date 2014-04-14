@@ -102,6 +102,7 @@ from pyqode.core.frontend.text import clear_selection
 from pyqode.core.frontend.text import move_right
 from pyqode.core.frontend.text import selected_text_to_upper
 from pyqode.core.frontend.text import selected_text_to_lower
+from pyqode.core.frontend.text import search_text
 
 
 # Client API
