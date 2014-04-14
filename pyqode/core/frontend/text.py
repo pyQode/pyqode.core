@@ -389,7 +389,7 @@ def detect_encoding(path, default_encoding):
         encoding = chardet.detect(bytes(data))['encoding']
     except ImportError:
         _logger().warning("chardet not available, using default encoding by "
-                       "default: %s" % default_encoding)
+                          "default: %s" % default_encoding)
         encoding = default_encoding
     else:
         _logger().debug('encoding detected using chardet: %s' % encoding)
@@ -467,7 +467,7 @@ def save_to_file(editor, path=None, encoding=None):
             path = editor.file_path
         else:
             _logger().warning('failed to save file. Path cannot be None if '
-                           'editor.file_path is None')
+                              'editor.file_path is None')
             return False
     # change encoding ?
     if encoding:
