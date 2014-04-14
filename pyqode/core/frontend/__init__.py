@@ -95,6 +95,12 @@ from pyqode.core.frontend.text import detect_encoding
 from pyqode.core.frontend.text import save_to_file
 from pyqode.core.frontend.text import mark_whole_doc_dirty
 from pyqode.core.frontend.text import line_indent
+from pyqode.core.frontend.text import get_right_word
+from pyqode.core.frontend.text import get_right_character
+from pyqode.core.frontend.text import insert_text
+from pyqode.core.frontend.text import clear_selection
+from pyqode.core.frontend.text import move_right
+
 
 # Client API
 from pyqode.core.frontend.client import connected_to_server

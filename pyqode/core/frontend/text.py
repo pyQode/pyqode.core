@@ -535,7 +535,7 @@ def get_right_word(editor):
     tc = editor.textCursor()
     tc.movePosition(QtGui.QTextCursor.WordRight,
                     QtGui.QTextCursor.KeepAnchor)
-    return tc.selectedText()
+    return tc.selectedText().strip()
 
 
 def get_right_character(editor):
