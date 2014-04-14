@@ -172,7 +172,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     def _on_results_available(self, status, results):
         logger.debug("cc: got completion results")
-        self.editor.set_cursor(QtCore.Qt.IBeamCursor)
+        self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
         all_results = []
         if status:
             for res in results:
@@ -273,7 +273,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def _set_wait_cursor(self):
-        self.editor.set_cursor(QtCore.Qt.WaitCursor)
+        self.editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
 
     def _is_last_char_end_of_word(self):
         try:

@@ -314,6 +314,140 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setMouseTracking(True)
         self.setCenterOnScroll(True)
 
+    # Utility methods
+    # ---------------
+    def set_mouse_cursor(self, cursor):
+        """
+        Changes the viewport cursor
+
+        :param cursor: the nex mouse cursor to set.
+        :type cursor: QtGui.QCursor
+        """
+        self.viewport().setCursor(cursor)
+        QtGui.QApplication.processEvents()
+
+    def show_tooltip(self, pos, tooltip):
+        """
+        Show a tool tip at the specified position
+
+        :param pos: Tooltip position
+
+        :param tooltip: Tooltip text
+        """
+        QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
+        self._prev_tooltip_block_nbr = -1
+
+    def margin_size(self, position=Panel.Position.LEFT):
+        """
+        Gets the size of a specific margin.
+
+        :param position: Margin position. See
+            :class:`pyqode.core.Panel.Position`
+
+        :return: The size of the specified margin
+        :rtype: float
+        """
+        return self._margin_sizes[position]
+
+    def setPlainText(self, txt, mime_type, encoding):
+        """
+        Extends setPlainText to force the user to set an encoding and a
+        mime type.
+
+        Emits the new_text_set signal.
+
+        :param txt: The new text to set.
+        """
+        self._fencoding = encoding
+        self._mime_type = mime_type
+        QtGui.QPlainTextEdit.setPlainText(self, txt)
+        self._original_text = txt
+        self._modified_lines.clear()
+        self.new_text_set.emit()
+        self.redoAvailable.emit(False)
+        self.undoAvailable.emit(False)
+        self.dirty = False
+        for mode in self._modes.values():
+            if hasattr(mode, 'set_mime_type'):
+                mode.set_mime_type(self.mime_type)
+
+    def add_action(self, action):
+        """
+        Adds an action to the editor's context menu.
+
+        :param action: QtGui.QAction
+        """
+        self._actions.append(action)
+        QtGui.QPlainTextEdit.addAction(self, action)
+
+    def actions(self):
+        """
+        Returns the list of actions/seprators of the context menu.
+        :return:
+        """
+        return self._actions
+
+    def add_separator(self):
+        """
+        Adds a seprator to the editor's context menu.
+
+        :return: The sepator that has been added.
+        :rtype: QtGui.QAction
+        """
+        action = QtGui.QAction(self)
+        action.setSeparator(True)
+        self._actions.append(action)
+        return action
+
+    def remove_action(self, action):
+        """
+        Removes an action/separator from the editor's context menu.
+
+        :param action: Action/seprator to remove.
+        """
+        self._actions.remove(action)
+
+    def refresh_icons(self, use_theme=True):
+        for action in self._actions:
+            if action.text() in settings.actions:
+                icon, theme = style.icons[action.text()]
+                if use_theme:
+                    action.setIcon(QtGui.QIcon.fromTheme(
+                        theme, QtGui.QIcon(icon)))
+                else:
+                    action.setIcon(QtGui.QIcon(icon))
+        try:
+            self.searchAndReplacePanel.refresh_icons(use_theme=use_theme)
+        except AttributeError:
+            pass  # panel not installed
+
+    def refresh_settings(self,):
+        """
+        Refresh all settings, every installed mode/panel will be refreshed too.
+
+        """
+        self._init_settings()
+        for m in self._modes.values():
+            m.refresh_settings()
+        for zone in self._panels.values():
+            for panel in zone.values():
+                panel.refresh_settings()
+
+    def refresh_style(self):
+        """
+        Refreshes the editor style, every installed mode/panel will be
+        refreshed too.
+
+        """
+        self._init_style()
+        for m in self._modes.values():
+            m.refresh_style()
+        for zone in self._panels.values():
+            for panel in zone.values():
+                panel.refresh_style()
+
+    # Public slots
+    # ------------
     @QtCore.pyqtSlot()
     def delete(self):
         """ Deletes the selected text """
@@ -343,18 +477,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             if hasattr(mode, 'rehighlight'):
                 mode.rehighlight()
 
-    def margin_size(self, position=Panel.Position.LEFT):
-        """
-        Gets the size of a specific margin.
-
-        :param position: Margin position. See
-            :class:`pyqode.core.Panel.Position`
-
-        :return: The size of the specified margin
-        :rtype: float
-        """
-        return self._margin_sizes[position]
-
+    @QtCore.pyqtSlot()
     def reset_zoom(self):
         """
         Resets the zoom value.
@@ -362,15 +485,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._font_size = style.font_size
         self._reset_palette()
 
-    def mark_whole_doc_dirty(self):
-        """
-        Marks the whole document as dirty to force a full refresh. **SLOW**
-        """
-        tc = self.textCursor()
-        tc.select(tc.Document)
-        self.document().markContentsDirty(tc.selectionStart(),
-                                          tc.selectionEnd())
-
+    @QtCore.pyqtSlot()
     def zoom_in(self, increment=1):
         """
         Zooms in the editor.
@@ -385,6 +500,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         text.mark_whole_doc_dirty(self)
         self._reset_palette()
 
+    @QtCore.pyqtSlot()
     def zoom_out(self, increment=1):
         """
         Zooms out the editor.
@@ -438,16 +554,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         """
         self.unindent_requested.emit()
 
-    def set_cursor(self, cursor):
-        """
-        Changes the viewport cursor
-
-        :param cursor: the nex mouse cursor to set.
-        :type cursor: QtGui.QCursor
-        """
-        self.viewport().setCursor(cursor)
-        QtGui.QApplication.processEvents()
-
+    @QtCore.pyqtSlot()
     def refresh_panels(self):
         """ Refreshes the editor panels. """
         self._resize_panels()
@@ -455,6 +562,8 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._update_panels(self.contentsRect(), 0)
         self.update()
 
+    # Events
+    # ------
     def resizeEvent(self, e):
         """
         Overrides resize event to resize the editor's panels.
@@ -471,7 +580,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
         :param e: paint event
         """
-        self.update_visible_blocks(e)
+        self._update_visible_blocks(e)
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
@@ -603,131 +712,19 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.mouse_moved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
-    def show_tooltip(self, pos, tooltip):
-        """
-        Show a tool tip at the specified position
-
-        :param pos: Tooltip position
-
-        :param tooltip: Tooltip text
-        """
-        QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
-        self._prev_tooltip_block_nbr = -1
-
     def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         QtGui.QPlainTextEdit.showEvent(self, event)
         self._update_viewport_margins()
 
-    def setPlainText(self, txt, mime_type, encoding):
-        """
-        Extends setPlainText to force the user to set an encoding and a
-        mime type.
-
-        Emits the new_text_set signal.
-
-        :param txt: The new text to set.
-        """
-        self._fencoding = encoding
-        self._mime_type = mime_type
-        QtGui.QPlainTextEdit.setPlainText(self, txt)
-        self._original_text = txt
-        self._modified_lines.clear()
-        self.new_text_set.emit()
-        self.redoAvailable.emit(False)
-        self.undoAvailable.emit(False)
-        self.dirty = False
-        for mode in self._modes.values():
-            if hasattr(mode, 'set_mime_type'):
-                mode.set_mime_type(self.mime_type)
-
-    def add_action(self, action):
-        """
-        Adds an action to the editor's context menu.
-
-        :param action: QtGui.QAction
-        """
-        self._actions.append(action)
-        QtGui.QPlainTextEdit.addAction(self, action)
-
-    def actions(self):
-        """
-        Returns the list of actions/seprators of the context menu.
-        :return:
-        """
-        return self._actions
-
-    def add_separator(self):
-        """
-        Adds a seprator to the editor's context menu.
-
-        :return: The sepator that has been added.
-        :rtype: QtGui.QAction
-        """
-        action = QtGui.QAction(self)
-        action.setSeparator(True)
-        self._actions.append(action)
-        return action
-
-    def remove_action(self, action):
-        """
-        Removes an action/separator from the editor's context menu.
-
-        :param action: Action/seprator to remove.
-        """
-        self._actions.remove(action)
-
-    def refresh_icons(self, use_theme=True):
-        for action in self._actions:
-            if action.text() in settings.actions:
-                icon, theme = style.icons[action.text()]
-                if use_theme:
-                    action.setIcon(QtGui.QIcon.fromTheme(
-                        theme, QtGui.QIcon(icon)))
-                else:
-                    action.setIcon(QtGui.QIcon(icon))
-        try:
-            self.searchAndReplacePanel.refresh_icons(use_theme=use_theme)
-        except AttributeError:
-            pass  # panel not installed
-
-    def refresh_settings(self,):
-        """
-        Refresh all settings, every installed mode/panel will be refreshed too.
-
-        """
-        self._init_settings()
-        for m in self._modes.values():
-            m.refresh_settings()
-        for zone in self._panels.values():
-            for panel in zone.values():
-                panel.refresh_settings()
-
-    def refresh_style(self):
-        """
-        Refreshes the editor style, every installed mode/panel will be
-        refreshed too.
-
-        """
-        self._init_style()
-        for m in self._modes.values():
-            m.refresh_style()
-        for zone in self._panels.values():
-            for panel in zone.values():
-                panel.refresh_style()
-
+    # Private methods
+    # ---------------
     def _show_context_menu(self, pt):
         self._mnu = QtGui.QMenu()
         self._mnu.addActions(self._actions)
         self._mnu.popup(self.mapToGlobal(pt))
 
     def _set_whitespaces_flags(self, show):
-        """
-        Shows/Hides whitespaces.
-
-        :param show: True to show whitespaces, False to hide them
-        :type show: bool
-        """
         doc = self.document()
         options = doc.defaultTextOption()
         if show:
@@ -779,9 +776,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self._set_whitespaces_flags(self._show_whitespaces)
 
     def _init_style(self):
-        """
-        Init the style PropertyRegistry
-        """
         if style.font is None:
             self._font_family = "monospace"
             if sys.platform == "win32":
@@ -804,12 +798,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self._sel_foreground = style.selection_foreground
         self._reset_palette()
 
-    def update_visible_blocks(self, event):
-        """
-        Update the list of visible blocks/lines position.
-
-        :param event: QtGui.QPaintEvent
-        """
+    def _update_visible_blocks(self, event):
         self._visible_blocks[:] = []
         block = self.firstVisibleBlock()
         block_nbr = block.blockNumber()
@@ -862,9 +851,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         return bottom, left, right, top
 
     def _resize_panels(self):
-        """
-        Resizes panels geometries
-        """
         cr = self.contentsRect()
         vcr = self.viewport().contentsRect()
         s_bottom, s_left, s_right, s_top = self._compute_zones_sizes()
@@ -916,9 +902,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             bottom += sh.height()
 
     def _update_panels(self, rect, dy):
-        """
-        Updates the panel on update request. (Scroll, update clipping rect,...)
-        """
         for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
                zones_id == Panel.Position.BOTTOM:
@@ -939,18 +922,12 @@ class QCodeEdit(QtGui.QPlainTextEdit):
             self._update_viewport_margins()
 
     def _on_text_changed(self):
-        """
-        Updates dirty flag on text changed.
-        """
         if not self._cleaning:
             self._modified_lines.add(text.cursor_position(self)[0])
             txt = self.toPlainText()
             self.dirty = (txt != self._original_text)
 
     def _update_viewport_margins(self):
-        """
-        Updates the viewport margins depending on the installed panels
-        """
         top = 0
         left = 0
         right = 0
@@ -971,15 +948,6 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         self.setViewportMargins(left, top, right, bottom)
 
     def _reset_palette(self):
-        """
-        Resets palette and font.
-
-        Sets the following attributes on the palette:
-            - background
-            - foreground
-            - sel background
-            - sel foreground
-        """
         self.setFont(QtGui.QFont(self._font_family, self._font_size))
         p = self.palette()
         p.setColor(p.Base, self._background)

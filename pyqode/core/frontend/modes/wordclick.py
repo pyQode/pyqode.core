@@ -49,7 +49,7 @@ class WordClickMode(Mode, QtCore.QObject):
             self._select_word_under_mouse_cursor()
         else:
             self._remove_decoration()
-            self.editor.set_cursor(QtCore.Qt.IBeamCursor)
+            self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
             self._previous_cursor_start = -1
             self._previous_cursor_end = -1
 
@@ -66,9 +66,9 @@ class WordClickMode(Mode, QtCore.QObject):
                 self._deco.set_foreground(QtCore.Qt.blue)
                 self._deco.set_as_underlined()
                 frontend.add_decoration(self.editor, self._deco)
-                self.editor.set_cursor(QtCore.Qt.PointingHandCursor)
+                self.editor.set_mouse_cursor(QtCore.Qt.PointingHandCursor)
             else:
-                self.editor.set_cursor(QtCore.Qt.IBeamCursor)
+                self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
 
     def _remove_decoration(self):
         if self._deco is not None:
