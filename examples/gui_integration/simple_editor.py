@@ -44,7 +44,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
-        self.actionSave.triggered.connect(self.editor.save_to_file)
+        self.actionSave.triggered.connect(self.save)
 
         # create edit menu
         mnu = QtGui.QMenu("Edit", self.menubar)
@@ -112,6 +112,10 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
     def on_mode_state_changed(self):
         action = self.sender()
         action.mode.enabled = action.isChecked()
+
+    @QtCore.pyqtSlot()
+    def save(self):
+        frontend.save_to_file(self.editor)
 
 
 def main():

@@ -21,7 +21,7 @@ def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = frontend.QCodeEdit()
-    editor.open_file(__file__)
+    frontend.open_file(editor, __file__)
     frontend.install_mode(editor,
                           modes.PygmentsSyntaxHighlighter(editor.document()))
     frontend.install_mode(editor, modes.CaretLineHighlighterMode())
