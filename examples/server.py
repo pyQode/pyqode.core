@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Simple server which adds the code_completion.DocumentWordsProvider to the
+Simple server which adds a DocumentWordsProvider to the
 CodeCompletion worker.
 """
 from pyqode.core import backend

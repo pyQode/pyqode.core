@@ -24,5 +24,7 @@
 #THE SOFTWARE.
 #
 """
-Contains the compile ui/rc scripts and their (res)sources
+This package contains the ui scripts for the simple_editor example.
+
+Run compile_ui.py to update ui scripts for qt designer ui/qrc files.
 """

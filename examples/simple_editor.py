@@ -40,7 +40,7 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         frontend.install_mode(self.editor, modes.SymbolMatcherMode())
 
         # start pyqode server for our code editor widget
-        frontend.start_server(self.editor, '../server.py')
+        frontend.start_server(self.editor, 'server.py')
 
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
