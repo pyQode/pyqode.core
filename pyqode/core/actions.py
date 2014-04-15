@@ -18,6 +18,37 @@ Example usage::
 
     editor.refresh_actions()
 
+QCodeEdit actions
+~~~~~~~~~~~~~~~~~
+
+.. autodata:: undo
+.. autodata:: redo
+.. autodata:: copy
+.. autodata:: cut
+.. autodata:: paste
+.. autodata:: delete
+.. autodata:: select_all
+.. autodata:: indent
+.. autodata:: unindent
+.. autodata:: goto_line
+.. autodata:: duplicate_line
+
+SearchAndReplacePanel actions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autodata:: find
+.. autodata:: replace
+.. autodata:: find_previous
+.. autodata:: find_next
+.. autodata:: close_search_panel
+
+
+CaseConverterMode actions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autodata:: to_lower
+.. autodata:: to_upper
+
 """
 from PyQt4.QtGui import QKeySequence
 

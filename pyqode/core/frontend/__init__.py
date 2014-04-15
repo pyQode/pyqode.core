@@ -1,11 +1,13 @@
 """
-This package contains the API for interacting with the frontend (client side
-GUI).
+This package contains the API for the frontend. We call frontend any bit
+of functionality related to the client side application (the Qt gui).
 
 The API is a mostly procedural API that works on QCodeEdit instance.
 
 Originally most of those functions were methods of QCodeEdit, we moved them
 in separates modules for the sake of readability.
+
+The API also provides a set of builtin extensions (modes and panels).
 
 The API can be divided into several parts:
 
@@ -21,6 +23,8 @@ The API can be divided into several parts:
         This is implemented in :mod:`frontend.extensions`. Builtin modes and
         panels are stored in a specific package: frontend.modes and
         frontend.panels.
+
+        The extension API is extended by the modes and panels packages.
 
     3) QTextCursor/QTextDocument API
 
@@ -50,7 +54,7 @@ The API can be divided into several parts:
         This is implemented in :mod:`frontend.syntax_highlighter`
 
 
-While those parts have been implemented in different modules, them are all
+While those parts have been implemented in different modules, they are all
 available from the top level frontend package (i.e. you just need to import the
 frontend package, no need to import submodules individually).
 

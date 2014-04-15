@@ -15,12 +15,10 @@ from pyqode.core.frontend.utils import DelayJobRunner
 
 class QCodeEdit(QtGui.QPlainTextEdit):
     """
-    Base class for any pyqode editor widget.
+    Base class for any pyqode source code editor widget.
 
-    Extends :py:class:`QPlainTextEdit` by adding an extension system (
-    modes and panels), a rich property system for styles and settings
-    (see :class:`pyqode.core.PropertyRegistry`) and by adding a series of
-    additional signal and methods.
+    Extends :class:`QPlainTextEdit` by adding an extension system (
+    modes and panels)by adding a series of additional signal and methods.
 
     **Signals:**
         - :attr:`pyqode.core.QCodeEdit.painted`
@@ -40,14 +38,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         - :attr:`pyqode.core.QCodeEdit.indent_requested`
         - :attr:`pyqode.core.QCodeEdit.unindent_requested`
 
-    .. note:: QCodeEdit has been designed to work with files (
-              :meth:`pyqode.core.QCodeEdit.openFile`,
-              :meth:`pyqode.core.QCodeEdit.saveToFile`), not plain text.
-              Well, you can still use some plain text but many modes and panels
-              that rely heavily on the current file name/path won't work
-              properly (e.g. the syntax highlighter mode uses the file name
-              extension to automatically adapt the lexer so you will need to do
-              it manually depending on the nature of the text/code to edit).
+    .. note:: setPlainText has been overrident to force you to define
+        a mimetype and an encoding.
+
     """
     #: Paint hook
     painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
@@ -255,6 +248,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
 
     @property
     def mime_type(self):
+        """
+        Gets the associated mime type.
+
+        """
         return self._mime_type
 
     def __init__(self, parent=None, create_default_actions=True):
@@ -432,6 +429,10 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                 panel.refresh_style()
 
     def refresh_actions(self):
+        """
+        Refreshes editor actions, every installed mode/panel will be
+        refreshed too.
+        """
         self._refresh_actions()
         for m in self._modes.values():
             m.refresh_actions()

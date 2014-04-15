@@ -23,14 +23,20 @@ Example usage::
 QCodeEdit options
 ~~~~~~~~~~~~~~~~~
 
-.. autodata:: font
-.. autodata:: font_size
-.. autodata:: background
-.. autodata:: foreground
-.. autodata:: whitespaces_foreground
-.. autodata:: selection_background
-.. autodata:: selection_foreground
-.. autodata:: caret_line_background
+.. autodata:: show_white_spaces
+.. autodata:: tab_length
+.. autodata:: use_spaces_instead_of_tabs
+.. autodata:: min_indent_column
+.. autodata:: save_on_focus_out
+.. autodata:: word_separators
+.. autodata:: cc_trigger_key
+.. autodata:: cc_trigger_len
+.. autodata:: cc_trigger_symbols
+.. autodata:: cc_show_tooltips
+.. autodata:: cc_case_sensitive
+.. autodata:: file_watcher_auto_reload
+.. autodata:: right_margin_pos
+
 """
 # ----------------
 # QCodeEdit settings
@@ -47,6 +53,7 @@ The number of spaces that defines a tabulation/indentation. Default is 4
 spaces.
 
 """
+
 use_spaces_instead_of_tabs = True
 """
 Tells pyqode to use spaces instead of tabs. Note that tab support is buggy,
