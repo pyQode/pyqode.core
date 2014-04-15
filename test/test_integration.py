@@ -42,7 +42,7 @@ def test_app():
     editor = frontend.QCodeEdit()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     frontend.open_file(editor, __file__)
-    editor.show()
+    # editor.show()
     QtCore.QTimer.singleShot(2000, _leave)
     app.exec_()
     frontend.stop_server(editor)
@@ -96,7 +96,7 @@ def test_client_server():
                                    on_receive=_on_receive)
     client_socket.start(os.path.join(os.getcwd(), 'server.py'))
     client_socket.connected.connect(_send_request)
-    win.show()
+    # win.show()
     app.exec_()
     client_socket.close()
     del client_socket
@@ -121,12 +121,18 @@ def test_client_server_py2():
     client_socket.start(os.path.join(os.getcwd(), 'server.py'),
                         interpreter=python2_path())
     client_socket.connected.connect(_send_request)
-    win.show()
+    # win.show()
     app.exec_()
     client_socket.close()
     del client_socket
     del win
     del app
+
+
+
+
+
+
 
 
 

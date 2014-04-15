@@ -35,7 +35,7 @@ def setup_module():
     window.setCentralWidget(editor)
     window.resize(800, 600)
     frontend.open_file(editor, __file__)
-    window.show()
+    # window.show()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     wait_for_connected(editor)
 
@@ -121,17 +121,6 @@ def test_select_lines():
     process_events()
     QTest.qWait(1000)
     assert frontend.selection_range(editor) == (1, 5)
-
-
-def test_line_pos_line_nbr():
-    global editor
-    # ensure we are at the top of the document
-    frontend.goto_line(editor, 1, 0, move=True)
-    process_events()
-    pos = frontend.line_pos_from_number(editor, 3)
-    assert pos is not None
-    nbr = frontend.line_nbr_from_position(editor, pos)
-    assert nbr == 3
 
 
 def test_open_file():

@@ -35,7 +35,7 @@ def setup_module():
     window.setCentralWidget(editor)
     window.resize(800, 600)
     frontend.open_file(editor, __file__)
-    window.show()
+    # window.show()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
     wait_for_connected(editor)
 
