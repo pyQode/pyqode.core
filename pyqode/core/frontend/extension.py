@@ -1,6 +1,7 @@
 """
 This module contains API base classes.
 """
+from enum import IntEnum
 import logging
 import weakref
 from PyQt4 import QtGui
@@ -66,12 +67,6 @@ class Mode(object):
         self.description = self.__doc__
         self._enabled = False
         self._editor = None
-
-    def __str__(self):
-        """
-        Returns the extension name
-        """
-        return self.name
 
     def _on_install(self, editor):
         """
@@ -185,9 +180,7 @@ class Panel(QtGui.QWidget, Mode):
 
     .. note:: A disabled panel will be hidden automatically.
     """
-
-    # todo make it an enum when python 3.4 is available
-    class Position(object):
+    class Position:
         """
         Enumerates the possible panel positions
         """
@@ -199,6 +192,10 @@ class Panel(QtGui.QWidget, Mode):
         RIGHT = 2
         #: Bottom margin
         BOTTOM = 3
+
+        @classmethod
+        def iterable(cls):
+            return [cls.TOP, cls.LEFT, cls.RIGHT, cls.BOTTOM]
 
     @property
     def scrollable(self):
@@ -272,15 +269,13 @@ class Panel(QtGui.QWidget, Mode):
             painter = QtGui.QPainter(self)
             painter.fillRect(event.rect(), self._background_brush)
 
-    def showEvent(self, *args, **kwargs):
-        self.editor.refresh_panels()
-
     def setVisible(self, visible):
+        _logger().debug('%s visibility changed' % self.name)
         QtGui.QWidget.setVisible(self, visible)
         self.editor.refresh_panels()
 
 
-def install_panel(editor, panel, position=Panel.Position.LEFT):
+def install_panel(editor, obj, position=Panel.Position.LEFT):
     """
     Installs a panel on on the editor. You must specify the position of the
     panel (panels are rendered in one of the four document margins, see
@@ -289,24 +284,25 @@ def install_panel(editor, panel, position=Panel.Position.LEFT):
     The panel is set as an object attribute using the panel's name as the
     key.
 
-    :param panel: The panel instance to install
+    :param obj: The panel instance to install
     :param position: The panel position
 
-    :type panel: pyqode.core.api.Panel
+    :type obj: pyqode.core.api.Panel
     :type position: int
     """
+    assert obj is not None
     pos_to_string = {
         Panel.Position.BOTTOM: 'bottom',
         Panel.Position.LEFT: 'left',
         Panel.Position.RIGHT: 'right',
         Panel.Position.TOP: 'top'
     }
-    _logger().info('installing panel %r at %r' %
-                   (panel.name, pos_to_string[position]))
-    panel.order_in_zone = len(editor._panels[position])
-    editor._panels[position][panel.name] = panel
-    panel._on_install(editor)
-    editor._update_viewport_margins()
+    _logger().info('installing panel %s at %r' %
+                   (obj.name, pos_to_string[position]))
+    obj.order_in_zone = len(editor._panels[position])
+    editor._panels[position][obj.name] = obj
+    obj._on_install(editor)
+    _logger().info('panel %s installed' % obj.name)
 
 
 def uninstall_panel(editor, name):

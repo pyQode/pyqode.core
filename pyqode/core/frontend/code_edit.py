@@ -2,6 +2,7 @@
 """
 This module contains the definition of the QCodeEdit
 """
+import logging
 import sys
 
 from PyQt4 import QtGui, QtCore
@@ -11,6 +12,10 @@ from pyqode.core.frontend import text, dialogs
 from pyqode.core.frontend.client import JsonTcpClient
 from pyqode.core.frontend.extension import Panel
 from pyqode.core.frontend.utils import DelayJobRunner
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):
@@ -551,10 +556,9 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     @QtCore.pyqtSlot()
     def refresh_panels(self):
         """ Refreshes the editor panels. """
+        _logger().debug('refresh_panels')
         self._resize_panels()
-        self._update_viewport_margins()
-        self._update_panels(self.contentsRect(), 0)
-        self.update()
+        self._update_panels(self.contentsRect(), 0, force_update_margins=True)
 
     # Events
     # ------
@@ -705,6 +709,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
     def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         QtGui.QPlainTextEdit.showEvent(self, event)
+        _logger().debug('show event')
         self._update_viewport_margins()
 
     # Private methods
@@ -922,7 +927,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                               cr.width() - w_offset, sh.height())
             bottom += sh.height()
 
-    def _update_panels(self, rect, dy):
+    def _update_panels(self, rect, dy, force_update_margins=False):
         for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
                zones_id == Panel.Position.BOTTOM:
@@ -939,7 +944,7 @@ class QCodeEdit(QtGui.QPlainTextEdit):
                     if l != ol or c != oc:
                         panel.update(0, rect.y(), panel.width(), rect.height())
                     self._cached_cursor_pos = text.cursor_position(self)
-        if rect.contains(self.viewport().rect()):
+        if rect.contains(self.viewport().rect()) or force_update_margins:
             self._update_viewport_margins()
 
     def _on_text_changed(self):
@@ -953,20 +958,43 @@ class QCodeEdit(QtGui.QPlainTextEdit):
         left = 0
         right = 0
         bottom = 0
+        _logger().debug('updating viewport margins')
+        _logger().debug('processing left panels')
         for panel in self._panels[Panel.Position.LEFT].values():
             if panel.isVisible():
-                left += panel.sizeHint().width()
+                w = panel.sizeHint().width()
+                _logger().debug('right panel width: %r' % w)
+                left += w
+            else:
+                _logger().debug('skipping invisible panel %r' % panel.name)
+        _logger().debug('processing right panels')
         for panel in self._panels[Panel.Position.RIGHT].values():
             if panel.isVisible():
-                right += panel.sizeHint().width()
+                w = panel.sizeHint().width()
+                _logger().debug('right panel width: %r' % w)
+                right += w
+            else:
+                _logger().debug('skipping invisible panel %s' % panel.name)
+        _logger().debug('processing top panels')
         for panel in self._panels[Panel.Position.TOP].values():
             if panel.isVisible():
-                top += panel.sizeHint().height()
+                h = panel.sizeHint().height()
+                _logger().debug('bottom panel height: %r' % h)
+                top += h
+            else:
+                _logger().debug('skipping invisible panel %s' % panel.name)
+        _logger().debug('processing bottom panels')
         for panel in self._panels[Panel.Position.BOTTOM].values():
             if panel.isVisible():
-                bottom += panel.sizeHint().height()
+                h = panel.sizeHint().height()
+                _logger().debug('bottom panel height: %r' % h)
+                bottom += h
+            else:
+                _logger().debug('skipping invisible panel %s' % panel.name)
         self._margin_sizes = (top, left, right, bottom)
         self.setViewportMargins(left, top, right, bottom)
+        _logger().debug('viewport margins updated: %r' % repr(
+            self._margin_sizes))
 
     def _reset_palette(self):
         self.setFont(QtGui.QFont(self._font_family, self._font_size))

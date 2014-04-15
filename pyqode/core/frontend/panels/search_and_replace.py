@@ -12,7 +12,7 @@ from pyqode.core.frontend.utils import DelayJobRunner, drift_color
 from pyqode.core.frontend.ui.search_panel_ui import Ui_SearchPanel
 
 
-class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
+class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     """
     This panel allow the user to search and replace some text in the current
     editor.
@@ -131,7 +131,7 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     def __init__(self):
         Panel.__init__(self)
-        DelayJobRunner.__init__(self, self, nb_threads_max=1, delay=500)
+        self.job_runner = DelayJobRunner(self, nb_threads_max=1, delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
 
@@ -280,13 +280,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         if txt:
             cursor = text_api.word_under_cursor(self.editor,
                                                 select_whole_word=True)
-            self.request_job(self._exec_search, True,
-                             txt, self.editor.document().clone(),
-                             cursor,
-                             self._search_flags())
+            self.job_runner.request_job(self._exec_search, True,
+                                        txt, self.editor.document().clone(),
+                                        cursor, self._search_flags())
         else:
-            self.cancel_requests()
-            self.stop_job()
+            self.job_runner.cancel_requests()
+            self.job_runner.stop_job()
             self._clear_occurrences()
             self._on_search_finished()
 
