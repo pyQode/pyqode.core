@@ -7,12 +7,10 @@ import sys
 from PyQt4 import QtGui, QtCore
 
 from pyqode.core import actions, settings, style
-from pyqode.core._internal import dialogs
-from pyqode.core._internal.client import JsonTcpClient
-from pyqode.core.frontend import text
+from pyqode.core.frontend import text, dialogs
+from pyqode.core.frontend.client import JsonTcpClient
 from pyqode.core.frontend.extension import Panel
 from pyqode.core.frontend.utils import DelayJobRunner
-from pyqode.core._internal.ui import pyqode_core_rc
 
 
 class QCodeEdit(QtGui.QPlainTextEdit):

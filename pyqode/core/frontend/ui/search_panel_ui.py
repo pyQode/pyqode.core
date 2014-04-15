@@ -243,4 +243,3 @@ class Ui_SearchPanel(object):
         self.actionFindPrevious.setToolTip(_translate("SearchPanel", "Find previous occurrence (upward)", None))
         self.actionFindPrevious.setShortcut(_translate("SearchPanel", "Shift+F3", None))
 
-from . import pyqode_core_rc

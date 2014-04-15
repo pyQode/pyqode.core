@@ -14,7 +14,7 @@ from PyQt4 import QtGui
 import pytest
 from pyqode.core import frontend
 from pyqode.core import backend
-from pyqode.core._internal.client import JsonTcpClient
+from pyqode.core.frontend.client import JsonTcpClient
 from .helpers import cwd_at
 from .helpers import require_python2
 from .helpers import python2_path
@@ -127,5 +127,7 @@ def test_client_server_py2():
     del client_socket
     del win
     del app
+
+
 
 

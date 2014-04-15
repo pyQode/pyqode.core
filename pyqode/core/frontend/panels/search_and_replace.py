@@ -9,7 +9,7 @@ from pyqode.core import style
 from pyqode.core import frontend
 from pyqode.core.frontend import TextDecoration, Panel, text as text_api
 from pyqode.core.frontend.utils import DelayJobRunner, drift_color
-from pyqode.core._internal.ui.search_panel_ui import Ui_SearchPanel
+from pyqode.core.frontend.ui.search_panel_ui import Ui_SearchPanel
 
 
 class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
