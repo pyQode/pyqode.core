@@ -1,16 +1,16 @@
 Python/Qt Code Editor Widget library
 ====================================
 
-.. image:: https://api.travis-ci.org/pyQode/pyqode.core.png?branch=master
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
     :target: https://travis-ci.org/pyQode/pyqode.core
     :alt: Travis-CI build status
 
-.. image:: https://pypip.in/d/pyqode.core/badge.png
-    :target: https://crate.io/packages/pyqode.core/
+.. image:: http://img.shields.io/pypi/dm/pyqode.core.svg
+    :target: https://pypi.python.org/pypi/pyqode.core/
     :alt: Number of PyPI downloads
 
-.. image:: https://pypip.in/v/pyqode.core/badge.png
-    :target: https://crate.io/packages/pyqode.core/
+.. image:: http://img.shields.io/pypi/v/pyqode.core.svg
+    :target: https://pypi.python.org/pypi/pyqode.core/
     :alt: Latest PyPI version
 
 .. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=ready&title=Ready 
@@ -29,14 +29,14 @@ pyQode is a **namespace package** made up of the following official packages:
 
   - `pyqode.core`_: core package
 
-  - `pyqode.python`_: python support (code completion, ...)
+  - `pyqode.core`_: python support (code completion, ...)
 
   - `pyqode.widgets`_: useful widgets for pyqode apps
 
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 .. _pyqode.core: https://github.com/pyQode/pyqode.core
-.. _pyqode.python: https://github.com/pyQode/pyqode.python
+.. _pyqode.core: https://github.com/pyQode/pyqode.core
 .. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
 .. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
