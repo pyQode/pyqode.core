@@ -47,29 +47,14 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def merged_colors(color_a, color_b, factor):
-    max_factor = 100
-    color_a = QtGui.QColor(color_a)
-    color_b = QtGui.QColor(color_b)
-    tmp = color_a
-    tmp.setRed((tmp.red() * factor) / max_factor +
-               (color_b.red() * (max_factor - factor)) / max_factor)
-    tmp.setGreen((tmp.green() * factor) / max_factor +
-                 (color_b.green() * (max_factor - factor)) / max_factor)
-    tmp.setBlue((tmp.blue() * factor) / max_factor +
-                (color_b.blue() * (max_factor - factor)) / max_factor)
-    return tmp
-
-
 def drift_color(base_color, factor=110):
     """
-    Return a near color that is lighter or darker than the base color.
+    Return color that is lighter or darker than the base color.
 
-    If baseColor.lightness is higher than 128 than darker is used else lighter
-    is used.
+    If base_color.lightness is higher than 128, the returned color is darker
+    otherwise is is lighter.
 
-    :param base_color: The base color to drift.
-
+    :param base_color: The base color to drift from
     :return A lighter or darker color.
     """
     base_color = QtGui.QColor(base_color)
@@ -80,35 +65,6 @@ def drift_color(base_color, factor=110):
             return QtGui.QColor('#202020')
         else:
             return base_color.lighter(factor + 10)
-
-
-def index_matching(seq, condition):
-    """
-    Returns the index of the element that match condition.
-
-    :param seq: The sequence to parse
-
-    :param condition: The index condition
-
-    :return: Index of the element that mathc the condition of -1
-    """
-    for i, x in enumerate(seq):
-        if condition(x):
-            return i
-    return -1
-
-
-def index_by_name(seq, name):
-    """
-    Search an element by "name".
-
-    :param seq: Sequence to parse
-
-    :param name: Name of the element
-
-    :return: Index of the element of -1
-    """
-    return index_matching(seq, lambda x: x.name == name)
 
 
 class TextStyle(object):
@@ -170,26 +126,9 @@ class TextStyle(object):
             self.underlined = True
 
 
-def inheritors(klass):
-    """
-    Returns all the class that inherits from klass (all the classes that
-    were already imported)
-
-    :param klass: class type
-
-    :return: list of subclasses
-    """
-    subclasses = set()
-    work = [klass]
-    while work:
-        parent = work.pop()
-        for child in parent.__subclasses__():
-            if child not in subclasses:
-                subclasses.add(child)
-                work.append(child)
-    return subclasses
-
-
+# -----------------
+# JobRunner implementation
+# -----------------
 class _InvokeEvent(QtCore.QEvent):
     EVENT_TYPE = QtCore.QEvent.Type(QtCore.QEvent.registerEventType())
 
