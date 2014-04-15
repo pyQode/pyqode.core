@@ -64,6 +64,8 @@ def test_show_white_spaces():
     editor.refresh_settings()
     # changes should have been applied
     assert editor.show_whitespaces is True
+    # reset settings for next tests
+    settings.show_white_spaces = False
 
 
 def test_tab_length():
@@ -78,8 +80,9 @@ def test_tab_length():
     assert settings.tab_length == 8
     QTest.keyPress(editor, QtCore.Qt.Key_Tab)
     assert editor.toPlainText() == 8 * ' '
-    # this test is really dumb because tab_length is read as need by the
-    # editor, there is no property to check
+
+    # reset settings for next tests
+    settings.tab_length = 4
 
 
 def test_use_spaces_instead_of_tabs():
@@ -94,6 +97,8 @@ def test_use_spaces_instead_of_tabs():
     assert settings.use_spaces_instead_of_tabs is False
     QTest.keyPress(editor, QtCore.Qt.Key_Tab)
     assert editor.toPlainText() == '    \t'
+    # reset settings for next tests
+    settings.use_spaces_instead_of_tabs = True
 
 
 def test_min_indent_column():
@@ -111,6 +116,8 @@ def test_min_indent_column():
     editor.refresh_settings()
     QTest.keyPress(editor, QtCore.Qt.Key_Return)
     assert editor.toPlainText() == '\n\n\n    '
+    # reset settings for next tests
+    settings.min_indent_column = 0
 
 
 def test_cc_trigger_key():
@@ -122,6 +129,8 @@ def test_cc_trigger_key():
     assert code_completion_mode.trigger_key == ord(' ')
     editor.refresh_settings()
     assert code_completion_mode.trigger_key == ord('M')
+    # reset settings for next tests
+    settings.cc_trigger_key = ord(' ')
 
 
 def test_cc_trigger_len():
@@ -133,6 +142,8 @@ def test_cc_trigger_len():
     assert code_completion_mode.trigger_length == 1
     editor.refresh_settings()
     assert code_completion_mode.trigger_length == 3
+    # reset settings for next tests
+    settings.cc_trigger_len = 1
 
 
 def test_cc_trigger_symbols():
@@ -144,6 +155,8 @@ def test_cc_trigger_symbols():
     assert code_completion_mode.trigger_symbols == ['.']
     editor.refresh_settings()
     assert code_completion_mode.trigger_symbols == ['.', '->']
+    # reset settings for next tests
+    settings.cc_trigger_symbols = ['.']
 
 
 def test_cc_show_tooltips():
@@ -155,6 +168,8 @@ def test_cc_show_tooltips():
     assert code_completion_mode.show_tooltips is True
     editor.refresh_settings()
     assert code_completion_mode.show_tooltips is False
+    # reset settings for next tests
+    settings.cc_show_tooltips = True
 
 
 def test_cc_case_sensitive():
@@ -166,6 +181,8 @@ def test_cc_case_sensitive():
     assert code_completion_mode.case_sensitive is False
     editor.refresh_settings()
     assert code_completion_mode.case_sensitive is True
+    # reset settings for next tests
+    settings.cc_case_sensitive = False
 
 
 def test_file_watcher_auto_reload():
@@ -178,6 +195,8 @@ def test_file_watcher_auto_reload():
     assert fw.auto_reload is False
     editor.refresh_settings()
     assert fw.auto_reload is True
+    # reset settings for next tests
+    settings.file_watcher_auto_reload = False
 
 
 def test_right_margin_pos():
@@ -190,3 +209,5 @@ def test_right_margin_pos():
     assert rm.position == 79
     editor.refresh_settings()
     assert rm.position == 120
+    # reset settings for next tests
+    settings.right_margin_pos = 79
