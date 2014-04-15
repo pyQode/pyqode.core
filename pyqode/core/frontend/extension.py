@@ -1,7 +1,6 @@
 """
 This module contains API base classes.
 """
-from enum import IntEnum
 import logging
 import weakref
 from PyQt4 import QtGui
