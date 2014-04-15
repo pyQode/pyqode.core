@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Contains the automatic generic indenter """
 import re
+from pyqode.core import settings
 from pyqode.core.frontend import Mode, text
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QTextCursor, QKeyEvent
@@ -15,7 +16,7 @@ class AutoIndentMode(Mode):
     """
     def __init__(self):
         super(AutoIndentMode, self).__init__()
-        self.min_indent = ""
+        self.min_indent = settings.min_indent_column * ' '
 
     def _get_indent(self, tc):
         """
@@ -57,3 +58,6 @@ class AutoIndentMode(Mode):
                     tc.insertText(new_txt)
 
             event.accept()
+
+    def refresh_settings(self):
+        self.min_indent = settings.min_indent_column * ' '

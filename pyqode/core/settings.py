@@ -43,7 +43,10 @@ QCodeEdit options
 # ----------------
 show_white_spaces = False
 """
-Specify if visual spaces must be highlighted. Default is False
+Specify if visual spaces must be highlighted. Default is False.
+
+Requires a call to refresh_settings on existing QCodeEdit instance for the
+change to be propagated/
 
 """
 
@@ -52,12 +55,18 @@ tab_length = 4
 The number of spaces that defines a tabulation/indentation. Default is 4
 spaces.
 
+Does not require a call to refresh_settings as this setting is read
+dynamically, as needed
+
 """
 
 use_spaces_instead_of_tabs = True
 """
 Tells pyqode to use spaces instead of tabs. Note that tab support is buggy,
 most of the pyqode modes are using spaces everywhere. Default is True.
+
+Does not require a call to refresh_settings as this setting is read
+dynamically, as needed
 
 """
 
@@ -66,12 +75,18 @@ min_indent_column = 0
 The minimum indent column, useful for languages such as COBOL where all code
 must starts at a column different than 0. Default is 0.
 
+Does not require a call to refresh_settings as this setting is read
+dynamically, as needed
+
 """
 
 save_on_focus_out = True
 """
 Automatically saves the editor content to file when the editor loses focus.
 Default is True.
+
+Does not require a call to refresh_settings as this setting is read
+dynamically, as needed
 
 """
 
@@ -81,8 +96,11 @@ word_separators = [
     '\t', '=', '-', ' '
 ]
 """
-The list of word separators used by many modes to detect word under cusros or
+The list of word separators used by many modes to detect word under cursor or
 to split the document words (code completion).
+
+Does not require a call to refresh_settings as this setting is read
+dynamically, as needed.
 
 """
 

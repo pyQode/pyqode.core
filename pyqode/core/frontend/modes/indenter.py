@@ -46,7 +46,10 @@ class IndenterMode(Mode):
                 nb_space_to_add = tab_len - (indentation % tab_len)
                 cursor = QtGui.QTextCursor(block)
                 cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-                [cursor.insertText(" ") for _ in range(nb_space_to_add)]
+                if settings.use_spaces_instead_of_tabs:
+                    [cursor.insertText(" ") for _ in range(nb_space_to_add)]
+                else:
+                    cursor.insertText('\t')
             block = block.next()
             i += 1
         cursor.endEditBlock()
@@ -64,7 +67,10 @@ class IndenterMode(Mode):
         i = 0
         while i < nb_lines:
             txt = block.text()
-            indentation = len(txt) - len(txt.lstrip()) - min_indent
+            if settings.use_spaces_instead_of_tabs:
+                indentation = len(txt) - len(txt.lstrip()) - min_indent
+            else:
+                indentation = len(txt) - len(txt.replace('\t', ''))
             if indentation > 0:
                 nb_spaces_to_remove = indentation - (indentation - (
                     indentation % tab_len))
@@ -89,7 +95,10 @@ class IndenterMode(Mode):
             # simply insert indentation at the cursor position
             tab_len = settings.tab_length
             cursor.beginEditBlock()
-            cursor.insertText(tab_len * " ")
+            if settings.use_spaces_instead_of_tabs:
+                cursor.insertText(tab_len * " ")
+            else:
+                cursor.insertText('\t')
             cursor.endEditBlock()
 
     def unindent(self):
