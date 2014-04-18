@@ -7,7 +7,7 @@ as intended
 import os
 import sys
 import logging
-from PyQt4 import QtCore
+from PyQt4.QtTest import QTest
 from PyQt4 import QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend import modes, panels
@@ -22,15 +22,13 @@ def test_app():
     """
     Test a simple but complete app
     """
-    def _leave():
-        """
-        Leave test_app after a certain amount of time.
-        """
-        app = QtGui.QApplication.instance()
-        app.exit(0)
-
-    logging.basicConfig(level=logging.DEBUG)
-    app = QtGui.QApplication(sys.argv)
+    # def _leave():
+    #     """
+    #     Leave test_app after a certain amount of time.
+    #     """
+    #     app = QtGui.QApplication.instance()
+    #     app.quit()
+    app = QtGui.QApplication.instance()
     editor = frontend.QCodeEdit()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
 
@@ -55,8 +53,7 @@ def test_app():
 
     frontend.open_file(editor, __file__)
     # editor.show()
-    QtCore.QTimer.singleShot(2000, _leave)
-    app.exec_()
+    # QtCore.QTimer.singleShot(2000, _leave)
+    QTest.qWait(2000)
     frontend.stop_server(editor)
     del editor
-    del app

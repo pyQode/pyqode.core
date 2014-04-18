@@ -2,6 +2,7 @@ import os
 import sys
 from PyQt4 import QtGui
 import pytest
+from PyQt4.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core import backend
 from pyqode.core.frontend.client import JsonTcpClient
@@ -45,7 +46,7 @@ def test_client_server():
     Once the result has been received we quit the qt app.
     """
     global client_socket
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance()
     win = QtGui.QMainWindow()
     client_socket = JsonTcpClient(win)
     with pytest.raises(frontend.NotConnectedError):
@@ -54,11 +55,10 @@ def test_client_server():
     client_socket.start(os.path.join(os.getcwd(), 'server.py'))
     client_socket.connected.connect(_send_request)
     # win.show()
-    app.exec_()
+    QTest.qWait(1000)
     client_socket.close()
     del client_socket
     del win
-    del app
 
 
 @cwd_at('test')
@@ -69,7 +69,7 @@ def test_client_server_py2():
     Same test as above except we run the server with python2 if available
     """
     global client_socket
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance()
     win = QtGui.QMainWindow()
     client_socket = JsonTcpClient(win)
     with pytest.raises(frontend.NotConnectedError):
@@ -79,11 +79,10 @@ def test_client_server_py2():
                         interpreter=python2_path())
     client_socket.connected.connect(_send_request)
     # win.show()
-    app.exec_()
+    QTest.qWait(1000)
     client_socket.close()
     del client_socket
     del win
-    del app
 
 
 

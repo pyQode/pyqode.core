@@ -14,13 +14,18 @@ from . import helpers
 from pyqode.core.frontend import modes
 
 
+def test_a():
+    assert 3 == 3
+
+
 @helpers.cwd_at('test')
-def setup_module():
+def setup_module(*args):
     """
     Setup a QApplication and QCodeEdit which open the client module code
     """
+    print('setup')
     global app, editor, window, code_completion_mode
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance()
     window = QtGui.QMainWindow()
     editor = frontend.QCodeEdit(window)
     frontend.install_mode(editor, modes.IndenterMode())
@@ -36,7 +41,7 @@ def setup_module():
     helpers.wait_for_connected(editor)
 
 
-def teardown_module():
+def teardown_module(*args):
     """
     Close server and exit QApplication
     """
@@ -45,7 +50,6 @@ def teardown_module():
     app.exit(0)
     QTest.qWait(1000)
     del editor
-    del app
 
 
 def test_show_white_spaces():

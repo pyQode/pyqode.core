@@ -49,7 +49,6 @@ def teardown_module():
     app.exit(0)
     QTest.qWait(1000)
     del editor
-    del app
 
 
 def test_modes():
