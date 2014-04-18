@@ -29,7 +29,7 @@ def setup_module():
     Setup a QApplication and QCodeEdit which open the client module code
     """
     global app, editor, window
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance()
     window = QtGui.QMainWindow()
     editor = frontend.QCodeEdit(window)
     window.setCentralWidget(editor)
