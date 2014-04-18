@@ -5,6 +5,11 @@ Python/Qt Code Editor Widget library
     :target: https://travis-ci.org/pyQode/pyqode.core
     :alt: Travis-CI build status
 
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop2
+    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop2
+    :alt: Coverage Status
+
 .. image:: http://img.shields.io/pypi/dm/pyqode.core.svg
     :target: https://pypi.python.org/pypi/pyqode.core/
     :alt: Number of PyPI downloads
