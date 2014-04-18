@@ -33,3 +33,4 @@ nosetests.xml
 .cache
 /*.json
 __pycache__
+htmlcov

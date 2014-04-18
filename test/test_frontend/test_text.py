@@ -133,9 +133,6 @@ def test_open_file():
 def test_save_file():
     global editor
     path = os.path.join(os.getcwd(), 'tmp.py')
-    # set line text to force change encoding
-    frontend.set_line_text(editor, 3, 'éêê')
-    QTest.qWait(1000)
     frontend.save_to_file(editor, path=path, encoding='utf-8')
     assert os.path.exists(path)
     assert editor.file_encoding == 'utf-8'

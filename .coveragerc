@@ -1,0 +1,6 @@
+[run]
+omit =
+    *_ui.py
+    *_rc.py
+    pyqode/core/designer_plugin.py
+    pyqode/core/frontend/dialogs.py

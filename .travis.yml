@@ -3,6 +3,10 @@ python:
  - "3.2"
 env:
  - TOXENV=py32
+ - TOXENV=cov
+matrix:
+    allow_failures:
+        - env: TOXENV=cov
 virtualenv:
   system_site_packages: true
 before_install:
@@ -13,3 +17,8 @@ install:
  - pip install --quiet --use-mirrors tox
 script:
   - tox
+after_script:
+    - if [ $TOXENV == "cov" ]; then
+      pip install --quiet --use-mirrors coveralls;
+      coveralls;
+      fi
