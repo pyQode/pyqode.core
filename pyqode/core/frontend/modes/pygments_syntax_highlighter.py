@@ -16,8 +16,7 @@ from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 
 from pyqode.core import frontend, style
-from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter, \
-    IndentBasedFoldDetector, CharBasedFoldDetector
+from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter
 
 
 def _logger():
@@ -176,44 +175,44 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
     #: Associates a fold detector to a specific pygments lexer.
-    try:
-        LEXERS_FOLD_DETECTORS = {
-            # indent based
-            PythonLexer: IndentBasedFoldDetector(),
-            CythonLexer: IndentBasedFoldDetector(),
-            BashLexer: IndentBasedFoldDetector(),
-            BatchLexer: IndentBasedFoldDetector(),
-            XmlLexer: IndentBasedFoldDetector(),
-            HtmlLexer: IndentBasedFoldDetector(),
-            JsonLexer: IndentBasedFoldDetector(),
-            BooLexer: IndentBasedFoldDetector(),
-            MakefileLexer: IndentBasedFoldDetector(),
-            CMakeLexer: IndentBasedFoldDetector(),
-            RstLexer: IndentBasedFoldDetector(),
-
-            # c family
-            CLexer: CharBasedFoldDetector(),
-            CppLexer: CharBasedFoldDetector(),
-            CSharpLexer: CharBasedFoldDetector(),
-            ActionScriptLexer: CharBasedFoldDetector(),
-            CoffeeScriptLexer: CharBasedFoldDetector(),
-            CssLexer: CharBasedFoldDetector(),
-            JavascriptLexer: CharBasedFoldDetector(),
-            JavaLexer: CharBasedFoldDetector(),
-            QmlLexer: CharBasedFoldDetector(),
-            PhpLexer: CharBasedFoldDetector(),
-            AdaLexer: CharBasedFoldDetector(),
-            CudaLexer: CharBasedFoldDetector(),
-            DLexer: CharBasedFoldDetector(),
-            GLShaderLexer: CharBasedFoldDetector(),
-            GoLexer: CharBasedFoldDetector(),
-            ObjectiveCLexer: CharBasedFoldDetector(),
-            ObjectiveCppLexer: CharBasedFoldDetector(),
-            ValaLexer: CharBasedFoldDetector(),
-        }
-    except NameError:
-        _logger().exception("failed to setup fold detectors associations.")
-        LEXERS_FOLD_DETECTORS = {}
+    # try:
+    #     LEXERS_FOLD_DETECTORS = {
+    #         # indent based
+    #         PythonLexer: IndentBasedFoldDetector(),
+    #         CythonLexer: IndentBasedFoldDetector(),
+    #         BashLexer: IndentBasedFoldDetector(),
+    #         BatchLexer: IndentBasedFoldDetector(),
+    #         XmlLexer: IndentBasedFoldDetector(),
+    #         HtmlLexer: IndentBasedFoldDetector(),
+    #         JsonLexer: IndentBasedFoldDetector(),
+    #         BooLexer: IndentBasedFoldDetector(),
+    #         MakefileLexer: IndentBasedFoldDetector(),
+    #         CMakeLexer: IndentBasedFoldDetector(),
+    #         RstLexer: IndentBasedFoldDetector(),
+    #
+    #         # c family
+    #         CLexer: CharBasedFoldDetector(),
+    #         CppLexer: CharBasedFoldDetector(),
+    #         CSharpLexer: CharBasedFoldDetector(),
+    #         ActionScriptLexer: CharBasedFoldDetector(),
+    #         CoffeeScriptLexer: CharBasedFoldDetector(),
+    #         CssLexer: CharBasedFoldDetector(),
+    #         JavascriptLexer: CharBasedFoldDetector(),
+    #         JavaLexer: CharBasedFoldDetector(),
+    #         QmlLexer: CharBasedFoldDetector(),
+    #         PhpLexer: CharBasedFoldDetector(),
+    #         AdaLexer: CharBasedFoldDetector(),
+    #         CudaLexer: CharBasedFoldDetector(),
+    #         DLexer: CharBasedFoldDetector(),
+    #         GLShaderLexer: CharBasedFoldDetector(),
+    #         GoLexer: CharBasedFoldDetector(),
+    #         ObjectiveCLexer: CharBasedFoldDetector(),
+    #         ObjectiveCppLexer: CharBasedFoldDetector(),
+    #         ValaLexer: CharBasedFoldDetector(),
+    #     }
+    # except NameError:
+    #     _logger().exception("failed to setup fold detectors associations.")
+    #     LEXERS_FOLD_DETECTORS = {}
 
     @property
     def pygments_style(self):
