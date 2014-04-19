@@ -21,6 +21,11 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+        # start pyqode server for our code editor widget
+        # it will takes some time to start a new process and connect the
+        # client socket so it is better to start it as soon as possible.
+        frontend.start_server(self.editor, 'server.py')
+
         # add panels
         frontend.install_panel(self.editor, panels.LineNumberPanel())
         frontend.install_panel(self.editor, panels.SearchAndReplacePanel(),
@@ -38,9 +43,6 @@ class SimpleEditorWindow(QtGui.QMainWindow, Ui_MainWindow):
         frontend.install_mode(self.editor, modes.AutoIndentMode())
         frontend.install_mode(self.editor, modes.IndenterMode())
         frontend.install_mode(self.editor, modes.SymbolMatcherMode())
-
-        # start pyqode server for our code editor widget
-        frontend.start_server(self.editor, 'server.py')
 
         # connect to editor signals
         self.editor.dirty_changed.connect(self.actionSave.setEnabled)
