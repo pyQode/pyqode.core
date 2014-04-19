@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 import mimetypes
 import os
 import sys
@@ -122,8 +122,15 @@ def main():
     # setup some specific mimetypes
     mimetypes.add_type('text/xml', '.ui')  # qt designer ui forms
     mimetypes.add_type('text/x-rst', '.rst')  # rst docs
-    mimetypes.add_type('text/x-cython', '.pyx')  # rst docs
-    mimetypes.add_type('text/x-cython', '.pxd')  # rst docs
+    mimetypes.add_type('text/x-cython', '.pyx')  # cython impl files
+    mimetypes.add_type('text/x-cython', '.pxd')  # cython def files
+    if sys.platform == 'win32':
+        # windows systems do not have a mimetypes for most of the codes python,
+        # you have to add them all explicitely on windows, otherwise there
+        # won't be any syntax highlighting
+        mimetypes.add_type('text/x-python', '.py')
+        mimetypes.add_type('text/x-python', '.pyw')
+        mimetypes.MimeTypes().read_windows_registry()
 
     app = QtGui.QApplication(sys.argv)
     win = SimpleEditorWindow()
