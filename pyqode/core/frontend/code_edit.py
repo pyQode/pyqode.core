@@ -13,6 +13,8 @@ from pyqode.core.frontend.client import JsonTcpClient
 from pyqode.core.frontend.extension import Panel
 from pyqode.core.frontend.utils import DelayJobRunner
 
+from pyqode.core.frontend.ui import pyqode_core_rc
+
 
 def _logger():
     return logging.getLogger(__name__)
