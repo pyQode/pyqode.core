@@ -101,6 +101,10 @@ except ImportError:
     _py33 = False
 
 
+def _logger():
+    return logging.getLogger(__name__)
+
+
 class JsonServer(socketserver.TCPServer):
     """
     A server socket based on a json messaging system.

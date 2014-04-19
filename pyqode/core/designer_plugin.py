@@ -12,7 +12,7 @@ import pyqode.core.frontend
 
 # Define this mapping to help the PySide's form builder create the correct
 # widget
-PLUGINS_TYPES = {'QCodeEdit': pyqode.core.frontend.QCodeEdit}
+PLUGINS_TYPES = {'QCodeEdit': pyqode.core.frontend.CodeEdit}
 
 try:
     from PyQt4 import QtDesigner
@@ -25,7 +25,7 @@ try:
         _class = 'QCodeEdit'    # name of the widget class
         _name = "QCodeEdit"
         _icon = None
-        _type = pyqode.core.frontend.QCodeEdit
+        _type = pyqode.core.frontend.CodeEdit
 
         def __init__(self, parent=None):
             QtDesigner.QPyDesignerCustomWidgetPlugin.__init__(
@@ -64,7 +64,7 @@ try:
             return ''
 
         def createWidget(self, parent):
-            return pyqode.core.frontend.QCodeEdit(parent)
+            return pyqode.core.frontend.CodeEdit(parent)
 
 except ImportError:
     print("Cannot use pyqode designer_plugins without PyQt4")

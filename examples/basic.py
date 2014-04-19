@@ -20,7 +20,7 @@ from pyqode.core.frontend import panels
 def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
-    editor = frontend.QCodeEdit()
+    editor = frontend.CodeEdit()
     frontend.open_file(editor, __file__)
     frontend.install_mode(editor,
                           modes.PygmentsSyntaxHighlighter(editor.document()))

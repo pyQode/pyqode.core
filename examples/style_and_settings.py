@@ -30,7 +30,7 @@ def main():
     style.pygments_style = 'monokai'
 
     # code from the simple example
-    editor = frontend.QCodeEdit()
+    editor = frontend.CodeEdit()
     frontend.open_file(editor, __file__)
     frontend.install_mode(editor, modes.CaretLineHighlighterMode())
     frontend.install_mode(editor,

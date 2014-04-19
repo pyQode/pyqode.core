@@ -60,7 +60,7 @@ frontend package, no need to import submodules individually).
 
 """
 # QCodeEdit
-from pyqode.core.frontend.code_edit import QCodeEdit
+from pyqode.core.frontend.code_edit import CodeEdit
 
 # Extensions API
 # Mode
@@ -123,6 +123,9 @@ from pyqode.core.frontend.decoration import add_decoration
 from pyqode.core.frontend.decoration import remove_decoration
 from pyqode.core.frontend.decoration import clear_decorations
 
+# syntax highlighter API
+from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter
+from pyqode.core.frontend.syntax_highlighter import ParenthesisInfo
 
 # Utils API
 from pyqode.core.frontend import utils

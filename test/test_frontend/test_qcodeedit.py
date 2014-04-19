@@ -32,7 +32,7 @@ def setup_module():
     global app, editor, window
     app = QtGui.QApplication.instance()
     window = QtGui.QMainWindow()
-    editor = frontend.QCodeEdit(window)
+    editor = frontend.CodeEdit(window)
     window.setCentralWidget(editor)
     window.resize(800, 600)
     # window.show()

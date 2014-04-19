@@ -34,49 +34,19 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     #: highlighter instance and the current text block
     block_highlight_finished = QtCore.pyqtSignal(object, object)
 
-    def __init__(self, parent, fold_detector=None):
+    def __init__(self, parent):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         self._spaces_ptrn = QtCore.QRegExp('\s+')
         # there is a bug with QTextBlockUserData in PyQt4, we need to
         # keep a reference on them, otherwise they are removed from memory.
         self._blocks = set()
-        self._fold_detector = fold_detector
 
     def __del__(self):
         self._blocks.clear()
 
     def set_mime_type(self, mime_type):
         pass
-
-    def set_fold_detector(self, fold_detector):
-        """
-        Setup the fold detector object to use to detect fold indents.
-
-        :param fold_detector: FoldDetector
-        :type fold_detector: pyqode.core.FoldDetector
-        """
-        self._fold_detector = fold_detector
-
-    def _detect_folding(self, text, user_data):
-        """
-        Detect folding indents using a foldDetector.
-        """
-        # Collect folding informations
-        if self._fold_detector:
-            user_data.fold_indent = self._fold_detector.get_fold_indent(
-                self, self.currentBlock(), text)
-            prev_block = self.currentBlock().previous()
-            if prev_block and prev_block.isValid():
-                # skip blank lines
-                while (prev_block and prev_block.isValid() and
-                       len(prev_block.text().strip()) == 0):
-                    prev_block = prev_block.previous()
-                prev_usd = prev_block.userData()
-                if prev_usd:
-                    prev_usd.fold_start = self._fold_detector.is_fold_start(
-                        prev_block, self.currentBlock())
-                prev_block.setUserData(prev_usd)
 
     @staticmethod
     def _detect_parentheses(text, user_data):
@@ -135,7 +105,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         user_data.line_number = self.currentBlock().blockNumber() + 1
         self._blocks.add(user_data)
         self.setCurrentBlockUserData(user_data)
-        self._detect_folding(text, user_data)
         self._detect_parentheses(text, user_data)
         self.highlight_block(text)
         self.block_highlight_finished.emit(self, text)

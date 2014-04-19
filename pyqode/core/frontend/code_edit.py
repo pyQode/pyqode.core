@@ -18,7 +18,7 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class QCodeEdit(QtGui.QPlainTextEdit):
+class CodeEdit(QtGui.QPlainTextEdit):
     """
     Base class for any pyqode source code editor widget.
 

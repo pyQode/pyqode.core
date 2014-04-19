@@ -29,7 +29,7 @@ def test_app():
     #     app = QtGui.QApplication.instance()
     #     app.quit()
     app = QtGui.QApplication.instance()
-    editor = frontend.QCodeEdit()
+    editor = frontend.CodeEdit()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
 
     # install the same modes/panels as in the simple_editor example

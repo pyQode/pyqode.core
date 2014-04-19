@@ -27,7 +27,7 @@ def setup_module(*args):
     global app, editor, window, code_completion_mode
     app = QtGui.QApplication.instance()
     window = QtGui.QMainWindow()
-    editor = frontend.QCodeEdit(window)
+    editor = frontend.CodeEdit(window)
     frontend.install_mode(editor, modes.IndenterMode())
     frontend.install_mode(editor, modes.AutoIndentMode())
     frontend.install_mode(editor, modes.FileWatcherMode())
@@ -60,7 +60,7 @@ def test_show_white_spaces():
     settings.show_white_spaces = True
     assert settings.show_white_spaces is True
     # new editors will have the new settings
-    new_editor = frontend.QCodeEdit()
+    new_editor = frontend.CodeEdit()
     assert new_editor.show_whitespaces is True
     # existing editor didn't changed
     assert editor.show_whitespaces is False

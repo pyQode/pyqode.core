@@ -231,7 +231,7 @@ class Panel(QtGui.QWidget, Mode):
             method!
 
         :param editor: editor instance
-        :type editor: pyqode.core.code_edit.editor
+        :type editor: pyqode.core.code_edit.py.editor
         """
         Mode._on_install(self, editor)
         self.setParent(editor)
