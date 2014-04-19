@@ -156,6 +156,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         Closes the socket and terminates the server process.
         """
+        self.logger.info('closing server')
         if self.is_connected and self._process.running:
             # send shutdown request
             self.send('shutdown')
@@ -337,7 +338,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 self._read_header()
             else:
                 self._read_payload()
-
 
 
 def start_server(editor, script, interpreter=sys.executable, args=None):
