@@ -292,35 +292,52 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             pass
         self.is_connected = False
 
+    def _read_header(self):
+        self.logger.debug('reading header')
+        self._header_buf += self.read(4)
+        if len(self._header_buf) == 4:
+            self._header_complete = True
+            s = struct.unpack('=I', self._header_buf)
+            self._to_read = s[0]
+            self._header_buf = bytes()
+            self.logger.debug('header content: %d', self._to_read)
+
+    def _read_payload(self):
+        self.logger.debug('reading payload data')
+        self.logger.debug('remaining bytes to read: %d' % self._to_read)
+        data_read = self.read(self._to_read)
+        nb_bytes_read = len(data_read)
+        self.logger.debug('%d bytes read' % nb_bytes_read)
+        self._data_buf += data_read
+        self._to_read -= nb_bytes_read
+        if self._to_read <= 0:
+            data = self._data_buf.decode('utf-8')
+            self.logger.debug('payload read: %r' % data)
+            self.logger.debug('payload length: %r' % len(self._data_buf))
+            self.logger.debug('decoding payload as json object')
+            obj = json.loads(data)
+            self.logger.debug('response received: %r' % obj)
+            try:
+                request_id = obj['request_id']
+                results = obj['results']
+                status = obj['status']
+            except (TypeError, KeyError):
+                pass  # internal request, no callback
+            else:
+                # possible callback
+                if request_id in self._callbacks:
+                    callback = self._callbacks.pop(request_id)
+                    callback(status, results)
+                self._header_complete = False
+                self._data_buf = bytes()
+
     def _on_ready_read(self):
         while self.bytesAvailable():
             if not self._header_complete:
-                self._header_buf += self.read(4)
-                if len(self._header_buf) == 4:
-                    self._header_complete = True
-                    s = struct.unpack('=I', self._header_buf)
-                    self._to_read = s[0]
-                    self._header_buf = bytes()
+                self._read_header()
             else:
-                self._data_buf += self.read(self._to_read)
-                self._to_read -= len(self._data_buf)
-                if self._to_read == 0:
-                    data = self._data_buf.decode('utf-8')
-                    obj = json.loads(data)
-                    self.logger.debug('response received: %r' % obj)
-                    try:
-                        request_id = obj['request_id']
-                        results = obj['results']
-                        status = obj['status']
-                    except (TypeError, KeyError):
-                        pass  # internal request, no callback
-                    else:
-                        # possible callback
-                        if request_id in self._callbacks:
-                            callback = self._callbacks.pop(request_id)
-                            callback(status, results)
-                    self._header_complete = False
-                    self._data_buf = bytes()
+                self._read_payload()
+
 
 
 def start_server(editor, script, interpreter=sys.executable, args=None):

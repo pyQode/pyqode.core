@@ -153,6 +153,7 @@ class JsonServer(socketserver.TCPServer):
             :param obj: The object to send, must be Json serializable.
             """
             msg = json.dumps(obj).encode('utf-8')
+            print('sending %d bytes for the payload' % len(msg))
             header = struct.pack('=I', len(msg))
             self.request.sendall(header)
             self.request.sendall(msg)
