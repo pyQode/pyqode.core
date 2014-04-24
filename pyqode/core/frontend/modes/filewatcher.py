@@ -111,7 +111,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         then reload the changed file in the editor
         """
         def inner_action(*a):
-            self.editor.open_file(self.editor.file_path)
+            self.editor.open_requested(self.editor.file_path)
 
         args = ("autoReloadChangedFiles", "File changed",
                 "The file <i>%s</i> has changed externally.\nDo you want to "

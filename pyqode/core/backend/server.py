@@ -161,6 +161,9 @@ class JsonServer(socketserver.TCPServer):
         def handle(self):
             while True:
                 data = self.read()
+                if data == 'shutdown':
+                    sys.stderr.write('shutdown received')
+                    sys.exit(0)
                 self._handle(data)
 
         def _import_class(self, cl):

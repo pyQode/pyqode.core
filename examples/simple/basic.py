@@ -21,7 +21,9 @@ def main():
     app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = frontend.CodeEdit()
+    frontend.start_server(editor, 'server.py')
     frontend.open_file(editor, __file__)
+    frontend.install_mode(editor, modes.CodeCompletionMode())
     frontend.install_mode(editor,
                           modes.PygmentsSyntaxHighlighter(editor.document()))
     frontend.install_mode(editor, modes.CaretLineHighlighterMode())
@@ -29,8 +31,15 @@ def main():
                            position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()
+    del editor
+    del window
+    del app
 
 
 if __name__ == "__main__":
     main()
+
+
+
+

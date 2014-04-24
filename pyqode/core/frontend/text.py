@@ -387,8 +387,8 @@ def detect_encoding(path, default_encoding):
         import chardet
         encoding = chardet.detect(bytes(data))['encoding']
     except ImportError:
-        _logger().warning("chardet not available, using default encoding by "
-                          "default: %s" % default_encoding)
+        _logger().warning("chardet not available, using default encoding: "
+                          "%s" % default_encoding)
         encoding = default_encoding
     else:
         _logger().debug('encoding detected using chardet: %s' % encoding)

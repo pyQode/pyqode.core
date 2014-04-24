@@ -33,9 +33,16 @@ def main():
 
     actions.redo.shortcut = 'Ctrl+Y'
     editor.refresh_actions()
+    app.exec_()
 
-    sys.exit(app.exec_())
+    del editor
+    del window
+    del app
 
 
 if __name__ == "__main__":
     main()
+
+
+
+

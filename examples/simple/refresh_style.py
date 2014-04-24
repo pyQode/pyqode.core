@@ -43,7 +43,11 @@ def main():
     editor.refresh_settings()
     editor.refresh_style()
 
-    sys.exit(app.exec_())
+    app.exec_()
+
+    del editor
+    del window
+    del app
 
 
 if __name__ == "__main__":

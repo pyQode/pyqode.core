@@ -10,6 +10,7 @@ import pyqode.core
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QDialog, QTabBar, QTabWidget
 
+from pyqode.core import frontend
 from pyqode.core.frontend.ui.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.frontend.modes import FileWatcherMode
 
@@ -83,7 +84,7 @@ class ClosableTabBar(QTabBar):
                 qMouseEvent.pos()))
 
 
-class CodeEditTabWidget(QTabWidget):
+class TabWidget(QTabWidget):
     """
     QTabWidget specialised to hold CodeEdit instances (or any other
     object that has the same interace).
@@ -227,7 +228,7 @@ class CodeEditTabWidget(QTabWidget):
         """
         return self._context_mnu.addSeparator()
 
-    def is_file_open(self, path):
+    def index_from_filename(self, path):
         """
         Checks if the path is already open in an editor tab.
 
@@ -241,6 +242,11 @@ class CodeEditTabWidget(QTabWidget):
                 except AttributeError:
                     pass  # not an editor widget
         return -1
+
+    def _del_code_edit(self, code_edit):
+        frontend.stop_server(code_edit)
+        code_edit.deleteLater()
+        del code_edit
 
     def add_code_edit(self, code_edit, name=None, icon=None):
         """
@@ -256,13 +262,12 @@ class CodeEditTabWidget(QTabWidget):
         :param icon: The tab widget icon. Optional
         :type icon: QtGui.QIcon or None
         """
-        index = self.is_file_open(code_edit.file_path)
+        index = self.index_from_filename(code_edit.file_path)
         if index != -1:
             # already open, just show it
             self.setCurrentIndex(index)
             # no need to keep this instance
-            code_edit.deleteLater()
-            del code_edit
+            self._del_code_edit(code_edit)
             return
         if not icon:
             icon = QtGui.QFileIconProvider().icon(
@@ -381,8 +386,7 @@ class CodeEditTabWidget(QTabWidget):
         if widget == self._current:
             self._current = None
         self.tab_closed.emit(widget)
-        widget.deleteLater()
-        del widget
+        self._del_code_edit(widget)
 
     def _on_tab_close_requested(self, index):
         widget = self._widgets[index]
@@ -464,7 +468,7 @@ class CodeEditTabWidget(QTabWidget):
         On close, we try to close dirty tabs and only process the close
         event if all dirty tabs were closed by the user.
         """
-        if not self._try_close_dirty_tabs():
+        if not self.close_all():
             event.ignore()
         else:
             event.accept()
@@ -482,7 +486,7 @@ if __name__ == "__main__":
 
     def main():
         app = QtGui.QApplication(sys.argv)
-        tw = CodeEditTabWidget(None)
+        tw = TabWidget(None)
         e = frontend.CodeEdit(tw)
         frontend.open_file(e, __file__)
         tw.add_code_edit(e)
