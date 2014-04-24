@@ -23,7 +23,7 @@ setup(
     namespace_packages=['pyqode'],
     version=read_version(),
     packages=find_packages(),
-    keywords=["QCodeEdit PyQt source code editor widget qt"],
+    keywords=["CodeEdit PyQt source code editor widget qt"],
     url='https://github.com/pyQode/pyqode.core',
     license='MIT',
     author='Colin Duquesnoy',

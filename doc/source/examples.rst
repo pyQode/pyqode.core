@@ -65,9 +65,9 @@ This example shows you how you can force pyQode to use PySide.
 Dump style and settings
 -------------------------
 
-This example dumps the style and settings property registry of a simple QCodeEdit
-and a QGenericCodeEdit to show you the dynamic nature of the settings depending
-on the installed modes/panels.
+This example dumps the style and settings property registry of a simple
+CodeEdit and a QGenericCodeEdit to show you the dynamic nature of the settings
+depending on the installed modes/panels.
 
 .. literalinclude:: /../../examples/styling/dump.py
    :linenos:

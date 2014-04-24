@@ -12,18 +12,18 @@ import pyqode.core.frontend
 
 # Define this mapping to help the PySide's form builder create the correct
 # widget
-PLUGINS_TYPES = {'QCodeEdit': pyqode.core.frontend.CodeEdit}
+PLUGINS_TYPES = {'CodeEdit': pyqode.core.frontend.CodeEdit}
 
 try:
     from PyQt4 import QtDesigner
 
-    class QCodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
-        """Designer plugin for pyqode.QCodeEdit.
+    class CodeEditPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
+        """Designer plugin for CodeEdit.
         Also serves as base class for other custom widget designer_plugins."""
 
         _module = 'pyqode.core'        # path to the widget's module
-        _class = 'QCodeEdit'    # name of the widget class
-        _name = "QCodeEdit"
+        _class = 'CodeEdit'    # name of the widget class
+        _name = "CodeEdit"
         _icon = None
         _type = pyqode.core.frontend.CodeEdit
 

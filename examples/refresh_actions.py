@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This example is an alternative version of style_and_settings where we modify
-the settings and styles after QCodeEdit has been shown.
+the settings and styles after CodeEdit has been shown.
 
 """
 import sys

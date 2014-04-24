@@ -222,7 +222,7 @@ def default_parser():
     parser as a base if you want to add custom arguments.
 
     The default parser only has one argument, the tcp port used to start the
-    server socket. *(QCodeEdit picks up a free port and use it to run
+    server socket. *(CodeEdit picks up a free port and use it to run
     the server and connect its client socket)*
 
     :returns: The default server argument parser.

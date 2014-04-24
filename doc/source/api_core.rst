@@ -7,7 +7,7 @@ This page contains the documentation about the core/base classes of pyqode.
 Editor widget
 --------------------
 
-QCodeEdit
+CodeEdit
 ++++++++++
 .. autoclass:: pyqode.core.QCodeEdit
     :members:

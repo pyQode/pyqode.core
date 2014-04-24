@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-A simple example that shows how to setup QCodeEdit, in this example we install
+A simple example that shows how to setup CodeEdit, in this example we install
 a syntax highlighter mode (base on pygments), a mode that highlights the
 current line and a _search and replace_ panel.
 

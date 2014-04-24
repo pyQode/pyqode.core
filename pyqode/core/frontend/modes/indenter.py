@@ -16,8 +16,8 @@ class IndenterMode(Mode):
     otherwise it fully indents/un-indents selected lines.
 
     To trigger an indentation/un-indentation programatically, you must emit
-    :attr:`pyqode.core.QCodeEdit.indent_requested` or
-    :attr:`pyqode.core.QCodeEdit.unindent_requested`.
+    :attr:`pyqode.core.frontend.CodeEdit.indent_requested` or
+    :attr:`pyqode.core.frontend.CodeEdit.unindent_requested`.
     """
     def _on_state_changed(self, state):
         if state:

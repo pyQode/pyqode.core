@@ -12,9 +12,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
     """
     FileWatcher mode, check if the opened file has changed externally.
 
-    This mode adds the following properties to
-    :attr:`pyqode.core.QCodeEdit.settings`
-
     """
     #: Signal emitted when the file has been deleted. The pyqtSignal is emitted
     #: with the current editor instance so that user have a chance to close

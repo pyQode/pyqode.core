@@ -22,7 +22,7 @@ def test_a():
 @helpers.cwd_at('test')
 def setup_module(*args):
     """
-    Setup a QApplication and QCodeEdit which open the client module code
+    Setup a QApplication and CodeEdit which open the client module code
     """
     print('setup')
     global app, editor, window, code_completion_mode

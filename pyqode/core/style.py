@@ -2,12 +2,12 @@
 """
 This module contains the global style settings for pyqode.core.
 
-QCodeEdit and the core modes/panels will use the values defined in this module
+CodeEdit and the core modes/panels will use the values defined in this module
 when instantiated to initialise their style related properties.
 
-This make it easy for the user to modify QCodeEdit style globally.
+This make it easy for the user to modify CodeEdit style globally.
 Widgets already instantiated can be refreshed using
-:meth:`pyqode.core.editor.QCodeEdit.refresh_style`.
+:meth:`pyqode.core.editor.CodeEdit.refresh_style`.
 
 To change a property on a specific editor, use the corresponding python
 property on the editor/mode/panel instance.
@@ -20,12 +20,12 @@ Example usage::
     style.background = QColor('black')
     style.foreground = QColor('white')
 
-    # refresh existing editor, new QCodeEdit instance will use the new style
+    # refresh existing editor, new CodeEdit instance will use the new style
     editor.refresh_style()
 
 
-QCodeEdit options
-~~~~~~~~~~~~~~~~~
+CodeEdit options
+~~~~~~~~~~~~~~~~
 
 .. autodata:: font
 .. autodata:: font_size
@@ -68,7 +68,7 @@ SearchAndReplacePanel
 from PyQt4.QtGui import QColor
 
 # ----------------
-# QCodeEdit
+# CodeEdit
 # ---------------
 
 font = None

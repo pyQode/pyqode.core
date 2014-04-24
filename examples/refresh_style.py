@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This example is an alternative version of style_and_settings where we modify
-the settings and styles after QCodeEdit has been shown.
+the settings and styles after CodeEdit has been shown.
 
 """
 import sys
@@ -32,14 +32,14 @@ def main():
     window.setCentralWidget(editor)
     window.show()
 
-    # make qcodeedit show whitespaces in dark gray
+    # show whitespaces in dark gray
     settings.show_white_spaces = True
     style.whitespaces_foreground = QtGui.QColor('#606020')
 
     # make a dark editor using the monokai theme
     style.pygments_style = 'monokai'
 
-    # we need to tell QCodeEdit instance to refresh its settings and style
+    # we need to tell CodeEdit instance to refresh its settings and style
     editor.refresh_settings()
     editor.refresh_style()
 

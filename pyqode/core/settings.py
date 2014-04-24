@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-This module expose the global settings for pyqode.core.
+This module exposes global settings for pyqode.core.
 
-QCodeEdit and the core modes/panels will use the values defined in this module
-when instantiated. This make it easy for the user to modify QCodeEdit settings
+CodeEdit and the core modes/panels will use the values defined in this module
+when instantiated. This make it easy for the user to modify CodeEdit settings
 globally. Widgets already instantiated can be refreshed using
-:meth:`pyqode.core.editor.QCodeEdit.refresh_settings`.
+:meth:`pyqode.core.editor.CodeEdit.refresh_settings`.
 
 Example usage::
 
@@ -16,11 +16,11 @@ Example usage::
     # add c++ code completion triggers
     settings.cc_trigger_symbols.append('->', '::')
 
-    # refresh existing editor, new QCodeEdit instance will use the new settings
+    # refresh existing editor, new CodeEdit instance will use the new settings
     editor.refresh_settings()
 
 
-QCodeEdit options
+CodeEdit options
 ~~~~~~~~~~~~~~~~~
 
 .. autodata:: show_white_spaces
@@ -39,13 +39,13 @@ QCodeEdit options
 
 """
 # ----------------
-# QCodeEdit settings
+# CodeEdit settings
 # ----------------
 show_white_spaces = False
 """
 Specify if visual spaces must be highlighted. Default is False.
 
-Requires a call to refresh_settings on existing QCodeEdit instance for the
+Requires a call to refresh_settings on existing CodeEdit instance for the
 change to be propagated/
 
 """

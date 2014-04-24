@@ -415,7 +415,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
               detect_encoding_func=detect_encoding,
               default_encoding=sys.getfilesystemencoding()):
     """
-    Open a file on a QCodeEdit instance.
+    Open a file on a CodeEdit instance.
 
     .. note:: This functions uses the :mod:`mimetypes` module to detect the
         file's mime type. You might need to add custom mime types using
@@ -513,7 +513,7 @@ def mark_whole_doc_dirty(editor):
     """
     Marks the whole document as dirty to force a full refresh. **SLOW**
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     """
     tc = editor.textCursor()
     tc.select(tc.Document)
@@ -525,7 +525,7 @@ def line_indent(editor, line_nbr=None):
     """
     Returns the indent level of the specified line
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     :param line_nbr: Number of the line to get indentation (1 base). Pass None
         to use the current line number.
     :return: Number of spaces that makes the indentation level of the
@@ -542,7 +542,7 @@ def get_right_word(editor):
     """
     Gets the character on the right of the text cursor.
 
-    :param editor: QCodeEdit instance.
+    :param editor: CodeEdit instance.
     :return: The word that is on the right of the text cursor.
     """
     tc = editor.textCursor()
@@ -555,7 +555,7 @@ def get_right_character(editor):
     """
     Get the character that is on the right of the text cursor.
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
 
     :return:
     """
@@ -571,7 +571,7 @@ def insert_text(editor, text, keep_position=True):
     """
     Insertes text at the cursor position.
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     :param text: text to insert
     :param keep_position: Flag that specifies if the cursor position must be
         kept. Pass False for a regular insert (the cursor will be at the end
@@ -589,7 +589,7 @@ def insert_text(editor, text, keep_position=True):
 def clear_selection(editor):
     """
     Clear text cursor selection
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     """
     tc = editor.textCursor()
     tc.clearSelection()
@@ -600,7 +600,7 @@ def move_right(editor, keep_anchor=False, nb_chars=1):
     """
     Move the cursor on the right
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     :param keep_anchor: True to keep anchor (to select text) or False to move
         the anchor (no selection)
     :param nb_chars: Number of characters to move.
@@ -615,7 +615,7 @@ def selected_text_to_lower(editor):
     """
     Replace the selected text by its lower version
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     """
     tc = editor.textCursor()
     tc.insertText(tc.selectedText().lower())
@@ -626,7 +626,7 @@ def selected_text_to_upper(editor):
     """
     Replace the selected text by its upper version
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     """
     txt = selected_text(editor)
     insert_text(editor, txt.upper())

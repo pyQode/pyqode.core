@@ -45,9 +45,10 @@ pyQode is a **namespace package** made up of the following official packages:
 .. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
 .. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
-**pyqode.core** is the foundation package, it contains the pyqode base classes (QCodeEdit, Mode, Panel) 
-and a set of builtin modes and panels that are useful for any kind of code editor. With pyqode.core you 
-can already create a generic code editor (similar to gedit, notepad++) with only a few lines of code.
+**pyqode.core** is the foundation package, it contains the pyqode base classes
+(CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
+for any kind of code editor. With pyqode.core you can already create a generic
+code editor (similar to gedit, notepad++) with only a few lines of code.
 
 Features
 --------

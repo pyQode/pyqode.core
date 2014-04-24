@@ -113,7 +113,7 @@ class CodeEditTabWidget(QTabWidget):
     def active_editor(self):
         """
         Returns the current editor widget or None if the current tab widget is
-        not a subclass of QCodeEdit or if there is no open tab.
+        not a subclass of CodeEdit or if there is no open tab.
         """
         return self._current
 

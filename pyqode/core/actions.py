@@ -3,11 +3,11 @@
 This module contains the global default definitions for actions shortcuts
 and icons.
 
-It works very much like the settings and style module. QCodeEdit and the core
+It works very much like the settings and style module. CodeEdit and the core
 modes/panels will use the values defined in this module when instantiated.
-This make it easy for the user to modify QCodeEdit actions globally.
+This make it easy for the user to modify CodeEdit actions globally.
 Widgets already created can be refreshed using
-:meth:`pyqode.core.editor.QCodeEdit.refresh_actions`.
+:meth:`pyqode.core.editor.CodeEdit.refresh_actions`.
 
 Example usage::
 
@@ -19,7 +19,7 @@ Example usage::
 
     editor.refresh_actions()
 
-QCodeEdit actions
+CodeEdit actions
 ~~~~~~~~~~~~~~~~~
 
 .. autodata:: undo
@@ -79,7 +79,7 @@ class Action:
                 (self.text, self.shortcut, self.icon))
 
 # ----------------
-# QCodeEdit actions
+# CodeEdit actions
 # ----------------
 undo = Action('Undo', shortcut=QKeySequence.Undo,
               icon=('edit-undo', ':/pyqode-icons/rc/edit-undo.png'))

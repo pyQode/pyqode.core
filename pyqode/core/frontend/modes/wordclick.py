@@ -34,8 +34,8 @@ class WordClickMode(Mode, QtCore.QObject):
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
 
     def _select_word_under_mouse_cursor(self):
-        # todo this already exists in QCodeEdit, check if there are any
-        # differences
+        # todo this already exists in CodeEdit, check if there are
+        # any differences
         tc = frontend.word_under_mouse_cursor(self.editor)
         if (self._previous_cursor_start != tc.selectionStart() and
                 self._previous_cursor_end != tc.selectionEnd()):

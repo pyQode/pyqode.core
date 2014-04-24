@@ -239,7 +239,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def _on_install(self, editor):
         """
-        :type editor: pyqode.code.QCodeEdit
+        :type editor: pyqode.code.frontend.CodeEdit
         """
         SyntaxHighlighter._on_install(self, editor)
         self._clear_caches()

@@ -240,7 +240,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
         :param obj: object to send
         :param encoding: encoding used to encode the json message into a
-            bytes array, this should match QCodeEdit.file_encoding.
+            bytes array, this should match CodeEdit.file_encoding.
         """
         self.logger.debug('sending request: %r' % obj)
         msg = json.dumps(obj)

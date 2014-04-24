@@ -37,14 +37,15 @@ class CodeCompletionWorker(object):
 
     The worker does not actually do anything smart, the real work of collecting
     code completions is accomplished by the completion providers (see the
-    :class:`pyqode.core.code_completion.Provider` interface)
-    listed in :attr:`pyqode.core.workers.CompletionWorker.providers`.
+    :class:`pyqode.core.backend.workers.CodeCompletionWorker.Provider`
+    interface) listed in
+    :attr:`pyqode.core.backend.workers.CompletionWorker.providers`.
 
-    Those completion providers must be installed on the CodeCompletionWorker
+    Completion providers must be installed on the CodeCompletionWorker
     at the beginning of the main server script, e.g.::
 
-        from pyqode.core import workers
-        workers.CodeCompletion.providers.insert(0, MyProvider())
+        from pyqode.core.backend import CodeCompletionWorker
+        CodeCompletionWorker.providers.insert(0, MyProvider())
     """
     #: The list of code completion provider to run on each completion request.
     providers = []
@@ -121,7 +122,7 @@ class DocumentWordsProvider(object):
     def split(txt, seps):
         """
         Splits a text in a meaningful list of words based on a list of word
-        separators.
+        separators (define in pyqode.core.settings)
 
         :param txt: Text to split
         :param seps: List of words separators

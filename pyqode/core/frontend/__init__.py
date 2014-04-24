@@ -2,16 +2,16 @@
 This package contains the API for the frontend. We call frontend any bit
 of functionality related to the client side application (the Qt gui).
 
-The API is a mostly procedural API that works on QCodeEdit instance.
+The API is a mostly procedural API that works on CodeEdit instance.
 
-Originally most of those functions were methods of QCodeEdit, we moved them
+Originally most of those functions were methods of CodeEdit, we moved them
 in separates modules for the sake of readability.
 
 The API also provides a set of builtin extensions (modes and panels).
 
 The API can be divided into several parts:
 
-    1) QCodeEdit API:
+    1) CodeEdit API:
 
         The code editor widget class.
 
@@ -59,7 +59,7 @@ available from the top level frontend package (i.e. you just need to import the
 frontend package, no need to import submodules individually).
 
 """
-# QCodeEdit
+# CodeEdit
 from pyqode.core.frontend.code_edit import CodeEdit
 
 # Extensions API

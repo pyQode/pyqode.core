@@ -27,7 +27,7 @@ def process_events():
 @cwd_at('test')
 def setup_module():
     """
-    Setup a QApplication and QCodeEdit which open the client module code
+    Setup a QApplication and CodeEdit which open the client module code
     """
     global app, editor, window
     app = QtGui.QApplication.instance()

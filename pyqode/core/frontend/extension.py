@@ -358,7 +358,7 @@ def uninstall_all(editor):
     """
     Uninstalls all modes and panels.
 
-    :param editor: QCodeEdit instance.
+    :param editor: CodeEdit instance.
     """
     while len(editor._modes):
         k = list(editor._modes.keys())[0]

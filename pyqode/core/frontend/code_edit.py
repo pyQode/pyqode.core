@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the definition of the QCodeEdit
+This module contains the definition of the CodeEdit
 """
 import logging
 import sys
@@ -28,22 +28,22 @@ class CodeEdit(QtGui.QPlainTextEdit):
     modes and panels)by adding a series of additional signal and methods.
 
     **Signals:**
-        - :attr:`pyqode.core.QCodeEdit.painted`
-        - :attr:`pyqode.core.QCodeEdit.new_text_set`
-        - :attr:`pyqode.core.QCodeEdit.painted`
-        - :attr:`pyqode.core.QCodeEdit.text_saved`
-        - :attr:`pyqode.core.QCodeEdit.text_saving`
-        - :attr:`pyqode.core.QCodeEdit.dirty_changed`
-        - :attr:`pyqode.core.QCodeEdit.key_pressed`
-        - :attr:`pyqode.core.QCodeEdit.key_released`
-        - :attr:`pyqode.core.QCodeEdit.mouse_pressed`
-        - :attr:`pyqode.core.QCodeEdit.mouse_released`
-        - :attr:`pyqode.core.QCodeEdit.mouse_wheel_activated`
-        - :attr:`pyqode.core.QCodeEdit.post_key_pressed`
-        - :attr:`pyqode.core.QCodeEdit.focused_in`
-        - :attr:`pyqode.core.QCodeEdit.mouse_moved`
-        - :attr:`pyqode.core.QCodeEdit.indent_requested`
-        - :attr:`pyqode.core.QCodeEdit.unindent_requested`
+        - :attr:`pyqode.core.CodeEdit.painted`
+        - :attr:`pyqode.core.CodeEdit.new_text_set`
+        - :attr:`pyqode.core.CodeEdit.painted`
+        - :attr:`pyqode.core.CodeEdit.text_saved`
+        - :attr:`pyqode.core.CodeEdit.text_saving`
+        - :attr:`pyqode.core.CodeEdit.dirty_changed`
+        - :attr:`pyqode.core.CodeEdit.key_pressed`
+        - :attr:`pyqode.core.CodeEdit.key_released`
+        - :attr:`pyqode.core.CodeEdit.mouse_pressed`
+        - :attr:`pyqode.core.CodeEdit.mouse_released`
+        - :attr:`pyqode.core.CodeEdit.mouse_wheel_activated`
+        - :attr:`pyqode.core.CodeEdit.post_key_pressed`
+        - :attr:`pyqode.core.CodeEdit.focused_in`
+        - :attr:`pyqode.core.CodeEdit.mouse_moved`
+        - :attr:`pyqode.core.CodeEdit.indent_requested`
+        - :attr:`pyqode.core.CodeEdit.unindent_requested`
 
     .. note:: setPlainText has been overrident to force you to define
         a mimetype and an encoding.
@@ -217,8 +217,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Gets/Sets the current file path. This property is used by many modes to
         work properly. It is automatically set by the
-        :meth:`pyqode.core.QCodeEdit.openFile` and
-        :meth:`pyqode.core.QCodeEdit.saveToFile` methods.
+        :meth:`pyqode.core.CodeEdit.openFile` and
+        :meth:`pyqode.core.CodeEdit.saveToFile` methods.
 
         If you need to work with plain text, be sure to adapt file path
         accordingly (the extension is enough)
@@ -539,7 +539,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.QCodeEdit.indent_requested` signal, the
+        Emits the :attr:`pyqode.core.CodeEdit.indent_requested` signal, the
         :class:`pyqode.core.IndenterMode` will perform the actual indentation.
         """
         self.indent_requested.emit()
@@ -549,7 +549,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Un-indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.QCodeEdit.unindent_requested` signal, the
+        Emits the :attr:`pyqode.core.CodeEdit.unindent_requested` signal, the
         :class:`pyqode.core.IndenterMode` will perform the actual
         un-indentation.
         """

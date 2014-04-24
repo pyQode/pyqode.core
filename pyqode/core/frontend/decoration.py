@@ -161,9 +161,9 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
 
 def add_decoration(editor, decoration):
     """
-    Adds a text decoration on a QCodeEdit instance
+    Adds a text decoration on a CodeEdit instance
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     :param decoration: Text decoration
     :type decoration: pyqode.core.TextDecoration
     """
@@ -178,9 +178,9 @@ def add_decoration(editor, decoration):
 
 def remove_decoration(editor, decoration):
     """
-    Remove text decoration from a QCodeEdit instance.
+    Remove text decoration from a CodeEdit instance.
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     :param decoration: The decoration to remove
     :type decoration: pyqode.core.TextDecoration
     """
@@ -195,9 +195,9 @@ def remove_decoration(editor, decoration):
 
 def clear_decorations(editor):
     """
-    Clears all text decorations from a QCodeEdit instance.
+    Clears all text decorations from a CodeEdit instance.
 
-    :param editor: QCodeEdit instance
+    :param editor: CodeEdit instance
     """
     editor._extra_selections[:] = []
     editor.setExtraSelections(editor._extra_selections)
