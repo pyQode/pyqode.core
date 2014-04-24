@@ -65,7 +65,7 @@ class CheckerMessage(object):
         return self.status_to_string(self.status)
 
     def __init__(self, description, status, line, col=None, icon=None,
-                 color=None):
+                 color=None, path=None):
         """
         :param description: The message description (used as a tooltip)
         :param status: The status associated with the message.
@@ -74,6 +74,7 @@ class CheckerMessage(object):
                     the end of the line).
         :param icon: Icon used for the marker panel
         :param color: Text decoration color
+        :param path: file path. Optional
         """
         assert 0 <= status <= 2
         #: The description of the message, used as a tooltip.
@@ -100,6 +101,7 @@ class CheckerMessage(object):
             self.icon = self.ICONS[status]
         self.marker = None
         self.decoration = None
+        self.path = path
 
     def __repr__(self):
         return "{0} {1}".format(self.description, self.line)
