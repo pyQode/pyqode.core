@@ -4,4 +4,3 @@ related to CodeEdit:
 
     - functions and classes to manage a list of recent files.
 """
-
