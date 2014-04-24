@@ -244,9 +244,6 @@ def clean_document(editor):
         for j in range(i - 1):
             remove_last_line(editor)
 
-    editor._cleaning = False
-    editor._original_text = editor.toPlainText()
-
     # restore cursor and scrollbars
     tc = editor.textCursor()
     tc.movePosition(tc.Start)
@@ -264,6 +261,8 @@ def clean_document(editor):
     editor.verticalScrollBar().setValue(value)
 
     editor.textCursor().endEditBlock()
+
+    editor._cleaning = False
 
 
 def select_lines(editor, start, end, apply_selection=True):
@@ -496,6 +495,7 @@ def save_to_file(editor, path=None, encoding=None):
             pass
         _logger().debug('rename %s to %s' % (tmp_path, path))
         os.rename(tmp_path, path)
+        editor._original_text = editor.toPlainText()
         editor.dirty = False
         editor._fpath = path
         editor.text_saved.emit(path)
@@ -629,7 +629,6 @@ def selected_text_to_upper(editor):
     :param editor: QCodeEdit instance
     """
     txt = selected_text(editor)
-    print("To replace: %s" % txt)
     insert_text(editor, txt.upper())
 
 

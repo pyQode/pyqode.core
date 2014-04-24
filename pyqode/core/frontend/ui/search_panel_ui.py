@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Mon Apr 14 22:10:32 2014
+# Created: Thu Apr 24 12:06:54 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -243,3 +243,4 @@ class Ui_SearchPanel(object):
         self.actionFindPrevious.setToolTip(_translate("SearchPanel", "Find previous occurrence (upward)", None))
         self.actionFindPrevious.setShortcut(_translate("SearchPanel", "Shift+F3", None))
 
+from . import pyqode_core_rc

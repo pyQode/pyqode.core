@@ -638,7 +638,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
     def focusOutEvent(self, event):
         if self._save_on_focus_out:
-            QtCore.QTimer.singleShot(500, self._save)
+            self._save()
 
     def mousePressEvent(self, event):
         """

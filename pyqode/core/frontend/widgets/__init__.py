@@ -16,3 +16,6 @@ pyqode applications:
     made up of primitive types (int, float, list, string).
 
 """
+from pyqode.core.frontend.widgets.errors_table import ErrorsTable
+from pyqode.core.frontend.widgets.interactive import InteractiveConsole
+from pyqode.core.frontend.widgets.tabs import CodeEditTabWidget
