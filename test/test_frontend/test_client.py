@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+Test the client/server API
+"""
 import os
 import sys
 from PyQt4 import QtGui

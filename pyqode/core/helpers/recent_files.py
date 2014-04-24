@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This module contains an helper class to manage the list of recent files
 in an IDE.

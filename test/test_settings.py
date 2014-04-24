@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Test scripts for the settings module.
 """

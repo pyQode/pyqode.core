@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This module tests the extension frontend module
 (pyqode.core.frontend.extension)

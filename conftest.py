@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+pytest config file
+"""
 import logging
 logging.basicConfig(level=logging.INFO)
 import pytest

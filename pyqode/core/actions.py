@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This module contains the global default definitions for actions shortcuts
 and icons.
