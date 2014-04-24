@@ -1,27 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
@@ -244,8 +221,10 @@ class InteractiveConsole(QTextEdit):
                 self._usr_buffer += txt
                 self.setTextColor(self._stdin_col)
             else:
-                self._usr_buffer = self._usr_buffer[0:len(self._usr_buffer)-1]
-        # text is inserted here, the text color must be defined before this line
+                self._usr_buffer = self._usr_buffer[
+                    0:len(self._usr_buffer) - 1]
+        # text is inserted here, the text color must be defined before this
+        # line
         QTextEdit.keyPressEvent(self, QKeyEvent)
 
     def _write_finished(self, exitCode, exitStatus):
@@ -257,8 +236,8 @@ class InteractiveConsole(QTextEdit):
         self.process_finished.emit(exitCode)
 
     def _write_started(self):
-        self._writer(self, "{0} {1}\n".format(self._process, " ".join(self._args)),
-                     self._app_msg_col)
+        self._writer(self, "{0} {1}\n".format(
+            self._process, " ".join(self._args)), self._app_msg_col)
         self._running = True
         self._logger().debug('process started')
 

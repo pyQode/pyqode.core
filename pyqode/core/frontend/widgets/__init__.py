@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This package contains a set of widgets that might be useful when writing
 pyqode applications:
