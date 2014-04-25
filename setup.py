@@ -33,7 +33,10 @@ setup(
     install_requires=['pygments'],
     entry_points={
         'pyqode_plugins':
-            ['pyqode_core = pyqode.core.designer_plugin']
+            [
+                'code_edit = pyqode.core.designer_plugins',
+
+            ]
     },
     zip_safe=False,
     classifiers=[

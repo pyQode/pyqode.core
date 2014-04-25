@@ -69,7 +69,8 @@ class MenuRecentFiles(QtGui.QMenu):
     #: The parameter is the path of the file to open.
     open_requested = QtCore.pyqtSignal(str)
 
-    def __init__(self, recent_files_manager, parent, title='Recent files'):
+    def __init__(self, parent, recent_files_manager=None,
+                 title='Recent files'):
         """
         :param organisation: name of your organisation as used for your own
                              QSettings

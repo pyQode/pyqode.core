@@ -146,11 +146,10 @@ class InteractiveConsole(QTextEdit):
     def _set_clear_on_start(self, value):
         self._clear_on_start = value
 
-    clear_on_start = Property(QColor, _get_clear_on_start, _set_clear_on_start,
+    clear_on_start = Property(bool, _get_clear_on_start, _set_clear_on_start,
                               doc='Clears output when the process starts')
 
-    @property
-    def merge_outputs(self):
+    def _get_merge_outputs(self):
         """
         Merge stderr with stdout. Default is False.
 
@@ -160,13 +159,15 @@ class InteractiveConsole(QTextEdit):
         """
         return self._merge_outputs
 
-    @merge_outputs.setter
-    def merge_outputs(self, value):
+    def _set_merge_outputs(self, value):
         self._merge_outputs = value
         if value:
             self.process.setProcessChannelMode(QProcess.MergedChannels)
         else:
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
+
+    merge_outputs = Property(bool, _get_merge_outputs, _set_merge_outputs,
+                             doc='Merges stdout and stderr. Default is False')
 
     def closeEvent(self, *args, **kwargs):
         if self.process.state() == QProcess.Running:
