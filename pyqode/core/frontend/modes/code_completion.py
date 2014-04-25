@@ -28,7 +28,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     The completion popup is shown the user press **ctrl+space** or
     automatically while the user is typing some code (this can be configured
-    using a series of properties described in the below table).
+    using a series of properties).
 
     .. note:: The code completion mode automatically starts a unique subprocess
               (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
