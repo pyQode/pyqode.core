@@ -16,18 +16,20 @@ class Mode(object):
     installed on a editor to add new behaviours or to modify the
     appearance.
 
-    A mode is added to a editor by using the
-    :meth:`pyqode.core.editor.installMode` or
-    :meth:`pyqode.core.editor.installPanel` methods.
+    A mode is added to a editor by using
+    :meth:`pyqode.core.frontend.install_mode` or
+    :meth:`pyqode.core.frontend.install_panel`.
 
-    Subclasses must/should override the following methods:
-        - :meth:`pyqode.core.Mode._on_state_changed`
-        - :meth:`pyqode.core.Mode.refresh_style`
-        - :meth:`pyqode.core.Mode.refresh_settings`
+    Subclasses may/should override the following methods:
+        - :meth:`pyqode.core.frontend.Mode._on_state_changed`
+        - :meth:`pyqode.core.frontend.Mode.refresh_style`
+        - :meth:`pyqode.core.frontend.Mode.refresh_settings`
+        - :meth:`pyqode.core.frontend.Mode.refresh_actions`
 
     The mode will be identified by its class name, this means that there cannot
-    be two modes of the same type on a editor (you have to subclass it)
+    be two modes of the same type on a editor!
     """
+
     @property
     def editor(self):
         """
@@ -35,7 +37,7 @@ class Mode(object):
 
         **READ ONLY**
 
-        :type: pyqode.core.editor.editor
+        :type: pyqode.core.frontend.CodeEdit
         """
         if self._editor is not None:
             return self._editor()
@@ -45,8 +47,9 @@ class Mode(object):
     @property
     def enabled(self):
         """
-        Tell if the mode is enabled, :meth:`pyqode.core.Mode._onStateChanged`
-        is called when the value changed.
+        Tell if the mode is enabled,
+        :meth:`pyqode.core.frontend.Mode._onStateChanged` is called when the
+        value changed.
 
         :type: bool
         """
@@ -59,8 +62,8 @@ class Mode(object):
             self._on_state_changed(enabled)
 
     def __init__(self):
-        #: Mode name/identifier. :class:`pyqode.core.editor` use it as the
-        #: attribute key when you install a mode.
+        #: Mode name/identifier. :class:`pyqode.core.frontend.CodeEdit` uses
+        # that as the attribute key when you install a mode.
         self.name = self.__class__.__name__
         #: Mode description
         self.description = self.__doc__
@@ -69,8 +72,7 @@ class Mode(object):
 
     def _on_install(self, editor):
         """
-        Installs the extension on the editor. Subclasses might want to override
-        this method to add new style/settings properties to the editor.
+        Installs the extension on the editor.
 
         .. note:: This method is called by editor when you install a Mode.
                   You should never call it yourself, even in a subclass.
@@ -78,7 +80,7 @@ class Mode(object):
         .. warning:: Don't forget to call **super** when subclassing
 
         :param editor: editor widget instance
-        :type editor: pyqode.core.editor
+        :type editor: pyqode.core.frontend.CodeEdit
         """
         self._editor = weakref.ref(editor)
         self.enabled = True
@@ -129,7 +131,7 @@ def install_mode(editor, mode):
 
     :param editor: editor instance on which the mode will be installed.
     :param mode: The mode instance to install.
-    :type mode: pyqode.core.api.Mode
+    :type mode: pyqode.core.frontend.Mode
     """
     _logger().info('installing mode %r' % mode.name)
     editor._modes[mode.name] = mode
@@ -157,7 +159,7 @@ def get_mode(editor, name_or_klass):
 
     :param name_or_klass: The name or the class of the mode to get
     :type name_or_klass: str or type
-    :rtype: pyqode.core.api.Mode
+    :rtype: pyqode.core.frontend.Mode
     """
     if not isinstance(name_or_klass, str):
         name_or_klass = name_or_klass.__name__
@@ -224,14 +226,14 @@ class Panel(QtGui.QWidget, Mode):
 
     def _on_install(self, editor):
         """
-        Extends :meth:`pyqode.core.Mode._onInstall` method to set the editor
-        instance as the parent widget.
+        Extends :meth:`pyqode.core.frontend.Mode._onInstall` method to set the
+        editor instance as the parent widget.
 
         .. warning:: Don't forget to call **super** if you override this
             method!
 
         :param editor: editor instance
-        :type editor: pyqode.core.code_edit.py.editor
+        :type editor: pyqode.core.frontend.CodeEdit
         """
         Mode._on_install(self, editor)
         self.setParent(editor)
@@ -269,6 +271,11 @@ class Panel(QtGui.QWidget, Mode):
             painter.fillRect(event.rect(), self._background_brush)
 
     def setVisible(self, visible):
+        """
+        Shows/Hides the panel
+
+        Automatically call CodeEdit.refresh_panels.
+        """
         _logger().debug('%s visibility changed' % self.name)
         QtGui.QWidget.setVisible(self, visible)
         self.editor.refresh_panels()
@@ -278,7 +285,7 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
     """
     Installs a panel on on the editor. You must specify the position of the
     panel (panels are rendered in one of the four document margins, see
-    :class:`pyqode.core.editor.Panel.Position`.
+    :class:`pyqode.core.frontend.Panel.Position`.
 
     The panel is set as an object attribute using the panel's name as the
     key.
@@ -286,7 +293,7 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
     :param obj: The panel instance to install
     :param position: The panel position
 
-    :type obj: pyqode.core.api.Panel
+    :type obj: pyqode.core.frontend.Panel
     :type position: int
     """
     assert obj is not None
@@ -348,7 +355,7 @@ def get_panels(editor):
     """
     Returns the panels dictionary.
 
-    :return: A dictionary of :class:`pyqode.core.Panel`
+    :return: A dictionary of :class:`pyqode.core.frontend.Panel`
     :rtype: dict
     """
     return editor._panels

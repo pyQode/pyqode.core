@@ -267,9 +267,10 @@ def clean_document(editor):
 
 def select_lines(editor, start, end, apply_selection=True):
     """
-    Select entire lines between start and end.
+    Selects entire lines between start and end line numbers.
 
-    This functions returned the text cursor that contains the selection.
+    This functions apply the selection and returns the text cursor that
+    contains the selection.
 
     Optionally it is possible to prevent the selection from being applied on
     the code editor widget by setting ``apply_selection`` to False.
@@ -357,8 +358,10 @@ def line_nbr_from_position(editor, y_pos):
 
 def keep_tc_pos(f):
     """
-    Decorator. Cache text cursor position and restore it when the wrapped
-    function exits. This decorator can only be used on modes or panels.
+    Cache text cursor position and restore it when the wrapped
+    function exits.
+
+    This decorator can only be used on modes or panels.
     """
     @functools.wraps(f)
     def wrapper(editor, *args, **kwds):
@@ -377,8 +380,10 @@ def detect_encoding(path, default_encoding):
     default system encoding is used instead.
 
     :param path: path of the file to detect encoding
+    :param default_encoding: fallback encoding that is used in case we failed
+        to detect the proper encoding.
 
-    :return: File encoding
+    :returns: File encoding
     """
     _logger().debug('detecting file encoding for file: %s' % path)
     with open(path, 'rb') as f:
@@ -387,8 +392,8 @@ def detect_encoding(path, default_encoding):
         import chardet
         encoding = chardet.detect(bytes(data))['encoding']
     except ImportError:
-        _logger().warning("chardet not available, using default encoding: "
-                          "%s" % default_encoding)
+        _logger().warning("chardet not available, using default encoding by "
+                          "default: %s" % default_encoding)
         encoding = default_encoding
     else:
         _logger().debug('encoding detected using chardet: %s' % encoding)
@@ -415,7 +420,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
               detect_encoding_func=detect_encoding,
               default_encoding=sys.getfilesystemencoding()):
     """
-    Open a file on a CodeEdit instance.
+    Opens a file on a CodeEdit instance.
 
     .. note:: This functions uses the :mod:`mimetypes` module to detect the
         file's mime type. You might need to add custom mime types using
@@ -457,6 +462,14 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
 
 
 def save_to_file(editor, path=None, encoding=None):
+    """
+    Saves the content of the editor to a file.
+
+    :param editor: CodeEdit instance
+    :param path: Path of the file to save
+    :param encoding: Encoding of the file to save.
+
+    """
     editor.text_saving.emit(path)
     sel_start = editor.textCursor().selectionStart()
     sel_end = editor.textCursor().selectionEnd()
@@ -553,7 +566,7 @@ def get_right_word(editor):
 
 def get_right_character(editor):
     """
-    Get the character that is on the right of the text cursor.
+    Gets the character that is on the right of the text cursor.
 
     :param editor: CodeEdit instance
 
@@ -569,7 +582,7 @@ def get_right_character(editor):
 
 def insert_text(editor, text, keep_position=True):
     """
-    Insertes text at the cursor position.
+    Inserts text at the cursor position.
 
     :param editor: CodeEdit instance
     :param text: text to insert
@@ -588,7 +601,8 @@ def insert_text(editor, text, keep_position=True):
 
 def clear_selection(editor):
     """
-    Clear text cursor selection
+    Clears text cursor selection
+
     :param editor: CodeEdit instance
     """
     tc = editor.textCursor()
@@ -598,7 +612,7 @@ def clear_selection(editor):
 
 def move_right(editor, keep_anchor=False, nb_chars=1):
     """
-    Move the cursor on the right
+    Moves the cursor on the right.
 
     :param editor: CodeEdit instance
     :param keep_anchor: True to keep anchor (to select text) or False to move
@@ -613,7 +627,7 @@ def move_right(editor, keep_anchor=False, nb_chars=1):
 
 def selected_text_to_lower(editor):
     """
-    Replace the selected text by its lower version
+    Replaces the selected text by its lower version
 
     :param editor: CodeEdit instance
     """
@@ -624,7 +638,7 @@ def selected_text_to_lower(editor):
 
 def selected_text_to_upper(editor):
     """
-    Replace the selected text by its upper version
+    Replaces the selected text by its upper version
 
     :param editor: CodeEdit instance
     """
@@ -646,7 +660,7 @@ def compare_cursors(cursor_a, cursor_b):
 
 def search_text(text_document, text_cursor, search_txt, search_flags):
     """
-    Search a text in a text document.
+    Searches a text in a text document.
 
     :param text_document: QTextDocument
     :param text_cursor: Current text cursor

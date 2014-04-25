@@ -108,7 +108,6 @@ from pyqode.core.frontend.text import selected_text_to_upper
 from pyqode.core.frontend.text import selected_text_to_lower
 from pyqode.core.frontend.text import search_text
 
-
 # Client API
 from pyqode.core.frontend.client import connected_to_server
 from pyqode.core.frontend.client import NotConnectedError

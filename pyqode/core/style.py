@@ -7,7 +7,7 @@ when instantiated to initialise their style related properties.
 
 This make it easy for the user to modify CodeEdit style globally.
 Widgets already instantiated can be refreshed using
-:meth:`pyqode.core.editor.CodeEdit.refresh_style`.
+:meth:`pyqode.core.frontend.CodeEdit.refresh_style`.
 
 To change a property on a specific editor, use the corresponding python
 property on the editor/mode/panel instance.

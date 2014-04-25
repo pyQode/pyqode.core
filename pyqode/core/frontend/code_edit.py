@@ -3,6 +3,7 @@
 This module contains the definition of the CodeEdit
 """
 import logging
+import mimetypes
 import sys
 
 from PyQt4 import QtGui, QtCore
@@ -25,7 +26,11 @@ class CodeEdit(QtGui.QPlainTextEdit):
     Base class for any pyqode source code editor widget.
 
     Extends :class:`QPlainTextEdit` by adding an extension system (
-    modes and panels)by adding a series of additional signal and methods.
+    modes and panels) and by adding a series of additional signal and methods.
+
+    To interact with the editor content, you may use the Qt Text API (
+    QTextCursor, ...) or use the more high level functions defined in
+    :mod:`pyqode.core.frontend.text`
 
     **Signals:**
         - :attr:`pyqode.core.CodeEdit.painted`
@@ -45,8 +50,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
         - :attr:`pyqode.core.CodeEdit.indent_requested`
         - :attr:`pyqode.core.CodeEdit.unindent_requested`
 
-    .. note:: setPlainText has been overrident to force you to define
-        a mimetype and an encoding.
+    .. note:: setPlainText has been overriden to force you to define
+        a mime type and an encoding.
 
     """
     #: Paint hook
@@ -106,7 +111,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
     @property
     def font_name(self):
         """
-        The editor font.
+        The editor font family name.
         """
         return self._font_family
 
@@ -206,7 +211,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
     @property
     def file_name(self):
         """
-        Returns the file name (see :meth:`QtCore.QFileInfo.fileName`)
+        Returns the open file name (see :meth:`QtCore.QFileInfo.fileName`)
 
         :rtype: str
         """
@@ -215,13 +220,11 @@ class CodeEdit(QtGui.QPlainTextEdit):
     @property
     def file_path(self):
         """
-        Gets/Sets the current file path. This property is used by many modes to
-        work properly. It is automatically set by the
-        :meth:`pyqode.core.CodeEdit.openFile` and
-        :meth:`pyqode.core.CodeEdit.saveToFile` methods.
+        Gets/Sets the current file path.
 
-        If you need to work with plain text, be sure to adapt file path
-        accordingly (the extension is enough)
+        This property is used by many modes to work properly. It is
+        automatically set by the :meth:`pyqode.core.frontend.open_file` and
+        :meth:`pyqode.core.CodeEdit.save_to_file` methods.
 
         :type: str
         """
@@ -234,7 +237,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
     @property
     def file_encoding(self):
         """
-        Returns last encoding used to open the file
+        Returns the last encoding used to open/save the file.
 
         :rtype: str
         """
@@ -266,17 +269,17 @@ class CodeEdit(QtGui.QPlainTextEdit):
         :param parent: Parent widget
 
         :param create_default_actions: Specify if the default actions (copy,
-                                     paste, ...) must be created.
-                                     Default is True.
+            paste, ...) must be created or not. Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        mimetypes.init()
         self._client = JsonTcpClient(self)
         self._last_mouse_pos = None
         self._cached_cursor_pos = (-1, -1)
         self._modified_lines = set()
         self._cleaning = False
         self._margin_sizes = (0, 0, 0, 0)
-        self.top = self.left = self.right = self.bottom = -1
+        self._top = self._left = self._right = self._bottom = -1
         self._visible_blocks = []
         self._extra_selections = []
         self._parenthesis_selections = []
@@ -321,9 +324,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
     # ---------------
     def set_mouse_cursor(self, cursor):
         """
-        Changes the viewport cursor
+        Changes the viewport's cursor
 
-        :param cursor: the nex mouse cursor to set.
+        :param cursor: the mouse cursor to set.
         :type cursor: QtGui.QCursor
         """
         self.viewport().setCursor(cursor)
@@ -385,14 +388,14 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
     def actions(self):
         """
-        Returns the list of actions/seprators of the context menu.
-        :return:
+        Returns the list of actions/sepqrators of the context menu.
+
         """
         return self._actions
 
     def add_separator(self):
         """
-        Adds a seprator to the editor's context menu.
+        Adds a sepqrator to the editor's context menu.
 
         :return: The sepator that has been added.
         :rtype: QtGui.QAction
@@ -470,8 +473,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
     @QtCore.pyqtSlot()
     def rehighlight(self):
         """
-        Convenience method that calls rehighlight on the syntax highlighter
-        mode.
+        Convenience method that calls rehighlight on the instqlled
+        syntax highlighter mode.
 
         """
         for mode in self._modes.values():
@@ -549,9 +552,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Un-indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.CodeEdit.unindent_requested` signal, the
-        :class:`pyqode.core.IndenterMode` will perform the actual
-        un-indentation.
+        Emits the :attr:`pyqode.core.frontend<CodeEdit.unindent_requested`
+        signal, the :class:`pyqode.core.frontend.modes.IndenterMode` will
+        perform the actual un-indentation.
         """
         self.unindent_requested.emit()
 
@@ -637,6 +640,10 @@ class CodeEdit(QtGui.QPlainTextEdit):
         QtGui.QApplication.processEvents()
 
     def focusOutEvent(self, event):
+        """
+        Saves content if save_on_focus_out is True.
+
+        """
         if self._save_on_focus_out:
             self._save()
 
@@ -875,7 +882,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
                 continue
             sh = panel.sizeHint()
             bottom += sh.height()
-        self.top, self.left, self.right, self.bottom = top, left, right, bottom
+        self._top, self._left, self._right, self._bottom = (
+            top, left, right, bottom)
         return bottom, left, right, top
 
     def _resize_panels(self):
@@ -981,15 +989,15 @@ class CodeEdit(QtGui.QPlainTextEdit):
         for panel in self._panels[Panel.Position.TOP].values():
             if panel.isVisible():
                 h = panel.sizeHint().height()
-                _logger().debug('bottom panel height: %r' % h)
+                _logger().debug('_bottom panel height: %r' % h)
                 top += h
             else:
                 _logger().debug('skipping invisible panel %s' % panel.name)
-        _logger().debug('processing bottom panels')
+        _logger().debug('processing _bottom panels')
         for panel in self._panels[Panel.Position.BOTTOM].values():
             if panel.isVisible():
                 h = panel.sizeHint().height()
-                _logger().debug('bottom panel height: %r' % h)
+                _logger().debug('_bottom panel height: %r' % h)
                 bottom += h
             else:
                 _logger().debug('skipping invisible panel %s' % panel.name)

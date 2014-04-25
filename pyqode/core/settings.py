@@ -5,7 +5,7 @@ This module exposes global settings for pyqode.core.
 CodeEdit and the core modes/panels will use the values defined in this module
 when instantiated. This make it easy for the user to modify CodeEdit settings
 globally. Widgets already instantiated can be refreshed using
-:meth:`pyqode.core.editor.CodeEdit.refresh_settings`.
+:meth:`pyqode.core.frontend.CodeEdit.refresh_settings`.
 
 Example usage::
 

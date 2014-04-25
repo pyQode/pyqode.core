@@ -257,7 +257,7 @@ class TabWidget(QTabWidget):
         same filename, else the already open tab is set as current.
 
         :param code_edit: The code editor widget tab to add
-        :type code_edit: pyqode.core.QCodeEdit
+        :type code_edit: pyqode.core.frontend.CodeEdit
 
         :param icon: The tab widget icon. Optional
         :type icon: QtGui.QIcon or None

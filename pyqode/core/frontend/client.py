@@ -127,6 +127,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     parts:
       - header: this simply contains the length of the payload. (4bytes)
       - payload: this is the actual message data as a json (byte) string.
+
     """
 
     def __init__(self, parent):
@@ -173,8 +174,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         on local host (the port number is defined by command line args).
 
         The server is a python script that starts a
-        :class:`pyqode.core.server.JsonServer`. You (the user) must write
-        the server script so that you can apply your own configuration
+        :class:`pyqode.core.backend.server.JsonServer`. You (the user) must
+        write the server script so that you can apply your own configuration
         server side.
 
         The script can be run with a custom interpreter. The default is to use
@@ -187,6 +188,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             executable scripts ends with '.exe' on Windows
         :param list args: list of additional command line args to use to start
             the server process.
+
         """
         self.logger.debug('running with python %d.%d.%d' %
                           sys.version_info[:3])
@@ -211,7 +213,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
         """
-        Request a work on the server.
+        Requests a work on the server.
 
         :param worker_class_or_function: Class or function to execute remotely.
         :param args: worker args, any Json serializable objects
@@ -344,7 +346,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
 def start_server(editor, script, interpreter=sys.executable, args=None):
     """
-    Starts a pyqode server, specific to a editor instance.
+    Starts a pyqode server, linked to a specific CodeEdit instance.
 
     The server is a python script that starts a
     :class:`pyqode.core.server.JsonServer`. You (the user) must write
@@ -385,7 +387,8 @@ def stop_server(editor):
 
 def request_work(editor, worker_class_or_function, args, on_receive=None):
     """
-    Requests some work on the server process of a specific editor instance.
+    Request some work to be done server side. You can get notified of the work
+    results by passing a callback (on_receive).
 
     :param: editor: editor instance
     :param worker_class_or_function: Worker class or function

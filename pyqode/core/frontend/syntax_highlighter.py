@@ -13,18 +13,20 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     It fills up the document with our custom user data, setup the parenthesis
     infos and run the FoldDetector on every text block. It **does not do any
     syntax highlighting**, this task is left to the sublasses such as
-    :class:`pyqode.core.PygmentsSyntaxHighlighter`.
+    :class:`pyqode.core.frontend.modes.PygmentsSyntaxHighlighter`.
 
     Subclasses **must** override the
-    :meth:`pyqode.core.SyntaxHighlighter.doHighlight` method to apply custom
-    highlighting.
+    :meth:`pyqode.core.frontend.SyntaxHighlighter.highlight_block` method to
+    apply custom highlighting.
 
     **signals**:
-        - :attr:`pyqode.core.SyntaxHighlighter.block_highlight_started`
-        - :attr:`pyqode.core.SyntaxHighlighter.block_highlight_finished`
+      - :attr:`pyqode.core.frontend.SyntaxHighlighter.block_highlight_started`
+      - :attr:`pyqode.core.frontend.SyntaxHighlighter.block_highlight_finished`
 
     .. warning:: You should always inherit from this class to create a new
-                 syntax. **Never inherit directly from QSyntaxHighlighter.**
+                 syntax highlighter mode.
+
+                 **Never inherit directly from QSyntaxHighlighter.**
     """
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block

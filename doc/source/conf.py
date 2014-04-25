@@ -134,7 +134,7 @@ html_theme = 'haiku'
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
 
-# The name of an image file (relative to this directory) to place at the top
+# The name of an image file (relative to this directory) to place at the _top
 # of the sidebar.
 #html_logo = None
 
@@ -148,7 +148,7 @@ html_theme = 'haiku'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
+# If not '', a 'Last updated on:' timestamp is inserted at every page _bottom,
 # using the given strftime format.
 #html_last_updated_fmt = '%b %d, %Y'
 
@@ -213,7 +213,7 @@ latex_documents = [
    u'Colin Duquesnoy', 'manual'),
 ]
 
-# The name of an image file (relative to this directory) to place at the top of
+# The name of an image file (relative to this directory) to place at the _top of
 # the title page.
 #latex_logo = None
 

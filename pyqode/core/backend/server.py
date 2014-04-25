@@ -23,14 +23,14 @@ For a request, the object will contains the following fields:
 
   - 'request_id': uuid generated client side
   - 'worker': fully qualified name to the worker callable (class or function),
-    e.g. 'pyqode.core.server.echo'
+    e.g. 'pyqode.core.backend.workers.echo_worker'
   - 'data': data specific to the chose worker.
 
 E.g::
 
     {
         'request_id': 'a97285af-cc88-48a4-ac69-7459b9c7fa66',
-        'worker': 'pyqode.core.workers.echo',
+        'worker': 'pyqode.core.backend.workers.echo_worker',
         'data': ['some code', 0]
     }
 
@@ -67,10 +67,10 @@ windows using cx_Freeze.
 Here is the most simple and basic example of a server script:
 
 .. code-block: python
-    from pyqode.core import server
+    from pyqode.core import backend
 
     if __name__ == '__main__':
-        server.run()
+        backend.serve_forever()
 
 .. warning:: The user can choose the python interpreter that will run the
     server. That means that classes and functions that run server side (
@@ -161,9 +161,6 @@ class JsonServer(socketserver.TCPServer):
         def handle(self):
             while True:
                 data = self.read()
-                if data == 'shutdown':
-                    sys.stderr.write('shutdown received')
-                    sys.exit(0)
                 self._handle(data)
 
         def _import_class(self, cl):
@@ -171,8 +168,9 @@ class JsonServer(socketserver.TCPServer):
             Imports a class from a fully qualified name string.
 
             :param cl: class string, e.g.
-                "pyqode.core.modes.code_completion.Worker"
+                "pyqode.core.backend.workers.CodeCompletionWorker"
             :return: The corresponding class
+
             """
             d = cl.rfind(".")
             class_name = cl[d + 1: len(cl)]
@@ -208,7 +206,7 @@ class JsonServer(socketserver.TCPServer):
         """
         :param args: Argument parser args. If None, the server will setup and
             use its own argument parser (using
-            :meth:`pyqode.core.server.default_parser`)
+            :meth:`pyqode.core.backend.default_parser`)
         """
         if not args:
             args = default_parser().parse_args()

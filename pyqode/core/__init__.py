@@ -20,7 +20,7 @@ pyqode is made up of the following top level packages/modules:
                 side GUI application
     - backend: any class/function used to implement the server side application
     - helpers: various helpers not directly related to CodeEdit (such as
-    a recent files manager)
+               a recent files manager)
     - actions.py: global default values for editor actions
     - settings.py: global default values for editor settings. This module
       is usually used by both the backend and the frontend.

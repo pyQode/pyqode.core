@@ -11,8 +11,8 @@ def _logger():
 
 class _TextDecorationSignals(QtCore.QObject):
     """
-    Holds the signals for a TextDecoration (as we cannot make it a QObject we
-    need to store its signals in an external QObject).
+    Holds the signals for a TextDecoration (since we cannot make it a QObject,
+    we need to store its signals in an external QObject).
     """
     clicked = QtCore.pyqtSignal(object)
 
@@ -20,13 +20,13 @@ class _TextDecorationSignals(QtCore.QObject):
 class TextDecoration(QtGui.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
-    utility class that adds a few utility methods over the Qt ExtraSelection.
+    utility class that adds a few utility methods over Qt's ExtraSelection.
 
     In addition to the helper methods, a tooltip can be added to a decoration.
-    Usefull for errors marks and so on...
+    (useful for errors marks and so on...)
 
     Text decoration expose 1 **clicked** signal stored in a separate QObject:
-    :attr:`pyqode.core.TextDecoration.signals`
+        :attr:`pyqode.core.frontend.TextDecoration.signals`
 
     .. code-block:: python
 
@@ -46,7 +46,6 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         :type cursor_or_bloc_or_doc: QTextCursor or QTextBlock or QTextDocument
 
         :param start_pos: Selection start pos
-
         :param end_pos: Selection end pos
 
         .. note:: Use the cursor selection if startPos and endPos are none.
@@ -123,6 +122,9 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         self.format.setProperty(QtGui.QTextFormat.FullWidthSelection, flag)
 
     def set_as_underlined(self, color=QtCore.Qt.blue):
+        """
+        Underlines the text
+        """
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SingleUnderline)
         self.format.setUnderlineColor(color)
@@ -165,7 +167,7 @@ def add_decoration(editor, decoration):
 
     :param editor: CodeEdit instance
     :param decoration: Text decoration
-    :type decoration: pyqode.core.TextDecoration
+    :type decoration: pyqode.core.frontend.TextDecoration
     """
     if decoration not in editor._extra_selections:
         editor._extra_selections.append(decoration)
@@ -182,7 +184,7 @@ def remove_decoration(editor, decoration):
 
     :param editor: CodeEdit instance
     :param decoration: The decoration to remove
-    :type decoration: pyqode.core.TextDecoration
+    :type decoration: pyqode.core.frontend.TextDecoration
     """
     try:
         editor._extra_selections.remove(decoration)
