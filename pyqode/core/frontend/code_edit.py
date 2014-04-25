@@ -98,17 +98,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._set_whitespaces_flags(value)
 
     @property
-    def save_on_focus_out(self):
-        """
-        Enables auto save on focus out.
-        """
-        return self._save_on_focus_out
-
-    @save_on_focus_out.setter
-    def save_on_focus_out(self, value):
-        self._save_on_focus_out = value
-
-    @property
     def font_name(self):
         """
         The editor font family name.
@@ -644,7 +633,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Saves content if save_on_focus_out is True.
 
         """
-        if self._save_on_focus_out:
+        if settings.save_on_focus_out:
             self._save()
 
     def mousePressEvent(self, event):
@@ -805,7 +794,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._show_whitespaces = settings.show_white_spaces
         self._tab_length = settings.tab_length
         self._use_spaces_instead_of_tabs = settings.use_spaces_instead_of_tabs
-        self._save_on_focus_out = settings.save_on_focus_out
         self.setTabStopWidth(self._tab_length *
                              self.fontMetrics().widthChar(" "))
         self._set_whitespaces_flags(self._show_whitespaces)

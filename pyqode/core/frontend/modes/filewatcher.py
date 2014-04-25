@@ -4,6 +4,7 @@ Contains the mode that control the external changes of file.
 """
 import os
 from pyqode.core import settings
+from pyqode.core import frontend
 from pyqode.core.frontend import Mode
 from PyQt4 import QtCore, QtGui
 
@@ -92,6 +93,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         Notify user from external event
         """
+        inital_value = settings.save_on_focus_out
+        settings.save_on_focus_out = False
         self._flg_notify = True
         dlg_type = (QtGui.QMessageBox.Yes |
                     QtGui.QMessageBox.No) if not dlg_type else dlg_type
@@ -104,6 +107,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 dlg_type) == expected_type):
             expected_action(self.editor.file_path)
         self._update_mtime()
+        settings.save_on_focus_out = inital_value
 
     def _notify_change(self):
         """
@@ -111,12 +115,12 @@ class FileWatcherMode(Mode, QtCore.QObject):
         then reload the changed file in the editor
         """
         def inner_action(*a):
-            self.editor.open_requested(self.editor.file_path)
+            frontend.open_file(self.editor, self.editor.file_path)
 
         args = ("autoReloadChangedFiles", "File changed",
                 "The file <i>%s</i> has changed externally.\nDo you want to "
                 "reload it?" % os.path.basename(self.editor.file_path))
-        kwargs = {"expectedAction": inner_action}
+        kwargs = {"expected_action": inner_action}
         if self.editor.hasFocus():
             self._notify(*args, **kwargs)
         else:
