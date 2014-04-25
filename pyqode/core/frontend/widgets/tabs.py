@@ -91,7 +91,8 @@ class TabWidget(QTabWidget):
 
     It ensures that there is only one open editor tab for a specific file path,
     it adds a few utility methods to quickly manipulate the current editor
-    widget.
+    widget. It will automatically rename tabs that share the same base filename
+    to include their distinctive parent directory.
 
     It handles tab close requests automatically and show a dialog box when
     a dirty tab widget is being closed. It also adds a convenience QTabBar
@@ -175,12 +176,24 @@ class TabWidget(QTabWidget):
             return True
         return False
 
+    def _ensure_unique_name(self, code_edit, name):
+        if name is not None:
+            code_edit._tab_name = name
+        else:
+            code_edit._tab_name = code_edit.file_name
+        file_name = code_edit.file_name
+        if self._name_exists(file_name):
+            file_name = self._rename_duplicate_tabs(
+                code_edit, code_edit.file_name, code_edit.file_path)
+            code_edit._tab_name = file_name
+
     @QtCore.pyqtSlot()
     def save_current(self, path=None):
         """
-        Save current editor content.
-
-        To save the file as, you just need to specify a path.
+        Save current editor content. Leave file to None to erase the previous
+        file content. If the current editor's file_path is None and path
+        is None, the function will call ``QtGui.QFileDialog.getSaveFileName``
+        to get a valid save filename.
 
         """
         try:
@@ -189,11 +202,17 @@ class TabWidget(QTabWidget):
                     self, 'Choose destination path')
                 if not path:
                     return False
+            old_path = self._current.file_path
             frontend.save_to_file(self._current, path)
-            # adapt tab title on save as
-            if path:
+            # path (and icon) may have changed
+            code_edit = self._current
+            if path and old_path != path:
+                self._ensure_unique_name(code_edit, code_edit.file_name)
+                icon = QtGui.QFileIconProvider().icon(
+                    QtCore.QFileInfo(code_edit.file_path))
+                self.setTabIcon(self.currentIndex(), icon)
                 self.setTabText(self.currentIndex(),
-                                QtCore.QFileInfo(path).fileName())
+                                code_edit._tab_name)
             return True
         except AttributeError:  # not an editor widget
             pass
@@ -204,13 +223,14 @@ class TabWidget(QTabWidget):
         """
         Save all editors.
         """
+        initial_index = self.currentIndex()
         for i in range(self.count()):
             try:
-                code_edit = self.widget(i)
-                self._save_editor(code_edit)
-                self.setTabText(i, code_edit._tab_name)
+                self.setCurrentIndex(i)
+                self.save_current()
             except AttributeError:
                 pass
+        self.setCurrentIndex(initial_index)
 
     def addAction(self, action):
         """
@@ -269,20 +289,13 @@ class TabWidget(QTabWidget):
             # no need to keep this instance
             self._del_code_edit(code_edit)
             return
+        self._ensure_unique_name(code_edit, name)
         if not icon:
             icon = QtGui.QFileIconProvider().icon(
                 QtCore.QFileInfo(code_edit.file_path))
-        file_name = code_edit.file_name
-        if name or not file_name:
-            file_name = name
-        assert file_name, 'You need to set the code edit name used as tab text'
-        if self._name_exists(file_name):
-            file_name = self._rename_duplicate_tabs(
-                file_name, code_edit.file_path)
-        code_edit._tab_name = file_name
-        index = self.addTab(code_edit, icon, file_name)
+        index = self.addTab(code_edit, icon, code_edit._tab_name)
         self.setCurrentIndex(index)
-        self.setTabText(index, file_name)
+        self.setTabText(index, code_edit._tab_name)
         code_edit.setFocus(True)
         try:
             fw = frontend.get_mode(code_edit, FileWatcherMode)
@@ -338,12 +351,12 @@ class TabWidget(QTabWidget):
         else:
             frontend.save_to_file(code_edit, path)
 
-    def _rename_duplicate_tabs(self, name, path):
+    def _rename_duplicate_tabs(self, current, name, path):
         """
         Rename tabs whose title is the same as the name
         """
         for i in range(self.count()):
-            if self.tabText(i) == name:
+            if self.widget(i)._tab_name == name and self.widget(i) != current:
                 file_path = self._widgets[i].file_path
                 if file_path:
                     parent_dir = os.path.split(os.path.abspath(
