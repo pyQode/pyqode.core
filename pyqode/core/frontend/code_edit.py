@@ -373,7 +373,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
                         'Failed to set lexer from mimetype: %s' %
                         self.mime_type)
                     _logger().debug('setting up lexer from file path: %s' %
-                                        self.file_path)
+                                    self.file_path)
                     mode.set_lexer_from_filename(self.file_path)
 
     def add_action(self, action):
