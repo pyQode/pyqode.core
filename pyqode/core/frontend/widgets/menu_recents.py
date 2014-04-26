@@ -14,7 +14,7 @@ class RecentFilesManager:
 
     """
     #: Maximum number of files kept in the list.
-    max_recent_files = 5
+    max_recent_files = 15
 
     def __init__(self, organisation, application):
         self._settings = QtCore.QSettings(organisation, application)
