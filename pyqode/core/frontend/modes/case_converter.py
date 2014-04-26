@@ -38,7 +38,7 @@ class CaseConverterMode(Mode):
 
     def refresh_actions(self):
         self.action_to_lower.setText(actions.to_lower.text)
-        self.action_to_lower.setShortcut(actions.to_upper.shortcut)
+        self.action_to_lower.setShortcut(actions.to_lower.shortcut)
         self.action_to_upper.setText(actions.to_upper.text)
         self.action_to_upper.setShortcut(actions.to_upper.shortcut)
 
