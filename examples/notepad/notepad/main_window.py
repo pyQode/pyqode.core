@@ -21,21 +21,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setup_recent_files_menu()
         self.setup_actions()
-        # setup some specific mimetypes
-        mimetypes.add_type('text/xml', '.ui') # qt designer ui forms
-        mimetypes.add_type('text/x-rst', '.rst') # rst docs
-        mimetypes.add_type('text/x-cython', '.pyx') # cython impl files
-        mimetypes.add_type('text/x-cython', '.pxd') # cython def files
-        # cobol files
-        for ext in ['.cbl', '.cob', '.cpy']:
-            mimetypes.add_type('text/x-cobol', ext)
-            mimetypes.add_type('text/x-cobol', ext.upper())
-        if sys.platform == 'win32':
-            # windows systems do not have a mimetypes for most of the codes
-            # python, you have to add them all explicitely on windows,
-            # otherwise there won't be any syntax highlighting
-            mimetypes.add_type('text/x-python', '.py')
-            mimetypes.add_type('text/x-python', '.pyw')
+        self.setup_mimetypes()
+        self.on_current_tab_changed()
 
     def setup_actions(self):
         """ Connects slots to signals """
@@ -63,7 +50,26 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuFile.insertMenu(self.actionSave, self.menu_recents)
         self.menuFile.insertSeparator(self.actionSave)
 
+    def setup_mimetypes(self):
+        """ Setup additional mime types. """
+        # setup some specific mimetypes
+        mimetypes.add_type('text/xml', '.ui')  # qt designer ui forms
+        mimetypes.add_type('text/x-rst', '.rst')  # rst docs
+        mimetypes.add_type('text/x-cython', '.pyx')  # cython impl files
+        mimetypes.add_type('text/x-cython', '.pxd')  # cython def files
+        # cobol files
+        for ext in ['.cbl', '.cob', '.cpy']:
+            mimetypes.add_type('text/x-cobol', ext)
+            mimetypes.add_type('text/x-cobol', ext.upper())
+        if sys.platform == 'win32':
+            # windows systems do not have a mimetypes for most of the codes
+            # python, you have to add them all explicitely on windows,
+            # otherwise there won't be any syntax highlighting
+            mimetypes.add_type('text/x-python', '.py')
+            mimetypes.add_type('text/x-python', '.pyw')
+
     def setup_mnu_style(self, editor):
+        """ setup the style menu for an editor tab """
         menu = QtGui.QMenu('Styles', self.menuEdit)
         group = QtGui.QActionGroup(self)
         current_style = frontend.get_mode(
@@ -201,7 +207,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(QtGui.QAction)
     def on_style_changed(self, action):
         style.pygments_style = action.text()
-        self.tabWidget.currentWidget().refresh_style()
+        self.tabWidget.refresh_style()
 
     def on_panel_state_changed(self):
         action = self.sender()
