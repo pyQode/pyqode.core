@@ -215,6 +215,7 @@ def clean_document(editor):
     """
     value = editor.verticalScrollBar().value()
     pos = cursor_position(editor)
+    original_pos = editor.textCursor().position()
 
     editor.textCursor().beginEditBlock()
 
@@ -231,23 +232,26 @@ def clean_document(editor):
                 set_line_text(editor, line + j, stxt)
                 removed.add(line + j)
     editor._modified_lines -= removed
+
+    # ensure there is only one blank line left at the end of the file
+    i = line_count(editor)
+    while i:
+        l = line_text(editor, i)
+        if l.strip():
+            break
+        remove_last_line(editor)
+        i -= 1
     if line_text(editor, line_count(editor)):
-        editor.appendPlainText("\n")
-    else:
-        # remove last blank line (except one)
-        i = 0
-        while line_count(editor) - i > 0:
-            l = line_text(editor, line_count(editor) - i)
-            if l:
-                break
-            i += 1
-        for j in range(i - 1):
-            remove_last_line(editor)
+        editor.appendPlainText('')
 
     # restore cursor and scrollbars
     tc = editor.textCursor()
+    doc = editor.document()
+    assert isinstance(doc, QtGui.QTextDocument)
     tc.movePosition(tc.Start)
-    tc.movePosition(tc.Down, tc.MoveAnchor, pos[0] - 1)
+    tc.movePosition(tc.Down, tc.MoveAnchor,
+                    pos[0] - 1 if pos[0] <= doc.blockCount() else
+                    doc.blockCount() - 1)
     tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
     p = tc.position()
     tc.select(tc.LineUnderCursor)
