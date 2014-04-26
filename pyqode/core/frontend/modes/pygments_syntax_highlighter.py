@@ -264,32 +264,21 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._pygments_style = style.pygments_style
         self._update_style()
 
-    def set_lexer_from_file_name(self, filename):
+    def set_lexer_from_filename(self, filename):
         """
         Change the lexer based on the filename (actually only the extension is
         needed)
 
         :param filename: Filename or extension
         """
-        try:
-            if filename.endswith("~"):
-                filename = filename[0:len(filename) - 1]
-            self._lexer = get_lexer_for_filename(filename)
-        except ClassNotFound:
-            _logger().exception("failed to find lexer from filename %s" %
-                                filename)
-            self._lexer = None
+        if filename.endswith("~"):
+            filename = filename[0:len(filename) - 1]
+        self._lexer = get_lexer_for_filename(filename)
+        _logger().info('lexer for filename (%s): %r' % (filename, self._lexer))
 
     def set_lexer_from_mime_type(self, mime, **options):
-        try:
-            self._lexer = get_lexer_for_mimetype(mime, **options)
-        except ClassNotFound:
-            _logger().exception("failed to find lexer from mime type %s" %
-                                mime)
-            self._lexer = None
-        else:
-            _logger().debug('lexer for mimetype (%s): %r' %
-                            (mime, self._lexer))
+        self._lexer = get_lexer_for_mimetype(mime, **options)
+        _logger().info('lexer for mimetype (%s): %r' % (mime, self._lexer))
 
     def highlight_block(self, text):
         original_text = text

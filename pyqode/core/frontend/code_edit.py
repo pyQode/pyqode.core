@@ -364,7 +364,17 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.dirty = False
         for mode in self._modes.values():
             if hasattr(mode, 'set_mime_type'):
-                mode.set_mime_type(self.mime_type)
+                try:
+                    _logger().debug('setting up lexer from mimetype: %s' %
+                                    self.mime_type)
+                    mode.set_mime_type(self.mime_type)
+                except ValueError:
+                    _logger().exception(
+                        'Failed to set lexer from mimetype: %s' %
+                        self.mime_type)
+                    _logger().debug('setting up lexer from file path: %s' %
+                                        self.file_path)
+                    mode.set_lexer_from_filename(self.file_path)
 
     def add_action(self, action):
         """
