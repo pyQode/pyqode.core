@@ -161,11 +161,9 @@ def line_text(editor, line_nbr):
     :return: Entire line's text
     :rtype: str
     """
-    tc = editor.textCursor()
-    tc.movePosition(tc.Start)
-    tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
-    tc.select(tc.LineUnderCursor)
-    return tc.selectedText()
+    doc = editor.document()
+    block = doc.findBlockByNumber(line_nbr - 1)
+    return block.text()
 
 
 def current_line_text(editor):
@@ -201,8 +199,7 @@ def remove_last_line(editor):
     """
     tc = editor.textCursor()
     tc.movePosition(tc.End, tc.MoveAnchor)
-    tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
-    tc.movePosition(tc.End, tc.KeepAnchor)
+    tc.select(tc.LineUnderCursor)
     tc.removeSelectedText()
     tc.deletePreviousChar()
     editor.setTextCursor(tc)
@@ -227,10 +224,11 @@ def clean_document(editor):
         for j in range(-1, 2):
             # skip current line
             if line + j != pos[0]:
-                txt = line_text(editor, line + j)
-                stxt = txt.rstrip()
-                set_line_text(editor, line + j, stxt)
-                removed.add(line + j)
+                if line + j >= 1:
+                    txt = line_text(editor, line + j)
+                    stxt = txt.rstrip()
+                    set_line_text(editor, line + j, stxt)
+                    removed.add(line + j)
     editor._modified_lines -= removed
 
     # ensure there is only one blank line left at the end of the file
