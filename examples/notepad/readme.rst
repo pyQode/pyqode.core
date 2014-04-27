@@ -24,3 +24,9 @@ To **freeze the application on Windows**, you first need to install cx_Freeze.
 Then you can run::
 
     python freeze_setup.py build
+
+The resulting binary can be found in the **bin/** folder.
+
+Additionally you can install innosetup and run setup.iss to build an installer
+out of the frozen app (the resulting installer can be found in the **dist**
+folder)
