@@ -229,7 +229,8 @@ def clean_document(editor):
                 if line + j >= 1:
                     txt = line_text(editor, line + j)
                     stxt = txt.rstrip()
-                    set_line_text(editor, line + j, stxt)
+                    if txt != stxt:
+                        set_line_text(editor, line + j, stxt)
                     removed.add(line + j)
     editor._modified_lines -= removed
 
