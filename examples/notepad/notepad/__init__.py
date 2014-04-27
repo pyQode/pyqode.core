@@ -10,7 +10,11 @@ This package contains the code of the notepad application:
 """
 import sys
 from PyQt4.QtGui import QApplication
-from notepad.main_window import MainWindow
+from .main_window import MainWindow
+
+
+__version__ = '0.0.1'
+
 
 
 def main():

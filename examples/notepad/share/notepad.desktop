@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=notepad
+Comment=notepad example (pyQode)
+Exec=notepad
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/notepad.png
+Categories=Development;IDE;
