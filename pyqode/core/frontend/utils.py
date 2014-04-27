@@ -367,3 +367,13 @@ class DelayJobRunner(JobRunner):
             self.start_job(self._job, False, *self._args, **self._kwargs)
         else:
             self._job(*self._args, **self._kwargs)
+
+
+def show_wait_cursor(f):
+    @functools.wraps(f)
+    def wrapper(editor, *args, **kwds):
+        editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
+        ret_val = f(editor, *args, **kwds)
+        editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
+        return ret_val
+    return wrapper

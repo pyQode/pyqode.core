@@ -643,7 +643,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Saves content if save_on_focus_out is True.
 
         """
-        if settings.save_on_focus_out:
+        if settings.save_on_focus_out and self.dirty and self.file_path:
             self._save()
 
     def mousePressEvent(self, event):
@@ -936,6 +936,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
             bottom += sh.height()
 
     def _update_panels(self, rect, dy, force_update_margins=False):
+        _logger().debug('_update_panels')
         for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
                zones_id == Panel.Position.BOTTOM:
@@ -953,6 +954,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
                         panel.update(0, rect.y(), panel.width(), rect.height())
                     self._cached_cursor_pos = text.cursor_position(self)
         if rect.contains(self.viewport().rect()) or force_update_margins:
+            _logger().debug('_update_panels -> _update_viewport_margins')
             self._update_viewport_margins()
 
     def _on_text_changed(self):

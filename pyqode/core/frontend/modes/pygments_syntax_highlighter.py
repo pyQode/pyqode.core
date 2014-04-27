@@ -247,11 +247,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def _on_state_changed(self, state):
         self.enabled = state
-        if state is True:
-            self.editor.text_saved.connect(self.rehighlight)
-            self.rehighlight()
-        else:
-            self.editor.text_saved.disconnect(self.rehighlight)
 
     def set_mime_type(self, mime_type):
         self.set_lexer_from_mime_type(mime_type)

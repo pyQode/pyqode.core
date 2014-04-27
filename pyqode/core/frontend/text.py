@@ -7,6 +7,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 
 from pyqode.core import settings
+from pyqode.core.frontend.utils import show_wait_cursor
 
 
 def _logger():
@@ -214,6 +215,7 @@ def clean_document(editor):
     pos = cursor_position(editor)
     original_pos = editor.textCursor().position()
 
+    _logger().debug('BEGIN edit blocks for cleaning  ')
     editor.textCursor().beginEditBlock()
 
     # cleanup whitespaces
@@ -262,8 +264,8 @@ def clean_document(editor):
     editor.setTextCursor(tc)
     editor.verticalScrollBar().setValue(value)
 
-    editor.textCursor().endEditBlock()
-
+    _logger().debug('FINISH editing blocks for cleaning')
+    tc.endEditBlock()
     editor._cleaning = False
 
 
@@ -418,6 +420,7 @@ def get_mimetype(path):
     return mimetype
 
 
+@show_wait_cursor
 def open_file(editor, path, replace_tabs_by_spaces=True,
               detect_encoding_func=detect_encoding,
               default_encoding=sys.getfilesystemencoding()):
@@ -463,6 +466,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
     editor.setWindowTitle(title)
 
 
+@show_wait_cursor
 def save_to_file(editor, path=None, encoding=None):
     """
     Saves the content of the editor to a file.
@@ -475,13 +479,16 @@ def save_to_file(editor, path=None, encoding=None):
     editor.text_saving.emit(path)
     sel_start = editor.textCursor().selectionStart()
     sel_end = editor.textCursor().selectionEnd()
+    _logger().debug('cleaning document')
     clean_document(editor)
+    _logger().debug('document cleaned')
+    plain_text = editor.toPlainText()
     if path is None:
         if editor.file_path:
             path = editor.file_path
         else:
-            _logger().warning('failed to save file. Path cannot be None if '
-                              'editor.file_path is None')
+            _logger().debug('failed to save file. Path cannot be None if '
+                            'editor.file_path is None')
             return False
     # change encoding ?
     if encoding:
@@ -492,7 +499,7 @@ def save_to_file(editor, path=None, encoding=None):
     try:
         _logger().debug('saving editor content to temp file: %s' % tmp_path)
         with open(tmp_path, 'w', encoding=editor.file_encoding) as f:
-            f.write(editor.toPlainText())
+            f.write(plain_text)
     except (IOError, OSError):
         try:
             os.remove(tmp_path)
@@ -510,11 +517,10 @@ def save_to_file(editor, path=None, encoding=None):
             pass
         _logger().debug('rename %s to %s' % (tmp_path, path))
         os.rename(tmp_path, path)
-        editor._original_text = editor.toPlainText()
+        editor._original_text = plain_text
         editor.dirty = False
         editor._fpath = path
         editor.text_saved.emit(path)
-
         if sel_start != sel_end:
             # reset selection
             tc = editor.textCursor()
