@@ -261,7 +261,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
-        mimetypes.init()
         self._client = JsonTcpClient(self)
         self._last_mouse_pos = None
         self._cached_cursor_pos = (-1, -1)
