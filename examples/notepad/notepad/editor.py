@@ -1,3 +1,5 @@
+import os
+import sys
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 from pyqode.core.frontend import panels
@@ -14,7 +16,10 @@ class GenericCodeEdit(frontend.CodeEdit):
     """
     def __init__(self, parent):
         super().__init__(parent)
-        frontend.start_server(self, server.__file__)
+        if hasattr(sys, "frozen"):
+            frontend.start_server(self, os.path.join(os.getcwd(), 'server.exe'))
+        else:
+            frontend.start_server(self, server.__file__)
 
         # add panels
         frontend.install_panel(self, panels.LineNumberPanel())

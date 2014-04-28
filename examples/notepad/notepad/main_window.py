@@ -67,6 +67,11 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             # otherwise there won't be any syntax highlighting
             mimetypes.add_type('text/x-python', '.py')
             mimetypes.add_type('text/x-python', '.pyw')
+            mimetypes.add_type('text/x-c', '.c')
+            mimetypes.add_type('text/x-c', '.h')
+            mimetypes.add_type('text/x-cpp', '.hpp')
+            mimetypes.add_type('text/x-cpp', '.cpp')
+            mimetypes.add_type('text/x-cpp', '.cxx')
 
     def setup_mnu_style(self, editor):
         """ setup the style menu for an editor tab """
