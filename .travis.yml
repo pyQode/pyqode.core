@@ -1,10 +1,8 @@
 language: python
 python:
  - "3.2"
- - "3.4"
 env:
  - TOXENV=py32
- - TOXENV=py34
  - TOXENV=cov
 matrix:
     allow_failures:
