@@ -13,10 +13,10 @@ def _logger():
 class Mode(object):
     """
     Base class for editor extensions. An extension is a "thing" that can be
-    installed on a editor to add new behaviours or to modify the
+    installed on an editor to add new behaviours or to modify the
     appearance.
 
-    A mode is added to a editor by using
+    A mode is added to an editor by using
     :meth:`pyqode.core.frontend.install_mode` or
     :meth:`pyqode.core.frontend.install_panel`.
 
@@ -48,8 +48,8 @@ class Mode(object):
     def enabled(self):
         """
         Tell if the mode is enabled,
-        :meth:`pyqode.core.frontend.Mode._onStateChanged` is called when the
-        value changed.
+        :meth:`pyqode.core.frontend.Mode._on_state_changed` is called when the
+        state changed.
 
         :type: bool
         """
@@ -226,7 +226,7 @@ class Panel(QtGui.QWidget, Mode):
 
     def _on_install(self, editor):
         """
-        Extends :meth:`pyqode.core.frontend.Mode._onInstall` method to set the
+        Extends :meth:`pyqode.core.frontend.Mode._on_install` method to set the
         editor instance as the parent widget.
 
         .. warning:: Don't forget to call **super** if you override this

@@ -26,7 +26,8 @@ class CheckerTriggers:
 
 class CheckerMessage(object):
     """
-    Holds data for a message displayed by the :class:`pyqode.core.CheckerMode`.
+    Holds data for a message displayed by the
+    :class:`pyqode.core.frontend.modes.CheckerMode`.
     """
     #: Default set of icons foreach message status
     ICONS = {CheckerMessages.INFO: ("marker-info",
@@ -120,17 +121,19 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         def analysisProcess(queue: multiprocessing.Queue, code: str, path:
         str, encoding: str):
 
-    You use the queue to put the list of :class:`pyqode.core.CheckerMessage`
-    that you want to be displayed.
+    You use the queue to put the list of
+    :class:`pyqode.core.frontend.modes.CheckerMessage` that you want to be
+    displayed.
 
     The background process is ran when the text changed and the user is idle
     for a specific delay or when the text is saved depending on the trigger
-    (see :const:`pyqode.core.CHECK_TRIGGER_TXT_CHANGED` or
-    :const:`pyqode.core.CHECK_TRIGGER_TXT_SAVED`). You can also request an
-    analysis manually using :meth:`pyqode.core.CheckerMode.requestAnalysis`
+    (see :const:`pyqode.core.frontend.modes.CheckMessages`).
+
+    You can also request an analysis manually using
+    :meth:`pyqode.core.frontend.modes.CheckerMode.request_analysis`
 
     The messages are displayed as text decorations on the editor and optional
-    markers can be added to a :class:`pyqode.core.MarkerPanel`
+    markers can be added to a :class:`pyqode.core.frontend.panels.MarkerPanel`
     """
     def __init__(self, worker,
                  delay=500,
@@ -141,15 +144,14 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
                       trigger is set to
-                      :const:pyqode.core.CHECK_TRIGGER_TXT_CHANGED`
+                      :class:pyqode.core.frontend.modes.CheckerTriggers`
         :param marker_panel_id: Identifier of the marker panel to use to add
                               checker messages markers.
         :param clear_on_request: Clear all markers on request. If set to False,
                             the marker will be cleared only when the analysis
                             jobs finished. Default is True
         :param trigger: The kind of trigger. (see
-                        :const:`pyqode.core.CHECK_TRIGGER_TXT_CHANGED` or
-                        :const:`pyqode.core.CHECK_TRIGGER_TXT_SAVED`)
+                        :class:pyqode.core.frontend.modes.CheckerTriggers)
         :param show_tooltip: Specify if a tooltip must be displayed when the
                              mouse is over a checker message decoration.
         """
@@ -240,23 +242,23 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
     def _on_state_changed(self, state):
         if state:
             if self._trigger == CheckerTriggers.TXT_CHANGED:
-                self.editor.textChanged.connect(self.request_checking)
+                self.editor.textChanged.connect(self.request_analysis)
             elif self._trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.text_saved.connect(self.request_checking)
-                self.editor.new_text_set.connect(self.request_checking)
+                self.editor.text_saved.connect(self.request_analysis)
+                self.editor.new_text_set.connect(self.request_analysis)
         else:
             if self._trigger == CheckerTriggers.TXT_CHANGED:
-                self.editor.textChanged.disconnect(self.request_checking)
+                self.editor.textChanged.disconnect(self.request_analysis)
             elif self._trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.text_saved.disconnect(self.request_checking)
-                self.editor.new_text_set.disconnect(self.request_checking)
+                self.editor.text_saved.disconnect(self.request_analysis)
+                self.editor.new_text_set.disconnect(self.request_analysis)
 
     def _on_work_finished(self, status, messages):
         if status:
             messages = [CheckerMessage(*msg) for msg in messages]
             self.add_messages(messages)
 
-    def request_checking(self):
+    def request_analysis(self):
         self._job_runner.request_job(self._request, False)
 
     def _request(self):

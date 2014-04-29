@@ -24,18 +24,13 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
     completion provider(s).
 
     To implement a code completion for a specific language, you only need to
-    implement new :class:`pyqode.core.CompletionProvider`
+    implement new
+    :class:`pyqode.core.backend.workers.CodeCompletionWorker.Provider`
 
     The completion popup is shown the user press **ctrl+space** or
     automatically while the user is typing some code (this can be configured
     using a series of properties).
 
-    .. note:: The code completion mode automatically starts a unique subprocess
-              (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
-              to run code completion tasks. This process is automatically
-              closed when the application is about to quit. You can use this
-              process to run custom task on the completion process (e.g.
-              setting up some :py:attr:`sys.modules`).
     """
     @property
     def trigger_key(self):

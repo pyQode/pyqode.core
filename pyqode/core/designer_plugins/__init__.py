@@ -8,9 +8,7 @@ class WidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
     To write a plugin, inherit from this class and define implement at least:
 
         - klass()
-        - module()
-
-    See :class:`pyqode.core.designer_plugins.code_edit_plugin.CodeEditPlugin`
+        - objectName()
     """
     def __init__(self, parent=None):
         super().__init__(parent=parent)

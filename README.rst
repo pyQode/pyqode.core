@@ -34,12 +34,12 @@ pyQode is a **namespace package** made up of the following official packages:
 
   - `pyqode.core`_: core package
 
-  - `pyqode.core`_: python support (code completion, ...)
+  - `pyqode.python`_: python support (code completion, ...)
 
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 .. _pyqode.core: https://github.com/pyQode/pyqode.core
-.. _pyqode.core: https://github.com/pyQode/pyqode.core
+.. _pyqode.python: https://github.com/pyQode/pyqode.python
 .. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
 **pyqode.core** is the foundation package, it contains the pyqode base classes
@@ -89,10 +89,10 @@ Then you can install pyqode.core using pip (for python3)::
 Resources
 ---------
 
--  `Downloads`_
--  `Source repository`_
--  `Documentation`_
--  `Wiki`_
+- `Downloads`_
+- `Source repository`_
+- `Documentation`_
+- `Wiki`_
 
 .. _Downloads: https://github.com/pyQode/pyqode.core/releases
 .. _Source repository: https://github.com/pyQode/pyqode.core/

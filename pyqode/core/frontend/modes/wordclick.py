@@ -11,8 +11,8 @@ class WordClickMode(Mode, QtCore.QObject):
     It will highlight the click-able word when the user press control and move
     the mouse over a word.
 
-    :attr:`pyqode.core.WordClickMode.word_clicked` is emitted when the word is
-    clicked by the user (while keeping control pressed).
+    :attr:`pyqode.core.frontend.modes.WordClickMode.word_clicked` is emitted
+    when the word is clicked by the user (while keeping control pressed).
     """
     #: Signal emitted when a word is clicked. The parameter is a
     #: QTextCursor with the clicked word set as the selected text.

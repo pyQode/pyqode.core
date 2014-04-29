@@ -25,7 +25,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
     """
     Base class for any pyqode source code editor widget.
 
-    Extends :class:`QPlainTextEdit` by adding an extension system (
+    Extends :class:`PyQt4.GtGui.QPlainTextEdit` by adding an extension system (
     modes and panels) and by adding a series of additional signal and methods.
 
     To interact with the editor content, you may use the Qt Text API (
@@ -33,22 +33,22 @@ class CodeEdit(QtGui.QPlainTextEdit):
     :mod:`pyqode.core.frontend.text`
 
     **Signals:**
-        - :attr:`pyqode.core.CodeEdit.painted`
-        - :attr:`pyqode.core.CodeEdit.new_text_set`
-        - :attr:`pyqode.core.CodeEdit.painted`
-        - :attr:`pyqode.core.CodeEdit.text_saved`
-        - :attr:`pyqode.core.CodeEdit.text_saving`
-        - :attr:`pyqode.core.CodeEdit.dirty_changed`
-        - :attr:`pyqode.core.CodeEdit.key_pressed`
-        - :attr:`pyqode.core.CodeEdit.key_released`
-        - :attr:`pyqode.core.CodeEdit.mouse_pressed`
-        - :attr:`pyqode.core.CodeEdit.mouse_released`
-        - :attr:`pyqode.core.CodeEdit.mouse_wheel_activated`
-        - :attr:`pyqode.core.CodeEdit.post_key_pressed`
-        - :attr:`pyqode.core.CodeEdit.focused_in`
-        - :attr:`pyqode.core.CodeEdit.mouse_moved`
-        - :attr:`pyqode.core.CodeEdit.indent_requested`
-        - :attr:`pyqode.core.CodeEdit.unindent_requested`
+        - :attr:`pyqode.core.frontend.CodeEdit.painted`
+        - :attr:`pyqode.core.frontend.CodeEdit.new_text_set`
+        - :attr:`pyqode.core.frontend.CodeEdit.painted`
+        - :attr:`pyqode.core.frontend.CodeEdit.text_saved`
+        - :attr:`pyqode.core.frontend.CodeEdit.text_saving`
+        - :attr:`pyqode.core.frontend.CodeEdit.dirty_changed`
+        - :attr:`pyqode.core.frontend.CodeEdit.key_pressed`
+        - :attr:`pyqode.core.frontend.CodeEdit.key_released`
+        - :attr:`pyqode.core.frontend.CodeEdit.mouse_pressed`
+        - :attr:`pyqode.core.frontend.CodeEdit.mouse_released`
+        - :attr:`pyqode.core.frontend.CodeEdit.mouse_wheel_activated`
+        - :attr:`pyqode.core.frontend.CodeEdit.post_key_pressed`
+        - :attr:`pyqode.core.frontend.CodeEdit.focused_in`
+        - :attr:`pyqode.core.frontend.CodeEdit.mouse_moved`
+        - :attr:`pyqode.core.frontend.CodeEdit.indent_requested`
+        - :attr:`pyqode.core.frontend.CodeEdit.unindent_requested`
 
     .. note:: setPlainText has been overriden to force you to define
         a mime type and an encoding.
@@ -213,7 +213,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         This property is used by many modes to work properly. It is
         automatically set by the :meth:`pyqode.core.frontend.open_file` and
-        :meth:`pyqode.core.CodeEdit.save_to_file` methods.
+        :meth:`pyqode.core.frontend.save_to_file` methods.
 
         :type: str
         """
@@ -336,7 +336,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Gets the size of a specific margin.
 
         :param position: Margin position. See
-            :class:`pyqode.core.Panel.Position`
+            :class:`pyqode.core.frontend.Panel.Position`
 
         :return: The size of the specified margin
         :rtype: float
@@ -540,8 +540,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.CodeEdit.indent_requested` signal, the
-        :class:`pyqode.core.IndenterMode` will perform the actual indentation.
+        Emits the :attr:`pyqode.core.frontend.CodeEdit.indent_requested`
+        signal, the :class:`pyqode.core.frontend.modes.IndenterMode` will
+        perform the actual indentation.
         """
         self.indent_requested.emit()
 
@@ -550,7 +551,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Un-indents the text cursor or the selection.
 
-        Emits the :attr:`pyqode.core.frontend<CodeEdit.unindent_requested`
+        Emits the :attr:`pyqode.core.frontend.CodeEdit.unindent_requested`
         signal, the :class:`pyqode.core.frontend.modes.IndenterMode` will
         perform the actual un-indentation.
         """

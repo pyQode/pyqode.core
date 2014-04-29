@@ -12,7 +12,7 @@ class AutoIndentMode(Mode):
     Generic indenter mode that indents the text when the user press RETURN.
 
     You can customize this mode by overriding
-    :meth:`pyqode.core.AutoIndentMode._getIndent`
+    :meth:`pyqode.core.frontend.modes.AutoIndentMode._get_indent`
     """
     def __init__(self):
         super(AutoIndentMode, self).__init__()

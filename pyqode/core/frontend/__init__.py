@@ -20,9 +20,10 @@ The API can be divided into several parts:
         Base classes for extending editor: Mode and panel and functions to
         add/remove/query modes and panels on editor.
 
-        This is implemented in :mod:`frontend.extensions`. Builtin modes and
-        panels are stored in a specific package: frontend.modes and
-        frontend.panels.
+        This is implemented in :mod:`pyqode.core.frontend.extensions`.
+        Builtin modes and panels are stored in a specific package:
+        :mod:`pyqode.core.frontend.modes` and
+        :mod:`pyqode.core.frontend.panels`.
 
         The extension API is extended by the modes and panels packages.
 
@@ -30,20 +31,20 @@ The API can be divided into several parts:
 
         A series of function to interact with the text document
 
-        This is implemented in :mod:`frontend.text`
+        This is implemented in :mod:`pyqode.core.frontend.text`
 
     4) Client/Server API
 
         A series of function to interacts with the pyqode server (start, stop,
         requests)
 
-        This is implemented in :mod:`frontend.client`
+        This is implemented in :mod:`pyqode.core.frontend.client`
 
     5) Text decorations API
 
         Classes and function to easily add decoration to the editor.
 
-        This is implemented in :mod:`frontend.decorations`
+        This is implemented in :mod:`pyqode.core.frontend.decorations`
 
 
     6) Syntax highlighter API
@@ -51,7 +52,7 @@ The API can be divided into several parts:
         The syntax highlighter base class and all the related classes (folding,
         symbol matcher,...)
 
-        This is implemented in :mod:`frontend.syntax_highlighter`
+        This is implemented in :mod:`pyqode.core.frontend.syntax_highlighter`
 
 
 While those parts have been implemented in different modules, they are all

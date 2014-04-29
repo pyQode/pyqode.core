@@ -30,8 +30,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     :attr:`cptOccurrences` and :meth:`getOccurrences`.
 
     The client code may now navigate through occurrences using
-    :meth:`selectNext` or :meth:`selectPrevious`, or replace the occurrences
-    with a specific text using :meth:`replaceOccurrence` or :meth:`replaceAll`.
+    :meth:`select_next` or :meth:`select_previous`, or replace the occurrences
+    with a specific text using :meth:`replace` or :meth:`replace_all`.
     """
     STYLESHEET = """SearchAndReplacePanel
     {

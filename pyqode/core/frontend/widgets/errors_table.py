@@ -20,12 +20,13 @@ COL_PATH = 5
 class ErrorsTable(QTableWidget):
     """
     Extends a QtGui.QTableWidget to easily show
-    :class:`CheckerMessage`.
+    :class:`pyqode.core.frontend.modes.CheckerMessage`.
 
     You add messages to the table using
 
-    :meth:`pyqode.python.QErrorsTable.addMessage`. You clear the table using
-    :meth:`pyqode.python.QErrorsTable.clear`
+    :meth:`pyqode.core.frontend.widgets.ErrorsTable.add_message`.
+
+    You clear the table using :meth:`pyqode.core.frontend.widgets.ErrorsTable`.
     """
     #: Signal emitted when a message is activated, the clicked signal is passed
     #: as a parameter
