@@ -14,7 +14,7 @@ include tox.ini
 include pytest.ini
 include conftest.py
 
-recursive-include pyqode/core/ui/*
-recursive-include doc/*
-recursive-include examples/*
-recursive-include test/*
+recursive-include pyqode/core/ui *
+recursive-include doc *
+recursive-include examples *
+recursive-include test *
