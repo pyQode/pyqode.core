@@ -26,7 +26,16 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setup_recent_files_menu()
         self.setup_actions()
         self.setup_mimetypes()
+        self.setup_status_bar_widgets()
         self.on_current_tab_changed()
+
+    def setup_status_bar_widgets(self):
+        self.lbl_filename = QtGui.QLabel()
+        self.lbl_encoding = QtGui.QLabel()
+        self.lbl_cursor_pos = QtGui.QLabel()
+        self.statusbar.addPermanentWidget(self.lbl_filename, 200)
+        self.statusbar.addPermanentWidget(self.lbl_encoding, 20)
+        self.statusbar.addPermanentWidget(self.lbl_cursor_pos, 20)
 
     def setup_actions(self):
         """ Connects slots to signals """
@@ -139,6 +148,8 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             index = self.tabWidget.index_from_filename(path)
             if index == -1:
                 editor = GenericCodeEdit(self)
+                editor.cursorPositionChanged.connect(
+                    self.on_cursor_pos_changed)
                 frontend.open_file(editor, path)
                 self.tabWidget.add_code_edit(editor)
                 self.recent_files_manager.open_file(path)
@@ -210,8 +221,15 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.setup_mnu_edit(editor)
             self.setup_mnu_modes(editor)
             self.setup_mnu_panels(editor)
+            self.lbl_cursor_pos.setText('%d:%d' % frontend.cursor_position(
+                editor))
+            self.lbl_encoding.setText(editor.file_encoding)
+            self.lbl_filename.setText(editor.file_path)
         else:
             self.actionSave.setDisabled(True)
+            self.lbl_cursor_pos.clear()
+            self.lbl_encoding.clear()
+            self.lbl_filename.clear()
 
     @QtCore.pyqtSlot(QtGui.QAction)
     def on_style_changed(self, action):
@@ -234,3 +252,9 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self, 'pyQode notepad',
             'This notepad application is an example of what you can do with '
             'pyqode.core.')
+
+    @QtCore.pyqtSlot()
+    def on_cursor_pos_changed(self):
+        if self.tabWidget.currentWidget():
+            self.lbl_cursor_pos.setText('%d:%d' % frontend.cursor_position(
+                self.tabWidget.currentWidget()))
