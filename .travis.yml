@@ -3,6 +3,7 @@ python:
  - "3.2"
 env:
  - TOXENV=py32
+ - TOXENV=py34
  - TOXENV=cov
 matrix:
     allow_failures:
