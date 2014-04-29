@@ -98,3 +98,15 @@ Resources
 .. _Source repository: https://github.com/pyQode/pyqode.core/
 .. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/pyQode/pyqode.core/wiki
+
+Snapshots
+---------
+
+Here are a few snapshots of the notepad example application (snapshots
+taken on a Gnome 3 desktop):
+
+.. image:: doc/source/_static/notepad.png
+    :alt: Default style
+
+.. image:: doc/source/_static/notepad-monokai.png
+    :alt: Monokai style
