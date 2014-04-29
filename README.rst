@@ -1,5 +1,5 @@
-Python/Qt Code Editor Widget library
-====================================
+Source Code Editor widget for PyQt4
+===================================
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
     :target: https://travis-ci.org/pyQode/pyqode.core
@@ -25,9 +25,9 @@ Python/Qt Code Editor Widget library
 What is pyQode?
 ---------------
 
-pyQode is a *flexible source code editor widget* for Python Qt
-applications. **pyQode is a library/widget, not an IDE**. You can see it as an
-alternative to QScintilla.
+pyQode is a *flexible source code editor widget* forPyQt4 applications.
+
+**pyQode is a library/widget, not an IDE**. *You can see it as an alternative to QScintilla.*
 
 
 pyQode is a **namespace package** made up of the following official packages:
@@ -36,13 +36,10 @@ pyQode is a **namespace package** made up of the following official packages:
 
   - `pyqode.core`_: python support (code completion, ...)
 
-  - `pyqode.widgets`_: useful widgets for pyqode apps
-
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 .. _pyqode.core: https://github.com/pyQode/pyqode.core
 .. _pyqode.core: https://github.com/pyQode/pyqode.core
-.. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
 .. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
 **pyqode.core** is the foundation package, it contains the pyqode base classes
@@ -61,6 +58,7 @@ Here are the core features:
 -  builtin modes and panels (folding, line number, code completion,
    syntax highlighting)
 -  Qt Designer plugin
+- client/server architecture for smooth, non-blocking UI.
 
 
 License
@@ -81,42 +79,12 @@ pyqode.core depends on the following libraries:
 
 Installation
 ------------
-You need to install PyQt4 or PySide by yourself.
+You need to install PyQt4 by yourself.
 
-Then you can install pyqode using pip::
+Then you can install pyqode.core using pip (for python3)::
 
-    $ pip install pyqode.core
+    $ pip3 install pyqode.core
 
-
-Usage
------
-
-The *public API* is exposed by the *pyqode.core* package.
-
-Here is a `simple example using PyQt4`_:
-
-.. code:: python
-
-    # simple example using PyQt4
-    import sys
-    import PyQt4  # just to tell pyqode we want to use PyQt4.
-    import pyqode.core
-    from PyQt4.QtGui import QApplication
-
-
-    def main():
-        app = QApplication(sys.argv)
-        editor = pyqode.core.QGenericCodeEdit()
-        editor.openFile(__file__)
-        editor.resize(800, 600)
-        editor.show()
-        return app.exec_()
-
-
-    if __name__ == "__main__":
-        sys.exit(main())
-
-.. _simple example using PyQt4: https://gist.github.com/ColinDuquesnoy/6096185
 
 Resources
 ---------
@@ -130,41 +98,3 @@ Resources
 .. _Source repository: https://github.com/pyQode/pyqode.core/
 .. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/pyQode/pyqode.core/wiki
-
-
-Screenshots
------------
-
-Here are a few screenshots of the gui integration example on several different platforms:
-
-* Windows 7:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/windows7.PNG
-    :alt: Windows 7
-    
-* Ubuntu:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/ubuntu.png
-    :alt: Ubuntu
-    
-* Linux Mint:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/mint.png
-    :alt: Linux mint
-    
-* KDE:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde.png
-    :alt: KDE
-    
-* KDE with a dark color scheme:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde-dark.png
-    :alt: KDE dark
-    
-* Gnome:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/gnome.png
-    :alt: Gnome
-
-

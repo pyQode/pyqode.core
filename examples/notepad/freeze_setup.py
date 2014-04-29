@@ -1,10 +1,5 @@
-#!/usr/bin/env python
-# coding: latin-1
-#
-# GTermEditor
-#
-# Copyright 2013-2014, Sirmo Games S.A.
-#
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 This setup script build a frozen distribution of the application (with the
 python interpreter and 3rd party libraries embedded) for Windows.
@@ -19,6 +14,7 @@ import sys
 from cx_Freeze import setup, Executable
 
 from pyqode.core.frontend.modes import PYGMENTS_STYLES
+
 
 def read_version():
     """

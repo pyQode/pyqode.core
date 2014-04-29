@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This package contains the Qt designer ui/qrc files and their python
 translation.

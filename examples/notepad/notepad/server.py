@@ -3,6 +3,8 @@
 """
 Simple server which adds a DocumentWordsProvider to the
 CodeCompletion worker.
+
+On Windows, this script is frozen by freeze_setup.py (cx_Freeze).
 """
 from pyqode.core import backend
 

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
+
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 from pyqode.core.frontend import panels

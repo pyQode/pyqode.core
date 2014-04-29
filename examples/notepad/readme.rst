@@ -1,15 +1,7 @@
-This directory contains a complete application based on pyqode.
+This directory contains a complete application based on pyqode.core.
 
 It uses *most of the pyqode.core features* and comes with packaging scripts to
-show you how to setup a pyqode application and how to distribute it (
-especially on Windows with cx_Freeze)
-
-The **notepad** package is made up of three files and an subpackage:
-
-    - __init__.py: contains the main function of the application
-    - main_window: contains the implementation of the main window
-    - editor: contains our custom CodeEdit definition
-    - ui: contains the Qt ui files and their python translations
+show you how to distribute a pyqode based application.
 
 To **run** the example, just run::
 
@@ -27,6 +19,6 @@ Then you can run::
 
 The resulting binary can be found in the **bin/** folder.
 
-Additionally you can install innosetup and run setup.iss to build an installer
+Additionally you can install InnoSetup and run setup.iss to build an installer
 out of the frozen app (the resulting installer can be found in the **dist**
-folder)
+folder).

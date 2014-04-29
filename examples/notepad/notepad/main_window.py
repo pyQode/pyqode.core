@@ -1,15 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 This module contains the main window implementation.
 """
 import mimetypes
 import os
+import sys
+
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-import sys
+
 from pyqode.core import frontend
 from pyqode.core import style
 from pyqode.core.frontend import modes
 from pyqode.core.frontend import widgets
+
 from .editor import GenericCodeEdit
 from .ui.main_window_ui import Ui_MainWindow
 
@@ -72,6 +76,32 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             mimetypes.add_type('text/x-cpp', '.hpp')
             mimetypes.add_type('text/x-cpp', '.cpp')
             mimetypes.add_type('text/x-cpp', '.cxx')
+
+    def setup_mnu_edit(self, editor):
+        self.menuEdit.addActions(editor.actions())
+        self.menuEdit.addSeparator()
+        self.setup_mnu_style(editor)
+
+    def setup_mnu_modes(self, editor):
+        for k, v in sorted(frontend.get_modes(editor).items()):
+            a = QtGui.QAction(self.menuModes)
+            a.setText(k)
+            a.setCheckable(True)
+            a.setChecked(True)
+            a.changed.connect(self.on_mode_state_changed)
+            a.mode = v
+            self.menuModes.addAction(a)
+
+    def setup_mnu_panels(self, editor):
+        for zones, dic in sorted(frontend.get_panels(editor).items()):
+            for k, v in dic.items():
+                a = QtGui.QAction(self.menuModes)
+                a.setText(k)
+                a.setCheckable(True)
+                a.setChecked(True)
+                a.changed.connect(self.on_panel_state_changed)
+                a.panel = v
+                self.menuPanels.addAction(a)
 
     def setup_mnu_style(self, editor):
         """ setup the style menu for an editor tab """
@@ -162,32 +192,6 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         else:
             self.actionSave.setEnabled(dirty and path is not None)
 
-    def setup_mnu_edit(self, editor):
-        self.menuEdit.addActions(editor.actions())
-        self.menuEdit.addSeparator()
-        self.setup_mnu_style(editor)
-
-    def setup_mnu_modes(self, editor):
-        for k, v in sorted(frontend.get_modes(editor).items()):
-            a = QtGui.QAction(self.menuModes)
-            a.setText(k)
-            a.setCheckable(True)
-            a.setChecked(True)
-            a.changed.connect(self.on_mode_state_changed)
-            a.mode = v
-            self.menuModes.addAction(a)
-
-    def setup_mnu_panels(self, editor):
-        for zones, dic in sorted(frontend.get_panels(editor).items()):
-            for k, v in dic.items():
-                a = QtGui.QAction(self.menuModes)
-                a.setText(k)
-                a.setCheckable(True)
-                a.setChecked(True)
-                a.changed.connect(self.on_panel_state_changed)
-                a.panel = v
-                self.menuPanels.addAction(a)
-
     @QtCore.pyqtSlot()
     def on_current_tab_changed(self):
         self.menuEdit.clear()
@@ -214,14 +218,17 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         style.pygments_style = action.text()
         self.tabWidget.refresh_style()
 
+    @QtCore.pyqtSlot()
     def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
 
+    @QtCore.pyqtSlot()
     def on_mode_state_changed(self):
         action = self.sender()
         action.mode.enabled = action.isChecked()
 
+    @QtCore.pyqtSlot()
     def on_about(self):
         QtGui.QMessageBox.about(
             self, 'pyQode notepad',

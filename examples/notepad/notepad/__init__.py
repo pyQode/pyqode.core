@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This package contains the code of the notepad application:
 
@@ -14,7 +15,6 @@ from .main_window import MainWindow
 
 
 __version__ = '0.0.1'
-
 
 
 def main():

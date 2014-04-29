@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 This scripts compile the ui and qrc files using pyside dev tools then modify
