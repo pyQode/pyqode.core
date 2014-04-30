@@ -35,7 +35,7 @@ def test_json_server():
 
     port = str(JsonTcpClient.pick_free_port())
 
-    sys.argv.clear()
+    sys.argv[:] = []
     sys.argv.append('server.py')
     sys.argv.append(port)
     srv = server.JsonServer()
