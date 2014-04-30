@@ -26,6 +26,8 @@ def run_client_process():
 def test_json_server():
     global port
 
+    import select
+
     class Args:
         port = 6789
 
@@ -43,7 +45,7 @@ def test_json_server():
     Timer(1, run_client_process).start()
     try:
         srv.serve_forever()
-    except ValueError:
+    except (ValueError, select.error):
         pass  # when closed from client we have a ValueError because of a
               # bad file descriptior, this is not a bug in pyqode but in
               # socketserver
