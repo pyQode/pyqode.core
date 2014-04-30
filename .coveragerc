@@ -1,11 +1,11 @@
 [run]
+source = pyqode
 omit =
     *_ui.py
     *_rc.py
     pyqode/core/frontend/dialogs.py
     pyqode/core/designer_plugins/*
     pyqode/core/frontend/widgets/*
-    # tested by the client but coverage does not see this code as executed
 
 [report]
 # Regexes for lines to exclude from consideration
