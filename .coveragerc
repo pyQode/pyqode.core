@@ -3,9 +3,9 @@ source = pyqode
 omit =
     *_ui.py
     *_rc.py
-    pyqode/core/frontend/dialogs.py
-    pyqode/core/designer_plugins/*
-    pyqode/core/frontend/widgets/*
+    *pyqode/core/frontend/dialogs.py
+    *pyqode/core/designer_plugins/*
+    *pyqode/core/frontend/widgets/*
 
 [report]
 # Regexes for lines to exclude from consideration
