@@ -4,3 +4,5 @@ omit =
     *_rc.py
     pyqode/core/designer_plugin.py
     pyqode/core/frontend/dialogs.py
+    pyqode/core/designer_plugins/*.py
+    pyqode/core/frontend/widgets/*.py
