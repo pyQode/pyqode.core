@@ -599,11 +599,10 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.key_pressed.emit(event)
         state = event.isAccepted()
         if not event.isAccepted():
-            replace = self._use_spaces_instead_of_tabs
-            if replace and event.key() == QtCore.Qt.Key_Tab:
+            if event.key() == QtCore.Qt.Key_Tab:
                 self.indent()
                 event.accept()
-            elif replace and event.key() == QtCore.Qt.Key_Backtab:
+            elif event.key() == QtCore.Qt.Key_Backtab:
                 self.un_indent()
                 event.accept()
             elif event.key() == QtCore.Qt.Key_Home:
