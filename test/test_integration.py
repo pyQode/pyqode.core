@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 A series of simple integration test, we check that a simple pyqode application
-is running is working as expected, that the client server architecture works
+is running as expected, that the client server architecture works
 as intended
 """
 import os
