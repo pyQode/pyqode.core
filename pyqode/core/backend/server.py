@@ -122,10 +122,10 @@ class JsonServer(socketserver.TCPServer):
         """
 
         def read_bytes(self, size):
-            if _py33:
-                data = bytes()
-            else:
+            if not _py33:
                 data = ''
+            else:
+                data = bytes()
             while len(data) < size:
                 tmp = self.request.recv(size - len(data))
                 data += tmp
@@ -159,9 +159,10 @@ class JsonServer(socketserver.TCPServer):
             self.request.sendall(msg)
 
         def handle(self):
-            while True:
+            running = True
+            while running:
                 data = self.read()
-                self._handle(data)
+                running = self._handle(data)
 
         def _import_class(self, cl):
             """
@@ -177,14 +178,17 @@ class JsonServer(socketserver.TCPServer):
             try:
                 m = __import__(cl[0:d], globals(), locals(), [class_name])
                 klass = getattr(m, class_name)
-            except (ImportError, AttributeError):
+            except ImportError:
+                raise ImportError(cl)
+            except AttributeError:
                 raise ImportError(cl)
             else:
                 return klass
 
         def _handle(self, data):
             try:
-                print('request received: %r' % data)
+                if data == 'shutdown':
+                    return False
                 assert data['worker']
                 assert data['request_id']
                 assert data['data']
@@ -201,6 +205,7 @@ class JsonServer(socketserver.TCPServer):
                 print('error with data=%r' % data)
                 e1, e2, e3 = sys.exc_info()
                 traceback.print_exception(e1, e2, e3, file=sys.stderr)
+            return True
 
     def __init__(self, args=None):
         """
@@ -212,6 +217,7 @@ class JsonServer(socketserver.TCPServer):
             args = default_parser().parse_args()
         self.port = args.port
         self._shutdown_request = False
+        self._Handler.srv = self
         # print('server running on port %s' % args.port)
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
@@ -243,7 +249,10 @@ def serve_forever(args=None):
         parser and parse command line arguments.
     """
     server = JsonServer(args=args)
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except ValueError:
+        pass
 
 
 # Server script example

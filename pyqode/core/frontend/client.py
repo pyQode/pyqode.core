@@ -167,7 +167,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._terminate_server_process()
         self.is_connected = False
 
-    def start(self, server_script, interpreter=sys.executable, args=None):
+    def start(self, server_script, interpreter=sys.executable, args=None,
+              port=None):
         """
         Starts a pyqode server (and connect our client socket when the server
         process has started). The server is started with a random free port
@@ -197,7 +198,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             interpreter = sys.executable
         self._process = _ServerProcess(self.parent())
         self._process.started.connect(self._on_process_started)
-        self._port = self._pick_free_port()
+        if not port:
+            self._port = self.pick_free_port()
+        else:
+            self._port = port
         if server_script.endswith('.exe'):
             # frozen server script on windows does not need an interpreter
             program = server_script
@@ -255,7 +259,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         # give time to the server to starts its socket
         QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
 
-    def _pick_free_port(self):
+    @staticmethod
+    def pick_free_port():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('127.0.0.1', 0))
         free_port = int(s.getsockname()[1])

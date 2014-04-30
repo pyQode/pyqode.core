@@ -456,6 +456,19 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                                   backend.CodeCompletionWorker, args=data,
                                   on_receive=self._on_results_available)
         except frontend.NotConnectedError:
-            pass
+            self._data = data
+            QtCore.QTimer.singleShot(100, self._retry_collect)
+        else:
+            self._set_wait_cursor()
+
+    def _retry_collect(self):
+        _logger().debug('retry work request')
+        try:
+            frontend.request_work(self.editor,
+                                  backend.CodeCompletionWorker,
+                                  args=self._data,
+                                  on_receive=self._on_results_available)
+        except frontend.NotConnectedError:
+            QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
             self._set_wait_cursor()
