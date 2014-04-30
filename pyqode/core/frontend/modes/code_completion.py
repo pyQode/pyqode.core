@@ -313,18 +313,16 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
     def _handle_completer_events(self, event):
         # complete
         if (event.key() == QtCore.Qt.Key_Enter or
-                event.key() == QtCore.Qt.Key_Return):
+                event.key() == QtCore.Qt.Key_Return or
+                event.key() == QtCore.Qt.Key_Tab):
             self._insert_completion(self._current_completion)
             self._hide_popup()
             event.accept()
-            return True
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
                 event.key() == QtCore.Qt.Key_Backtab):
             self._hide_popup()
             event.accept()
-            return True
-        return False
 
     def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)

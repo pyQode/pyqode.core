@@ -596,21 +596,22 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         initial_state = event.isAccepted()
         event.ignore()
-        replace = self._use_spaces_instead_of_tabs
-        if replace and event.key() == QtCore.Qt.Key_Tab:
-            self.indent()
-            event.accept()
-        elif replace and event.key() == QtCore.Qt.Key_Backtab:
-            self.un_indent()
-            event.accept()
-        elif event.key() == QtCore.Qt.Key_Home:
-            self._do_home_key(
-                event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
         self.key_pressed.emit(event)
         state = event.isAccepted()
         if not event.isAccepted():
-            event.setAccepted(initial_state)
-            QtGui.QPlainTextEdit.keyPressEvent(self, event)
+            replace = self._use_spaces_instead_of_tabs
+            if replace and event.key() == QtCore.Qt.Key_Tab:
+                self.indent()
+                event.accept()
+            elif replace and event.key() == QtCore.Qt.Key_Backtab:
+                self.un_indent()
+                event.accept()
+            elif event.key() == QtCore.Qt.Key_Home:
+                self._do_home_key(
+                    event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
+            if not event.isAccepted():
+                event.setAccepted(initial_state)
+                QtGui.QPlainTextEdit.keyPressEvent(self, event)
         event.setAccepted(state)
         self.post_key_pressed.emit(event)
 
