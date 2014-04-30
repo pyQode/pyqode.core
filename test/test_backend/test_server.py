@@ -29,7 +29,7 @@ def test_json_server():
     class Args:
         port = 6789
 
-    argv = sys.argv.copy()
+    argv = list(sys.argv)
     srv = server.JsonServer(args=Args())
     srv.server_close()
 
