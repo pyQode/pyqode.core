@@ -203,7 +203,10 @@ class TabWidget(QTabWidget):
                 if not path:
                     return False
             old_path = self._current.file_path
-            frontend.save_to_file(self._current, path)
+            try:
+                frontend.save_to_file(self._current, path)
+            except AttributeError:
+                self._current.save(path)
             # path (and icon) may have changed
             code_edit = self._current
             if path and old_path != path:
@@ -264,7 +267,10 @@ class TabWidget(QTabWidget):
         return -1
 
     def _del_code_edit(self, code_edit):
-        frontend.stop_server(code_edit)
+        try:
+            frontend.stop_server(code_edit)
+        except AttributeError:
+            pass
         code_edit.deleteLater()
         del code_edit
 
@@ -299,7 +305,7 @@ class TabWidget(QTabWidget):
         code_edit.setFocus(True)
         try:
             fw = frontend.get_mode(code_edit, FileWatcherMode)
-        except KeyError:
+        except (KeyError, AttributeError):
             # not installed
             pass
         else:
