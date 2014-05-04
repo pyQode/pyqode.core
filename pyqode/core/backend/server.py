@@ -195,6 +195,7 @@ class JsonServer(socketserver.TCPServer):
                 worker = self._import_class(data['worker'])
                 if inspect.isclass(worker):
                     worker = worker()
+                print('worker: %r' % worker)
                 status, result = worker(data['data'])
                 response = {'request_id': data['request_id'],
                             'status': status,

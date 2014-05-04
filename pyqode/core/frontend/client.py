@@ -9,7 +9,7 @@ import struct
 import sys
 import uuid
 
-from PyQt4 import QtCore, QtNetwork, QtGui
+from PyQt4 import QtCore, QtNetwork
 
 
 class NotConnectedError(Exception):
