@@ -30,7 +30,6 @@ def test_app():
     """
     Test a simple but complete app
     """
-    app = QtGui.QApplication.instance()
     editor = frontend.CodeEdit()
     frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
 

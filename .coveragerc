@@ -1,8 +1,11 @@
 [run]
 source = pyqode
 omit =
+    # qt design ui files
     *_ui.py
     *_rc.py
+    # at the moment, we do not test misc ui elements such as
+    # widgets and dialogs (how could this be possible to test?)
     *pyqode/core/frontend/dialogs.py
     *pyqode/core/designer_plugins/*
     *pyqode/core/frontend/widgets/*
