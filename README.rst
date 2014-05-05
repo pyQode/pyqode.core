@@ -6,8 +6,8 @@ Source Code Editor widget for PyQt4
     :alt: Travis-CI build status
 
 
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop2
-    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop2
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop
+    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
     :alt: Coverage Status
 
 .. image:: http://img.shields.io/pypi/dm/pyqode.core.svg
