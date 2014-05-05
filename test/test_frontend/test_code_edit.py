@@ -35,8 +35,9 @@ def setup_module():
     # app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = frontend.CodeEdit(window)
-    # frontend.install_mode(editor, modes.PygmentsSyntaxHighlighter(
-    #     editor.document()))
+    frontend.open_file(editor, __file__)
+    frontend.install_mode(editor, modes.PygmentsSyntaxHighlighter(
+        editor.document()))
     window.setCentralWidget(editor)
     window.resize(800, 600)
     window.show()
@@ -48,20 +49,23 @@ def teardown_module():
     """
     Close server and exit QApplication
     """
-    global editor, app
+    global window, editor, app
     frontend.stop_server(editor)
-    app.exit(0)
     QTest.qWait(1000)
+    del window
     del editor
 
 
 def test_set_plain_text():
     global editor
+    text = editor.toPlainText()
     with pytest.raises(TypeError):
         editor.setPlainText('Some text')
     editor.setPlainText('Some text', mimetypes.guess_type('file.py')[0],
                         'utf-8')
     assert editor.toPlainText() == 'Some text'
+    editor.setPlainText(text, mimetypes.guess_type('file.py')[0],
+                        'utf-8')
 
 
 def test_actions():
@@ -78,11 +82,9 @@ def test_actions():
 
 
 def test_duplicate_line():
-    editor.setPlainText('Some text', mimetypes.guess_type('file.py')[0],
-                        'utf-8')
-    assert editor.toPlainText() == 'Some text'
     editor.duplicate_line()
-    assert editor.toPlainText() == 'Some text\nSome text'
+    assert editor.toPlainText().startswith(get_first_line() + '\n' +
+                                           get_first_line())
 
 
 def test_show_tooltip():
@@ -104,7 +106,6 @@ def test_margin_size():
     process_events()
     # as the window is not visible, we need to refresh panels manually
     assert editor.margin_size(frontend.Panel.Position.LEFT) != 0
-    window.hide()
 
 
 def test_zoom():
@@ -124,24 +125,25 @@ def test_zoom():
             assert editor.font_size == 1
 
 
+def get_first_line():
+    return editor.toPlainText().splitlines()[0]
+
+
 def test_indent():
-    editor.setPlainText('Some text', mimetypes.guess_type('file.py')[0],
-                        'utf-8')
     frontend.goto_line(editor, 1)
+    first_line = get_first_line()
     editor.indent()
     # no indenter mode -> indent should not do anything
-    assert editor.toPlainText() == 'Some text'
+    assert get_first_line() == first_line
     editor.un_indent()
-    assert editor.toPlainText() == 'Some text'
+    assert get_first_line() == first_line
     # add indenter mode, call to indent/un_indent should now work
     frontend.install_mode(editor, modes.IndenterMode())
-    editor.setPlainText('Some text', mimetypes.guess_type('file.py')[0],
-                        'utf-8')
     frontend.goto_line(editor, 1)
     editor.indent()
-    assert editor.toPlainText() == '    Some text'
+    assert get_first_line() == '    ' + first_line
     editor.un_indent()
-    assert editor.toPlainText() == 'Some text'
+    assert get_first_line() == first_line
 
 
 def test_whitespaces():
@@ -199,20 +201,24 @@ def test_file_attribs():
 
 def test_setPlainText():
     editor.file_path = 'test.py'
-    editor.setPlainText('', 'text/x-unknown', 'utf-8')
+    text = editor.toPlainText()
+    editor.setPlainText('', 'text/x-python', 'utf-8')
+    assert editor.toPlainText() == ''
+    editor.setPlainText(text, 'text/x-unknown', 'utf-8')
 
 
 def test_delete():
-    frontend.open_file(editor, __file__)
+    global editor
     txt = editor.toPlainText()
     frontend.select_lines(editor, 1, 1)
     editor.delete()
     assert txt != editor.toPlainText()
+    editor.setPlainText(txt, 'text/x-python', 'utf-8')
 
 
-# def test_rehighlight():
-#     global editor
-#     editor.rehighlight()
+def test_rehighlight():
+    global editor
+    editor.rehighlight()
 
 
 def test_key_pressed_event():
@@ -227,7 +233,6 @@ def test_key_released_event():
 
 
 def test_focus_out():
-    frontend.open_file(editor, __file__)
     settings.save_on_focus_out = True
     editor.dirty = True
     assert editor.dirty is True
@@ -251,7 +256,7 @@ def test_mouse_events():
     editor.mouseMoveEvent(QtGui.QMouseEvent(
         QtCore.QEvent.MouseMove, QtCore.QPoint(10, 10),
         QtCore.Qt.RightButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))
-    editor.verticalScrollBar().setValue(editor.verticalScrollBar().maximum())
+    editor.verticalScrollBar().setValue(editor.verticalScrollBar().maximum()/2.0)
 
 
 def test_show_context_menu():
@@ -282,9 +287,3 @@ def test_multiple_panels():
     p = SearchPanel()
     frontend.install_panel(editor, p, p.Position.TOP)
     p.show()
-
-    editor.show()
-    editor.refresh_panels()
-    QTest.qWait(500)
-    editor.hide()
-    frontend.uninstall_all(editor)
