@@ -135,17 +135,14 @@ class Server(object):
         self.__process.start()
         self.__running = False
         try:
-            if sys.platform == "win32":
+            try:
                 self._client = Client(('localhost', port))
-            else:
-                try:
-                    self._client = Client(('', port))
-                except OSError:
-                    # wait a second before starting, this occur if we were connected to
-                    # previously running server that has just closed (we need to wait a
-                    # little before starting a new one)
-                    time.sleep(1)
-                    self._client = Client(('', port))
+            except OSError:
+                # wait a second before starting, this occur if we were connected to
+                # previously running server that has just closed (we need to wait a
+                # little before starting a new one)
+                time.sleep(1)
+                self._client = Client(('localhost', port))
             logger.info("Connected to Code Completion Server on 127.0.0.1:%d" %
                         port)
             self.__running = True

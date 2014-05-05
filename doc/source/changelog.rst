@@ -5,6 +5,13 @@ Change Log
 
     These lists are not exhaustive.
 
+1.3.2
+-----
+
+Fixed bugs:
+    - server port was not forwarded by server.start
+    - fix issue with file watcher if editor has been deleted.
+
 1.3.1
 -----
 

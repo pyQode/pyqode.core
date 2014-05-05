@@ -154,12 +154,15 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 "The file <i>%s</i> has changed externally.\nDo you want to "
                 "reload it?" % os.path.basename(self.editor.filePath))
         kwargs = {"expectedAction": innerAction}
-        if self.editor.hasFocus():
-            self.__notify(*args, **kwargs)
-        else:
-            self._notificationPending = True
-            self._args = args
-            self._kwargs = kwargs
+        try:
+            if self.editor.hasFocus():
+                self.__notify(*args, **kwargs)
+            else:
+                self._notificationPending = True
+                self._args = args
+                self._kwargs = kwargs
+        except RuntimeError:
+            pass
 
     def _checkForPendingNotification(self, *args, **kwargs):
         if self._notificationPending and not self._processing:
