@@ -10,11 +10,10 @@ include LICENSE.txt
 include AUTHORS.txt
 include README.rst
 include CONTRIBUTING.md
-include tox.ini
+include runtests.py
 include pytest.ini
 include conftest.py
 
-recursive-include pyqode/core/ui *
 recursive-include doc *
 recursive-include examples *
 recursive-include test *
