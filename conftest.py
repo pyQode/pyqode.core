@@ -15,6 +15,7 @@ app = None
 @pytest.fixture(scope="session", autouse=True)
 def create_qapplication(request):
     global app
+    print('create qapplication')
     app = QApplication(sys.argv)
 
     def teardown():

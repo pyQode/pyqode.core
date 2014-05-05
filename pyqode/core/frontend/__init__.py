@@ -77,6 +77,8 @@ from pyqode.core.frontend.extension import get_panels
 from pyqode.core.frontend.extension import install_panel
 from pyqode.core.frontend.extension import uninstall_panel
 
+from pyqode.core.frontend.extension import uninstall_all
+
 # Text API
 from pyqode.core.frontend.text import clean_document
 from pyqode.core.frontend.text import current_line_text

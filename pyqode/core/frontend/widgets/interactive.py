@@ -274,24 +274,3 @@ class InteractiveConsole(QTextEdit):
         text_edit.setTextColor(color)
         text_edit.insertPlainText(text)
         text_edit.moveCursor(QTextCursor.End)
-
-
-if __name__ == "__main__":
-    import sys
-    from PyQt4.QtCore import QTimer
-
-    if len(sys.argv) <= 1:
-        app = QApplication(sys.argv)
-        t = InteractiveConsole()
-        t.resize(800, 600)
-        t.show()
-        t.start_process(sys.executable, args=[__file__, "subprocess"],
-                        cwd=os.getcwd())
-        # automatically stop process after 5s
-        QTimer.singleShot(5000, t.stop_process)
-        app.exec_()
-    else:
-        print("Hello from a subprocess!")
-        d = input("Enter something:\n>>> ")
-        sys.stderr.write('This message has been written to stderr\n')
-        print("You've just typed '%s' in the QTextEdit" % d)

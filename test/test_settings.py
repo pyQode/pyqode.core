@@ -13,6 +13,7 @@ from pyqode.core import settings
 
 from . import helpers
 from pyqode.core.frontend import modes
+from pyqode.core.frontend import panels
 
 
 def test_a():
@@ -33,6 +34,7 @@ def setup_module(*args):
     frontend.install_mode(editor, modes.AutoIndentMode())
     frontend.install_mode(editor, modes.FileWatcherMode())
     frontend.install_mode(editor, modes.RightMarginMode())
+    frontend.install_panel(editor, panels.SearchAndReplacePanel())
     code_completion_mode = modes.CodeCompletionMode()
     frontend.install_mode(editor, code_completion_mode)
     window.setCentralWidget(editor)
@@ -46,11 +48,8 @@ def teardown_module(*args):
     """
     Close server and exit QApplication
     """
-    global editor, app
+    global editor
     frontend.stop_server(editor)
-    app.exit(0)
-    QTest.qWait(1000)
-    del editor
 
 
 def test_show_white_spaces():

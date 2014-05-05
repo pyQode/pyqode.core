@@ -23,7 +23,6 @@ exclude_lines =
     if __name__ == .__main__.:
     if not _py33:
     serve_forever
-    .endswith('.exe')
     except :
     except:
     .debug
@@ -33,8 +32,16 @@ exclude_lines =
     except AttributeError:
     except RuntimeError:
     pass
+
     # unknown errors
     error = -1
+
+    # platform specific code
+    self._font_family
+    .endswith('.exe')
+    if not _py33:
+    self._sel_background
+    self._sel_foreground
 
     # Don't complain if non importable code is not run
     except ImportError:
