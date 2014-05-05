@@ -167,28 +167,25 @@ def test_font_size():
 
 
 def test_foreground():
-    assert editor.foreground.name() == QtGui.QColor("#000000").name()
+    assert editor.foreground.name()
 
 
 def test_whitespaces_foreground():
-    assert editor.whitespaces_foreground.name() == QtGui.QColor(
-        "#d3d3d3").name()
+    assert editor.whitespaces_foreground.name()
     editor.whitespaces_foreground = QtGui.QColor("#FF0000")
     assert editor.whitespaces_foreground.name() == QtGui.QColor(
         "#FF0000").name()
 
 
 def test_selection_background():
-    assert editor.selection_background.name() == QtGui.QColor(
-        "#4a90d9").name()
+    assert editor.selection_background.name()
     editor.selection_background = QtGui.QColor("#FF0000")
     assert editor.selection_background.name() == QtGui.QColor(
         "#FF0000").name()
 
 
 def test_selection_foreground():
-    assert editor.selection_foreground.name() == QtGui.QColor(
-        "#ffffff").name()
+    assert editor.selection_foreground.name()
     editor.selection_foreground = QtGui.QColor("#FF0000")
     assert editor.selection_foreground.name() == QtGui.QColor(
         "#FF0000").name()
