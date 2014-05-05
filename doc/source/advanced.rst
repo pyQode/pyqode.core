@@ -12,15 +12,15 @@ pyQode use the PropertyRegistry class to store style and settings properties.
 A property registry is a simple **dictionary of properties** (key/values)
 organised per section. It can be easily serialised to **JSON**.
 
-QCodeEdit defines a series of style/settings properties in the "General"
+CodeEdit defines a series of style/settings properties in the "General"
 section. Modes and panels are also free to add their properties when they are
 installed on an editor instance. This means that you'll end up with completely
 different dictionaries depending on the installed modes/panels.
 
-For example, consider the difference between the QCodeEdit and the
+For example, consider the difference between the CodeEdit and the
 QGenericCodeEdit settings:
 
-    * QCodeEdit:
+    * CodeEdit:
         .. code-block:: json
 
             {
@@ -67,7 +67,7 @@ Changing a property manually:
 +++++++++++++++++++++++++++++++++++++++++++
 
 You can change the style and settings values using the style and settings
-properties of QCodeEdit:
+properties of CodeEdit:
 
 .. code-block:: python
 
@@ -87,13 +87,13 @@ Style and settings can be serialized to JSON easily:
 
     # Editor 01: modify default style to be dark then save it to "dark.json"
     file_path = "dark.json"
-    editor_01 = pyqode.core.QCodeEdit()
+    editor_01 = pyqode.core.CodeEdit()
     editor_01.style.setValue("background", "#222222")
     editor_01.style.setValue("foreground", "#888888")
     editor_01.style.save(file_path)
 
     # Editor 02: style loaded from the file we just saved
-    editor_02 = pyqode.core.QCodeEdit()
+    editor_02 = pyqode.core.CodeEdit()
     editor_02.style.open(file_path)
     editor_02.show()
 
@@ -105,7 +105,7 @@ covering the creation of a new mode/panel from scratch and from an existing one.
 
 pyQode tends to prefer composition over inheritance, that's why you should
 create a new mode/panel whenever you want to extends the functionality of
-QCodeEdit.
+CodeEdit.
 
 You do that by subclassing **pyqode.core.Mode** or **pyqode.core.Panel** (or a
 more specific Mode such as the SyntaxHighlighterMode)
@@ -117,7 +117,7 @@ When you create a new mode you must give it an IDENTIFIER and a DESCRIPTION::
         DESCRIPTION = "An example mode"
 
 The IDENTIFIER string is set as the mode name and is used to identify the mode
-when installed on a QCodeEdit::
+when installed on a CodeEdit::
 
     editor.installMode(MyMode())
     print(editor.myOwnMode)
@@ -145,7 +145,7 @@ There are a few methods that are interesting to override:
 
    * **_onInstall**:
 
-     This method is called when the mode is installed on a QCodeEdit.
+     This method is called when the mode is installed on a CodeEdit.
 
      Typically, this method is used to add new properties to the editor style or
      settings:
@@ -319,7 +319,7 @@ suggestions to the user. The list of suggestion is made up by collecting the
 suggestions provided by a series of CodeCompletionProvider. The code completion
 mode run the CodeCompletionProvider in a background process. This background
 process is started automatically the first time a CodeCompletionMode is installed
-on a QCodeEdit instance and shutdown when the QApplication is about to exit.
+on a CodeEdit instance and shutdown when the QApplication is about to exit.
 
 It is up to the user to install a completion provider on the completion mode.
 
@@ -368,7 +368,7 @@ Syntax highlighter modes
 pyQode makes extensive use of QSyntaxHighlighter for various purposes completely
 different from syntax highlighting such as code folding and parenthesis matching.
 
-To implement a new syntax highlighter for QCodeEdit, you **must** subclass
+To implement a new syntax highlighter for CodeEdit, you **must** subclass
 pyqode.core.SyntaxHighlighter and override doHighlightBlock instead of
 highlightBlock.
 
@@ -439,7 +439,7 @@ For that you need to create a python module for you plugin following this scheme
     import os
     if not 'QT_API' in os.environ:
         os.environ.setdefault("QT_API", "PyQt")
-    from pyqode.qt.QtGui import QIcon
+    from PyQt4.QtGui import QIcon
 
     # TODO import you widget module
     from your_package.your_widget import QYourWidget
@@ -448,9 +448,9 @@ For that you need to create a python module for you plugin following this scheme
     # ui scripts won't load properly (you will have TypeError)
     PLUGINS_TYPES = {'QHomeWidget': pyqode.widgets.QHomeWidget}
 
-    from pyqode.core.plugins.pyqode_core_plugin import QCodeEditPlugin
+    from pyqode.core.plugins.pyqode_core_plugin import CodeEditPlugin
 
-    class YourPlugin(QCodeEditPlugin):
+    class YourPlugin(CodeEditPlugin):
         _module = 'your_package.your_widget' # path to the widget's module
         _class = 'QYourWidget'    # name of the widget class
         _name = "QYourWidget"  # I don't know why but this must be the same

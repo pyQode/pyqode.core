@@ -20,6 +20,7 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
+.cache
 nosetests.xml
 # Translations
 *.mo
@@ -29,5 +30,7 @@ nosetests.xml
 .pydevproject
 # pycharm
 .idea
+.cache
 /*.json
 __pycache__
+htmlcov

@@ -3,24 +3,18 @@
 #
 # Manifest template for creating the pyQode source distribution.
 include MANIFEST.in
+
 # setup, license and readme
 include setup.py
-include ez_setup.py
 include LICENSE.txt
 include AUTHORS.txt
 include README.rst
 include CONTRIBUTING.md
-# ui sources and resources
-include pyqode/core/ui/*
-include pyqode/core/ui/rc/*
-# docs
-include doc/*
-include doc/source/*
-include doc/source/_static/*
-include doc/source/api/*
-# examples
-include examples/gui_integration/*
-include examples/gui_integration/ui/*
-include examples/gui_integration/ui/rc/*
-include examples/qt_bindings/*
-include examples/styling/*
+include tox.ini
+include pytest.ini
+include conftest.py
+
+recursive-include pyqode/core/ui *
+recursive-include doc *
+recursive-include examples *
+recursive-include test *

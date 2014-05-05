@@ -1,0 +1,34 @@
+[run]
+source = pyqode
+omit =
+    *_ui.py
+    *_rc.py
+    *pyqode/core/frontend/dialogs.py
+    *pyqode/core/designer_plugins/*
+    *pyqode/core/frontend/widgets/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Don't complain about missing debug-only code:
+    def __repr__
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+    raise RuntimeError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+    if not _py33:
+    serve_forever
+    except :
+    except:
+
+    # Don't complain if non importable code is not run
+    except ImportError:
+    except AttributeError:
+
+    # Don't complain about _logger function not called
+    logging.getLogger

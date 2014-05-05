@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>about.png</file>
+    <file>close.png</file>
+    <file>document-new.png</file>
+    <file>document-open.png</file>
+    <file>document-save-as.png</file>
+    <file>document-save.png</file>
+    <file>pyqode.png</file>
+  </qresource>
+</RCC>
