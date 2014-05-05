@@ -11,6 +11,6 @@ install:
   - sudo pip install --quiet coveralls
 script:
   - sudo pip install .
-  - runtests.py
+  - python3 runtests.py
 after_script:
   - coveralls
