@@ -1,24 +1,16 @@
 language: python
 python:
- - "3.2"
-env:
- - TOXENV=py32
- - TOXENV=cov
-matrix:
-    allow_failures:
-        - env: TOXENV=cov
+  - "3.2"
 virtualenv:
   system_site_packages: true
 before_install:
- - "export DISPLAY=:99.0"
- - "sh -e /etc/init.d/xvfb start"
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
 install:
- - sudo apt-get install -qq python3-pyqt4 --fix-missing
- - pip install --quiet --use-mirrors tox
+  - sudo apt-get install -qq python3-pyqt4 --fix-missing
+  - sudo pip install --quiet coveralls
 script:
-  - tox
+  - sudo pip install .
+  - runtests.py
 after_script:
-    - if [ $TOXENV == "cov" ]; then
-      pip install --quiet --use-mirrors coveralls;
-      coveralls;
-      fi
+  - coveralls

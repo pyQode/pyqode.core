@@ -85,6 +85,15 @@ Then you can install pyqode.core using pip (for python3)::
 
     $ pip3 install pyqode.core
 
+Testing
+-------
+
+pyqode.core now have a test suite and measure its coverage.
+
+To run the test and see the coverage report run the following command (you don't need
+to install anything)::
+
+    $ python3 runtests.py
 
 Resources
 ---------
