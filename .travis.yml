@@ -1,6 +1,14 @@
 language: python
 python:
   - "3.2"
+env:
+  - ENV=pytest
+  - ENV=pep8
+  - ENV=cov
+matrix:
+    allow_failures:
+        - env: ENV=cov
+        - env: ENV=pep8
 virtualenv:
   system_site_packages: true
 before_install:
@@ -8,9 +16,21 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 install:
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
-  - sudo pip install --quiet coveralls
 script:
-  - sudo pip install .
-  - python3 runtests.py
+  - pip install .
+  - if [ $ENV == "pytest" ]; then
+    python3 runtests.py
+    fi
+  - if [ $ENV == "pep8" ]; then
+    pip install pytest-pep8
+    python3 runtests.py --pep8
+    fi
+  - if [ $ENV == "cov" ]; then
+    pip install pytest-cov
+    python3 runtests.py --cov pyqode
+    fi
 after_script:
-  - coveralls
+  - if [ $ENV == "cov" ]; then
+    sudo pip install --quiet coveralls
+    coveralls
+    fi
