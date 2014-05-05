@@ -38,7 +38,7 @@ def main():
     frontend.install_panel(editor, panels.SearchAndReplacePanel(),
                            position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
-    window.show()
+    # window.show()
 
     cc_mode.request_completion()
     # frontend.goto_line()

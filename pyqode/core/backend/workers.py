@@ -100,8 +100,9 @@ class CodeCompletionWorker(object):
         completions = []
         for prov in CodeCompletionWorker.providers:
             try:
-                completions.append(prov.complete(
-                    code, line, column, path, encoding, prefix))
+                results = prov.complete(
+                    code, line, column, path, encoding, prefix)
+                completions += [c for c in results]
                 if len(completions) > 20:
                     break
             except:
@@ -139,7 +140,7 @@ class DocumentWordsProvider(object):
         words = set()
         for w in raw_words:
             # w = w.strip()
-            if w.isalpha():
+            if w.replace('_', '').isalpha():
                 words.add(w)
         return sorted(words)
 

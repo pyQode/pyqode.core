@@ -23,12 +23,21 @@ exclude_lines =
     if __name__ == .__main__.:
     if not _py33:
     serve_forever
+    .endswith('.exe')
     except :
     except:
+    .debug
+    .info
+    logger
+    except (TypeError, KeyError):
+    except AttributeError:
+    except RuntimeError:
+    pass
+    # unknown errors
+    error = -1
 
     # Don't complain if non importable code is not run
     except ImportError:
-    except AttributeError:
 
     # Don't complain about _logger function not called
     logging.getLogger

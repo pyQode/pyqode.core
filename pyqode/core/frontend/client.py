@@ -193,16 +193,13 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         self.logger.debug('running with python %d.%d.%d' %
                           sys.version_info[:3])
-        assert os.path.exists(server_script)
-        if not interpreter:
-            interpreter = sys.executable
         self._process = _ServerProcess(self.parent())
         self._process.started.connect(self._on_process_started)
         if not port:
             self._port = self.pick_free_port()
         else:
             self._port = port
-        if server_script.endswith('.exe'):
+        if server_script.endswith('.exe'):  # pragma: no cover
             # frozen server script on windows does not need an interpreter
             program = server_script
             pgm_args = [str(self._port)]
@@ -278,12 +275,12 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                          (self.peerName(), self.peerPort()))
         self.is_connected = True
 
-    def _on_error(self, socket_error):
-        if socket_error not in SOCKET_ERROR_STRINGS:
-            socket_error = -1
+    def _on_error(self, error):
+        if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
+            error = -1
         self.logger.error('socket error %d: %s' %
-                          (socket_error, SOCKET_ERROR_STRINGS[socket_error]))
-        if socket_error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
+                          (error, SOCKET_ERROR_STRINGS[error]))
+        if error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
             # try again, sometimes the server process might not have started
             # its socket yet.
             if self._connection_attempts < MAX_RETRY:
@@ -327,19 +324,15 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             self.logger.debug('decoding payload as json object')
             obj = json.loads(data)
             self.logger.debug('response received: %r' % obj)
-            try:
-                request_id = obj['request_id']
-                results = obj['results']
-                status = obj['status']
-            except (TypeError, KeyError):
-                pass  # internal request, no callback
-            else:
-                # possible callback
-                if request_id in self._callbacks:
-                    callback = self._callbacks.pop(request_id)
-                    callback(status, results)
-                self._header_complete = False
-                self._data_buf = bytes()
+            request_id = obj['request_id']
+            results = obj['results']
+            status = obj['status']
+            # possible callback
+            if request_id in self._callbacks:
+                callback = self._callbacks.pop(request_id)
+                callback(status, results)
+            self._header_complete = False
+            self._data_buf = bytes()
 
     def _on_ready_read(self):
         while self.bytesAvailable():

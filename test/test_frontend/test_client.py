@@ -56,7 +56,9 @@ def test_client_server():
     with pytest.raises(frontend.NotConnectedError):
         client_socket.request_work(backend.echo_worker, 'some data',
                                    on_receive=_on_receive)
-    client_socket.start(os.path.join(os.getcwd(), 'server.py'))
+    client_socket.start(os.path.join(os.getcwd(), 'server.py'),
+                        args=['-s', '/path'],
+                        port=5566)
     client_socket.connected.connect(_send_request)
     # win.show()
     QTest.qWait(1000)
@@ -65,13 +67,7 @@ def test_client_server():
     del win
 
 
-@cwd_at('test')
-@require_python2()
-@not_py2()
-def test_client_server_py2():
-    """
-    Same test as above except we run the server with python2 if available
-    """
+def test_frozen_server():
     global client_socket
     app = QtGui.QApplication.instance()
     win = QtGui.QMainWindow()
@@ -79,14 +75,4 @@ def test_client_server_py2():
     with pytest.raises(frontend.NotConnectedError):
         client_socket.request_work(backend.echo_worker, 'some data',
                                    on_receive=_on_receive)
-    client_socket.start(os.path.join(os.getcwd(), 'server.py'),
-                        interpreter=python2_path())
-    client_socket.connected.connect(_send_request)
-    # win.show()
-    QTest.qWait(1000)
-    client_socket.close()
-    del client_socket
-    del win
-
-
-
+    client_socket.start('server.exe', args=['-s', '/path'], port=5566)

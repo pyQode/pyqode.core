@@ -83,6 +83,7 @@ def test_show_tooltip():
 
 def test_margin_size():
     global editor, window
+    # we really need to show the window here to get correct margin size.
     window.show()
     QTest.qWaitForWindowShown(window)
     for position in frontend.Panel.Position.iterable():
@@ -91,7 +92,6 @@ def test_margin_size():
     panel = frontend.panels.LineNumberPanel()
     frontend.install_panel(editor, panel,
                            position=frontend.Panel.Position.LEFT)
-    QTest.qWait(1000)
     panel.setVisible(True)
     process_events()
     # as the window is not visible, we need to refresh panels manually
