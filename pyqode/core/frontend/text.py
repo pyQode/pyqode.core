@@ -460,7 +460,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
         content = content.replace(
             "\t", " " * settings.tab_length)
     # set plain text
-    editor._fpath = path
+    editor.file_path = path
     editor.setPlainText(content, get_mimetype(path), encoding)
     title = QtCore.QFileInfo(editor.file_path).fileName()
     editor.setDocumentTitle(title)
