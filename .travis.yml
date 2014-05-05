@@ -19,18 +19,18 @@ install:
 script:
   - pip install .
   - if [ $ENV == "pytest" ]; then
-    python3 runtests.py
+    python3 runtests.py;
     fi
   - if [ $ENV == "pep8" ]; then
-    pip install pytest-pep8
-    python3 runtests.py --pep8
+    pip install pytest-pep8;
+    python3 runtests.py --pep8;
     fi
   - if [ $ENV == "cov" ]; then
-    pip install pytest-cov
-    python3 runtests.py --cov pyqode
+    pip install pytest-cov;
+    python3 runtests.py --cov pyqode;
     fi
 after_script:
   - if [ $ENV == "cov" ]; then
-    sudo pip install --quiet coveralls
-    coveralls
+    sudo pip install --quiet coveralls;
+    coveralls;
     fi
