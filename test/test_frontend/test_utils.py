@@ -49,32 +49,26 @@ def test_text_style():
 
 
 editor = None
-flag = False
 
 
 def add_deco():
-    global flag
     print('run')
-    flag = True
     time.sleep(0.1)
 
 
 def test_job_runner():
-    global editor, flag
-    flag = False
+    global editor
+    print('test job runner')
     editor = frontend.CodeEdit()
     job_runner = utils.JobRunner(editor)
     job_runner.start_job(add_deco, force=True)
     job_runner.start_job(add_deco, force=False)
     assert job_runner.job_running
-    QTest.qWait(2000)
-    assert flag is True
-    QTest.qWait(2000)
 
 
 def test_delay_job_runner():
-    global editor, flag
-    flag = False
+    print('test delay job runner')
+    global editor
     editor = frontend.CodeEdit()
     job_runner = utils.DelayJobRunner(editor)
     job_runner.request_job(add_deco, async=False)
