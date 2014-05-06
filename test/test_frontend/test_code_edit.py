@@ -14,6 +14,8 @@ from pyqode.core.frontend import panels, modes
 from ..helpers import cwd_at, wait_for_connected
 
 
+foo = {}  # just there to cover code that matches '{' with '}'
+
 app = None
 editor = None
 window = None

@@ -166,6 +166,5 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.cc_disabled_zones = []
 
     def __repr__(self):
-        return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}"
-                "".format(self.line_number, self.folded, self.fold_indent,
-                          self.fold_start))
+        return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}".format(
+            self.line_number, self.folded, self.fold_indent, self.fold_start))

@@ -69,8 +69,6 @@ def test_job_runner():
     assert job_runner.job_running
     QTest.qWait(2000)
     assert flag is True
-    for i in range(10):
-        job_runner.start_job(add_deco, force=False)
     QTest.qWait(2000)
 
 
