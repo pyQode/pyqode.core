@@ -17,6 +17,7 @@ from ..helpers import cwd_at, wait_for_connected
 app = None
 editor = None
 window = None
+original_text = None
 
 
 def process_events():
@@ -29,13 +30,14 @@ def setup_module():
     """
     Setup a QApplication and CodeEdit which open the client module code
     """
-    global app, editor, window
+    global app, editor, window, original_text
     app = QtGui.QApplication.instance()
     # import sys
     # app = QtGui.QApplication(sys.argv)
     window = QtGui.QMainWindow()
     editor = frontend.CodeEdit(window)
     frontend.open_file(editor, __file__)
+    original_text = editor.toPlainText()
     frontend.install_mode(editor, modes.PygmentsSyntaxHighlighter(
         editor.document()))
     window.setCentralWidget(editor)
@@ -51,6 +53,8 @@ def teardown_module():
     """
     global window, editor, app
     frontend.stop_server(editor)
+    editor.setPlainText(original_text, 'text/x-python', 'utf-8')
+    frontend.save_to_file(editor)
     QTest.qWait(1000)
     del window
     del editor
@@ -82,9 +86,11 @@ def test_actions():
 
 
 def test_duplicate_line():
+    txt = editor.toPlainText()
     editor.duplicate_line()
     assert editor.toPlainText().startswith(get_first_line() + '\n' +
                                            get_first_line())
+    editor.setPlainText(txt, 'text/x-python', 'utf-8')
 
 
 def test_show_tooltip():
@@ -200,7 +206,7 @@ def test_file_attribs():
 
 
 def test_setPlainText():
-    editor.file_path = 'test.py'
+    editor.file_path = __file__
     text = editor.toPlainText()
     editor.setPlainText('', 'text/x-python', 'utf-8')
     assert editor.toPlainText() == ''
