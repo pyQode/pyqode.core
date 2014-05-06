@@ -96,3 +96,21 @@ def test_clear_decoration():
     frontend.clear_decorations(editor)
     assert frontend.add_decoration(editor, deco)
     assert frontend.remove_decoration(editor, deco)
+
+
+def test_constructors():
+    deco = frontend.TextDecoration(editor.textCursor(),
+                                   start_pos=10, end_pos=15)
+    deco = frontend.TextDecoration(editor.textCursor(),
+                                   start_line=10, end_line=15)
+
+
+def test_formats():
+    deco = frontend.TextDecoration(editor.textCursor(),
+                                   start_line=10, end_line=15)
+    deco.set_foreground(QtGui.QColor('#FF0000'))
+    deco.set_outline(QtGui.QColor('#FF0000'))
+    deco.set_as_spell_check(QtGui.QColor('#FF0000'))
+    deco.set_as_error(QtGui.QColor('#FF0000'))
+    deco.set_as_error()
+    deco.set_as_warning()

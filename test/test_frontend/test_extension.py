@@ -62,6 +62,7 @@ def test_modes():
     mode = CaseConverterMode()
     frontend.install_mode(editor, mode)
     m = frontend.get_mode(editor, CaseConverterMode)
+    assert len(frontend.get_modes(editor)) == 1
     assert m == mode
     m = frontend.uninstall_mode(editor, CaseConverterMode)
     assert m == mode
@@ -75,14 +76,32 @@ def test_panels():
 
     """
     from pyqode.core.frontend.panels import LineNumberPanel
-    global editor
+    global editor, window
+    window.show()
     panel = LineNumberPanel()
     frontend.install_panel(editor, panel, panel.Position.LEFT)
     QTest.qWait(1000)
     p, zone = frontend.get_panel(editor, LineNumberPanel, get_zone=True)
-    assert p == panel
+    p2 = frontend.get_panel(editor, LineNumberPanel, get_zone=False)
+    assert p == panel == p2
     assert zone == panel.Position.LEFT
+    assert len(frontend.get_panels(editor)) == 4
+    for i in range(4):
+        p.enabled = not p.enabled
     p = frontend.uninstall_panel(editor, LineNumberPanel)
     assert p == panel
     with pytest.raises(KeyError):
         frontend.uninstall_panel(editor, LineNumberPanel)
+    window.hide()
+
+
+def test_uninstall_all():
+    global editor
+    frontend.uninstall_all(editor)
+    from pyqode.core.frontend.modes import CaseConverterMode
+    from pyqode.core.frontend.panels import LineNumberPanel
+    mode = CaseConverterMode()
+    frontend.install_mode(editor, mode)
+    frontend.install_panel(editor, LineNumberPanel(),
+                           LineNumberPanel.Position.LEFT)
+    frontend.uninstall_all(editor)

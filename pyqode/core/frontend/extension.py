@@ -146,11 +146,9 @@ def uninstall_mode(editor, name):
     """
     _logger().info('uninstalling mode %r' % name)
     m = get_mode(editor, name)
-    if m:
-        m._on_uninstall()
-        editor._modes.pop(m.name)
-        return m
-    return None
+    m._on_uninstall()
+    editor._modes.pop(m.name)
+    return m
 
 
 def get_mode(editor, name_or_klass):
@@ -370,9 +368,7 @@ def uninstall_all(editor):
     while len(editor._modes):
         k = list(editor._modes.keys())[0]
         uninstall_mode(editor, k)
-    while len(editor._panels):
-        zone = list(editor._panels.keys())[0]
-        while len(editor._panels[zone]):
-            k = list(editor._panels[zone].keys())[0]
+    for i in range(4):
+        while len(editor._panels[i]):
+            k = list(editor._panels[i].keys())[0]
             uninstall_panel(editor, k)
-        editor._panels.pop(zone, None)
