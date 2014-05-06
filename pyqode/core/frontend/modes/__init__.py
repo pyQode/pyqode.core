@@ -6,7 +6,9 @@ from pyqode.core.frontend.modes.autocomplete import AutoCompleteMode
 from pyqode.core.frontend.modes.caret_line_highlight import \
     CaretLineHighlighterMode
 from pyqode.core.frontend.modes.case_converter import CaseConverterMode
-from pyqode.core.frontend.modes.checker import CheckerMode, CheckerMessage
+from pyqode.core.frontend.modes.checker import CheckerMode
+from pyqode.core.frontend.modes.checker import CheckerMessage
+from pyqode.core.frontend.modes.checker import CheckerMessages
 from pyqode.core.frontend.modes.code_completion import CodeCompletionMode
 from pyqode.core.frontend.modes.filewatcher import FileWatcherMode
 from pyqode.core.frontend.modes.matcher import SymbolMatcherMode

@@ -346,7 +346,7 @@ def get_panel(editor, name_or_klass, get_zone=False):
                 return panel, i
             else:
                 return panel
-    return None, -1
+    raise KeyError(name_or_klass)
 
 
 def get_panels(editor):

@@ -17,13 +17,6 @@ class CheckerMessages:
     ERROR = 2
 
 
-class CheckerTriggers:
-    #: Check is triggered when text has changed.
-    TXT_CHANGED = 0
-    #: Check is triggered when text has been saved.
-    TXT_SAVED = 1
-
-
 class CheckerMessage(object):
     """
     Holds data for a message displayed by the
@@ -138,8 +131,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
     def __init__(self, worker,
                  delay=500,
                  marker_panel_id="markerPanel",
-                 clear_on_request=True, trigger=CheckerTriggers.TXT_CHANGED,
-                 show_tooltip=False):
+                 clear_on_request=True, show_tooltip=False):
         """
         :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
@@ -160,7 +152,6 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
         self._messages = []
         self._worker = worker
-        self._trigger = trigger
         self._mutex = QtCore.QMutex()
         self._clear_on_request = clear_on_request
         self._show_tooltip = show_tooltip
@@ -179,8 +170,6 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         """
         if clear:
             self.clear_messages()
-        if isinstance(messages, CheckerMessage):
-            messages = [messages]
         marker_panel = None
         nb_msg = len(messages)
         if nb_msg > 20:
@@ -189,7 +178,8 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             self._messages.append(message)
             if message.line:
                 try:
-                    marker_panel = frontend.get_panel(self.editor, MarkerPanel)
+                    marker_panel = frontend.get_panel(self.editor,
+                                                      MarkerPanel)
                 except KeyError:
                     pass
                 else:
@@ -233,7 +223,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         while len(self._messages):
             self.remove_message(self._messages[0])
         try:
-            m = frontend.get_mode(self.editor, MarkerPanel)
+            m = frontend.get_panel(self.editor, MarkerPanel)
         except KeyError:
             pass
         else:
@@ -241,22 +231,16 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
 
     def _on_state_changed(self, state):
         if state:
-            if self._trigger == CheckerTriggers.TXT_CHANGED:
-                self.editor.textChanged.connect(self.request_analysis)
-            elif self._trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.text_saved.connect(self.request_analysis)
-                self.editor.new_text_set.connect(self.request_analysis)
+            self.editor.textChanged.connect(self.request_analysis)
         else:
-            if self._trigger == CheckerTriggers.TXT_CHANGED:
-                self.editor.textChanged.disconnect(self.request_analysis)
-            elif self._trigger == CheckerTriggers.TXT_SAVED:
-                self.editor.text_saved.disconnect(self.request_analysis)
-                self.editor.new_text_set.disconnect(self.request_analysis)
+            self.editor.textChanged.disconnect(self.request_analysis)
 
     def _on_work_finished(self, status, messages):
         if status:
             messages = [CheckerMessage(*msg) for msg in messages]
             self.add_messages(messages)
+        else:
+            self.clear_messages()
 
     def request_analysis(self):
         self._job_runner.request_job(self._request, False)
@@ -274,4 +258,4 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             frontend.request_work(self.editor, self._worker, request_data,
                                   on_receive=self._on_work_finished)
         except frontend.NotConnectedError:
-            QtCore.QTimer.singleShot(2000, self._request)
+            QtCore.QTimer.singleShot(100, self._request)
