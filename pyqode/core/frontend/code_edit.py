@@ -262,7 +262,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
         self._client = JsonTcpClient(self)
-        self._last_mouse_pos = None
+        self._last_mouse_pos = QtCore.QPoint(0, 0)
         self._cached_cursor_pos = (-1, -1)
         self._modified_lines = set()
         self._cleaning = False

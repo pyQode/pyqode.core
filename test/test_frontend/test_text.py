@@ -2,10 +2,11 @@
 """
 This module tests the text frontend module (pyqode.core.frontend.text)
 """
+import mimetypes
 import os
 import sys
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtTest import QTest
 
 import pytest
@@ -84,6 +85,11 @@ def test_selected_text():
         editor, select_whole_word=True).selectedText() == 'This'
 
 
+def test_word_under_mouse_cursor():
+    global editor
+    assert frontend.word_under_mouse_cursor(editor) is not None
+
+
 def test_line_text():
     global editor
     frontend.goto_line(editor, 3, 0, move=True)
@@ -106,9 +112,14 @@ def test_remove_last_line():
 
 def test_clean_document():
     global editor
-    count = frontend.line_count(editor) + 1
-    editor.appendPlainText("\n\n\n")
+    frontend.clean_document(editor)
+    count = frontend.line_count(editor)
+    frontend.set_line_text(editor, 1, '"""   ')
+    editor.appendPlainText("")
+    editor.appendPlainText("")
+    editor.appendPlainText("")
     assert frontend.line_count(editor) == count + 3
+    frontend.select_lines(editor, 1, frontend.line_count(editor))
     frontend.clean_document(editor)
     process_events()
     assert frontend.line_count(editor) == count
@@ -120,6 +131,26 @@ def test_select_lines():
     process_events()
     QTest.qWait(1000)
     assert frontend.selection_range(editor) == (1, 5)
+    frontend.clear_decorations(editor)
+
+
+def test_line_pos_from_number():
+    assert frontend.line_pos_from_number(editor, 1) is not None
+    assert frontend.line_pos_from_number(
+        editor, frontend.line_count(editor) + 10) is None
+
+
+def test_line_nbr_from_position():
+    frontend.open_file(editor, __file__)
+    window.show()
+    editor.repaint()
+    sys.stderr.write(str(editor.visible_blocks))
+    assert frontend.line_nbr_from_position(
+        editor, frontend.line_pos_from_number(editor, 1)) is not None
+    assert frontend.line_nbr_from_position(
+        editor, 0) is None
+    window.hide()
+    process_events()
 
 
 def test_open_file():
@@ -132,10 +163,11 @@ def test_open_file():
 def test_save_file():
     global editor
     path = os.path.join(os.getcwd(), 'tmp.py')
-    frontend.save_to_file(editor, path=path, encoding='utf-8')
+    frontend.select_lines(editor, 1, 2)
+    assert frontend.save_to_file(editor, path=path, encoding='utf-8') is True
     assert os.path.exists(path)
     assert editor.file_encoding == 'utf-8'
-    frontend.save_to_file(editor, path=path, encoding='latin-1')
+    assert frontend.save_to_file(editor, path=path, encoding='latin-1') is True
     assert editor.file_encoding == 'latin-1'
     frontend.open_file(editor, path, detect_encoding_func=None,
                        default_encoding='latin-1')
@@ -143,6 +175,10 @@ def test_save_file():
     assert editor.file_encoding == 'latin-1'
     os.remove('tmp.py')
     frontend.open_file(editor, __file__)
+    assert frontend.save_to_file(editor, path='/usr/bin', encoding='utf-8') \
+        is False
+    editor.file_path = None
+    assert frontend.save_to_file(editor) is False
 
 
 def test_mark_whole_doc_dirty():
@@ -240,3 +276,23 @@ def test_search_text():
         'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
     assert len(occurences) == 11
+
+
+def test_keep_tc():
+    @frontend.keep_tc_pos
+    def move_cursor(editor, arg):
+        assert arg == 'arg'
+        frontend.goto_line(editor, 5)
+
+    l, c = frontend.cursor_position(editor)
+    move_cursor(editor, 'arg')
+    nl, nc = frontend.cursor_position(editor)
+    assert l == nl and c == nc
+
+
+def test_get_mimetype():
+    mimetypes.add_type('text/x-python', '.py')
+    mimetypes.add_type('text/xml', '.ui')
+    assert frontend.get_mimetype('file.py') == 'text/x-python'
+    assert frontend.get_mimetype('file.ui') == 'text/xml'
+    assert frontend.get_mimetype('file.foo') == 'text/plain'

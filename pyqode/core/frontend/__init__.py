@@ -110,6 +110,8 @@ from pyqode.core.frontend.text import move_right
 from pyqode.core.frontend.text import selected_text_to_upper
 from pyqode.core.frontend.text import selected_text_to_lower
 from pyqode.core.frontend.text import search_text
+from pyqode.core.frontend.text import keep_tc_pos
+from pyqode.core.frontend.text import get_mimetype
 
 # Client API
 from pyqode.core.frontend.client import connected_to_server

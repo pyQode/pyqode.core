@@ -25,10 +25,6 @@ class memoized(object):
 
     def __call__(self, *args):
         try:
-            if not isinstance(args, collections.Hashable):
-                # uncacheable. a list, for instance.
-                # better to not cache than blow up.
-                return self.func(*args)
             if args in self.cache:
                 return self.cache[args]
             else:
@@ -296,9 +292,9 @@ class JobRunner(object):
         if len(self._job_queue) > 0:
             self._job_queue.pop(0)
         if len(self._job_queue) > 0:
-            self._job_queue[0].start()
             self._job_running = True
             self._job_queue[0].used = True
+            self._job_queue[0].start()
 
     def stop_job(self):
         """

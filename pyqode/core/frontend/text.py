@@ -339,7 +339,7 @@ def line_pos_from_number(editor, line_number):
     :rtype: int or None
     """
     block = editor.document().findBlockByNumber(line_number)
-    if block:
+    if block.isValid():
         return int(editor.blockBoundingGeometry(block).translated(
                    editor.contentOffset()).top())
     return None
