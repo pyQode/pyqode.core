@@ -1,7 +1,7 @@
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
-from pyqode.core import frontend, style
+from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
 
