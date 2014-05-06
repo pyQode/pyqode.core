@@ -319,11 +319,8 @@ def uninstall_panel(editor, name):
     """
     _logger().info('Uninstalling panel %s' % name)
     p, zone = get_panel(editor, name, get_zone=True)
-    if p:
-        p._on_uninstall()
-        return editor._panels[zone].pop(p.name, None)
-    else:
-        raise KeyError(name)
+    p._on_uninstall()
+    return editor._panels[zone].pop(p.name, None)
 
 
 def get_panel(editor, name_or_klass, get_zone=False):
