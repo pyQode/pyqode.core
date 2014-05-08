@@ -33,8 +33,8 @@ class IndenterMode(Mode):
         tab_len = settings.tab_length
         cursor.beginEditBlock()
         nb_lines = len(cursor.selection().toPlainText().splitlines())
-        if nb_lines == 0:
-            nb_lines = 1
+        # if nb_lines == 0:
+        #     nb_lines = 1
         block = doc.findBlock(cursor.selectionStart())
         assert isinstance(block, QtGui.QTextBlock)
         i = 0
@@ -59,8 +59,6 @@ class IndenterMode(Mode):
         min_indent = settings.min_indent_column
         tab_len = settings.tab_length
         cursor.beginEditBlock()
-        if not cursor.hasSelection():
-            cursor.select(cursor.LineUnderCursor)
         nb_lines = len(cursor.selection().toPlainText().splitlines())
         block = doc.findBlock(cursor.selectionStart())
         assert isinstance(block, QtGui.QTextBlock)
@@ -121,8 +119,6 @@ class IndenterMode(Mode):
                 char = trav_cursor.selectedText()
                 if char == " ":
                     spaces += 1
-                else:
-                    break
                 trav_cursor.setPosition(pos - 1)
             cursor.movePosition(cursor.Left, cursor.MoveAnchor, spaces)
             [cursor.deleteChar() for _ in range(spaces)]
