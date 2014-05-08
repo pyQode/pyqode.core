@@ -270,7 +270,7 @@ def clean_document(editor):
     editor._cleaning = False
 
 
-def select_lines(editor, start, end, apply_selection=True):
+def select_lines(editor, start=1, end=-1, apply_selection=True):
     """
     Selects entire lines between start and end line numbers.
 
@@ -283,7 +283,8 @@ def select_lines(editor, start, end, apply_selection=True):
     :param editor: editor instance.
     :param start: Start line number (1 based)
     :type start: int
-    :param end: End line number (1 based)
+    :param end: End line number (1 based). Use  -1 to select up to the end of
+        the document
     :type end: int
     :param apply_selection: True to apply the selection before returning
      the QTextCursor.
@@ -291,6 +292,8 @@ def select_lines(editor, start, end, apply_selection=True):
 
     :return A QTextCursor that holds the requested selection
     """
+    if end == -1:
+        end = line_count(editor)
     if start and end:
         tc = editor.textCursor()
         tc.movePosition(tc.Start, tc.MoveAnchor)
