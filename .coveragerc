@@ -33,7 +33,9 @@ exclude_lines =
     except (TypeError, KeyError):
     except AttributeError:
     except RuntimeError:
+    except ImportError
     pass
+    if hasattr
 
     # unknown errors
     error = -1
@@ -50,3 +52,8 @@ exclude_lines =
 
     # Don't complain about _logger function not called
     logging.getLogger
+
+    # pygments syntax highlighter: some methods are really hard to test
+    def get_tokens_unprocessed
+    def _get_format_from_style
+    def _update_style
