@@ -60,7 +60,6 @@ except ImportError as e:  # too new on some systems
 
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
-from pygments.util import ClassNotFound
 
 
 from pygments.styles import STYLE_MAP
@@ -252,9 +251,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self.set_lexer_from_mime_type(mime_type)
         self.rehighlight()
 
-    def _on_text_saved(self):
-        self.rehighlight()
-
     def refresh_style(self):
         self._pygments_style = style.pygments_style
         self._update_style()
@@ -277,52 +273,43 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     def highlight_block(self, text):
         original_text = text
-        if not self.editor:
-            return
+        if self.editor and self._lexer and self.enabled:
+            prev_data = self.currentBlock().previous().userData()
+            if hasattr(prev_data, "syntax_stack"):
+                self._lexer._saved_state_stack = prev_data.syntax_stack
+            elif hasattr(self._lexer, '_saved_state_stack'):
+                del self._lexer._saved_state_stack
 
-        if self._lexer is None:
-            return
+            # Lex the text using Pygments
+            index = 0
+            usd = self.currentBlock().userData()
+            usd.cc_disabled_zones[:] = []
+            for token, text in self._lexer.get_tokens(text):
+                length = len(text)
+                if "comment" in str(token).lower():
+                    # to the end
+                    usd.cc_disabled_zones.append((index, pow(2, 32)))
+                elif "string" in str(token).lower():
+                    usd.cc_disabled_zones.append((index, index + length))
+                self.setFormat(index, length, self._get_format(token))
+                index += length
 
-        if self.enabled is False:
-            return
+            if hasattr(self._lexer, '_saved_state_stack'):
+                data = self.currentBlock().userData()
+                setattr(data, "syntax_stack", self._lexer._saved_state_stack)
+                self.currentBlock().setUserData(data)
+                # Clean up for the next go-round.
+                del self._lexer._saved_state_stack
 
-        prev_data = self.currentBlock().previous().userData()
-
-        if hasattr(prev_data, "syntax_stack"):
-            self._lexer._saved_state_stack = prev_data.syntax_stack
-        elif hasattr(self._lexer, '_saved_state_stack'):
-            del self._lexer._saved_state_stack
-
-        # Lex the text using Pygments
-        index = 0
-        usd = self.currentBlock().userData()
-        usd.cc_disabled_zones[:] = []
-        for token, text in self._lexer.get_tokens(text):
-            length = len(text)
-            if "comment" in str(token).lower():
-                # to the end
-                usd.cc_disabled_zones.append((index, pow(2, 32)))
-            elif "string" in str(token).lower():
-                usd.cc_disabled_zones.append((index, index + length))
-            self.setFormat(index, length, self._get_format(token))
-            index += length
-
-        if hasattr(self._lexer, '_saved_state_stack'):
-            data = self.currentBlock().userData()
-            setattr(data, "syntax_stack", self._lexer._saved_state_stack)
-            self.currentBlock().setUserData(data)
-            # Clean up for the next go-round.
-            del self._lexer._saved_state_stack
-
-        # spaces
-        text = original_text
-        expression = QRegExp('\s+')
-        index = expression.indexIn(text, 0)
-        while index >= 0:
-            index = expression.pos(0)
-            length = len(expression.cap(0))
-            self.setFormat(index, length, self._get_format(Whitespace))
-            index = expression.indexIn(text, index + length)
+            # spaces
+            text = original_text
+            expression = QRegExp('\s+')
+            index = expression.indexIn(text, 0)
+            while index >= 0:
+                index = expression.pos(0)
+                length = len(expression.cap(0))
+                self.setFormat(index, length, self._get_format(Whitespace))
+                index = expression.indexIn(text, index + length)
 
     def _update_style(self):
         """ Sets the style to the specified Pygments style.
@@ -372,20 +359,10 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if token in self._formats:
             return self._formats[token]
 
-        if self._style is None:
-            result = self._get_format_from_document(token, self._document)
-        else:
-            result = self._get_format_from_style(token, self._style)
+        result = self._get_format_from_style(token, self._style)
 
         self._formats[token] = result
         return result
-
-    def _get_format_from_document(self, token, document):
-        """ Returns a QTextCharFormat for token by
-        """
-        code, html = next(self._formatter._format_lines([(token, 'dummy')]))
-        self._document.setHtml(html)
-        return QtGui.QTextCursor(self._document).charFormat()
 
     def _get_format_from_style(self, token, style):
         """ Returns a QTextCharFormat for token by reading a Pygments style.
