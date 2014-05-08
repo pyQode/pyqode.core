@@ -114,21 +114,21 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
-        if self._request_cnt:
-            return
-        # only check first byte
-        column = frontend.current_column_nbr(self.editor)
-        usd = self.editor.textCursor().block().userData()
-        for start, end in usd.cc_disabled_zones:
-            if start <= column < end:
-                _logger().debug(
-                    "cc: cancel request, cursor is in a disabled zone")
-                return
-        self._request_cnt += 1
-        self._collect_completions(
-            self.editor.toPlainText(), frontend.current_line_nbr(self.editor),
-            frontend.current_column_nbr(self.editor), self.editor.file_path,
-            self.editor.file_encoding, self.completion_prefix)
+        if not self._request_cnt:
+            # only check first byte
+            column = frontend.current_column_nbr(self.editor)
+            usd = self.editor.textCursor().block().userData()
+            if usd and hasattr(usd, 'cc_disabled_zones'):
+                for start, end in usd.cc_disabled_zones:
+                    if start <= column < end:
+                        _logger().debug(
+                            "cc: cancel request, cursor is in a disabled zone")
+                        return
+            self._request_cnt += 1
+            self._collect_completions(
+                self.editor.toPlainText(), frontend.current_line_nbr(self.editor),
+                frontend.current_column_nbr(self.editor), self.editor.file_path,
+                self.editor.file_encoding, self.completion_prefix)
 
     def _on_install(self, editor):
         self._completer = QtGui.QCompleter([""], editor)
@@ -159,7 +159,6 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 self._display_completion_tooltip)
             self.editor.cursorPositionChanged.disconnect(
                 self._on_cursor_position_changed)
-            self.editor.new_text_set.disconnect(self.requestPreload)
 
     def _on_focus_in(self, event):
         """
