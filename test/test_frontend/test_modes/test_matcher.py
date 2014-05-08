@@ -37,6 +37,11 @@ def setup_module():
     QTest.qWait(500)
 
 
+def teardown_module():
+    global editor
+    del editor
+
+
 def test_enabled():
     global mode
     assert mode.enabled

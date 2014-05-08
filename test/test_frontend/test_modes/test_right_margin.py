@@ -20,6 +20,11 @@ def setup_module():
 
 def teardown_module():
     global editor
+    del editor
+
+
+def teardown_module():
+    global editor
     frontend.stop_server(editor)
     del editor
 

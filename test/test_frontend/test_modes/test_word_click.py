@@ -17,6 +17,11 @@ def setup_module():
     frontend.open_file(editor, __file__)
 
 
+def teardown_module():
+    global editor
+    del editor
+
+
 def test_enabled():
     global mode
     assert mode.enabled
