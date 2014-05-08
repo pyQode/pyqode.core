@@ -3,16 +3,16 @@ from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
+from pyqode.core import style
 
 
 editor = None
-mode = None
+mode = modes.CaretLineHighlighterMode()
 
 
 def setup_module():
     global editor, mode
     editor = frontend.CodeEdit()
-    mode = modes.CaseConverterMode()
     frontend.install_mode(editor, mode)
     frontend.open_file(editor, __file__)
     editor.show()
@@ -31,6 +31,15 @@ def test_enabled():
     mode.enabled = True
 
 
-def test_slots():
-    mode.to_upper()
-    mode.to_lower()
+def test_properties():
+    assert isinstance(mode.background, QtGui.QColor)
+    c = QtGui.QColor('red')
+    mode.background = c
+    assert mode.background.name() == c.name()
+
+
+def test_style():
+    c = QtGui.QColor('yellow')
+    style.caret_line_background = c
+    editor.refresh_style()
+    assert mode.background.name() == c.name()
