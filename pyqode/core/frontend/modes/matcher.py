@@ -41,7 +41,7 @@ class SymbolMatcherMode(frontend.Mode):
     def unmatch_background(self):
         return self._unmatch_background
 
-    @match_background.setter
+    @unmatch_background.setter
     def unmatch_background(self, value):
         self._unmatch_background = value
         self._refresh_decorations()
@@ -50,7 +50,7 @@ class SymbolMatcherMode(frontend.Mode):
     def unmatch_foreground(self):
         return self._unmatch_foreground
 
-    @match_foreground.setter
+    @unmatch_foreground.setter
     def unmatch_foreground(self, value):
         self._unmatch_foreground = value
         self._refresh_decorations()
@@ -303,9 +303,7 @@ class SymbolMatcherMode(frontend.Mode):
             return False
 
     def do_symbols_matching(self):
-        for d in self._decorations:
-            frontend.remove_decoration(self.editor, d)
-        self._decorations[:] = []
+        self._clear_decorations()
         data = self.editor.textCursor().block().userData()
         if data and isinstance(data, TextBlockUserData):
             pos = self.editor.textCursor().block().position()

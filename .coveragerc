@@ -29,7 +29,6 @@ exclude_lines =
     except :
     except:
     .debug
-    .info
     logger
     except (TypeError, KeyError):
     except AttributeError:
