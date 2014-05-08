@@ -31,16 +31,15 @@ class AutoCompleteMode(Mode):
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_post_key_pressed(self, e):
-        if e.isAccepted():
-            return
-        txt = e.text()
-        next_char = text.get_right_character(self.editor)
-        if txt in self.MAPPING:
-            to_insert = self.MAPPING[txt]
-            if (not next_char or next_char in self.MAPPING.keys() or
-                    next_char in self.MAPPING.values() or
-                    next_char.isspace()):
-                text.insert_text(self.editor, to_insert)
+        if not e.isAccepted():
+            txt = e.text()
+            next_char = text.get_right_character(self.editor)
+            if txt in self.MAPPING:
+                to_insert = self.MAPPING[txt]
+                if (not next_char or next_char in self.MAPPING.keys() or
+                        next_char in self.MAPPING.values() or
+                        next_char.isspace()):
+                    text.insert_text(self.editor, to_insert)
 
     def _on_key_pressed(self, e):
         txt = e.text()
