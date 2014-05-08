@@ -131,7 +131,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def __init__(self):
         Panel.__init__(self)
-        self.job_runner = DelayJobRunner(self, nb_threads_max=1, delay=500)
+        self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
 
@@ -264,7 +264,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.request_search(new_txt)
 
     def focusOutEvent(self, event):
-        self.stop_job()
         self.cancel_requests()
         Panel.focusOutEvent(self, event)
 
@@ -280,12 +279,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if txt:
             cursor = text_api.word_under_cursor(self.editor,
                                                 select_whole_word=True)
-            self.job_runner.request_job(self._exec_search, True,
-                                        txt, self.editor.document().clone(),
-                                        cursor, self._search_flags())
+            self.job_runner.request_job(
+                self._exec_search, txt, self.editor.document(),
+                cursor, self._search_flags())
         else:
             self.job_runner.cancel_requests()
-            self.job_runner.stop_job()
             self._clear_occurrences()
             self._on_search_finished()
 

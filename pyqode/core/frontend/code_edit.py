@@ -271,8 +271,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._visible_blocks = []
         self._extra_selections = []
         self._parenthesis_selections = []
-        self._tooltips_runner = DelayJobRunner(
-            self, nb_threads_max=1, delay=700)
+        self._tooltips_runner = DelayJobRunner(delay=700)
         self._prev_tooltip_block_nbr = -1
         self._fpath = None
         self._fencoding = None
@@ -701,7 +700,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
             if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
                 if self._prev_tooltip_block_nbr != c.blockNumber():
                     self._tooltips_runner.request_job(
-                        self.show_tooltip, False,
+                        self.show_tooltip,
                         self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
                 self._prev_tooltip_block_nbr = c.blockNumber()
                 block_found = True

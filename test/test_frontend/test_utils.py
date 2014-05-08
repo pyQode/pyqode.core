@@ -51,27 +51,17 @@ def test_text_style():
 editor = None
 
 
-def add_deco():
+def job():
     print('run')
     time.sleep(0.1)
-
-
-def test_job_runner():
-    global editor
-    print('test job runner')
-    editor = frontend.CodeEdit()
-    job_runner = utils.JobRunner(editor)
-    job_runner.start_job(add_deco, force=True)
-    job_runner.start_job(add_deco, force=False)
-    assert job_runner.job_running
 
 
 def test_delay_job_runner():
     print('test delay job runner')
     global editor
     editor = frontend.CodeEdit()
-    job_runner = utils.DelayJobRunner(editor)
-    job_runner.request_job(add_deco, async=False)
+    job_runner = utils.DelayJobRunner()
+    job_runner.request_job(job)
     QTest.qWait(1000)
-    job_runner.request_job(add_deco, async=True)
+    job_runner.request_job(job)
     QTest.qWait(1000)

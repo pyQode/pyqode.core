@@ -92,7 +92,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._current_completion = ""
         # use to display a waiting cursor if completion provider takes too much
         # time
-        self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=1000)
+        self._job_runner = DelayJobRunner(delay=1000)
         self._tooltips = {}
         self._cursor_line = -1
         self._cancel_next = False
@@ -268,7 +268,6 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             self._cursor_line = cl
             self._hide_popup()
             self._job_runner.cancel_requests()
-            self._job_runner.stop_job()
 
     @QtCore.pyqtSlot()
     def _set_wait_cursor(self):

@@ -84,7 +84,7 @@ class MarkerPanel(Panel):
         self._icons = {}
         self._previous_line = -1
         self.scrollable = True
-        self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=100)
+        self._job_runner = DelayJobRunner(delay=100)
         self.setMouseTracking(True)
         self._to_remove = []
 
@@ -192,11 +192,10 @@ class MarkerPanel(Panel):
         marker = self.marker_for_line(line)
         if marker and marker.description:
             if self._previous_line != line:
-                self._job_runner.request_job(self._display_tooltip, False,
-                                             marker.description,
-                                             frontend.line_pos_from_number(
-                                                 self.editor,
-                                                 marker.position - 2))
+                self._job_runner.request_job(
+                    self._display_tooltip, marker.description,
+                    frontend.line_pos_from_number(
+                        self.editor, marker.position - 2))
         else:
             self._job_runner.cancel_requests()
         self._previous_line = line

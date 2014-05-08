@@ -149,7 +149,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         """
         frontend.Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        self._job_runner = DelayJobRunner(self, nb_threads_max=1, delay=delay)
+        self._job_runner = DelayJobRunner(delay=delay)
         self._messages = []
         self._worker = worker
         self._mutex = QtCore.QMutex()
@@ -243,7 +243,7 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             self.clear_messages()
 
     def request_analysis(self):
-        self._job_runner.request_job(self._request, False)
+        self._job_runner.request_job(self._request)
 
     def _request(self):
         """ Requests a checking of the editor content. """
