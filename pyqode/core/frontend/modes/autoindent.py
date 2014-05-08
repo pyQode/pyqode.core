@@ -42,22 +42,21 @@ class AutoIndentMode(Mode):
         Auto indent if the released key is the return key.
         :param event: the key event
         """
-        if event.isAccepted():
-            return
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-            tc = self.editor.textCursor()
-            pre, post = self._get_indent(tc)
-            tc.insertText("%s\n%s" % (pre, post))
+        if not event.isAccepted():
+            if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+                tc = self.editor.textCursor()
+                pre, post = self._get_indent(tc)
+                tc.insertText("%s\n%s" % (pre, post))
 
-            # eats possible whitespaces
-            tc.movePosition(tc.WordRight, tc.KeepAnchor)
-            txt = tc.selectedText()
-            if txt.startswith(' '):
-                new_txt = txt.replace(" ", '')
-                if len(txt) > len(new_txt):
-                    tc.insertText(new_txt)
+                # eats possible whitespaces
+                tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                txt = tc.selectedText()
+                if txt.startswith(' '):
+                    new_txt = txt.replace(" ", '')
+                    if len(txt) > len(new_txt):
+                        tc.insertText(new_txt)
 
-            event.accept()
+                event.accept()
 
     def refresh_settings(self):
         self.min_indent = settings.min_indent_column * ' '
