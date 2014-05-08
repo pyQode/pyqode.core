@@ -67,6 +67,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         try:
             self._mtime = os.path.getmtime(self.editor.file_path)
         except OSError:
+            # file_path does not exists.
             self._mtime = 0
             self._timer.stop()
         except TypeError:
@@ -76,36 +77,28 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._timer.stop()
 
     def _check_mtime(self):
-        if (self.editor is None or self.editor.file_path and
-                os.path.exists(self.editor.file_path)):
-            return
-        if not self.editor.file_path:
-            return
-        if not os.path.exists(self.editor.file_path) and self._mtime:
-            self._notify_deleted_file()
-        else:
-            mtime = os.path.getmtime(self.editor.file_path)
-            if mtime > self._mtime:
-                self._mtime = mtime
-                self._notify_change()
+        if self.editor and self.editor.file_path:
+            if not os.path.exists(self.editor.file_path) and self._mtime:
+                self._notify_deleted_file()
+            else:
+                mtime = os.path.getmtime(self.editor.file_path)
+                if mtime > self._mtime:
+                    self._mtime = mtime
+                    self._notify_change()
 
-    def _notify(self, settings_val, title, message, dlg_type=None,
-                expected_type=None, expected_action=None):
+    def _notify(self, settings_val, title, message, expected_action=None):
         """
         Notify user from external event
         """
         inital_value = settings.save_on_focus_out
         settings.save_on_focus_out = False
         self._flg_notify = True
-        dlg_type = (QtGui.QMessageBox.Yes |
-                    QtGui.QMessageBox.No) if not dlg_type else dlg_type
-        expected_type = QtGui.QMessageBox.Yes if not expected_type \
-            else expected_type
+        dlg_type = (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
         expected_action = (
             lambda *x: None) if not expected_action else expected_action
         if (self._auto_reload or QtGui.QMessageBox.question(
                 self.editor, title, message,
-                dlg_type) == expected_type):
+                dlg_type, QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
             expected_action(self.editor.file_path)
         self._update_mtime()
         settings.save_on_focus_out = inital_value
