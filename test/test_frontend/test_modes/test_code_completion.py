@@ -2,9 +2,7 @@
 Tests the code completion mode
 """
 import functools
-import os
-import pytest
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend, settings
 from pyqode.core.frontend import modes
@@ -32,7 +30,6 @@ def ensure_connected_and_visible(func):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 def test_enabled(editor):
     mode = get_mode(editor)
     assert mode.enabled
@@ -41,7 +38,6 @@ def test_enabled(editor):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 def test_properties(editor):
     mode = get_mode(editor)
     mode.trigger_key = 'A'
@@ -63,7 +59,6 @@ def test_properties(editor):
 
 
 @editor_open(__file__)
-@pytest.mark.skip_on_travis
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -86,7 +81,6 @@ def test_request_completion(editor):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_events(editor):
     assert frontend.connected_to_server(editor)
@@ -128,7 +122,6 @@ def test_events(editor):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_insert_completions(editor):
     assert frontend.connected_to_server(editor)
@@ -152,7 +145,6 @@ def test_insert_completions(editor):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_show_completion_with_tooltip(editor):
     mode = get_mode(editor)
@@ -166,7 +158,6 @@ def test_show_completion_with_tooltip(editor):
 
 
 @editor_open(__file__)
-# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_show_completion_with_icon(editor):
     mode = get_mode(editor)

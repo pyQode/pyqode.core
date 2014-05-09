@@ -10,12 +10,6 @@ omit =
     *pyqode/core/designer_plugins/*
     *pyqode/core/frontend/widgets/*
 
-    # we cannot test code completion mode entirely on Travis CI because
-    # of a Qt bug with QCompleter so we omit this one (even thought there is
-    # a test suite that covers 98% of the code completion mode's code on a
-    # non-travis ci platform.
-    *code_completion.py
-
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
