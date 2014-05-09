@@ -25,13 +25,15 @@ def test_code_completion_worker():
         'encoding': 'utf-8',
         'prefix': ''
     }
-    status, completions = worker(data)
+    status, completion_groups = worker(data)
     assert status
-    assert len(completions)
-    print(completions)
+    assert len(completion_groups)
+    assert len(completion_groups[0])
+    print(completion_groups)
     found = False
-    for c in completions:
-        if c['name'] == 'test_code_completion_worker':
-            found = True
-            break
+    for completions in completion_groups:
+        for c in completions:
+            if c['name'] == 'test_code_completion_worker':
+                found = True
+                break
     assert found

@@ -102,7 +102,7 @@ class CodeCompletionWorker(object):
             try:
                 results = prov.complete(
                     code, line, column, path, encoding, prefix)
-                completions += [c for c in results]
+                completions.append(results)
                 if len(completions) > 20:
                     break
             except:
