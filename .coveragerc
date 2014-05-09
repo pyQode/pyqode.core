@@ -11,8 +11,9 @@ omit =
     *pyqode/core/frontend/widgets/*
 
     # we cannot test code completion mode entirely on Travis CI because
-    # of a Qt bug with QCompleter so we ommit this one (even thought there is
-    # a test that covers 98% of the code on a non-travis ci platform.
+    # of a Qt bug with QCompleter so we omit this one (even thought there is
+    # a test suite that covers 98% of the code completion mode's code on a
+    # non-travis ci platform.
     *code_completion.py
 
 [report]
@@ -40,7 +41,6 @@ exclude_lines =
     except RuntimeError:
     except ImportError
     pass
-    if hasattr
 
     # unknown errors
     error = -1
