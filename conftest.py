@@ -64,7 +64,6 @@ def editor(request):
     from test import helpers
     from pyqode.core import frontend, settings
 
-
     logging.info('setup session editor')
 
     settings.file_watcher_auto_reload = True

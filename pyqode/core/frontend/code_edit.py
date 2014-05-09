@@ -821,11 +821,13 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._foreground = style.foreground
         self._whitespaces_foreground = style.whitespaces_foreground
         if style.selection_background is None:
-            self._sel_background = QtGui.QApplication.instance().palette().highlight().color()
+            self._sel_background = QtGui.QApplication.instance(
+                ).palette().highlight().color()
         else:
             self._sel_background = style.selection_background
         if style.selection_foreground is None:
-            self._sel_foreground = QtGui.QApplication.instance().palette().highlightedText().color()
+            self._sel_foreground = QtGui.QApplication.instance(
+                ).palette().highlightedText().color()
         else:
             self._sel_foreground = style.selection_foreground
         self._reset_palette()
