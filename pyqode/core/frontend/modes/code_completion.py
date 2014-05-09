@@ -346,6 +346,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             cr.setWidth(self._completer.popup().sizeHintForColumn(0) + w)
             # show the completion list
             if self.editor.isVisible():
+                self.editor.setFocus(True)
                 self._completer.complete(cr)
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(0, 0))

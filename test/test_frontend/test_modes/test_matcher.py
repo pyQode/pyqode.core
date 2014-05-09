@@ -13,43 +13,26 @@ example_tuple = (
 )
 
 
-from PyQt4 import QtCore
 from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from test.helpers import log_test_name, editor_open
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
 
-editor = None
-mode = modes.SymbolMatcherMode()
+
+def get_mode(editor):
+    return frontend.get_mode(editor, modes.SymbolMatcherMode)
 
 
-def setup_module():
-    global editor, mode
-    editor = frontend.CodeEdit()
-    editor.setMinimumWidth(800)
-    editor.setMinimumWidth(600)
-    frontend.install_mode(
-        editor, modes.PygmentsSyntaxHighlighter(editor.document()))
-    frontend.install_mode(editor, mode)
-    frontend.open_file(editor, __file__)
-    editor.show()
-    QTest.qWait(500)
-
-
-def teardown_module():
-    global editor
-    del editor
-
-
-def test_enabled():
-    global mode
+def test_enabled(editor):
+    mode = get_mode(editor)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_properties():
+def test_properties(editor):
+    mode = get_mode(editor)
     c = QtGui.QColor('yellow')
     assert isinstance(mode.match_background, QtGui.QColor)
     mode.match_background = c
@@ -74,12 +57,15 @@ def test_properties():
     assert mode.unmatch_foreground.name() != c.name()
 
 
-def test_matching():
+@editor_open(__file__)
+@log_test_name
+def test_matching(editor):
     """
     Moves the text cursor in a few places to execute all statements in
     matcher.py.
 
     """
+    mode = get_mode(editor)
     # before [
     frontend.goto_line(editor, 2, 14)
     mode.do_symbols_matching()
@@ -107,7 +93,10 @@ c = (
 """
 
 
-def test_unmatching():
+@editor_open(__file__)
+@log_test_name
+def test_unmatching(editor):
+    mode = get_mode(editor)
     # for this test we need to load uncorrect code with non matching symbols
     editor.setPlainText(malformed_symbols_code, 'text/x-python', 'utf-8')
     frontend.goto_line(editor, 1, 4)
@@ -126,7 +115,10 @@ a = [([1, 2, (45, 3)]), ({2: (45, 10)}),
 """
 
 
-def test_complex_matching():
+@editor_open(__file__)
+@log_test_name
+def test_complex_matching(editor):
+    mode = get_mode(editor)
     # [
     editor.setPlainText(cplx_code, 'text/x-python', 'utf-8')
     frontend.goto_line(editor, 2, 4)
@@ -148,12 +140,15 @@ def test_complex_matching():
     mode.do_symbols_matching()
 
 
-def test_symbol_pos():
+@editor_open(__file__)
+@log_test_name
+def test_symbol_pos(editor):
     """
     Moves the text cursor in a few places to execute all statements in
     matcher.py.
 
     """
+    mode = get_mode(editor)
     frontend.open_file(editor, __file__)
     # move to ')'
     cursor = frontend.goto_line(editor, 13, 1, move=False)

@@ -78,14 +78,13 @@ class _ServerProcess(QtCore.QProcess):
         self.running = False
         self._srv_logger = logging.getLogger('pyqode.server')
         self.logger = logging.getLogger(__name__)
+        self._test_not_deleted = False
 
     def _on_process_started(self):
         self.logger.info('server process started')
         self.running = True
 
     def _on_process_error(self, error):
-        if not self.running:
-            return
         if error not in PROCESS_ERROR_STRING:
             error = -1
         try:
@@ -93,8 +92,9 @@ class _ServerProcess(QtCore.QProcess):
         except RuntimeError:
             pass
         else:
-            self.logger.error('server process error %s: %s' %
-                              (error, PROCESS_ERROR_STRING[error]))
+            if not self.running:
+                self.logger.error('server process error %s: %s' %
+                                  (error, PROCESS_ERROR_STRING[error]))
 
     def _on_process_finished(self, exit_code):
         self.logger.info('server process finished with exit code %d' %

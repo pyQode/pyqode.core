@@ -2,58 +2,18 @@
 """
 Test scripts for the settings module.
 """
-import os
-import sys
-
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core import settings
-
-
-from . import helpers
 from pyqode.core.frontend import modes
-from pyqode.core.frontend import panels
+from test.helpers import log_test_name
+from test.helpers import preserve_settings
 
 
-def test_a():
-    assert 3 == 3
-
-
-@helpers.cwd_at('test')
-def setup_module(*args):
-    """
-    Setup a QApplication and CodeEdit which open the client module code
-    """
-    print('setup')
-    global app, editor, window, code_completion_mode
-    app = QtGui.QApplication.instance()
-    window = QtGui.QMainWindow()
-    editor = frontend.CodeEdit(window)
-    frontend.install_mode(editor, modes.IndenterMode())
-    frontend.install_mode(editor, modes.AutoIndentMode())
-    frontend.install_mode(editor, modes.FileWatcherMode())
-    frontend.install_mode(editor, modes.RightMarginMode())
-    frontend.install_panel(editor, panels.SearchAndReplacePanel())
-    code_completion_mode = modes.CodeCompletionMode()
-    frontend.install_mode(editor, code_completion_mode)
-    window.setCentralWidget(editor)
-    window.resize(800, 600)
-    # window.show()
-    frontend.start_server(editor, os.path.join(os.getcwd(), 'server.py'))
-    helpers.wait_for_connected(editor)
-
-
-def teardown_module(*args):
-    """
-    Close server and exit QApplication
-    """
-    global editor
-    frontend.stop_server(editor)
-
-
-def test_show_white_spaces():
-    global editor
+@preserve_settings
+@log_test_name
+def test_show_white_spaces(editor):
     assert settings.show_white_spaces is False
     assert editor.show_whitespaces is False
     # change settings
@@ -72,8 +32,9 @@ def test_show_white_spaces():
     settings.show_white_spaces = False
 
 
-def test_tab_length():
-    global editor
+@preserve_settings
+@log_test_name
+def test_tab_length(editor):
     assert settings.tab_length == 4
     QTest.keyPress(editor, QtCore.Qt.Key_Tab)
     assert editor.toPlainText() == 4 * ' '
@@ -89,8 +50,9 @@ def test_tab_length():
     settings.tab_length = 4
 
 
-def test_use_spaces_instead_of_tabs():
-    global editor
+@preserve_settings
+@log_test_name
+def test_use_spaces_instead_of_tabs(editor):
     editor.clear()
     assert settings.use_spaces_instead_of_tabs is True
     settings.tab_length = 4
@@ -105,8 +67,9 @@ def test_use_spaces_instead_of_tabs():
     settings.use_spaces_instead_of_tabs = True
 
 
-def test_min_indent_column():
-    global editor
+@preserve_settings
+@log_test_name
+def test_min_indent_column(editor):
     editor.clear()
     assert settings.min_indent_column == 0
     QTest.keyPress(editor, QtCore.Qt.Key_Return)
@@ -124,8 +87,14 @@ def test_min_indent_column():
     settings.min_indent_column = 0
 
 
-def test_cc_trigger_key():
-    global code_completion_mode, editor
+def get_completion_mode(editor):
+    return frontend.get_mode(editor, modes.CodeCompletionMode)
+
+
+@preserve_settings
+@log_test_name
+def test_cc_trigger_key(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.cc_trigger_key == ord(' ')
     assert isinstance(code_completion_mode, modes.CodeCompletionMode)
     assert code_completion_mode.trigger_key == ord(' ')
@@ -137,8 +106,10 @@ def test_cc_trigger_key():
     settings.cc_trigger_key = ord(' ')
 
 
-def test_cc_trigger_len():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_cc_trigger_len(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.cc_trigger_len == 1
     assert isinstance(code_completion_mode, modes.CodeCompletionMode)
     assert code_completion_mode.trigger_length == 1
@@ -150,8 +121,10 @@ def test_cc_trigger_len():
     settings.cc_trigger_len = 1
 
 
-def test_cc_trigger_symbols():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_cc_trigger_symbols(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.cc_trigger_symbols == ['.']
     assert isinstance(code_completion_mode, modes.CodeCompletionMode)
     assert code_completion_mode.trigger_symbols == ['.']
@@ -163,8 +136,10 @@ def test_cc_trigger_symbols():
     settings.cc_trigger_symbols = ['.']
 
 
-def test_cc_show_tooltips():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_cc_show_tooltips(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.cc_show_tooltips is True
     assert isinstance(code_completion_mode, modes.CodeCompletionMode)
     assert code_completion_mode.show_tooltips is True
@@ -176,8 +151,10 @@ def test_cc_show_tooltips():
     settings.cc_show_tooltips = True
 
 
-def test_cc_case_sensitive():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_cc_case_sensitive(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.cc_case_sensitive is False
     assert isinstance(code_completion_mode, modes.CodeCompletionMode)
     assert code_completion_mode.case_sensitive is False
@@ -189,8 +166,10 @@ def test_cc_case_sensitive():
     settings.cc_case_sensitive = False
 
 
-def test_file_watcher_auto_reload():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_file_watcher_auto_reload(editor):
+    code_completion_mode = get_completion_mode(editor)
     assert settings.file_watcher_auto_reload is False
     fw = frontend.get_mode(editor, modes.FileWatcherMode)
     assert fw
@@ -203,8 +182,9 @@ def test_file_watcher_auto_reload():
     settings.file_watcher_auto_reload = False
 
 
-def test_right_margin_pos():
-    global code_completion_mode, editor
+@preserve_settings
+@log_test_name
+def test_right_margin_pos(editor):
     assert settings.right_margin_pos == 79
     rm = frontend.get_mode(editor, modes.RightMarginMode)
     assert rm

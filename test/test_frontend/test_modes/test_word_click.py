@@ -5,32 +5,19 @@ from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
 
-editor = None
-mode = None
+def get_mode(editor):
+    return frontend.get_mode(editor, modes.WordClickMode)
 
 
-def setup_module():
-    global editor, mode
-    editor = frontend.CodeEdit()
-    mode = modes.WordClickMode()
-    frontend.install_mode(editor, mode)
-    frontend.open_file(editor, __file__)
-
-
-def teardown_module():
-    global editor
-    del editor
-
-
-def test_enabled():
-    global mode
+def test_enabled(editor):
+    mode = get_mode(editor)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_events():
-    global editor
+def test_events(editor):
+    mode = get_mode(editor)
     mode._add_decoration(editor.textCursor())
     pt = QtCore.QPoint(10, frontend.line_pos_from_number(editor, 1))
     QTest.mouseMove(editor, pt)

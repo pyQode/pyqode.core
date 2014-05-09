@@ -1,38 +1,16 @@
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
 from pyqode.core import frontend, settings
 from pyqode.core.frontend import modes
 
 
-editor = None
-mode = modes.IndenterMode()
-
-
-def setup_module():
-    global editor, mode
-    editor = frontend.CodeEdit()
-    editor.setMinimumWidth(800)
-    editor.setMinimumWidth(600)
-    frontend.install_mode(editor, mode)
-    frontend.open_file(editor, __file__)
-    editor.show()
-    QTest.qWait(500)
-
-
-def teardown_module():
-    global editor
-    del editor
-
-
-def test_enabled():
-    global mode
+def test_enabled(editor):
+    mode = frontend.get_mode(editor, modes.IndenterMode)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_indent_selection():
+def test_indent_selection(editor):
+    mode = frontend.get_mode(editor, modes.IndenterMode)
     # select all
     frontend.select_lines(editor)
     mode.indent()

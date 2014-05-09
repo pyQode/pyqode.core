@@ -1,14 +1,11 @@
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
 import datetime
-from pyqode.core import frontend, settings
+from pyqode.core import frontend
 from pyqode.core.frontend import modes
-
-
-editor = None
-mode = modes.FileWatcherMode()
+from test.helpers import editor_open, preserve_settings
 
 
 file_path = os.path.join(
@@ -16,32 +13,31 @@ file_path = os.path.join(
 
 
 def setup_module():
-    global editor, mode
-    editor = frontend.CodeEdit()
-    editor.setMinimumWidth(800)
-    editor.setMinimumWidth(600)
-    frontend.install_mode(editor, mode)
     with open(file_path, 'w') as f:
         f.write("test file initial")
-    frontend.open_file(editor, file_path)
-    editor.show()
-    QTest.qWait(500)
 
 
 def teardown_module():
-    global editor
-    del editor
     os.remove(file_path)
 
 
-def test_enabled():
-    global mode
+def get_mode(editor):
+    return frontend.get_mode(editor, modes.FileWatcherMode)
+
+
+@editor_open(file_path)
+def test_enabled(editor):
+    mode = get_mode(editor)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_modif_accept_with_focus():
+@editor_open(file_path)
+@preserve_settings
+def test_modif_accept_with_focus(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
             f2.write("test file %s" % datetime.datetime.now())
@@ -51,7 +47,10 @@ def test_modif_accept_with_focus():
     QTest.qWait(1000)
 
 
-def test_modif_reject_with_focus():
+@editor_open(file_path)
+def test_modif_reject_with_focus(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
             f2.write("test file %s" % datetime.datetime.now())
@@ -61,7 +60,10 @@ def test_modif_reject_with_focus():
     QTest.qWait(1000)
 
 
-def test_modif_without_focus():
+@editor_open(file_path)
+def test_modif_without_focus(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
     win = QtGui.QMainWindow()
     win.show()
     QTest.qWaitForWindowShown(win)
@@ -82,7 +84,6 @@ def accept_mbox():
         if isinstance(w, QtGui.QMessageBox):
             QTest.keyPress(w, QtCore.Qt.Key_Space)
 
-
 def reject_mbox():
     widgets = QtGui.QApplication.instance().topLevelWidgets()
     for w in widgets:
@@ -90,7 +91,12 @@ def reject_mbox():
             QTest.keyPress(w, QtCore.Qt.Key_Escape)
 
 
-def test_modif_autoreload():
+@editor_open(file_path)
+@preserve_settings
+def test_modif_autoreload(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
+    mode = get_mode(editor)
     mode.auto_reload = True
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
@@ -98,7 +104,11 @@ def test_modif_autoreload():
     QTest.qWait(1000)
 
 
-def test_delete():
+@editor_open(file_path)
+@preserve_settings
+def test_delete(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
     os.remove(file_path)
     QTest.qWait(1000)
     with open(file_path, 'w') as f:
@@ -106,14 +116,23 @@ def test_delete():
     frontend.open_file(editor, file_path)
 
 
-def test_none_filepath():
+@editor_open(file_path)
+@preserve_settings
+def test_none_filepath(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
+    mode.auto_reload = False
     p = editor.file_path
     editor.file_path = None
     mode._update_mtime()
     editor.file_path = p
 
 
-def test_non_existing_file_path():
+@editor_open(file_path)
+@preserve_settings
+def test_non_existing_file_path(editor):
+    mode = get_mode(editor)
+    mode.auto_reload = False
     p = editor.file_path
     editor.file_path = '/usr/blah/foo/bar.txt'
     mode._update_mtime()

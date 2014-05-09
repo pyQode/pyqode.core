@@ -1,40 +1,33 @@
-import os
-from PyQt4 import QtCore, QtGui
 from PyQt4.QtTest import QTest
 
 from pyqode.core import frontend
 from pyqode.core.frontend import modes, panels
 
-
-editor = None
-mode = None
-
-from ...helpers import cwd_at
+from ...helpers import preserve_editor_config
+from ...helpers import server_path
 
 
-@cwd_at('test')
-def setup_module():
-    global editor, mode
-    editor = frontend.CodeEdit()
-    mode = modes.CheckerMode(check, delay=1, show_tooltip=True)
-    frontend.install_mode(editor, mode)
-    frontend.open_file(editor, __file__)
+def get_mode(editor):
+    return frontend.get_mode(editor, modes.CheckerMode)
 
 
-def teardown_module():
-    global editor
-    frontend.stop_server(editor)
-    del editor
-
-
-def test_enabled():
-    global mode
+def test_enabled(editor):
+    try:
+        mode = get_mode(editor)
+    except KeyError:
+        mode = modes.CheckerMode(check)
+        frontend.install_mode(editor, mode)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_checker_message():
+def test_checker_message(editor):
+    try:
+        mode = get_mode(editor)
+    except KeyError:
+        mode = modes.CheckerMode(check)
+        frontend.install_mode(editor, mode)
     assert modes.CheckerMessage.status_to_string(
         modes.CheckerMessages.INFO) == 'Info'
     assert modes.CheckerMessage.status_to_string(
@@ -47,11 +40,17 @@ def test_checker_message():
     assert msg.status_string == 'Error'
 
 
-@cwd_at('test')
-def test_request_analysis():
+@preserve_editor_config
+def test_request_analysis(editor):
+    try:
+        mode = get_mode(editor)
+    except KeyError:
+        mode = modes.CheckerMode(check)
+        frontend.install_mode(editor, mode)
+    frontend.stop_server(editor)
     mode.clear_messages()
     mode.request_analysis()
-    frontend.start_server(editor, os.path.abspath('server.py'))
+    frontend.start_server(editor, server_path())
     QTest.qWait(2000)
     mode.request_analysis()
     QTest.qWait(2000)

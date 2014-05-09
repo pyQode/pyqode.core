@@ -7,37 +7,16 @@ import pytest
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend, settings
-from pyqode.core.frontend import modes, panels
-from ...helpers import cwd_at
+from pyqode.core.frontend import modes
+
+from ...helpers import cwd_at, server_path
+from ...helpers import editor_open
 
 
-editor = None
-mode = modes.CodeCompletionMode()
+def get_mode(editor):
+    return frontend.get_mode(editor, modes.CodeCompletionMode)
 
 
-@pytest.mark.skip_on_travis
-@cwd_at('test')
-def setup_module():
-    global editor, mode
-    settings.save_on_focus_out = False
-    editor = frontend.CodeEdit()
-    frontend.install_mode(editor, mode)
-    frontend.install_mode(editor, modes.PygmentsSyntaxHighlighter(
-        editor.document()))
-    frontend.open_file(editor, __file__)
-    editor.setMinimumWidth(800)
-    editor.show()
-
-
-@pytest.mark.skip_on_travis
-def teardown_module():
-    global editor
-    frontend.uninstall_mode(editor, modes.CodeCompletionMode)
-    frontend.stop_server(editor)
-    del editor
-
-
-@pytest.mark.skip_on_travis
 def ensure_connected_and_visible(func):
     """
     Ensures the frontend is connect is connected to the server. If that is not
@@ -45,25 +24,26 @@ def ensure_connected_and_visible(func):
     """
     @functools.wraps(func)
     @cwd_at('test')
-    def wrapper(*args, **kwds):
-        global editor
+    def wrapper(editor, *args, **kwds):
         if not frontend.connected_to_server(editor):
-            frontend.start_server(editor, 'server.py')
-        QtGui.QApplication.instance().setActiveWindow(editor)
-        return func(*args, **kwds)
+            frontend.start_server(editor, server_path())
+        return func(editor, *args, **kwds)
     return wrapper
 
 
-@pytest.mark.skip_on_travis
-def test_enabled():
-    global mode
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
+def test_enabled(editor):
+    mode = get_mode(editor)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-@pytest.mark.skip_on_travis
-def test_properties():
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
+def test_properties(editor):
+    mode = get_mode(editor)
     mode.trigger_key = 'A'
     assert mode.trigger_key == 'A'
     mode.trigger_length = 3
@@ -82,10 +62,11 @@ def test_properties():
     assert mode.trigger_key == settings.cc_trigger_key
 
 
+@editor_open(__file__)
 @pytest.mark.skip_on_travis
-@cwd_at('test')
-def test_request_completion():
-    QtGui.QApplication.instance().setActiveWindow(editor)
+def test_request_completion(editor):
+    mode = get_mode(editor)
+    QTest.qWait(1000)
     if frontend.connected_to_server(editor):
         frontend.stop_server(editor)
     # request a completion at start of the document, this request will be
@@ -96,7 +77,7 @@ def test_request_completion():
     assert mode.request_completion() is True
     # starts the server after the request to test the retry on NotConnected
     # mechanism
-    frontend.start_server(editor, os.path.abspath('server.py'))
+    frontend.start_server(editor, server_path())
     QTest.qWait(2000)
     # only the first request should be accepted
     ret1 = mode.request_completion()
@@ -104,9 +85,10 @@ def test_request_completion():
     assert ret1 is True and ret2 is False
 
 
-@pytest.mark.skip_on_travis
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
-def test_events():
+def test_events(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
     QTest.keyPress(editor, settings.cc_trigger_key, QtCore.Qt.ControlModifier)
@@ -145,9 +127,10 @@ def test_events():
     QTest.keyPress(editor, settings.cc_trigger_key, QtCore.Qt.ControlModifier)
 
 
-@pytest.mark.skip_on_travis
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
-def test_insert_completions():
+def test_insert_completions(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
     # check insert completions
@@ -168,9 +151,11 @@ def test_insert_completions():
     QTest.qWait(100)
 
 
-@pytest.mark.skip_on_travis
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
-def test_show_completion_with_tooltip():
+def test_show_completion_with_tooltip(editor):
+    mode = get_mode(editor)
     settings.cc_show_tooltips = True
     editor.refresh_settings()
     mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
@@ -180,8 +165,10 @@ def test_show_completion_with_tooltip():
     mode._display_completion_tooltip('test')
 
 
-@pytest.mark.skip_on_travis
+@editor_open(__file__)
+# # @pytest.mark.skip_on_travis
 @ensure_connected_and_visible
-def test_show_completion_with_icon():
+def test_show_completion_with_icon(editor):
+    mode = get_mode(editor)
     mode._show_completions([{'name': 'test',
                              'icon': ':/pyqode-icons/rc/edit-undo.png'}])

@@ -2,52 +2,48 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import panels
+from test.helpers import editor_open
 
 
-editor = None
-panel = panels.SearchAndReplacePanel()
+def get_panel(editor):
+    return frontend.get_panel(editor, panels.SearchAndReplacePanel)
 
 
-def setup_module():
-    global editor, panel
-    editor = frontend.CodeEdit()
-    frontend.install_panel(editor, panel, panel.Position.BOTTOM)
-    editor.show()
-    editor.setMinimumWidth(800)
-    frontend.open_file(editor, __file__)
-    QTest.qWait(1000)
-    panel.checkBoxCase.setChecked(True)
-    panel.checkBoxWholeWords.setChecked(True)
-
-
-def teardown_module():
-    global editor
-    del editor
-
-
-def test_enabled():
-    global panel
+@editor_open(__file__)
+def test_enabled(editor):
+    panel = get_panel(editor)
     assert panel.enabled
     panel.enabled = False
     panel.enabled = True
 
 
-def test_request_search():
+@editor_open(__file__)
+def test_request_search(editor):
+    panel = get_panel(editor)
     panel.request_search('import')
     QTest.qWait(1000)
     assert panel.cpt_occurences > 1
 
 
-def test_action_search_triggered():
+@editor_open(__file__)
+def test_action_search_triggered(editor):
+    panel = get_panel(editor)
     # select word under cursor
     tc = frontend.word_under_mouse_cursor(editor)
     editor.setTextCursor(tc)
     panel.on_actionSearch_triggered()
     assert panel.isVisible()
     QTest.qWait(1000)
+    panel.checkBoxCase.setChecked(True)
+    panel.checkBoxWholeWords.setChecked(True)
+    panel.on_actionSearch_triggered()
+    assert panel.isVisible()
+    QTest.qWait(1000)
 
 
-def test_action_search_triggered2():
+@editor_open(__file__)
+def test_action_search_triggered2(editor):
+    panel = get_panel(editor)
     # second search with the same text
     tc = frontend.word_under_mouse_cursor(editor)
     editor.setTextCursor(tc)
@@ -56,21 +52,27 @@ def test_action_search_triggered2():
     QTest.qWait(1000)
 
 
-def test_action_next():
+@editor_open(__file__)
+def test_action_next(editor):
+    panel = get_panel(editor)
     panel.request_search('import')
     for i in range(panel.cpt_occurences + 1):
         panel.select_next()
         QTest.qWait(100)
 
 
-def test_action_previous():
+@editor_open(__file__)
+def test_action_previous(editor):
+    panel = get_panel(editor)
     panel.request_search('import')
     for i in range(panel.cpt_occurences + 1):
         panel.select_previous()
         QTest.qWait(100)
 
 
-def test_style():
+@editor_open(__file__)
+def test_style(editor):
+    panel = get_panel(editor)
     panel.request_search('import')
     QTest.qWait(1000)
     panel.background = QtGui.QColor('green')
@@ -78,7 +80,9 @@ def test_style():
     QTest.qWait(1000)
 
 
-def test_close():
+@editor_open(__file__)
+def test_close(editor):
+    panel = get_panel(editor)
     panel.on_actionSearch_triggered()
     assert panel.isVisible()
     panel.on_pushButtonClose_clicked()
@@ -87,7 +91,9 @@ def test_close():
     panel.on_actionSearch_triggered()
 
 
-def test_focus_out_event():
+@editor_open(__file__)
+def test_focus_out_event(editor):
+    panel = get_panel(editor)
     frontend.goto_line(editor, 1)
     tc = frontend.word_under_mouse_cursor(editor)
     editor.setTextCursor(tc)
@@ -99,7 +105,9 @@ def test_focus_out_event():
     panel.setFocus(True)
 
 
-def test_replace():
+@editor_open(__file__)
+def test_replace(editor):
+    panel = get_panel(editor)
     replacement_txt = 'REPLACEMENT_TEXT'
     panel.on_actionActionSearchAndReplace_triggered()
     panel.request_search('import')
@@ -117,7 +125,9 @@ def test_replace():
     assert panel.cpt_occurences == nb_occurences + 1
 
 
-def test_event_filter():
+@editor_open(__file__)
+def test_event_filter(editor):
+    panel = get_panel(editor)
     panel.on_actionActionSearchAndReplace_triggered()
     panel.request_search('import')
     QTest.qWait(1000)
