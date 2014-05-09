@@ -3,6 +3,7 @@ Tests the code completion mode
 """
 import functools
 import os
+import pytest
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtTest import QTest
 from pyqode.core import frontend, settings
@@ -14,6 +15,7 @@ editor = None
 mode = modes.CodeCompletionMode()
 
 
+@pytest.mark.skip_on_travis
 @cwd_at('test')
 def setup_module():
     global editor, mode
@@ -27,6 +29,7 @@ def setup_module():
     editor.show()
 
 
+@pytest.mark.skip_on_travis
 def teardown_module():
     global editor
     frontend.uninstall_mode(editor, modes.CodeCompletionMode)
@@ -34,6 +37,7 @@ def teardown_module():
     del editor
 
 
+@pytest.mark.skip_on_travis
 def ensure_connected_and_visible(func):
     """
     Ensures the frontend is connect is connected to the server. If that is not
@@ -50,6 +54,7 @@ def ensure_connected_and_visible(func):
     return wrapper
 
 
+@pytest.mark.skip_on_travis
 def test_enabled():
     global mode
     assert mode.enabled
@@ -57,6 +62,7 @@ def test_enabled():
     mode.enabled = True
 
 
+@pytest.mark.skip_on_travis
 def test_properties():
     mode.trigger_key = 'A'
     assert mode.trigger_key == 'A'
@@ -76,6 +82,7 @@ def test_properties():
     assert mode.trigger_key == settings.cc_trigger_key
 
 
+@pytest.mark.skip_on_travis
 @cwd_at('test')
 def test_request_completion():
     QtGui.QApplication.instance().setActiveWindow(editor)
@@ -97,6 +104,7 @@ def test_request_completion():
     assert ret1 is True and ret2 is False
 
 
+@pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_events():
     assert frontend.connected_to_server(editor)
@@ -137,6 +145,7 @@ def test_events():
     QTest.keyPress(editor, settings.cc_trigger_key, QtCore.Qt.ControlModifier)
 
 
+@pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_insert_completions():
     assert frontend.connected_to_server(editor)
@@ -159,6 +168,7 @@ def test_insert_completions():
     QTest.qWait(100)
 
 
+@pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_show_completion_with_tooltip():
     settings.cc_show_tooltips = True
@@ -170,6 +180,7 @@ def test_show_completion_with_tooltip():
     mode._display_completion_tooltip('test')
 
 
+@pytest.mark.skip_on_travis
 @ensure_connected_and_visible
 def test_show_completion_with_icon():
     mode._show_completions([{'name': 'test',
