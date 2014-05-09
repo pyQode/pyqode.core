@@ -140,7 +140,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._previous_stylesheet = ""
         self._separator = None
         self._decorations = []
-        self._mutex = QtCore.QMutex()
         self._occurrences = []
         self._current_occurrence_index = -1
         self._update_buttons(txt="")
@@ -264,7 +263,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.request_search(new_txt)
 
     def focusOutEvent(self, event):
-        self.cancel_requests()
+        self.job_runner.cancel_requests()
         Panel.focusOutEvent(self, event)
 
     def request_search(self, txt=None):
@@ -295,11 +294,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
         :return: List of tuple(int, int)
         """
-        self._mutex.lock()
         retval = []
         for occ in self._occurrences:
             retval.append(occ)
-        self._mutex.unlock()
         return retval
 
     def select_next(self):
@@ -439,13 +436,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         return flags
 
     def _exec_search(self, search_txt, doc, original_cursor, flags):
-        self._mutex.lock()
         self._occurrences[:] = []
         self._current_occurrence_index = -1
         if search_txt:
             self._occurrences, self._current_occurrence_index = \
                 text_api.search_text(doc, original_cursor, search_txt, flags)
-        self._mutex.unlock()
         self.search_finished.emit()
 
     def _update_label_matches(self):
@@ -486,15 +481,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._reset_stylesheet()
 
     def _current_occurrence(self):
-        self._mutex.lock()
         ret_val = self._current_occurrence_index
-        self._mutex.unlock()
         return ret_val
 
     def _clear_occurrences(self):
-        self._mutex.lock()
         self._occurrences[:] = []
-        self._mutex.unlock()
 
     def _create_decoration(self, selection_start, selection_end):
         """ Creates the text occurences decoration """
@@ -512,12 +503,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._decorations[:] = []
 
     def _set_current_occurrence(self, cr):
-        self._mutex.lock()
         self._current_occurrence_index = cr
-        self._mutex.unlock()
 
     def _remove_occurrence(self, i, offset=0):
-        self._mutex.lock()
         self._occurrences.pop(i)
         if offset:
             updated_occurences = []
@@ -528,7 +516,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                 else:
                     updated_occurences.append((occ[0], occ[1]))
             self._occurrences = updated_occurences
-        self._mutex.unlock()
 
     def _update_buttons(self, txt=""):
         enable = self.cpt_occurences > 1
