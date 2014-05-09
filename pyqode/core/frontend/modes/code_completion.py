@@ -123,12 +123,14 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                     if start <= column < end:
                         _logger().debug(
                             "cc: cancel request, cursor is in a disabled zone")
-                        return
+                        return False
             self._request_cnt += 1
             self._collect_completions(
                 self.editor.toPlainText(), frontend.current_line_nbr(self.editor),
                 frontend.current_column_nbr(self.editor), self.editor.file_path,
                 self.editor.file_encoding, self.completion_prefix)
+            return True
+        return False
 
     def _on_install(self, editor):
         self._completer = QtGui.QCompleter([""], editor)
@@ -284,29 +286,19 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 seps = settings.word_separators
                 return last_char in seps and last_char not in symbols
             return False
-        except IndexError:
+        except (IndexError, TypeError):
             return False
-        except TypeError:
-            return False  # no symbols
 
     def _show_completions(self, completions):
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
-        if self._is_last_char_end_of_word():
-            return
-        # user typed too fast: the user already typed the only suggestion we
-        # have
-        elif (len(completions) == 1 and
-              completions[0]['name'] == self.completion_prefix):
-            return
-        # a request cancel has been set
-        if self._cancel_next:
-            self._cancel_next = False
-            return
-        # we can show the completer
-        self._update_model(completions, self._completer.model())
-        self._show_popup()
-        # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        if (not self._cancel_next and not self._is_last_char_end_of_word() and
+                not (len(completions) == 1 and
+                     completions[0]['name'] == self.completion_prefix)):
+            # we can show the completer
+            self._update_model(completions, self._completer.model())
+            self._show_popup()
+        self._cancel_next = False
 
     def _handle_completer_events(self, event):
         # complete
@@ -410,10 +402,9 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._tooltips.clear()
         for completion in completions:
             name = completion['name']
-            if not name:
-                continue
             # skip redundant completion
-            if name != self.completion_prefix and name not in displayed_texts:
+            if (name and name != self.completion_prefix and
+                    name not in displayed_texts):
                 displayed_texts.append(name)
                 item = QtGui.QStandardItem()
                 item.setData(name, QtCore.Qt.DisplayRole)
@@ -431,17 +422,11 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         if completion not in self._tooltips:
             QtGui.QToolTip.hideText()
             return
-        if completion in self._tooltips:
-            tooltip = self._tooltips[completion].strip()
-        else:
-            tooltip = None
-        if tooltip:
-            pos = self._completer.popup().pos()
-            pos.setX(pos.x() + self._completer.popup().size().width())
-            pos.setY(pos.y() - 15)
-            QtGui.QToolTip.showText(pos, tooltip, self.editor)
-        else:
-            QtGui.QToolTip.hideText()
+        tooltip = self._tooltips[completion].strip()
+        pos = self._completer.popup().pos()
+        pos.setX(pos.x() + self._completer.popup().size().width())
+        pos.setY(pos.y() - 15)
+        QtGui.QToolTip.showText(pos, tooltip, self.editor)
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
