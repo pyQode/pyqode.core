@@ -332,7 +332,8 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             if self._case_sensitive:
                 self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
             else:
-                self._completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+                self._completer.setCaseSensitivity(
+                    QtCore.Qt.CaseInsensitive)
             # set prefix
             self._completer.setCompletionPrefix(self.completion_prefix)
             # compute size and pos
@@ -344,9 +345,10 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             w = self._completer.popup().verticalScrollBar().sizeHint().width()
             cr.setWidth(self._completer.popup().sizeHintForColumn(0) + w)
             # show the completion list
-            self._completer.complete(cr)
-            self._completer.popup().setCurrentIndex(
-                self._completer.completionModel().index(0, 0))
+            if self.editor.isVisible():
+                self._completer.complete(cr)
+                self._completer.popup().setCurrentIndex(
+                    self._completer.completionModel().index(0, 0))
 
     def _insert_completion(self, completion):
         tc = frontend.word_under_cursor(self.editor, select_whole_word=True)

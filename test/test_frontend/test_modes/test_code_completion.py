@@ -159,6 +159,7 @@ def test_insert_completions():
     QTest.qWait(100)
 
 
+@ensure_connected_and_visible
 def test_show_completion_with_tooltip():
     settings.cc_show_tooltips = True
     editor.refresh_settings()
@@ -169,6 +170,7 @@ def test_show_completion_with_tooltip():
     mode._display_completion_tooltip('test')
 
 
+@ensure_connected_and_visible
 def test_show_completion_with_icon():
     mode._show_completions([{'name': 'test',
                              'icon': ':/pyqode-icons/rc/edit-undo.png'}])
