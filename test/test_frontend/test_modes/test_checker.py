@@ -3,7 +3,7 @@ from PyQt4.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import modes, panels
 
-from ...helpers import preserve_editor_config
+from ...helpers import preserve_editor_config, wait_for_connected
 from ...helpers import server_path
 
 
@@ -52,8 +52,9 @@ def test_request_analysis(editor):
     mode.request_analysis()
     if frontend.connected_to_server(editor):
         frontend.stop_server(editor)
+    mode.request_analysis()
     frontend.start_server(editor, server_path())
-    QTest.qWait(3000)
+    wait_for_connected(editor)
     mode.request_analysis()
     QTest.qWait(3000)
     frontend.install_panel(editor, panels.MarkerPanel())

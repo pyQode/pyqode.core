@@ -139,6 +139,9 @@ def preserve_editor_config(func):
         finally:
             frontend.uninstall_all(editor)
             setup_editor(editor)
+            if not frontend.connected_to_server(editor):
+                frontend.start_server(editor, server_path())
+                wait_for_connected(editor)
         return ret
     return wrapper
 
