@@ -161,9 +161,7 @@ def test_mark_whole_doc_dirty(editor):
     frontend.mark_whole_doc_dirty(editor)
 
 
-src = """@editor_open(__file__)
-@log_test_name
-def test_mark_whole_doc_dirty(editor):
+src = """def test_mark_whole_doc_dirty(editor):
     frontend.mark_whole_doc_dirty(editor)
 """
 

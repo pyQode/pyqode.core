@@ -21,6 +21,7 @@ def test_modes(editor):
 
     """
     from pyqode.core.frontend.modes import CaseConverterMode
+    frontend.uninstall_all(editor)
     mode = CaseConverterMode()
     frontend.install_mode(editor, mode)
     m = frontend.get_mode(editor, CaseConverterMode)

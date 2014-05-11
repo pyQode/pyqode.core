@@ -12,7 +12,7 @@ from PyQt4.QtTest import QTest
 from pyqode.core import frontend, style, settings
 from pyqode.core.frontend import panels, modes
 
-from test.helpers import log_test_name, preserve_style, preserve_settings
+from test.helpers import log_test_name, preserve_style, preserve_settings, preserve_editor_config
 from test.helpers import editor_open
 
 
@@ -34,7 +34,7 @@ def test_set_plain_text(editor):
 @log_test_name
 def test_actions(editor):
     # 13 default shortcuts
-    nb_actions_expected = 13
+    nb_actions_expected = 21  # 13 default actions + search panel actions + case converter,...
     assert len(editor.actions()) == nb_actions_expected
     action = QtGui.QAction('my_action', editor)
     editor.add_action(action)
@@ -49,8 +49,8 @@ def test_actions(editor):
 @log_test_name
 def test_duplicate_line(editor):
     editor.duplicate_line()
-    assert editor.toPlainText().startswith(get_first_line() + '\n' +
-                                           get_first_line())
+    assert editor.toPlainText().startswith(get_first_line(editor) + '\n' +
+                                           get_first_line(editor))
 
 
 @editor_open(__file__)
@@ -60,8 +60,10 @@ def test_show_tooltip(editor):
 
 
 @editor_open(__file__)
+@preserve_editor_config
 @log_test_name
 def test_margin_size(editor):
+    frontend.uninstall_all(editor)
     # we really need to show the window here to get correct margin size.
     editor.show()
     QTest.qWaitForWindowShown(editor)
@@ -96,29 +98,29 @@ def test_zoom(editor):
             assert editor.font_size == 1
 
 
-@editor_open(__file__)
-@log_test_name
 def get_first_line(editor):
     return editor.toPlainText().splitlines()[0]
 
 
 @editor_open(__file__)
 @log_test_name
+@preserve_editor_config
 def test_indent(editor):
+    frontend.uninstall_all(editor)
     frontend.goto_line(editor, 1)
-    first_line = get_first_line()
+    first_line = get_first_line(editor)
     editor.indent()
     # no indenter mode -> indent should not do anything
-    assert get_first_line() == first_line
+    assert get_first_line(editor) == first_line
     editor.un_indent()
-    assert get_first_line() == first_line
+    assert get_first_line(editor) == first_line
     # add indenter mode, call to indent/un_indent should now work
     frontend.install_mode(editor, modes.IndenterMode())
     frontend.goto_line(editor, 1)
     editor.indent()
-    assert get_first_line() == '    ' + first_line
+    assert get_first_line(editor) == '    ' + first_line
     editor.un_indent()
-    assert get_first_line() == first_line
+    assert get_first_line(editor) == first_line
 
 
 @editor_open(__file__)

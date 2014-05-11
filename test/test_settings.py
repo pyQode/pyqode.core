@@ -170,16 +170,16 @@ def test_cc_case_sensitive(editor):
 @log_test_name
 def test_file_watcher_auto_reload(editor):
     code_completion_mode = get_completion_mode(editor)
-    assert settings.file_watcher_auto_reload is False
+    assert settings.file_watcher_auto_reload is True
     fw = frontend.get_mode(editor, modes.FileWatcherMode)
     assert fw
-    assert fw.auto_reload is False
-    settings.file_watcher_auto_reload = True
-    assert fw.auto_reload is False
-    editor.refresh_settings()
     assert fw.auto_reload is True
-    # reset settings for next tests
     settings.file_watcher_auto_reload = False
+    assert fw.auto_reload is True
+    editor.refresh_settings()
+    assert fw.auto_reload is False
+    # reset settings for next tests
+    settings.file_watcher_auto_reload = True
 
 
 @preserve_settings
