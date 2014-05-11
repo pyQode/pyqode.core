@@ -176,6 +176,12 @@ class MarkerPanel(Panel):
                         key = marker.icon[0]
                     else:
                         key = marker.icon
+                    if not key in self._icons:
+                        key, val = self.make_marker_icon(marker.icon)
+                        if key and val:
+                            self._icons[key] = val
+                        else:
+                            continue
                     self._icons[key].paint(painter, r)
 
     def mousePressEvent(self, event):

@@ -175,8 +175,8 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         if nb_msg > 20:
             nb_msg = 20
         for message in messages[0:nb_msg]:
-            self._messages.append(message)
             if message.line:
+                self._messages.append(message)
                 try:
                     marker_panel = frontend.get_panel(self.editor,
                                                       MarkerPanel)
