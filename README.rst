@@ -27,6 +27,10 @@ Stable (`master`_):
 .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master
     :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
     :alt: Coverage Status
+    
+.. image:: https://landscape.io/github/pyQode/pyqode.core/master/landscape.png
+   :target: https://landscape.io/github/pyQode/pyqode.core/master
+   :alt: Code Health
 
 
 Unstable (`develop`_):
@@ -39,6 +43,10 @@ Unstable (`develop`_):
 .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop
     :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
     :alt: Coverage Status
+    
+.. image:: https://landscape.io/github/pyQode/pyqode.core/develop/landscape.png
+   :target: https://landscape.io/github/pyQode/pyqode.core/develop
+   :alt: Code Health
 
 .. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:ready&title=Ready 
     :target: https://waffle.io/pyqode/pyqode.core
