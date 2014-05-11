@@ -1,33 +1,30 @@
+import random
 from PyQt4.QtTest import QTest
 
 from pyqode.core import frontend
 from pyqode.core.frontend import modes, panels
 
-from ...helpers import preserve_editor_config, wait_for_connected
+from ...helpers import preserve_editor_config, wait_for_connected, editor_open
 from ...helpers import server_path
 
 
 def get_mode(editor):
-    return frontend.get_mode(editor, modes.CheckerMode)
-
-
-def test_enabled(editor):
     try:
-        mode = get_mode(editor)
+        mode = frontend.get_mode(editor, modes.CheckerMode)
     except KeyError:
         mode = modes.CheckerMode(check)
         frontend.install_mode(editor, mode)
+    return mode
+
+
+def test_enabled(editor):
+    mode = get_mode(editor)
     assert mode.enabled
     mode.enabled = False
     mode.enabled = True
 
 
-def test_checker_message(editor):
-    try:
-        mode = get_mode(editor)
-    except KeyError:
-        mode = modes.CheckerMode(check)
-        frontend.install_mode(editor, mode)
+def test_checker_message():
     assert modes.CheckerMessage.status_to_string(
         modes.CheckerMessages.INFO) == 'Info'
     assert modes.CheckerMessage.status_to_string(
@@ -40,6 +37,7 @@ def test_checker_message(editor):
     assert msg.status_string == 'Error'
 
 
+@editor_open(__file__)
 @preserve_editor_config
 def test_request_analysis(editor):
     try:
@@ -49,10 +47,10 @@ def test_request_analysis(editor):
         frontend.install_mode(editor, mode)
     frontend.stop_server(editor)
     mode.clear_messages()
-    mode.request_analysis()
     if frontend.connected_to_server(editor):
         frontend.stop_server(editor)
     mode.request_analysis()
+    QTest.qWait(500)
     frontend.start_server(editor, server_path())
     wait_for_connected(editor)
     mode.request_analysis()
@@ -65,6 +63,45 @@ def test_request_analysis(editor):
     QTest.qWait(3000)
     frontend.uninstall_panel(editor, panels.MarkerPanel)
     mode.clear_messages()
+
+
+@editor_open(__file__)
+@preserve_editor_config
+def test_add_messages(editor):
+    mode = get_mode(editor)
+    mode.clear_messages()
+    status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
+              modes.CheckerMessages.INFO]
+    mode.add_messages([modes.CheckerMessage('desc', random.choice(status),
+                                            10 + i)
+                       for i in range(40)])
+    assert len(mode._messages) == 20
+    QTest.qWait(500)
+
+
+@editor_open(__file__)
+@preserve_editor_config
+def test_remove_message(editor):
+    mode = get_mode(editor)
+    status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
+              modes.CheckerMessages.INFO]
+    mode.add_messages([modes.CheckerMessage('desc', random.choice(status),
+                                            10 + i)
+                       for i in range(40)])
+    assert len(mode._messages) == 20
+    QTest.qWait(500)
+    mode.remove_message(mode._messages[10])
+    QTest.qWait(500)
+    assert len(mode._messages) == 19
+    mode.clear_messages()
+
+
+@editor_open(__file__)
+@preserve_editor_config
+def test_work_finished(editor):
+    mode = get_mode(editor)
+    mode._on_work_finished(False, [])
+    mode._on_work_finished(False, [('desc', i % 3, 10 + i) for i in range(40)])
 
 
 i = 0
