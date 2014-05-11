@@ -1,7 +1,6 @@
 """
 This module tests the CodeEdit class
 """
-import logging
 import mimetypes
 import platform
 import pytest
@@ -299,3 +298,33 @@ def test_resize(editor):
 def test_unknown_mimetype(editor):
     editor.clear()
     editor.setPlainText('dd', 'xyzbqdhb', 'utf-8')
+
+
+def accept_mbox():
+    print('accept')
+    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    for w in widgets:
+        print(w)
+        if isinstance(w, QtGui.QDialog):
+            QTest.keyPress(w, QtCore.Qt.Key_Return)
+            QTest.keyPress(w, QtCore.Qt.Key_Enter)
+            QTest.keyPress(w, QtCore.Qt.Key_Space)
+
+
+def reject_mbox():
+    print('reject')
+    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    for w in widgets:
+        print(w)
+        if isinstance(w, QtGui.QDialog):
+            QTest.keyPress(w, QtCore.Qt.Key_Escape)
+
+
+@log_test_name
+def test_goto_line_dlg(editor):
+    QtCore.QTimer.singleShot(1500, accept_mbox)
+    editor.goto_line()
+    QTest.qWait(1000)
+    QtCore.QTimer.singleShot(1500, reject_mbox)
+    editor.goto_line()
+    QTest.qWait(1000)
