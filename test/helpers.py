@@ -63,10 +63,7 @@ def editor_open(path):
             import logging
             logging.critical('---------------- %s ----------------' % func.__name__)
             frontend.open_file(editor, path)
-            try:
-                return func(editor, *args, **kwds)
-            except:
-                return
+            return func(editor, *args, **kwds)
         return wrapper
     return decorator
 
@@ -77,8 +74,6 @@ def preserve_settings(func):
         dic = dict(settings.__dict__)
         try:
             ret = func(editor, *args, **kwds)
-        except:
-            ret = None
         finally:
             for k, v in dic.items():
                 if k.startswith('_'):
@@ -93,10 +88,9 @@ def preserve_style(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         dic = dict(style.__dict__)
+        ret = None
         try:
             ret = func(editor, *args, **kwds)
-        except:
-            ret = None
         finally:
             print('Restoring default style')
             for k, v in dic.items():
@@ -115,10 +109,9 @@ def preserve_actions(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         dic = dict(actions.__dict__)
+        ret = None
         try:
             ret = func(editor, *args, **kwds)
-        except:
-            ret = None
         finally:
             for k, v in dic.items():
                 if k.startswith('_'):
@@ -132,10 +125,9 @@ def preserve_actions(func):
 def preserve_editor_config(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
+        ret = None
         try:
             ret = func(editor, *args, **kwds)
-        except:
-            ret = None
         finally:
             frontend.uninstall_all(editor)
             setup_editor(editor)
