@@ -3,7 +3,7 @@ Report bugs or ask a question
 
 You can report bugs or ask question on our bug tracker: https://github.com/pyQode/pyqode.core/issues?state=open
 
-Please, if your issue has been fixed in develop branch only, **do not close it**. 
+**Please, if your issue has been fixed in develop branch only, do not close it**. 
 
 We leave our issues open while they have not been merged into the master branch (i.e. while the fix has not officially been released).
 
