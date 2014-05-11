@@ -7,13 +7,15 @@ Status
 Package:
 ++++++++
 
-.. image:: http://img.shields.io/pypi/dm/pyqode.core.svg
+
+.. image:: http://img.shields.io/pypi/v/pyqode.core.png
+    :target: https://pypi.python.org/pypi/pyqode.core/
+    :alt: Latest PyPI version
+
+.. image:: http://img.shields.io/pypi/dm/pyqode.core.png
     :target: https://pypi.python.org/pypi/pyqode.core/
     :alt: Number of PyPI downloads
 
-.. image:: http://img.shields.io/pypi/v/pyqode.core.svg
-    :target: https://pypi.python.org/pypi/pyqode.core/
-    :alt: Latest PyPI version
 
 Stable (master):
 ++++++++++++++++
