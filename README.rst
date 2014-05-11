@@ -17,7 +17,7 @@ Package:
     :alt: Number of PyPI downloads
 
 
-Stable (master):
+Stable (`master`_):
 ++++++++++++++++
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
@@ -29,7 +29,7 @@ Stable (master):
     :alt: Coverage Status
 
 
-Unstable (develop):
+Unstable (`develop`_):
 +++++++++++++++++++
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop
@@ -64,10 +64,6 @@ pyQode is a **namespace package** made up of the following official packages:
   - `pyqode.python`_: python support (code completion, ...)
 
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
-
-.. _pyqode.core: https://github.com/pyQode/pyqode.core
-.. _pyqode.python: https://github.com/pyQode/pyqode.python
-.. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
 **pyqode.core** is the foundation package, it contains the pyqode base classes
 (CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
@@ -130,10 +126,6 @@ Resources
 - `Documentation`_
 - `Wiki`_
 
-.. _Downloads: https://github.com/pyQode/pyqode.core/releases
-.. _Source repository: https://github.com/pyQode/pyqode.core/
-.. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
-.. _Wiki: https://github.com/pyQode/pyqode.core/wiki
 
 Snapshots
 ---------
@@ -146,3 +138,14 @@ taken on a Gnome 3 desktop):
 
 .. image:: doc/source/_static/notepad-monokai.png
     :alt: Monokai style
+    
+    
+.. _pyqode.core: https://github.com/pyQode/pyqode.core
+.. _pyqode.python: https://github.com/pyQode/pyqode.python
+.. _pyqode.designer: https://github.com/pyQode/pyqode.designer
+.. _Downloads: https://github.com/pyQode/pyqode.core/releases
+.. _Source repository: https://github.com/pyQode/pyqode.core/
+.. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
+.. _Wiki: https://github.com/pyQode/pyqode.core/wiki
+.. _master: https://github.com/pyQode/pyqode.core/tree/master
+.. _develop: https://github.com/pyQode/pyqode.core/tree/develop
