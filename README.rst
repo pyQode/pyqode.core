@@ -113,10 +113,17 @@ Testing
 
 pyqode.core now have a test suite and measure its coverage.
 
-To run the test and see the coverage report run the following command (you don't need
-to install anything)::
+To run the test, just run the following command (you don't need to install anything)::
 
     $ python3 runtests.py
+    
+If you need coverage, install pytest-coverage and run::
+
+    $ python3 runtests.py --cov pyqode --cov-report term
+    
+If you want to test PEP8 compliance, install pytest-pep8 and run::
+
+    $ python3 runtests.py --pep8
 
 Resources
 ---------
