@@ -364,8 +364,10 @@ def uninstall_all(editor):
     """
     while len(editor._modes):
         k = list(editor._modes.keys())[0]
-        uninstall_mode(editor, k)
+        m = uninstall_mode(editor, k)
+        del m
     for i in range(4):
         while len(editor._panels[i]):
             k = list(editor._panels[i].keys())[0]
-            uninstall_panel(editor, k)
+            p = uninstall_panel(editor, k)
+            del p
