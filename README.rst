@@ -1,14 +1,11 @@
 Source Code Editor widget for PyQt4
 ===================================
 
-.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
-    :target: https://travis-ci.org/pyQode/pyqode.core
-    :alt: Travis-CI build status
+Status
+------
 
-
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop
-    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
-    :alt: Coverage Status
+Package:
+++++++++
 
 .. image:: http://img.shields.io/pypi/dm/pyqode.core.svg
     :target: https://pypi.python.org/pypi/pyqode.core/
@@ -18,12 +15,44 @@ Source Code Editor widget for PyQt4
     :target: https://pypi.python.org/pypi/pyqode.core/
     :alt: Latest PyPI version
 
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=ready&title=Ready 
-    :target: https://waffle.io/pyqode/pyqode.core
-    :alt: 'Stories in Ready'
+Stable (master):
+++++++++++++++++
 
-What is pyQode?
----------------
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
+    :target: https://travis-ci.org/pyQode/pyqode.core
+    :alt: Travis-CI build status
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master
+    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
+    :alt: Coverage Status
+
+
+Unstable (develop):
++++++++++++++++++++
+
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop
+    :target: https://travis-ci.org/pyQode/pyqode.core
+    :alt: Travis-CI build status
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop
+    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
+    :alt: Coverage Status
+
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:ready&title=Ready 
+    :target: https://waffle.io/pyqode/pyqode.core
+    :alt: 'Tasks ready to be implemented'
+    
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:in progress&title=In progress
+    :target: https://waffle.io/pyqode/pyqode.core
+    :alt: 'Tasks in progress'
+
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:done&title=Done
+    :target: https://waffle.io/pyqode/pyqode.core
+    :alt: 'Tasks done in develop branch'
+
+
+About pyQode
+------------
 
 pyQode is a *flexible source code editor widget* forPyQt4 applications.
 
