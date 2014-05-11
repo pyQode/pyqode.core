@@ -48,11 +48,11 @@ Unstable (`develop`_):
    :target: https://landscape.io/github/pyQode/pyqode.core/develop
    :alt: Code Health
 
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:ready&title=Ready 
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:ready&title=ready 
     :target: https://waffle.io/pyqode/pyqode.core
     :alt: 'Tasks ready to be implemented'
     
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:done&title=Done
+.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:done&title=done
     :target: https://waffle.io/pyqode/pyqode.core
     :alt: 'Tasks done in develop branch'
 
