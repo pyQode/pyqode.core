@@ -44,10 +44,6 @@ Unstable (develop):
     :target: https://waffle.io/pyqode/pyqode.core
     :alt: 'Tasks ready to be implemented'
     
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:in progress&title=In progress
-    :target: https://waffle.io/pyqode/pyqode.core
-    :alt: 'Tasks in progress'
-
 .. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:done&title=Done
     :target: https://waffle.io/pyqode/pyqode.core
     :alt: 'Tasks done in develop branch'
