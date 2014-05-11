@@ -8,7 +8,7 @@ You can report bugs or ask question on our bug tracker: https://github.com/pyQod
 We leave our issues open while they have not been merged into the master branch (i.e. while the fix has not officially been released).
 
 *Note: we are now using [waffle.io](https://waffle.io/pyqode/pyqode.core) to manage all pyqode issues (from all
-sub repositories).
+sub repositories).*
 
 
 Submitting pull requests:
