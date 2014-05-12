@@ -28,11 +28,17 @@ class FileWatcherMode(Mode, QtCore.QObject):
 
     @auto_reload.setter
     def auto_reload(self, value):
+        """
+        Automatically reloads changed files
+        """
         self._auto_reload = value
 
     def __init__(self):
         QtCore.QObject.__init__(self)
         Mode.__init__(self)
+        self._auto_reload = False
+        self._flg_notify = False
+        self._data = (None, None)
         self._timer = QtCore.QTimer()
         self._timer.setInterval(200)
         self._timer.timeout.connect(self._check_mtime)
@@ -42,6 +48,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self.refresh_settings()
 
     def refresh_settings(self):
+        """ Refresh settings: auto reload """
         self._auto_reload = settings.file_watcher_auto_reload
 
     def _on_state_changed(self, state):
@@ -64,6 +71,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self.editor.focused_in.disconnect(self._check_for_pending)
 
     def _update_mtime(self):
+        """ Updates modif time """
         try:
             self._mtime = os.path.getmtime(self.editor.file_path)
         except OSError:
@@ -77,6 +85,9 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._timer.stop()
 
     def _check_mtime(self):
+        """
+        Checks watched file moficiation time.
+        """
         if self.editor and self.editor.file_path:
             if not os.path.exists(self.editor.file_path) and self._mtime:
                 self._notify_deleted_file()
@@ -86,7 +97,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                     self._mtime = mtime
                     self._notify_change()
 
-    def _notify(self, settings_val, title, message, expected_action=None):
+    def _notify(self, title, message, expected_action=None):
         """
         Notify user from external event
         """
@@ -108,24 +119,30 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Notify user from external change if autoReloadChangedFiles is False
         then reload the changed file in the editor
         """
-        def inner_action(*a):
+        def inner_action(*args):
+            """ Inner action: open file """
+            # pylint: disable=unused-argument
             frontend.open_file(self.editor, self.editor.file_path)
 
-        args = ("autoReloadChangedFiles", "File changed",
+        args = ("File changed",
                 "The file <i>%s</i> has changed externally.\nDo you want to "
                 "reload it?" % os.path.basename(self.editor.file_path))
         kwargs = {"expected_action": inner_action}
         if self.editor.hasFocus():
+            # pylint: disable=star-args
             self._notify(*args, **kwargs)
         else:
             self._notification_pending = True
-            self._args = args
-            self._kwargs = kwargs
+            self._data = (args, kwargs)
 
     def _check_for_pending(self, *args, **kwargs):
+        """
+        Checks if a notification is pending.
+        """
         if self._notification_pending and not self._processing:
             self._processing = True
-            self._notify(*self._args, **self._kwargs)
+            args, kwargs = self._data
+            self._notify(*args, **kwargs)
             self._notification_pending = False
             self._processing = False
 

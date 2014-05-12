@@ -1,4 +1,8 @@
+"""
+This packages contains the various qt designer plugins
+"""
 from PyQt4 import QtDesigner
+# pylint: disable=missing-docstring, invalid-name, abstract-class-not-used
 
 
 class WidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
@@ -16,6 +20,9 @@ class WidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
         print(self.name(), self.includeFile(), self.objectName())
 
     def klass(self):
+        """
+        Returns the classname of the widget
+        """
         raise NotImplementedError()
 
     def initialize(self, form_editor):

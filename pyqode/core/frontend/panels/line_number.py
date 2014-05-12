@@ -16,11 +16,15 @@ class LineNumberPanel(Panel):
         self.scrollable = True
         self._selecting = False
         self._sel_start = -1
+        self._line_color_u = self.palette().color(
+            QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
+        self._line_color_s = self.palette().color(
+            QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
 
     def _on_install(self, editor):
         Panel._on_install(self, editor)
 
-    def sizeHint(self):
+    def sizeHint(self):  # pylint: disable=invalid-name
         """
         Returns the panel size hint (as the panel is on the left, we only need
         to compute the width
@@ -42,7 +46,7 @@ class LineNumberPanel(Panel):
         space = 3 + self.editor.fontMetrics().width("9") * digits
         return space
 
-    def mousePressEvent(self, e):
+    def mousePressEvent(self, e):  # pylint: disable=invalid-name
         """
         Starts selecting
         """
@@ -53,23 +57,29 @@ class LineNumberPanel(Panel):
         frontend.select_lines(self.editor, start, end)
 
     def cancel_selection(self):
+        """
+        Cancel line selection.
+        """
         self._selecting = False
         self._sel_start = -1
 
-    def mouseReleaseEvent(self, e):
+    def mouseReleaseEvent(self, event):
         """ Cancels selection """
+        # pylint: disable=invalid-name, unused-argument
         self.cancel_selection()
 
     def leaveEvent(self, event):
         """
         Cancels selection
         """
+        # pylint: disable=invalid-name, unused-argument
         self.cancel_selection()
 
     def mouseMoveEvent(self, e):
         """
         Updates end of selection if we are currently selecting
         """
+        # pylint: disable=invalid-name, unused-argument
         if self._selecting:
             end_pos = e.pos().y()
             start_line = frontend.line_nbr_from_position(
@@ -81,11 +91,8 @@ class LineNumberPanel(Panel):
         """
         Paints the line numbers
         """
+        # pylint: disable=invalid-name, unused-argument, too-many-locals
         Panel.paintEvent(self, event)
-        self._line_color_u = self.palette().color(
-            QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
-        self._line_color_s = self.palette().color(
-            QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
         if self.isVisible():
             painter = QtGui.QPainter(self)
             # get style options (font, size)
@@ -102,6 +109,7 @@ class LineNumberPanel(Panel):
             has_sel = sel_start != sel_end
             cl = frontend.current_line_nbr(self.editor)
             # draw every visible blocks
+            # pylint: disable=unused-variable
             for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):

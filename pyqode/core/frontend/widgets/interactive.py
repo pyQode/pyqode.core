@@ -4,12 +4,14 @@ This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
 """
 import logging
-import os
-
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtProperty as Property, QProcess
-from PyQt4.QtGui import QTextEdit, QApplication, QTextCursor, QColor
-
+from PyQt4.QtGui import QTextEdit, QTextCursor, QColor
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING
+# pylint: disable=too-many-instance-attributes, missing-docstring
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class InteractiveConsole(QTextEdit):
@@ -38,6 +40,8 @@ class InteractiveConsole(QTextEdit):
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
         self._stderr_col = QColor("#FF0000")
+        self._process = None
+        self._args = None
         self._usr_buffer = ""
         self._clear_on_start = True
         self.process = QProcess()
@@ -67,23 +71,23 @@ class InteractiveConsole(QTextEdit):
 
     def _on_stdout(self):
         txt = bytes(self.process.readAllStandardOutput()).decode('utf-8')
-        logging.debug('stdout ready: %s' % txt)
+        logging.debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
         txt = bytes(self.process.readAllStandardError()).decode('utf-8')
-        logging.debug('stderr ready: %s' % txt)
+        logging.debug('stderr ready: %s', txt)
         self._writer(self, txt, self.stderr_color)
 
     def _get_background_col(self):
-        p = self.palette()
-        return p.color(p.Base)
+        pal = self.palette()
+        return pal.color(pal.Base)
 
     def _set_background_color(self, color):
-        p = self.palette()
-        p.setColor(p.Base, color)
-        p.setColor(p.Text, self.stdout_color)
-        self.setPalette(p)
+        pal = self.palette()
+        pal.setColor(pal.Base, color)
+        pal.setColor(pal.Text, self.stdout_color)
+        self.setPalette(pal)
 
     #: The console background color. Default is white.
     background_color = Property(
@@ -95,9 +99,9 @@ class InteractiveConsole(QTextEdit):
 
     def _set_stdout_col(self, color):
         self._stdout_col = color
-        p = self.palette()
-        p.setColor(p.Text, self.stdout_color)
-        self.setPalette(p)
+        pal = self.palette()
+        pal.setColor(pal.Text, self.stdout_color)
+        self.setPalette(pal)
 
     #: Color of the process output. Default is black.
     stdout_color = Property(
@@ -138,7 +142,7 @@ class InteractiveConsole(QTextEdit):
     app_msg_color = Property(
         QColor, _get_app_message_color, _set_app_message_color,
         doc="Color of the application messages ('Process started', "
-            "'Process finished with status %d')")
+        "'Process finished with status %d')")
 
     def _get_clear_on_start(self):
         return self._clear_on_start
@@ -170,6 +174,7 @@ class InteractiveConsole(QTextEdit):
                              doc='Merges stdout and stderr. Default is False')
 
     def closeEvent(self, *args, **kwargs):
+        # pylint: disable=invalid-name, unused-argument
         if self.process.state() == QProcess.Running:
             self.process.terminate()
 
@@ -200,25 +205,23 @@ class InteractiveConsole(QTextEdit):
             self.process.start(process, args)
             self._write_started()
         else:
-            self._logger().warning('a process is already running')
-
-    def _logger(self):
-        return logging.getLogger(__name__)
+            _logger().warning('a process is already running')
 
     def stop_process(self):
-        self._logger().debug('killing process')
+        _logger().debug('killing process')
         self.process.kill()
         self._user_stop = True
 
-    def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Return or QKeyEvent.key() == Qt.Key_Enter:
+    def keyPressEvent(self, event):
+        # pylint: disable=invalid-name
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
             self._usr_buffer += "\n"
             self.process.write(bytes(self._usr_buffer, "utf-8"))
             self._usr_buffer = ""
         else:
-            if QKeyEvent.key() != Qt.Key_Backspace:
-                txt = QKeyEvent.text()
+            if event.key() != Qt.Key_Backspace:
+                txt = event.text()
                 self._usr_buffer += txt
                 self.setTextColor(self._stdin_col)
             else:
@@ -226,21 +229,21 @@ class InteractiveConsole(QTextEdit):
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
-        QTextEdit.keyPressEvent(self, QKeyEvent)
+        QTextEdit.keyPressEvent(self, event)
 
-    def _write_finished(self, exitCode, exitStatus):
-        self._writer(self, "\nProcess finished with exit code %d" % exitCode,
+    def _write_finished(self, exit_code, exit_status):
+        self._writer(self, "\nProcess finished with exit code %d" % exit_code,
                      self._app_msg_col)
         self._running = False
-        self._logger().debug('process finished (exitCode=%r, exitStatus=%r' %
-                             (exitCode, exitStatus))
-        self.process_finished.emit(exitCode)
+        _logger().debug('process finished (exit_code=%r, exit_status=%r)',
+                        exit_code, exit_status)
+        self.process_finished.emit(exit_code)
 
     def _write_started(self):
         self._writer(self, "{0} {1}\n".format(
             self._process, " ".join(self._args)), self._app_msg_col)
         self._running = True
-        self._logger().debug('process started')
+        _logger().debug('process started')
 
     def _write_error(self, error):
         if self._user_stop:
@@ -252,7 +255,7 @@ class InteractiveConsole(QTextEdit):
                 self._process, " ".join(self._args)), self.app_msg_color)
             err = PROCESS_ERROR_STRING[error]
             self._writer(self, "Error: %s" % err, self.stderr_color)
-            self._logger().debug('process error: %s' % err)
+            _logger().debug('process error: %s', err)
         self._running = False
 
     @staticmethod

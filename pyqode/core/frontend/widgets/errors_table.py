@@ -4,9 +4,7 @@ Contains a custom QTableWidget for easier displaying of CheckerMessages
 """
 from pyqode.core.frontend.utils import memoized
 from pyqode.core.frontend.modes.checker import CheckerMessage
-from pyqode.core.frontend.modes.checker import CheckerMessages
 from PyQt4 import QtCore, QtGui
-
 from PyQt4.QtGui import QTableWidget
 
 
@@ -28,6 +26,7 @@ class ErrorsTable(QTableWidget):
 
     You clear the table using :meth:`pyqode.core.frontend.widgets.ErrorsTable`.
     """
+    # pylint: disable=too-many-public-methods
     #: Signal emitted when a message is activated, the clicked signal is passed
     #: as a parameter
     msg_activated = QtCore.pyqtSignal(CheckerMessage)
@@ -47,11 +46,11 @@ class ErrorsTable(QTableWidget):
         self.setSelectionBehavior(self.SelectRows)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
-        self.contextMenu = QtGui.QMenu()
-        self.actionCopyDescription = QtGui.QAction("Copy", self)
-        self.actionCopyDescription.triggered.connect(
+        self.context_mnu = QtGui.QMenu()
+        self._a_copy_desc = QtGui.QAction("Copy", self)
+        self._a_copy_desc.triggered.connect(
             self._copy_cell_text)
-        self.contextMenu.addAction(self.actionCopyDescription)
+        self.context_mnu.addAction(self._a_copy_desc)
 
     def _copy_cell_text(self):
         """
@@ -61,7 +60,8 @@ class ErrorsTable(QTableWidget):
         QtGui.QApplication.clipboard().setText(txt)
 
     def _show_context_menu(self, pos):
-        self.contextMenu.exec_(self.mapToGlobal(pos))
+        """ Shows the context menu """
+        self.context_mnu.exec_(self.mapToGlobal(pos))
 
     def clear(self, *args, **kwargs):
         """
@@ -73,8 +73,12 @@ class ErrorsTable(QTableWidget):
         self.setHorizontalHeaderLabels(
             ["Nr", "Type", "File name", "Line", "Description", "File path"])
 
+    @staticmethod
     @memoized
-    def make_icon(self, icon):
+    def make_icon(icon):
+        """
+        Make icon from icon filename/tuple (if you want to use a theme)
+        """
         if isinstance(icon, tuple):
             return QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
@@ -83,12 +87,12 @@ class ErrorsTable(QTableWidget):
         else:
             return None
 
-    def add_message(self, checkerMessage):
+    def add_message(self, msg):
         """
         Adds a checker message to the table.
 
-        :param checkerMessage: The message to add
-        :type checkerMessage: pyqode.core.frontend.modes.CheckerMessage
+        :param msg: The message to add
+        :type msg: pyqode.core.frontend.modes.CheckerMessage
         """
         row = self.rowCount()
         self.insertRow(row)
@@ -96,42 +100,42 @@ class ErrorsTable(QTableWidget):
         # Nr
         item = QtGui.QTableWidgetItem(str(row + 1).zfill(3))
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, 0, item)
 
         # type
-        item = QtGui.QTableWidgetItem(self.make_icon(checkerMessage.icon),
-                                      checkerMessage.status_string)
+        item = QtGui.QTableWidgetItem(self.make_icon(msg.icon),
+                                      msg.status_string)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_TYPE, item)
 
         # filename
         item = QtGui.QTableWidgetItem(
-            QtCore.QFileInfo(checkerMessage.path).fileName())
+            QtCore.QFileInfo(msg.path).fileName())
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_FILE_NAME, item)
 
         # line
-        if checkerMessage.line <= 0:
+        if msg.line <= 0:
             item = QtGui.QTableWidgetItem("----")
         else:
-            item = QtGui.QTableWidgetItem(str(checkerMessage.line).zfill(4))
+            item = QtGui.QTableWidgetItem(str(msg.line).zfill(4))
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_LINE_NBR, item)
 
         # desc
-        item = QtGui.QTableWidgetItem(checkerMessage.description)
+        item = QtGui.QTableWidgetItem(msg.description)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_MSG, item)
 
         # filename
-        item = QtGui.QTableWidgetItem(checkerMessage.path)
+        item = QtGui.QTableWidgetItem(msg.path)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, checkerMessage)
+        item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_PATH, item)
 
     def _on_item_activated(self, item):

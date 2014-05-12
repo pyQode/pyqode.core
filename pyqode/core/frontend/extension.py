@@ -7,6 +7,7 @@ from PyQt4 import QtGui
 
 
 def _logger():
+    """ Returns module's logger """
     return logging.getLogger(__name__)
 
 
@@ -57,6 +58,7 @@ class Mode(object):
 
     @enabled.setter
     def enabled(self, enabled):
+        # pylint: disable=missing-docstring
         if enabled != self._enabled:
             self._enabled = enabled
             self._on_state_changed(enabled)
@@ -133,7 +135,8 @@ def install_mode(editor, mode):
     :param mode: The mode instance to install.
     :type mode: pyqode.core.frontend.Mode
     """
-    _logger().info('installing mode %r' % mode.name)
+    _logger().info('installing mode %r', mode.name)
+    # pylint: disable=protected-access
     editor._modes[mode.name] = mode
     mode._on_install(editor)
 
@@ -144,11 +147,12 @@ def uninstall_mode(editor, name):
 
     :param name: The name of the mode to uninstall.
     """
-    _logger().info('uninstalling mode %r' % name)
-    m = get_mode(editor, name)
-    m._on_uninstall()
-    editor._modes.pop(m.name)
-    return m
+    # pylint: disable=protected-access
+    _logger().info('uninstalling mode %r', name)
+    mode = get_mode(editor, name)
+    mode._on_uninstall()
+    editor._modes.pop(mode.name)
+    return mode
 
 
 def get_mode(editor, name_or_klass):
@@ -159,6 +163,7 @@ def get_mode(editor, name_or_klass):
     :type name_or_klass: str or type
     :rtype: pyqode.core.frontend.Mode
     """
+    # pylint: disable=protected-access
     if not isinstance(name_or_klass, str):
         name_or_klass = name_or_klass.__name__
     return editor._modes[name_or_klass]
@@ -168,6 +173,7 @@ def get_modes(editor):
     """
     Returns the dictionary of modes.
     """
+    # pylint: disable=protected-access
     return editor._modes
 
 
@@ -179,7 +185,7 @@ class Panel(QtGui.QWidget, Mode):
 
     .. note:: A disabled panel will be hidden automatically.
     """
-    class Position:
+    class Position:  # pylint: disable=no-init, too-few-public-methods
         """
         Enumerates the possible panel positions
         """
@@ -194,6 +200,7 @@ class Panel(QtGui.QWidget, Mode):
 
         @classmethod
         def iterable(cls):
+            """ Returns possible positions as an iterable (list) """
             return [cls.TOP, cls.LEFT, cls.RIGHT, cls.BOTTOM]
 
     @property
@@ -209,6 +216,7 @@ class Panel(QtGui.QWidget, Mode):
 
     @scrollable.setter
     def scrollable(self, value):
+        # pylint: disable=missing-docstring
         self._scrollable = value
 
     def __init__(self):
@@ -259,6 +267,8 @@ class Panel(QtGui.QWidget, Mode):
             self.hide()
 
     def paintEvent(self, event):
+        """ Fills the panel background. """
+        # pylint: disable=invalid-name
         if self.isVisible():
             # fill background
             self._background_brush = QtGui.QBrush(QtGui.QColor(
@@ -274,7 +284,8 @@ class Panel(QtGui.QWidget, Mode):
 
         Automatically call CodeEdit.refresh_panels.
         """
-        _logger().debug('%s visibility changed' % self.name)
+        # pylint: disable=invalid-name
+        _logger().debug('%s visibility changed', self.name)
         QtGui.QWidget.setVisible(self, visible)
         self.editor.refresh_panels()
 
@@ -294,6 +305,7 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
     :type obj: pyqode.core.frontend.Panel
     :type position: int
     """
+    # pylint: disable=protected-access
     assert obj is not None
     pos_to_string = {
         Panel.Position.BOTTOM: 'bottom',
@@ -301,12 +313,12 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
         Panel.Position.RIGHT: 'right',
         Panel.Position.TOP: 'top'
     }
-    _logger().info('installing panel %s at %r' %
-                   (obj.name, pos_to_string[position]))
+    _logger().info('installing panel %s at %r', obj.name,
+                   pos_to_string[position])
     obj.order_in_zone = len(editor._panels[position])
     editor._panels[position][obj.name] = obj
     obj._on_install(editor)
-    _logger().info('panel %s installed' % obj.name)
+    _logger().info('panel %s installed', obj.name)
 
 
 def uninstall_panel(editor, name):
@@ -317,10 +329,11 @@ def uninstall_panel(editor, name):
 
     :return: The uninstalled mode instance
     """
-    _logger().info('Uninstalling panel %s' % name)
-    p, zone = get_panel(editor, name, get_zone=True)
-    p._on_uninstall()
-    return editor._panels[zone].pop(p.name, None)
+    # pylint: disable=protected-access
+    _logger().info('Uninstalling panel %s', name)
+    panel, zone = get_panel(editor, name, get_zone=True)
+    panel._on_uninstall()
+    return editor._panels[zone].pop(panel.name, None)
 
 
 def get_panel(editor, name_or_klass, get_zone=False):
@@ -331,6 +344,7 @@ def get_panel(editor, name_or_klass, get_zone=False):
     :param get_zone: True to also return the zone in which the panel has
         been installed.
     """
+    # pylint: disable=protected-access
     if not isinstance(name_or_klass, str):
         name_or_klass = name_or_klass.__name__
     for i in range(4):
@@ -353,6 +367,7 @@ def get_panels(editor):
     :return: A dictionary of :class:`pyqode.core.frontend.Panel`
     :rtype: dict
     """
+    # pylint: disable=protected-access
     return editor._panels
 
 
@@ -362,12 +377,13 @@ def uninstall_all(editor):
 
     :param editor: CodeEdit instance.
     """
+    # pylint: disable=protected-access
     while len(editor._modes):
-        k = list(editor._modes.keys())[0]
-        m = uninstall_mode(editor, k)
-        del m
+        key = list(editor._modes.keys())[0]
+        mode = uninstall_mode(editor, key)
+        del mode
     for i in range(4):
         while len(editor._panels[i]):
-            k = list(editor._panels[i].keys())[0]
-            p = uninstall_panel(editor, k)
-            del p
+            key = list(editor._panels[i].keys())[0]
+            panel = uninstall_panel(editor, key)
+            del panel

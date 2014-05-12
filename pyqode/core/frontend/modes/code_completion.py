@@ -4,13 +4,13 @@ This module contains the code completion mode and the related classes.
 """
 import logging
 import re
-
 from PyQt4 import QtGui, QtCore
-
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
 from pyqode.core import backend
+# pylint: disable=too-many-instance-attributes, missing-docstring
+
 
 
 def _logger():
@@ -98,6 +98,13 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._cancel_next = False
         self._request_cnt = 0
         self._last_completion_prefix = ""
+        self._trigger_key = None
+        self._trigger_len = None
+        self._trigger_symbols = None
+        self._show_tooltips = None
+        self._case_sensitive = None
+        self._data = None
+        self._completer = None
         self._init_settings()
 
     def _init_settings(self):
@@ -170,6 +177,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
         :param event: QFocusEvents
         """
+        # pylint: disable=unused-argument
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, status, results):
@@ -216,6 +224,17 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             ret_val = (k in seps and k not in symbols)
         return ret_val
 
+    def _update_prefix(self, event, is_end_of_word, is_navigation_key):
+        self._completer.setCompletionPrefix(self.completion_prefix)
+        cnt = self._completer.completionCount()
+        if (not cnt or (self.completion_prefix == "" and is_navigation_key) or
+                is_end_of_word or
+                (int(event.modifiers()) and
+                 event.key() == QtCore.Qt.Key_Backspace)):
+            self._hide_popup()
+        else:
+            self._show_popup()
+
     def _on_key_released(self, event):
         if self._is_shortcut(event):
             return
@@ -226,26 +245,17 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             event, is_printable, symbols)
         if self._completer.popup().isVisible():
             # Update completion prefix
-            self._completer.setCompletionPrefix(self.completion_prefix)
-            cnt = self._completer.completionCount()
-            if (not cnt or (self.completion_prefix == "" and is_navigation_key)
-                or is_end_of_word or
-                    (int(event.modifiers()) and event.key() ==
-                        QtCore.Qt.Key_Backspace)):
-                self._hide_popup()
-            else:
-                self._show_popup()
-        # text triggers
+            self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
             else:
                 # trigger symbols
                 if symbols:
-                    tc = frontend.word_under_cursor(self.editor)
-                    tc.setPosition(tc.position())
-                    tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                    text_to_cursor = tc.selectedText()
+                    cursor = frontend.word_under_cursor(self.editor)
+                    cursor.setPosition(cursor.position())
+                    cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+                    text_to_cursor = cursor.selectedText()
                     for symbol in symbols:
                         if text_to_cursor.endswith(symbol):
                             _logger().debug("cc: symbols trigger")
@@ -266,9 +276,9 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._current_completion = completion
 
     def _on_cursor_position_changed(self):
-        cl = frontend.current_line_nbr(self.editor)
-        if cl != self._cursor_line:
-            self._cursor_line = cl
+        current_line = frontend.current_line_nbr(self.editor)
+        if current_line != self._cursor_line:
+            self._cursor_line = current_line
             self._hide_popup()
             self._job_runner.cancel_requests()
 
@@ -278,11 +288,11 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     def _is_last_char_end_of_word(self):
         try:
-            tc = frontend.word_under_cursor(self.editor)
-            tc.setPosition(tc.position())
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-            l = tc.selectedText()
-            last_char = l[len(l) - 1]
+            cursor = frontend.word_under_cursor(self.editor)
+            cursor.setPosition(cursor.position())
+            cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+            line = cursor.selectedText()
+            last_char = line[len(line) - 1]
             if last_char != ' ':
                 symbols = self._trigger_symbols
                 seps = settings.word_separators
@@ -312,7 +322,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             event.accept()
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
-                event.key() == QtCore.Qt.Key_Backtab):
+              event.key() == QtCore.Qt.Key_Backtab):
             self._hide_popup()
             event.accept()
 
@@ -337,24 +347,27 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             # set prefix
             self._completer.setCompletionPrefix(self.completion_prefix)
             # compute size and pos
-            cr = self.editor.cursorRect()
+            cursor_rec = self.editor.cursorRect()
             char_width = self.editor.fontMetrics().width('A')
             prefix_len = (len(self.completion_prefix) * char_width)
-            cr.translate(self.editor.margin_size() - prefix_len,
-                         self.editor.margin_size(0))
-            w = self._completer.popup().verticalScrollBar().sizeHint().width()
-            cr.setWidth(self._completer.popup().sizeHintForColumn(0) + w)
+            cursor_rec.translate(self.editor.margin_size() - prefix_len,
+                                 self.editor.margin_size(0))
+            popup = self._completer.popup()
+            width = popup.verticalScrollBar().sizeHint().width()
+            cursor_rec.setWidth(self._completer.popup().sizeHintForColumn(0) +
+                                width)
             # show the completion list
             if self.editor.isVisible():
                 self.editor.setFocus(True)
-                self._completer.complete(cr)
+                self._completer.complete(cursor_rec)
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(0, 0))
 
     def _insert_completion(self, completion):
-        tc = frontend.word_under_cursor(self.editor, select_whole_word=True)
-        tc.insertText(completion)
-        self.editor.setTextCursor(tc)
+        cursor = frontend.word_under_cursor(self.editor,
+                                            select_whole_word=True)
+        cursor.insertText(completion)
+        self.editor.setTextCursor(cursor)
 
     def _is_shortcut(self, event):
         """
@@ -369,8 +382,8 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         return val and event.key() == self._trigger_key
 
     @staticmethod
-    def strip_control_characters(input):
-        if input:
+    def strip_control_characters(input_txt):
+        if input_txt:
             # unicode invalid characters
             re_illegal = \
                 '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
@@ -379,10 +392,10 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
                  chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
                  chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
-            input = re.sub(re_illegal, "", input)
+            input_txt = re.sub(re_illegal, "", input_txt)
             # ascii control characters
-            input = re.sub(r"[\x01-\x1F\x7F]", "", input)
-        return input
+            input_txt = re.sub(r"[\x01-\x1F\x7F]", "", input_txt)
+        return input_txt
 
     @staticmethod
     def _is_printable_key_event(event):
@@ -435,6 +448,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
+        # pylint: disable=too-many-arguments
         _logger().debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,

@@ -8,6 +8,9 @@ from pyqode.core.frontend.ui import dlg_goto_line_ui
 
 
 class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
+    """
+    Goto line dialog.
+    """
     def __init__(self, parent, current_line, line_count):
         QtGui.QDialog.__init__(self, parent)
         dlg_goto_line_ui.Ui_Dialog.__init__(self)
@@ -25,6 +28,12 @@ class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
 
     @classmethod
     def get_line(cls, parent, current_line, line_count):
+        """
+        Gets user selected line.
+
+        :returns: tuple(line, status) status is False if the dialog has been
+            rejected.
+        """
         dlg = GoToLineDialog(parent, current_line, line_count)
         if dlg.exec_() == dlg.Accepted:
             return dlg.spinBox.value(), True

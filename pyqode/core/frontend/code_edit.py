@@ -3,21 +3,17 @@
 This module contains the definition of the CodeEdit
 """
 import logging
-import mimetypes
 import sys
-
 from PyQt4 import QtGui, QtCore
-
 from pyqode.core import actions, settings, style
 from pyqode.core.frontend import text, dialogs
 from pyqode.core.frontend.client import JsonTcpClient
 from pyqode.core.frontend.extension import Panel
 from pyqode.core.frontend.utils import DelayJobRunner
 
-from pyqode.core.frontend.ui import pyqode_core_rc
-
 
 def _logger():
+    """ Gets module logger """
     return logging.getLogger(__name__)
 
 
@@ -32,28 +28,11 @@ class CodeEdit(QtGui.QPlainTextEdit):
     QTextCursor, ...) or use the more high level functions defined in
     :mod:`pyqode.core.frontend.text`
 
-    **Signals:**
-        - :attr:`pyqode.core.frontend.CodeEdit.painted`
-        - :attr:`pyqode.core.frontend.CodeEdit.new_text_set`
-        - :attr:`pyqode.core.frontend.CodeEdit.painted`
-        - :attr:`pyqode.core.frontend.CodeEdit.text_saved`
-        - :attr:`pyqode.core.frontend.CodeEdit.text_saving`
-        - :attr:`pyqode.core.frontend.CodeEdit.dirty_changed`
-        - :attr:`pyqode.core.frontend.CodeEdit.key_pressed`
-        - :attr:`pyqode.core.frontend.CodeEdit.key_released`
-        - :attr:`pyqode.core.frontend.CodeEdit.mouse_pressed`
-        - :attr:`pyqode.core.frontend.CodeEdit.mouse_released`
-        - :attr:`pyqode.core.frontend.CodeEdit.mouse_wheel_activated`
-        - :attr:`pyqode.core.frontend.CodeEdit.post_key_pressed`
-        - :attr:`pyqode.core.frontend.CodeEdit.focused_in`
-        - :attr:`pyqode.core.frontend.CodeEdit.mouse_moved`
-        - :attr:`pyqode.core.frontend.CodeEdit.indent_requested`
-        - :attr:`pyqode.core.frontend.CodeEdit.unindent_requested`
-
     .. note:: setPlainText has been overriden to force you to define
         a mime type and an encoding.
 
     """
+    # pylint: disable=too-many-instance-attributes, too-many-public-methods
     #: Paint hook
     painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
@@ -93,7 +72,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._show_whitespaces
 
     @show_whitespaces.setter
-    def show_whitespaces(self, value):
+    def show_whitespaces(self, value):  # pylint: disable=missing-docstring
         self._show_whitespaces = value
         self._set_whitespaces_flags(value)
 
@@ -105,7 +84,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._font_family
 
     @font_name.setter
-    def font_name(self, value):
+    def font_name(self, value):  # pylint: disable=missing-docstring
         self._font_family = value
         self._reset_palette()
 
@@ -117,7 +96,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._font_size
 
     @font_size.setter
-    def font_size(self, value):
+    def font_size(self, value):  # pylint: disable=missing-docstring
         self._font_size = value
         self._reset_palette()
 
@@ -129,7 +108,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._background
 
     @background.setter
-    def background(self, value):
+    def background(self, value):  # pylint: disable=missing-docstring
         self._background = value
         self._reset_palette()
 
@@ -141,7 +120,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._foreground
 
     @foreground.setter
-    def foreground(self, value):
+    def foreground(self, value):  # pylint: disable=missing-docstring
         self._foreground = value
         self._reset_palette()
 
@@ -154,8 +133,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
     @whitespaces_foreground.setter
     def whitespaces_foreground(self, value):
+        # pylint: disable=missing-docstring
         self._whitespaces_foreground = value
-        # highlighted by syntax highlighter
         self.rehighlight()
 
     @property
@@ -166,7 +145,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._sel_background
 
     @selection_background.setter
-    def selection_background(self, value):
+    def selection_background(self, value):  # pylint: disable=missing-docstring
         self._sel_background = value
         self._reset_palette()
 
@@ -178,7 +157,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._sel_foreground
 
     @selection_foreground.setter
-    def selection_foreground(self, value):
+    def selection_foreground(self, value):  # pylint: disable=missing-docstring
         self._sel_foreground = value
         self.rehighlight()
 
@@ -192,7 +171,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._dirty
 
     @dirty.setter
-    def dirty(self, value):
+    def dirty(self, value):  # pylint: disable=missing-docstring
         if self._dirty != value:
             self._dirty = value
             self.dirty_changed.emit(value)
@@ -220,7 +199,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         return self._fpath
 
     @file_path.setter
-    def file_path(self, value):
+    def file_path(self, value):  # pylint: disable=missing-docstring
         self._fpath = value
 
     @property
@@ -249,18 +228,26 @@ class CodeEdit(QtGui.QPlainTextEdit):
     def mime_type(self):
         """
         Gets the associated mime type.
-
         """
         return self._mime_type
 
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
-
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """
         QtGui.QPlainTextEdit.__init__(self, parent)
+        self._use_spaces_instead_of_tabs = True
+        self._whitespaces_foreground = None
+        self._sel_background = None
+        self._show_whitespaces = False
+        self._foreground = None
+        self._sel_foreground = None
+        self._tab_length = 4
+        self._font_size = 10
+        self._background = None
+        self._font_family = 'monospace'
         self._client = JsonTcpClient(self)
         self._last_mouse_pos = QtCore.QPoint(0, 0)
         self._cached_cursor_pos = (-1, -1)
@@ -324,7 +311,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Show a tool tip at the specified position
 
         :param pos: Tooltip position
-
         :param tooltip: Tooltip text
         """
         QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
@@ -336,7 +322,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         :param position: Margin position. See
             :class:`pyqode.core.frontend.Panel.Position`
-
         :return: The size of the specified margin
         :rtype: float
         """
@@ -351,6 +336,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         :param txt: The new text to set.
         """
+        # pylint: disable=invalid-name
         self._fencoding = encoding
         self._mime_type = mime_type
         QtGui.QPlainTextEdit.setPlainText(self, txt)
@@ -363,14 +349,14 @@ class CodeEdit(QtGui.QPlainTextEdit):
         for mode in self._modes.values():
             if hasattr(mode, 'set_mime_type'):
                 try:
-                    _logger().debug('setting up lexer from mimetype: %s' %
+                    _logger().debug('setting up lexer from mimetype: %s',
                                     self.mime_type)
                     mode.set_mime_type(self.mime_type)
                 except ValueError:
                     _logger().exception(
-                        'Failed to set lexer from mimetype: %s' %
+                        'Failed to set lexer from mimetype: %s',
                         self.mime_type)
-                    _logger().debug('setting up lexer from file path: %s' %
+                    _logger().debug('setting up lexer from file path: %s',
                                     self.file_path)
                     mode.set_lexer_from_filename(self.file_path)
 
@@ -416,8 +402,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         """
         self._init_settings()
-        for m in self._modes.values():
-            m.refresh_settings()
+        for mode in self._modes.values():
+            mode.refresh_settings()
         for zone in self._panels.values():
             for panel in zone.values():
                 panel.refresh_settings()
@@ -429,8 +415,8 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         """
         self._init_style()
-        for m in self._modes.values():
-            m.refresh_style()
+        for mode in self._modes.values():
+            mode.refresh_style()
         for zone in self._panels.values():
             for panel in zone.values():
                 panel.refresh_style()
@@ -441,14 +427,12 @@ class CodeEdit(QtGui.QPlainTextEdit):
         refreshed too.
         """
         self._refresh_actions()
-        for m in self._modes.values():
-            m.refresh_actions()
+        for mode in self._modes.values():
+            mode.refresh_actions()
         for zone in self._panels.values():
             for panel in zone.values():
                 panel.refresh_actions()
 
-    # Public slots
-    # ------------
     @QtCore.pyqtSlot()
     def delete(self):
         """ Deletes the selected text """
@@ -472,7 +456,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Convenience method that calls rehighlight on the instqlled
         syntax highlighter mode.
-
         """
         for mode in self._modes.values():
             if hasattr(mode, 'rehighlight'):
@@ -524,14 +507,14 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Duplicates the line under the cursor. If multiple lines are selected,
         only the last one is duplicated.
         """
-        tc = self.textCursor()
-        tc.select(tc.LineUnderCursor)
-        line = tc.selectedText()
-        tc.movePosition(tc.Down, tc.MoveAnchor)
-        tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
-        tc.insertText(line + "\n")
-        tc.movePosition(tc.Left, tc.MoveAnchor)
-        self.setTextCursor(tc)
+        cursor = self.textCursor()
+        cursor.select(cursor.LineUnderCursor)
+        line = cursor.selectedText()
+        cursor.movePosition(cursor.Down, cursor.MoveAnchor)
+        cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
+        cursor.insertText(line + "\n")
+        cursor.movePosition(cursor.Left, cursor.MoveAnchor)
+        self.setTextCursor(cursor)
         self._do_home_key()
 
     @QtCore.pyqtSlot()
@@ -563,9 +546,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._resize_panels()
         self._update_panels(self.contentsRect(), 0, force_update_margins=True)
 
-    # Events
-    # ------
-    def resizeEvent(self, e):
+    def resizeEvent(self, e):  # pylint: disable=invalid-name
         """
         Overrides resize event to resize the editor's panels.
 
@@ -574,7 +555,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.resizeEvent(self, e)
         self._resize_panels()
 
-    def paintEvent(self, e):
+    def paintEvent(self, e):  # pylint: disable=invalid-name
         """
         Overrides paint event to update the list of visible blocks and emit
         the painted event.
@@ -585,7 +566,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         QtGui.QPlainTextEdit.paintEvent(self, e)
         self.painted.emit(e)
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event):  # pylint: disable=invalid-name
         """
         Overrides the keyPressEvent to emit the key_pressed signal.
 
@@ -613,7 +594,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         event.setAccepted(state)
         self.post_key_pressed.emit(event)
 
-    def keyReleaseEvent(self, event):
+    def keyReleaseEvent(self, event):  # pylint: disable=invalid-name
         """
         Overrides keyReleaseEvent to emit the key_released signal.
 
@@ -626,7 +607,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
 
-    def focusInEvent(self, event):
+    def focusInEvent(self, event):  # pylint: disable=invalid-name
         """
         Overrides focusInEvent to emits the focused_in signal
 
@@ -637,15 +618,16 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.repaint()
         QtGui.QApplication.processEvents()
 
-    def focusOutEvent(self, event):
+    def focusOutEvent(self, event):  # pylint: disable=invalid-name
         """
         Saves content if save_on_focus_out is True.
 
         """
         if settings.save_on_focus_out and self.dirty and self.file_path:
             self._save()
+        QtGui.QPlainTextEdit.focusOutEvent(self, event)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
         """
         Overrides mousePressEvent to emits mouse_pressed signal
 
@@ -654,15 +636,15 @@ class CodeEdit(QtGui.QPlainTextEdit):
         initial_state = event.isAccepted()
         event.ignore()
         self.mouse_pressed.emit(event)
-        c = self.cursorForPosition(event.pos())
+        cursor = self.cursorForPosition(event.pos())
         for sel in self._extra_selections:
-            if sel.cursor.blockNumber() == c.blockNumber():
+            if sel.cursor.blockNumber() == cursor.blockNumber():
                 sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.mousePressEvent(self, event)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):  # pylint: disable=invalid-name
         """
         Emits mouse_released signal.
 
@@ -675,7 +657,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event):  # pylint: disable=invalid-name
         """
         Emits the mouse_wheel_activated signal.
 
@@ -688,21 +670,22 @@ class CodeEdit(QtGui.QPlainTextEdit):
             event.setAccepted(initial_state)
             QtGui.QPlainTextEdit.wheelEvent(self, event)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
         """
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
         """
-        c = self.cursorForPosition(event.pos())
+        cursor = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
         block_found = False
         for sel in self._extra_selections:
-            if sel.cursor.blockNumber() == c.blockNumber() and sel.tooltip:
-                if self._prev_tooltip_block_nbr != c.blockNumber():
+            if (sel.cursor.blockNumber() == cursor.blockNumber() and
+                    sel.tooltip):
+                if self._prev_tooltip_block_nbr != cursor.blockNumber():
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
                         self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
-                self._prev_tooltip_block_nbr = c.blockNumber()
+                self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
         if not block_found:
@@ -713,20 +696,20 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.mouse_moved.emit(event)
         QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
 
-    def showEvent(self, event):
+    def showEvent(self, event):  # pylint: disable=invalid-name
         """ Overrides showEvent to update the viewport margins """
         QtGui.QPlainTextEdit.showEvent(self, event)
         _logger().debug('show event')
         self._update_viewport_margins()
 
-    # Private methods
-    # ---------------
-    def _show_context_menu(self, pt):
+    def _show_context_menu(self, point):
+        """ Shows the context menu """
         self._mnu = QtGui.QMenu()
         self._mnu.addActions(self._actions)
-        self._mnu.popup(self.mapToGlobal(pt))
+        self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
+        """ Sets show white spaces flag """
         doc = self.document()
         options = doc.defaultTextOption()
         if show:
@@ -738,6 +721,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         doc.setDefaultTextOption(options)
 
     def _init_actions(self):
+        """ Init default QAction """
         values = [
             (actions.undo, self.undo, self.undoAvailable),
             (actions.redo, self.redo, self.redoAvailable),
@@ -753,27 +737,21 @@ class CodeEdit(QtGui.QPlainTextEdit):
             None,
             (actions.goto_line, self.goto_line, None)
         ]
-
         for val in values:
+            # pylint: disable = unpacking-non-sequence
             if val:
                 action, trig_slot, enable_signal = val
-                if action.icon:
-                    theme, icon = action.icon
-                    a = QtGui.QAction(QtGui.QIcon.fromTheme(
-                        theme, QtGui.QIcon(icon)), action.text, self)
-                else:
-                    a = QtGui.QAction(action.text, self)
-                a.setShortcut(action.shortcut)
-                a.setText(action.text)
-                a.setIconVisibleInMenu(True)
-                a.triggered.connect(trig_slot)
+                qaction = action.make_action(self)
+                qaction.setIconVisibleInMenu(True)
+                qaction.triggered.connect(trig_slot)
                 if enable_signal:
-                    enable_signal.connect(a.setEnabled)
-                self.add_action(a)
+                    enable_signal.connect(qaction.setEnabled)
+                self.add_action(qaction)
             else:
                 self.add_separator()
 
     def _refresh_actions(self):
+        """ Refreshes actions """
         actions_defs = [
             actions.undo,
             actions.redo,
@@ -789,7 +767,6 @@ class CodeEdit(QtGui.QPlainTextEdit):
             None,
             actions.goto_line
         ]
-
         for adef, action in zip(actions_defs, self._actions):
             if adef:
                 action.setText(adef.text)
@@ -800,6 +777,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
                     action.setIcon(icon)
 
     def _init_settings(self):
+        """ Init setting """
         self._show_whitespaces = settings.show_white_spaces
         self._tab_length = settings.tab_length
         self._use_spaces_instead_of_tabs = settings.use_spaces_instead_of_tabs
@@ -808,6 +786,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._set_whitespaces_flags(self._show_whitespaces)
 
     def _init_style(self):
+        """ Inits style options """
         if style.font is None:
             self._font_family = "monospace"
             if sys.platform == "win32":
@@ -831,7 +810,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
             self._sel_foreground = style.selection_foreground
         self._reset_palette()
 
-    def _update_visible_blocks(self, event):
+    def _update_visible_blocks(self, *args):
+        """ Updates the list of visible blocks """
+        #: pylint: disable=unused-argument
         self._visible_blocks[:] = []
         block = self.firstVisibleBlock()
         block_nbr = block.blockNumber()
@@ -852,44 +833,49 @@ class CodeEdit(QtGui.QPlainTextEdit):
             block_nbr = block.blockNumber()
 
     def _compute_zones_sizes(self):
+        """ Compute panel zone sizes """
         # Left panels
         left = 0
         for panel in self._panels[Panel.Position.LEFT].values():
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            left += sh.width()
+            size_hint = panel.sizeHint()
+            left += size_hint.width()
         # Right panels
         right = 0
         for panel in self._panels[Panel.Position.RIGHT].values():
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            right += sh.width()
+            size_hint = panel.sizeHint()
+            right += size_hint.width()
         # Top panels
         top = 0
         for panel in self._panels[Panel.Position.TOP].values():
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            top += sh.height()
+            size_hint = panel.sizeHint()
+            top += size_hint.height()
         # Bottom panels
         bottom = 0
         for panel in self._panels[Panel.Position.BOTTOM].values():
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            bottom += sh.height()
+            size_hint = panel.sizeHint()
+            bottom += size_hint.height()
         self._top, self._left, self._right, self._bottom = (
             top, left, right, bottom)
         return bottom, left, right, top
 
     def _resize_panels(self):
-        cr = self.contentsRect()
-        vcr = self.viewport().contentsRect()
+        """ Resizes panels """
+        # pylint: disable=too-many-locals
+        content_rect = self.contentsRect()
+        viewport_content_rect = self.viewport().contentsRect()
         s_bottom, s_left, s_right, s_top = self._compute_zones_sizes()
-        w_offset = cr.width() - (vcr.width() + s_left + s_right)
-        h_offset = cr.height() - (vcr.height() + s_bottom + s_top)
+        w_offset = content_rect.width() - (viewport_content_rect.width() +
+                                           s_left + s_right)
+        h_offset = content_rect.height() - (viewport_content_rect.height() +
+                                            s_bottom + s_top)
         left = 0
         panels = list(self._panels[Panel.Position.LEFT].values())
         panels.sort(key=lambda panel: panel.order_in_zone, reverse=True)
@@ -897,45 +883,52 @@ class CodeEdit(QtGui.QPlainTextEdit):
             if not panel.isVisible():
                 continue
             panel.adjustSize()
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.left() + left, cr.top() + s_top,
-                              sh.width(),
-                              cr.height() - s_bottom - s_top - h_offset)
-            left += sh.width()
+            size_hint = panel.sizeHint()
+            panel.setGeometry(content_rect.left() + left,
+                              content_rect.top() + s_top,
+                              size_hint.width(),
+                              content_rect.height() - s_bottom - s_top -
+                              h_offset)
+            left += size_hint.width()
         right = 0
         panels = list(self._panels[Panel.Position.RIGHT].values())
         panels.sort(key=lambda panel: panel.order_in_zone, reverse=True)
         for panel in panels:
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.right() - right - sh.width() - w_offset,
-                              cr.top(), sh.width(), cr.height() - h_offset)
-            right += sh.width()
+            size_hint = panel.sizeHint()
+            panel.setGeometry(content_rect.right() - right -
+                              size_hint.width() - w_offset,
+                              content_rect.top(), size_hint.width(),
+                              content_rect.height() - h_offset)
+            right += size_hint.width()
         top = 0
         panels = list(self._panels[Panel.Position.TOP].values())
         panels.sort(key=lambda panel: panel.order_in_zone)
         for panel in panels:
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.left(), cr.top() + top,
-                              cr.width() - w_offset,
-                              sh.height())
-            top += sh.height()
+            size_hint = panel.sizeHint()
+            panel.setGeometry(content_rect.left(), content_rect.top() + top,
+                              content_rect.width() - w_offset,
+                              size_hint.height())
+            top += size_hint.height()
         bottom = 0
         panels = list(self._panels[Panel.Position.BOTTOM].values())
         panels.sort(key=lambda panel: panel.order_in_zone)
         for panel in panels:
             if not panel.isVisible():
                 continue
-            sh = panel.sizeHint()
-            panel.setGeometry(cr.left(),
-                              cr.bottom() - bottom - sh.height() - h_offset,
-                              cr.width() - w_offset, sh.height())
-            bottom += sh.height()
+            size_hint = panel.sizeHint()
+            panel.setGeometry(content_rect.left(),
+                              content_rect.bottom() - bottom -
+                              size_hint.height() - h_offset,
+                              content_rect.width() - w_offset,
+                              size_hint.height())
+            bottom += size_hint.height()
 
-    def _update_panels(self, rect, dy, force_update_margins=False):
+    def _update_panels(self, rect, delta_y, force_update_margins=False):
+        """ Updates panels """
         _logger().debug('_update_panels')
         for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
@@ -945,12 +938,12 @@ class CodeEdit(QtGui.QPlainTextEdit):
             for panel in panels:
                 if not panel.scrollable:
                     continue
-                if dy:
-                    panel.scroll(0, dy)
+                if delta_y:
+                    panel.scroll(0, delta_y)
                 else:
-                    l, c = text.cursor_position(self)
-                    ol, oc = self._cached_cursor_pos
-                    if l != ol or c != oc:
+                    line, col = text.cursor_position(self)
+                    oline, ocol = self._cached_cursor_pos
+                    if line != oline or col != ocol:
                         panel.update(0, rect.y(), panel.width(), rect.height())
                     self._cached_cursor_pos = text.cursor_position(self)
         if rect.contains(self.viewport().rect()) or force_update_margins:
@@ -958,12 +951,14 @@ class CodeEdit(QtGui.QPlainTextEdit):
             self._update_viewport_margins()
 
     def _on_text_changed(self):
+        """ Adjust dirty flag depending on editor's content """
         if not self._cleaning:
             self._modified_lines.add(text.cursor_position(self)[0])
             txt = self.toPlainText()
             self.dirty = (txt != self._original_text)
 
     def _update_viewport_margins(self):
+        """ Update viewport margins """
         top = 0
         left = 0
         right = 0
@@ -972,62 +967,65 @@ class CodeEdit(QtGui.QPlainTextEdit):
         _logger().debug('processing left panels')
         for panel in self._panels[Panel.Position.LEFT].values():
             if panel.isVisible():
-                w = panel.sizeHint().width()
-                _logger().debug('right panel width: %r' % w)
-                left += w
+                width = panel.sizeHint().width()
+                _logger().debug('right panel width: %r', width)
+                left += width
             else:
-                _logger().debug('skipping invisible panel %r' % panel.name)
+                _logger().debug('skipping invisible panel %r', panel.name)
         _logger().debug('processing right panels')
         for panel in self._panels[Panel.Position.RIGHT].values():
             if panel.isVisible():
-                w = panel.sizeHint().width()
-                _logger().debug('right panel width: %r' % w)
-                right += w
+                width = panel.sizeHint().width()
+                _logger().debug('right panel width: %r', width)
+                right += width
             else:
-                _logger().debug('skipping invisible panel %s' % panel.name)
+                _logger().debug('skipping invisible panel %s', panel.name)
         _logger().debug('processing top panels')
         for panel in self._panels[Panel.Position.TOP].values():
             if panel.isVisible():
-                h = panel.sizeHint().height()
-                _logger().debug('_bottom panel height: %r' % h)
-                top += h
+                height = panel.sizeHint().height()
+                _logger().debug('_bottom panel height: %r', height)
+                top += height
             else:
-                _logger().debug('skipping invisible panel %s' % panel.name)
+                _logger().debug('skipping invisible panel %s', panel.name)
         _logger().debug('processing _bottom panels')
         for panel in self._panels[Panel.Position.BOTTOM].values():
             if panel.isVisible():
-                h = panel.sizeHint().height()
-                _logger().debug('_bottom panel height: %r' % h)
-                bottom += h
+                height = panel.sizeHint().height()
+                _logger().debug('_bottom panel height: %r', height)
+                bottom += height
             else:
-                _logger().debug('skipping invisible panel %s' % panel.name)
+                _logger().debug('skipping invisible panel %s', panel.name)
         self._margin_sizes = (top, left, right, bottom)
         self.setViewportMargins(left, top, right, bottom)
-        _logger().debug('viewport margins updated: %r' % repr(
+        _logger().debug('viewport margins updated: %r', repr(
             self._margin_sizes))
 
     def _reset_palette(self):
+        """ Resets QPalette """
         self.setFont(QtGui.QFont(self._font_family, self._font_size))
-        p = self.palette()
-        p.setColor(p.Base, self._background)
-        p.setColor(p.Text, self._foreground)
-        p.setColor(QtGui.QPalette.Highlight, self._sel_background)
-        p.setColor(QtGui.QPalette.HighlightedText, self._sel_foreground)
-        self.setPalette(p)
+        pal = self.palette()
+        pal.setColor(pal.Base, self._background)
+        pal.setColor(pal.Text, self._foreground)
+        pal.setColor(QtGui.QPalette.Highlight, self._sel_background)
+        pal.setColor(QtGui.QPalette.HighlightedText, self._sel_foreground)
+        self.setPalette(pal)
 
     def _do_home_key(self, event=None, select=False):
+        """ Performs home key action """
         # get nb char to first significative char
         delta = self.textCursor().positionInBlock() - text.line_indent(self)
         if delta:
-            tc = self.textCursor()
+            cursor = self.textCursor()
             move = QtGui.QTextCursor.MoveAnchor
             if select:
                 move = QtGui.QTextCursor.KeepAnchor
-            tc.movePosition(
+            cursor.movePosition(
                 QtGui.QTextCursor.Left, move, delta)
-            self.setTextCursor(tc)
+            self.setTextCursor(cursor)
             if event:
                 event.accept()
 
     def _save(self):
+        """ Save to file """
         text.save_to_file(self)

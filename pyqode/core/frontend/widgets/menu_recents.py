@@ -20,6 +20,7 @@ class RecentFilesManager:
         self._settings = QtCore.QSettings(organisation, application)
 
     def clear(self):
+        """ Clears recent files in QSettings """
         self._settings.setValue('recentFiles', [])
 
     def get_recent_files(self):
@@ -36,9 +37,9 @@ class RecentFilesManager:
         if isinstance(files, str):
             files = [files]
         # filter files, remove files that do not exist anymore
-        for f in files:
-            if os.path.exists(f):
-                ret_val.append(f)
+        for file in files:
+            if os.path.exists(file):
+                ret_val.append(file)
         return ret_val
 
     def open_file(self, file):
@@ -86,25 +87,32 @@ class MenuRecentFiles(QtGui.QMenu):
         self.update_actions()
 
     def update_actions(self):
+        """
+        Updates the list of actions.
+        """
         self.clear()
         self.recent_files_actions[:] = []
-        for f in self.manager.get_recent_files():
+        for file in self.manager.get_recent_files():
             action = QtGui.QAction(self)
-            action.setText(os.path.split(f)[1])
-            action.setData(f)
+            action.setText(os.path.split(file)[1])
+            action.setData(file)
             action.triggered.connect(self._on_action_triggered)
             self.addAction(action)
             self.recent_files_actions.append(action)
         self.addSeparator()
         action_clear = QtGui.QAction('Clear list', self)
-        action_clear.triggered.connect(self._clear_recent_files)
+        action_clear.triggered.connect(self.clear_recent_files)
         self.addAction(action_clear)
 
-    def _clear_recent_files(self):
+    def clear_recent_files(self):
+        """ Clear recent files and menu. """
         self.manager.clear()
         self.update_actions()
 
     def _on_action_triggered(self):
+        """
+        Emits open_requested when a recent file action has been triggered.
+        """
         action = self.sender()
         assert isinstance(action, QtGui.QAction)
         path = action.data()

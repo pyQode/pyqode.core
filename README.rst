@@ -18,7 +18,7 @@ Package:
 
 
 Stable (`master`_):
-++++++++++++++++
++++++++++++++++++++
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
     :target: https://travis-ci.org/pyQode/pyqode.core
@@ -34,7 +34,7 @@ Stable (`master`_):
 
 
 Unstable (`develop`_):
-+++++++++++++++++++
+++++++++++++++++++++++
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop
     :target: https://travis-ci.org/pyQode/pyqode.core
@@ -83,12 +83,12 @@ Features
 
 Here are the core features:
 
--  simple widget based on QPlainTextEdit
--  easily customisable (modes and panels)
--  native look and feel close to Qt creator
--  builtin modes and panels (folding, line number, code completion,
-   syntax highlighting)
--  Qt Designer plugin
+- simple widget based on QPlainTextEdit
+- easily customisable (modes and panels)
+- native look and feel close to Qt creator
+- builtin modes and panels (line number, code completion,
+  syntax highlighting,...)
+- Qt Designer plugin
 - client/server architecture for smooth, non-blocking UI.
 
 
@@ -112,7 +112,7 @@ Installation
 ------------
 You need to install PyQt4 by yourself.
 
-Then you can install pyqode.core using pip (for python3)::
+Then you can install pyqode.core using **pip**::
 
     $ pip3 install pyqode.core
 
@@ -121,7 +121,8 @@ Testing
 
 pyqode.core now have a test suite and measure its coverage.
 
-To run the test, just run the following command (you don't need to install anything)::
+To run the test, just run the following command (you don't need to install
+anything)::
 
     $ python3 runtests.py
     

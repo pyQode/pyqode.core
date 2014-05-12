@@ -15,15 +15,17 @@ from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 
-from pyqode.core import frontend, style
+from pyqode.core import frontend, style as core_style
 from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter
 
 
 def _logger():
+    """ Returns the module's logger """
     return logging.getLogger(__name__)
 
 
 try:
+    # pylint: disable=unused-import
     from pygments.lexers.agile import PythonLexer
     from pygments.lexers.text import BashLexer
     from pygments.lexers.other import BatchLexer
@@ -54,15 +56,13 @@ try:
     from pygments.lexers.compiled import ObjectiveCLexer
     from pygments.lexers.compiled import ObjectiveCppLexer
     from pygments.lexers.compiled import ValaLexer
-except ImportError as e:  # too new on some systems
+except ImportError as exc:  # too new on some systems
     _logger().exception("failed to import pygments lexers, please update your "
-                        "pygments installation. %s" % e)
-
+                        "pygments installation. %s", exc)
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
-
-
 from pygments.styles import STYLE_MAP
+
 
 #: A sorted list of available pygments styles, for convenience
 PYGMENTS_STYLES = sorted(STYLE_MAP.keys())
@@ -73,6 +73,7 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
 
         Monkeypatched to store the final stack on the object itself.
     """
+    # pylint: disable=protected-access,too-many-branches
     pos = 0
     tokendefs = self._tokens
     if hasattr(self, '_saved_state_stack'):
@@ -86,14 +87,14 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
         return
     while 1:
         for rexmatch, action, new_state in statetokens:
-            m = rexmatch(text, pos)
-            if m:
+            match = rexmatch(text, pos)
+            if match:
                 if type(action) is _TokenType:
-                    yield pos, action, m.group()
+                    yield pos, action, match.group()
                 else:
-                    for item in action(self, m):
+                    for item in action(self, match):
                         yield item
-                pos = m.end()
+                pos = match.end()
                 if new_state is not None:
                     # state transition
                     if isinstance(new_state, tuple):
@@ -149,16 +150,16 @@ def replace_pattern(tokens, new_pattern):
                 state[index] = new_pattern
 
 # More monkeypatching!
-comment_start = (r'/\*', Comment.Multiline, 'comment')
-comment_state = [(r'[^*/]', Comment.Multiline),
+COMMENT_START = (r'/\*', Comment.Multiline, 'comment')
+COMMENT_STATE = [(r'[^*/]', Comment.Multiline),
                  (r'/\*', Comment.Multiline, '#push'),
                  (r'\*/', Comment.Multiline, '#pop'),
                  (r'[*/]', Comment.Multiline)]
-replace_pattern(CLexer.tokens, comment_start)
-replace_pattern(CppLexer.tokens, comment_start)
-CLexer.tokens['comment'] = comment_state
-CppLexer.tokens['comment'] = comment_state
-CSharpLexer.tokens['comment'] = comment_state
+replace_pattern(CLexer.tokens, COMMENT_START)
+replace_pattern(CppLexer.tokens, COMMENT_START)
+CLexer.tokens['comment'] = COMMENT_STATE
+CppLexer.tokens['comment'] = COMMENT_STATE
+CSharpLexer.tokens['comment'] = COMMENT_STATE
 
 
 class PygmentsSyntaxHighlighter(SyntaxHighlighter):
@@ -170,6 +171,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                  The text is automatically re-highlighted on save.
 
     """
+    # pylint: disable=too-many-instance-attributes
     #: Mode description
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
@@ -215,25 +217,33 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
     @property
     def pygments_style(self):
+        """
+        Gets/Sets the pygments style
+        """
         return self._pygments_style
 
     @pygments_style.setter
     def pygments_style(self, value):
+        """
+        Gets/Sets the pygments style
+        """
         self._pygments_style = value
         self._update_style()
 
     def __init__(self, document, lexer=None):
         super(PygmentsSyntaxHighlighter, self).__init__(document)
         self._document = QtGui.QTextDocument()
+        self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self._pygments_style = style.pygments_style
+        self._pygments_style = core_style.pygments_style
         self._brushes = {}
         self._formats = {}
         self._init_style()
 
     def _init_style(self):
-        self._pygments_style = style.pygments_style
+        """ Init pygments style """
+        self._pygments_style = core_style.pygments_style
         self._update_style()
 
     def _on_install(self, editor):
@@ -252,7 +262,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self.rehighlight()
 
     def refresh_style(self):
-        self._pygments_style = style.pygments_style
+        self._pygments_style = core_style.pygments_style
         self._update_style()
 
     def set_lexer_from_filename(self, filename):
@@ -265,13 +275,17 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if filename.endswith("~"):
             filename = filename[0:len(filename) - 1]
         self._lexer = get_lexer_for_filename(filename)
-        _logger().info('lexer for filename (%s): %r' % (filename, self._lexer))
+        _logger().info('lexer for filename (%s): %r', filename, self._lexer)
 
     def set_lexer_from_mime_type(self, mime, **options):
+        """
+        Sets the pygments lexer from mime type.
+        """
         self._lexer = get_lexer_for_mimetype(mime, **options)
-        _logger().info('lexer for mimetype (%s): %r' % (mime, self._lexer))
+        _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text):
+        # pylint: disable=protected-access
         original_text = text
         if self.editor and self._lexer and self.enabled:
             prev_data = self.currentBlock().previous().userData()
@@ -303,7 +317,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
             # spaces
             text = original_text
-            expression = QRegExp('\s+')
+            expression = QRegExp(r'\s+')
             index = expression.indexIn(text, 0)
             while index >= 0:
                 index = expression.pos(0)
@@ -314,8 +328,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def _update_style(self):
         """ Sets the style to the specified Pygments style.
         """
-        style = get_style_by_name(self._pygments_style)
-        self._style = style
+        self._style = get_style_by_name(self._pygments_style)
         self._clear_caches()
         # update editor bg and fg from pygments style.
         fgc = self._style.style_for_token(Text)['color']
@@ -335,13 +348,14 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         if self.editor:
             self.editor.background = bgc
             self.editor.foreground = fgc
-            self.editor._reset_palette()
+            self.editor._reset_palette()  # pylint: disable=protected-access
             try:
-                m = frontend.get_mode(self.editor, 'CaretLineHighlighterMode')
+                mode = frontend.get_mode(self.editor,
+                                         'CaretLineHighlighterMode')
             except KeyError:
                 pass
             else:
-                m.refresh_style()
+                mode.refresh_style()
         self.rehighlight()
 
     def _clear_caches(self):
@@ -354,7 +368,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         """ Returns a QTextCharFormat for token or None.
         """
         if token == Whitespace:
-            return style.whitespaces_foreground
+            return core_style.whitespaces_foreground
 
         if token in self._formats:
             return self._formats[token]

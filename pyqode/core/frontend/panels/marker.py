@@ -11,6 +11,7 @@ from pyqode.core.frontend.utils import DelayJobRunner, memoized
 
 
 def _logger():
+    """ Gets module's logger """
     return logging.getLogger(__name__)
 
 
@@ -110,6 +111,11 @@ class MarkerPanel(Panel):
     @staticmethod
     @memoized
     def make_marker_icon(icon):
+        """
+        Make (and memoize) an icon from an icon filename.
+
+        :param icon: Icon filename or tuple (to use a theme).
+        """
         if isinstance(icon, tuple):
             return icon[0], QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
@@ -148,17 +154,21 @@ class MarkerPanel(Panel):
             if line == marker.position:
                 return marker
 
-    def sizeHint(self):
-        fm = QtGui.QFontMetricsF(self.editor.font())
-        size_hint = QtCore.QSize(fm.height(), fm.height())
+    def sizeHint(self):  # pylint: disable=invalid-name
+        """
+        Returns the panel size hint. (fixed with of 16px)
+        """
+        metrics = QtGui.QFontMetricsF(self.editor.font())
+        size_hint = QtCore.QSize(metrics.height(), metrics.height())
         if size_hint.width() > 16:
             size_hint.setWidth(16)
         return size_hint
 
     def paintEvent(self, event):
+        # pylint: disable=invalid-name, unused-variable
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
-        for top, blockNumber, block in self.editor.visible_blocks:
+        for top, block_nbr, block in self.editor.visible_blocks:
             user_data = block.userData()
             if hasattr(user_data, "marker"):
                 marker = user_data.marker
@@ -167,11 +177,11 @@ class MarkerPanel(Panel):
                     self._to_remove.remove(marker)
                     continue
                 if marker and marker.icon:
-                    r = QtCore.QRect()
-                    r.setX(0)
-                    r.setY(top)
-                    r.setWidth(self.sizeHint().width())
-                    r.setHeight(self.sizeHint().height())
+                    rect = QtCore.QRect()
+                    rect.setX(0)
+                    rect.setY(top)
+                    rect.setWidth(self.sizeHint().width())
+                    rect.setHeight(self.sizeHint().height())
                     if isinstance(marker.icon, tuple):
                         key = marker.icon[0]
                     else:
@@ -182,9 +192,17 @@ class MarkerPanel(Panel):
                             self._icons[key] = val
                         else:
                             continue
-                    self._icons[key].paint(painter, r)
+                    self._icons[key].paint(painter, rect)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+        """
+        Handle mouse press:
+
+            - emit add marker signal if there were no marker under the mouse
+              cursor
+            - emit remove marker signal if there were one or more markers under
+              the mouse cursor.
+        """
         line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         if self.marker_for_line(line):
             _logger().debug("remove marker requested")
@@ -193,7 +211,10 @@ class MarkerPanel(Panel):
             _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+        """
+        Requests a tooltip if the cursor is currently over a marker.
+        """
         line = frontend.line_nbr_from_position(self.editor, event.pos().y())
         marker = self.marker_for_line(line)
         if marker and marker.description:
@@ -207,9 +228,16 @@ class MarkerPanel(Panel):
         self._previous_line = line
 
     def leaveEvent(self, *args, **kwargs):
+        """
+        Hide tooltip when leaving the panel region.
+        """
+        # pylint: disable=invalid-name, unused-argument
         QtGui.QToolTip.hideText()
         self._previous_line = -1
 
     def _display_tooltip(self, tooltip, top):
+        """
+        Display tooltip at the specified top position.
+        """
         QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)

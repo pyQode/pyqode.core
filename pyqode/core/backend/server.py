@@ -89,20 +89,41 @@ import inspect
 import logging
 import json
 import struct
-import sys
 import traceback
-import select
-
 try:
     import socketserver
-    _py33 = True
+    PY33 = True
 except ImportError:
+    # pylint: disable=import-error
     import SocketServer as socketserver
-    _py33 = False
+    PY33 = False
 
 
 def _logger():
+    """ Returns the module's logger """
     return logging.getLogger(__name__)
+
+
+def import_class(klass):
+    """
+    Imports a class from a fully qualified name string.
+
+    :param klass: class string, e.g.
+        "pyqode.core.backend.workers.CodeCompletionWorker"
+    :return: The corresponding class
+
+    """
+    path = klass.rfind(".")
+    class_name = klass[path + 1: len(klass)]
+    try:
+        module = __import__(klass[0:path], globals(), locals(), [class_name])
+        klass = getattr(module, class_name)
+    except ImportError:
+        raise ImportError(klass)
+    except AttributeError:
+        raise ImportError(klass)
+    else:
+        return klass
 
 
 class JsonServer(socketserver.TCPServer):
@@ -122,7 +143,8 @@ class JsonServer(socketserver.TCPServer):
         """
 
         def read_bytes(self, size):
-            if not _py33:
+            """ Read x bytes """
+            if not PY33:
                 data = ''
             else:
                 data = bytes()
@@ -134,21 +156,20 @@ class JsonServer(socketserver.TCPServer):
             return data
 
         def get_msg_len(self):
-            d = self.read_bytes(4)
-            s = struct.unpack('=I', d)
-            return s[0]
+            """ Gets message len """
+            data = self.read_bytes(4)
+            payload = struct.unpack('=I', data)
+            return payload[0]
 
         def read(self):
-            """
-            Reads a json string from socket and load it.
-            """
+            """ Reads a json string from socket and load it. """
             size = self.get_msg_len()
             data = self.read_bytes(size).decode('utf-8')
             return json.loads(data)
 
         def send(self, obj):
             """
-            Sends a python obj as a json string on the socket
+            Sends a python obj as a json string on the socket.
 
             :param obj: The object to send, must be Json serializable.
             """
@@ -159,40 +180,26 @@ class JsonServer(socketserver.TCPServer):
             self.request.sendall(msg)
 
         def handle(self):
+            """
+            Hanlde the request and keep it alive while shutdown signal
+            has not been received
+            """
             running = True
             while running:
                 data = self.read()
                 running = self._handle(data)
 
-        def _import_class(self, cl):
-            """
-            Imports a class from a fully qualified name string.
-
-            :param cl: class string, e.g.
-                "pyqode.core.backend.workers.CodeCompletionWorker"
-            :return: The corresponding class
-
-            """
-            d = cl.rfind(".")
-            class_name = cl[d + 1: len(cl)]
-            try:
-                m = __import__(cl[0:d], globals(), locals(), [class_name])
-                klass = getattr(m, class_name)
-            except ImportError:
-                raise ImportError(cl)
-            except AttributeError:
-                raise ImportError(cl)
-            else:
-                return klass
-
         def _handle(self, data):
+            """
+            Handles a work request.
+            """
             try:
                 if data == 'shutdown':
                     return False
                 assert data['worker']
                 assert data['request_id']
                 assert data['data']
-                worker = self._import_class(data['worker'])
+                worker = import_class(data['worker'])
                 if inspect.isclass(worker):
                     worker = worker()
                 print('worker: %r' % worker)
@@ -202,10 +209,10 @@ class JsonServer(socketserver.TCPServer):
                             'results': result}
                 print('sending response: %r' % response)
                 self.send(response)
-            except:
+            except:  # pylint: disable=bare-except
                 print('error with data=%r' % data)
-                e1, e2, e3 = sys.exc_info()
-                traceback.print_exception(e1, e2, e3, file=sys.stderr)
+                exc1, exc2, exc3 = sys.exc_info()
+                traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
             return True
 
     def __init__(self, args=None):

@@ -28,6 +28,11 @@ class IndenterMode(Mode):
             self.editor.unindent_requested.disconnect(self.unindent)
 
     def indent_selection(self, cursor):
+        """
+        Indent selected text
+
+        :param cursor: QTextCursor
+        """
         doc = self.editor.document()
         min_indent = settings.min_indent_column
         tab_len = settings.tab_length
@@ -47,7 +52,8 @@ class IndenterMode(Mode):
                 cursor = QtGui.QTextCursor(block)
                 cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
                 if settings.use_spaces_instead_of_tabs:
-                    [cursor.insertText(" ") for _ in range(nb_space_to_add)]
+                    for _ in range(nb_space_to_add):
+                        cursor.insertText(" ")
                 else:
                     cursor.insertText('\t')
             block = block.next()
@@ -55,6 +61,9 @@ class IndenterMode(Mode):
         cursor.endEditBlock()
 
     def unindent_selection(self, cursor):
+        """
+        Un-indents selected text
+        """
         doc = self.editor.document()
         min_indent = settings.min_indent_column
         tab_len = settings.tab_length
@@ -76,7 +85,8 @@ class IndenterMode(Mode):
                     nb_spaces_to_remove = tab_len
                 cursor = QtGui.QTextCursor(block)
                 cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-                [cursor.deleteChar() for _ in range(nb_spaces_to_remove)]
+                for _ in range(nb_spaces_to_remove):
+                    cursor.deleteChar()
             block = block.next()
             i += 1
         cursor.endEditBlock()
@@ -121,5 +131,6 @@ class IndenterMode(Mode):
                     spaces += 1
                 trav_cursor.setPosition(pos - 1)
             cursor.movePosition(cursor.Left, cursor.MoveAnchor, spaces)
-            [cursor.deleteChar() for _ in range(spaces)]
+            for _ in range(spaces):
+                cursor.deleteChar()
             cursor.endEditBlock()

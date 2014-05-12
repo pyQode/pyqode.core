@@ -60,6 +60,7 @@ available from the top level frontend package (i.e. you just need to import the
 frontend package, no need to import submodules individually).
 
 """
+# pylint: disable=unused-import
 # CodeEdit
 from pyqode.core.frontend.code_edit import CodeEdit
 
@@ -133,3 +134,6 @@ from pyqode.core.frontend.syntax_highlighter import ParenthesisInfo
 
 # Utils API
 from pyqode.core.frontend import utils
+
+
+from pyqode.core.frontend.ui import pyqode_core_rc

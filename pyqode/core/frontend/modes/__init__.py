@@ -2,6 +2,7 @@
 """
 This package contains the core modes
 """
+# pylint: disable=unused-import
 from pyqode.core.frontend.modes.autocomplete import AutoCompleteMode
 from pyqode.core.frontend.modes.caret_line_highlight import \
     CaretLineHighlighterMode

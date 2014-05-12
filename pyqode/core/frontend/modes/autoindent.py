@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Contains the automatic generic indenter """
-import re
 from pyqode.core import settings
 from pyqode.core.frontend import Mode, text
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QTextCursor, QKeyEvent
 
 
 class AutoIndentMode(Mode):
@@ -18,14 +16,15 @@ class AutoIndentMode(Mode):
         super(AutoIndentMode, self).__init__()
         self.min_indent = settings.min_indent_column * ' '
 
-    def _get_indent(self, tc):
+    def _get_indent(self, cursor):
         """
         Return the indentation text (a series of spaces or tabs)
 
-        :param tc: QTextCursor
+        :param cursor: QTextCursor
 
         :returns: Tuple (text before new line, text after new line)
         """
+        # pylint: disable=unused-argument
         indent = text.line_indent(self.editor) * ' '
         if len(indent) < len(self.min_indent):
             indent = self.min_indent
@@ -44,17 +43,17 @@ class AutoIndentMode(Mode):
         """
         if not event.isAccepted():
             if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-                tc = self.editor.textCursor()
-                pre, post = self._get_indent(tc)
-                tc.insertText("%s\n%s" % (pre, post))
+                cursor = self.editor.textCursor()
+                pre, post = self._get_indent(cursor)
+                cursor.insertText("%s\n%s" % (pre, post))
 
                 # eats possible whitespaces
-                tc.movePosition(tc.WordRight, tc.KeepAnchor)
-                txt = tc.selectedText()
+                cursor.movePosition(cursor.WordRight, cursor.KeepAnchor)
+                txt = cursor.selectedText()
                 if txt.startswith(' '):
                     new_txt = txt.replace(" ", '')
                     if len(txt) > len(new_txt):
-                        tc.insertText(new_txt)
+                        cursor.insertText(new_txt)
 
                 event.accept()
 

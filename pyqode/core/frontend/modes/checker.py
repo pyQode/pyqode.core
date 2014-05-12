@@ -6,9 +6,14 @@ from PyQt4 import QtCore, QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner
 from pyqode.core.frontend.panels.marker import Marker, MarkerPanel
+# pylint: disable=too-many-arguments, maybe-no-member
 
 
 class CheckerMessages:
+    """
+    Enumerates the possible checker message types.
+    """
+    # pylint: disable=no-init, too-few-public-methods
     #: Status value for an information message.
     INFO = 0
     #: Status value for a warning message.
@@ -22,6 +27,7 @@ class CheckerMessage(object):
     Holds data for a message displayed by the
     :class:`pyqode.core.frontend.modes.CheckerMode`.
     """
+    # pylint: disable= too-many-instance-attributes
     #: Default set of icons foreach message status
     ICONS = {CheckerMessages.INFO: ("marker-info",
                                     ":/pyqode-icons/rc/dialog-info.png"),
@@ -39,7 +45,8 @@ class CheckerMessage(object):
     def status_to_string(cls, status):
         """
         Converts a message status to a string.
-        :param status: Status to convert (pyqode.core.MSG_STATUS_XXX)
+        :param status: Status to convert (
+            pyqode.core.frontend.modes.CheckerMessages)
 
         :return: The status string.
         :rtype: str
@@ -223,11 +230,11 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
         while len(self._messages):
             self.remove_message(self._messages[0])
         try:
-            m = frontend.get_panel(self.editor, MarkerPanel)
+            mode = frontend.get_panel(self.editor, MarkerPanel)
         except KeyError:
             pass
         else:
-            m.repaint()
+            mode.repaint()
 
     def _on_state_changed(self, state):
         if state:
@@ -236,6 +243,13 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             self.editor.textChanged.disconnect(self.request_analysis)
 
     def _on_work_finished(self, status, messages):
+        """
+        Display results.
+
+        :param status: Response status
+        :param messages: Response data, messages.
+        """
+        # pylint: disable=star-args
         if status:
             messages = [CheckerMessage(*msg) for msg in messages]
             self.add_messages(messages)
@@ -243,6 +257,9 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
             self.clear_messages()
 
     def request_analysis(self):
+        """
+        Requests an analysis.
+        """
         self._job_runner.request_job(self._request)
 
     def _request(self):

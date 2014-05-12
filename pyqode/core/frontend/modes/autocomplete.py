@@ -23,6 +23,7 @@ class AutoCompleteMode(Mode):
         self.logger = logging.getLogger(__name__)
 
     def _on_state_changed(self, state):
+        # pylint: disable=missing-docstring
         if state:
             self.editor.post_key_pressed.connect(self._on_post_key_pressed)
             self.editor.key_pressed.connect(self._on_key_pressed)
@@ -30,9 +31,10 @@ class AutoCompleteMode(Mode):
             self.editor.post_key_pressed.disconnect(self._on_post_key_pressed)
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
-    def _on_post_key_pressed(self, e):
-        if not e.isAccepted():
-            txt = e.text()
+    def _on_post_key_pressed(self, event):
+        # pylint: disable=missing-docstring
+        if not event.isAccepted():
+            txt = event.text()
             next_char = text.get_right_character(self.editor)
             if txt in self.MAPPING:
                 to_insert = self.MAPPING[txt]
@@ -41,18 +43,19 @@ class AutoCompleteMode(Mode):
                         next_char.isspace()):
                     text.insert_text(self.editor, to_insert)
 
-    def _on_key_pressed(self, e):
-        txt = e.text()
+    def _on_key_pressed(self, event):
+        # pylint: disable=missing-docstring
+        txt = event.text()
         next_char = text.get_right_character(self.editor)
-        self.logger.debug('next char: %s' % next_char)
+        self.logger.debug('next char: %s', next_char)
         ignore = False
         if txt and next_char == txt and next_char in self.MAPPING:
             ignore = True
-        elif e.text() == ')' or e.text() == ']' or e.text() == '}':
+        elif event.text() == ')' or event.text() == ']' or event.text() == '}':
             if next_char == ')' or next_char == ']' or next_char == '}':
                 ignore = True
         if ignore:
-            e.accept()
+            event.accept()
             self.logger.debug('clear selection and move right')
             text.clear_selection(self.editor)
             text.move_right(self.editor)

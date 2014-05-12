@@ -19,6 +19,8 @@ A worker is always tightly coupled with its caller, so are the data.
 import sys
 import traceback
 from pyqode.core import settings
+# pylint: disable=too-many-arguments, too-few-public-methods, bare-except
+# pylint: disable=unused-argument, abstract-class-not-used
 
 
 def echo_worker(data):
@@ -108,8 +110,8 @@ class CodeCompletionWorker(object):
             except:
                 sys.stderr.write('Failed to get completions from provider %r'
                                  % prov)
-                e1, e2, e3 = sys.exc_info()
-                traceback.print_exception(e1, e2, e3, file=sys.stderr)
+                exc1, exc2, exc3 = sys.exc_info()
+                traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
         return True, completions
 
 
@@ -138,14 +140,17 @@ class DocumentWordsProvider(object):
         # now we can split using the default_sep
         raw_words = txt.split(default_sep)
         words = set()
-        for w in raw_words:
+        for word in raw_words:
             # w = w.strip()
-            if w.replace('_', '').isalpha():
-                words.add(w)
+            if word.replace('_', '').isalpha():
+                words.add(word)
         return sorted(words)
 
-    def complete(self, code, line, column, path, encoding, prefix):
+    def complete(self, code, *args):
+        """
+        Provides completions based on the document words.
+        """
         completions = []
-        for w in self.split(code, settings.word_separators):
-            completions.append({'name': w})
+        for word in self.split(code, settings.word_separators):
+            completions.append({'name': word})
         return completions

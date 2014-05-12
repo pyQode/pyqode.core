@@ -1,3 +1,6 @@
+"""
+This module contains the classes and functions related to text decorations.
+"""
 import logging
 from PyQt4 import QtGui, QtCore
 
@@ -14,6 +17,8 @@ class _TextDecorationSignals(QtCore.QObject):
     Holds the signals for a TextDecoration (since we cannot make it a QObject,
     we need to store its signals in an external QObject).
     """
+    # pylint: disable=too-few-public-methods
+    #: Signal emitted when a TextDecoration has been clicked.
     clicked = QtCore.pyqtSignal(object)
 
 
@@ -36,7 +41,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
         def a_slot(decoration):
             print(decoration)
     """
-
+    # pylint: disable=too-many-arguments
     def __init__(self, cursor_or_bloc_or_doc, start_pos=None, end_pos=None,
                  start_line=None, end_line=None, draw_order=0, tooltip=None):
         """
@@ -169,6 +174,7 @@ def add_decoration(editor, decoration):
     :param decoration: Text decoration
     :type decoration: pyqode.core.frontend.TextDecoration
     """
+    # pylint: disable=protected-access
     if decoration not in editor._extra_selections:
         editor._extra_selections.append(decoration)
         editor._extra_selections = sorted(
@@ -186,12 +192,13 @@ def remove_decoration(editor, decoration):
     :param decoration: The decoration to remove
     :type decoration: pyqode.core.frontend.TextDecoration
     """
+    # pylint: disable=protected-access
     try:
         editor._extra_selections.remove(decoration)
         editor.setExtraSelections(editor._extra_selections)
         return True
     except ValueError:
-        _logger().exception('cannot remove decoration %r' % decoration)
+        _logger().exception('cannot remove decoration %r', decoration)
         return False
 
 
@@ -201,5 +208,6 @@ def clear_decorations(editor):
 
     :param editor: CodeEdit instance
     """
+    # pylint: disable=protected-access
     editor._extra_selections[:] = []
     editor.setExtraSelections(editor._extra_selections)

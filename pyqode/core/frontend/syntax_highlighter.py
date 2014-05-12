@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 from pyqode.core.frontend import Mode
 
 
+# pylint: disable=abstract-class-not-used
 class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     Abstract Base class for syntax highlighter modes.
@@ -39,7 +40,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def __init__(self, parent):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
-        self._spaces_ptrn = QtCore.QRegExp('\s+')
+        self._spaces_ptrn = QtCore.QRegExp(r'\s+')
         # there is a bug with QTextBlockUserData in PyQt4, we need to
         # keep a reference on them, otherwise they are removed from memory.
         self._blocks = set()
@@ -48,10 +49,13 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self._blocks.clear()
 
     def set_mime_type(self, mime_type):
+        """ Sets the associated mime type and update the internal lexer """
         pass
 
     @staticmethod
     def _detect_parentheses(text, user_data):
+        """ Detect symbols (parentheses, braces, ...)
+        """
         user_data.parentheses[:] = []
         user_data.square_brackets[:] = []
         user_data.braces[:] = []
@@ -96,7 +100,10 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         user_data.braces[:] = sorted(
             user_data.braces, key=lambda x: x.position)
 
-    def highlightBlock(self, text):
+    def highlightBlock(self, text):  #: pylint: disable=invalid-name
+        """
+        Highlights a block of text.
+        """
         self.block_highlight_started.emit(self, text)
         # setup user data
         user_data = self.currentBlockUserData()
@@ -124,6 +131,7 @@ class ParenthesisInfo(object):
     """
     Stores information about a parenthesis in a line of code.
     """
+    # pylint: disable=too-few-public-methods
     def __init__(self, pos, char):
         #: Position of the parenthesis, expressed as a number of character
         self.position = pos
@@ -140,6 +148,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
 
     You can also add your own
     """
+    # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
         QtGui.QTextBlockUserData.__init__(self)
         #: Line number of the data, for convenience

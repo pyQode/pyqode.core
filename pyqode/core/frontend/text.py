@@ -1,16 +1,19 @@
+"""
+This module contains a series of function that extends the QT test API.
+"""
 import functools
 import logging
 import mimetypes
 import os
 import sys
-
 from PyQt4 import QtCore, QtGui
-
 from pyqode.core import settings
 from pyqode.core.frontend.utils import show_wait_cursor
+# pylint: disable=protected-access
 
 
 def _logger():
+    """ Gets the module's logger"""
     return logging.getLogger(__name__)
 
 
@@ -26,14 +29,16 @@ def goto_line(editor, line, column=0, move=True):
     :return: The new text cursor
     :rtype: QtGui.QTextCursor
     """
-    tc = editor.textCursor()
-    tc.movePosition(tc.Start, tc.MoveAnchor)
-    tc.movePosition(tc.Down, tc.MoveAnchor, line - 1)
+    text_cursor = editor.textCursor()
+    text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
+    text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                             line - 1)
     if column:
-        tc.movePosition(tc.Right, tc.MoveAnchor, column)
+        text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
+                                 column)
     if move:
-        editor.setTextCursor(tc)
-    return tc
+        editor.setTextCursor(text_cursor)
+    return text_cursor
 
 
 def selected_text(editor):
@@ -45,7 +50,7 @@ def selected_text(editor):
     return editor.textCursor().selectedText()
 
 
-def word_under_cursor(editor, select_whole_word=False, tc=None):
+def word_under_cursor(editor, select_whole_word=False, text_cursor=None):
     """
     Gets the word under cursor using the separators defined by
     :attr:`pyqode.core.settings.word_separators`.
@@ -58,43 +63,47 @@ def word_under_cursor(editor, select_whole_word=False, tc=None):
     :param editor: editor instance.
     :param select_whole_word: If set to true the whole word is selected,
      else the selection stops at the cursor position.
-    :param tc: Optional custom text cursor (e.g. from a QTextDocument clone)
+    :param text_cursor: Optional custom text cursor (e.g. from a
+        QTextDocument clone)
     :return The QTextCursor that contains the selected word.
     """
-    if not tc:
-        tc = editor.textCursor()
+    if not text_cursor:
+        text_cursor = editor.textCursor()
     word_separators = settings.word_separators
-    end_pos = start_pos = tc.position()
+    end_pos = start_pos = text_cursor.position()
     # select char by char until we are at the original cursor position.
-    while not tc.atStart():
-        tc.movePosition(tc.Left, tc.KeepAnchor, 1)
+    while not text_cursor.atStart():
+        text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
         try:
-            ch = tc.selectedText()[0]
+            char = text_cursor.selectedText()[0]
             word_separators = settings.word_separators
-            st = tc.selectedText()
-            if (st in word_separators and (st != "n" and st != "t")
-                    or ch.isspace()):
+            selected_txt = text_cursor.selectedText()
+            if (selected_txt in word_separators and
+                    (selected_txt != "n" and selected_txt != "t")
+                    or char.isspace()):
                 break  # start boundary found
         except IndexError:
             break  # nothing selectable
-        start_pos = tc.position()
-        tc.setPosition(start_pos)
+        start_pos = text_cursor.position()
+        text_cursor.setPosition(start_pos)
     if select_whole_word:
         # select the resot of the word
-        tc.setPosition(end_pos)
-        while not tc.atEnd():
-            tc.movePosition(tc.Right, tc.KeepAnchor, 1)
-            ch = tc.selectedText()[0]
-            st = tc.selectedText()
-            if (st in word_separators and (st != "n" and st != "t")
-                    or ch.isspace()):
+        text_cursor.setPosition(end_pos)
+        while not text_cursor.atEnd():
+            text_cursor.movePosition(text_cursor.Right,
+                                     text_cursor.KeepAnchor, 1)
+            char = text_cursor.selectedText()[0]
+            selected_txt = text_cursor.selectedText()
+            if (selected_txt in word_separators and
+                    (selected_txt != "n" and selected_txt != "t")
+                    or char.isspace()):
                 break  # end boundary found
-            end_pos = tc.position()
-            tc.setPosition(end_pos)
+            end_pos = text_cursor.position()
+            text_cursor.setPosition(end_pos)
     # now that we habe the boundaries, we can select the text
-    tc.setPosition(start_pos)
-    tc.setPosition(end_pos, tc.KeepAnchor)
-    return tc
+    text_cursor.setPosition(start_pos)
+    text_cursor.setPosition(end_pos, text_cursor.KeepAnchor)
+    return text_cursor
 
 
 def word_under_mouse_cursor(editor):
@@ -103,9 +112,9 @@ def word_under_mouse_cursor(editor):
 
     :return: A QTextCursor with the word under mouse cursor selected.
     """
-    tc = editor.cursorForPosition(editor._last_mouse_pos)
-    tc = word_under_cursor(editor, True, tc)
-    return tc
+    text_cursor = editor.cursorForPosition(editor._last_mouse_pos)
+    text_cursor = word_under_cursor(editor, True, text_cursor)
+    return text_cursor
 
 
 def cursor_position(editor):
@@ -186,24 +195,25 @@ def set_line_text(editor, line_nbr, new_text):
     :param new_text: The replacement text.
 
     """
-    tc = editor.textCursor()
-    tc.movePosition(tc.Start)
-    tc.movePosition(tc.Down, tc.MoveAnchor, line_nbr - 1)
-    tc.select(tc.LineUnderCursor)
-    tc.insertText(new_text)
-    editor.setTextCursor(tc)
+    text_cursor = editor.textCursor()
+    text_cursor.movePosition(text_cursor.Start)
+    text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                             line_nbr - 1)
+    text_cursor.select(text_cursor.LineUnderCursor)
+    text_cursor.insertText(new_text)
+    editor.setTextCursor(text_cursor)
 
 
 def remove_last_line(editor):
     """
     Removes the last line of the document.
     """
-    tc = editor.textCursor()
-    tc.movePosition(tc.End, tc.MoveAnchor)
-    tc.select(tc.LineUnderCursor)
-    tc.removeSelectedText()
-    tc.deletePreviousChar()
-    editor.setTextCursor(tc)
+    text_cursor = editor.textCursor()
+    text_cursor.movePosition(text_cursor.End, text_cursor.MoveAnchor)
+    text_cursor.select(text_cursor.LineUnderCursor)
+    text_cursor.removeSelectedText()
+    text_cursor.deletePreviousChar()
+    editor.setTextCursor(text_cursor)
 
 
 def clean_document(editor):
@@ -213,8 +223,6 @@ def clean_document(editor):
     """
     value = editor.verticalScrollBar().value()
     pos = cursor_position(editor)
-    original_pos = editor.textCursor().position()
-
     _logger().debug('BEGIN edit blocks for cleaning  ')
     editor.textCursor().beginEditBlock()
 
@@ -237,8 +245,8 @@ def clean_document(editor):
     # ensure there is only one blank line left at the end of the file
     i = line_count(editor)
     while i:
-        l = line_text(editor, i)
-        if l.strip():
+        line = line_text(editor, i)
+        if line.strip():
             break
         remove_last_line(editor)
         i -= 1
@@ -246,27 +254,28 @@ def clean_document(editor):
         editor.appendPlainText('')
 
     # restore cursor and scrollbars
-    tc = editor.textCursor()
+    text_cursor = editor.textCursor()
     doc = editor.document()
     assert isinstance(doc, QtGui.QTextDocument)
-    tc.movePosition(tc.Start)
-    tc.movePosition(tc.Down, tc.MoveAnchor,
-                    pos[0] - 1 if pos[0] <= doc.blockCount() else
-                    doc.blockCount() - 1)
-    tc.movePosition(tc.StartOfLine, tc.MoveAnchor)
-    p = tc.position()
-    tc.select(tc.LineUnderCursor)
-    if tc.selectedText():
-        tc.setPosition(p)
+    text_cursor.movePosition(text_cursor.Start)
+    text_cursor.movePosition(
+        text_cursor.Down, text_cursor.MoveAnchor,
+        pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
+    text_cursor.movePosition(text_cursor.StartOfLine, text_cursor.MoveAnchor)
+    cpos = text_cursor.position()
+    text_cursor.select(text_cursor.LineUnderCursor)
+    if text_cursor.selectedText():
+        text_cursor.setPosition(cpos)
         offset = pos[1] - eaten
-        tc.movePosition(tc.Right, tc.MoveAnchor, offset)
+        text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
+                                 offset)
     else:
-        tc.setPosition(p)
-    editor.setTextCursor(tc)
+        text_cursor.setPosition(cpos)
+    editor.setTextCursor(text_cursor)
     editor.verticalScrollBar().setValue(value)
 
     _logger().debug('FINISH editing blocks for cleaning')
-    tc.endEditBlock()
+    text_cursor.endEditBlock()
     editor._cleaning = False
 
 
@@ -295,21 +304,28 @@ def select_lines(editor, start=1, end=-1, apply_selection=True):
     if end == -1:
         end = line_count(editor)
     if start and end:
-        tc = editor.textCursor()
-        tc.movePosition(tc.Start, tc.MoveAnchor)
-        tc.movePosition(tc.Down, tc.MoveAnchor, start - 1)
+        text_cursor = editor.textCursor()
+        text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
+        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                                 start - 1)
         if end > start:  # Going down
-            tc.movePosition(tc.Down, tc.KeepAnchor, end - start)
-            tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
+            text_cursor.movePosition(text_cursor.Down, text_cursor.KeepAnchor,
+                                     end - start)
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.KeepAnchor)
         elif end < start:  # going up
             # don't miss end of line !
-            tc.movePosition(tc.EndOfLine, tc.MoveAnchor)
-            tc.movePosition(tc.Up, tc.KeepAnchor, start - end)
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.MoveAnchor)
+            text_cursor.movePosition(text_cursor.Up, text_cursor.KeepAnchor,
+                                     start - end)
+            text_cursor.movePosition(text_cursor.StartOfLine,
+                                     text_cursor.KeepAnchor)
         else:
-            tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.KeepAnchor)
         if apply_selection:
-            editor.setTextCursor(tc)
+            editor.setTextCursor(text_cursor)
 
 
 def selection_range(editor):
@@ -323,9 +339,9 @@ def selection_range(editor):
         editor.textCursor().selectionStart()).blockNumber() + 1
     end = doc.findBlock(
         editor.textCursor().selectionEnd()).blockNumber() + 1
-    tc = QtGui.QTextCursor(editor.textCursor())
-    tc.setPosition(editor.textCursor().selectionEnd())
-    if tc.columnNumber() == 0 and start != end:
+    text_cursor = QtGui.QTextCursor(editor.textCursor())
+    text_cursor.setPosition(editor.textCursor().selectionEnd())
+    if text_cursor.columnNumber() == 0 and start != end:
         end -= 1
     return start, end
 
@@ -344,7 +360,7 @@ def line_pos_from_number(editor, line_number):
     block = editor.document().findBlockByNumber(line_number)
     if block.isValid():
         return int(editor.blockBoundingGeometry(block).translated(
-                   editor.contentOffset()).top())
+            editor.contentOffset()).top())
     return None
 
 
@@ -357,27 +373,29 @@ def line_nbr_from_position(editor, y_pos):
     :return: Line number (1 based)
     :rtype: int
     """
+    # pylint: disable=unused-variable
     height = editor.fontMetrics().height()
-    for top, l, block in editor.visible_blocks:
+    for top, line, block in editor.visible_blocks:
         if top <= y_pos <= top + height:
-            return l
+            return line
     return None
 
 
-def keep_tc_pos(f):
+def keep_tc_pos(func):
     """
     Cache text cursor position and restore it when the wrapped
     function exits.
 
     This decorator can only be used on modes or panels.
     """
-    @functools.wraps(f)
+    @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
+        """ Decorator """
         pos = editor.textCursor().position()
-        retval = f(editor, *args, **kwds)
-        tc = editor.textCursor()
-        tc.setPosition(pos)
-        editor.setTextCursor(tc)
+        retval = func(editor, *args, **kwds)
+        text_cursor = editor.textCursor()
+        text_cursor.setPosition(pos)
+        editor.setTextCursor(text_cursor)
         return retval
     return wrapper
 
@@ -393,18 +411,18 @@ def detect_encoding(path, default_encoding):
 
     :returns: File encoding
     """
-    _logger().debug('detecting file encoding for file: %s' % path)
-    with open(path, 'rb') as f:
-        data = f.read()
+    _logger().debug('detecting file encoding for file: %s', path)
+    with open(path, 'rb') as file:
+        data = file.read()
     try:
         import chardet
         encoding = chardet.detect(bytes(data))['encoding']
     except ImportError:
         _logger().warning("chardet not available, using default encoding by "
-                          "default: %s" % default_encoding)
+                          "default: %s", default_encoding)
         encoding = default_encoding
     else:
-        _logger().debug('encoding detected using chardet: %s' % encoding)
+        _logger().debug('encoding detected using chardet: %s', encoding)
     return encoding
 
 
@@ -416,11 +434,11 @@ def get_mimetype(path):
     :param path: path of the file
     :return: the corresponding mime type.
     """
-    _logger().debug('detecting mimetype for %s' % path)
+    _logger().debug('detecting mimetype for %s', path)
     mimetype = mimetypes.guess_type(path)[0]
     if mimetype is None:
         mimetype = mimetypes.guess_type('file.txt')[0]
-    _logger().debug('mimetype detected: %s' % mimetype)
+    _logger().debug('mimetype detected: %s', mimetype)
     return mimetype
 
 
@@ -454,10 +472,10 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
     # detect encoding
     encoding = (detect_encoding_func(path, default_encoding)
                 if detect_encoding_func else default_encoding)
-    _logger().debug('file encoding: %s' % encoding)
+    _logger().debug('file encoding: %s', encoding)
     # open file and get its content
-    with open(path, 'r', encoding=encoding) as f:
-        content = f.read()
+    with open(path, 'r', encoding=encoding) as file:
+        content = file.read()
     # replace tabs by spaces
     if replace_tabs_by_spaces:
         content = content.replace(
@@ -501,25 +519,25 @@ def save_to_file(editor, path=None, encoding=None):
     # succeeded we just rename it to the final file name.
     tmp_path = path + '~'
     try:
-        _logger().debug('saving editor content to temp file: %s' % tmp_path)
-        with open(tmp_path, 'w', encoding=editor.file_encoding) as f:
-            f.write(plain_text)
+        _logger().debug('saving editor content to temp file: %s', tmp_path)
+        with open(tmp_path, 'w', encoding=editor.file_encoding) as file:
+            file.write(plain_text)
     except (IOError, OSError):
         try:
             os.remove(tmp_path)
         except OSError:
             pass
-        _logger().exception('failed to save file: %s' % path)
+        _logger().exception('failed to save file: %s', path)
         return False
     else:
         _logger().debug('save to temp file succeeded')
         # remove path and rename temp file
-        _logger().debug('remove file: %s' % path)
+        _logger().debug('remove file: %s', path)
         try:
             os.remove(path)
         except (OSError, IOError):
             pass
-        _logger().debug('rename %s to %s' % (tmp_path, path))
+        _logger().debug('rename %s to %s', tmp_path, path)
         os.rename(tmp_path, path)
         editor._original_text = plain_text
         editor.dirty = False
@@ -527,10 +545,10 @@ def save_to_file(editor, path=None, encoding=None):
         editor.text_saved.emit(path)
         if sel_start != sel_end:
             # reset selection
-            tc = editor.textCursor()
-            tc.setPosition(sel_start)
-            tc.setPosition(sel_end, tc.KeepAnchor)
-            editor.setTextCursor(tc)
+            text_cursor = editor.textCursor()
+            text_cursor.setPosition(sel_start)
+            text_cursor.setPosition(sel_end, text_cursor.KeepAnchor)
+            editor.setTextCursor(text_cursor)
         return True
 
 
@@ -540,10 +558,10 @@ def mark_whole_doc_dirty(editor):
 
     :param editor: CodeEdit instance
     """
-    tc = editor.textCursor()
-    tc.select(tc.Document)
-    editor.document().markContentsDirty(tc.selectionStart(),
-                                        tc.selectionEnd())
+    text_cursor = editor.textCursor()
+    text_cursor.select(text_cursor.Document)
+    editor.document().markContentsDirty(text_cursor.selectionStart(),
+                                        text_cursor.selectionEnd())
 
 
 def line_indent(editor, line_nbr=None):
@@ -570,10 +588,10 @@ def get_right_word(editor):
     :param editor: CodeEdit instance.
     :return: The word that is on the right of the text cursor.
     """
-    tc = editor.textCursor()
-    tc.movePosition(QtGui.QTextCursor.WordRight,
-                    QtGui.QTextCursor.KeepAnchor)
-    return tc.selectedText().strip()
+    text_cursor = editor.textCursor()
+    text_cursor.movePosition(QtGui.QTextCursor.WordRight,
+                             QtGui.QTextCursor.KeepAnchor)
+    return text_cursor.selectedText().strip()
 
 
 def get_right_character(editor):
@@ -602,13 +620,13 @@ def insert_text(editor, text, keep_position=True):
         kept. Pass False for a regular insert (the cursor will be at the end
         of the inserted text).
     """
-    tc = editor.textCursor()
+    text_cursor = editor.textCursor()
     if keep_position:
-        p = tc.position()
-    tc.insertText(text)
+        pos = text_cursor.position()
+    text_cursor.insertText(text)
     if keep_position:
-        tc.setPosition(p)
-    editor.setTextCursor(tc)
+        text_cursor.setPosition(pos)
+    editor.setTextCursor(text_cursor)
 
 
 def clear_selection(editor):
@@ -617,9 +635,9 @@ def clear_selection(editor):
 
     :param editor: CodeEdit instance
     """
-    tc = editor.textCursor()
-    tc.clearSelection()
-    editor.setTextCursor(tc)
+    text_cursor = editor.textCursor()
+    text_cursor.clearSelection()
+    editor.setTextCursor(text_cursor)
 
 
 def move_right(editor, keep_anchor=False, nb_chars=1):
@@ -631,10 +649,11 @@ def move_right(editor, keep_anchor=False, nb_chars=1):
         the anchor (no selection)
     :param nb_chars: Number of characters to move.
     """
-    tc = editor.textCursor()
-    tc.movePosition(tc.Right, tc.KeepAnchor if keep_anchor else tc.MoveAnchor,
-                    nb_chars)
-    editor.setTextCursor(tc)
+    text_cursor = editor.textCursor()
+    text_cursor.movePosition(
+        text_cursor.Right, text_cursor.KeepAnchor if keep_anchor else
+        text_cursor.MoveAnchor, nb_chars)
+    editor.setTextCursor(text_cursor)
 
 
 def selected_text_to_lower(editor):
@@ -643,9 +662,9 @@ def selected_text_to_lower(editor):
 
     :param editor: CodeEdit instance
     """
-    tc = editor.textCursor()
-    tc.insertText(tc.selectedText().lower())
-    editor.setTextCursor(tc)
+    text_cursor = editor.textCursor()
+    text_cursor.insertText(text_cursor.selectedText().lower())
+    editor.setTextCursor(text_cursor)
 
 
 def selected_text_to_upper(editor):
@@ -692,6 +711,6 @@ def search_text(text_document, text_cursor, search_txt, search_flags):
                             cursor.selectionEnd()))
         cursor.setPosition(cursor.position() + 1)
         cursor = text_document.find(search_txt, cursor, search_flags)
-    _logger().debug('search occurences: %r' % occurrences)
-    _logger().debug('occurence index: %d' % index)
+    _logger().debug('search occurences: %r', occurrences)
+    _logger().debug('occurence index: %d', index)
     return occurrences, index

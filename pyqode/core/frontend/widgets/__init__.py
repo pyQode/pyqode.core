@@ -15,6 +15,7 @@ pyqode applications:
     - QPropertyGrid: a simple property grid that works on pure python object
     made up of primitive types (int, float, list, string).
 """
+# pylint: disable=unused-import
 from pyqode.core.frontend.widgets.tabs import TabWidget
 from pyqode.core.frontend.widgets.errors_table import ErrorsTable
 from pyqode.core.frontend.widgets.interactive import InteractiveConsole

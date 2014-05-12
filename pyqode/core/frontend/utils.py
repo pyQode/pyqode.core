@@ -2,18 +2,17 @@
 """
 Contains utility functions
 """
-import collections
 import functools
 import logging
-import weakref
 from PyQt4 import QtCore, QtGui
 
 
 def _logger():
+    """ Returns module logger """
     return logging.getLogger(__name__)
 
 
-class memoized(object):
+class memoized(object):  # pylint: disable=invalid-name, too-few-public-methods
     """
     Decorator. Caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned
@@ -63,7 +62,7 @@ def drift_color(base_color, factor=110):
             return base_color.lighter(factor + 10)
 
 
-class TextStyle(object):
+class TextStyle(object):  # pylint: disable=too-few-public-methods
     """
     Helper class to define a text format. This class has methods to set the
     text style from a string and to easily be created from a string, making
@@ -108,6 +107,7 @@ class TextStyle(object):
 
     @memoized
     def from_string(self, string):
+        """ Makes TextStyles from a string """
         tokens = string.split(" ")
         assert len(tokens) == 4
         self.color = QtGui.QColor(tokens[0])
@@ -143,6 +143,7 @@ class DelayJobRunner(object):
         self._timer.timeout.connect(self._exec_requested_job)
         self._args = []
         self._kwargs = {}
+        self._job = lambda x: None
 
     def request_job(self, job, *args, **kwargs):
         """
@@ -180,15 +181,16 @@ class DelayJobRunner(object):
         self._job(*self._args, **self._kwargs)
 
 
-def show_wait_cursor(f):
+def show_wait_cursor(func):
     """
     Decorator that show a wait cursor the time to execute the wrapped function.
     The cursor is automatically restored once the method returned.
     """
-    @functools.wraps(f)
+    @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
+        """ Decorator """
         editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
-        ret_val = f(editor, *args, **kwds)
+        ret_val = func(editor, *args, **kwds)
         editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
         return ret_val
     return wrapper

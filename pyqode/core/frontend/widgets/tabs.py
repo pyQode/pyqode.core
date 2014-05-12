@@ -5,14 +5,13 @@ show code editor tabs.
 """
 import logging
 import os
-import sys
-import pyqode.core
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QDialog, QTabBar, QTabWidget
-
 from pyqode.core import frontend
 from pyqode.core.frontend.ui.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.frontend.modes import FileWatcherMode
+# pylint: disable=too-many-instance-attributes, missing-docstring
+# pylint: disable=protected-access
 
 
 def _logger():
@@ -43,29 +42,29 @@ class DlgUnsavedFiles(QDialog, Ui_Dialog):
         self.bt_discard = self.buttonBox.button(QtGui.QDialogButtonBox.Discard)
         self.bt_discard.clicked.connect(self._set_discarded)
         self.bt_discard.clicked.connect(self.accept)
-        for f in files:
-            self._add_file(f)
+        for file in files:
+            self._add_file(file)
         self.listWidget.itemSelectionChanged.connect(
             self._on_selection_changed)
         self._on_selection_changed()
 
-    def _add_file(self, filePath):
-        icon = QtGui.QFileIconProvider().icon(QtCore.QFileInfo(filePath))
-        item = QtGui.QListWidgetItem(icon, filePath)
+    def _add_file(self, path):
+        icon = QtGui.QFileIconProvider().icon(QtCore.QFileInfo(path))
+        item = QtGui.QListWidgetItem(icon, path)
         self.listWidget.addItem(item)
 
     def _set_discarded(self):
         self.discarded = True
 
     def _on_selection_changed(self):
-        nbItems = len(self.listWidget.selectedItems())
-        if nbItems == 0:
+        nb_items = len(self.listWidget.selectedItems())
+        if nb_items == 0:
             self.bt_save_all.setText("Save")
             self.bt_save_all.setEnabled(False)
         else:
             self.bt_save_all.setEnabled(True)
             self.bt_save_all.setText("Save selected")
-            if nbItems == self.listWidget.count():
+            if nb_items == self.listWidget.count():
                 self.bt_save_all.setText("Save all")
 
 
@@ -77,11 +76,11 @@ class ClosableTabBar(QTabBar):
         QtGui.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
 
-    def mousePressEvent(self, qMouseEvent):
-        QtGui.QTabBar.mousePressEvent(self, qMouseEvent)
-        if qMouseEvent.button() == QtCore.Qt.MiddleButton:
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+        QtGui.QTabBar.mousePressEvent(self, event)
+        if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
-                qMouseEvent.pos()))
+                event.pos()))
 
 
 class TabWidget(QTabWidget):
@@ -133,10 +132,10 @@ class TabWidget(QTabWidget):
         for name, slot in [('Close', self.close),
                            ('Close others', self.close_others),
                            ('Close all', self.close_all)]:
-            a = QtGui.QAction(name, self)
-            a.triggered.connect(slot)
-            self._context_mnu.addAction(a)
-            self.addAction(a)
+            qaction = QtGui.QAction(name, self)
+            qaction.triggered.connect(slot)
+            self._context_mnu.addAction(qaction)
+            self.addAction(qaction)
         # keep a list of widgets (to avoid PyQt bug where
         # the C++ class loose the wrapped obj type).
         self._widgets = []
@@ -153,12 +152,12 @@ class TabWidget(QTabWidget):
         """
         Closes every editors tabs except the current one.
         """
-        cw = self.currentWidget()
-        self._try_close_dirty_tabs(exept=cw)
+        current_widget = self.currentWidget()
+        self._try_close_dirty_tabs(exept=current_widget)
         i = 0
         while self.count() > 1:
-            w = self._widgets[i]
-            if w != cw:
+            widget = self._widgets[i]
+            if widget != current_widget:
                 self.removeTab(i)
             else:
                 i = 1
@@ -235,7 +234,7 @@ class TabWidget(QTabWidget):
                 pass
         self.setCurrentIndex(initial_index)
 
-    def addAction(self, action):
+    def addAction(self, action):  # pylint: disable=invalid-name
         """
         Adds an action to the TabBar context menu
 
@@ -243,7 +242,7 @@ class TabWidget(QTabWidget):
         """
         self._context_mnu.addAction(action)
 
-    def addSeparator(self):
+    def add_separator(self):
         """
         Adds a separator to the TabBar context menu.
 
@@ -266,7 +265,8 @@ class TabWidget(QTabWidget):
                     pass  # not an editor widget
         return -1
 
-    def _del_code_edit(self, code_edit):
+    @staticmethod
+    def _del_code_edit(code_edit):
         try:
             frontend.stop_server(code_edit)
         except AttributeError:
@@ -304,14 +304,14 @@ class TabWidget(QTabWidget):
         self.setTabText(index, code_edit._tab_name)
         code_edit.setFocus(True)
         try:
-            fw = frontend.get_mode(code_edit, FileWatcherMode)
+            file_watcher = frontend.get_mode(code_edit, FileWatcherMode)
         except (KeyError, AttributeError):
             # not installed
             pass
         else:
-            fw.file_deleted.connect(self._on_file_deleted)
+            file_watcher.file_deleted.connect(self._on_file_deleted)
 
-    def addTab(self, elem, icon, name):
+    def addTab(self, elem, icon, name):  # pylint: disable=invalid-name
         """
         Extends QTabWidget.addTab to keep an internal list of added tabs.
         """
@@ -393,15 +393,15 @@ class TabWidget(QTabWidget):
         except AttributeError:
             pass  # not an editor widget
 
-    def removeTab(self, p_int):
+    def removeTab(self, index):  # pylint: disable=invalid-name
         """
-        Removes tab at index ``p_int``.
+        Removes tab at index ``index``.
 
         This method will emits tab_closed for the removed tab.
 
         """
-        QTabWidget.removeTab(self, p_int)
-        widget = self._widgets.pop(p_int)
+        QTabWidget.removeTab(self, index)
+        widget = self._widgets.pop(index)
         if widget == self._current:
             self._current = None
         self.tab_closed.emit(widget)
@@ -420,9 +420,8 @@ class TabWidget(QTabWidget):
                     if not dlg.discarded:
                         self._save_editor(widget)
                     self.removeTab(index)
-        except AttributeError as e:
-            _logger().warning(e)
-            pass  # do nothing, let the user handle this case
+        except AttributeError:
+            _logger().warning('Failed to close tab %d', index)
         if self.count() == 0:
             self.last_tab_closed.emit()
 
@@ -442,12 +441,13 @@ class TabWidget(QTabWidget):
             if not dlg.discarded:
                 for item in dlg.listWidget.selectedItems():
                     filename = item.text()
-                    for w in widgets:
-                        if w.file_path == filename:
+                    widget = None
+                    for widget in widgets:
+                        if widget.file_path == filename:
                             break
-                    if w != exept:
-                        w.save_to_file()
-                        self.removeTab(self.indexOf(w))
+                    if widget != exept:
+                        widget.save_to_file()
+                        self.removeTab(self.indexOf(widget))
             return True
         return False
 
@@ -482,7 +482,7 @@ class TabWidget(QTabWidget):
             pass
         self.dirty_changed.emit(dirty)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # pylint: disable=invalid-name
         """
         On close, we try to close dirty tabs and only process the close
         event if all dirty tabs were closed by the user.

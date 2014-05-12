@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+This module contains the WordClickMode
+"""
 from PyQt4 import QtCore, QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend import TextDecoration, Mode
@@ -26,6 +29,10 @@ class WordClickMode(Mode, QtCore.QObject):
         self._deco = None
 
     def _on_state_changed(self, state):
+        """
+        Connects/disconnects slots to/from signals when the mode state
+        changed.
+        """
         if state:
             self.editor.mouse_moved.connect(self._on_mouse_moved)
             self.editor.mouse_pressed.connect(self._on_mouse_pressed)
@@ -34,16 +41,18 @@ class WordClickMode(Mode, QtCore.QObject):
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
 
     def _select_word_under_mouse_cursor(self):
-        tc = frontend.word_under_mouse_cursor(self.editor)
-        if (self._previous_cursor_start != tc.selectionStart() and
-                self._previous_cursor_end != tc.selectionEnd()):
+        """ Selects the word under the mouse cursor. """
+        cursor = frontend.word_under_mouse_cursor(self.editor)
+        if (self._previous_cursor_start != cursor.selectionStart() and
+                self._previous_cursor_end != cursor.selectionEnd()):
             self._remove_decoration()
-            self._add_decoration(tc)
-        self._previous_cursor_start = tc.selectionStart()
-        self._previous_cursor_end = tc.selectionEnd()
+            self._add_decoration(cursor)
+        self._previous_cursor_start = cursor.selectionStart()
+        self._previous_cursor_end = cursor.selectionEnd()
 
-    def _on_mouse_moved(self, e):
-        if e.modifiers() & QtCore.Qt.ControlModifier:
+    def _on_mouse_moved(self, event):
+        """ mouse moved callback """
+        if event.modifiers() & QtCore.Qt.ControlModifier:
             self._select_word_under_mouse_cursor()
         else:
             self._remove_decoration()
@@ -51,16 +60,20 @@ class WordClickMode(Mode, QtCore.QObject):
             self._previous_cursor_start = -1
             self._previous_cursor_end = -1
 
-    def _on_mouse_pressed(self, e):
-        if e.button() == 1 and self._deco:
-            tc = frontend.word_under_mouse_cursor(self.editor)
-            if tc and tc.selectedText():
-                self.word_clicked.emit(tc)
+    def _on_mouse_pressed(self, event):
+        """ mouse pressed callback """
+        if event.button() == 1 and self._deco:
+            cursor = frontend.word_under_mouse_cursor(self.editor)
+            if cursor and cursor.selectedText():
+                self.word_clicked.emit(cursor)
 
-    def _add_decoration(self, tc):
+    def _add_decoration(self, cursor):
+        """
+        Adds a decoration for the word under ``cursor``.
+        """
         if self._deco is None:
-            if tc.selectedText():
-                self._deco = TextDecoration(tc)
+            if cursor.selectedText():
+                self._deco = TextDecoration(cursor)
                 self._deco.set_foreground(QtCore.Qt.blue)
                 self._deco.set_as_underlined()
                 frontend.add_decoration(self.editor, self._deco)
@@ -69,6 +82,9 @@ class WordClickMode(Mode, QtCore.QObject):
                 self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
 
     def _remove_decoration(self):
+        """
+        Removes the word under cursor's decoration
+        """
         if self._deco is not None:
             frontend.remove_decoration(self.editor, self._deco)
             self._deco = None

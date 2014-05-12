@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+This module contains the ZoomMode which lets you zoom in and out the editor.
+"""
 from pyqode.core.frontend import Mode
 from PyQt4 import QtCore
 

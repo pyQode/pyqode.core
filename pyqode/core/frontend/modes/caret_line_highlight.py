@@ -15,10 +15,16 @@ class CaretLineHighlighterMode(frontend.Mode):
     """
     @property
     def background(self):
+        """
+        Background color of the caret line
+        """
         return self._color
 
     @background.setter
     def background(self, value):
+        """
+        Background color of the caret line
+        """
         self._color = value
         self._update_highlight()
 
@@ -27,9 +33,13 @@ class CaretLineHighlighterMode(frontend.Mode):
         self._decoration = None
         self._brush = None
         self._pos = -1
+        self._color = None
         self._init_style()
 
     def _init_style(self):
+        """
+        Init brush
+        """
         if style.caret_line_background is None:
             if self.editor:
                 self._color = drift_color(self.editor.background, 110)
@@ -61,10 +71,12 @@ class CaretLineHighlighterMode(frontend.Mode):
         self._update_highlight()
 
     def refresh_style(self):
+        """ Refresh brush """
         self._init_style()
         self._update_highlight()
 
     def _clear_deco(self):
+        """ Clear line decoration """
         if self._decoration:
             frontend.remove_decoration(self.editor, self._decoration)
 
