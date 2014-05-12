@@ -242,7 +242,7 @@ def test_focus_out(editor):
     settings.save_on_focus_out = True
     editor.dirty = True
     assert editor.dirty is True
-    editor.focusOutEvent(None)
+    editor.focusOutEvent(QtGui.QFocusEvent(QtCore.QEvent.FocusOut))
 
 
 @editor_open(__file__)
