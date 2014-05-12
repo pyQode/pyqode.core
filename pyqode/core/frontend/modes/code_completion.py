@@ -12,7 +12,6 @@ from pyqode.core import backend
 # pylint: disable=too-many-instance-attributes, missing-docstring
 
 
-
 def _logger():
     return logging.getLogger(__name__)
 
