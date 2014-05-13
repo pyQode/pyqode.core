@@ -591,8 +591,10 @@ class CodeEdit(QtGui.QPlainTextEdit):
             if not event.isAccepted():
                 event.setAccepted(initial_state)
                 QtGui.QPlainTextEdit.keyPressEvent(self, event)
+        new_state = event.isAccepted()
         event.setAccepted(state)
         self.post_key_pressed.emit(event)
+        event.setAccepted(new_state)
 
     def keyReleaseEvent(self, event):  # pylint: disable=invalid-name
         """
