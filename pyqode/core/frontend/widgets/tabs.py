@@ -446,7 +446,7 @@ class TabWidget(QTabWidget):
                         if widget.file_path == filename:
                             break
                     if widget != exept:
-                        widget.save_to_file()
+                        frontend.save_to_file(widget)
                         self.removeTab(self.indexOf(widget))
             return True
         return False
