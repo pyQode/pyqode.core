@@ -15,7 +15,30 @@ before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-  - sudo apt-get install -qq python3-pyqt5 --fix-missing
+  # Qt 5.2
+  - curm -O -L http://download.qt-project.org/official_releases/qt/5.2/5.2.1/single/qt-everywhere-opensource-src-5.2.1.tar.gz
+  - tar -zxvf qt-everywhere-opensource-src-5.2.1.tar.gz
+  - cd qt-everywhere-opensource-src-5.2.1/
+  - ./configure -opensource -confirm-license
+  - make
+  - sudo make install
+  - cd ..
+  # sip
+  - curl -O -L sourceforge.net/projects/pyqt/files/sip/sip-4.15.5/sip-4.15.5.tar.gz
+  - tar -zxvf sip-4.15.5.tar.gz
+  - cd sip-4.15.5/
+  - python configure.py
+  - make
+  - sudo make install
+  - cd ..
+  # PyQt5
+  - curl -O -L http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.2.1/PyQt-gpl-5.2.1.tar.gz
+  - tar -zxvf PyQt-gpl-5.2.1.tar.gz
+  - cd PyQt-gpl-5.2.1.tar.gz
+  - python configure.py
+  - make
+  - make install
+  - cd ..
 script:
   - pip install .
   - if [ $ENV == "pytest" ]; then
