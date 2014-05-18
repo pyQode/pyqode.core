@@ -17,7 +17,7 @@ before_install:
 install:
   # Qt 5.2
   - curl -O -L http://download.qt-project.org/official_releases/qt/5.2/5.2.1/single/qt-everywhere-opensource-src-5.2.1.tar.gz
-  - tar -zxvf qt-everywhere-opensource-src-5.2.1.tar.gz
+  - tar -zxf qt-everywhere-opensource-src-5.2.1.tar.gz
   - cd qt-everywhere-opensource-src-5.2.1/
   - ./configure -opensource -confirm-license
   - make
@@ -25,7 +25,7 @@ install:
   - cd ..
   # sip
   - curl -O -L sourceforge.net/projects/pyqt/files/sip/sip-4.15.5/sip-4.15.5.tar.gz
-  - tar -zxvf sip-4.15.5.tar.gz
+  - tar -zxf sip-4.15.5.tar.gz
   - cd sip-4.15.5/
   - python configure.py
   - make
@@ -33,7 +33,7 @@ install:
   - cd ..
   # PyQt5
   - curl -O -L http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.2.1/PyQt-gpl-5.2.1.tar.gz
-  - tar -zxvf PyQt-gpl-5.2.1.tar.gz
+  - tar -zxf PyQt-gpl-5.2.1.tar.gz
   - cd PyQt-gpl-5.2.1.tar.gz
   - python configure.py
   - make
