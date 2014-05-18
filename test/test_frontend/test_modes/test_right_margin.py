@@ -1,6 +1,6 @@
-from PyQt4 import QtGui
 from pyqode.core import frontend, style
 from pyqode.core.frontend import modes
+from PyQt5 import QtGui
 
 
 def get_mode(editor):

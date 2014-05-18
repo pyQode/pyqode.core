@@ -5,8 +5,8 @@ show code editor tabs.
 """
 import logging
 import os
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QDialog, QTabBar, QTabWidget
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QDialog, QTabBar, QTabWidget
 from pyqode.core import frontend
 from pyqode.core.frontend.ui.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.frontend.modes import FileWatcherMode
@@ -32,14 +32,14 @@ class DlgUnsavedFiles(QDialog, Ui_Dialog):
     def __init__(self, parent, files=None):
         if files is None:
             files = []
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         Ui_Dialog.__init__(self)
         self.setupUi(self)
         self.bt_save_all = self.buttonBox.button(
-            QtGui.QDialogButtonBox.SaveAll)
+            QtWidgets.QDialogButtonBox.SaveAll)
         self.bt_save_all.clicked.connect(self.accept)
         self.discarded = False
-        self.bt_discard = self.buttonBox.button(QtGui.QDialogButtonBox.Discard)
+        self.bt_discard = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
         self.bt_discard.clicked.connect(self._set_discarded)
         self.bt_discard.clicked.connect(self.accept)
         for file in files:
@@ -49,8 +49,8 @@ class DlgUnsavedFiles(QDialog, Ui_Dialog):
         self._on_selection_changed()
 
     def _add_file(self, path):
-        icon = QtGui.QFileIconProvider().icon(QtCore.QFileInfo(path))
-        item = QtGui.QListWidgetItem(icon, path)
+        icon = QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(path))
+        item = QtWidgets.QListWidgetItem(icon, path)
         self.listWidget.addItem(item)
 
     def _set_discarded(self):
@@ -73,11 +73,11 @@ class ClosableTabBar(QTabBar):
     Custom QTabBar that can be closed using a mouse middle click.
     """
     def __init__(self, parent):
-        QtGui.QTabBar.__init__(self, parent)
+        QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
-        QtGui.QTabBar.mousePressEvent(self, event)
+        QtWidgets.QTabBar.mousePressEvent(self, event)
         if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
                 event.pos()))
@@ -108,7 +108,7 @@ class TabWidget(QTabWidget):
     #: Signal emitted when the last tab has been closed
     last_tab_closed = QtCore.pyqtSignal()
     #: Signal emitted when a tab has been closed
-    tab_closed = QtCore.pyqtSignal(QtGui.QWidget)
+    tab_closed = QtCore.pyqtSignal(QtWidgets.QWidget)
 
     @property
     def active_editor(self):
@@ -119,7 +119,7 @@ class TabWidget(QTabWidget):
         return self._current
 
     def __init__(self, parent):
-        QtGui.QTabWidget.__init__(self, parent)
+        QtWidgets.QTabWidget.__init__(self, parent)
         self._current = None
         self.currentChanged.connect(self._on_current_changed)
         self.tabCloseRequested.connect(self._on_tab_close_requested)
@@ -128,11 +128,11 @@ class TabWidget(QTabWidget):
         tab_bar.customContextMenuRequested.connect(self._show_tab_context_menu)
         self.setTabBar(tab_bar)
         self.tab_bar = tab_bar
-        self._context_mnu = QtGui.QMenu()
+        self._context_mnu = QtWidgets.QMenu()
         for name, slot in [('Close', self.close),
                            ('Close others', self.close_others),
                            ('Close all', self.close_all)]:
-            qaction = QtGui.QAction(name, self)
+            qaction = QtWidgets.QAction(name, self)
             qaction.triggered.connect(slot)
             self._context_mnu.addAction(qaction)
             self.addAction(qaction)
@@ -191,13 +191,13 @@ class TabWidget(QTabWidget):
         """
         Save current editor content. Leave file to None to erase the previous
         file content. If the current editor's file_path is None and path
-        is None, the function will call ``QtGui.QFileDialog.getSaveFileName``
+        is None, the function will call ``QtWidgets.QFileDialog.getSaveFileName``
         to get a valid save filename.
 
         """
         try:
             if not path and not self._current.file_path:
-                path = QtGui.QFileDialog.getSaveFileName(
+                path = QtWidgets.QFileDialog.getSaveFileName(
                     self, 'Choose destination path')
                 if not path:
                     return False
@@ -210,7 +210,7 @@ class TabWidget(QTabWidget):
             code_edit = self._current
             if path and old_path != path:
                 self._ensure_unique_name(code_edit, code_edit.file_name)
-                icon = QtGui.QFileIconProvider().icon(
+                icon = QtWidgets.QFileIconProvider().icon(
                     QtCore.QFileInfo(code_edit.file_path))
                 self.setTabIcon(self.currentIndex(), icon)
                 self.setTabText(self.currentIndex(),
@@ -286,7 +286,7 @@ class TabWidget(QTabWidget):
         :type code_edit: pyqode.core.frontend.CodeEdit
 
         :param icon: The tab widget icon. Optional
-        :type icon: QtGui.QIcon or None
+        :type icon: QtWidgets.QIcon or None
         """
         index = self.index_from_filename(code_edit.file_path)
         if index != -1:
@@ -297,7 +297,7 @@ class TabWidget(QTabWidget):
             return
         self._ensure_unique_name(code_edit, name)
         if not icon:
-            icon = QtGui.QFileIconProvider().icon(
+            icon = QtWidgets.QFileIconProvider().icon(
                 QtCore.QFileInfo(code_edit.file_path))
         index = self.addTab(code_edit, icon, code_edit._tab_name)
         self.setCurrentIndex(index)
@@ -350,7 +350,7 @@ class TabWidget(QTabWidget):
     def _save_editor(self, code_edit):
         path = None
         if not code_edit.file_path:
-            path = QtGui.QFileDialog.getSaveFileName(
+            path = QtWidgets.QFileDialog.getSaveFileName(
                 self, 'Choose destination path')
             if path:
                 frontend.save_to_file(code_edit, path)

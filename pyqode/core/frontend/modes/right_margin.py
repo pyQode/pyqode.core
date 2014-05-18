@@ -4,7 +4,7 @@ This module contains the right margin mode.
 """
 from pyqode.core import settings, style
 from pyqode.core.frontend import Mode, mark_whole_doc_dirty
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtGui
 
 
 class RightMarginMode(Mode):

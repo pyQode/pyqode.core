@@ -51,7 +51,7 @@ CaseConverterMode actions
 .. autodata:: to_upper
 
 """
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 # pylint: disable=C0103
 
 
@@ -86,7 +86,7 @@ class Action:
 
     def make_action(self, parent):
         """ Make a QAction out of the action properties """
-        a = QtGui.QAction(parent)
+        a = QtWidgets.QAction(parent)
         a.setText(self.text)
         a.setShortcut(self.shortcut)
         if self.icon:

@@ -4,7 +4,7 @@ This module contains the definition of the CodeEdit
 """
 import logging
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from pyqode.core import actions, settings, style
 from pyqode.core.frontend import text, dialogs
 from pyqode.core.frontend.client import JsonTcpClient
@@ -17,11 +17,11 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class CodeEdit(QtGui.QPlainTextEdit):
+class CodeEdit(QtWidgets.QPlainTextEdit):
     """
     Base class for any pyqode source code editor widget.
 
-    Extends :class:`PyQt4.GtGui.QPlainTextEdit` by adding an extension system (
+    Extends :class:`PyQt5.GtGui.QPlainTextEdit` by adding an extension system (
     modes and panels) and by adding a series of additional signal and methods.
 
     To interact with the editor content, you may use the Qt Text API (
@@ -220,7 +220,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         the line number (already 1 based), and the QTextBlock itself.
 
         :return: A list of tuple(top_position, line_number, block)
-        :rtype: List of tuple(int, int, QtGui.QTextBlock)
+        :rtype: List of tuple(int, int, QtWidgets.QTextBlock)
         """
         return self._visible_blocks
 
@@ -237,7 +237,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """
-        QtGui.QPlainTextEdit.__init__(self, parent)
+        super().__init__(parent)
         self._use_spaces_instead_of_tabs = True
         self._whitespaces_foreground = None
         self._sel_background = None
@@ -294,6 +294,17 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.setMouseTracking(True)
         self.setCenterOnScroll(True)
 
+    def __del__(self):
+        try:
+            self.blockCountChanged.disconnect(self._update_viewport_margins)
+            self.textChanged.disconnect(self._on_text_changed)
+            self.updateRequest.disconnect(self._update_panels)
+            self.blockCountChanged.disconnect(self.update)
+            self.cursorPositionChanged.disconnect(self.update)
+            self.selectionChanged.disconnect(self.update)
+        except TypeError:
+            pass
+
     # Utility methods
     # ---------------
     def set_mouse_cursor(self, cursor):
@@ -301,10 +312,10 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Changes the viewport's cursor
 
         :param cursor: the mouse cursor to set.
-        :type cursor: QtGui.QCursor
+        :type cursor: QtWidgets.QCursor
         """
         self.viewport().setCursor(cursor)
-        QtGui.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
 
     def show_tooltip(self, pos, tooltip):
         """
@@ -313,7 +324,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         :param pos: Tooltip position
         :param tooltip: Tooltip text
         """
-        QtGui.QToolTip.showText(pos, tooltip[0: 1024], self)
+        QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
         self._prev_tooltip_block_nbr = -1
 
     def margin_size(self, position=Panel.Position.LEFT):
@@ -339,7 +350,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         # pylint: disable=invalid-name
         self._fencoding = encoding
         self._mime_type = mime_type
-        QtGui.QPlainTextEdit.setPlainText(self, txt)
+        super().setPlainText(txt)
         self._original_text = txt
         self._modified_lines.clear()
         self.new_text_set.emit()
@@ -364,10 +375,10 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         Adds an action to the editor's context menu.
 
-        :param action: QtGui.QAction
+        :param action: QtWidgets.QAction
         """
         self._actions.append(action)
-        QtGui.QPlainTextEdit.addAction(self, action)
+        super().addAction(action)
 
     def actions(self):
         """
@@ -381,9 +392,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
         Adds a sepqrator to the editor's context menu.
 
         :return: The sepator that has been added.
-        :rtype: QtGui.QAction
+        :rtype: QtWidgets.QAction
         """
-        action = QtGui.QAction(self)
+        action = QtWidgets.QAction(self)
         action.setSeparator(True)
         self._actions.append(action)
         return action
@@ -552,7 +563,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
 
         :param e: resize event
         """
-        QtGui.QPlainTextEdit.resizeEvent(self, e)
+        super().resizeEvent(e)
         self._resize_panels()
 
     def paintEvent(self, e):  # pylint: disable=invalid-name
@@ -563,7 +574,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         :param e: paint event
         """
         self._update_visible_blocks(e)
-        QtGui.QPlainTextEdit.paintEvent(self, e)
+        super().paintEvent(e)
         self.painted.emit(e)
 
     def keyPressEvent(self, event):  # pylint: disable=invalid-name
@@ -590,7 +601,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
                     event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
             if not event.isAccepted():
                 event.setAccepted(initial_state)
-                QtGui.QPlainTextEdit.keyPressEvent(self, event)
+                super().keyPressEvent(event)
         new_state = event.isAccepted()
         event.setAccepted(state)
         self.post_key_pressed.emit(event)
@@ -607,7 +618,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.key_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            QtGui.QPlainTextEdit.keyReleaseEvent(self, event)
+            super().keyReleaseEvent(event)
 
     def focusInEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -616,9 +627,9 @@ class CodeEdit(QtGui.QPlainTextEdit):
         :param event: QFocusEvent
         """
         self.focused_in.emit(event)
-        QtGui.QPlainTextEdit.focusInEvent(self, event)
+        super().focusInEvent(event)
         self.repaint()
-        QtGui.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
 
     def focusOutEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -627,7 +638,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         """
         if settings.save_on_focus_out and self.dirty and self.file_path:
             self._save()
-        QtGui.QPlainTextEdit.focusOutEvent(self, event)
+        super().focusOutEvent(event)
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -644,7 +655,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
                 sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            QtGui.QPlainTextEdit.mousePressEvent(self, event)
+            super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -657,7 +668,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.mouse_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            QtGui.QPlainTextEdit.mouseReleaseEvent(self, event)
+            super().mouseReleaseEvent(event)
 
     def wheelEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -670,7 +681,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self.mouse_wheel_activated.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            QtGui.QPlainTextEdit.wheelEvent(self, event)
+            super().wheelEvent(event)
 
     def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
         """
@@ -692,21 +703,21 @@ class CodeEdit(QtGui.QPlainTextEdit):
                 break
         if not block_found:
             if self._prev_tooltip_block_nbr != -1:
-                QtGui.QToolTip.hideText()
+                QtWidgets.QToolTip.hideText()
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
         self.mouse_moved.emit(event)
-        QtGui.QPlainTextEdit.mouseMoveEvent(self, event)
+        super().mouseMoveEvent(event)
 
     def showEvent(self, event):  # pylint: disable=invalid-name
         """ Overrides showEvent to update the viewport margins """
-        QtGui.QPlainTextEdit.showEvent(self, event)
+        super().showEvent(event)
         _logger().debug('show event')
         self._update_viewport_margins()
 
     def _show_context_menu(self, point):
         """ Shows the context menu """
-        self._mnu = QtGui.QMenu()
+        self._mnu = QtWidgets.QMenu()
         self._mnu.addActions(self._actions)
         self._mnu.popup(self.mapToGlobal(point))
 
@@ -801,7 +812,7 @@ class CodeEdit(QtGui.QPlainTextEdit):
         self._background = style.background
         self._foreground = style.foreground
         self._whitespaces_foreground = style.whitespaces_foreground
-        app = QtGui.QApplication.instance()
+        app = QtWidgets.QApplication.instance()
         if style.selection_background is None:
             self._sel_background = app.palette().highlight().color()
         else:

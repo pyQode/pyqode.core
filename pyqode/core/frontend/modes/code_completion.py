@@ -4,7 +4,7 @@ This module contains the code completion mode and the related classes.
 """
 import logging
 import re
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
@@ -141,7 +141,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         return False
 
     def _on_install(self, editor):
-        self._completer = QtGui.QCompleter([""], editor)
+        self._completer = QtWidgets.QCompleter([""], editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
@@ -190,7 +190,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._show_completions(all_results)
 
     def _on_key_pressed(self, event):
-        QtGui.QToolTip.hideText()
+        QtWidgets.QToolTip.hideText()
         is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
         if self._completer.popup().isVisible():
@@ -329,7 +329,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         self._completer.popup().hide()
         self._job_runner.cancel_requests()
-        QtGui.QToolTip.hideText()
+        QtWidgets.QToolTip.hideText()
 
     def _show_popup(self):
         cnt = self._completer.completionCount()
@@ -437,13 +437,13 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         if not self._show_tooltips:
             return
         if completion not in self._tooltips:
-            QtGui.QToolTip.hideText()
+            QtWidgets.QToolTip.hideText()
             return
         tooltip = self._tooltips[completion].strip()
         pos = self._completer.popup().pos()
         pos.setX(pos.x() + self._completer.popup().size().width())
         pos.setY(pos.y() - 15)
-        QtGui.QToolTip.showText(pos, tooltip, self.editor)
+        QtWidgets.QToolTip.showText(pos, tooltip, self.editor)
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):

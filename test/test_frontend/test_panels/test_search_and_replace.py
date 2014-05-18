@@ -1,5 +1,5 @@
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtTest import QTest
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import panels
 from test.helpers import editor_open

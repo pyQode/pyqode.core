@@ -4,8 +4,8 @@ Contains a custom QTableWidget for easier displaying of CheckerMessages
 """
 from pyqode.core.frontend.utils import memoized
 from pyqode.core.frontend.modes.checker import CheckerMessage
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QTableWidget
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QTableWidget
 
 
 COL_TYPE = 1
@@ -17,7 +17,7 @@ COL_PATH = 5
 
 class ErrorsTable(QTableWidget):
     """
-    Extends a QtGui.QTableWidget to easily show
+    Extends a QtWidgets.QTableWidget to easily show
     :class:`pyqode.core.frontend.modes.CheckerMessage`.
 
     You add messages to the table using
@@ -32,22 +32,22 @@ class ErrorsTable(QTableWidget):
     msg_activated = QtCore.pyqtSignal(CheckerMessage)
 
     def __init__(self, parent=None):
-        QtGui.QTableWidget.__init__(self, parent)
+        QtWidgets.QTableWidget.__init__(self, parent)
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(
             ["Nr", "Type", "File name", "Line", "Description", "File path"])
         self.horizontalHeader().setResizeMode(
-            QtGui.QHeaderView.ResizeToContents)
+            QtWidgets.QHeaderView.ResizeToContents)
         self.horizontalHeader().setResizeMode(
-            COL_MSG, QtGui.QHeaderView.Stretch)
+            COL_MSG, QtWidgets.QHeaderView.Stretch)
         self.setMinimumSize(900, 200)
         self.itemActivated.connect(self._on_item_activated)
         self.setSelectionMode(self.SingleSelection)
         self.setSelectionBehavior(self.SelectRows)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
-        self.context_mnu = QtGui.QMenu()
-        self._a_copy_desc = QtGui.QAction("Copy", self)
+        self.context_mnu = QtWidgets.QMenu()
+        self._a_copy_desc = QtWidgets.QAction("Copy", self)
         self._a_copy_desc.triggered.connect(
             self._copy_cell_text)
         self.context_mnu.addAction(self._a_copy_desc)
@@ -57,7 +57,7 @@ class ErrorsTable(QTableWidget):
         Copies the description of the selected message to the clipboard
         """
         txt = self.currentItem().text()
-        QtGui.QApplication.clipboard().setText(txt)
+        QtWidgets.QApplication.clipboard().setText(txt)
 
     def _show_context_menu(self, pos):
         """ Shows the context menu """
@@ -67,7 +67,7 @@ class ErrorsTable(QTableWidget):
         """
         Clears the tables and the message list
         """
-        QtGui.QTableWidget.clear(self, *args, **kwargs)
+        QtWidgets.QTableWidget.clear(self, *args, **kwargs)
         self.setRowCount(0)
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(
@@ -80,10 +80,10 @@ class ErrorsTable(QTableWidget):
         Make icon from icon filename/tuple (if you want to use a theme)
         """
         if isinstance(icon, tuple):
-            return QtGui.QIcon.fromTheme(
-                icon[0], QtGui.QIcon(icon[1]))
+            return QtWidgets.QIcon.fromTheme(
+                icon[0], QtWidgets.QIcon(icon[1]))
         elif isinstance(icon, str):
-            return QtGui.QIcon(icon)
+            return QtWidgets.QIcon(icon)
         else:
             return None
 
@@ -98,20 +98,20 @@ class ErrorsTable(QTableWidget):
         self.insertRow(row)
 
         # Nr
-        item = QtGui.QTableWidgetItem(str(row + 1).zfill(3))
+        item = QtWidgets.QTableWidgetItem(str(row + 1).zfill(3))
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, 0, item)
 
         # type
-        item = QtGui.QTableWidgetItem(self.make_icon(msg.icon),
+        item = QtWidgets.QTableWidgetItem(self.make_icon(msg.icon),
                                       msg.status_string)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_TYPE, item)
 
         # filename
-        item = QtGui.QTableWidgetItem(
+        item = QtWidgets.QTableWidgetItem(
             QtCore.QFileInfo(msg.path).fileName())
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
@@ -119,21 +119,21 @@ class ErrorsTable(QTableWidget):
 
         # line
         if msg.line <= 0:
-            item = QtGui.QTableWidgetItem("----")
+            item = QtWidgets.QTableWidgetItem("----")
         else:
-            item = QtGui.QTableWidgetItem(str(msg.line).zfill(4))
+            item = QtWidgets.QTableWidgetItem(str(msg.line).zfill(4))
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_LINE_NBR, item)
 
         # desc
-        item = QtGui.QTableWidgetItem(msg.description)
+        item = QtWidgets.QTableWidgetItem(msg.description)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_MSG, item)
 
         # filename
-        item = QtGui.QTableWidgetItem(msg.path)
+        item = QtWidgets.QTableWidgetItem(msg.path)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_PATH, item)

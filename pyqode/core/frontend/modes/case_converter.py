@@ -2,7 +2,7 @@
 """
 Contains a case converter mode.
 """
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 from pyqode.core import actions
 from pyqode.core.frontend import Mode, text
@@ -41,9 +41,9 @@ class CaseConverterMode(Mode):
 
     def _create_actions(self):
         """ Create associated actions """
-        self.action_to_lower = QtGui.QAction(self.editor)
+        self.action_to_lower = QtWidgets.QAction(self.editor)
         self.action_to_lower.triggered.connect(self.to_lower)
-        self.action_to_upper = QtGui.QAction(self.editor)
+        self.action_to_upper = QtWidgets.QAction(self.editor)
         self.action_to_upper.triggered.connect(self.to_upper)
         self._actions_created = True
         self.refresh_actions()

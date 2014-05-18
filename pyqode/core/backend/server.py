@@ -89,6 +89,7 @@ import inspect
 import logging
 import json
 import struct
+import sys
 import traceback
 try:
     import socketserver
@@ -186,15 +187,22 @@ class JsonServer(socketserver.TCPServer):
             """
             running = True
             while running:
+                print('waiting for data')
                 data = self.read()
                 running = self._handle(data)
+            print('server finished')
+            self.srv.t = logging.threading.Thread(name='shutdown',
+                                                  target=self.srv.shutdown)
+            self.srv.t.start()
 
         def _handle(self, data):
             """
             Handles a work request.
             """
             try:
+                print('handling request %r' % data)
                 if data == 'shutdown':
+                    print('shutdown request received')
                     return False
                 assert data['worker']
                 assert data['request_id']
@@ -226,9 +234,12 @@ class JsonServer(socketserver.TCPServer):
         self.port = args.port
         self._shutdown_request = False
         self._Handler.srv = self
+        self._running = True
         # print('server running on port %s' % args.port)
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
+        print('started on 127.0.0.1:%d' % int(args.port))
+        print("running with python %d.%d.%d" % (sys.version_info[:3]))
 
 
 def default_parser():
@@ -265,6 +276,4 @@ def serve_forever(args=None):
 
 # Server script example
 if __name__ == '__main__':
-    import sys
-    print("running with python %d.%d.%d" % (sys.version_info[:3]))
     serve_forever()

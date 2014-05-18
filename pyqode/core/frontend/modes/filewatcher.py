@@ -6,7 +6,7 @@ import os
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend import Mode
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -104,12 +104,12 @@ class FileWatcherMode(Mode, QtCore.QObject):
         inital_value = settings.save_on_focus_out
         settings.save_on_focus_out = False
         self._flg_notify = True
-        dlg_type = (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        dlg_type = (QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         expected_action = (
             lambda *x: None) if not expected_action else expected_action
-        if (self._auto_reload or QtGui.QMessageBox.question(
+        if (self._auto_reload or QtWidgets.QMessageBox.question(
                 self.editor, title, message,
-                dlg_type, QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
+                dlg_type, QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes):
             expected_action(self.editor.file_path)
         self._update_mtime()
         settings.save_on_focus_out = inital_value

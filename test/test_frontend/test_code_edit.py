@@ -5,8 +5,8 @@ import mimetypes
 import platform
 import pytest
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtTest import QTest
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtTest import QTest
 
 from pyqode.core import frontend, style, settings
 from pyqode.core.frontend import panels, modes
@@ -35,7 +35,7 @@ def test_actions(editor):
     # 13 default shortcuts
     nb_actions_expected = 21  # 13 default actions + search panel actions + case converter,...
     assert len(editor.actions()) == nb_actions_expected
-    action = QtGui.QAction('my_action', editor)
+    action = QtWidgets.QAction('my_action', editor)
     editor.add_action(action)
     nb_actions_expected += 1
     assert len(editor.actions()) == nb_actions_expected
@@ -65,7 +65,7 @@ def test_margin_size(editor):
     frontend.uninstall_all(editor)
     # we really need to show the window here to get correct margin size.
     editor.show()
-    QTest.qWaitForWindowShown(editor)
+    QTest.qWaitForWindowActive(editor)
     for position in frontend.Panel.Position.iterable():
         # there is no panel on this widget, all margin must be 0
         assert editor.margin_size(position) == 0
@@ -255,7 +255,9 @@ def test_mouse_events(editor):
         QtCore.QEvent.MouseButtonRelease, QtCore.QPoint(10, 10),
         QtCore.Qt.RightButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))
     editor.wheelEvent(QtGui.QWheelEvent(
-        QtCore.QPoint(10, 10), 1, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+        QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
+        QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
+        QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
     editor.mouseMoveEvent(QtGui.QMouseEvent(
         QtCore.QEvent.MouseMove, QtCore.QPoint(10, 10),
         QtCore.Qt.RightButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))
@@ -265,7 +267,7 @@ def test_mouse_events(editor):
 @log_test_name
 @editor_open(__file__)
 def test_show_context_menu(editor):
-    assert isinstance(editor, QtGui.QPlainTextEdit)
+    assert isinstance(editor, QtWidgets.QPlainTextEdit)
     editor.customContextMenuRequested.emit(QtCore.QPoint(10, 10))
     editor._mnu.hide()
 
@@ -289,9 +291,10 @@ def test_multiple_panels(editor):
 
 @log_test_name
 def test_resize(editor):
-    editor.resize(20, 30)
-    QTest.qWait(500)
+    editor.resize(200, 300)
+    QTest.qWait(1000)
     editor.resize(800, 600)
+    QTest.qWait(1000)
 
 
 @log_test_name
@@ -302,10 +305,10 @@ def test_unknown_mimetype(editor):
 
 def accept_mbox():
     print('accept')
-    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    widgets = QtWidgets.QApplication.instance().topLevelWidgets()
     for w in widgets:
         print(w)
-        if isinstance(w, QtGui.QDialog):
+        if isinstance(w, QtWidgets.QDialog):
             QTest.keyPress(w, QtCore.Qt.Key_Return)
             QTest.keyPress(w, QtCore.Qt.Key_Enter)
             QTest.keyPress(w, QtCore.Qt.Key_Space)
@@ -313,10 +316,10 @@ def accept_mbox():
 
 def reject_mbox():
     print('reject')
-    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    widgets = QtWidgets.QApplication.instance().topLevelWidgets()
     for w in widgets:
         print(w)
-        if isinstance(w, QtGui.QDialog):
+        if isinstance(w, QtWidgets.QDialog):
             QTest.keyPress(w, QtCore.Qt.Key_Escape)
 
 

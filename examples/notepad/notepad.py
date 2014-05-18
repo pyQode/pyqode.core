@@ -4,5 +4,5 @@ from notepad import main
 import logging
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARNING)
     main()

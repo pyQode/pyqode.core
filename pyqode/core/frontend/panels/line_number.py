@@ -4,7 +4,7 @@ This module contains the line number panel
 """
 from pyqode.core import frontend
 from pyqode.core.frontend import Panel
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class LineNumberPanel(Panel):

@@ -2,7 +2,7 @@
 """
 This module contains the search and replace panel
 """
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 from pyqode.core import actions
 from pyqode.core import style
 from pyqode.core import frontend
@@ -124,7 +124,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                 icon = QtGui.QIcon(icon)
             for action in qactions:
                 action.setIcon(icon)
-                if isinstance(action, QtGui.QAction):
+                if isinstance(action, QtWidgets.QAction):
                     action.setShortcut(action_def.shortcut)
                     action.setText(action_def.text)
             for label in labels:

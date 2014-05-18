@@ -3,7 +3,7 @@ This module contains API base classes.
 """
 import logging
 import weakref
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets, QtGui
 
 
 def _logger():
@@ -177,7 +177,7 @@ def get_modes(editor):
     return editor._modes
 
 
-class Panel(QtGui.QWidget, Mode):
+class Panel(QtWidgets.QWidget, Mode):
     """
     Base class for editor panels.
 
@@ -221,7 +221,7 @@ class Panel(QtGui.QWidget, Mode):
 
     def __init__(self):
         Mode.__init__(self)
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         #: Panel order into the zone it is installed to. This value is
         #: automatically set when installing the panel but it can be changed
         #: later (negative values can also be used).
@@ -286,7 +286,7 @@ class Panel(QtGui.QWidget, Mode):
         """
         # pylint: disable=invalid-name
         _logger().debug('%s visibility changed', self.name)
-        QtGui.QWidget.setVisible(self, visible)
+        QtWidgets.QWidget.setVisible(self, visible)
         self.editor.refresh_panels()
 
 

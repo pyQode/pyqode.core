@@ -2,7 +2,7 @@
 """ Contains the automatic generic indenter """
 from pyqode.core import settings
 from pyqode.core.frontend import Mode, text
-from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 
 class AutoIndentMode(Mode):

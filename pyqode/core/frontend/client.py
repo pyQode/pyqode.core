@@ -7,7 +7,7 @@ import socket
 import struct
 import sys
 import uuid
-from PyQt4 import QtCore, QtNetwork
+from PyQt5 import QtCore, QtNetwork, QtWidgets
 
 
 class NotConnectedError(Exception):
@@ -62,6 +62,10 @@ TIMEOUT_BEFORE_RETRY = 100
 MAX_RETRY = 100
 
 
+def _logger():
+    return logging.getLogger(__name__)
+
+
 class _ServerProcess(QtCore.QProcess):
     """
     Extends QProcess with methods to easily manipulate the server process.
@@ -69,7 +73,7 @@ class _ServerProcess(QtCore.QProcess):
     Also logs everything that is written to the process' stdout/stderr.
     """
     def __init__(self, parent):
-        super(_ServerProcess, self).__init__(parent)
+        super().__init__(parent)
         self.started.connect(self._on_process_started)
         self.error.connect(self._on_process_error)
         self.finished.connect(self._on_process_finished)
@@ -77,12 +81,11 @@ class _ServerProcess(QtCore.QProcess):
         self.readyReadStandardError.connect(self._on_process_stderr_ready)
         self.running = False
         self._srv_logger = logging.getLogger('pyqode.server')
-        self.logger = logging.getLogger(__name__)
         self._test_not_deleted = False
 
     def _on_process_started(self):
         """ Logs process started """
-        self.logger.info('server process started')
+        _logger().info('server process started')
         self.running = True
 
     def _on_process_error(self, error):
@@ -91,18 +94,21 @@ class _ServerProcess(QtCore.QProcess):
             error = -1
         try:
             self._test_not_deleted
-        except RuntimeError:
+        except AttributeError:
             pass
         else:
             if not self.running:
-                self.logger.error('server process error %s: %s', error,
+                _logger().error('server process error %s: %s', error,
                                   PROCESS_ERROR_STRING[error])
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        self.logger.info('server process finished with exit code %d',
+        _logger().info('server process finished with exit code %d',
                          exit_code)
-        self.running = False
+        try:
+            self.running = False
+        except AttributeError:
+            pass
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
@@ -138,12 +144,11 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, parent):
-        QtNetwork.QTcpSocket.__init__(self, parent)
+        super().__init__(parent)
         self.connected.connect(self._on_connected)
         self.error.connect(self._on_error)
         self.disconnected.connect(self._on_disconnected)
         self.readyRead.connect(self._on_ready_read)
-        self.logger = logging.getLogger(__name__)
         self._header_complete = False
         self._header_buf = bytes()
         self._to_read = 0
@@ -157,21 +162,20 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _terminate_server_process(self):
         """ Terminates the server process """
-        if self._process and self._process.running:
-            self.logger.info('terminating server process')
-            self._process.terminate()
+        _logger().info('waiting for server process to finish')
+        while self._process.running:
+            QtWidgets.QApplication.processEvents()
 
     def close(self):
         """ Closes the socket and terminates the server process. """
-        self.logger.info('closing server')
-        if self.is_connected and self._process.running:
+        _logger().info('closing server')
+        if self.is_connected:
             # send shutdown request
             self.send('shutdown')
-            self.logger.info('shutdown signal send')
-        self.logger.info('closing socket')
-        QtNetwork.QTcpSocket.close(self)
-        self._terminate_server_process()
-        self.is_connected = False
+        if self._process.running:
+            self._terminate_server_process()
+            self.is_connected = False
+        super().close()
 
     def start(self, server_script, interpreter=sys.executable, args=None,
               port=None):
@@ -198,7 +202,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
         """
         major, minor, build = sys.version_info[:3]
-        self.logger.debug('running with python %d.%d.%d', major, minor, build)
+        _logger().debug('running with python %d.%d.%d', major, minor, build)
         self._process = _ServerProcess(self.parent())
         self._process.started.connect(self._on_process_started)
         if not port:
@@ -215,7 +219,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if args:
             pgm_args += args
         self._process.start(program, pgm_args)
-        self.logger.info('starting server process: %s %s', program,
+        _logger().info('starting server process: %s %s', program,
                          ' '.join(pgm_args))
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
@@ -251,7 +255,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :param encoding: encoding used to encode the json message into a
             bytes array, this should match CodeEdit.file_encoding.
         """
-        self.logger.debug('sending request: %r', obj)
+        _logger().debug('sending request: %r', obj)
         msg = json.dumps(obj)
         msg = msg.encode(encoding)
         header = struct.pack('=I', len(msg))
@@ -274,14 +278,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _connect(self):
         """ Connects our client socket to the server socket """
-        self.logger.debug('connecting to 127.0.0.1:%d', self._port)
+        _logger().debug('connecting to 127.0.0.1:%d', self._port)
         self._connection_attempts += 1
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
 
     def _on_connected(self):
         """ Logs connected """
-        self.logger.info('connected to server: %s:%d',
+        _logger().info('connected to server: %s:%d',
                          self.peerName(), self.peerPort())
         self.is_connected = True
 
@@ -292,8 +296,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
-        self.logger.error('socket error %d: %s', error,
-                          SOCKET_ERROR_STRINGS[error])
+        _logger().error('socket error %d: %s', error,
+                        SOCKET_ERROR_STRINGS[error])
         if error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
             # try again, sometimes the server process might not have started
             # its socket yet.
@@ -306,41 +310,44 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_disconnected(self):
         """ Logs disconnected """
         try:
-            self.logger.info('disconnected from server: %s:%d',
+            _logger().info('disconnected from server: %s:%d',
                              self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
             pass
-        self.is_connected = False
+        try:
+            self.is_connected = False
+        except AttributeError:
+            pass
 
     def _read_header(self):
         """ Reads message header """
-        self.logger.debug('reading header')
+        _logger().debug('reading header')
         self._header_buf += self.read(4)
         if len(self._header_buf) == 4:
             self._header_complete = True
             header = struct.unpack('=I', self._header_buf)
             self._to_read = header[0]
             self._header_buf = bytes()
-            self.logger.debug('header content: %d', self._to_read)
+            _logger().debug('header content: %d', self._to_read)
 
     def _read_payload(self):
         """ Reads the payload (=data) """
-        self.logger.debug('reading payload data')
-        self.logger.debug('remaining bytes to read: %d', self._to_read)
+        _logger().debug('reading payload data')
+        _logger().debug('remaining bytes to read: %d', self._to_read)
         data_read = self.read(self._to_read)
         nb_bytes_read = len(data_read)
-        self.logger.debug('%d bytes read', nb_bytes_read)
+        _logger().debug('%d bytes read', nb_bytes_read)
         self._data_buf += data_read
         self._to_read -= nb_bytes_read
         if self._to_read <= 0:
             data = self._data_buf.decode('utf-8')
-            self.logger.debug('payload read: %r', data)
-            self.logger.debug('payload length: %r', len(self._data_buf))
-            self.logger.debug('decoding payload as json object')
+            _logger().debug('payload read: %r', data)
+            _logger().debug('payload length: %r', len(self._data_buf))
+            _logger().debug('decoding payload as json object')
             obj = json.loads(data)
-            self.logger.debug('response received: %r', obj)
+            _logger().debug('response received: %r', obj)
             request_id = obj['request_id']
             results = obj['results']
             status = obj['status']

@@ -1,9 +1,9 @@
 """
 Tests the code completion mode
 """
-import functools
-from PyQt4 import QtCore
-from PyQt4.QtTest import QTest
+mo mod import functools
+from PyQt5 import QtCore
+from PyQt5.QtTest import QTest
 from pyqode.core import frontend, settings
 from pyqode.core.frontend import modes
 

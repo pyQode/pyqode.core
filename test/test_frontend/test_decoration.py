@@ -3,8 +3,8 @@
 This module tests the extension frontend module
 (pyqode.core.frontend.extension)
 """
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtTest import QTest
 from pyqode.core import frontend
 
 from ..helpers import log_test_name

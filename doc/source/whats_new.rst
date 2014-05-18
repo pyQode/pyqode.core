@@ -66,7 +66,7 @@ ppa:pyqode/stable.
 
     - The API has been completely rewritten and renamed into pyQode.
     - It is now a namespace package; functionality are split over separate packages, pyqode.core being the foundation package.
-    - It now supports both python 2.7 and python 3.3 and can works with PyQt4 or PySide.
+    - It now supports both python 2.7 and python 3.3 and can works with PyQt5 or PySide.
     - The look and feel and the performances have been improved, the API is cleaner.
     - Qt designer plugins are also available.
 

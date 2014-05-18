@@ -1,5 +1,5 @@
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from PyQt5 import QtGui
+from PyQt5.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 from pyqode.core import style

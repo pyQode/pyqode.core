@@ -3,7 +3,7 @@
 This module contains the marker panel
 """
 import logging
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from pyqode.core.frontend import Panel
 from pyqode.core import frontend
@@ -232,12 +232,12 @@ class MarkerPanel(Panel):
         Hide tooltip when leaving the panel region.
         """
         # pylint: disable=invalid-name, unused-argument
-        QtGui.QToolTip.hideText()
+        QtWidgets.QToolTip.hideText()
         self._previous_line = -1
 
     def _display_tooltip(self, tooltip, top):
         """
         Display tooltip at the specified top position.
         """
-        QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
+        QtWidgets.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)

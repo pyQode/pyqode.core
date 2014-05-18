@@ -6,8 +6,8 @@ import mimetypes
 import os
 import sys
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 from pyqode.core import frontend
 from pyqode.core import style
@@ -18,7 +18,7 @@ from .editor import GenericCodeEdit
 from .ui.main_window_ui import Ui_MainWindow
 
 
-class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         # Load our UI (made in Qt Designer)
@@ -30,9 +30,9 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.on_current_tab_changed()
 
     def setup_status_bar_widgets(self):
-        self.lbl_filename = QtGui.QLabel()
-        self.lbl_encoding = QtGui.QLabel()
-        self.lbl_cursor_pos = QtGui.QLabel()
+        self.lbl_filename = QtWidgets.QLabel()
+        self.lbl_encoding = QtWidgets.QLabel()
+        self.lbl_cursor_pos = QtWidgets.QLabel()
         self.statusbar.addPermanentWidget(self.lbl_filename, 200)
         self.statusbar.addPermanentWidget(self.lbl_encoding, 20)
         self.statusbar.addPermanentWidget(self.lbl_cursor_pos, 20)
@@ -47,7 +47,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionClose_other_tabs.triggered.connect(
             self.tabWidget.close_others)
         self.actionClose_all_tabs.triggered.connect(self.tabWidget.close_all)
-        self.actionQuit.triggered.connect(QtGui.QApplication.instance().quit)
+        self.actionQuit.triggered.connect(QtWidgets.QApplication.instance().quit)
         self.tabWidget.dirty_changed.connect(self.on_dirty_changed)
         self.tabWidget.currentChanged.connect(self.on_current_tab_changed)
         self.actionAbout.triggered.connect(self.on_about)
@@ -93,7 +93,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def setup_mnu_modes(self, editor):
         for k, v in sorted(frontend.get_modes(editor).items()):
-            a = QtGui.QAction(self.menuModes)
+            a = QtWidgets.QAction(self.menuModes)
             a.setText(k)
             a.setCheckable(True)
             a.setChecked(True)
@@ -104,7 +104,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def setup_mnu_panels(self, editor):
         for zones, dic in sorted(frontend.get_panels(editor).items()):
             for k, v in dic.items():
-                a = QtGui.QAction(self.menuModes)
+                a = QtWidgets.QAction(self.menuModes)
                 a.setText(k)
                 a.setCheckable(True)
                 a.setChecked(True)
@@ -114,13 +114,13 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def setup_mnu_style(self, editor):
         """ setup the style menu for an editor tab """
-        menu = QtGui.QMenu('Styles', self.menuEdit)
-        group = QtGui.QActionGroup(self)
+        menu = QtWidgets.QMenu('Styles', self.menuEdit)
+        group = QtWidgets.QActionGroup(self)
         current_style = frontend.get_mode(
             editor, modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
         for s in sorted(modes.PYGMENTS_STYLES):
-            a = QtGui.QAction(menu)
+            a = QtWidgets.QAction(menu)
             a.setText(s)
             a.setCheckable(True)
             if s == current_style:
@@ -171,7 +171,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         accepted.
 
         """
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Open')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Open')
         if filename:
             self.open_file(filename)
 
@@ -182,7 +182,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
         """
         path = self.tabWidget.currentWidget().file_path
         path = os.path.dirname(path) if path else ''
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save', path)
+        filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save', path)
         if filename:
             self.tabWidget.save_current(filename)
             self.recent_files_manager.open_file(filename)
@@ -231,7 +231,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.lbl_encoding.clear()
             self.lbl_filename.clear()
 
-    @QtCore.pyqtSlot(QtGui.QAction)
+    @QtCore.pyqtSlot(QtWidgets.QAction)
     def on_style_changed(self, action):
         style.pygments_style = action.text()
         self.tabWidget.refresh_style()
@@ -248,7 +248,7 @@ class MainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def on_about(self):
-        QtGui.QMessageBox.about(
+        QtWidgets.QMessageBox.about(
             self, 'pyQode notepad',
             'This notepad application is an example of what you can do with '
             'pyqode.core.')

@@ -1,7 +1,7 @@
 import os
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from PyQt5 import QtCore
+from PyQt5 import QtWidgets
+from PyQt5.QtTest import QTest
 import datetime
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
@@ -64,30 +64,30 @@ def test_modif_reject_with_focus(editor):
 def test_modif_without_focus(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
-    win = QtGui.QMainWindow()
+    win = QtWidgets.QMainWindow()
     win.show()
-    QTest.qWaitForWindowShown(win)
+    QTest.qWaitForWindowActive(win)
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
             f2.write("test file %s" % datetime.datetime.now())
     QtCore.QTimer.singleShot(1500, accept_mbox)
     # wait for the filewatcher to detect the changed
     QTest.qWait(500)
-    QtGui.QApplication.instance().setActiveWindow(editor)
+    QtWidgets.QApplication.instance().setActiveWindow(editor)
     # wait for the message box to appear
     QTest.qWait(500)
 
 
 def accept_mbox():
-    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    widgets = QtWidgets.QApplication.instance().topLevelWidgets()
     for w in widgets:
-        if isinstance(w, QtGui.QMessageBox):
+        if isinstance(w, QtWidgets.QMessageBox):
             QTest.keyPress(w, QtCore.Qt.Key_Space)
 
 def reject_mbox():
-    widgets = QtGui.QApplication.instance().topLevelWidgets()
+    widgets = QtWidgets.QApplication.instance().topLevelWidgets()
     for w in widgets:
-        if isinstance(w, QtGui.QMessageBox):
+        if isinstance(w, QtWidgets.QMessageBox):
             QTest.keyPress(w, QtCore.Qt.Key_Escape)
 
 

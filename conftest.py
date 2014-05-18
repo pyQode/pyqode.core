@@ -10,9 +10,10 @@ This scripts configures the test suite. We do two things:
 import logging
 import os
 import sys
-from PyQt4.QtTest import QTest
+from PyQt5.QtTest import QTest
 import pytest
-from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
+import time
 
 try:
     import faulthandler
@@ -37,7 +38,7 @@ def pytest_runtest_setup(item):
 # -------------------
 # Setup logging
 # -------------------
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     filename='pytest.log',
                     filemode='w')
 
@@ -71,16 +72,16 @@ def editor(request):
 
     _widget = frontend.CodeEdit()
     frontend.start_server(_widget, helpers.server_path())
+    helpers.wait_for_connected(_widget)
     helpers.setup_editor(_widget)
-    _widget.resize(800, 600)
     _widget.show()
+    _widget.resize(800, 600)
     _app.setActiveWindow(_widget)
 
     def fin():
         global _widget
         logging.info('teardown session editor')
         frontend.stop_server(_widget)
-        QTest.qWait(1000)
         del _widget
 
     request.addfinalizer(fin)

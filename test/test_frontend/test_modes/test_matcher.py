@@ -13,10 +13,10 @@ example_tuple = (
 )
 
 
-from PyQt4 import QtGui
 from test.helpers import log_test_name, editor_open
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
+from PyQt5 import QtGui
 
 
 

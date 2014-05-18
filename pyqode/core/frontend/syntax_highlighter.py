@@ -2,7 +2,7 @@
 """
 Base class for pyqode syntax hightlighters
 """
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from pyqode.core.frontend import Mode
 
 
@@ -38,10 +38,10 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     block_highlight_finished = QtCore.pyqtSignal(object, object)
 
     def __init__(self, parent):
-        QtGui.QSyntaxHighlighter.__init__(self, parent)
+        super().__init__(parent)
         Mode.__init__(self)
         self._spaces_ptrn = QtCore.QRegExp(r'\s+')
-        # there is a bug with QTextBlockUserData in PyQt4, we need to
+        # there is a bug with QTextBlockUserData in PyQt5, we need to
         # keep a reference on them, otherwise they are removed from memory.
         self._blocks = set()
 
@@ -150,7 +150,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
     """
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
-        QtGui.QTextBlockUserData.__init__(self)
+        super().__init__()
         #: Line number of the data, for convenience
         self.line_number = -1
         #: Specify if the block is folded

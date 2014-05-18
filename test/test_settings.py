@@ -2,8 +2,8 @@
 """
 Test scripts for the settings module.
 """
-from PyQt4 import QtCore
-from PyQt4.QtTest import QTest
+from PyQt5 import QtCore
+from PyQt5.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core import settings
 from pyqode.core.frontend import modes
