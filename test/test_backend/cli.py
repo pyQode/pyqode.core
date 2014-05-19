@@ -32,11 +32,6 @@ def main():
     frontend.open_file(editor, __file__)
     cc_mode = modes.CodeCompletionMode()
     frontend.install_mode(editor, cc_mode)
-    frontend.install_mode(editor,
-                          modes.PygmentsSyntaxHighlighter(editor.document()))
-    frontend.install_mode(editor, modes.CaretLineHighlighterMode())
-    frontend.install_panel(editor, panels.SearchAndReplacePanel(),
-                           position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     # window.show()
 

@@ -370,9 +370,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 break
         self._original_text = txt
         self._modified_lines.clear()
-        highlighter.process_events_on_highlight = True
+        if highlighter:
+            highlighter.process_events_on_highlight = True
         super().setPlainText(txt)
-        highlighter.process_events_on_highlight = False
+        if highlighter:
+            highlighter.process_events_on_highlight = False
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
