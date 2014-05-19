@@ -30,7 +30,7 @@ script:
     fi
   - if [ $PEP8 ]; then
     pip install pytest-pep8;
-    python3 runtests.py --pep8;
+    python3 runtests.py --pep8 -m pep8;
     fi
   - if [ $COV ]; then
     pip install pytest-cov;
