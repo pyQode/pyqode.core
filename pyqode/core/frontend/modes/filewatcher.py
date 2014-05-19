@@ -56,15 +56,16 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Connects/Disconnects to the mouse_wheel_activated and key_pressed event
         """
         if state is True:
-            self._timer.start()
             self.editor.new_text_set.connect(self._update_mtime)
+            self.editor.new_text_set.connect(self._timer.start)
             self.editor.text_saved.connect(self._update_mtime)
             self.editor.text_saved.connect(self._timer.start)
             self.editor.text_saving.connect(self._timer.stop)
             self.editor.focused_in.connect(self._check_for_pending)
         else:
             self._timer.stop()
-            self.editor.new_text_set.disconnect(self._update_mtime)
+            self.editor.new_text_set.connect(self._update_mtime)
+            self.editor.new_text_set.connect(self._timer.start)
             self.editor.text_saved.disconnect(self._update_mtime)
             self.editor.text_saved.disconnect(self._timer.start)
             self.editor.text_saving.disconnect(self._timer.stop)
