@@ -6,8 +6,8 @@ import mimetypes
 import os
 import sys
 
-from PyQt5 import QtGui
-from PyQt5.QtTest import QTest
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 
 from pyqode.core import frontend
 

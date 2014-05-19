@@ -2,7 +2,7 @@
 """
 This module contains the search and replace panel
 """
-from PyQt5 import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core import actions
 from pyqode.core import style
 from pyqode.core import frontend
@@ -85,7 +85,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
              "panelHighlight"]
 
     #: Signal emitted when a search operation finished
-    search_finished = QtCore.pyqtSignal()
+    search_finished = QtCore.Signal()
 
     @property
     def background(self):
@@ -231,11 +231,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pushButtonClose_clicked(self):  # pylint: disable=invalid-name
         self.close_panel()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSearch_triggered(self):  # pylint: disable=invalid-name
         self.widgetSearch.show()
         self.widgetReplace.hide()
@@ -250,7 +250,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if not text_changed:
             self.request_search(new_text)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
         # pylint: disable=invalid-name
         self.widgetSearch.show()

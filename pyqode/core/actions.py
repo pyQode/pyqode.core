@@ -51,7 +51,7 @@ CaseConverterMode actions
 .. autodata:: to_upper
 
 """
-from PyQt5 import QtGui, QtWidgets
+from pyqode.qt import QtGui, QtWidgets
 # pylint: disable=C0103
 
 

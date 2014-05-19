@@ -4,7 +4,7 @@ Contains the default indenter.
 """
 from pyqode.core import settings
 from pyqode.core.frontend import Mode
-from PyQt5 import QtGui
+from pyqode.qt import QtGui
 
 
 class IndenterMode(Mode):

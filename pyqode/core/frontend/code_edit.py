@@ -4,7 +4,7 @@ This module contains the definition of the CodeEdit
 """
 import logging
 import sys
-from PyQt5 import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core import actions, settings, style
 from pyqode.core.frontend import text, dialogs
 from pyqode.core.frontend.client import JsonTcpClient
@@ -34,35 +34,35 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     """
     # pylint: disable=too-many-instance-attributes, too-many-public-methods
     #: Paint hook
-    painted = QtCore.pyqtSignal(QtGui.QPaintEvent)
+    painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
-    new_text_set = QtCore.pyqtSignal()
+    new_text_set = QtCore.Signal()
     #: Signal emitted when the text is saved to file
-    text_saved = QtCore.pyqtSignal(str)
+    text_saved = QtCore.Signal(str)
     #: Signal emitted before the text is saved to file
-    text_saving = QtCore.pyqtSignal(str)
+    text_saving = QtCore.Signal(str)
     #: Signal emitted when the dirty state changed
-    dirty_changed = QtCore.pyqtSignal(bool)
+    dirty_changed = QtCore.Signal(bool)
     #: Signal emitted when a key is pressed
-    key_pressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    key_pressed = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when a key is released
-    key_released = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    key_released = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when a mouse button is pressed
-    mouse_pressed = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    mouse_pressed = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted when a mouse button is released
-    mouse_released = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    mouse_released = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted on a wheel event
-    mouse_wheel_activated = QtCore.pyqtSignal(QtGui.QWheelEvent)
+    mouse_wheel_activated = QtCore.Signal(QtGui.QWheelEvent)
     #: Signal emitted at the end of the key_pressed event
-    post_key_pressed = QtCore.pyqtSignal(QtGui.QKeyEvent)
+    post_key_pressed = QtCore.Signal(QtGui.QKeyEvent)
     #: Signal emitted when focusInEvent is is called
-    focused_in = QtCore.pyqtSignal(QtGui.QFocusEvent)
+    focused_in = QtCore.Signal(QtGui.QFocusEvent)
     #: Signal emitted when the mouse_moved
-    mouse_moved = QtCore.pyqtSignal(QtGui.QMouseEvent)
+    mouse_moved = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted when the user press the TAB key
-    indent_requested = QtCore.pyqtSignal()
+    indent_requested = QtCore.Signal()
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
-    unindent_requested = QtCore.pyqtSignal()
+    unindent_requested = QtCore.Signal()
 
     @property
     def show_whitespaces(self):
@@ -444,12 +444,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             for panel in zone.values():
                 panel.refresh_actions()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def delete(self):
         """ Deletes the selected text """
         self.textCursor().removeSelectedText()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def goto_line(self):
         """
         Shows goto line dialog and go to the selected line.
@@ -462,7 +462,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             line = 1
         return text.goto_line(self, line, move=True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def rehighlight(self):
         """
         Convenience method that calls rehighlight on the instqlled
@@ -472,7 +472,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             if hasattr(mode, 'rehighlight'):
                 mode.rehighlight()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def reset_zoom(self):
         """
         Resets the zoom value.
@@ -480,7 +480,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._font_size = style.font_size
         self._reset_palette()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def zoom_in(self, increment=1):
         """
         Zooms in the editor.
@@ -495,7 +495,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         text.mark_whole_doc_dirty(self)
         self._reset_palette()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def zoom_out(self, increment=1):
         """
         Zooms out the editor.
@@ -512,7 +512,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         text.mark_whole_doc_dirty(self)
         self._reset_palette()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def duplicate_line(self):
         """
         Duplicates the line under the cursor. If multiple lines are selected,
@@ -528,7 +528,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setTextCursor(cursor)
         self._do_home_key()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def indent(self):
         """
         Indents the text cursor or the selection.
@@ -539,7 +539,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.indent_requested.emit()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def un_indent(self):
         """
         Un-indents the text cursor or the selection.
@@ -550,7 +550,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.unindent_requested.emit()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def refresh_panels(self):
         """ Refreshes the editor panels. """
         _logger().debug('refresh_panels')

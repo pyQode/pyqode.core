@@ -3,7 +3,7 @@ This module contains API base classes.
 """
 import logging
 import weakref
-from PyQt5 import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 
 def _logger():

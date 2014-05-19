@@ -4,7 +4,7 @@ This module contains the code completion mode and the related classes.
 """
 import logging
 import re
-from PyQt5 import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
@@ -281,7 +281,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             self._hide_popup()
             self._job_runner.cancel_requests()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def _set_wait_cursor(self):
         self.editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
 

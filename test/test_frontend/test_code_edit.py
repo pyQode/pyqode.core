@@ -2,11 +2,12 @@
 This module tests the CodeEdit class
 """
 import mimetypes
+import os
 import platform
 import pytest
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtTest import QTest
+from pyqode.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt.QtTest import QTest
 
 from pyqode.core import frontend, style, settings
 from pyqode.core.frontend import panels, modes
@@ -254,10 +255,15 @@ def test_mouse_events(editor):
     editor.mouseReleaseEvent(QtGui.QMouseEvent(
         QtCore.QEvent.MouseButtonRelease, QtCore.QPoint(10, 10),
         QtCore.Qt.RightButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))
-    editor.wheelEvent(QtGui.QWheelEvent(
-        QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
-        QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
-        QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+    if os.environ['QT_API'].lower() == 'PyQt5':
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
+            QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
+            QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+    else:
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), 1, QtCore.Qt.MidButton,
+            QtCore.Qt.NoModifier))
     editor.mouseMoveEvent(QtGui.QMouseEvent(
         QtCore.QEvent.MouseMove, QtCore.QPoint(10, 10),
         QtCore.Qt.RightButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))

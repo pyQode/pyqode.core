@@ -6,8 +6,8 @@ on pygments.
 .. note: This code is taken and adapted from the IPython project.
 """
 import logging
-from PyQt5 import QtGui
-from PyQt5.QtCore import QRegExp
+from pyqode.qt import QtGui
+from pyqode.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer

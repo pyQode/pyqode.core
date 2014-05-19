@@ -7,7 +7,7 @@ import socket
 import struct
 import sys
 import uuid
-from PyQt5 import QtCore, QtNetwork, QtWidgets
+from pyqode.qt import QtCore, QtNetwork, QtWidgets
 
 
 class NotConnectedError(Exception):
@@ -112,14 +112,22 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
-        output = bytes(self.readAllStandardOutput()).decode('utf-8')
+        o = self.readAllStandardOutput()
+        try:
+            output = bytes(o).decode('utf-8')
+        except TypeError:
+            output = bytes(o.data()).decode('utf-8')
         output = output[:output.rfind('\n')]
         for line in output.splitlines():
             self._srv_logger.debug(line)
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """
-        output = bytes(self.readAllStandardError()).decode('utf-8')
+        o = self.readAllStandardError()
+        try:
+            output = bytes(o).decode('utf-8')
+        except TypeError:
+            output = bytes(o.data()).decode('utf-8')
         output = output[:output.rfind('\n')]
         for line in output.splitlines():
             self._srv_logger.error(line)

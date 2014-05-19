@@ -2,7 +2,7 @@
 """
 This module contains the WordClickMode
 """
-from PyQt5 import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend import TextDecoration, Mode
 
@@ -19,7 +19,7 @@ class WordClickMode(Mode, QtCore.QObject):
     """
     #: Signal emitted when a word is clicked. The parameter is a
     #: QTextCursor with the clicked word set as the selected text.
-    word_clicked = QtCore.pyqtSignal(QtGui.QTextCursor)
+    word_clicked = QtCore.Signal(QtGui.QTextCursor)
 
     def __init__(self):
         QtCore.QObject.__init__(self)

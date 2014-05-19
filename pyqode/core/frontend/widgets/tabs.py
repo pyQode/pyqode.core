@@ -5,7 +5,7 @@ show code editor tabs.
 """
 import logging
 import os
-from PyQt5 import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 from PyQt5.QtWidgets import QDialog, QTabBar, QTabWidget
 from pyqode.core import frontend
 from pyqode.core.frontend.ui.dlg_unsaved_files_ui import Ui_Dialog
@@ -104,11 +104,11 @@ class TabWidget(QTabWidget):
 
     """
     #: Signal emitted when a tab dirty flag changed
-    dirty_changed = QtCore.pyqtSignal(bool)
+    dirty_changed = QtCore.Signal(bool)
     #: Signal emitted when the last tab has been closed
-    last_tab_closed = QtCore.pyqtSignal()
+    last_tab_closed = QtCore.Signal()
     #: Signal emitted when a tab has been closed
-    tab_closed = QtCore.pyqtSignal(QtWidgets.QWidget)
+    tab_closed = QtCore.Signal(QtWidgets.QWidget)
 
     @property
     def active_editor(self):
@@ -140,14 +140,14 @@ class TabWidget(QTabWidget):
         # the C++ class loose the wrapped obj type).
         self._widgets = []
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def close(self):
         """
         Closes the active editor
         """
         self.tabCloseRequested.emit(self.currentIndex())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def close_others(self):
         """
         Closes every editors tabs except the current one.
@@ -162,7 +162,7 @@ class TabWidget(QTabWidget):
             else:
                 i = 1
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def close_all(self):
         """
         Closes all editors
@@ -186,7 +186,7 @@ class TabWidget(QTabWidget):
                 code_edit, code_edit.file_name, code_edit.file_path)
             code_edit._tab_name = file_name
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def save_current(self, path=None):
         """
         Save current editor content. Leave file to None to erase the previous
@@ -220,7 +220,7 @@ class TabWidget(QTabWidget):
             pass
         return False
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def save_all(self):
         """
         Save all editors.

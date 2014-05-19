@@ -10,7 +10,7 @@ the whitespaces.
 """
 import sys
 
-from PyQt5 import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 from pyqode.core import frontend, settings, style
 from pyqode.core.frontend import modes

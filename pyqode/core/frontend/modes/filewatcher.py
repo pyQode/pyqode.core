@@ -6,7 +6,7 @@ import os
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend import Mode
-from PyQt5 import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -14,10 +14,10 @@ class FileWatcherMode(Mode, QtCore.QObject):
     FileWatcher mode, check if the opened file has changed externally.
 
     """
-    #: Signal emitted when the file has been deleted. The pyqtSignal is emitted
+    #: Signal emitted when the file has been deleted. The Signal is emitted
     #: with the current editor instance so that user have a chance to close
     #: the editor.
-    file_deleted = QtCore.pyqtSignal(object)
+    file_deleted = QtCore.Signal(object)
 
     @property
     def auto_reload(self):

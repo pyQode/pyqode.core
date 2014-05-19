@@ -6,8 +6,8 @@ import mimetypes
 import os
 import sys
 
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+from pyqode.qt import QtCore
+from pyqode.qt import QtWidgets
 
 from pyqode.core import frontend
 from pyqode.core import style
@@ -136,7 +136,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         self.tabWidget.closeEvent(QCloseEvent)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def open_file(self, path):
         """
         Creates a new GenericCodeEdit, opens the requested file and adds it
@@ -157,14 +157,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 self.tabWidget.setCurrentIndex(index)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_new(self):
         """
         Add a new empty code editor to the tab widget
         """
         self.tabWidget.add_code_edit(GenericCodeEdit(self), 'New document')
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_open(self):
         """
         Shows an open file dialog and open the file if the dialog was
@@ -175,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filename:
             self.open_file(filename)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_save_as(self):
         """
         Save the current editor document as.
@@ -188,7 +188,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.recent_files_manager.open_file(filename)
             self.menu_recents.update_actions()
 
-    @QtCore.pyqtSlot(bool)
+    @QtCore.Slot(bool)
     def on_dirty_changed(self, dirty):
         """
         Enable/Disable save action depending on the dirty flag of the
@@ -203,7 +203,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.actionSave.setEnabled(dirty and path is not None)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_current_tab_changed(self):
         self.menuEdit.clear()
         self.menuModes.clear()
@@ -231,29 +231,29 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lbl_encoding.clear()
             self.lbl_filename.clear()
 
-    @QtCore.pyqtSlot(QtWidgets.QAction)
+    @QtCore.Slot(QtWidgets.QAction)
     def on_style_changed(self, action):
         style.pygments_style = action.text()
         self.tabWidget.refresh_style()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_mode_state_changed(self):
         action = self.sender()
         action.mode.enabled = action.isChecked()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_about(self):
         QtWidgets.QMessageBox.about(
             self, 'pyQode notepad',
             'This notepad application is an example of what you can do with '
             'pyqode.core.')
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cursor_pos_changed(self):
         if self.tabWidget.currentWidget():
             self.lbl_cursor_pos.setText('%d:%d' % frontend.cursor_position(

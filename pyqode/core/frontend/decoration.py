@@ -2,7 +2,7 @@
 This module contains the classes and functions related to text decorations.
 """
 import logging
-from PyQt5 import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 def _logger():
@@ -19,7 +19,7 @@ class _TextDecorationSignals(QtCore.QObject):
     """
     # pylint: disable=too-few-public-methods
     #: Signal emitted when a TextDecoration has been clicked.
-    clicked = QtCore.pyqtSignal(object)
+    clicked = QtCore.Signal(object)
 
 
 class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):

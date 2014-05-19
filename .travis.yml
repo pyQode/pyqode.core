@@ -2,58 +2,47 @@ language: python
 python:
   - "3.2"
 env:
-  - ENV=pytest
-  - ENV=pep8
-  - ENV=cov
+  - QT_API=PySide
+  - QT_API=PyQt4
+  - QT_API=PyQt5
+  - PEP8=1
+  - COV=1
 matrix:
     allow_failures:
-        - env: ENV=cov
-        - env: ENV=pep8
+        - env: COV
+        - env: PEP8
+        - env: QTA_API=PyQt5
 virtualenv:
   system_site_packages: true
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-  # Qt 5.2
-  - curl -O -L http://download.qt-project.org/official_releases/qt/5.2/5.2.1/single/qt-everywhere-opensource-src-5.2.1.tar.gz
-  - tar -zxf qt-everywhere-opensource-src-5.2.1.tar.gz
-  - cd qt-everywhere-opensource-src-5.2.1/
-  - ./configure -opensource -confirm-license
-  - make
-  - sudo make install
-  - cd ..
-  # sip
-  - curl -O -L sourceforge.net/projects/pyqt/files/sip/sip-4.15.5/sip-4.15.5.tar.gz
-  - tar -zxf sip-4.15.5.tar.gz
-  - cd sip-4.15.5/
-  - python configure.py
-  - make
-  - sudo make install
-  - cd ..
-  # PyQt5
-  - curl -O -L http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.2.1/PyQt-gpl-5.2.1.tar.gz
-  - tar -zxf PyQt-gpl-5.2.1.tar.gz
-  - cd PyQt-gpl-5.2.1.tar.gz
-  - python configure.py
-  - make
-  - make install
-  - cd ..
+  # used for QT_API=pyqt4, COV and PEP8
+  - sudo apt-get install -qq python3-pyqt4 --fix-missing
+  # PySide
+  - if [ $ENV == "pyside" ]; then
+    sudo apt-get install -qq python3-pyside --fix-missing
+    fi
+  # PyQt5 (won't be available untill travis upgrade to ubuntu 14.04
+  - if [ $ENV == "pyqt5" ]; then
+    sudo apt-get install -qq python3-pyqt5 --fix-missing
+    fi
 script:
   - pip install .
-  - if [ $ENV == "pytest" ]; then
+  - if [ $QT_API ]; then
     python3 runtests.py;
     fi
-  - if [ $ENV == "pep8" ]; then
+  - if [ $PEP8 ]; then
     pip install pytest-pep8;
     python3 runtests.py --pep8;
     fi
-  - if [ $ENV == "cov" ]; then
+  - if [ $COV ]; then
     pip install pytest-cov;
     python3 runtests.py --cov pyqode;
     fi
 after_script:
-  - if [ $ENV == "cov" ]; then
+  - if [ $COV ]; then
     sudo pip install --quiet coveralls;
     coveralls;
     fi

@@ -4,9 +4,9 @@ Test the client/server API
 """
 import os
 import sys
-from PyQt5 import QtWidgets
+from pyqode.qt import QtWidgets
 import pytest
-from PyQt5.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core import backend
 from pyqode.core.frontend.client import JsonTcpClient

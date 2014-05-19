@@ -2,7 +2,7 @@
 """
 Contains a case converter mode.
 """
-from PyQt5 import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 from pyqode.core import actions
 from pyqode.core.frontend import Mode, text
@@ -23,7 +23,7 @@ class CaseConverterMode(Mode):
         self.action_to_upper = None
         self.separator = None
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def to_upper(self, *args):
         """
         Converts selected text to upper
@@ -31,7 +31,7 @@ class CaseConverterMode(Mode):
         # pylint: disable=unused-argument
         text.selected_text_to_upper(self.editor)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def to_lower(self, *args):
         """
         Converts selected text to lower

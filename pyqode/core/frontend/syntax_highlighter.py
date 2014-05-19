@@ -2,7 +2,7 @@
 """
 Base class for pyqode syntax hightlighters
 """
-from PyQt5 import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.frontend import Mode
 
 
@@ -31,11 +31,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    block_highlight_started = QtCore.pyqtSignal(object, object)
+    block_highlight_started = QtCore.Signal(object, object)
 
     #: Signal emitted at the end of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
-    block_highlight_finished = QtCore.pyqtSignal(object, object)
+    block_highlight_finished = QtCore.Signal(object, object)
 
     def __init__(self, parent):
         super().__init__(parent)

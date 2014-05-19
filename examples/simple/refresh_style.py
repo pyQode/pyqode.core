@@ -7,7 +7,7 @@ the settings and styles after CodeEdit has been shown.
 """
 import sys
 
-from PyQt5 import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 from pyqode.core import frontend
 from pyqode.core import settings

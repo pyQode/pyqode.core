@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from PyQt5 import QtWidgets, QtCore
+from pyqode.qt import QtWidgets, QtCore
 
 from pyqode.core import frontend
 from pyqode.core.frontend import modes

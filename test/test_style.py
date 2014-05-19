@@ -2,7 +2,7 @@
 """
 Test scripts for the settings module.
 """
-from PyQt5 import QtGui
+from pyqode.qt import QtGui
 from pyqode.core import style
 from test.helpers import preserve_style
 

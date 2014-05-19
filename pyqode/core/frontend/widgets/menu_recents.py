@@ -4,7 +4,7 @@ which use your application's QSettings to store the list of recent files.
 
 """
 import os
-from PyQt5 import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class RecentFilesManager:
@@ -68,7 +68,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
     """
     #: Signal emitted when the user clicked on a recent file action.
     #: The parameter is the path of the file to open.
-    open_requested = QtCore.pyqtSignal(str)
+    open_requested = QtCore.Signal(str)
 
     def __init__(self, parent, recent_files_manager=None,
                  title='Recent files'):

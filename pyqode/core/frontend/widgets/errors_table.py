@@ -4,7 +4,7 @@ Contains a custom QTableWidget for easier displaying of CheckerMessages
 """
 from pyqode.core.frontend.utils import memoized
 from pyqode.core.frontend.modes.checker import CheckerMessage
-from PyQt5 import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 from PyQt5.QtWidgets import QTableWidget
 
 
@@ -29,7 +29,7 @@ class ErrorsTable(QTableWidget):
     # pylint: disable=too-many-public-methods
     #: Signal emitted when a message is activated, the clicked signal is passed
     #: as a parameter
-    msg_activated = QtCore.pyqtSignal(CheckerMessage)
+    msg_activated = QtCore.Signal(CheckerMessage)
 
     def __init__(self, parent=None):
         QtWidgets.QTableWidget.__init__(self, parent)

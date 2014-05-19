@@ -65,7 +65,7 @@ SearchAndReplacePanel
 .. autodata:: search_occurrence_foreground
 
 """
-from PyQt5.QtGui import QColor
+from pyqode.qt.QtGui import QColor
 # pylint: disable=C0103
 # ----------------
 # CodeEdit

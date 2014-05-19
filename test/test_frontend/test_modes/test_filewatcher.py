@@ -1,7 +1,7 @@
 import os
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
-from PyQt5.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt import QtWidgets
+from pyqode.qt.QtTest import QTest
 import datetime
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
