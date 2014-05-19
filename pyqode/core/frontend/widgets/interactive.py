@@ -5,8 +5,8 @@ This module contains interactive widgets:
 """
 import logging
 from pyqode.qt.QtCore import Qt, Signal, pyqtProperty as Property, QProcess
-from PyQt5.QtWidgets import QTextEdit
-from PyQt5.QtGui import QColor, QTextCursor
+from pyqode.qt.QtWidgets import QTextEdit
+from pyqode.qt.QtGui import QColor, QTextCursor
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING
 # pylint: disable=too-many-instance-attributes, missing-docstring
 

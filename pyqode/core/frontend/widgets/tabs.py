@@ -6,7 +6,7 @@ show code editor tabs.
 import logging
 import os
 from pyqode.qt import QtCore, QtWidgets
-from PyQt5.QtWidgets import QDialog, QTabBar, QTabWidget
+from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget
 from pyqode.core import frontend
 from pyqode.core.frontend.ui.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.frontend.modes import FileWatcherMode

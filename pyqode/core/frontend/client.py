@@ -172,7 +172,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """ Terminates the server process """
         _logger().info('waiting for server process to finish')
         while self._process.running:
-            QtWidgets.QApplication.processEvents()
+            self._process.terminate()
+            # QtWidgets.QApplication.processEvents()
 
     def close(self):
         """ Closes the socket and terminates the server process. """

@@ -21,7 +21,7 @@ def test_key_events(editor):
     assert editor.font_size == zoom
     QTest.keyPress(editor, '-', QtCore.Qt.ControlModifier)
     assert editor.font_size < zoom
-    if os.environ['QT_API'].lower() == 'PyQt5':
+    if os.environ['QT_API'].lower() == 'pyqt5':
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
             QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
@@ -30,11 +30,11 @@ def test_key_events(editor):
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), 1,
             QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
-    if os.environ['QT_API'].lower() == 'PyQt5':
+    if os.environ['QT_API'].lower() == 'pyqt5':
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
             QtCore.QPoint(0, -1), QtCore.QPoint(0, -1), -1,
-            QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+             QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
     else:
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), -1,

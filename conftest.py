@@ -31,6 +31,9 @@ def pytest_runtest_setup(item):
         travis_platform = True if 'TRAVIS' in os.environ else False
         if travis_platform and item.get_marker('skip_on_travis'):
             pytest.skip("test skipped when ran on Travis-CI: %r" % item)
+        else:
+            logging.info("------------------- %s -------------------",
+                         item.name)
 
 
 # -------------------
