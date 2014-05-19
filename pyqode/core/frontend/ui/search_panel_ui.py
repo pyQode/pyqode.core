@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Sun May 18 18:48:27 2014
+# Created: Mon May 19 10:47:05 2014
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
