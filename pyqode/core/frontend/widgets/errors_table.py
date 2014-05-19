@@ -105,7 +105,7 @@ class ErrorsTable(QTableWidget):
 
         # type
         item = QtWidgets.QTableWidgetItem(self.make_icon(msg.icon),
-                                      msg.status_string)
+                                          msg.status_string)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_TYPE, item)

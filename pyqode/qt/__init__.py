@@ -50,7 +50,7 @@ class PythonQtError(Exception):
     pass
 
 
-if not QT_API in os.environ:
+if QT_API not in os.environ:
     # autodetect
     try:
         import PyQt5

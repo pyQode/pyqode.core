@@ -99,12 +99,12 @@ class _ServerProcess(QtCore.QProcess):
         else:
             if not self.running:
                 _logger().error('server process error %s: %s', error,
-                                  PROCESS_ERROR_STRING[error])
+                                PROCESS_ERROR_STRING[error])
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
         _logger().info('server process finished with exit code %d',
-                         exit_code)
+                       exit_code)
         try:
             self.running = False
         except AttributeError:
@@ -229,7 +229,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             pgm_args += args
         self._process.start(program, pgm_args)
         _logger().info('starting server process: %s %s', program,
-                         ' '.join(pgm_args))
+                       ' '.join(pgm_args))
 
     def request_work(self, worker_class_or_function, args, on_receive=None):
         """
@@ -295,7 +295,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_connected(self):
         """ Logs connected """
         _logger().info('connected to server: %s:%d',
-                         self.peerName(), self.peerPort())
+                       self.peerName(), self.peerPort())
         self.is_connected = True
 
     def _on_error(self, error):
@@ -320,7 +320,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """ Logs disconnected """
         try:
             _logger().info('disconnected from server: %s:%d',
-                             self.peerName(), self.peerPort())
+                           self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit

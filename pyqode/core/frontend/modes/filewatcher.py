@@ -108,8 +108,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
         expected_action = (
             lambda *x: None) if not expected_action else expected_action
         if (self._auto_reload or QtWidgets.QMessageBox.question(
-                self.editor, title, message,
-                dlg_type, QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes):
+                self.editor, title, message, dlg_type,
+                QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes):
             expected_action(self.editor.file_path)
         self._update_mtime()
         settings.save_on_focus_out = inital_value

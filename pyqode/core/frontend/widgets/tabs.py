@@ -39,7 +39,8 @@ class DlgUnsavedFiles(QDialog, Ui_Dialog):
             QtWidgets.QDialogButtonBox.SaveAll)
         self.bt_save_all.clicked.connect(self.accept)
         self.discarded = False
-        self.bt_discard = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
+        self.bt_discard = self.buttonBox.button(
+            QtWidgets.QDialogButtonBox.Discard)
         self.bt_discard.clicked.connect(self._set_discarded)
         self.bt_discard.clicked.connect(self.accept)
         for file in files:
@@ -191,13 +192,13 @@ class TabWidget(QTabWidget):
         """
         Save current editor content. Leave file to None to erase the previous
         file content. If the current editor's file_path is None and path
-        is None, the function will call ``QtWidgets.QFileDialog.getSaveFileName``
-        to get a valid save filename.
+        is None, the function will call
+        ``QtWidgets.QFileDialog.getSaveFileName`` to get a valid save filename.
 
         """
         try:
             if not path and not self._current.file_path:
-                path = QtWidgets.QFileDialog.getSaveFileName(
+                path, filter = QtWidgets.QFileDialog.getSaveFileName(
                     self, 'Choose destination path')
                 if not path:
                     return False
