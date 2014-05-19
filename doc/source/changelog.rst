@@ -77,7 +77,7 @@ Fixed bugs:
 The API has been completely rewritten. Here are the major changes
 
  * added support for python 3
- * added support for PyQt4
+ * added support for PyQt5
  * added support for Qt Designer plugins
  * morphed into a namespaces package
  * improved look and feel: native look and feel close to Qt Create

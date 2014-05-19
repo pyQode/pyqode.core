@@ -6,7 +6,7 @@ import os
 from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend import Mode
-from PyQt4 import QtCore, QtGui
+from pyqode.qt import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -14,10 +14,10 @@ class FileWatcherMode(Mode, QtCore.QObject):
     FileWatcher mode, check if the opened file has changed externally.
 
     """
-    #: Signal emitted when the file has been deleted. The pyqtSignal is emitted
+    #: Signal emitted when the file has been deleted. The Signal is emitted
     #: with the current editor instance so that user have a chance to close
     #: the editor.
-    file_deleted = QtCore.pyqtSignal(object)
+    file_deleted = QtCore.Signal(object)
 
     @property
     def auto_reload(self):
@@ -104,12 +104,12 @@ class FileWatcherMode(Mode, QtCore.QObject):
         inital_value = settings.save_on_focus_out
         settings.save_on_focus_out = False
         self._flg_notify = True
-        dlg_type = (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        dlg_type = (QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         expected_action = (
             lambda *x: None) if not expected_action else expected_action
-        if (self._auto_reload or QtGui.QMessageBox.question(
-                self.editor, title, message,
-                dlg_type, QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
+        if (self._auto_reload or QtWidgets.QMessageBox.question(
+                self.editor, title, message, dlg_type,
+                QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes):
             expected_action(self.editor.file_path)
         self._update_mtime()
         settings.save_on_focus_out = inital_value

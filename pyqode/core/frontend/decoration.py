@@ -2,7 +2,7 @@
 This module contains the classes and functions related to text decorations.
 """
 import logging
-from PyQt4 import QtGui, QtCore
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 def _logger():
@@ -19,10 +19,10 @@ class _TextDecorationSignals(QtCore.QObject):
     """
     # pylint: disable=too-few-public-methods
     #: Signal emitted when a TextDecoration has been clicked.
-    clicked = QtCore.pyqtSignal(object)
+    clicked = QtCore.Signal(object)
 
 
-class TextDecoration(QtGui.QTextEdit.ExtraSelection):
+class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
     utility class that adds a few utility methods over Qt's ExtraSelection.
@@ -55,7 +55,7 @@ class TextDecoration(QtGui.QTextEdit.ExtraSelection):
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
-        QtGui.QTextEdit.ExtraSelection.__init__(self)
+        super().__init__()
         self.signals = _TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip

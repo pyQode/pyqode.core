@@ -7,7 +7,7 @@ the settings and styles after CodeEdit has been shown.
 """
 import sys
 
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets
 
 from pyqode.core import frontend
 from pyqode.core import actions
@@ -16,8 +16,8 @@ from pyqode.core.frontend import panels
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    window = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QMainWindow()
 
     # code from the simple example
     editor = frontend.CodeEdit()

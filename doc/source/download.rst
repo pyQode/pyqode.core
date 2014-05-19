@@ -9,7 +9,7 @@ Requirements:
 You will need to install the following packages yourself:
     - setuptools
     - pip
-    - PySide or PyQt4
+    - PySide or PyQt5
 
 The following packages will be installed automatically:
     - pygments

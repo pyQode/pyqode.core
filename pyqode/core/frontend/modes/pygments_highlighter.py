@@ -6,8 +6,8 @@ on pygments.
 .. note: This code is taken and adapted from the IPython project.
 """
 import logging
-from PyQt4 import QtGui
-from PyQt4.QtCore import QRegExp
+from pyqode.qt import QtGui
+from pyqode.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
@@ -231,8 +231,8 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._update_style()
 
     def __init__(self, document, lexer=None):
-        super(PygmentsSyntaxHighlighter, self).__init__(document)
-        self._document = QtGui.QTextDocument()
+        super().__init__(document)
+        self._document = document
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()

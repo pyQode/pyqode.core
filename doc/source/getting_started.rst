@@ -3,7 +3,7 @@ Getting started
 
 This page is a gentle introduction to the pyQode framework.
 
-Before reading this you should have pyqode.core and PySide/PyQt4 :doc:`installed </download>` on your system.
+Before reading this you should have pyqode.core and PySide/PyQt5 :doc:`installed </download>` on your system.
 
 
 .. contents:: :local:
@@ -32,7 +32,7 @@ There are multiple ways of doing this but the preferred way is to simply set an
 environment variable at the top of your main module and then import pyqode.core::
 
     import os
-    os.environ["QT_API"] = "PySide"  # or "PyQt" if you want to use PyQt4
+    os.environ["QT_API"] = "PySide"  # or "PyQt" if you want to use PyQt5
     import pyqode.core
 
 
@@ -51,22 +51,22 @@ or
 .. warning:: The QT_API string is case sensitive (this will change with version 1.1)
 
 
-.. note:: You can also write a qt bindings independent application by using the **PyQt4** package.
+.. note:: You can also write a qt bindings independent application by using the **PyQt5** package.
           pyQode will pick up the first available bindings and expose it through the **qt** package.
-          Simply import QtGui and QtCore module from PyQt4 to use the automatically chosen binding:
+          Simply import QtWidgets and QtCore module from PyQt5 to use the automatically chosen binding:
 
           .. code-block:: python
 
               import sys
-              from PyQt4 import QtGui
+              from PyQt5 import QtWidgets
 
-              app = QtGui.QApplication(sys.argv)
-              win = QtGui.QMainWindow()
+              app = QtWidgets.QApplication(sys.argv)
+              win = QtWidgets.QMainWindow()
               win.show()
               print(app)
               app.exec_()
 
-**Most of the code samples of this documentation are bindings independent and use the PyQt4 package.**
+**Most of the code samples of this documentation are bindings independent and use the PyQt5 package.**
 
 
 The editor widget: QCodeEdit
@@ -115,13 +115,13 @@ Here is a minimal example code:
 .. code-block:: python
 
     import sys
-    from PyQt4 import QtGui
+    from PyQt5 import QtWidgets
     import pyqode.core
 
 
     def main():
-        app = QtGui.QApplication(sys.argv)
-        window = QtGui.QMainWindow()
+        app = QtWidgets.QApplication(sys.argv)
+        window = QtWidgets.QMainWindow()
         editor = pyqode.core.QGenericCodeEdit()
         editor.openFile(__file__)
         window.setCentralWidget(editor)
@@ -141,13 +141,13 @@ modes and panels:
 .. code-block:: python
 
     import sys
-    from PyQt4 import QtGui
+    from PyQt5 import QtWidgets
     import pyqode.core
 
 
     def main():
-        app = QtGui.QApplication(sys.argv)
-        window = QtGui.QMainWindow()
+        app = QtWidgets.QApplication(sys.argv)
+        window = QtWidgets.QMainWindow()
         editor = pyqode.core.QCodeEdit()
         editor.openFile(__file__)
         editor.installMode(pyqode.core.PygmentsSyntaxHighlighter(editor.document()))

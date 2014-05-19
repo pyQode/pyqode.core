@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from PyQt4 import QtGui, QtCore
+from pyqode.qt import QtWidgets, QtCore
 
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
@@ -21,8 +21,8 @@ def quit():
 def main():
     global editor, app
 
-    app = QtGui.QApplication(sys.argv)
-    window = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QMainWindow()
     editor = frontend.CodeEdit()
     # frontend.start_server(editor, 'server.py')
     editor._client._port = int(sys.argv[1])

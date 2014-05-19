@@ -10,7 +10,7 @@ the whitespaces.
 """
 import sys
 
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 from pyqode.core import frontend, settings, style
 from pyqode.core.frontend import modes
@@ -19,8 +19,8 @@ from pyqode.core.frontend import panels
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    window = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QMainWindow()
 
     # make the code edit show whitespaces in dark gray
     settings.show_white_spaces = True

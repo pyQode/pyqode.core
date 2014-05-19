@@ -3,7 +3,7 @@
 """
 Setup script for notepad
 
-You will need to install PyQt4 on your own.
+You will need to install PyQt5 on your own.
 """
 import os
 import sys

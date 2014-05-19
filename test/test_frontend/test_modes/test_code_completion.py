@@ -2,12 +2,12 @@
 Tests the code completion mode
 """
 import functools
-from PyQt4 import QtCore
-from PyQt4.QtTest import QTest
+from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt.QtTest import QTest
 from pyqode.core import frontend, settings
 from pyqode.core.frontend import modes
 
-from ...helpers import cwd_at, server_path
+from ...helpers import cwd_at, server_path, wait_for_connected
 from ...helpers import editor_open
 
 
@@ -15,7 +15,21 @@ def get_mode(editor):
     return frontend.get_mode(editor, modes.CodeCompletionMode)
 
 
-def ensure_connected_and_visible(func):
+def ensure_visible(func):
+    """
+    Ensures the frontend is connect is connected to the server. If that is not
+    the case, the code completion server is started automatically
+    """
+    @functools.wraps(func)
+    @cwd_at('test')
+    def wrapper(editor, *args, **kwds):
+        QtWidgets.QApplication.setActiveWindow(editor)
+        editor.setFocus(True)
+        return func(editor, *args, **kwds)
+    return wrapper
+
+
+def ensure_connected(func):
     """
     Ensures the frontend is connect is connected to the server. If that is not
     the case, the code completion server is started automatically
@@ -25,11 +39,13 @@ def ensure_connected_and_visible(func):
     def wrapper(editor, *args, **kwds):
         if not frontend.connected_to_server(editor):
             frontend.start_server(editor, server_path())
+            wait_for_connected(editor)
         return func(editor, *args, **kwds)
     return wrapper
 
 
 @editor_open(__file__)
+@ensure_visible
 def test_enabled(editor):
     mode = get_mode(editor)
     assert mode.enabled
@@ -38,6 +54,7 @@ def test_enabled(editor):
 
 
 @editor_open(__file__)
+@ensure_visible
 def test_properties(editor):
     mode = get_mode(editor)
     mode.trigger_key = 'A'
@@ -59,6 +76,7 @@ def test_properties(editor):
 
 
 @editor_open(__file__)
+@ensure_visible
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -81,7 +99,8 @@ def test_request_completion(editor):
 
 
 @editor_open(__file__)
-@ensure_connected_and_visible
+@ensure_connected
+@ensure_visible
 def test_events(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
@@ -122,7 +141,8 @@ def test_events(editor):
 
 
 @editor_open(__file__)
-@ensure_connected_and_visible
+@ensure_connected
+@ensure_visible
 def test_insert_completions(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
@@ -145,7 +165,7 @@ def test_insert_completions(editor):
 
 
 @editor_open(__file__)
-@ensure_connected_and_visible
+@ensure_connected
 def test_show_completion_with_tooltip(editor):
     mode = get_mode(editor)
     settings.cc_show_tooltips = True
@@ -158,7 +178,7 @@ def test_show_completion_with_tooltip(editor):
 
 
 @editor_open(__file__)
-@ensure_connected_and_visible
+@ensure_connected
 def test_show_completion_with_icon(editor):
     mode = get_mode(editor)
     mode._show_completions([{'name': 'test',

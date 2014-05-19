@@ -32,7 +32,7 @@ if len(sys.argv) == 1:
     sys.argv.append("build")
 
 # Build options
-options = {"excludes": ["PyQt4.uic.port_v3", "PySide", "tcltk", "jedi"],
+options = {"excludes": ["PyQt5.uic.port_v3", "PySide", "tcltk", "jedi"],
            "namespace_packages": ["pyqode.core"],
            "include_msvcr": True,
            "build_exe": "bin",

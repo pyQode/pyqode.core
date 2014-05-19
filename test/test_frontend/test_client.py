@@ -4,9 +4,9 @@ Test the client/server API
 """
 import os
 import sys
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets
 import pytest
-from PyQt4.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core import backend
 from pyqode.core.frontend.client import JsonTcpClient
@@ -23,7 +23,7 @@ def _on_receive(status, results):
     """
     assert status is True
     assert results == 'some data'
-    app = QtGui.QApplication.instance()
+    app = QtWidgets.QApplication.instance()
     app.exit(0)
 
 
@@ -48,7 +48,7 @@ def test_client_server():
     Once the result has been received we quit the qt app.
     """
     global client_socket
-    win = QtGui.QMainWindow()
+    win = QtWidgets.QMainWindow()
     client_socket = JsonTcpClient(win)
     with pytest.raises(frontend.NotConnectedError):
         client_socket.request_work(backend.echo_worker, 'some data',
@@ -85,7 +85,7 @@ def test_client_server_py2(editor, app):
 
 def test_frozen_server():
     global client_socket
-    win = QtGui.QMainWindow()
+    win = QtWidgets.QMainWindow()
     client_socket = JsonTcpClient(win)
     with pytest.raises(frontend.NotConnectedError):
         client_socket.request_work(backend.echo_worker, 'some data',

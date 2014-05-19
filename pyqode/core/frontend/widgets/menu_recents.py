@@ -4,7 +4,7 @@ which use your application's QSettings to store the list of recent files.
 
 """
 import os
-from PyQt4 import QtCore, QtGui
+from pyqode.qt import QtCore, QtWidgets
 
 
 class RecentFilesManager:
@@ -59,7 +59,7 @@ class RecentFilesManager:
         self._settings.setValue('recentFiles', files)
 
 
-class MenuRecentFiles(QtGui.QMenu):
+class MenuRecentFiles(QtWidgets.QMenu):
     """
     Menu that manage the list of recent files.
 
@@ -68,7 +68,7 @@ class MenuRecentFiles(QtGui.QMenu):
     """
     #: Signal emitted when the user clicked on a recent file action.
     #: The parameter is the path of the file to open.
-    open_requested = QtCore.pyqtSignal(str)
+    open_requested = QtCore.Signal(str)
 
     def __init__(self, parent, recent_files_manager=None,
                  title='Recent files'):
@@ -93,14 +93,14 @@ class MenuRecentFiles(QtGui.QMenu):
         self.clear()
         self.recent_files_actions[:] = []
         for file in self.manager.get_recent_files():
-            action = QtGui.QAction(self)
+            action = QtWidgets.QAction(self)
             action.setText(os.path.split(file)[1])
             action.setData(file)
             action.triggered.connect(self._on_action_triggered)
             self.addAction(action)
             self.recent_files_actions.append(action)
         self.addSeparator()
-        action_clear = QtGui.QAction('Clear list', self)
+        action_clear = QtWidgets.QAction('Clear list', self)
         action_clear.triggered.connect(self.clear_recent_files)
         self.addAction(action_clear)
 
@@ -114,7 +114,7 @@ class MenuRecentFiles(QtGui.QMenu):
         Emits open_requested when a recent file action has been triggered.
         """
         action = self.sender()
-        assert isinstance(action, QtGui.QAction)
+        assert isinstance(action, QtWidgets.QAction)
         path = action.data()
         self.open_requested.emit(path)
         self.update_actions()

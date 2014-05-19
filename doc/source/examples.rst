@@ -46,12 +46,12 @@ the pyqode.core plugins to add the QGenericCodeEdit to the ui.
           need to do that in a real world application where you use one qt
           binding.
 
-Force PyQt4
+Force PyQt5
 ----------------
 
-This example shows you how you can force pyQode to use PyQt4.
+This example shows you how you can force pyQode to use PyQt5.
 
-.. literalinclude:: /../../examples/qt_bindings/pyqt4.py
+.. literalinclude:: /../../examples/qt_bindings/PyQt5.py
    :linenos:
 
 Force PySide

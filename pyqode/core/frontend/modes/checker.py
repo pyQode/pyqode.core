@@ -2,7 +2,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
-from PyQt4 import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner
 from pyqode.core.frontend.panels.marker import Marker, MarkerPanel

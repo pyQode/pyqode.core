@@ -1,5 +1,5 @@
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+from pyqode.qt import QtWidgets, QtGui
+from pyqode.qt.QtTest import QTest
 import time
 from pyqode.core import frontend
 from pyqode.core.frontend import utils

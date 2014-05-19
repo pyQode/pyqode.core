@@ -6,7 +6,7 @@ import logging
 import mimetypes
 import os
 import sys
-from PyQt4 import QtCore, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core import settings
 from pyqode.core.frontend.utils import show_wait_cursor
 # pylint: disable=protected-access

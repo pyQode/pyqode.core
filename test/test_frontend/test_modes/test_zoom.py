@@ -1,6 +1,7 @@
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+import os
+from pyqode.qt import QtCore
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
@@ -20,9 +21,21 @@ def test_key_events(editor):
     assert editor.font_size == zoom
     QTest.keyPress(editor, '-', QtCore.Qt.ControlModifier)
     assert editor.font_size < zoom
-    editor.wheelEvent(QtGui.QWheelEvent(
-        QtCore.QPoint(10, 10), 1, QtCore.Qt.MidButton,
-        QtCore.Qt.ControlModifier))
-    editor.wheelEvent(QtGui.QWheelEvent(
-        QtCore.QPoint(10, 10), -1, QtCore.Qt.MidButton,
-        QtCore.Qt.ControlModifier))
+    if os.environ['QT_API'].lower() == 'pyqt5':
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
+            QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
+            QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+    else:
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), 1,
+            QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+    if os.environ['QT_API'].lower() == 'pyqt5':
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
+            QtCore.QPoint(0, -1), QtCore.QPoint(0, -1), -1,
+             QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+    else:
+        editor.wheelEvent(QtGui.QWheelEvent(
+            QtCore.QPoint(10, 10), -1,
+            QtCore.Qt.MidButton, QtCore.Qt.NoModifier))

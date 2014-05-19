@@ -2,17 +2,17 @@
 """
 Contains pyqode dialogs windows.
 """
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets
 
 from pyqode.core.frontend.ui import dlg_goto_line_ui
 
 
-class GoToLineDialog(QtGui.QDialog, dlg_goto_line_ui.Ui_Dialog):
+class GoToLineDialog(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
     """
     Goto line dialog.
     """
     def __init__(self, parent, current_line, line_count):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         dlg_goto_line_ui.Ui_Dialog.__init__(self)
         self.setupUi(self)
         self.buttonBox.accepted.connect(self.accept)

@@ -10,7 +10,7 @@ import sys
 from os.path import abspath
 from os.path import dirname
 
-from PyQt4.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 from pyqode.core import actions
 from pyqode.core import frontend

@@ -4,8 +4,9 @@ This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
 """
 import logging
-from PyQt4.QtCore import Qt, pyqtSignal, pyqtProperty as Property, QProcess
-from PyQt4.QtGui import QTextEdit, QTextCursor, QColor
+from pyqode.qt.QtCore import Qt, Signal, Property, QProcess
+from pyqode.qt.QtWidgets import QTextEdit
+from pyqode.qt.QtGui import QColor, QTextCursor
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING
 # pylint: disable=too-many-instance-attributes, missing-docstring
 
@@ -32,7 +33,7 @@ class InteractiveConsole(QTextEdit):
 
     """
     #: Signal emitted when the process has finished.
-    process_finished = pyqtSignal(int)
+    process_finished = Signal(int)
 
     def __init__(self, parent=None):
         QTextEdit.__init__(self, parent)

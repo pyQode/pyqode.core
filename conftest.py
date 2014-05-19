@@ -10,9 +10,8 @@ This scripts configures the test suite. We do two things:
 import logging
 import os
 import sys
-from PyQt4.QtTest import QTest
 import pytest
-from PyQt4.QtGui import QApplication
+import time
 
 try:
     import faulthandler
@@ -32,12 +31,15 @@ def pytest_runtest_setup(item):
         travis_platform = True if 'TRAVIS' in os.environ else False
         if travis_platform and item.get_marker('skip_on_travis'):
             pytest.skip("test skipped when ran on Travis-CI: %r" % item)
+        else:
+            logging.info("------------------- %s -------------------",
+                         item.name)
 
 
 # -------------------
 # Setup logging
 # -------------------
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     filename='pytest.log',
                     filemode='w')
 
@@ -45,6 +47,7 @@ logging.basicConfig(level=logging.INFO,
 # Setup QApplication
 # -------------------
 # 2. create qt application
+from pyqode.qt.QtWidgets import QApplication
 _app = QApplication(sys.argv)
 _widget = None
 
@@ -71,16 +74,16 @@ def editor(request):
 
     _widget = frontend.CodeEdit()
     frontend.start_server(_widget, helpers.server_path())
+    helpers.wait_for_connected(_widget)
     helpers.setup_editor(_widget)
-    _widget.resize(800, 600)
     _widget.show()
+    _widget.resize(800, 600)
     _app.setActiveWindow(_widget)
 
     def fin():
         global _widget
         logging.info('teardown session editor')
         frontend.stop_server(_widget)
-        QTest.qWait(1000)
         del _widget
 
     request.addfinalizer(fin)

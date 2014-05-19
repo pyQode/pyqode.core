@@ -4,6 +4,7 @@ omit =
     # qt design ui files
     *_ui.py
     *_rc.py
+    *pyqode/qt/*
     # at the moment, we do not test misc ui elements such as
     # widgets and dialogs (how could this be possible to test?)
     *pyqode/core/frontend/dialogs.py

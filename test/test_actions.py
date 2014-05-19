@@ -2,7 +2,7 @@
 """
 Test scripts for the actions module.
 """
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets, QtGui
 from pyqode.core import actions
 
 from .helpers import preserve_actions

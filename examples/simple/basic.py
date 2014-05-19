@@ -9,8 +9,7 @@ There are many other modes and panels, feel free to use this example as a
 starting point and experiment!
 """
 import sys
-
-from PyQt4 import QtGui
+from pyqode.qt import QtWidgets
 
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
@@ -18,8 +17,9 @@ from pyqode.core.frontend import panels
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    window = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    print(app)
+    window = QtWidgets.QMainWindow()
     editor = frontend.CodeEdit()
     frontend.start_server(editor, 'server.py')
     frontend.open_file(editor, __file__)
@@ -37,9 +37,6 @@ def main():
     del app
 
 
+
 if __name__ == "__main__":
     main()
-
-
-
-
