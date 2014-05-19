@@ -8,8 +8,8 @@ env:
   - COV=1
 matrix:
     allow_failures:
-        - env: COV
-        - env: PEP8
+        - env: COV=1
+        - env: PEP8=1
         - env: QT_API=PyQt5
 virtualenv:
   system_site_packages: true
