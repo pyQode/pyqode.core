@@ -76,7 +76,7 @@ class RightMarginMode(Mode):
 
     def _paint_margin(self, event):  # pylint: disable=unused-argument
         """ Paints the right margin after editor paint event. """
-        font = self.editor.currentCharFormat().font()
+        font = QtGui.QFont(self.editor.font_name, self.editor.font_size)
         metrics = QtGui.QFontMetricsF(font)
         pos = self._margin_pos
         offset = self.editor.contentOffset().x() + \
