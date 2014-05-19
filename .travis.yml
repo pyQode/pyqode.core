@@ -21,11 +21,11 @@ install:
   # used for QT_API=pyqt4, COV and PEP8
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
   # PySide
-  - if [ $ENV == "pyside" ]; then
+  - if [ $QT_API == "pyside" ]; then
     sudo apt-get install -qq python3-pyside --fix-missing
     fi
   # PyQt5 (won't be available untill travis upgrade to ubuntu 14.04
-  - if [ $ENV == "pyqt5" ]; then
+  - if [ $QT_API == "pyqt5" ]; then
     sudo apt-get install -qq python3-pyqt5 --fix-missing
     fi
 script:
