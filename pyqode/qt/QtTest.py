@@ -15,9 +15,4 @@ elif os.environ[QT_API] == PYQT4_API:
             OldQTest.qWaitForWindowShown(QWidget)
 
 elif os.environ[QT_API] == PYSIDE_API:
-    from PySide.QtTest import QTest as OldQTest
-
-    class QTest(OldQTest):
-        @staticmethod
-        def qWaitForWindowActive(QWidget):
-            OldQTest.qWaitForWindowShown(QWidget)
+    raise ImportError('QtTest support is incomplete for PySide')

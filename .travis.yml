@@ -2,7 +2,6 @@ language: python
 python:
   - "3.2"
 env:
-  - QT_API=PySide
   - QT_API=PyQt4
   - QT_API=PyQt5
   - PEP8=1
@@ -11,7 +10,7 @@ matrix:
     allow_failures:
         - env: COV
         - env: PEP8
-        - env: QTA_API=PyQt5
+        - env: QT_API=PyQt5
 virtualenv:
   system_site_packages: true
 before_install:
@@ -20,10 +19,6 @@ before_install:
 install:
   # used for QT_API=pyqt4, COV and PEP8
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
-  # PySide
-  - if [ $QT_API == "pyside" ]; then
-    sudo apt-get install -qq python3-pyside --fix-missing
-    fi
   # PyQt5 (won't be available untill travis upgrade to ubuntu 14.04
   - if [ $QT_API == "pyqt5" ]; then
     sudo apt-get install -qq python3-pyqt5 --fix-missing
