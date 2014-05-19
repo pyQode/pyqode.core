@@ -1,3 +1,0 @@
-[bugtraq "github"]
-  url = "https://github.com/pyQode/pyqode.core/issues/%BUGID%"
-  logRegex = "\\d+"

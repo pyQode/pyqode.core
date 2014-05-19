@@ -6,13 +6,13 @@ include MANIFEST.in
 
 # setup, license and readme
 include setup.py
-include LICENSE.txt
-include AUTHORS.txt
-include README.rst
-include CONTRIBUTING.md
+include LICENSE
+include *.rst
 include runtests.py
 include pytest.ini
 include conftest.py
+include .coveragerc
+include pylintrc
 
 recursive-include doc *
 recursive-include examples *

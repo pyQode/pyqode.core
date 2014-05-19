@@ -1,5 +1,5 @@
-Source Code Editor widget for PyQt5
-===================================
+Source Code Editor Widget for PyQt/PySide
+=========================================
 
 Status
 ------
@@ -60,9 +60,10 @@ Unstable (`develop`_):
 About pyQode
 ------------
 
-pyQode is a *flexible source code editor widget* for PyQt5 applications.
+pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
 
-**pyQode is a library/widget, not an IDE**. *You can see it as an alternative to QScintilla.*
+**pyQode is a library/widget, not an IDE**. *You can see it as an alternative
+to QScintilla.*
 
 
 pyQode is a **namespace package** made up of the following official packages:
@@ -83,6 +84,7 @@ Features
 
 Here are the core features:
 
+- support multiple frontend: PyQt5, PyQt4 and PySide
 - simple widget based on QPlainTextEdit
 - easily customisable (modes and panels)
 - native look and feel close to Qt creator
@@ -104,13 +106,13 @@ Requirements
 pyqode.core depends on the following libraries:
 
 -  Python 3 (>= 3.2)
--  PyQt5
+-  PyQt5 or PyQt4 or PySide
 -  pygments
 
 
 Installation
 ------------
-You need to install PyQt5 by yourself.
+You need to install PyQt or PySide by yourself.
 
 Then you can install pyqode.core using **pip**::
 
