@@ -351,15 +351,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # pylint: disable=invalid-name
         self._fencoding = encoding
         self._mime_type = mime_type
-        super().setPlainText(txt)
-        self._original_text = txt
-        self._modified_lines.clear()
-        self.new_text_set.emit()
-        self.redoAvailable.emit(False)
-        self.undoAvailable.emit(False)
-        self.dirty = False
+        self.clear()
+        highlighter = None
         for mode in self._modes.values():
             if hasattr(mode, 'set_mime_type'):
+                highlighter = mode
                 try:
                     _logger().debug('setting up lexer from mimetype: %s',
                                     self.mime_type)
@@ -371,6 +367,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                     _logger().debug('setting up lexer from file path: %s',
                                     self.file_path)
                     mode.set_lexer_from_filename(self.file_path)
+                break
+        self._original_text = txt
+        self._modified_lines.clear()
+        highlighter.process_events_on_highlight = True
+        super().setPlainText(txt)
+        highlighter.process_events_on_highlight = False
+        self.new_text_set.emit()
+        self.redoAvailable.emit(False)
+        self.undoAvailable.emit(False)
+        self.dirty = False
 
     def add_action(self, action):
         """

@@ -44,6 +44,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         # there is a bug with QTextBlockUserData in PyQt5, we need to
         # keep a reference on them, otherwise they are removed from memory.
         self._blocks = set()
+        #: Set this flag to true to process events when a line is highlighted.
+        self.process_events_on_highlight = False
 
     def __del__(self):
         self._blocks.clear()
@@ -117,6 +119,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self._detect_parentheses(text, user_data)
         self.highlight_block(text)
         self.block_highlight_finished.emit(self, text)
+        if self.process_events_on_highlight:
+            QtWidgets.QApplication.instance().processEvents()
 
     def highlight_block(self, text):
         """
@@ -125,6 +129,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         :param text: Line of text to highlight.
         """
         raise NotImplementedError()
+
+    def rehighlight(self, *args, **kwargs):
+        super().rehighlight()
 
 
 class ParenthesisInfo(object):
