@@ -48,7 +48,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tabWidget.close_others)
         self.actionClose_all_tabs.triggered.connect(self.tabWidget.close_all)
         self.actionQuit.triggered.connect(QtWidgets.QApplication.instance().quit)
-        self.tabWidget.dirty_changed.connect(self.on_dirty_changed)
         self.tabWidget.currentChanged.connect(self.on_current_tab_changed)
         self.actionAbout.triggered.connect(self.on_about)
 
@@ -150,10 +149,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 editor = GenericCodeEdit(self)
                 editor.cursorPositionChanged.connect(
                     self.on_cursor_pos_changed)
-                frontend.open_file(editor, path)
                 self.tabWidget.add_code_edit(editor)
                 self.recent_files_manager.open_file(path)
                 self.menu_recents.update_actions()
+                frontend.open_file(editor, path)
             else:
                 self.tabWidget.setCurrentIndex(index)
 
@@ -188,21 +187,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.recent_files_manager.open_file(filename)
             self.menu_recents.update_actions()
 
-    @QtCore.Slot(bool)
-    def on_dirty_changed(self, dirty):
-        """
-        Enable/Disable save action depending on the dirty flag of the
-        current editor tab.
-
-        :param dirty: Dirty flag
-        """
-        try:
-            path = self.tabWidget.currentWidget().file_path
-        except (AttributeError, TypeError):
-            self.actionSave.setDisabled(True)
-        else:
-            self.actionSave.setEnabled(dirty and path is not None)
-
     @QtCore.Slot()
     def on_current_tab_changed(self):
         self.menuEdit.clear()
@@ -212,6 +196,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.menuEdit.setEnabled(editor is not None)
         self.menuModes.setEnabled(editor is not None)
         self.menuPanels.setEnabled(editor is not None)
+        self.actionSave.setEnabled(editor is not None)
         self.actionSave_as.setEnabled(editor is not None)
         self.actionClose_tab.setEnabled(editor is not None)
         self.actionClose_all_tabs.setEnabled(editor is not None)
@@ -226,7 +211,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lbl_encoding.setText(editor.file_encoding)
             self.lbl_filename.setText(editor.file_path)
         else:
-            self.actionSave.setDisabled(True)
             self.lbl_cursor_pos.clear()
             self.lbl_encoding.clear()
             self.lbl_filename.clear()
