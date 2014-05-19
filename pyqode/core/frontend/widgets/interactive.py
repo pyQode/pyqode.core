@@ -4,7 +4,7 @@ This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
 """
 import logging
-from pyqode.qt.QtCore import Qt, Signal, pyqtProperty as Property, QProcess
+from pyqode.qt.QtCore import Qt, Signal, Property, QProcess
 from pyqode.qt.QtWidgets import QTextEdit
 from pyqode.qt.QtGui import QColor, QTextCursor
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING

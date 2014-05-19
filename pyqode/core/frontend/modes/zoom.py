@@ -59,7 +59,11 @@ class ZoomMode(Mode):
         :param event: wheel event
         :type event: QWheelEvent
         """
-        delta = event.angleDelta().y()
+        try:
+            delta = event.angleDelta().y()
+        except AttributeError:
+            # PyQt4/PySide
+            delta = event.delta()
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if delta < self.prev_delta:
                 self.editor.zoom_out()

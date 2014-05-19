@@ -303,7 +303,11 @@ class TabWidget(QTabWidget):
         index = self.addTab(code_edit, icon, code_edit._tab_name)
         self.setCurrentIndex(index)
         self.setTabText(index, code_edit._tab_name)
-        code_edit.setFocus(True)
+        try:
+            code_edit.setFocus(True)
+        except TypeError:
+            # PySide
+            code_edit.setFocus()
         try:
             file_watcher = frontend.get_mode(code_edit, FileWatcherMode)
         except (KeyError, AttributeError):

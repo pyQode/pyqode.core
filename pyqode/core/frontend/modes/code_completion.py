@@ -357,7 +357,11 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                                 width)
             # show the completion list
             if self.editor.isVisible():
-                self.editor.setFocus(True)
+                try:
+                    self.editor.setFocus(True)
+                except TypeError:
+                    # pyside
+                    self.editor.setFocus()
                 self._completer.complete(cursor_rec)
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(0, 0))
