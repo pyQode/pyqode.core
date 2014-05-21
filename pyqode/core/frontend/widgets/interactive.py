@@ -4,9 +4,11 @@ This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
 """
 import logging
+import sys
 from pyqode.qt.QtCore import Qt, Signal, Property, QProcess
 from pyqode.qt.QtWidgets import QTextEdit
-from pyqode.qt.QtGui import QColor, QTextCursor
+from pyqode.qt.QtGui import QColor, QTextCursor, QFont
+from pyqode.core import style
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING
 # pylint: disable=too-many-instance-attributes, missing-docstring
 
@@ -36,7 +38,7 @@ class InteractiveConsole(QTextEdit):
     process_finished = Signal(int)
 
     def __init__(self, parent=None):
-        QTextEdit.__init__(self, parent)
+        super().__init__(parent)
         self._stdout_col = QColor("#404040")
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
@@ -54,6 +56,15 @@ class InteractiveConsole(QTextEdit):
         self._running = False
         self._writer = self.write
         self._user_stop = False
+        if style.font is None:
+            style.font = "monospace"
+            if sys.platform == "win32":
+                style.font = "Consolas"
+            elif sys.platform == "darwin":
+                style.font = 'Monaco'
+        else:
+            self._font_family = style.font
+        self.setFont(QFont(style.font, style.font_size))
 
     def set_writer(self, writer):
         """
@@ -230,7 +241,7 @@ class InteractiveConsole(QTextEdit):
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
-        QTextEdit.keyPressEvent(self, event)
+        super().keyPressEvent(event)
 
     def _write_finished(self, exit_code, exit_status):
         self._writer(self, "\nProcess finished with exit code %d" % exit_code,
