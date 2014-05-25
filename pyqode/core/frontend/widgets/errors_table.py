@@ -4,7 +4,7 @@ Contains a custom QTableWidget for easier displaying of CheckerMessages
 """
 from pyqode.core.frontend.utils import memoized
 from pyqode.core.frontend.modes.checker import CheckerMessage
-from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.qt.QtWidgets import QTableWidget
 
 
@@ -36,10 +36,16 @@ class ErrorsTable(QTableWidget):
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(
             ["Nr", "Type", "File name", "Line", "Description", "File path"])
-        self.horizontalHeader().setResizeMode(
-            QtWidgets.QHeaderView.ResizeToContents)
-        self.horizontalHeader().setResizeMode(
-            COL_MSG, QtWidgets.QHeaderView.Stretch)
+        try:
+            self.horizontalHeader().setResizeMode(
+                QtWidgets.QHeaderView.ResizeToContents)
+            self.horizontalHeader().setResizeMode(
+                COL_MSG, QtWidgets.QHeaderView.Stretch)
+        except AttributeError:
+            self.horizontalHeader().setSectionResizeMode(
+                QtWidgets.QHeaderView.ResizeToContents)
+            self.horizontalHeader().setSectionResizeMode(
+                COL_MSG, QtWidgets.QHeaderView.Stretch)
         self.setMinimumSize(900, 200)
         self.itemActivated.connect(self._on_item_activated)
         self.setSelectionMode(self.SingleSelection)
@@ -80,10 +86,10 @@ class ErrorsTable(QTableWidget):
         Make icon from icon filename/tuple (if you want to use a theme)
         """
         if isinstance(icon, tuple):
-            return QtWidgets.QIcon.fromTheme(
-                icon[0], QtWidgets.QIcon(icon[1]))
+            return QtGui.QIcon.fromTheme(
+                icon[0], QtGui.QIcon(icon[1]))
         elif isinstance(icon, str):
-            return QtWidgets.QIcon(icon)
+            return QtGui.QIcon(icon)
         else:
             return None
 
