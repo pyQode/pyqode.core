@@ -82,7 +82,7 @@ def test_min_indent_column(editor):
     assert editor.toPlainText() == '\n\n'
     editor.refresh_settings()
     QTest.keyPress(editor, QtCore.Qt.Key_Return)
-    assert editor.toPlainText() == '\n\n\n    '
+    assert editor.toPlainText() == '\n\n\n'
     # reset settings for next tests
     settings.min_indent_column = 0
 

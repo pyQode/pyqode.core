@@ -56,6 +56,3 @@ class AutoIndentMode(Mode):
                         cursor.insertText(new_txt)
 
                 event.accept()
-
-    def refresh_settings(self):
-        self.min_indent = settings.min_indent_column * ' '
