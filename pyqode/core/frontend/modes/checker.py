@@ -110,7 +110,7 @@ class CheckerMessage(object):
 
 class CheckerMode(frontend.Mode, QtCore.QObject):
     """
-    Performs a user defined code analysis job in a background process and
+    Performs a user defined code analysis job using the backend and
     display the results on the editor instance.
 
     The user defined code analysis job is a simple **function** with the
@@ -118,21 +118,29 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
 
     .. code-block:: python
 
-        def analysisProcess(queue: multiprocessing.Queue, code: str, path:
-        str, encoding: str):
+        def analysisProcess(data)
 
-    You use the queue to put the list of
-    :class:`pyqode.core.frontend.modes.CheckerMessage` that you want to be
-    displayed.
+    where data is the request data:
 
-    The background process is ran when the text changed and the user is idle
-    for a specific delay or when the text is saved depending on the trigger
-    (see :const:`pyqode.core.frontend.modes.CheckMessages`).
+    .. code-block:: python
+
+        request_data = {
+                'code': self.editor.toPlainText(),
+                'path': self.editor.file_path,
+                'encoding': self.editor.file_encoding
+            }
+
+    and the return value is a tuple made up of the following elements:
+
+        (description, status, line, [col], [icon], [color], [path])
+
+    The background process is ran when the text changed and the ide is an idle
+    state for a few seconds.
 
     You can also request an analysis manually using
     :meth:`pyqode.core.frontend.modes.CheckerMode.request_analysis`
 
-    The messages are displayed as text decorations on the editor and optional
+    Messages are displayed as text decorations on the editor and optional
     markers can be added to a :class:`pyqode.core.frontend.panels.MarkerPanel`
     """
     def __init__(self, worker,
