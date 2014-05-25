@@ -153,6 +153,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self._port = -1
         self.connected.connect(self._on_connected)
         self.error.connect(self._on_error)
         self.disconnected.connect(self._on_disconnected)
@@ -166,7 +167,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.is_connected = False
         self._process = None
         self._connection_attempts = 0
-        self._port = -1
 
     def _terminate_server_process(self):
         """ Terminates the server process """
