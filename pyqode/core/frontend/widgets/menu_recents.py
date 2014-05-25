@@ -69,6 +69,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
     #: Signal emitted when the user clicked on a recent file action.
     #: The parameter is the path of the file to open.
     open_requested = QtCore.Signal(str)
+    clear_requested = QtCore.Signal()
 
     def __init__(self, parent, recent_files_manager=None,
                  title='Recent files'):
@@ -108,6 +109,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
         """ Clear recent files and menu. """
         self.manager.clear()
         self.update_actions()
+        self.clear_requested.emit()
 
     def _on_action_triggered(self):
         """
