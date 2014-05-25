@@ -20,7 +20,7 @@ install:
   # used for QT_API=pyqt4, COV and PEP8
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
   # PyQt5 (won't be available untill travis upgrade to ubuntu 14.04
-  - if [ $QT_API = "pyqt5" ]; then
+  - if [ $QT_API = "PyQt5" ]; then
     sudo apt-get install -qq python3-pyqt5 --fix-missing;
     fi
 script:
