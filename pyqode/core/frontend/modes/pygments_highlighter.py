@@ -298,12 +298,11 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             index = 0
             usd = self.currentBlock().userData()
             usd.cc_disabled_zones[:] = []
-            for token, text in self._lexer.get_tokens(text):
+            tokens = list(self._lexer.get_tokens(text))
+            for token, text in tokens:
                 length = len(text)
-                if "comment" in str(token).lower():
-                    # to the end
-                    usd.cc_disabled_zones.append((index, pow(2, 32)))
-                elif "string" in str(token).lower():
+                if ("comment" in str(token).lower() or
+                        "string" in str(token).lower()) and not text.isspace():
                     usd.cc_disabled_zones.append((index, index + length))
                 self.setFormat(index, length, self._get_format(token))
                 index += length
