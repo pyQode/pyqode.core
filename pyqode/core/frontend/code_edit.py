@@ -86,6 +86,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @font_name.setter
     def font_name(self, value):  # pylint: disable=missing-docstring
         self._font_family = value
+        if not self._font_family:
+            self._font_family = "monospace"
+            if sys.platform == "win32":
+                self._font_family = "Consolas"
+            elif sys.platform == "darwin":
+                self._font_family = 'Monaco'
         self._reset_palette()
 
     @property
@@ -1032,6 +1038,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         pal.setColor(QtGui.QPalette.Highlight, self._sel_background)
         pal.setColor(QtGui.QPalette.HighlightedText, self._sel_foreground)
         self.setPalette(pal)
+        self.repaint()
 
     def _do_home_key(self, event=None, select=False):
         """ Performs home key action """
