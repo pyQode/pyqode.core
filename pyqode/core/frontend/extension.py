@@ -139,6 +139,7 @@ def install_mode(editor, mode):
     # pylint: disable=protected-access
     editor._modes[mode.name] = mode
     mode._on_install(editor)
+    return mode
 
 
 def uninstall_mode(editor, name):
@@ -319,6 +320,7 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
     editor._panels[position][obj.name] = obj
     obj._on_install(editor)
     _logger().info('panel %s installed', obj.name)
+    return obj
 
 
 def uninstall_panel(editor, name):
