@@ -288,6 +288,8 @@ class TabWidget(QTabWidget):
 
         :param icon: The tab widget icon. Optional
         :type icon: QtWidgets.QIcon or None
+
+        :return: Tab index
         """
         index = self.index_from_filename(code_edit.file_path)
         if index != -1:
@@ -295,7 +297,7 @@ class TabWidget(QTabWidget):
             self.setCurrentIndex(index)
             # no need to keep this instance
             self._del_code_edit(code_edit)
-            return
+            return -1
         self._ensure_unique_name(code_edit, name)
         if not icon:
             icon = QtWidgets.QFileIconProvider().icon(
@@ -315,6 +317,7 @@ class TabWidget(QTabWidget):
             pass
         else:
             file_watcher.file_deleted.connect(self._on_file_deleted)
+        return index
 
     def addTab(self, elem, icon, name):  # pylint: disable=invalid-name
         """
