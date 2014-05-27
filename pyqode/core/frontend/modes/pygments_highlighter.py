@@ -15,7 +15,7 @@ from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 
-from pyqode.core import frontend, style as core_style
+from pyqode.core import frontend
 from pyqode.core.frontend.syntax_highlighter import SyntaxHighlighter
 
 
@@ -236,14 +236,14 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self._pygments_style = core_style.pygments_style
+        self._pygments_style = 'default'
         self._brushes = {}
         self._formats = {}
         self._init_style()
 
     def _init_style(self):
         """ Init pygments style """
-        self._pygments_style = core_style.pygments_style
+        self._pygments_style = 'default'
         self._update_style()
 
     def _on_install(self, editor):
@@ -260,10 +260,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def set_mime_type(self, mime_type):
         self.set_lexer_from_mime_type(mime_type)
         self.rehighlight()
-
-    def refresh_style(self):
-        self._pygments_style = core_style.pygments_style
-        self._update_style()
 
     def set_lexer_from_filename(self, filename):
         """
@@ -354,7 +350,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             except KeyError:
                 pass
             else:
-                mode.refresh_style()
+                mode.refresh()
         self.rehighlight()
 
     def _clear_caches(self):
@@ -367,7 +363,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         """ Returns a QTextCharFormat for token or None.
         """
         if token == Whitespace:
-            return core_style.whitespaces_foreground
+            return self.editor.whitespaces_foreground
 
         if token in self._formats:
             return self._formats[token]

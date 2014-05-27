@@ -65,12 +65,9 @@ def app(request):
 def editor(request):
     global _app, _widget
     from test import helpers
-    from pyqode.core import frontend, settings
+    from pyqode.core import frontend
 
     logging.info('setup session editor')
-
-    settings.file_watcher_auto_reload = True
-    settings.save_on_focus_out = False
 
     _widget = frontend.CodeEdit()
     frontend.start_server(_widget, helpers.server_path())
@@ -79,6 +76,7 @@ def editor(request):
     _widget.show()
     _widget.resize(800, 600)
     _app.setActiveWindow(_widget)
+    _widget.save_on_focus_out = False
 
     def fin():
         global _widget

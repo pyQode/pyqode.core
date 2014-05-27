@@ -2,9 +2,9 @@
 """
 This module contains the symbol matcher mode
 """
-from pyqode.core import style
 from pyqode.core import frontend
 from pyqode.core.frontend.syntax_highlighter import TextBlockUserData
+from pyqode.qt import QtGui
 
 
 class SymbolMatcherMode(frontend.Mode):
@@ -74,21 +74,10 @@ class SymbolMatcherMode(frontend.Mode):
     def __init__(self):
         super().__init__()
         self._decorations = []
-        self._match_background = None
-        self._match_foreground = None
-        self._unmatch_background = None
-        self._unmatch_foreground = None
-        self._init_style()
-
-    def _init_style(self):  # pylint: disable=missing-docstring
-        self._match_background = style.matching_braces_background
-        self._match_foreground = style.matching_braces_foreground
-        self._unmatch_background = style.not_matching_braces_background
-        self._unmatch_foreground = style.not_matching_brace_foreground
-
-    def refresh_style(self):
-        self._init_style()
-        self._refresh_decorations()
+        self._match_background = QtGui.QColor('#B4EEB4')
+        self._match_foreground = QtGui.QColor('red')
+        self._unmatch_background = QtGui.QColor('transparent')
+        self._unmatch_foreground = QtGui.QColor('red')
 
     def _clear_decorations(self):  # pylint: disable=missing-docstring
         for deco in self._decorations:

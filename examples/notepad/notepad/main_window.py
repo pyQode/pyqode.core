@@ -10,7 +10,6 @@ from pyqode.qt import QtCore
 from pyqode.qt import QtWidgets
 
 from pyqode.core import frontend
-from pyqode.core import style
 from pyqode.core.frontend import modes
 from pyqode.core.frontend import widgets
 
@@ -28,6 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
         self.on_current_tab_changed()
+        self.pygments_style = 'default'
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -147,6 +147,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             index = self.tabWidget.index_from_filename(path)
             if index == -1:
                 editor = GenericCodeEdit(self)
+                editor.file_path = path
                 editor.cursorPositionChanged.connect(
                     self.on_cursor_pos_changed)
                 self.tabWidget.add_code_edit(editor)
@@ -155,6 +156,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 frontend.open_file(editor, path)
             else:
                 self.tabWidget.setCurrentIndex(index)
+            self.refresh_color_scheme()
 
     @QtCore.Slot()
     def on_new(self):
@@ -162,6 +164,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Add a new empty code editor to the tab widget
         """
         self.tabWidget.add_code_edit(GenericCodeEdit(self), 'New document')
+        self.refresh_color_scheme()
 
     @QtCore.Slot()
     def on_open(self):
@@ -215,10 +218,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lbl_encoding.clear()
             self.lbl_filename.clear()
 
+    def refresh_color_scheme(self):
+        style = self.pygments_style
+        for i in range(self.tabWidget.count()):
+            editor = self.tabWidget.widget(i)
+            frontend.get_mode(
+                editor, modes.PygmentsSyntaxHighlighter).pygments_style = style
+            frontend.get_mode(
+                editor, modes.CaretLineHighlighterMode).refresh()
+
     @QtCore.Slot(QtWidgets.QAction)
     def on_style_changed(self, action):
-        style.pygments_style = action.text()
-        self.tabWidget.refresh_style()
+        self.pygments_style = action.text()
+        self.refresh_color_scheme()
 
     @QtCore.Slot()
     def on_panel_state_changed(self):

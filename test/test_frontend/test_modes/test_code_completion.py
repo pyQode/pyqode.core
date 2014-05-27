@@ -4,7 +4,7 @@ Tests the code completion mode
 import functools
 from pyqode.qt import QtCore, QtWidgets
 from pyqode.qt.QtTest import QTest
-from pyqode.core import frontend, settings
+from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
 from ...helpers import cwd_at, server_path, wait_for_connected
@@ -29,6 +29,22 @@ def ensure_visible(func):
     return wrapper
 
 
+code = '''"""
+Empty module
+"""
+'''
+
+
+def ensure_empty(func):
+    @functools.wraps(func)
+    @cwd_at('test')
+    def wrapper(editor, *args, **kwds):
+        editor.file_path = None
+        editor.setPlainText(code, 'text/x-python', 'utf-8')
+        return func(editor, *args, **kwds)
+    return wrapper
+
+
 def ensure_connected(func):
     """
     Ensures the frontend is connect is connected to the server. If that is not
@@ -44,8 +60,9 @@ def ensure_connected(func):
     return wrapper
 
 
-@editor_open(__file__)
+@ensure_empty
 @ensure_visible
+@ensure_connected
 def test_enabled(editor):
     mode = get_mode(editor)
     assert mode.enabled
@@ -53,8 +70,9 @@ def test_enabled(editor):
     mode.enabled = True
 
 
-@editor_open(__file__)
+@ensure_empty
 @ensure_visible
+@ensure_connected
 def test_properties(editor):
     mode = get_mode(editor)
     mode.trigger_key = 'A'
@@ -69,14 +87,12 @@ def test_properties(editor):
     assert mode.show_tooltips is False
     mode.case_sensitive = True
     assert mode.case_sensitive is True
-
-    # restore settings for other tests
-    editor.refresh_settings()
-    assert mode.trigger_key == settings.cc_trigger_key
+    mode.trigger_key = 1
 
 
-@editor_open(__file__)
+@ensure_empty
 @ensure_visible
+@ensure_connected
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -98,13 +114,13 @@ def test_request_completion(editor):
     assert ret1 is True and ret2 is False
 
 
-@editor_open(__file__)
-@ensure_connected
+@ensure_empty
 @ensure_visible
+@ensure_connected
 def test_events(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
-    QTest.keyPress(editor, settings.cc_trigger_key, QtCore.Qt.ControlModifier)
+    QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
     QTest.qWait(2000)
     QTest.keyPress(editor, QtCore.Qt.Key_Escape)
     QTest.qWait(500)
@@ -137,12 +153,12 @@ def test_events(editor):
     QTest.keyPress(editor, 'Q')
     QTest.keyPress(editor, 't')
     QTest.qWait(500)
-    QTest.keyPress(editor, settings.cc_trigger_key, QtCore.Qt.ControlModifier)
+    QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
 
 
-@editor_open(__file__)
-@ensure_connected
+@ensure_empty
 @ensure_visible
+@ensure_connected
 def test_insert_completions(editor):
     assert frontend.connected_to_server(editor)
     frontend.goto_line(editor, 4)
@@ -164,12 +180,11 @@ def test_insert_completions(editor):
     QTest.qWait(100)
 
 
-@editor_open(__file__)
+@ensure_empty
 @ensure_connected
 def test_show_completion_with_tooltip(editor):
     mode = get_mode(editor)
-    settings.cc_show_tooltips = True
-    editor.refresh_settings()
+    mode.show_tooltips = True
     mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
     mode._display_completion_tooltip('test')
     mode._display_completion_tooltip('spam')
@@ -177,7 +192,7 @@ def test_show_completion_with_tooltip(editor):
     mode._display_completion_tooltip('test')
 
 
-@editor_open(__file__)
+@ensure_empty
 @ensure_connected
 def test_show_completion_with_icon(editor):
     mode = get_mode(editor)

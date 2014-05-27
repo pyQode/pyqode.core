@@ -1,4 +1,4 @@
-from pyqode.core import frontend, style
+from pyqode.core import frontend
 from pyqode.core.frontend import modes
 from pyqode.qt import QtGui
 
@@ -23,6 +23,6 @@ def test_position(editor):
 
 def test_color(editor):
     mode = get_mode(editor)
-    assert mode.color.name() == style.right_margin_color.name()
+    assert mode.color.name() == QtGui.QColor('red').name()
     mode.color = QtGui.QColor('#00FF00')
     assert mode.color.name() == QtGui.QColor('#00FF00').name()

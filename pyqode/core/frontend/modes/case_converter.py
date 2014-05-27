@@ -3,8 +3,6 @@
 Contains a case converter mode.
 """
 from pyqode.qt import QtCore, QtWidgets
-
-from pyqode.core import actions
 from pyqode.core.frontend import Mode, text
 
 
@@ -50,10 +48,10 @@ class CaseConverterMode(Mode):
 
     def refresh_actions(self):
         """ Refresh actions """
-        self.action_to_lower.setText(actions.to_lower.text)
-        self.action_to_lower.setShortcut(actions.to_lower.shortcut)
-        self.action_to_upper.setText(actions.to_upper.text)
-        self.action_to_upper.setShortcut(actions.to_upper.shortcut)
+        self.action_to_lower.setText('Convert to lower case')
+        self.action_to_lower.setShortcut('Ctrl+U')
+        self.action_to_upper.setText('Convert to UPPER CASE')
+        self.action_to_upper.setShortcut('Ctrl+Shift+U')
 
     def _on_state_changed(self, state):
         if state:

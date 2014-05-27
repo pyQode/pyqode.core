@@ -50,12 +50,6 @@ def test_properties(editor):
     mode.unmatch_foreground = c
     assert mode.unmatch_foreground.name() == c.name()
 
-    editor.refresh_style()
-    assert mode.match_background.name() != c.name()
-    assert mode.match_foreground.name() != c.name()
-    assert mode.unmatch_background.name() != c.name()
-    assert mode.unmatch_foreground.name() != c.name()
-
 
 @editor_open(__file__)
 @log_test_name
@@ -84,7 +78,6 @@ def test_matching(editor):
     # after )
     frontend.goto_line(editor, 13, 1)
     mode.do_symbols_matching()
-    editor.refresh_style()
 
 
 malformed_symbols_code = """a = [
@@ -105,7 +98,6 @@ def test_unmatching(editor):
     mode.do_symbols_matching()
     frontend.goto_line(editor, 3, 4)
     mode.do_symbols_matching()
-    editor.refresh_style()
 
 
 cplx_code = """

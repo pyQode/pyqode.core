@@ -326,26 +326,6 @@ class TabWidget(QTabWidget):
         self._widgets.append(elem)
         return super().addTab(elem, icon, name)
 
-    def refresh_settings(self):
-        """
-        Calls refresh_settings on every code edit
-        """
-        for code_edit in self._widgets:
-            try:
-                code_edit.refresh_settings()
-            except AttributeError:
-                pass
-
-    def refresh_style(self):
-        """
-        Calls refresh_style on every code edit
-        """
-        for code_edit in self._widgets:
-            try:
-                code_edit.refresh_style()
-            except AttributeError:
-                pass
-
     def _name_exists(self, name):
         """
         Checks if we already have an opened tab with the same name.

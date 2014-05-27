@@ -12,10 +12,6 @@ from os.path import dirname
 
 from pyqode.qt.QtTest import QTest
 
-from pyqode.core import actions
-from pyqode.core import frontend
-from pyqode.core import style
-from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
 from pyqode.core.frontend import panels
@@ -71,15 +67,14 @@ def editor_open(path):
 def preserve_settings(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
-        dic = dict(settings.__dict__)
+        editor.save_on_focus_out = False
+        frontend.get_mode(editor, modes.FileWatcherMode).auto_reload = False
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            for k, v in dic.items():
-                if k.startswith('_'):
-                    continue
-                setattr(settings, k, v)
-            editor.refresh_settings()
+            assert isinstance(editor, frontend.CodeEdit)
+            editor.save_on_focus_out = False
+            frontend.get_mode(editor, modes.FileWatcherMode).auto_reload = False
         return ret
     return wrapper
 
@@ -87,37 +82,11 @@ def preserve_settings(func):
 def preserve_style(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
-        dic = dict(style.__dict__)
-        ret = None
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            print('Restoring default style')
-            for k, v in dic.items():
-                if k.startswith('_'):
-                    continue
-                print('STYLE', k, v)
-                setattr(style, k, v)
-                print('STYLE VAL:', k, getattr(style, k))
-            editor.refresh_style()
-            QTest.qWait(100)
-        return ret
-    return wrapper
-
-
-def preserve_actions(func):
-    @functools.wraps(func)
-    def wrapper(editor, *args, **kwds):
-        dic = dict(actions.__dict__)
-        ret = None
-        try:
-            ret = func(editor, *args, **kwds)
-        finally:
-            for k, v in dic.items():
-                if k.startswith('_'):
-                    continue
-                setattr(actions, k, v)
-            editor.refresh_actions()
+            editor.font_name = ''
+            editor.font_size = 10
         return ret
     return wrapper
 
@@ -135,6 +104,7 @@ def preserve_editor_config(func):
                 frontend.start_server(editor, server_path())
                 wait_for_connected(editor)
         return ret
+        # return func(editor, *args, **kwds)
     return wrapper
 
 
@@ -215,3 +185,4 @@ def setup_editor(code_edit):
     frontend.install_mode(code_edit, modes.IndenterMode())
     frontend.install_mode(code_edit, modes.SymbolMatcherMode())
     frontend.install_mode(code_edit, modes.WordClickMode())
+    frontend.get_mode(code_edit, modes.FileWatcherMode).auto_reload = True

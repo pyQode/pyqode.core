@@ -6,8 +6,7 @@ import logging
 import mimetypes
 import os
 import sys
-from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core import settings
+from pyqode.qt import QtCore, QtGui
 from pyqode.core.frontend.utils import show_wait_cursor
 # pylint: disable=protected-access
 
@@ -53,7 +52,7 @@ def selected_text(editor):
 def word_under_cursor(editor, select_whole_word=False, text_cursor=None):
     """
     Gets the word under cursor using the separators defined by
-    :attr:`pyqode.core.settings.word_separators`.
+    :attr:`pyqode.core.frontend.CodeEdit.word_separators`.
 
     .. note: Instead of returning the word string, this function returns
         a QTextCursor, that way you may get more information than just the
@@ -69,14 +68,14 @@ def word_under_cursor(editor, select_whole_word=False, text_cursor=None):
     """
     if not text_cursor:
         text_cursor = editor.textCursor()
-    word_separators = settings.word_separators
+    word_separators = editor.word_separators
     end_pos = start_pos = text_cursor.position()
     # select char by char until we are at the original cursor position.
     while not text_cursor.atStart():
         text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
         try:
             char = text_cursor.selectedText()[0]
-            word_separators = settings.word_separators
+            word_separators = editor.word_separators
             selected_txt = text_cursor.selectedText()
             if (selected_txt in word_separators and
                     (selected_txt != "n" and selected_txt != "t")
@@ -479,7 +478,7 @@ def open_file(editor, path, replace_tabs_by_spaces=True,
     # replace tabs by spaces
     if replace_tabs_by_spaces:
         content = content.replace(
-            "\t", " " * settings.tab_length)
+            "\t", " " * editor.tab_length)
     # set plain text
     editor.file_path = path
     editor.setPlainText(content, get_mimetype(path), encoding)

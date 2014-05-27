@@ -9,7 +9,7 @@ import pytest
 from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.qt.QtTest import QTest
 
-from pyqode.core import frontend, style, settings
+from pyqode.core import frontend
 from pyqode.core.frontend import panels, modes
 
 from test.helpers import log_test_name, preserve_style, preserve_settings, preserve_editor_config
@@ -34,7 +34,7 @@ def test_set_plain_text(editor):
 @log_test_name
 def test_actions(editor):
     # 13 default shortcuts
-    nb_actions_expected = 21  # 13 default actions + search panel actions + case converter,...
+    nb_actions_expected = 22  # 13 default actions + search panel actions + case converter,...
     assert len(editor.actions()) == nb_actions_expected
     action = QtWidgets.QAction('my_action', editor)
     editor.add_action(action)
@@ -60,10 +60,14 @@ def test_show_tooltip(editor):
 
 
 @editor_open(__file__)
-@preserve_editor_config
+# @preserve_editor_config
 @log_test_name
 def test_margin_size(editor):
-    frontend.uninstall_all(editor)
+    # frontend.uninstall_all(editor)
+    for zone in frontend.get_panels(editor).keys():
+        for panel in frontend.get_panels(editor)[zone].keys():
+            frontend.get_panel(editor, panel).enabled = False
+
     # we really need to show the window here to get correct margin size.
     editor.show()
     QTest.qWaitForWindowActive(editor)
@@ -78,18 +82,22 @@ def test_margin_size(editor):
     # as the window is not visible, we need to refresh panels manually
     assert editor.margin_size(frontend.Panel.Position.LEFT) != 0
 
+    for zone in frontend.get_panels(editor).keys():
+        for panel in frontend.get_panels(editor)[zone].keys():
+            frontend.get_panel(editor, panel).enabled = True
+
 
 @editor_open(__file__)
 @preserve_style
 @log_test_name
 def test_zoom(editor):
-    assert editor.font_size == style.font_size
+    assert editor.font_size == 10
     editor.zoom_in()
-    assert editor.font_size == style.font_size + 1
+    assert editor.font_size == 11
     editor.reset_zoom()
-    assert editor.font_size == style.font_size
+    assert editor.font_size == 10
     editor.zoom_out()
-    assert editor.font_size == style.font_size - 1
+    assert editor.font_size == 9
 
     while editor.font_size > 1:
         editor.zoom_out()
@@ -104,9 +112,8 @@ def get_first_line(editor):
 
 @editor_open(__file__)
 @log_test_name
-@preserve_editor_config
 def test_indent(editor):
-    frontend.uninstall_all(editor)
+    frontend.get_mode(editor, modes.IndenterMode).enabled = False
     frontend.goto_line(editor, 1)
     first_line = get_first_line(editor)
     editor.indent()
@@ -115,7 +122,7 @@ def test_indent(editor):
     editor.un_indent()
     assert get_first_line(editor) == first_line
     # add indenter mode, call to indent/un_indent should now work
-    frontend.install_mode(editor, modes.IndenterMode())
+    frontend.get_mode(editor, modes.IndenterMode).enabled = True
     frontend.goto_line(editor, 1)
     editor.indent()
     assert get_first_line(editor) == '    ' + first_line
@@ -240,7 +247,7 @@ def test_key_released_event(editor):
 @editor_open(__file__)
 @log_test_name
 def test_focus_out(editor):
-    settings.save_on_focus_out = True
+    editor.save_on_focus_out = True
     editor.dirty = True
     assert editor.dirty is True
     editor.focusOutEvent(QtGui.QFocusEvent(QtCore.QEvent.FocusOut))

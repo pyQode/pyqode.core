@@ -1,4 +1,4 @@
-from pyqode.core import frontend, settings
+from pyqode.core import frontend
 from pyqode.core.frontend import modes
 
 
@@ -18,7 +18,7 @@ def test_indent_selection(editor):
     frontend.select_lines(editor, 1)
     mode.indent()
     mode.unindent()
-    settings.use_spaces_instead_of_tabs = False
+    editor.use_spaces_instead_of_tabs = False
     frontend.select_lines(editor)
     mode.indent()
     mode.unindent()

@@ -194,3 +194,46 @@ def show_wait_cursor(func):
         editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
         return ret_val
     return wrapper
+
+
+class Action:
+    """
+    Utility class used to describe a QAction:
+        - text: text of the action (used as QAction text)
+        - shortcut: QtGui.QKeySequence or string used to setup the action
+          shortcut.
+        - icon: optional icon associated with the action.
+
+    """
+    def __init__(self, text, shortcut='', icon=('', '')):
+        """
+        :param text: text of the action
+        :param shortcut: QtGui.QKeySequence string associated with the action.
+            Optional.
+        :param icon: icon associated with the action. This can be a string or
+            a tuple of strings to create an action from theme (theme, fallback)
+        """
+        self.text = text
+        self.shortcut = shortcut
+        self.icon = icon
+
+    def make_icon(self):
+        """ Make an icon from the action icon definition """
+        if isinstance(self.icon, tuple):
+            theme, icon = self.icon
+            return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+        else:
+            QtGui.QIcon(self.icon)
+
+    def make_action(self, parent):
+        """ Make a QAction out of the action properties """
+        a = QtWidgets.QAction(parent)
+        a.setText(self.text)
+        a.setShortcut(self.shortcut)
+        if self.icon:
+            a.setIcon(self.make_icon())
+        return a
+
+    def __repr__(self):
+        return ('Action(%r, shortcut=%r icon=%r)' %
+                (self.text, self.shortcut, self.icon))

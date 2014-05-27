@@ -18,7 +18,6 @@ A worker is always tightly coupled with its caller, so are the data.
 """
 import sys
 import traceback
-from pyqode.core import settings
 # pylint: disable=too-many-arguments, too-few-public-methods, bare-except
 # pylint: disable=unused-argument, abstract-class-not-used
 
@@ -121,6 +120,13 @@ class DocumentWordsProvider(object):
     """
     words = {}
 
+    # word separators
+    separators = [
+        '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '{',
+        '}', '|', ':', '"', "'", "<", ">", "?", ",", ".", "/", ";", '[',
+        ']', '\\', '\n', '\t', '=', '-', ' '
+    ]
+
     @staticmethod
     def split(txt, seps):
         """
@@ -151,6 +157,6 @@ class DocumentWordsProvider(object):
         Provides completions based on the document words.
         """
         completions = []
-        for word in self.split(code, settings.word_separators):
+        for word in self.split(code, self.separators):
             completions.append({'name': word})
         return completions

@@ -3,7 +3,6 @@
 Test the client/server API
 """
 import os
-import sys
 from pyqode.qt import QtWidgets
 import pytest
 from pyqode.qt.QtTest import QTest

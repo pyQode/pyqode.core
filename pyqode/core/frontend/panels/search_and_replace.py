@@ -3,8 +3,6 @@
 This module contains the search and replace panel
 """
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core import actions
-from pyqode.core import style
 from pyqode.core import frontend
 from pyqode.core.frontend import TextDecoration, Panel, text as text_api
 from pyqode.core.frontend.utils import DelayJobRunner, drift_color
@@ -105,31 +103,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._fg = value
         self._refresh_decorations()
 
-    def refresh_actions(self):
-        values = [
-            (actions.find, [self.actionSearch], [self.labelSearch]),
-            (actions.replace, [self.actionActionSearchAndReplace],
-             [self.labelReplace]),
-            (actions.find_next, [self.actionFindNext, self.pushButtonNext],
-             []),
-            (actions.find_previous,
-             [self.actionFindPrevious, self.pushButtonPrevious], []),
-            (actions.close_search_panel, [self.pushButtonClose], []),
-        ]
-        for action_def, qactions, labels in values:
-            icon = action_def.icon
-            try:
-                icon = QtGui.QIcon.fromTheme(icon[0], QtGui.QIcon(icon[1]))
-            except TypeError:
-                icon = QtGui.QIcon(icon)
-            for action in qactions:
-                action.setIcon(icon)
-                if isinstance(action, QtWidgets.QAction):
-                    action.setShortcut(action_def.shortcut)
-                    action.setText(action_def.text)
-            for label in labels:
-                label.setPixmap(icon.pixmap(16, 16))
-
     def __init__(self):
         Panel.__init__(self)
         self.job_runner = DelayJobRunner(delay=500)
@@ -142,17 +115,49 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._decorations = []
         self._occurrences = []
         self._current_occurrence_index = -1
-        self._bg = style.search_occurrence_background
-        self._fg = style.search_occurrence_foreground
+        self._bg = None
+        self._fg = None
         self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        self.refresh_actions()
+        self._init_actions()
         self._init_style()
 
+    def _init_actions(self):
+        def _icon(val):
+            if isinstance(val, tuple):
+                theme, icon = val
+                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+            else:
+                QtGui.QIcon(val)
+        icon = _icon(('edit-find', ':/pyqode-icons/rc/edit-find.png'))
+        self.actionSearch.setIcon(icon)
+        self.actionSearch.setShortcut(QtGui.QKeySequence.Find)
+        self.labelSearch.setPixmap(icon.pixmap(16, 16))
+
+        icon = _icon(('edit-find-replace',
+                      ':/pyqode-icons/rc/edit-find-replace.png'))
+        self.actionActionSearchAndReplace.setShortcut(
+            QtGui.QKeySequence.Replace)
+        self.actionActionSearchAndReplace.setIcon(icon)
+        self.labelReplace.setPixmap(icon.pixmap(16, 16))
+
+        icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
+        self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
+        self.actionFindPrevious.setIcon(icon)
+        self.pushButtonPrevious.setIcon(icon)
+
+        icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'))
+        self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
+        self.actionFindNext.setIcon(icon)
+        self.pushButtonNext.setIcon(icon)
+
+        icon = _icon(('application-exit', ':/pyqode-icons/rc/close.png'))
+        self.pushButtonClose.setIcon(icon)
+
     def _init_style(self):
-        self._bg = style.search_occurrence_background
-        self._fg = style.search_occurrence_foreground
+        self._bg = QtGui.QColor('yellow')
+        self._fg = QtGui.QColor('black')
 
     def _on_install(self, editor):
         Panel._on_install(self, editor)

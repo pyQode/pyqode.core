@@ -3,8 +3,6 @@
 This module contains the care line highlighter mode
 """
 from pyqode.qt import QtGui
-
-from pyqode.core import style
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import drift_color
 
@@ -16,9 +14,14 @@ class CaretLineHighlighterMode(frontend.Mode):
     @property
     def background(self):
         """
-        Background color of the caret line
+        Background color of the caret line. Default is to use a color slightly
+        darker/lighter than the background color. You can override the
+        automatic color by setting up this property
         """
-        return self._color
+        if self._color or not self.editor:
+            return self._color
+        else:
+            return drift_color(self.editor.background, 110)
 
     @background.setter
     def background(self, value):
@@ -26,40 +29,25 @@ class CaretLineHighlighterMode(frontend.Mode):
         Background color of the caret line
         """
         self._color = value
-        self._update_highlight()
+        self.refresh()
 
     def __init__(self):
         super().__init__()
         self._decoration = None
-        self._brush = None
         self._pos = -1
         self._color = None
-        self._init_style()
-
-    def _init_style(self):
-        """
-        Init brush
-        """
-        if style.caret_line_background is None:
-            if self.editor:
-                self._color = drift_color(self.editor.background, 110)
-            else:
-                self._color = drift_color(style.background, 110)
-        else:
-            self._color = style.caret_line_background
-        self._brush = QtGui.QBrush(QtGui.QColor(self._color))
 
     def _on_state_changed(self, state):
         """
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
         if state:
-            self.editor.cursorPositionChanged.connect(self._update_highlight)
-            self.editor.new_text_set.connect(self._update_highlight)
+            self.editor.cursorPositionChanged.connect(self.refresh)
+            self.editor.new_text_set.connect(self.refresh)
         else:
             self.editor.cursorPositionChanged.disconnect(
-                self._update_highlight)
-            self.editor.new_text_set.disconnect(self._update_highlight)
+                self.refresh)
+            self.editor.new_text_set.disconnect(self.refresh)
             self._clear_deco()
 
     def _on_install(self, editor):
@@ -68,24 +56,24 @@ class CaretLineHighlighterMode(frontend.Mode):
             - caretLineBackground
         """
         super()._on_install(editor)
-        self._update_highlight()
-
-    def refresh_style(self):
-        """ Refresh brush """
-        self._init_style()
-        self._update_highlight()
+        self.refresh()
 
     def _clear_deco(self):
         """ Clear line decoration """
         if self._decoration:
             frontend.remove_decoration(self.editor, self._decoration)
 
-    def _update_highlight(self):
+    def refresh(self):
         """
         Updates the current line decoration
         """
         self._clear_deco()
+        if self._color:
+            color = self._color
+        else:
+            color = drift_color(self.editor.background, 110)
+        brush = QtGui.QBrush(color)
         self._decoration = frontend.TextDecoration(self.editor.textCursor())
-        self._decoration.set_background(self._brush)
+        self._decoration.set_background(brush)
         self._decoration.set_full_width()
         frontend.add_decoration(self.editor, self._decoration)

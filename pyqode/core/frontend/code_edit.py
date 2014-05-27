@@ -5,7 +5,6 @@ This module contains the definition of the CodeEdit
 import logging
 import sys
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.core import actions, settings, style
 from pyqode.core.frontend import text, dialogs
 from pyqode.core.frontend.client import JsonTcpClient
 from pyqode.core.frontend.extension import Panel
@@ -63,6 +62,38 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     indent_requested = QtCore.Signal()
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
     unindent_requested = QtCore.Signal()
+
+    @property
+    def use_spaces_instead_of_tabs(self):
+        return self._use_spaces_instead_of_tabs
+
+    @use_spaces_instead_of_tabs.setter
+    def use_spaces_instead_of_tabs(self, value):
+        self._use_spaces_instead_of_tabs = value
+
+    @property
+    def tab_length(self):
+        return self._tab_length
+
+    @tab_length.setter
+    def tab_length(self, value):
+        self._tab_length = value
+
+    @property
+    def min_indent_column(self):
+        return self._min_indent_column
+
+    @min_indent_column.setter
+    def min_indent_column(self, value):
+        self._min_indent_column = value
+
+    @property
+    def save_on_focus_out(self):
+        return self._save_on_focus_out
+
+    @save_on_focus_out.setter
+    def save_on_focus_out(self, value):
+        self._save_on_focus_out = value
 
     @property
     def show_whitespaces(self):
@@ -244,6 +275,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
+        #: List of word separators
+        self.word_separators = [
+            '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '{',
+            '}', '|', ':', '"', "'", "<", ">", "?", ",", ".", "/", ";", '[',
+            ']', '\\', '\n', '\t', '=', '-', ' '
+        ]
+        self._min_indent_column = 0
+        self._save_on_focus_out = True
         self._use_spaces_instead_of_tabs = True
         self._whitespaces_foreground = None
         self._sel_background = None
@@ -422,43 +461,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self._actions.remove(action)
 
-    def refresh_settings(self,):
-        """
-        Refresh all settings, every installed mode/panel will be refreshed too.
-
-        """
-        self._init_settings()
-        for mode in self._modes.values():
-            mode.refresh_settings()
-        for zone in self._panels.values():
-            for panel in zone.values():
-                panel.refresh_settings()
-
-    def refresh_style(self):
-        """
-        Refreshes the editor style, every installed mode/panel will be
-        refreshed too.
-
-        """
-        self._init_style()
-        for mode in self._modes.values():
-            mode.refresh_style()
-        for zone in self._panels.values():
-            for panel in zone.values():
-                panel.refresh_style()
-
-    def refresh_actions(self):
-        """
-        Refreshes editor actions, every installed mode/panel will be
-        refreshed too.
-        """
-        self._refresh_actions()
-        for mode in self._modes.values():
-            mode.refresh_actions()
-        for zone in self._panels.values():
-            for panel in zone.values():
-                panel.refresh_actions()
-
     @QtCore.Slot()
     def delete(self):
         """ Deletes the selected text """
@@ -492,7 +494,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         Resets the zoom value.
         """
-        self._font_size = style.font_size
+        self._font_size = 10
         self._reset_palette()
 
     @QtCore.Slot()
@@ -651,7 +653,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Saves content if save_on_focus_out is True.
 
         """
-        if settings.save_on_focus_out and self.dirty and self.file_path:
+        if self.save_on_focus_out and self.dirty and self.file_path:
             self._save()
         super().focusOutEvent(event)
 
@@ -750,92 +752,124 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self):
         """ Init default QAction """
-        values = [
-            (actions.undo, self.undo, self.undoAvailable),
-            (actions.redo, self.redo, self.redoAvailable),
-            None,
-            (actions.copy, self.copy, self.copyAvailable),
-            (actions.cut, self.cut, self.copyAvailable),
-            (actions.paste, self.paste, None),
-            (actions.delete, self.delete, None),
-            (actions.duplicate_line, self.duplicate_line, None),
-            (actions.select_all, self.selectAll, None),
-            (actions.indent, self.indent, None),
-            (actions.unindent, self.un_indent, None),
-            None,
-            (actions.goto_line, self.goto_line, None)
-        ]
-        for val in values:
-            # pylint: disable = unpacking-non-sequence
-            if val:
-                action, trig_slot, enable_signal = val
-                qaction = action.make_action(self)
-                qaction.setIconVisibleInMenu(True)
-                qaction.triggered.connect(trig_slot)
-                if enable_signal:
-                    enable_signal.connect(qaction.setEnabled)
-                self.add_action(qaction)
+        def _icon(val):
+            if isinstance(val, tuple):
+                theme, icon = val
+                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
             else:
-                self.add_separator()
-
-    def _refresh_actions(self):
-        """ Refreshes actions """
-        actions_defs = [
-            actions.undo,
-            actions.redo,
-            None,
-            actions.copy,
-            actions.cut,
-            actions.paste,
-            actions.delete,
-            actions.duplicate_line,
-            actions.select_all,
-            actions.indent,
-            actions.unindent,
-            None,
-            actions.goto_line
-        ]
-        for adef, action in zip(actions_defs, self._actions):
-            if adef:
-                action.setText(adef.text)
-                action.setShortcut(adef.shortcut)
-                if adef.icon:
-                    theme, icon = adef.icon
-                    icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
-                    action.setIcon(icon)
+                QtGui.QIcon(val)
+        # Undo
+        action = QtWidgets.QAction('Undo', self)
+        action.setShortcut(QtGui.QKeySequence.Undo)
+        action.setIcon(_icon(('edit-undo', ':/pyqode-icons/rc/edit-undo.png')))
+        action.triggered.connect(self.undo)
+        self.undoAvailable.connect(action.setEnabled)
+        self.add_action(action)
+        self.action_undo = action
+        # Redo
+        action = QtWidgets.QAction('Redo', self)
+        action.setShortcut(QtGui.QKeySequence.Redo)
+        action.setIcon(_icon(('edit-redo', ':/pyqode-icons/rc/edit-redo.png')))
+        action.triggered.connect(self.redo)
+        self.redoAvailable.connect(action.setEnabled)
+        self.add_action(action)
+        self.action_redo = action
+        # separator
+        self.add_separator()
+        # Copy
+        action = QtWidgets.QAction('Copy', self)
+        action.setShortcut(QtGui.QKeySequence.Copy)
+        action.setIcon(_icon(('edit-copy', ':/pyqode-icons/rc/edit-copy.png')))
+        action.triggered.connect(self.copy)
+        self.copyAvailable.connect(action.setEnabled)
+        self.add_action(action)
+        self.action_copy = action
+        # cut
+        action = QtWidgets.QAction('Cut', self)
+        action.setShortcut(QtGui.QKeySequence.Cut)
+        action.setIcon(_icon(('edit-cut', ':/pyqode-icons/rc/edit-cut.png')))
+        action.triggered.connect(self.cut)
+        self.copyAvailable.connect(action.setEnabled)
+        self.add_action(action)
+        self.action_cut = action
+        # paste
+        action = QtWidgets.QAction('Paste', self)
+        action.setShortcut(QtGui.QKeySequence.Paste)
+        action.setIcon(_icon(('edit-paste',
+                              ':/pyqode-icons/rc/edit-paste.png')))
+        action.triggered.connect(self.paste)
+        self.add_action(action)
+        self.action_paste = action
+        # delete
+        action = QtWidgets.QAction('Delete', self)
+        action.setShortcut(QtGui.QKeySequence.Delete)
+        action.setIcon(_icon(('edit-delete',
+                              ':/pyqode-icons/rc/edit-delete.png')))
+        action.triggered.connect(self.delete)
+        self.add_action(action)
+        self.action_delete = action
+        # duplicate line
+        action = QtWidgets.QAction('Duplicate line', self)
+        action.setShortcut('Ctrl+D')
+        action.triggered.connect(self.duplicate_line)
+        self.add_action(action)
+        self.action_duplicate_line = action
+        # select all
+        action = QtWidgets.QAction('Select all', self)
+        action.setShortcut(QtGui.QKeySequence.SelectAll)
+        action.setIcon(_icon(('edit-select-all',
+                              ':/pyqode-icons/rc/edit-select-all.png')))
+        action.triggered.connect(self.selectAll)
+        self.add_action(action)
+        self.action_select_all = action
+        # separator
+        self.add_separator()
+        # indent
+        action = QtWidgets.QAction('Indent', self)
+        action.setShortcut('Tab')
+        action.setIcon(_icon(('format-indent-more',
+                              ':/pyqode-icons/rc/format-indent-more.png')))
+        action.triggered.connect(self.indent)
+        self.add_action(action)
+        self.action_indent = action
+        # unindent
+        action = QtWidgets.QAction('Un-indent', self)
+        action.setShortcut('Shift+Tab')
+        action.setIcon(_icon(('format-indent-less',
+                              ':/pyqode-icons/rc/format-indent-less.png')))
+        action.triggered.connect(self.un_indent)
+        self.add_action(action)
+        self.action_un_indent = action
+        # separator
+        self.add_separator()
+        # goto
+        action = QtWidgets.QAction('Go to line', self)
+        action.setShortcut('Ctrl+G')
+        action.setIcon(_icon(('start-here',
+                              ':/pyqode-icons/rc/goto-line.png')))
+        action.triggered.connect(self.goto_line)
+        self.add_action(action)
+        self.action_goto_line = action
 
     def _init_settings(self):
         """ Init setting """
-        self._show_whitespaces = settings.show_white_spaces
-        self._tab_length = settings.tab_length
-        self._use_spaces_instead_of_tabs = settings.use_spaces_instead_of_tabs
+        self._show_whitespaces = False
+        self._tab_length = 4
+        self._use_spaces_instead_of_tabs = True
         self.setTabStopWidth(self._tab_length *
                              self.fontMetrics().widthChar(" "))
         self._set_whitespaces_flags(self._show_whitespaces)
 
     def _init_style(self):
         """ Inits style options """
-        if style.font is None:
-            self._font_family = "monospace"
-            if sys.platform == "win32":
-                self._font_family = "Consolas"
-            elif sys.platform == "darwin":
-                self._font_family = 'Monaco'
-        else:
-            self._font_family = style.font
-        self._font_size = style.font_size
-        self._background = style.background
-        self._foreground = style.foreground
-        self._whitespaces_foreground = style.whitespaces_foreground
+        self._font_name = ""  # platform specific value in property setter
+        self._font_size = 10
+        self._background = QtGui.QColor('white')
+        self._foreground = QtGui.QColor('black')
+        self._whitespaces_foreground = QtGui.QColor('light gray')
         app = QtWidgets.QApplication.instance()
-        if style.selection_background is None:
-            self._sel_background = app.palette().highlight().color()
-        else:
-            self._sel_background = style.selection_background
-        if style.selection_foreground is None:
-            self._sel_foreground = app.palette().highlightedText().color()
-        else:
-            self._sel_foreground = style.selection_foreground
+        self._sel_background = app.palette().highlight().color()
+        self._sel_foreground = app.palette().highlightedText().color()
         self._reset_palette()
 
     def _update_visible_blocks(self, *args):

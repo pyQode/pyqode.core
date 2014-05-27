@@ -5,7 +5,6 @@ This module contains the code completion mode and the related classes.
 import logging
 import re
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
 from pyqode.core import backend
@@ -107,14 +106,11 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         self._init_settings()
 
     def _init_settings(self):
-        self._trigger_key = settings.cc_trigger_key
-        self._trigger_len = settings.cc_trigger_len
-        self._trigger_symbols = settings.cc_trigger_symbols
-        self._show_tooltips = settings.cc_show_tooltips
-        self._case_sensitive = settings.cc_case_sensitive
-
-    def refresh_settings(self):
-        self._init_settings()
+        self._trigger_key = QtCore.Qt.Key_Space
+        self._trigger_len = 1
+        self._trigger_symbols = ['.']
+        self._show_tooltips = True
+        self._case_sensitive = False
 
     def request_completion(self):
         """
@@ -215,11 +211,10 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
                 event.key() == QtCore.Qt.Key_Home)
 
     @staticmethod
-    def _is_end_of_word_char(event, is_printable, symbols):
+    def _is_end_of_word_char(event, is_printable, symbols, seps):
         ret_val = False
         if is_printable and symbols:
             k = event.text()
-            seps = settings.word_separators
             ret_val = (k in seps and k not in symbols)
         return ret_val
 
@@ -241,7 +236,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
         is_navigation_key = self._is_navigation_key(event)
         symbols = self._trigger_symbols
         is_end_of_word = self._is_end_of_word_char(
-            event, is_printable, symbols)
+            event, is_printable, symbols, self.editor.word_separators)
         if self._completer.popup().isVisible():
             # Update completion prefix
             self._update_prefix(event, is_end_of_word, is_navigation_key)
@@ -294,7 +289,7 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
             last_char = line[len(line) - 1]
             if last_char != ' ':
                 symbols = self._trigger_symbols
-                seps = settings.word_separators
+                seps = self.editor.word_separators
                 return last_char in seps and last_char not in symbols
             return False
         except (IndexError, TypeError):

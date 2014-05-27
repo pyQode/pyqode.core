@@ -107,18 +107,6 @@ class Mode(object):
         """
         pass
 
-    def refresh_style(self):
-        """
-        Called by editor when the user wants to refresh style options.
-        """
-        pass
-
-    def refresh_settings(self):
-        """
-        Called by editor when the user wants to refresh settings.
-        """
-        pass
-
     def refresh_actions(self):
         """
         Called by editor when the user wants to refresh actions shortcuts and

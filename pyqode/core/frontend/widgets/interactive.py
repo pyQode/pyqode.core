@@ -8,7 +8,6 @@ import sys
 from pyqode.qt.QtCore import Qt, Signal, Property, QProcess
 from pyqode.qt.QtWidgets import QTextEdit
 from pyqode.qt.QtGui import QColor, QTextCursor, QFont
-from pyqode.core import style
 from pyqode.core.frontend.client import PROCESS_ERROR_STRING
 # pylint: disable=too-many-instance-attributes, missing-docstring
 
@@ -56,15 +55,13 @@ class InteractiveConsole(QTextEdit):
         self._running = False
         self._writer = self.write
         self._user_stop = False
-        if style.font is None:
-            style.font = "monospace"
-            if sys.platform == "win32":
-                style.font = "Consolas"
-            elif sys.platform == "darwin":
-                style.font = 'Monaco'
-        else:
-            self._font_family = style.font
-        self.setFont(QFont(style.font, style.font_size))
+        font = "monospace"
+        if sys.platform == "win32":
+            font = "Consolas"
+        elif sys.platform == "darwin":
+            font = 'Monaco'
+        self._font_family = font
+        self.setFont(QFont(font, 10))
 
     def set_writer(self, writer):
         """

@@ -2,7 +2,6 @@ from pyqode.qt import QtGui
 from pyqode.qt.QtTest import QTest
 from pyqode.core import frontend
 from pyqode.core.frontend import modes
-from pyqode.core import style
 from test.helpers import preserve_style, editor_open
 
 
@@ -30,7 +29,6 @@ def test_properties(editor):
 def test_style(editor):
     mode = get_mode(editor)
     c = QtGui.QColor('yellow')
-    style.caret_line_background = c
-    editor.refresh_style()
+    mode.background = c
     QTest.qWait(1000)
     assert mode.background.name() == c.name()

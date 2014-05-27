@@ -3,7 +3,6 @@
 Contains the mode that control the external changes of file.
 """
 import os
-from pyqode.core import settings
 from pyqode.core import frontend
 from pyqode.core.frontend import Mode
 from pyqode.qt import QtCore, QtWidgets
@@ -45,11 +44,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._mtime = 0
         self._notification_pending = False
         self._processing = False
-        self.refresh_settings()
-
-    def refresh_settings(self):
-        """ Refresh settings: auto reload """
-        self._auto_reload = settings.file_watcher_auto_reload
 
     def _on_state_changed(self, state):
         """
