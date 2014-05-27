@@ -23,6 +23,11 @@ class RecentFilesManager:
         """ Clears recent files in QSettings """
         self._settings.setValue('recentFiles', [])
 
+    def remove(self, filename):
+        files = self._settings.value('recentFiles', [])
+        files.remove(filename)
+        self._settings.setValue('recentFiles', files)
+
     def get_recent_files(self):
         """
         Gets the list of recent files. (files that do not exists anymore
