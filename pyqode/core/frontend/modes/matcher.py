@@ -17,8 +17,6 @@ class SymbolMatcherMode(frontend.Mode):
         the editor instance.
 
     """
-    # todo why isn't there style settings for unmatched parenthesis?
-
     @property
     def match_background(self):
         """
@@ -74,9 +72,9 @@ class SymbolMatcherMode(frontend.Mode):
     def __init__(self):
         super().__init__()
         self._decorations = []
-        self._match_background = QtGui.QColor('#B4EEB4')
+        self._match_background = QtGui.QBrush(QtGui.QColor('#B4EEB4'))
         self._match_foreground = QtGui.QColor('red')
-        self._unmatch_background = QtGui.QColor('transparent')
+        self._unmatch_background = QtGui.QBrush(QtGui.QColor('transparent'))
         self._unmatch_foreground = QtGui.QColor('red')
 
     def _clear_decorations(self):  # pylint: disable=missing-docstring
