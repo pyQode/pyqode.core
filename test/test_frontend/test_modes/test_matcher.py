@@ -34,7 +34,7 @@ def test_enabled(editor):
 def test_properties(editor):
     mode = get_mode(editor)
     c = QtGui.QColor('yellow')
-    assert isinstance(mode.match_background, QtGui.QColor)
+    assert isinstance(mode.match_background, QtGui.QBrush)
     mode.match_background = c
     assert mode.match_background.name() == c.name()
 
@@ -42,7 +42,7 @@ def test_properties(editor):
     mode.match_foreground = c
     assert mode.match_foreground.name() == c.name()
 
-    assert isinstance(mode.unmatch_background, QtGui.QColor)
+    assert isinstance(mode.unmatch_background, QtGui.QBrush)
     mode.unmatch_background = c
     assert mode.unmatch_background.name() == c.name()
 
