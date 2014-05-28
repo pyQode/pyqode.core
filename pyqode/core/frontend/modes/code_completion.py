@@ -4,6 +4,7 @@ This module contains the code completion mode and the related classes.
 """
 import logging
 import re
+import sys
 from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core import frontend
 from pyqode.core.frontend.utils import DelayJobRunner, memoized
@@ -376,8 +377,11 @@ class CodeCompletionMode(frontend.Mode, QtCore.QObject):
 
         :return: bool
         """
-        val = int(event.modifiers() & QtCore.Qt.ControlModifier)
-        return val and event.key() == self._trigger_key
+        modifier = QtCore.Qt.MetaModifier if sys.platform == 'darwin' else QtCore.Qt.ControlModifier
+        valid_modifier = int(event.modifiers() & modifier) == modifier
+        valid_key = event.key() == self._trigger_key
+        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" % (valid_modifier, valid_key))
+        return valid_key and valid_modifier
 
     @staticmethod
     def strip_control_characters(input_txt):
