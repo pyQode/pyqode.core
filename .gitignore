@@ -31,8 +31,8 @@ nosetests.xml
 .pydevproject
 # pycharm
 .idea
-.cache
 /*.json
 __pycache__
 htmlcov
 *.log
+*.DS_Store
