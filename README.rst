@@ -4,57 +4,22 @@ Source Code Editor Widget for PyQt/PySide
 Status
 ------
 
-Package:
-++++++++
+===================== ======================================================================= =========================================================
+Package               .. image:: http://img.shields.io/pypi/v/pyqode.core.png                 .. image:: http://img.shields.io/pypi/dm/pyqode.core.png
+                        :target: https://pypi.python.org/pypi/pyqode.core/                      :target: https://pypi.python.org/pypi/pyqode.core/
+                        :alt: Latest PyPI version                                               :alt: Number of PyPI downloads
+===================== ======================================================================= =========================================================
 
 
-.. image:: http://img.shields.io/pypi/v/pyqode.core.png
-    :target: https://pypi.python.org/pypi/pyqode.core/
-    :alt: Latest PyPI version
-
-.. image:: http://img.shields.io/pypi/dm/pyqode.core.png
-    :target: https://pypi.python.org/pypi/pyqode.core/
-    :alt: Number of PyPI downloads
-
-
-Stable (`master`_):
-+++++++++++++++++++
-
-.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
-    :target: https://travis-ci.org/pyQode/pyqode.core
-    :alt: Travis-CI build status
-
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master
-    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
-    :alt: Coverage Status
-    
-.. image:: https://landscape.io/github/pyQode/pyqode.core/master/landscape.png
-   :target: https://landscape.io/github/pyQode/pyqode.core/master
-   :alt: Code Health
-
-
-Unstable (`develop`_):
-++++++++++++++++++++++
-
-.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop
-    :target: https://travis-ci.org/pyQode/pyqode.core
-    :alt: Travis-CI build status
-
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop
-    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop
-    :alt: Coverage Status
-    
-.. image:: https://landscape.io/github/pyQode/pyqode.core/develop/landscape.png
-   :target: https://landscape.io/github/pyQode/pyqode.core/develop
-   :alt: Code Health
-
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:ready&title=ready 
-    :target: https://waffle.io/pyqode/pyqode.core
-    :alt: 'Tasks ready to be implemented'
-    
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=status:done&title=done
-    :target: https://waffle.io/pyqode/pyqode.core
-    :alt: 'Tasks done in develop branch'
+========================== ======================================================================= ================================================================================== ================================================================================
+Stable (`master`_)         .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master   .. image:: https://landscape.io/github/pyQode/pyqode.core/master/landscape.png   
+                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master                   :target: https://landscape.io/github/pyQode/pyqode.core/master
+                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                              :alt: Code Health
+========================== ======================================================================= ================================================================================== ================================================================================
+Unstable (`develop`_)      .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop  .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop  .. image:: https://landscape.io/github/pyQode/pyqode.core/develop/landscape.png   
+                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop                  :target: https://landscape.io/github/pyQode/pyqode.core/develop
+                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                              :alt: Code Health
+========================== ======================================================================= ================================================================================== ================================================================================
 
 
 About pyQode
