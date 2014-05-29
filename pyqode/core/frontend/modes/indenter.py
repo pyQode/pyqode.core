@@ -136,7 +136,7 @@ class IndenterMode(Mode):
                 if char == " ":
                     spaces += 1
                 trav_cursor.setPosition(pos - 1)
-            cursor.movePosition(cursor.Left, cursor.MoveAnchor, spaces)
+            cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
             for _ in range(spaces):
                 cursor.deleteChar()
             cursor.endEditBlock()
