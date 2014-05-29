@@ -43,15 +43,11 @@ class CaseConverterMode(Mode):
         self.action_to_lower.triggered.connect(self.to_lower)
         self.action_to_upper = QtWidgets.QAction(self.editor)
         self.action_to_upper.triggered.connect(self.to_upper)
-        self._actions_created = True
-        self.refresh_actions()
-
-    def refresh_actions(self):
-        """ Refresh actions """
         self.action_to_lower.setText('Convert to lower case')
         self.action_to_lower.setShortcut('Ctrl+U')
         self.action_to_upper.setText('Convert to UPPER CASE')
         self.action_to_upper.setShortcut('Ctrl+Shift+U')
+        self._actions_created = True
 
     def _on_state_changed(self, state):
         if state:

@@ -328,22 +328,25 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         # update editor bg and fg from pygments style.
         fgc = self._style.style_for_token(Text)['color']
         bgc = self._style.background_color
-        if fgc is None:
-            fgc = QtGui.QColor('#000000')
-        elif isinstance(fgc, str):
-            if not fgc.startswith('#'):
-                fgc = '#%s' % fgc
-            fgc = QtGui.QColor(fgc)
         if bgc is None:
             bgc = QtGui.QColor('#ffffff')
         elif isinstance(bgc, str):
             if not bgc.startswith('#'):
                 bgc = '#%s' % fgc
             bgc = QtGui.QColor(bgc)
+        if fgc is None:
+            if bgc.lightness() > 128:
+                fgc = QtGui.QColor('#000000')
+            else:
+                fgc = QtGui.QColor('#FFFFFF')
+        elif isinstance(fgc, str):
+            if not fgc.startswith('#'):
+                fgc = '#%s' % fgc
+            fgc = QtGui.QColor(fgc)
         if self.editor:
             self.editor.background = bgc
             self.editor.foreground = fgc
-            self.editor._reset_palette()  # pylint: disable=protected-access
+            self.editor._reset_stylesheet()  # pylint: disable=protected-access
             try:
                 mode = frontend.get_mode(self.editor,
                                          'CaretLineHighlighterMode')

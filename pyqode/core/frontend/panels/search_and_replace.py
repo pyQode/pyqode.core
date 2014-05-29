@@ -38,7 +38,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         color: %(color)s;
     }
 
-    QPushButton
+    QtoolButton
     {
         color: %(color)s;
         background-color: transparent;
@@ -48,7 +48,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         border: none;
     }
 
-    QPushButton:hover
+    QtoolButton:hover
     {
         background-color: %(highlight)s;
         border: none;
@@ -56,12 +56,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         color: %(color)s;
     }
 
-    QPushButton:pressed, QCheckBox:pressed
+    QtoolButton:pressed, QCheckBox:pressed
     {
         border: 1px solid %(bck)s;
     }
 
-    QPushButton:disabled
+    QtoolButton:disabled
     {
         color: %(highlight)s;
     }
@@ -145,15 +145,15 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
         self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
         self.actionFindPrevious.setIcon(icon)
-        self.pushButtonPrevious.setIcon(icon)
+        self.toolButtonPrevious.setIcon(icon)
 
         icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'))
         self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
         self.actionFindNext.setIcon(icon)
-        self.pushButtonNext.setIcon(icon)
+        self.toolButtonNext.setIcon(icon)
 
         icon = _icon(('application-exit', ':/pyqode-icons/rc/close.png'))
-        self.pushButtonClose.setIcon(icon)
+        self.toolButtonClose.setIcon(icon)
 
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
@@ -161,14 +161,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _on_install(self, editor):
         Panel._on_install(self, editor)
-        self._reset_stylesheet()
-        self.on_pushButtonClose_clicked()
-
-    def refresh_style(self):
-        self._bg = style.search_occurrence_background
-        self._fg = style.search_occurrence_foreground
-        self._reset_stylesheet()
-        self._refresh_decorations()
+        self.on_toolButtonClose_clicked()
 
     def _refresh_decorations(self):
         for deco in self._decorations:
@@ -192,13 +185,13 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxCase.stateChanged.connect(self.request_search)
             self.checkBoxWholeWords.stateChanged.connect(self.request_search)
             # navigation slots
-            self.pushButtonNext.clicked.connect(self.select_next)
+            self.toolButtonNext.clicked.connect(self.select_next)
             self.actionFindNext.triggered.connect(self.select_next)
-            self.pushButtonPrevious.clicked.connect(self.select_previous)
+            self.toolButtonPrevious.clicked.connect(self.select_previous)
             self.actionFindPrevious.triggered.connect(self.select_previous)
             # replace slots
-            self.pushButtonReplace.clicked.connect(self.replace)
-            self.pushButtonReplaceAll.clicked.connect(self.replace_all)
+            self.toolButtonReplace.clicked.connect(self.replace)
+            self.toolButtonReplaceAll.clicked.connect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.connect(self._update_buttons)
             self.search_finished.connect(self._on_search_finished)
@@ -218,12 +211,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxWholeWords.stateChanged.disconnect(
                 self.request_search)
             # navigation slots
-            self.pushButtonNext.clicked.disconnect(self.select_next)
+            self.toolButtonNext.clicked.disconnect(self.select_next)
             self.actionFindNext.triggered.disconnect(self.select_next)
-            self.pushButtonPrevious.clicked.disconnect(self.select_previous)
+            self.toolButtonPrevious.clicked.disconnect(self.select_previous)
             # replace slots
-            self.pushButtonReplace.clicked.disconnect(self.replace)
-            self.pushButtonReplaceAll.clicked.disconnect(self.replace_all)
+            self.toolButtonReplace.clicked.disconnect(self.replace)
+            self.toolButtonReplaceAll.clicked.disconnect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.disconnect(self._update_buttons)
             self.search_finished.connect(self._on_search_finished)
@@ -237,7 +230,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
-    def on_pushButtonClose_clicked(self):  # pylint: disable=invalid-name
+    def on_toolButtonClose_clicked(self):  # pylint: disable=invalid-name
         self.close_panel()
 
     @QtCore.Slot()
@@ -433,7 +426,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                     self.select_next()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
-                self.on_pushButtonClose_clicked()
+                self.on_toolButtonClose_clicked()
         return Panel.eventFilter(self, obj, event)
 
     def _search_flags(self):
@@ -476,16 +469,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._update_label_matches()
         self._update_buttons(txt=self.lineEditReplace.text())
 
-    def _reset_stylesheet(self):
-        highlight = drift_color(self.editor.palette().window().color())
-        stylesheet = self.STYLESHEET % {
-            "bck": self.editor.palette().window().color().name(),
-            "color": self.editor.palette().windowText().color().name(),
-            "highlight": highlight.name()}
-        if stylesheet != self._previous_stylesheet:
-            self.setStyleSheet(stylesheet)
-            self._previous_stylesheet = stylesheet
-
     def _current_occurrence(self):
         ret_val = self._current_occurrence_index
         return ret_val
@@ -525,11 +508,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _update_buttons(self, txt=""):
         enable = self.cpt_occurences > 1
-        self.pushButtonNext.setEnabled(enable)
-        self.pushButtonPrevious.setEnabled(enable)
+        self.toolButtonNext.setEnabled(enable)
+        self.toolButtonPrevious.setEnabled(enable)
         self.actionFindNext.setEnabled(enable)
         self.actionFindPrevious.setEnabled(enable)
         enable = (txt != self.lineEditSearch.text() and
                   self.cpt_occurences)
-        self.pushButtonReplace.setEnabled(enable)
-        self.pushButtonReplaceAll.setEnabled(enable)
+        self.toolButtonReplace.setEnabled(enable)
+        self.toolButtonReplaceAll.setEnabled(enable)

@@ -85,7 +85,7 @@ def test_close(editor):
     panel = get_panel(editor)
     panel.on_actionSearch_triggered()
     assert panel.isVisible()
-    panel.on_pushButtonClose_clicked()
+    panel.on_toolButtonClose_clicked()
     assert not panel.isVisible()
     QTest.qWait(100)
     panel.on_actionSearch_triggered()

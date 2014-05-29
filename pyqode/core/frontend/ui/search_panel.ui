@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>686</width>
-    <height>81</height>
+    <width>692</width>
+    <height>94</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,7 +92,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonPrevious">
+          <widget class="QToolButton" name="toolButtonPrevious">
            <property name="text">
             <string/>
            </property>
@@ -103,7 +103,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonNext">
+          <widget class="QToolButton" name="toolButtonNext">
            <property name="text">
             <string/>
            </property>
@@ -333,7 +333,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonClose">
+          <widget class="QToolButton" name="toolButtonClose">
            <property name="text">
             <string/>
            </property>
@@ -343,8 +343,8 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>12</width>
-             <height>12</height>
+             <width>24</width>
+             <height>24</height>
             </size>
            </property>
           </widget>
@@ -394,14 +394,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonReplace">
+          <widget class="QToolButton" name="toolButtonReplace">
            <property name="text">
             <string>Replace</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonReplaceAll">
+          <widget class="QToolButton" name="toolButtonReplaceAll">
            <property name="text">
             <string>Replace All</string>
            </property>
@@ -422,8 +422,8 @@
          </item>
         </layout>
         <zorder>lineEditReplace</zorder>
-        <zorder>pushButtonReplace</zorder>
-        <zorder>pushButtonReplaceAll</zorder>
+        <zorder>toolButtonReplace</zorder>
+        <zorder>toolButtonReplaceAll</zorder>
         <zorder>horizontalSpacer_2</zorder>
         <zorder>labelReplace</zorder>
        </widget>
@@ -508,13 +508,13 @@
  <tabstops>
   <tabstop>lineEditSearch</tabstop>
   <tabstop>lineEditReplace</tabstop>
-  <tabstop>pushButtonPrevious</tabstop>
-  <tabstop>pushButtonNext</tabstop>
+  <tabstop>toolButtonPrevious</tabstop>
+  <tabstop>toolButtonNext</tabstop>
   <tabstop>checkBoxCase</tabstop>
   <tabstop>checkBoxWholeWords</tabstop>
-  <tabstop>pushButtonReplace</tabstop>
-  <tabstop>pushButtonReplaceAll</tabstop>
-  <tabstop>pushButtonClose</tabstop>
+  <tabstop>toolButtonReplace</tabstop>
+  <tabstop>toolButtonReplaceAll</tabstop>
+  <tabstop>toolButtonClose</tabstop>
  </tabstops>
  <resources>
   <include location="pyqode_core.qrc"/>

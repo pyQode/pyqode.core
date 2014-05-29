@@ -107,13 +107,6 @@ class Mode(object):
         """
         pass
 
-    def refresh_actions(self):
-        """
-        Called by editor when the user wants to refresh actions shortcuts and
-        icons.
-        """
-        pass
-
 
 def install_mode(editor, mode):
     """
@@ -218,6 +211,8 @@ class Panel(QtWidgets.QWidget, Mode):
         self._scrollable = False
         self._background_brush = None
         self._foreground_pen = None
+        #: Position in the editor (top, left, right, bottom)
+        self.position = -1
 
     def _on_install(self, editor):
         """
@@ -279,7 +274,7 @@ class Panel(QtWidgets.QWidget, Mode):
         self.editor.refresh_panels()
 
 
-def install_panel(editor, obj, position=Panel.Position.LEFT):
+def install_panel(editor, panel, position=Panel.Position.LEFT):
     """
     Installs a panel on on the editor. You must specify the position of the
     panel (panels are rendered in one of the four document margins, see
@@ -288,27 +283,28 @@ def install_panel(editor, obj, position=Panel.Position.LEFT):
     The panel is set as an object attribute using the panel's name as the
     key.
 
-    :param obj: The panel instance to install
+    :param panel: The panel instance to install
     :param position: The panel position
 
-    :type obj: pyqode.core.frontend.Panel
+    :type panel: pyqode.core.frontend.Panel
     :type position: int
     """
     # pylint: disable=protected-access
-    assert obj is not None
+    assert panel is not None
     pos_to_string = {
         Panel.Position.BOTTOM: 'bottom',
         Panel.Position.LEFT: 'left',
         Panel.Position.RIGHT: 'right',
         Panel.Position.TOP: 'top'
     }
-    _logger().info('installing panel %s at %r', obj.name,
+    _logger().info('installing panel %s at %r', panel.name,
                    pos_to_string[position])
-    obj.order_in_zone = len(editor._panels[position])
-    editor._panels[position][obj.name] = obj
-    obj._on_install(editor)
-    _logger().info('panel %s installed', obj.name)
-    return obj
+    panel.order_in_zone = len(editor._panels[position])
+    editor._panels[position][panel.name] = panel
+    panel.position = position
+    panel._on_install(editor)
+    _logger().info('panel %s installed', panel.name)
+    return panel
 
 
 def uninstall_panel(editor, name):

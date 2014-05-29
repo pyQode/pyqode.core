@@ -123,7 +123,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 self._font_family = "Consolas"
             elif sys.platform == "darwin":
                 self._font_family = 'Monaco'
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @property
     def font_size(self):
@@ -135,7 +135,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @font_size.setter
     def font_size(self, value):  # pylint: disable=missing-docstring
         self._font_size = value
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @property
     def background(self):
@@ -147,7 +147,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @background.setter
     def background(self, value):  # pylint: disable=missing-docstring
         self._background = value
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @property
     def foreground(self):
@@ -159,7 +159,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @foreground.setter
     def foreground(self, value):  # pylint: disable=missing-docstring
         self._foreground = value
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @property
     def whitespaces_foreground(self):
@@ -184,7 +184,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @selection_background.setter
     def selection_background(self, value):  # pylint: disable=missing-docstring
         self._sel_background = value
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @property
     def selection_foreground(self):
@@ -361,7 +361,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :type cursor: QtWidgets.QCursor
         """
         self.viewport().setCursor(cursor)
-        QtWidgets.QApplication.processEvents()
 
     def show_tooltip(self, pos, tooltip):
         """
@@ -495,7 +494,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Resets the zoom value.
         """
         self._font_size = 10
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @QtCore.Slot()
     def zoom_in(self, increment=1):
@@ -510,7 +509,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self._font_size += increment
         text.mark_whole_doc_dirty(self)
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @QtCore.Slot()
     def zoom_out(self, increment=1):
@@ -527,7 +526,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if self._font_size <= 0:
             self._font_size = increment
         text.mark_whole_doc_dirty(self)
-        self._reset_palette()
+        self._reset_stylesheet()
 
     @QtCore.Slot()
     def duplicate_line(self):
@@ -870,7 +869,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         app = QtWidgets.QApplication.instance()
         self._sel_background = app.palette().highlight().color()
         self._sel_foreground = app.palette().highlightedText().color()
-        self._reset_palette()
+        self._reset_stylesheet()
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """
@@ -1063,15 +1062,19 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         _logger().debug('viewport margins updated: %r', repr(
             self._margin_sizes))
 
-    def _reset_palette(self):
-        """ Resets QPalette """
+    def _reset_stylesheet(self):
+        """ Resets stylesheet"""
         self.setFont(QtGui.QFont(self._font_family, self._font_size))
-        pal = self.palette()
-        pal.setColor(pal.Base, self._background)
-        pal.setColor(pal.Text, self._foreground)
-        pal.setColor(QtGui.QPalette.Highlight, self._sel_background)
-        pal.setColor(QtGui.QPalette.HighlightedText, self._sel_foreground)
-        self.setPalette(pal)
+        qss = """QPlainTextEdit
+        {
+            background-color: %s;
+            color: %s;
+            selection-background-color: %s;
+            selection-color: %s;
+        }""" % (self.background.name(), self.foreground.name(),
+                self.selection_background.name(),
+                self.selection_foreground.name())
+        self.setStyleSheet(qss)
         self.repaint()
 
     def _do_home_key(self, event=None, select=False):

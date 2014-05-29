@@ -4,6 +4,7 @@ This module contains the line number panel
 """
 from pyqode.core import frontend
 from pyqode.core.frontend import Panel
+from pyqode.core.frontend.utils import drift_color
 from pyqode.qt import QtCore, QtWidgets, QtGui
 
 
@@ -20,9 +21,6 @@ class LineNumberPanel(Panel):
             QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
         self._line_color_s = self.palette().color(
             QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
-
-    def _on_install(self, editor):
-        Panel._on_install(self, editor)
 
     def sizeHint(self):  # pylint: disable=invalid-name
         """
@@ -92,6 +90,8 @@ class LineNumberPanel(Panel):
         Paints the line numbers
         """
         # pylint: disable=invalid-name, unused-argument, too-many-locals
+        self._line_color_u = drift_color(self.editor.background, 200)
+        self._line_color_s = drift_color(self.editor.foreground, 150)
         Panel.paintEvent(self, event)
         if self.isVisible():
             painter = QtGui.QPainter(self)
