@@ -7,15 +7,15 @@ Package               .. image:: http://img.shields.io/pypi/v/pyqode.core.png   
                         :alt: Latest PyPI version                                               :alt: Number of PyPI downloads
 ===================== ======================================================================= =========================================================
 
-========================== ======================================================================= ================================================================================== ================================================================================
-Stable (`master`_)         .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master   .. image:: https://landscape.io/github/pyQode/pyqode.core/master/landscape.png   
-                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master                   :target: https://landscape.io/github/pyQode/pyqode.core/master
-                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                              :alt: Code Health
-========================== ======================================================================= ================================================================================== ================================================================================
-Unstable (`develop`_)      .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop  .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop  .. image:: https://landscape.io/github/pyQode/pyqode.core/develop/landscape.png   
-                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop                  :target: https://landscape.io/github/pyQode/pyqode.core/develop
-                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                              :alt: Code Health
-========================== ======================================================================= ================================================================================== ================================================================================
+========================== ======================================================================= ==================================================================================
+Stable (`master`_)         .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master  
+                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master                 
+                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                            
+========================== ======================================================================= ==================================================================================
+Unstable (`develop`_)      .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop  .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop 
+                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop                
+                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                            
+========================== ======================================================================= ==================================================================================
 
 
 About pyQode
