@@ -1,15 +1,11 @@
 Source Code Editor Widget for PyQt/PySide
 =========================================
 
-Status
-------
-
 ===================== ======================================================================= =========================================================
 Package               .. image:: http://img.shields.io/pypi/v/pyqode.core.png                 .. image:: http://img.shields.io/pypi/dm/pyqode.core.png
                         :target: https://pypi.python.org/pypi/pyqode.core/                      :target: https://pypi.python.org/pypi/pyqode.core/
                         :alt: Latest PyPI version                                               :alt: Number of PyPI downloads
 ===================== ======================================================================= =========================================================
-
 
 ========================== ======================================================================= ================================================================================== ================================================================================
 Stable (`master`_)         .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master   .. image:: https://landscape.io/github/pyQode/pyqode.core/master/landscape.png   
