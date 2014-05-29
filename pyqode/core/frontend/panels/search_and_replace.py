@@ -152,7 +152,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.actionFindNext.setIcon(icon)
         self.toolButtonNext.setIcon(icon)
 
-        icon = _icon(('application-exit', ':/pyqode-icons/rc/close.png'))
+        icon = _icon(('window-close', ':/pyqode-icons/rc/close.png'))
         self.toolButtonClose.setIcon(icon)
 
     def _init_style(self):
