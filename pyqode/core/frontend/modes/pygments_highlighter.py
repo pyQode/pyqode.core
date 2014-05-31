@@ -258,8 +258,12 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self.enabled = state
 
     def set_mime_type(self, mime_type):
-        self.set_lexer_from_mime_type(mime_type)
-        self.rehighlight()
+        try:
+            self.set_lexer_from_mime_type(mime_type)
+        except:
+            pass
+        else:
+            self.rehighlight()
 
     def set_lexer_from_filename(self, filename):
         """
@@ -270,8 +274,11 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         """
         if filename.endswith("~"):
             filename = filename[0:len(filename) - 1]
-        self._lexer = get_lexer_for_filename(filename)
-        _logger().info('lexer for filename (%s): %r', filename, self._lexer)
+        try:
+            self._lexer = get_lexer_for_filename(filename)
+            _logger().info('lexer for filename (%s): %r', filename, self._lexer)
+        except :
+            pass  # lexer not found
 
     def set_lexer_from_mime_type(self, mime, **options):
         """
