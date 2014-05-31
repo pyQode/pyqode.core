@@ -990,7 +990,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _update_panels(self, rect, delta_y, force_update_margins=False):
         """ Updates panels """
-        _logger().debug('_update_panels')
         for zones_id, zone in self._panels.items():
             if zones_id == Panel.Position.TOP or \
                zones_id == Panel.Position.BOTTOM:
