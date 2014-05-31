@@ -8,11 +8,10 @@ from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.qt.QtWidgets import QTableWidget
 
 
-COL_TYPE = 1
-COL_FILE_NAME = 2
-COL_LINE_NBR = 3
-COL_MSG = 4
-COL_PATH = 5
+COL_TYPE = 0
+COL_FILE_NAME = 1
+COL_LINE_NBR = 2
+COL_MSG = 3
 
 
 class ErrorsTable(QTableWidget):
@@ -35,13 +34,15 @@ class ErrorsTable(QTableWidget):
         QtWidgets.QTableWidget.__init__(self, parent)
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(
-            ["Nr", "Type", "File name", "Line", "Description", "File path"])
+            ["Type", "File name", "Line", "Description", 'Details'])
         try:
+            # pyqt4
             self.horizontalHeader().setResizeMode(
                 QtWidgets.QHeaderView.ResizeToContents)
             self.horizontalHeader().setResizeMode(
                 COL_MSG, QtWidgets.QHeaderView.Stretch)
         except AttributeError:
+            # pyqt5
             self.horizontalHeader().setSectionResizeMode(
                 QtWidgets.QHeaderView.ResizeToContents)
             self.horizontalHeader().setSectionResizeMode(
@@ -53,10 +54,12 @@ class ErrorsTable(QTableWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.context_mnu = QtWidgets.QMenu()
-        self._a_copy_desc = QtWidgets.QAction("Copy", self)
-        self._a_copy_desc.triggered.connect(
-            self._copy_cell_text)
-        self.context_mnu.addAction(self._a_copy_desc)
+        self.action_details = QtWidgets.QAction('View details', self)
+        self.action_details.triggered.connect(self.showDetails)
+        self.action_copy = QtWidgets.QAction('Copy error', self)
+        self.action_copy.triggered.connect(self._copy_cell_text)
+        self.context_mnu.addAction(self.action_details)
+        self.context_mnu.addAction(self.action_copy)
 
     def _copy_cell_text(self):
         """
@@ -75,9 +78,9 @@ class ErrorsTable(QTableWidget):
         """
         QtWidgets.QTableWidget.clear(self, *args, **kwargs)
         self.setRowCount(0)
-        self.setColumnCount(6)
+        self.setColumnCount(4)
         self.setHorizontalHeaderLabels(
-            ["Nr", "Type", "File name", "Line", "Description", "File path"])
+            ["Type", "File name", "Line", "Description"])
 
     @staticmethod
     @memoized
@@ -102,12 +105,6 @@ class ErrorsTable(QTableWidget):
         """
         row = self.rowCount()
         self.insertRow(row)
-
-        # Nr
-        item = QtWidgets.QTableWidgetItem(str(row + 1).zfill(3))
-        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, msg)
-        self.setItem(row, 0, item)
 
         # type
         item = QtWidgets.QTableWidgetItem(self.make_icon(msg.icon),
@@ -138,15 +135,18 @@ class ErrorsTable(QTableWidget):
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_MSG, item)
 
-        # filename
-        item = QtWidgets.QTableWidgetItem(msg.path)
-        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-        item.setData(QtCore.Qt.UserRole, msg)
-        self.setItem(row, COL_PATH, item)
-
     def _on_item_activated(self, item):
         """
         Emits the message activated signal
         """
         msg = item.data(QtCore.Qt.UserRole)
         self.msg_activated.emit(msg)
+
+    def showDetails(self):
+        msg = self.currentItem().data(QtCore.Qt.UserRole)
+        QtWidgets.QMessageBox.information(
+            self, 'Message details',
+            """<p><b>Description:</b>%s</p>
+            <i><p><b>File:</b>%s</p>
+            <p><b>Line</b>: %d</p></i>
+            """ % (msg.description, msg.path, msg.line, ))
