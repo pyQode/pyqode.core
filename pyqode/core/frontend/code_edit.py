@@ -861,15 +861,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_style(self):
         """ Inits style options """
-        self._font_name = ""  # platform specific value in property setter
-        self._font_size = 10
         self._background = QtGui.QColor('white')
         self._foreground = QtGui.QColor('black')
         self._whitespaces_foreground = QtGui.QColor('light gray')
         app = QtWidgets.QApplication.instance()
         self._sel_background = app.palette().highlight().color()
         self._sel_foreground = app.palette().highlightedText().color()
-        self._reset_stylesheet()
+        self._font_size = 10
+        self.font_name = ""  # platform specific value in property setter
+        # self._reset_stylesheet() -> should be called by font_name setter
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """
