@@ -61,11 +61,11 @@ except ImportError as exc:  # too new on some systems
                         "pygments installation. %s", exc)
 from pygments.styles import get_style_by_name
 from pygments.token import Whitespace, Comment
-from pygments.styles import STYLE_MAP
+from pygments.styles import get_all_styles
 
 
 #: A sorted list of available pygments styles, for convenience
-PYGMENTS_STYLES = sorted(STYLE_MAP.keys())
+PYGMENTS_STYLES = sorted(list(get_all_styles()))
 
 
 def get_tokens_unprocessed(self, text, stack=('root',)):
