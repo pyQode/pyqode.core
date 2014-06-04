@@ -96,8 +96,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         Notify user from external event
         """
-        inital_value = settings.save_on_focus_out
-        settings.save_on_focus_out = False
+        inital_value = self.editor.save_on_focus_out
+        self.editor.save_on_focus_out = False
         self._flg_notify = True
         dlg_type = (QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         expected_action = (
@@ -107,7 +107,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes):
             expected_action(self.editor.file_path)
         self._update_mtime()
-        settings.save_on_focus_out = inital_value
+        self.editor.save_on_focus_out = inital_value
 
     def _notify_change(self):
         """
