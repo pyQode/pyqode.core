@@ -126,9 +126,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         """
         raise NotImplementedError()
 
-    def rehighlight(self, *args, **kwargs):
-        super().rehighlight()
-
 
 class ParenthesisInfo(object):
     """
