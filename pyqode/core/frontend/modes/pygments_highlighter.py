@@ -290,8 +290,9 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def highlight_block(self, text):
         # pylint: disable=protected-access
         original_text = text
+        block = self.currentBlock()
         if self.editor and self._lexer and self.enabled:
-            prev_data = self.currentBlock().previous().userData()
+            prev_data = block.previous().userData()
             if hasattr(prev_data, "syntax_stack"):
                 self._lexer._saved_state_stack = prev_data.syntax_stack
             elif hasattr(self._lexer, '_saved_state_stack'):
@@ -299,21 +300,20 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
 
             # Lex the text using Pygments
             index = 0
-            usd = self.currentBlock().userData()
+            usd = block.userData()
             usd.cc_disabled_zones[:] = []
             tokens = list(self._lexer.get_tokens(text))
             for token, text in tokens:
                 length = len(text)
-                if ("comment" in str(token).lower() or
-                        "string" in str(token).lower()) and not text.isspace():
+                token_str = str(token).lower()
+                if ("comment" in token_str or
+                        "string" in token_str) and not text.isspace():
                     usd.cc_disabled_zones.append((index, index + length))
                 self.setFormat(index, length, self._get_format(token))
                 index += length
 
             if hasattr(self._lexer, '_saved_state_stack'):
-                data = self.currentBlock().userData()
-                setattr(data, "syntax_stack", self._lexer._saved_state_stack)
-                self.currentBlock().setUserData(data)
+                setattr(usd, "syntax_stack", self._lexer._saved_state_stack)
                 # Clean up for the next go-round.
                 del self._lexer._saved_state_stack
 

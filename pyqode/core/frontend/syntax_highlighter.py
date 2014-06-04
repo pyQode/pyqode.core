@@ -109,18 +109,14 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.block_highlight_started.emit(self, text)
         # setup user data
         user_data = self.currentBlockUserData()
-        if not isinstance(user_data, TextBlockUserData):
+        if not user_data:
             user_data = TextBlockUserData()
-            self.setCurrentBlockUserData(user_data)
         # update user data
         user_data.line_number = self.currentBlock().blockNumber() + 1
         self._blocks.add(user_data)
         self.setCurrentBlockUserData(user_data)
         self._detect_parentheses(text, user_data)
         self.highlight_block(text)
-        self.block_highlight_finished.emit(self, text)
-        if self.process_events_on_highlight:
-            QtWidgets.QApplication.instance().processEvents()
 
     def highlight_block(self, text):
         """
