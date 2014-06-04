@@ -236,14 +236,14 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self._pygments_style = 'default'
+        self._pygments_style = 'qt'
         self._brushes = {}
         self._formats = {}
         self._init_style()
 
     def _init_style(self):
         """ Init pygments style """
-        self._pygments_style = 'default'
+        self._pygments_style = 'qt'
         self._update_style()
 
     def _on_install(self, editor):

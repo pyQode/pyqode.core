@@ -27,7 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
         self.on_current_tab_changed()
-        self.pygments_style = 'default'
+        self.pygments_style = 'qt'
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -184,7 +184,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         path = self.tabWidget.currentWidget().file_path
         path = os.path.dirname(path) if path else ''
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save', path)
+        filename, filter = QtWidgets.QFileDialog.getSaveFileName(
+            self, 'Save', path)
         if filename:
             self.tabWidget.save_current(filename)
             self.recent_files_manager.open_file(filename)
