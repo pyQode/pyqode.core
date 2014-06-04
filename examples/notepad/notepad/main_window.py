@@ -69,21 +69,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         mimetypes.add_type('text/x-rst', '.rst')  # rst docs
         mimetypes.add_type('text/x-cython', '.pyx')  # cython impl files
         mimetypes.add_type('text/x-cython', '.pxd')  # cython def files
+        mimetypes.add_type('text/x-python', '.py')
+        mimetypes.add_type('text/x-python', '.pyw')
+        mimetypes.add_type('text/x-c', '.c')
+        mimetypes.add_type('text/x-c', '.h')
+        mimetypes.add_type('text/x-c++hdr', '.hpp')
+        mimetypes.add_type('text/x-c++src', '.cpp')
+        mimetypes.add_type('text/x-c++src', '.cxx')
         # cobol files
         for ext in ['.cbl', '.cob', '.cpy']:
             mimetypes.add_type('text/x-cobol', ext)
             mimetypes.add_type('text/x-cobol', ext.upper())
-        if sys.platform == 'win32':
-            # windows systems do not have a mimetypes for most of the codes
-            # python, you have to add them all explicitely on windows,
-            # otherwise there won't be any syntax highlighting
-            mimetypes.add_type('text/x-python', '.py')
-            mimetypes.add_type('text/x-python', '.pyw')
-            mimetypes.add_type('text/x-c', '.c')
-            mimetypes.add_type('text/x-c', '.h')
-            mimetypes.add_type('text/x-cpp', '.hpp')
-            mimetypes.add_type('text/x-cpp', '.cpp')
-            mimetypes.add_type('text/x-cpp', '.cxx')
+
 
     def setup_mnu_edit(self, editor):
         self.menuEdit.addActions(editor.actions())
