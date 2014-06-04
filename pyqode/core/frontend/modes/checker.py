@@ -272,6 +272,8 @@ class CheckerMode(frontend.Mode, QtCore.QObject):
 
     def _request(self):
         """ Requests a checking of the editor content. """
+        if not self.editor:
+            return
         if self._clear_on_request:
             self.clear_messages()
         request_data = {

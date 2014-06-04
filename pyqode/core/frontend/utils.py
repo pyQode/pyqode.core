@@ -145,6 +145,9 @@ class DelayJobRunner(object):
         self._kwargs = {}
         self._job = lambda x: None
 
+    def __del__(self):
+        self.cancel_requests()
+
     def request_job(self, job, *args, **kwargs):
         """
         Request a job execution. The job will be executed after the delay
