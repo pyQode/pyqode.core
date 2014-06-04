@@ -306,9 +306,11 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             for token, text in tokens:
                 length = len(text)
                 token_str = str(token).lower()
-                if ("comment" in token_str or
-                        "string" in token_str) and not text.isspace():
+                comment = "comment" in token_str
+                if (comment or "string" in token_str) and not text.isspace():
                     usd.cc_disabled_zones.append((index, index + length))
+                if comment and 'multiline' in token_str:
+                    self.setCurrentBlockState(1)
                 self.setFormat(index, length, self._get_format(token))
                 index += length
 

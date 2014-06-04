@@ -115,6 +115,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         user_data.line_number = self.currentBlock().blockNumber() + 1
         self._blocks.add(user_data)
         self.setCurrentBlockUserData(user_data)
+        self.setCurrentBlockState(0)
         self._detect_parentheses(text, user_data)
         self.highlight_block(text)
 
