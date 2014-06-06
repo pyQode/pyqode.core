@@ -6,6 +6,7 @@ on pygments.
 .. note: This code is taken and adapted from the IPython project.
 """
 import logging
+from pygments.util import ClassNotFound
 from pyqode.qt import QtGui
 from pyqode.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
@@ -332,7 +333,12 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
     def _update_style(self):
         """ Sets the style to the specified Pygments style.
         """
-        self._style = get_style_by_name(self._pygments_style)
+        try:
+            self._style = get_style_by_name(self._pygments_style)
+        except ClassNotFound:
+            # unknown style, also happen with plugins style when used from a frozen app.
+            self._style = get_style_by_name('default')
+            self._pygments_style = 'default'
         self._clear_caches()
         # update editor bg and fg from pygments style.
         fgc = self._style.style_for_token(Text)['color']
