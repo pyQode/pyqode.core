@@ -3,6 +3,7 @@
 This module contains interactive widgets:
     - interactive console: a text edit made to run subprocesses interactively
 """
+import locale
 import logging
 import sys
 from pyqode.qt.QtCore import Qt, Signal, Property, QProcess
@@ -79,12 +80,12 @@ class InteractiveConsole(QTextEdit):
             self._writer = writer
 
     def _on_stdout(self):
-        txt = bytes(self.process.readAllStandardOutput()).decode('utf-8')
+        txt = bytes(self.process.readAllStandardOutput()).decode(locale.getpreferredencoding())
         logging.debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
-        txt = bytes(self.process.readAllStandardError()).decode('utf-8')
+        txt = bytes(self.process.readAllStandardError()).decode(locale.getpreferredencoding())
         logging.debug('stderr ready: %s', txt)
         self._writer(self, txt, self.stderr_color)
 
