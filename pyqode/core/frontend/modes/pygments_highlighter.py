@@ -7,6 +7,7 @@ on pygments.
 """
 import logging
 from pygments.util import ClassNotFound
+import sys
 from pyqode.qt import QtGui
 from pyqode.qt.QtCore import QRegExp
 from pygments.formatters.html import HtmlFormatter
@@ -67,6 +68,9 @@ from pygments.styles import get_all_styles
 
 #: A sorted list of available pygments styles, for convenience
 PYGMENTS_STYLES = sorted(list(get_all_styles()))
+
+if hasattr(sys, 'frozen'):
+    PYGMENTS_STYLES += ['darcula', 'qt']
 
 
 def get_tokens_unprocessed(self, text, stack=('root',)):
@@ -337,8 +341,15 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self._style = get_style_by_name(self._pygments_style)
         except ClassNotFound:
             # unknown style, also happen with plugins style when used from a frozen app.
-            self._style = get_style_by_name('default')
-            self._pygments_style = 'default'
+            if self._pygments_style == 'qt':
+                from pyqode.core.frontend.styles import QtStyle
+                self._style = QtStyle
+            elif self._pygments_style == 'darcula':
+                from pyqode.core.frontend.styles import DarculaStyle
+                self._style = DarculaStyle
+            else:
+                self._style = get_style_by_name('default')
+                self._pygments_style = 'default'
         self._clear_caches()
         # update editor bg and fg from pygments style.
         fgc = self._style.style_for_token(Text)['color']

@@ -10,8 +10,10 @@ found in the bin folder::
     python freeze_setup.py build
 
 """
+import os
 import sys
 from cx_Freeze import setup, Executable
+import shutil
 
 from pyqode.core.frontend.modes import PYGMENTS_STYLES
 
@@ -36,8 +38,9 @@ options = {"excludes": ["PyQt5.uic.port_v3", "PySide", "tcltk", "jedi"],
            "namespace_packages": ["pyqode.core"],
            "include_msvcr": True,
            "build_exe": "bin",
-           "includes": ["pkg_resources"] + ["pygments.styles.%s" % style
-                                            for style in PYGMENTS_STYLES]}
+           "includes": ["pkg_resources"] +
+                       ["pygments.styles.%s" % style for style in PYGMENTS_STYLES
+                        if not 'darcula' in style and not 'qt' in style]}
 
 # Run the cxFreeze setup
 setup(name="Notepad",
@@ -49,4 +52,12 @@ setup(name="Notepad",
                      base="Win32GUI"),
           Executable("notepad/server.py",
                      targetName="server.exe")])
+
+# NOTE: if you are using PyQt5, you will have to copy libEGL.dll manually
+try:
+    import PyQt5
+except ImportError:
+    pass  # pyqt4 or pyqside
+else:
+    shutil.copy(os.path.join(os.path.dirname(PyQt5.__file__), 'libEGL.dll'), 'bin')
 
