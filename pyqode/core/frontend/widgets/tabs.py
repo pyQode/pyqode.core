@@ -211,11 +211,13 @@ class TabWidget(QTabWidget):
             code_edit = self._current
             if path and old_path != path:
                 self._ensure_unique_name(code_edit, code_edit.file_name)
-                icon = QtWidgets.QFileIconProvider().icon(
-                    QtCore.QFileInfo(code_edit.file_path))
-                self.setTabIcon(self.currentIndex(), icon)
-                self.setTabText(self.currentIndex(),
-                                code_edit._tab_name)
+                self.setTabText(self.currentIndex(), code_edit._tab_name)
+                ext = os.path.splitext(path)[1]
+                old_ext = os.path.splitext(old_path)[1]
+                if ext != old_ext:
+                    icon = QtWidgets.QFileIconProvider().icon(
+                        QtCore.QFileInfo(code_edit.file_path))
+                    self.setTabIcon(self.currentIndex(), icon)
             return True
         except AttributeError:  # not an editor widget
             pass
