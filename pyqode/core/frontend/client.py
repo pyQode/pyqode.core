@@ -112,6 +112,8 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
+        if not self:
+            return
         o = self.readAllStandardOutput()
         try:
             output = bytes(o).decode('utf-8')
@@ -123,6 +125,8 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """
+        if not self:
+            return
         o = self.readAllStandardError()
         try:
             output = bytes(o).decode('utf-8')
