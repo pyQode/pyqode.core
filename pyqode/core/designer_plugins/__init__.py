@@ -1,8 +1,8 @@
 """
 This packages contains the various qt designer plugins
 """
-from pyqode.qt import QtDesigner
 # pylint: disable=missing-docstring, invalid-name, abstract-class-not-used
+from pyqode.core.qt import QtDesigner
 
 
 class WidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):

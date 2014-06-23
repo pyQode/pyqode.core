@@ -12,6 +12,7 @@ import os
 import sys
 import pytest
 import time
+from pyqode.core.api.code_edit import CodeEdit
 
 try:
     import faulthandler
@@ -47,7 +48,7 @@ logging.basicConfig(level=logging.DEBUG,
 # Setup QApplication
 # -------------------
 # 2. create qt application
-from pyqode.qt.QtWidgets import QApplication
+from pyqode.core.qt.QtWidgets import QApplication
 _app = QApplication(sys.argv)
 _widget = None
 
@@ -65,12 +66,11 @@ def app(request):
 def editor(request):
     global _app, _widget
     from test import helpers
-    from pyqode.core import frontend
 
     logging.info('setup session editor')
 
-    _widget = frontend.CodeEdit()
-    frontend.start_server(_widget, helpers.server_path())
+    _widget = CodeEdit()
+    _widget.backend.start(helpers.server_path())
     helpers.wait_for_connected(_widget)
     helpers.setup_editor(_widget)
     _widget.show()
@@ -81,7 +81,7 @@ def editor(request):
     def fin():
         global _widget
         logging.info('teardown session editor')
-        frontend.stop_server(_widget)
+        _widget.backend.stop()
         del _widget
 
     request.addfinalizer(fin)

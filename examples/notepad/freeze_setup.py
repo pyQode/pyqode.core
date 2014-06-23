@@ -15,7 +15,7 @@ import sys
 from cx_Freeze import setup, Executable
 import shutil
 
-from pyqode.core.frontend.modes import PYGMENTS_STYLES
+from pyqode.core.modes import PYGMENTS_STYLES
 
 
 def read_version():

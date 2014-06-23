@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-
-from pyqode.core import frontend
-from pyqode.core.frontend import modes
-from pyqode.core.frontend import panels
-
+from pyqode.core import api
+from pyqode.core import modes
+from pyqode.core import panels
 from . import server
 
 
-class GenericCodeEdit(frontend.CodeEdit):
+class GenericCodeEdit(api.CodeEdit):
     """
     A generic code editor widget. This is just a CodeEdit with a preconfigured
     set of modes and panels.
@@ -19,25 +17,26 @@ class GenericCodeEdit(frontend.CodeEdit):
     def __init__(self, parent):
         super().__init__(parent)
         if hasattr(sys, "frozen"):
-            frontend.start_server(self, os.path.join(os.getcwd(), 'server.exe'))
+            # start the frozen server on Windows
+            self.backend.start(os.path.join(os.getcwd(), 'server.exe'))
         else:
-            frontend.start_server(self, server.__file__)
+            self.backend.start(server.__file__)
 
-        # add panels
-        frontend.install_panel(self, panels.LineNumberPanel())
-        frontend.install_panel(self, panels.SearchAndReplacePanel(),
-                               panels.SearchAndReplacePanel.Position.BOTTOM)
+        # append panels
+        self.panels.append(panels.LineNumberPanel())
+        self.panels.append(panels.SearchAndReplacePanel(),
+                        api.Panel.Position.BOTTOM)
 
-        # add modes
-        frontend.install_mode(self, modes.AutoCompleteMode())
-        frontend.install_mode(self, modes.CaseConverterMode())
-        frontend.install_mode(self, modes.FileWatcherMode())
-        frontend.install_mode(self, modes.CaretLineHighlighterMode())
-        frontend.install_mode(self, modes.RightMarginMode())
-        frontend.install_mode(self, modes.PygmentsSyntaxHighlighter(
+        # append modes
+        self.modes.append(modes.AutoCompleteMode())
+        self.modes.append(modes.CaseConverterMode())
+        self.modes.append(modes.FileWatcherMode())
+        self.modes.append(modes.CaretLineHighlighterMode())
+        self.modes.append(modes.RightMarginMode())
+        self.modes.append(modes.PygmentsSyntaxHighlighter(
             self.document()))
-        frontend.install_mode(self, modes.ZoomMode())
-        frontend.install_mode(self, modes.CodeCompletionMode())
-        frontend.install_mode(self, modes.AutoIndentMode())
-        frontend.install_mode(self, modes.IndenterMode())
-        frontend.install_mode(self, modes.SymbolMatcherMode())
+        self.modes.append(modes.ZoomMode())
+        self.modes.append(modes.CodeCompletionMode())
+        self.modes.append(modes.AutoIndentMode())
+        self.modes.append(modes.IndenterMode())
+        self.modes.append(modes.SymbolMatcherMode())

@@ -6,15 +6,12 @@ the jedi helper module for their testing package
 import os
 import functools
 import platform
-import sys
 from os.path import abspath
 from os.path import dirname
-
-from pyqode.qt.QtTest import QTest
-
-from pyqode.core import frontend
-from pyqode.core.frontend import modes
-from pyqode.core.frontend import panels
+from pyqode.core.api import CodeEdit
+from pyqode.core import modes
+from pyqode.core import panels
+from pyqode.core.qt.QtTest import QTest
 
 
 test_dir = dirname(abspath(__file__))
@@ -56,9 +53,7 @@ def editor_open(path):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(editor, *args, **kwds):
-            import logging
-            logging.critical('---------------- %s ----------------' % func.__name__)
-            frontend.open_file(editor, path)
+            editor.file.open(path)
             return func(editor, *args, **kwds)
         return wrapper
     return decorator
@@ -68,13 +63,13 @@ def preserve_settings(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         editor.save_on_focus_out = False
-        frontend.get_mode(editor, modes.FileWatcherMode).auto_reload = False
+        editor.modes.get(modes.FileWatcherMode).auto_reload = False
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            assert isinstance(editor, frontend.CodeEdit)
+            assert isinstance(editor, CodeEdit)
             editor.save_on_focus_out = False
-            frontend.get_mode(editor, modes.FileWatcherMode).auto_reload = False
+            editor.modes.get(modes.FileWatcherMode).auto_reload = False
         return ret
     return wrapper
 
@@ -98,10 +93,11 @@ def preserve_editor_config(func):
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            frontend.uninstall_all(editor)
+            editor.modes.clear()
+            editor.panels.clear()
             setup_editor(editor)
-            if not frontend.connected_to_server(editor):
-                frontend.start_server(editor, server_path())
+            if not editor.backend.connected:
+                editor.backend.start(editor, server_path())
                 wait_for_connected(editor)
         return ret
         # return func(editor, *args, **kwds)
@@ -140,7 +136,7 @@ def log_test_name(func):
 # Helper functions
 # -------------------
 def wait_for_connected(editor):
-    while not frontend.connected_to_server(editor):
+    while not editor.backend.connected:
         QTest.qWait(100)
 
 
@@ -160,29 +156,29 @@ def server_path():
 
 
 def setup_editor(code_edit):
-        # add panels
+        # append panels
     p = panels.LineNumberPanel()
-    frontend.install_panel(code_edit, p)
+    code_edit.panels.append(p)
     p.show()
     p = panels.MarkerPanel()
-    frontend.install_panel(code_edit, p)
+    code_edit.panels.append(p)
     p.show()
     p = panels.SearchAndReplacePanel()
-    frontend.install_panel(code_edit, p, p.Position.BOTTOM)
+    code_edit.panels.append(p, p.Position.BOTTOM)
     p.show()
 
-    # add modes
-    frontend.install_mode(code_edit, modes.AutoCompleteMode())
-    frontend.install_mode(code_edit, modes.CaseConverterMode())
-    frontend.install_mode(code_edit, modes.FileWatcherMode())
-    frontend.install_mode(code_edit, modes.CaretLineHighlighterMode())
-    frontend.install_mode(code_edit, modes.RightMarginMode())
-    frontend.install_mode(code_edit, modes.PygmentsSyntaxHighlighter(
+    # append modes
+    code_edit.modes.append(modes.AutoCompleteMode())
+    code_edit.modes.append(modes.CaseConverterMode())
+    code_edit.modes.append(modes.FileWatcherMode())
+    code_edit.modes.append(modes.CaretLineHighlighterMode())
+    code_edit.modes.append(modes.RightMarginMode())
+    code_edit.modes.append(modes.PygmentsSyntaxHighlighter(
         code_edit.document()))
-    frontend.install_mode(code_edit, modes.ZoomMode())
-    frontend.install_mode(code_edit, modes.CodeCompletionMode())
-    frontend.install_mode(code_edit, modes.AutoIndentMode())
-    frontend.install_mode(code_edit, modes.IndenterMode())
-    frontend.install_mode(code_edit, modes.SymbolMatcherMode())
-    frontend.install_mode(code_edit, modes.WordClickMode())
-    frontend.get_mode(code_edit, modes.FileWatcherMode).auto_reload = True
+    code_edit.modes.append(modes.ZoomMode())
+    code_edit.modes.append(modes.CodeCompletionMode())
+    code_edit.modes.append(modes.AutoIndentMode())
+    code_edit.modes.append(modes.IndenterMode())
+    code_edit.modes.append(modes.SymbolMatcherMode())
+    code_edit.modes.append(modes.WordClickMode())
+    code_edit.modes.get(modes.FileWatcherMode).auto_reload = True

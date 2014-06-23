@@ -1,4 +1,4 @@
 Class diagram
 =================
 
-.. todo: add class diagram
+.. todo: append class diagram

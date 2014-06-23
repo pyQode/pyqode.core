@@ -62,7 +62,7 @@ New features:
   - Wrap settings and style properties with python properties
   - Allow user to start code completion server before a code editor instance is created.
   - New mode: AutoComplete mode
-  - New mode: WordClickMode, add support for word under MOUSE cursor
+  - New mode: WordClickMode, append support for word under MOUSE cursor
   - New setting: autoSave on focus out
 
 Fixed bugs:
@@ -102,7 +102,7 @@ First release. Brings the following features:
  * code completion (static word list, from document words)
  * line number Panel
  * code folding Panel
- * markers Panel (to add breakpoints, bookmarks, errors,...)
+ * markers Panel (to append breakpoints, bookmarks, errors,...)
  * right margin indicator mode
  * active line highlighting mode
  * editor zoom mode
@@ -110,5 +110,5 @@ First release. Brings the following features:
  * text decorations (squiggle, box)
  * unicode support (specify encoding when you load your file)
  * styling (built-in white and dark styles + possibility to customize)
- * flexible framework to add custom panels/modes
+ * flexible framework to append custom panels/modes
  * auto indent mode(indentation level is based on the previous line indent)

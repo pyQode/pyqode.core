@@ -1,11 +1,10 @@
 import logging
 import sys
+from pyqode.core.api.code_edit import CodeEdit
 
-from pyqode.qt import QtWidgets, QtCore
+from pyqode.core.qt import QtWidgets, QtCore
 
-from pyqode.core import frontend
-from pyqode.core.frontend import modes
-from pyqode.core.frontend import panels
+from pyqode.core import modes
 
 
 editor = None
@@ -14,7 +13,7 @@ app = None
 
 def quit():
     global app, editor
-    editor._client.send('shutdown')
+    editor.backend.socket.send('shutdown')
     QtCore.QTimer.singleShot(2000, app.quit)
 
 
@@ -23,20 +22,19 @@ def main():
 
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
-    editor = frontend.CodeEdit()
-    # frontend.start_server(editor, 'server.py')
-    editor._client._port = int(sys.argv[1])
-    editor._client._connect()
-    editor._client._process = QtCore.QProcess()
-    editor._client._process.running = True
-    frontend.open_file(editor, __file__)
+    editor = CodeEdit()
+    # connect to an existing instance of server
+    editor.backend.socket._port = int(sys.argv[1])
+    editor.backend.socket._connect()
+    editor.backend.socket._process = QtCore.QProcess()
+    editor.backend.socket._process.running = True
+    editor.file.open(__file__)
     cc_mode = modes.CodeCompletionMode()
-    frontend.install_mode(editor, cc_mode)
+    editor.modes.append(cc_mode)
     window.setCentralWidget(editor)
     # window.show()
 
     cc_mode.request_completion()
-    # frontend.goto_line()
 
     QtCore.QTimer.singleShot(5000, quit)
     app.exec_()
@@ -47,7 +45,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
