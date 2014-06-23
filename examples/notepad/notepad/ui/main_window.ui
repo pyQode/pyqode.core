@@ -211,7 +211,7 @@
   <customwidget>
    <class>TabWidget</class>
    <extends>QTabWidget</extends>
-   <header>pyqode.core.frontend.widgets.tabs</header>
+   <header>pyqode.core.widgets.tabs</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

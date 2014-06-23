@@ -1,43 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-This example expands the simple example to show you how to define custom
-settings and styles.
-
-In this example, we are going to make a dark code editor widget which shows
-the whitespaces.
+In this example, we are going to make a dark code editor widget and make it show visual
+whitespaces.
 
 """
 import sys
-
-from pyqode.qt import QtWidgets, QtGui
-
-from pyqode.core import frontend, settings, style
-from pyqode.core.frontend import modes
-from pyqode.core.frontend import panels
-
+from pyqode.core.qt import QtWidgets, QtGui
+from pyqode.core import api
+from pyqode.core import modes
+from pyqode.core import panels
 
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = QtWidgets.QMainWindow()
 
+    # code from the simple example
+    editor = api.CodeEdit()
+    editor.file.open(__file__)
+    editor.modes.append(modes.CaretLineHighlighterMode())
+    sh = modes.PygmentsSyntaxHighlighter(editor.document())
+    editor.modes.append(sh)
+    editor.panels.append(panels.SearchAndReplacePanel(),
+                      api.Panel.Position.TOP)
     # make the code edit show whitespaces in dark gray
-    settings.show_white_spaces = True
-    style.whitespaces_foreground = QtGui.QColor('#606020')
+    editor.show_white_spaces = True
+    editor.whitespaces_foreground = QtGui.QColor('#606020')
 
     # make a dark editor using the monokai theme
-    style.pygments_style = 'monokai'
+    sh.pygments_style = 'monokai'
 
-    # code from the simple example
-    editor = frontend.CodeEdit()
-    frontend.open_file(editor, __file__)
-    frontend.install_mode(editor, modes.CaretLineHighlighterMode())
-    frontend.install_mode(editor,
-                          modes.PygmentsSyntaxHighlighter(editor.document()))
-    frontend.install_panel(editor,
-                           panels.SearchAndReplacePanel(),
-                           position=panels.SearchAndReplacePanel.Position.TOP)
     window.setCentralWidget(editor)
     window.show()
 

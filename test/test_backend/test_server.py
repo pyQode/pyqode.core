@@ -1,7 +1,7 @@
 import os
 import sys
+from pyqode.core.api.client import JsonTcpClient as JsonTcpClient
 from pyqode.core.backend import server
-from pyqode.core.frontend.client import JsonTcpClient
 from threading import Timer
 
 from subprocess import Popen

@@ -78,7 +78,7 @@ It adds a few utility signals/methods and introduces the concept of **Modes and 
 
 A mode/panel is an editor extension that, once installed on a QCodeEdit instance, may modify its behaviour and appearance:
 
-  * **Modes** are simple objects which connect to the editor signals to add new behaviours (such as automatic indentation, code completion, syntax checking,...)
+  * **Modes** are simple objects which connect to the editor signals to append new behaviours (such as automatic indentation, code completion, syntax checking,...)
 
   * **Panels** are the combination of a **Mode** and a **QWidget**. They are displayed in the QCodeEdit's content margins.
     When you install a Panel on a QCodeEdit, you can choose to install it on one of the four following zones:

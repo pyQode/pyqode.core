@@ -4,12 +4,12 @@ omit =
     # qt design ui files
     *_ui.py
     *_rc.py
-    *pyqode/qt/*
+    *pyqode/core/qt/*
     # at the moment, we do not test misc ui elements such as
     # widgets and dialogs (how could this be possible to test?)
-    *pyqode/core/frontend/dialogs.py
+    *pyqode/core/dialogs/*
     *pyqode/core/designer_plugins/*
-    *pyqode/core/frontend/widgets/*
+    *pyqode/core/widgets/*
 
 [report]
 # Regexes for lines to exclude from consideration

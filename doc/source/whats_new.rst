@@ -13,7 +13,7 @@ We are working on a brand new major version of pyqode, version 2.0.
 The next major version will focus on:
     - improving the subprocess server (1 per editor)
     - rewriting the code folder mode which is a mess at the moment
-    - add multiple cursor support (if possible)
+    - append multiple cursor support (if possible)
     - introduce smart completion (class, for loops, ...) such as in Eclipse or
       Visual C#
 

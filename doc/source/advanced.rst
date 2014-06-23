@@ -13,7 +13,7 @@ A property registry is a simple **dictionary of properties** (key/values)
 organised per section. It can be easily serialised to **JSON**.
 
 CodeEdit defines a series of style/settings properties in the "General"
-section. Modes and panels are also free to add their properties when they are
+section. Modes and panels are also free to append their properties when they are
 installed on an editor instance. This means that you'll end up with completely
 different dictionaries depending on the installed modes/panels.
 
@@ -147,7 +147,7 @@ There are a few methods that are interesting to override:
 
      This method is called when the mode is installed on a CodeEdit.
 
-     Typically, this method is used to add new properties to the editor style or
+     Typically, this method is used to append new properties to the editor style or
      settings:
 
         .. code-block:: python
@@ -208,7 +208,7 @@ simple modes and panels:
 
         def _onInstall(self, editor):
             super(MyMode, self)._onInstall(editor)
-            # add custom style/settings to the editor here
+            # append custom style/settings to the editor here
 
         def _onStateChanged(self, state):
             super(MyMode, self)._onStateChanged(editor)
@@ -241,7 +241,7 @@ simple modes and panels:
 
         def _onInstall(self, editor):
             super(MyPanel, self)._onInstall(editor)
-            # add custom style/settings to the editor here
+            # append custom style/settings to the editor here
 
         def _onStateChanged(self, state):
             super(MyPanel, self)._onStateChanged(editor)
@@ -323,7 +323,7 @@ on a CodeEdit instance and shutdown when the QApplication is about to exit.
 
 It is up to the user to install a completion provider on the completion mode.
 
-That means that the only thing required to add code completion support for your
+That means that the only thing required to append code completion support for your
 favorite language is to subclass CodeCompletionProvider to return a list of
 contextual suggestions:
 
@@ -461,7 +461,7 @@ For that you need to create a python module for you plugin following this scheme
 
 
 Now that you have a script you must install it as a **pyqode_plugins**. For that purpose
-you must add an entry point to your setup.py:
+you must append an entry point to your setup.py:
 
 .. code-block:: python
 

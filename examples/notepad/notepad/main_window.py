@@ -6,12 +6,12 @@ import mimetypes
 import os
 import sys
 
-from pyqode.qt import QtCore
-from pyqode.qt import QtWidgets
+from pyqode.core.qt import QtCore
+from pyqode.core.qt import QtWidgets
 
-from pyqode.core import frontend
-from pyqode.core.frontend import modes
-from pyqode.core.frontend import widgets
+from pyqode.core import api
+from pyqode.core import modes
+from pyqode.core import widgets
 
 from .editor import GenericCodeEdit
 from .ui.main_window_ui import Ui_MainWindow
@@ -81,39 +81,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             mimetypes.add_type('text/x-cobol', ext)
             mimetypes.add_type('text/x-cobol', ext.upper())
 
-
     def setup_mnu_edit(self, editor):
         self.menuEdit.addActions(editor.actions())
         self.menuEdit.addSeparator()
         self.setup_mnu_style(editor)
 
     def setup_mnu_modes(self, editor):
-        for k, v in sorted(frontend.get_modes(editor).items()):
+        for mode in editor.modes:
             a = QtWidgets.QAction(self.menuModes)
-            a.setText(k)
+            a.setText(mode.name)
             a.setCheckable(True)
             a.setChecked(True)
             a.changed.connect(self.on_mode_state_changed)
-            a.mode = v
+            a.mode = mode
             self.menuModes.addAction(a)
 
     def setup_mnu_panels(self, editor):
-        for zones, dic in sorted(frontend.get_panels(editor).items()):
-            for k, v in dic.items():
-                a = QtWidgets.QAction(self.menuModes)
-                a.setText(k)
-                a.setCheckable(True)
-                a.setChecked(True)
-                a.changed.connect(self.on_panel_state_changed)
-                a.panel = v
-                self.menuPanels.addAction(a)
+        for panel in editor.panels:
+            a = QtWidgets.QAction(self.menuModes)
+            a.setText(panel.name)
+            a.setCheckable(True)
+            a.setChecked(True)
+            a.changed.connect(self.on_panel_state_changed)
+            a.panel = panel
+            self.menuPanels.addAction(a)
 
     def setup_mnu_style(self, editor):
         """ setup the style menu for an editor tab """
         menu = QtWidgets.QMenu('Styles', self.menuEdit)
         group = QtWidgets.QActionGroup(self)
-        current_style = frontend.get_mode(
-            editor, modes.PygmentsSyntaxHighlighter).pygments_style
+        current_style = editor.modes.get(
+            modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
         for s in sorted(modes.PYGMENTS_STYLES):
             a = QtWidgets.QAction(menu)
@@ -144,13 +142,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             index = self.tabWidget.index_from_filename(path)
             if index == -1:
                 editor = GenericCodeEdit(self)
-                editor.file_path = path
+                editor.file.open(path)
                 editor.cursorPositionChanged.connect(
                     self.on_cursor_pos_changed)
                 self.tabWidget.add_code_edit(editor)
                 self.recent_files_manager.open_file(path)
                 self.menu_recents.update_actions()
-                frontend.open_file(editor, path)
             else:
                 self.tabWidget.setCurrentIndex(index)
             self.refresh_color_scheme()
@@ -179,7 +176,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Save the current editor document as.
         """
-        path = self.tabWidget.currentWidget().file_path
+        path = self.tabWidget.currentWidget().file.path
         path = os.path.dirname(path) if path else ''
         filename, filter = QtWidgets.QFileDialog.getSaveFileName(
             self, 'Save', path)
@@ -207,10 +204,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.setup_mnu_edit(editor)
             self.setup_mnu_modes(editor)
             self.setup_mnu_panels(editor)
-            self.lbl_cursor_pos.setText('%d:%d' % frontend.cursor_position(
-                editor))
-            self.lbl_encoding.setText(editor.file_encoding)
-            self.lbl_filename.setText(editor.file_path)
+            self.lbl_cursor_pos.setText(
+                '%d:%d' % api.TextHelper(editor).cursor_position())
+            self.lbl_encoding.setText(editor.file.encoding)
+            self.lbl_filename.setText(editor.file.path)
         else:
             self.lbl_cursor_pos.clear()
             self.lbl_encoding.clear()
@@ -220,10 +217,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         style = self.pygments_style
         for i in range(self.tabWidget.count()):
             editor = self.tabWidget.widget(i)
-            frontend.get_mode(
-                editor, modes.PygmentsSyntaxHighlighter).pygments_style = style
-            frontend.get_mode(
-                editor, modes.CaretLineHighlighterMode).refresh()
+            editor.modes.get(
+                modes.PygmentsSyntaxHighlighter).pygments_style = style
+            editor.modes.get(modes.CaretLineHighlighterMode).refresh()
 
     @QtCore.Slot(QtWidgets.QAction)
     def on_style_changed(self, action):
@@ -250,5 +246,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.Slot()
     def on_cursor_pos_changed(self):
         if self.tabWidget.currentWidget():
-            self.lbl_cursor_pos.setText('%d:%d' % frontend.cursor_position(
-                self.tabWidget.currentWidget()))
+            editor = self.tabWidget.currentWidget()
+            self.lbl_cursor_pos.setText(
+                '%d:%d' % api.TextHelper(editor).cursor_position())

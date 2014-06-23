@@ -35,7 +35,7 @@ Gui integration
 
 This simple example show how you can build a simple generic editor using
 pyqode.core. The example user interface has been designed in Qt Designer using
-the pyqode.core plugins to add the QGenericCodeEdit to the ui.
+the pyqode.core plugins to append the QGenericCodeEdit to the ui.
 
 .. literalinclude:: /../../examples/gui_integration/simple_editor.py
    :linenos:

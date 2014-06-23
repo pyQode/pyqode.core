@@ -4,11 +4,32 @@ The backend package contains the API to use on the server side:
     - workers definitions
 """
 # server
-from pyqode.core.backend.server import JsonServer
-from pyqode.core.backend.server import default_parser
-from pyqode.core.backend.server import serve_forever
+from .server import JsonServer
+from .server import default_parser
+from .server import serve_forever
 
 # workers
-from pyqode.core.backend.workers import CodeCompletionWorker
-from pyqode.core.backend.workers import DocumentWordsProvider
-from pyqode.core.backend.workers import echo_worker
+from .workers import CodeCompletionWorker
+from .workers import DocumentWordsProvider
+from .workers import echo_worker
+
+
+class NotConnected(Exception):
+    """
+    Raised if the client is not connected to the server when an operation
+    is requested.
+    """
+    def __init__(self):
+        super().__init__('Client socket not connected or '
+                         'server not started')
+
+
+__all__ = [
+    'JsonServer',
+    'default_parser',
+    'serve_forever',
+    'CodeCompletionWorker',
+    'DocumentWordsProvider',
+    'echo_worker',
+    'NotConnected'
+]

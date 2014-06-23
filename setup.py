@@ -35,8 +35,8 @@ setup(
         'pyqode_plugins':
             ['code_edit = pyqode.core.designer_plugins'],
         'pygments.styles':
-            ['qt = pyqode.core.frontend.styles:QtStyle',
-             'darcula = pyqode.core.frontend.styles:DarculaStyle']
+            ['qt = pyqode.core.styles.qt:QtStyle',
+             'darcula = pyqode.core.styles.darcula:DarculaStyle']
     },
     zip_safe=False,
     classifiers=[
