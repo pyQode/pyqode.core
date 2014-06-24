@@ -235,7 +235,7 @@ class TextHelper:
          else the selection stops at the cursor position.
         :param text_cursor: Optional custom text cursor (e.g. from a
             QTextDocument clone)
-        :return The QTextCursor that contains the selected word.
+        :returns: The QTextCursor that contains the selected word.
         """
         editor = self._editor
         if not text_cursor:
@@ -449,7 +449,7 @@ class TextHelper:
             end of the document
         :param apply_selection: True to apply the selection before returning
          the QTextCursor.
-        :return A QTextCursor that holds the requested selection
+        :returns: A QTextCursor that holds the requested selection
         """
         editor = self._editor
         if end == -1:
@@ -637,12 +637,12 @@ class TextHelper:
         """
         Searches a text in a text document.
 
-        :param text_document: QTextDocument
         :param text_cursor: Current text cursor
         :param search_txt: Text to search
         :param search_flags: QTextDocument.FindFlags
-        :return: the list of occurences, the current occurence index
-        :returns tuple([], int)
+        :returns: the list of occurrences, the current occurrence index
+        :rtype: tuple([], int)
+
         """
         def compare_cursors(cursor_a, cursor_b):
             return (cursor_b.selectionStart() >= cursor_a.selectionStart() and

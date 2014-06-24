@@ -11,7 +11,7 @@ from .search_and_replace import SearchAndReplacePanel
 
 __all__ = [
     'LineNumberPanel',
-    'Marker'
+    'Marker',
     'MarkerPanel',
-    'SearchAndReplacePanel'
+    'SearchAndReplacePanel',
 ]

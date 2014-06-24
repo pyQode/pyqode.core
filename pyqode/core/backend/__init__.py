@@ -13,6 +13,7 @@ We use a worker based json messaging server using the TCP/IP protocol.
 
 We build our own, very simple protocoal where each message is made up of two
 parts:
+
   - a header: simply contains the length of the payload
   - a payload: a json formatted string, the content of the message.
 

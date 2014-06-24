@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This package contains the core modes
+This package contains the core modes.
+
 """
 # pylint: disable=unused-import
 from .autocomplete import AutoCompleteMode
@@ -23,7 +24,7 @@ from .zoom import ZoomMode
 
 __all__ = [
     'AutoCompleteMode',
-    'AutoIndentMode'
+    'AutoIndentMode',
     'CaretLineHighlighterMode',
     'CaseConverterMode',
     'CheckerMode',

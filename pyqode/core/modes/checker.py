@@ -48,9 +48,8 @@ class CheckerMessage(object):
     def status_to_string(cls, status):
         """
         Converts a message status to a string.
-        :param status: Status to convert (
-            pyqode.core.modes.CheckerMessages)
 
+        :param status: Status to convert (p yqode.core.modes.CheckerMessages)
         :return: The status string.
         :rtype: str
         """

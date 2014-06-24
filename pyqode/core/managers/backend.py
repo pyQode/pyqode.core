@@ -13,6 +13,7 @@ class BackendManager(Manager):
 
     It is responsible of starting the backend process and the client socket and
     exposes an API to easily control the backend:
+
         - start
         - stop
         - send_request

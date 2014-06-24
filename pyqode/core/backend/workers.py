@@ -70,8 +70,9 @@ class CodeCompletionWorker(object):
             Returns a list of completions.
 
             A completion is dictionary with the following keys:
+
                 - 'name': name of the completion, this the text displayed and
-                inserted when the user select a completion in the list
+                  inserted when the user select a completion in the list
                 - 'icon': an optional icon file name
                 - 'tooltip': an optional tooltip string
 
