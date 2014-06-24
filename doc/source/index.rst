@@ -22,8 +22,8 @@ few lines of code.
 This documentation will only cover the `pyqode.core`_ package.
 
 
-.. image:: _static/screenshot.png
-    :alt: QGenericCodeEdit on Linux Mint 15 Cinnamon
+.. image:: _static/notepad.png
+    :alt: Screenshot of notepad example
     :width: 400
     :height: 300
     :align: center
