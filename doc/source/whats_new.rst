@@ -1,6 +1,6 @@
 What's New?
 ===========
-This page presents the latest news concerning the pyqode project and releases.
+This page presents the latest news concerning the pyqode project.
 You will find what the latest release added and what is planned for the next
 versions.
 
