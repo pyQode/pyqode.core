@@ -194,7 +194,12 @@ class FileManager(Manager):
             _logger().debug('save to temp file succeeded')
             # remove path and rename temp file
             _logger().debug('rename %s to %s', tmp_path, path)
-            os.remove(path)
+            try:
+                # needed on windows as we cannot rename an existing file
+                os.remove(path)
+            except FileNotFoundError:
+                # first save  (aka save as)
+                pass
             os.rename(tmp_path, path)
             self._rm_tmp(tmp_path)
             # reset dirty flags
