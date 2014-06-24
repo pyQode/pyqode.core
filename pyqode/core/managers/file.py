@@ -194,6 +194,7 @@ class FileManager(Manager):
             _logger().debug('save to temp file succeeded')
             # remove path and rename temp file
             _logger().debug('rename %s to %s', tmp_path, path)
+            os.remove(path)
             os.rename(tmp_path, path)
             self._rm_tmp(tmp_path)
             # reset dirty flags
