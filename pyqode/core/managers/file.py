@@ -197,7 +197,7 @@ class FileManager(Manager):
             try:
                 # needed on windows as we cannot rename an existing file
                 os.remove(path)
-            except FileNotFoundError:
+            except OSError:
                 # first save  (aka save as)
                 pass
             os.rename(tmp_path, path)
