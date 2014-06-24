@@ -1,17 +1,23 @@
 Welcome to pyQode documentation!
-=======================================
+================================
 
-pyQode is a flexible source code editor widget library for Python/Qt applications.
+pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
 
-pyQode is a **namespace package** made up of the following official packages:
+**pyQode is a library/widget, not an IDE**. *You can see it as an alternative
+to QScintilla.*
 
-    * `pyqode.core`_: The foundation package. Defines the base classes and provides a set of generic modes and panels that can be used for any kind of code editor widget.
+pyQode is organised as a **namespace package** made up of the following
+official packages:
 
-    * `pyqode.python`_: Add python support to pyqode (code completion, calltips, live code checking,...)
+  - `pyqode.core`_: core package
+  - `pyqode.python`_: python support (code completion, ...)
+  - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
-    * `pyqode.widgets`_: A set of useful widgets that can be used to speed up the development of pyqode applications (property grid, tab widget,...)
-
-    * `pyqode.designer`_: Startup script that starts Qt Designer with the installed pyqode plugins
+**pyqode.core** is the foundation package, it contains the base classes
+(CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
+for any kind of code editor. With ``pyqode.core`` you can already create a
+generic code editor (similar to gedit, leafpad, notepad++, ...) with only a
+few lines of code.
 
 This documentation will only cover the `pyqode.core`_ package.
 
@@ -21,6 +27,7 @@ This documentation will only cover the `pyqode.core`_ package.
     :width: 400
     :height: 300
     :align: center
+
 
 Parts of the documentation:
 ===========================
@@ -34,8 +41,8 @@ Parts of the documentation:
     getting_started
     advanced
     examples
+    api/index
     changelog
-    api
     bugs
     contribute
     license
@@ -72,12 +79,12 @@ Parts of the documentation:
 
    * .. glossary::
 
-      :doc:`api`
+      :doc:`api/index`
          The api reference documentation
 
 
 Meta information:
-============================
+=================
 
 .. hlist::
    :columns: 2
@@ -104,7 +111,7 @@ Meta information:
 
 
 Indices and tables:
-============================
+===================
 
 * :ref:`genindex`
 

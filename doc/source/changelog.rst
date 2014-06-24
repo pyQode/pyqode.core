@@ -5,6 +5,27 @@ Change Log
 
     These lists are not exhaustive.
 
+2.0.0
+-----
+
+New features/improvements:
+    - PyQt5 support
+    - Mac OSX support
+    - new client/server API
+    - simpler settings API
+    - simpler modes/panels API
+    - there is now a way to select the python interpreter used for the backend
+      process
+    - integrate widgets defined in pyqode.widgets (pyqode.widgets will be
+      removed soon)
+    - allow tab key to choose a completion
+    - new pyqode specific pygments color schemes
+
+Fixed bugs:
+    - fix zombie backend process
+    - fix unsupported pickle protocol
+    - fix list of pygments style: all styles are now included, including plugins!
+
 1.3.2
 -----
 

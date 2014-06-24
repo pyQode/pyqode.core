@@ -23,7 +23,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     QTextCursor, ...) or use the more high level functions defined in
     :mod:`pyqode.core.api.TextHelper`
 
-    .. note:: setPlainText has been overriden to force you to define
+    .. note:: setPlainText has been overridden to force you to define
         a mime type and an encoding.
 
     """
@@ -229,16 +229,21 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
-        #: Manager (import them here to avoid circular imports)
         from pyqode.core.managers import BackendManager
         from pyqode.core.managers import FileManager
         from pyqode.core.managers import ModesManager
         from pyqode.core.managers import TextDecorationsManager
         from pyqode.core.managers import PanelsManager
+        #: BackendManager used to control the backend process
         self.backend = BackendManager(self)
+        #: FileManager used to open/save file on the editor
         self.file = FileManager(self)
+        #: ModesManager used to append modes to the editor
         self.modes = ModesManager(self)
+        #: PanelsManager used to append panels to the editor
         self.panels = PanelsManager(self)
+        #: TextDecorationManager: manage the list of
+        #: TextDecoration/ExtraSelections
         self.decorations = TextDecorationsManager(self)
 
         # Settings

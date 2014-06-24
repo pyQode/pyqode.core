@@ -1,83 +1,81 @@
 Examples
 ========
 If you downloaded a source archive or cloned pyQode from github, you will find a
-series of examples in the examples directory at the root of the archive.
+series of examples in the ``examples`` directory, at the root of the archive.
 
 All examples requires pyqode.core to be installed.
 
-.. note:: All examples are bindings independent so that all user can run them
+.. note:: All examples are bindings independent so that every user can run them
           without being required to install an unwanted qt binding.
-
-.. contents:: :local:
 
 .. highlight:: python
    :linenothreshold: 5
 
-Using a pre-made editor
------------------------
+Basic example
+-------------
 
 This example show how to use a pre-made editor.
 
-.. literalinclude:: /../../examples/premade.py
+Frontend:
++++++++++
+
+.. literalinclude:: /../../examples/simple/basic.py
    :linenos:
 
-Creating a custom editor
-----------------------------
+Backend:
+++++++++
 
-This example show how to create a custom editor from scratch using the available
-modes and panels.
-
-.. literalinclude:: /../../examples/custom.py
+.. literalinclude:: /../../examples/simple/server.py
    :linenos:
 
-Gui integration
------------------
+Custom actions
+--------------
 
-This simple example show how you can build a simple generic editor using
-pyqode.core. The example user interface has been designed in Qt Designer using
-the pyqode.core plugins to append the QGenericCodeEdit to the ui.
+This example show you how to modify default actions, here we modify the
+shortcut and the text of the ``duplicate lines`` actions.
 
-.. literalinclude:: /../../examples/gui_integration/simple_editor.py
+.. note:: This example shares the backend script with the Basic example.
+
+.. literalinclude:: /../../examples/simple/custom_actions.py
    :linenos:
 
-.. note:: This example makes use of a designer ui file compiled using the
-          translate_ui script. This script call the pyside compiler and replace
-          a few imports to make it usable by both bindings. You typically don't
-          need to do that in a real world application where you use one qt
-          binding.
+Custom actions
+--------------
 
-Force PyQt5
-----------------
+This example show you how to change some editor properties. Here we modify
+the pygments color scheme.
 
-This example shows you how you can force pyQode to use PyQt5.
+.. note:: This example shares the backend script with the Basic example.
 
-.. literalinclude:: /../../examples/qt_bindings/PyQt5.py
+.. literalinclude:: /../../examples/simple/style_and_settings.py
    :linenos:
 
-Force PySide
-----------------
+Select Qt bindings
+------------------
 
-This example shows you how you can force pyQode to use PySide.
+Those examples show you how to force the use of a specific qt bindings.
 
-.. literalinclude:: /../../examples/qt_bindings/pyside.py
+PyQt5 (default)
++++++++++++++++
+
+.. literalinclude:: /../../examples/select_qt/pyqt5.py
    :linenos:
 
-Dump style and settings
--------------------------
+PyQt4
++++++
 
-This example dumps the style and settings property registry of a simple
-CodeEdit and a QGenericCodeEdit to show you the dynamic nature of the settings
-depending on the installed modes/panels.
-
-.. literalinclude:: /../../examples/styling/dump.py
+.. literalinclude:: /../../examples/select_qt/pyqt4.py
    :linenos:
 
-Save and load settings
--------------------------
+PySide
+++++++
 
-This example show you how you can serialize/deserialize style and settings
-properties. The example create a first editor and modify its style manually. The
-style is then save to a json file and used to setup a second editor.
-
-.. literalinclude:: /../../examples/styling/save_load.py
+.. literalinclude:: /../../examples/select_qt/pyside.py
    :linenos:
+
+Notepad
+-------
+
+This example is a complete but minimal code editor application. It is too large
+to be included here. You should really have a look at it as this example
+combines nealy all the concepts exposed by pyqode.core

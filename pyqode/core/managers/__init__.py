@@ -2,6 +2,7 @@
 The managers package contains a series of managers classes for CodeEdit.
 
 A manager is class that takes care of a specific aspect of CodeEdit:
+
     - FileManager: open, save, encoding detection
     - BackendManager: manage the backend process (start the process and
       handle communication through sockets).

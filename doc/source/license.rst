@@ -1,11 +1,11 @@
 License
-============
+=======
 
 pyQode is licensed under the MIT license.
 
 
 The MIT License (MIT)
--------------------------
+---------------------
 
 Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
 

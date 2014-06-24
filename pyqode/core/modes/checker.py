@@ -177,14 +177,11 @@ class CheckerMode(Mode, QtCore.QObject):
 
     def add_messages(self, messages, clear=True):
         """
-        Adds one message or a list of message.
+        Adds a message or a list of message.
 
         :param messages: A list of messages or a single message
         :param clear: Clear messages before displaying the new ones.
                       Default is True.
-
-        .. warning:: This function will be renamed to **addMessages** for the
-                     next release (this is planned for 1.1).
         """
         if clear:
             self.clear_messages()

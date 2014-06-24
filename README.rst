@@ -26,16 +26,14 @@ pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
 **pyQode is a library/widget, not an IDE**. *You can see it as an alternative
 to QScintilla.*
 
-
-pyQode is a **namespace package** made up of the following official packages:
+pyQode is organised as a **namespace package** made up of the following
+official packages:
 
   - `pyqode.core`_: core package
-
   - `pyqode.python`_: python support (code completion, ...)
-
   - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
-**pyqode.core** is the foundation package, it contains the pyqode base classes
+**pyqode.core** is the foundation package, it contains the base classes
 (CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
 for any kind of code editor. With pyqode.core you can already create a generic
 code editor (similar to gedit, notepad++) with only a few lines of code.

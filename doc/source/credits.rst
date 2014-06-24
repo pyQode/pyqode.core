@@ -1,10 +1,11 @@
 Credits
-==============
+=======
 
 pyQode uses a couple of external libraries and projects.
 
 Here is the complete list:
-    * python
+
+    * Python
     * Qt using PySide or PyQt
     * Tango icons
     * Pygments
