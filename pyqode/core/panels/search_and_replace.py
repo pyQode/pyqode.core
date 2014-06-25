@@ -87,6 +87,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     @property
     def background(self):
+        """ Text decoration background """
         return self._bg
 
     @background.setter
@@ -96,6 +97,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     @property
     def foreground(self):
+        """ Text decoration foreground """
         return self._fg
 
     @foreground.setter

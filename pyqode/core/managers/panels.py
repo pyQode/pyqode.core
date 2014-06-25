@@ -33,6 +33,13 @@ class PanelsManager(Manager):
         editor.updateRequest.connect(self.update)
 
     def append(self, panel, position=Panel.Position.LEFT):
+        """
+        Install a panel on the editor.
+
+        :param panel: Panel to install
+        :param position: Panel position
+        :return: The installed panel
+        """
         assert panel is not None
         pos_to_string = {
             Panel.Position.BOTTOM: 'bottom',
@@ -50,12 +57,22 @@ class PanelsManager(Manager):
         return panel
 
     def remove(self, name_or_klass):
+        """
+        Removes the specified panel.
+
+        :param name_or_klass: Name or class of the panel to remove.
+        :return: The removed panel
+        """
         _logger().info('removing panel %r', name_or_klass)
         panel = self.get(name_or_klass)
         panel.on_uninstall()
         return self._panels[panel.position].pop(panel.name, None)
 
     def clear(self):
+        """
+        Removes all panel from the editor.
+
+        """
         for i in range(4):
             while len(self._panels[i]):
                 key = list(self._panels[i].keys())[0]
@@ -63,6 +80,12 @@ class PanelsManager(Manager):
                 del panel
 
     def get(self, name_or_klass):
+        """
+        Gets a specific panel instance.
+
+        :param name_or_klass: Name or class of the panel to retrieve.
+        :return: The specified panel instance.
+        """
         if not isinstance(name_or_klass, str):
             name_or_klass = name_or_klass.__name__
         for zone in range(4):
@@ -89,6 +112,13 @@ class PanelsManager(Manager):
         return len(lst)
 
     def panels_for_zone(self, zone):
+        """
+        Gets the list of panels attached to the specified zone.
+
+        :param zone: Panel position.
+
+        :return: List of panels instances.
+        """
         return list(self._panels[zone].values())
 
     def refresh(self):

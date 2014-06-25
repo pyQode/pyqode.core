@@ -30,11 +30,12 @@ class InteractiveConsole(QTextEdit):
     to the process stdin.
 
     You can customize the colors using the following attributes:
-        - stdout_color: color of the process' stdout
+
+        - stdout_color: color of the process stdout
         - stdin_color: color of the user inputs. Green by default
         - app_msg_color: color for custom application message (
-                         process started, process finished)
-        - stderr_color: color of the process' stderr
+          process started, process finished)
+        - stderr_color: color of the process stderr
 
     """
     #: Signal emitted when the process has finished.
@@ -92,86 +93,97 @@ class InteractiveConsole(QTextEdit):
         logging.debug('stderr ready: %s', txt)
         self._writer(self, txt, self.stderr_color)
 
-    def _get_background_col(self):
+    @property
+    def background_color(self):
+        """ The console background color. Default is white. """
         pal = self.palette()
         return pal.color(pal.Base)
 
-    def _set_background_color(self, color):
+    @background_color.setter
+    def background_color(self, color):
         pal = self.palette()
         pal.setColor(pal.Base, color)
         pal.setColor(pal.Text, self.stdout_color)
         self.setPalette(pal)
 
-    #: The console background color. Default is white.
-    background_color = property(_get_background_col, _set_background_color)
-
-    def _get_stdout_col(self):
+    @property
+    def stdout_color(self):
+        """ STDOUT color. Default is black. """
         return self._stdout_col
 
-    def _set_stdout_col(self, color):
+    @stdout_color.setter
+    def stdout_color(self, color):
         self._stdout_col = color
         pal = self.palette()
-        pal.setColor(pal.Text, self.stdout_color)
+        pal.setColor(pal.Text, self._stdout_color)
         self.setPalette(pal)
 
-    #: Color of the process output. Default is black.
-    stdout_color = property(_get_stdout_col, _set_stdout_col)
+    @property
+    def stderr_color(self):
+        """
+        Color for stderr output if :attr:`pyqode.core.widgets.InteractiveConsole.merge_outputs`
+        is False.
 
-    def _get_err_col(self):
+        Default is Red.
+        """
         return self._stderr_col
 
-    def _set_err_col(self, color):
+    @stderr_color.setter
+    def stderr_color(self, color):
         self._stderr_col = color
 
-    #: Color for stderr output if
-    # :attr:`pyqode.widgets.QInteractiveConsole.mergeStderrWithStdout`is False.
-    stderr_color = property(_get_err_col, _set_err_col)
-
-    def _get_stdin_col(self):
+    @property
+    def stdin_color(self):
+        """
+        STDIN color. Default is green.
+        """
         return self._stdin_col
 
-    def _set_stdin_col(self, color):
+    @stdin_color.setter
+    def stdin_color(self, color):
         self._stdin_col = color
 
-    #: Color for user inputs. Default is green.
-    stdin_color = property(_get_stdin_col, _set_stdin_col)
-
-    def _get_app_message_color(self):
+    @property
+    def app_msg_color(self):
+        """
+        Color of the application messages (e.g.: 'Process started',
+        'Process finished with status %d')
+        """
         return self._app_msg_col
 
-    def _set_app_message_color(self, color):
+    @app_msg_color.setter
+    def app_msg_color(self, color):
         self._app_msg_col = color
 
-    #: Color of the application messages (e.g.: 'Process started',
-    #: 'Process finished with status %d')
-    app_msg_color = property(_get_app_message_color, _set_app_message_color)
-
-    def _get_clear_on_start(self):
+    @property
+    def clear_on_start(self):
+        """
+        True to clear window when starting a new process. False to accumulate
+        outputs.
+        """
         return self._clear_on_start
 
-    def _set_clear_on_start(self, value):
+    @clear_on_start.setter
+    def clear_on_start(self, value):
         self._clear_on_start = value
 
-    clear_on_start = property(_get_clear_on_start, _set_clear_on_start)
-
-    def _get_merge_outputs(self):
+    @property
+    def merge_outputs(self):
         """
         Merge stderr with stdout. Default is False.
 
-        If set to true, stderr and stdin won't have distinctive colors, i.e.
-        stderr output will display with the same color as stdout.
+        If set to true, stderr and stdin will use the same color: stdin_color.
 
         """
         return self._merge_outputs
 
-    def _set_merge_outputs(self, value):
+    @merge_outputs.setter
+    def merge_outputs(self, value):
         self._merge_outputs = value
         if value:
             self.process.setProcessChannelMode(QProcess.MergedChannels)
         else:
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
-
-    merge_outputs = property(_get_merge_outputs, _set_merge_outputs)
 
     def closeEvent(self, *args, **kwargs):
         # pylint: disable=invalid-name, unused-argument
@@ -208,6 +220,9 @@ class InteractiveConsole(QTextEdit):
             _logger().warning('a process is already running')
 
     def stop_process(self):
+        """
+        Stop the process (by killing it).
+        """
         _logger().debug('killing process')
         self.process.kill()
         self._user_stop = True

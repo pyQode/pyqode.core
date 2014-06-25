@@ -220,8 +220,8 @@ To use modes and panels, you must use the corresponding manager:
     - :class:`pyqode.core.managers.PanelsManager` for panels
 
 Those managers are available as attributes of CodeEditr:
-    - :attr:`pyqode.core.CodeEdit.modes`
-    - :attr:`pyqode.core.CodeEdit.panels`
+    - :attr:`pyqode.core.api.CodeEdit.modes`
+    - :attr:`pyqode.core.api.CodeEdit.panels`
 
 To install a mode/panel, use the ``append`` method::
 

@@ -21,53 +21,28 @@ import os
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../..'))
 
-os.environ['QT_API'] = 'PyQt5'
 
-try:
-    import PyQt5
-except ImportError:
-    try:
-        import PyQt4
-    except ImportError:
-        # user does not have PyQt5 installed, use mock objects instead.
-        class Mock(object):
-            # because we do from PyQt5.QtCore import * in pyqode.core.qt.QtCore (and all other similar modules)
-            __all__ = ['QDialog', 'QPlainTextEdit', 'QPaintEvent', 'QKeyEvent', 'QMouseEvent',
-                       'QWheelEvent', 'QFocusEvent', 'QTextEdit', 'QObject', 'QColor', 'QWidget',
-                       'QSyntaxHighlighter', 'QTextBlockUserData', 'QTcpSocket', 'QProcess',
-                       'qRegisterResourceData', 'QTableWidget', 'QRegExp', 'QTextCursor',
-                       'QFont', 'QMenu', 'QTabBar', 'QTabWidget', 'pyqtSlot']
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
 
-            @classmethod
-            def mock_modules(cls, *modules):
-                for module in modules:
-                    sys.modules[module] = cls(cls.__module__)
+    def __call__(self, *args, **kwargs):
+        return Mock()
 
-            def __init__(self, *args, **kwargs):
-                pass
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
+            return Mock()
 
-            def __call__(self, *args, **kwargs):
-                return self.__class__()
-
-            def __getattr__(self, attribute):
-                if attribute in ('__file__', '__path__'):
-                    return os.devnull
-                elif attribute and attribute[0] == attribute[0].upper():
-                    mockType = self.__class__
-                    # mockType.__name__ = attribute
-                    mockType.__module__ = __name__
-                    mockType.ExtraSelection = object
-                    mockType.blue = object
-                    mockType.red = object
-                    return mockType
-                else:
-                    return self.__class__()
-
-        MOCK_MODULES = ['PyQt5', 'PyQt5.Qt', 'PyQt5.QtGui', 'PyQt5.QtCore', 'PyQt5.QtNetwork', 'PyQt5.QtWidgets',
-                        'PyQt5.QtWidgets.QTextEdit', 'Slot']
-        for mod_name in MOCK_MODULES:
-            m = Mock(mod_name)
-            sys.modules[mod_name] = m
+for mod_name in ['PyQt5', "PyQt4"]:
+    m = Mock(mod_name)
+    sys.modules[mod_name] = m
 
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -87,7 +62,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pyQode'
+project = u'pyqode.core'
 copyright = u'2013, Colin Duquesnoy'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -138,6 +113,7 @@ pygments_style = 'default'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
+os.environ['SPHINX'] = "1"
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 html_theme = 'default'
 if not on_rtd:  # only import and set the theme if we're building docs locally
@@ -216,7 +192,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pyQodeDoc'
+htmlhelp_basename = 'pyqode.core_doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -235,7 +211,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pyQode.tex', u'pyQode Documentation',
+  ('index', 'pyqode.core.tex', u'pyqode.core Documentation',
    u'Colin Duquesnoy', 'manual'),
 ]
 
@@ -265,7 +241,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyqode', u'pyQode Documentation',
+    ('index', 'pyqode.core', u'pyqode.core Documentation',
      [u'Colin Duquesnoy'], 1)
 ]
 

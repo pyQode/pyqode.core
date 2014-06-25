@@ -287,8 +287,8 @@ class TabWidget(QTabWidget):
         :param code_edit: The code editor widget tab to append
         :type code_edit: pyqode.core.api.CodeEdit
 
-        :param icon: The tab widget icon. Optional
-        :type icon: QtWidgets.QIcon or None
+        :param name: Name of the tab. Will use code_edit.file.name if None is
+            supplied. Default is None
 
         :return: Tab index
         """

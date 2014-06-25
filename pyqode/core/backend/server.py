@@ -181,7 +181,7 @@ def serve_forever(args=None):
     """
     Creates the server and serves forever
 
-    :param args: Optional argparser args if you decided to setup your own
+    :param args: Optional args if you decided to use your own
         argument parser. Default is None to let the JsonServer setup its own
         parser and parse command line arguments.
     """

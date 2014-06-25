@@ -2,6 +2,11 @@ import logging
 import sys
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import GoToLineDialog
+from pyqode.core.managers import BackendManager
+from pyqode.core.managers import FileManager
+from pyqode.core.managers import ModesManager
+from pyqode.core.managers import TextDecorationsManager
+from pyqode.core.managers import PanelsManager
 # ensure pyqode resource have been imported and are ready to use.
 from pyqode.core.ui import pyqode_core_rc
 from pyqode.core.qt import QtWidgets, QtCore, QtGui
@@ -61,6 +66,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def use_spaces_instead_of_tabs(self):
+        """ Use spaces instead of tabulations. Default is True. """
         return self._use_spaces_instead_of_tabs
 
     @use_spaces_instead_of_tabs.setter
@@ -69,6 +75,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def tab_length(self):
+        """ Tab length, number of spaces. """
         return self._tab_length
 
     @tab_length.setter
@@ -77,6 +84,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def min_indent_column(self):
+        """
+        Minimum indent colum.
+
+        Some languages such as cobol starts coding at column 7.
+        """
         return self._min_indent_column
 
     @min_indent_column.setter
@@ -85,6 +97,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def save_on_focus_out(self):
+        """
+        Automtically saves editor content on focus out.
+
+        Default is False.
+        """
         return self._save_on_focus_out
 
     @save_on_focus_out.setter
@@ -195,6 +212,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.rehighlight()
 
     @property
+    def word_separators(self):
+        """
+        The list of word separators used by the code completion mode
+        and the word clicked mode.
+        """
+        return self._word_separators
+
+    @word_separators.setter
+    def word_separators(self, separators):
+        self._word_separators = separators
+
+    @property
     def dirty(self):
         """
         Gets/sets the dirty flag.
@@ -222,6 +251,35 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         return self._visible_blocks
 
+    @property
+    def file(self):
+        """ FileManager used to open/save file on the editor """
+        return self._file
+
+    @file.setter
+    def file(self, file_manager):
+        self._file = file_manager
+
+    @property
+    def backend(self):
+        """ BackendManager used to control the backend process """
+        return self._backend
+
+    @property
+    def modes(self):
+        """ ModesManager used to append modes to the editor """
+        return self._modes
+
+    @property
+    def panels(self):
+        """ PanelsManager used to append panels to the editor """
+        return self._panels
+
+    @property
+    def decorations(self):
+        """ TextDecorationManager: manage the list of text decorations """
+        return self._decorations
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
@@ -229,32 +287,20 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
-        from pyqode.core.managers import BackendManager
-        from pyqode.core.managers import FileManager
-        from pyqode.core.managers import ModesManager
-        from pyqode.core.managers import TextDecorationsManager
-        from pyqode.core.managers import PanelsManager
-        #: BackendManager used to control the backend process
-        self.backend = BackendManager(self)
-        #: FileManager used to open/save file on the editor
-        self.file = FileManager(self)
-        #: ModesManager used to append modes to the editor
-        self.modes = ModesManager(self)
-        #: PanelsManager used to append panels to the editor
-        self.panels = PanelsManager(self)
-        #: TextDecorationManager: manage the list of
-        #: TextDecoration/ExtraSelections
-        self.decorations = TextDecorationsManager(self)
 
-        # Settings
-        #: List of word separators
-        self.word_separators = [
+        self._backend = BackendManager(self)
+        self._file = FileManager(self)
+        self._modes = ModesManager(self)
+        self._panels = PanelsManager(self)
+        self._decorations = TextDecorationsManager(self)
+
+        self._word_separators = [
             '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '{',
             '}', '|', ':', '"', "'", "<", ">", "?", ",", ".", "/", ";", '[',
             ']', '\\', '\n', '\t', '=', '-', ' '
         ]
         self._min_indent_column = 0
-        self._save_on_focus_out = True
+        self._save_on_focus_out = False
         self._use_spaces_instead_of_tabs = True
         self._whitespaces_foreground = None
         self._sel_background = None
@@ -329,6 +375,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Emits the new_text_set signal.
 
         :param txt: The new text to set.
+        :param mime_type: Associated mimetype. Setting the mime will update the
+                          pygments lexer.
+        :param encoding: text encoding
         """
         # pylint: disable=invalid-name
         self.file.mimetype = mime_type
@@ -420,8 +469,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @QtCore.Slot()
     def rehighlight(self):
         """
-        Convenience method that calls rehighlight on the instqlled
-        syntax highlighter mode.
+        Calls rehighlight on the installed syntax highlighter mode.
         """
         for mode in self.modes:
             if hasattr(mode, 'rehighlight'):

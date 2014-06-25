@@ -11,6 +11,10 @@ def _logger():
 
 
 class ModesManager(Manager):
+    """
+    Manages the list of modes of the code edit widget.
+
+    """
     def __init__(self, editor):
         super().__init__(editor)
         self._modes = {}

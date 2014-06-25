@@ -12,8 +12,8 @@ pyQode tends to prefer composition over inheritance, that's why you should
 create a new mode/panel whenever you want to extends the functionality of
 CodeEdit.
 
-You do that by subclassing **pyqode.core.api.Mode** or
-**pyqode.core.api.Panel** (or a more specific Mode such as the
+You do that by subclassing :class:`pyqode.core.api.Mode` or
+:class:`pyqode.core.api.Panel` (or a more specific Mode such as the
 SyntaxHighlighterMode)
 
 There are a few methods that are interesting to override:
@@ -96,7 +96,7 @@ Code checker modes (code linting)
 ---------------------------------
 
 pyQode have a base mode to help you write code checker modes (linters):
-:class:`pyqode.core.modes.CheckerMode``
+:class:`pyqode.core.modes.CheckerMode`
 
 To create a new checker mode, you can simply subclass CheckerMode and pass him
 the checker function that needs to be executed contextually (on the backend

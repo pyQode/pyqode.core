@@ -24,7 +24,7 @@ class FileManager(Manager):
         - detect encoding
         - detect mimetype
 
-    Example of usage:
+    Example of usage::
 
         editor = CodeEdit()
         assert editor.file.path == ''
@@ -35,26 +35,32 @@ class FileManager(Manager):
     """
     @property
     def path(self):
+        """ Gets the file path """
         return self._path
 
     @property
     def name(self):
+        """ Gets the file base name """
         return os.path.split(self.path)[1]
 
     @property
     def extension(self):
+        """ Gets the file path """
         return os.path.splitext(self.path)[1]
 
     @property
     def dirname(self):
+        """ Gets the file directory name """
         return os.path.dirname(self._path)
 
     @property
     def encoding(self):
+        """ Gets the file encoding """
         return self._encoding
 
     @property
     def icon(self):
+        """ Gets the file icon, provided by _get_icon """
         return self._get_icon()
 
     def _get_icon(self):
@@ -73,6 +79,12 @@ class FileManager(Manager):
         self.replace_tabs_by_spaces = replace_tabs_by_spaces
 
     def detect_encoding(self, path):
+        """
+        Detects file encoding
+
+        :param path: file path
+        :return: detected encoding
+        """
         _logger().debug('detecting file encoding for file: %s', path)
         with open(path, 'rb') as file:
             data = file.read()
@@ -104,6 +116,11 @@ class FileManager(Manager):
         return mimetype
 
     def open(self, path):
+        """
+        Open a file and set its content on the editor widget.
+
+        :param path: Path of the file to open.
+        """
         self._encoding = self.detect_encoding(path)
         _logger().info('file encoding: %s', self.encoding)
         # open file and get its content
@@ -120,6 +137,12 @@ class FileManager(Manager):
         self.editor.setWindowTitle(self.editor.file.name)
 
     def _save_tmp(self, plain_text, path):
+        """
+        Save the editor content to a temporary file.
+
+        :param plain_text: text to save
+        :param path: path of the file to save
+        """
         _logger().debug('saving editor content to temp file: %s', path)
         # fallback to locale preferred encoding (happen for ascii files)
         for encoding in [self.encoding, locale.getpreferredencoding()]:

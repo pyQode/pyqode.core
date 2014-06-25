@@ -18,8 +18,7 @@ class TextDecorationsManager(Manager):
         """
         Adds a text decoration on a CodeEdit instance
 
-        :param editor: CodeEdit instance
-        :param decoration: Text decoration
+        :param decoration: Text decoration to add
         :type decoration: pyqode.core.api.TextDecoration
         """
         # pylint: disable=protected-access
@@ -32,6 +31,12 @@ class TextDecorationsManager(Manager):
         return False
 
     def remove(self, decoration):
+        """
+        Removes a text decoration from the editor.
+
+        :param decoration: Text decoration to remove
+        :type decoration: pyqode.core.api.TextDecoration
+        """
         try:
             self._decorations.remove(decoration)
             self.editor.setExtraSelections(self._decorations)
@@ -41,6 +46,10 @@ class TextDecorationsManager(Manager):
             return False
 
     def clear(self):
+        """
+        Removes all text decoration from the editor.
+
+        """
         self._decorations[:] = []
         self.editor.setExtraSelections(self._decorations)
 

@@ -8,10 +8,12 @@ class Mode(object):
     appearance.
 
     A mode is added to an editor by using the ModesManager/PanelsManager:
-        :meth:`pyqode.core.api.CodeEdit.modes.append` or
-        :meth:`pyqode.core.api.CodeEdit.panels.append`
+
+        - :meth:`pyqode.core.api.CodeEdit.modes.append` or
+        - :meth:`pyqode.core.api.CodeEdit.panels.append`
 
     Subclasses may/should override the following methods:
+
         - :meth:`pyqode.core.api.Mode.on_install`
         - :meth:`pyqode.core.api.Mode.on_uninstall`
         - :meth:`pyqode.core.api.Mode.on_state_changed`
@@ -65,13 +67,13 @@ class Mode(object):
         """
         Installs the extension on the editor.
 
-        .. note:: This method is called by editor when you install a Mode.
-                  You should never call it yourself, even in a subclass.
-
-        .. warning:: Don't forget to call **super** when subclassing
-
         :param editor: editor widget instance
         :type editor: pyqode.core.api.code_edit.CodeEdit
+
+        .. note:: This method is called by editor when you install a Mode.
+                  You should never call it yourself, even in a subclasss.
+
+        .. warning:: Don't forget to call **super** when subclassing
         """
         self._editor = weakref.ref(editor)
         self.enabled = True
