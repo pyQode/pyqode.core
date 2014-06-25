@@ -41,44 +41,15 @@ except ImportError:
         def __init__(self, *args):
             pass
 
-    # class Slot(object):
-    #     def __init__(self, *args):
-    #         pass
-    #
-    #     def __call__(self, *args, **kwargs):
-    #         pass
-    import functools
-
-    def Slot(*types, str_name=None, str_result=None):
+    def Slot(*types):
         def decorator(func):
+            import functools
+
             @functools.wraps(func)
             def wrapper(*args, **kwds):
                 return func(*args, **kwds)
             return wrapper
         return decorator
-
-    # class Signal(object):
-    #     def __call__(self, *args, **kwargs): # real signature unknown
-    #         pass
-    #
-    #     def __getitem__(self, *args, **kwargs): # real signature unknown
-    #         pass
-    #
-    #     def __get__(self, *args, **kwargs): # real signature unknown
-    #         pass
-    #
-    #     def __init__(self, *types, name=None): # real signature unknown; restored from __doc__
-    #         pass
-    #
-    #     @staticmethod # known case of __new__
-    #     def __new__(*args, **kwargs): # real signature unknown
-    #         pass
-    #
-    #     def __repr__(self, *args, **kwargs): # real signature unknown
-    #         pass
-
-
-
 
     class QThread(object):
         pass
