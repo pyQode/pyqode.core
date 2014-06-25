@@ -115,7 +115,7 @@ class InteractiveConsole(QTextEdit):
     def stdout_color(self, color):
         self._stdout_col = color
         pal = self.palette()
-        pal.setColor(pal.Text, self._stdout_color)
+        pal.setColor(pal.Text, self._stdout_col)
         self.setPalette(pal)
 
     @property
