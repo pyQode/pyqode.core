@@ -368,7 +368,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     self._completer.completionModel().index(0, 0))
 
     def _insert_completion(self, completion):
-        cursor = self._helper.word_under_cursor(select_whole_word=True)
+        cursor = self._helper.word_under_cursor(select_whole_word=False)
         cursor.insertText(completion)
         self.editor.setTextCursor(cursor)
 
