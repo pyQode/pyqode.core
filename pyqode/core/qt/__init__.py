@@ -41,9 +41,9 @@ import os
 
 
 QT_API = 'QT_API'
-PYQT5_API = 'PyQt5'
-PYQT4_API = 'PyQt4'
-PYSIDE_API = 'PySide'
+PYQT5_API = 'pyqt5'
+PYQT4_API = 'pyqt4'
+PYSIDE_API = 'pyside'
 
 
 class PythonQtError(Exception):
