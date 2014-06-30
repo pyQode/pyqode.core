@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'search_panel.ui'
 #
-# Created: Tue Jun 10 16:00:30 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Mon Jun 30 18:34:45 2014
+#      by: PyQt5 UI code generator 5.3
 #
 # WARNING! All changes made in this file will be lost!
 
