@@ -5,7 +5,7 @@ This page covers advanced topics:
 
 Creating modes and panels
 -------------------------
-In this section we will see how to extend the pyqode with new modes and panels,
+In this section we will see how to extend pyqode with new modes and panels,
 covering the creation of a new mode/panel from scratch and from an existing one.
 
 pyQode tends to prefer composition over inheritance, that's why you should
@@ -95,12 +95,12 @@ simple modes and panels:
 Code checker modes (code linting)
 ---------------------------------
 
-pyQode have a base mode to help you write code checker modes (linters):
+pyQode have already have a mode to help you write code checker modes (linters):
 :class:`pyqode.core.modes.CheckerMode`
 
-To create a new checker mode, you can simply subclass CheckerMode and pass him
-the checker function that needs to be executed contextually (on the backend
-side).
+To create a new checker mode, simply subclass :class:`pyqode.core.modes.CheckerMode` and
+pass it the checker function that needs to be executed contextually (on the
+backend side).
 
 Here is a typical implementation of a checker mode:
 
@@ -137,13 +137,14 @@ Code completion modes
 The code completion mode is a flexible mode that provides a list of code
 suggestions to the user. The list of suggestion is made up by collecting the
 suggestions provided by a series of providers (this is done by the backend
-process.
+process).
 
-The only thing required to add code completion support for your
+The only step required to add code completion support for your
 favorite language is to implement a new CodeCompletionProvider that returns a
-list of suggestions and set it on :class:`pyqode.core.backend.CodeCompletionWorker`.
+list of suggestions and set it on
+:class:`pyqode.core.backend.CodeCompletionWorker`(on the backend side).
 
-Here is the provider interface you must implement::
+Here is the interface you must implement for a new code completion provider::
 
     class Provider(object):
         """
@@ -182,7 +183,8 @@ Here is the provider interface you must implement::
             raise NotImplementedError()
 
 
-To set it on the worker, just add the following lines to your backend server script::
+To set it on the worker, just add the following lines to your backend server
+script::
 
     from pyqode.core import backend
 
@@ -194,26 +196,25 @@ To set it on the worker, just add the following lines to your backend server scr
 Syntax highlighter mode
 -----------------------
 
-pyQode makes extensive use of QSyntaxHighlighter for various purposes completely
-different from syntax highlighting such as code folding and parenthesis matching.
+pyQode makes extensive use of QSyntaxHighlighter for various purposes,
+sometimes completely different from syntax highlighting such as code folding and
+parenthesis matching.
 
-To implement a new syntax highlighter for CodeEdit, you **must** subclass
-:class:`pyqode.core.api.SyntaxHighlighter` and override ``highlight_block``
+To implement a new syntax highlighter for CodeEdit, you **must subclass**
+:class:`pyqode.core.api.SyntaxHighlighter` and **override** ``highlight_block``
 instead of ``highlightBlock``.
 
 For a complete real life example, see :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`
 or :class:`pyqode.python.PythonSyntaxHighlighters`
 
 .. warning:: You cannot just create your own QSyntaxHighlighter as you would do
-             with a simple QPlainTextEdit as this will break code folding
-             and parenthesis matching modes).
+             with a simple QPlainTextEdit because this will break code folding
+             and parenthesis matching modes!
 
 Code folding
 ------------
 
-Code folding has been temporarly removed from pyqode 2.0.
-
-.. todo: Document this once code folding is back
+**Code folding has been temporarly removed from pyqode 2.0. It will be reintroduced in a future version.**
 
 
 Designer plugins
@@ -223,8 +224,8 @@ pyQode comes with a mechanism to quickly create Qt designer plugins and most
 of the widgets already have their own plugin.
 
 To use the existing pyQode plugins you need to use the `pyqode.designer`_ startup
-script. This scripts discover the pyqode plugins using pkgconfig and starts
-Qt Designer with the correct plugins path.
+script. This scripts discovers all installed pyqode plugins using pkgconfig and
+starts Qt Designer with the correct plugins path.
 
 A pyQode Qt Designer is a Qt designer plugin but also a setuptools plugin (
 using the entry points mechanism).
@@ -264,3 +265,9 @@ To do that, you just have to append an entrypoint to your setup.py:
 
 
 .. _`pyqode.designer`:
+
+.. warning:: It is important that your plugin module file name ends up with
+    ``plugin``. See `this document`_ for more information about QtDesigner
+    plugins.
+
+.. _this document: http://pyqt.sourceforge.net/Docs/PyQt5/designer.html#writing-qt-designer-plugins

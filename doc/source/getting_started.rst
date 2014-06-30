@@ -36,6 +36,14 @@ To use pyQode, simply import one of those packages::
     from pyqode.core import panels
     from pyqode.core import widgets
 
+    # then you start using pyqode, e.g:
+    editor = api.CodeEdit()
+    editor.modes.append(modes.CodeCompletionMode())
+    editor.panels.append(panels.LineNumberPanel())
+
+    tabWidget = widgets.TabWidget()
+    tabWidget.add_code_edit(editor)
+
 
 Selecting a Qt bindings
 -----------------------
@@ -59,14 +67,15 @@ For example, to use PySide::
 
 
 .. note:: You can also use the qt package of pyqode.core to write a bindings
-          independant application but you have to be aware that pyqode.core.qt
-          does not wrap the entire Qt API, only what was required for pyQode.
+          independent application but you have to be aware that
+          ``pyqode.core.qt`` does not wrap the entire Qt API (it only what was
+          required to write pyQode).
 
 The backend
 -----------
 
 pyQode is a client server API, the GUI side is called the ``frontend`` and
-the background process used to perfom heavyweight computation is called
+the background process used to perfom heavyweight computation is called the
 ``backend``.
 
 When writing a pyQode application, you have to write both the frontend script
@@ -87,8 +96,9 @@ Here is an example of server script::
 The frontend
 ------------
 
-Writing the frontend is not more complicated than writing the backend. All
-you have to do is:
+Writing the pyqode frontend is not more complicated than writing the backend.
+
+All you have to do is:
 
     1) create a :class:`pyqode.core.api.CodeEdit`
     2) start the backend process
@@ -138,7 +148,7 @@ The editor widget is a simple extension to QPlainTextEdit.
 It adds a few utility signals/methods and introduces the concept of
 **Managers, Modes and Panels**.
 
-A **mode/panel** is an editor extension that, once installed on a CodeEdit
+A **mode/panel** is an editor extension that, once added to a CodeEdit
 instance, may modify its behaviour and appearance:
 
   * **Modes** are simple objects which connect to the editor signals to append new behaviours (such as automatic indentation, code completion, syntax checking,...)
@@ -154,14 +164,18 @@ instance, may modify its behaviour and appearance:
             :width: 600
             :height: 450
 
-A **manager** is an object that literally manage one specific aspect of code
-edit. There are managers to manage the list of modes/panels, to open/save file
-and to control the backend:
+A **manager** is an object that literally manage a specific aspect of
+:class:`pyqode.core.api.CodeEdit`. There are managers to manage the list of
+modes/panels, to open/save file and to control the backend:
 
-    - :attr:`pyqode.core.api.CodeEdit.file`: File manager. Use it to open/save files or access the opened file attribute.
-    - :attr:`pyqode.core.api.CodeEdit.backend`: Backend manager. Use it to start/stop the backend or send a work request.
-    - :attr:`pyqode.core.api.CodeEdit.modes`: Modes manager. Use it to append/remove modes on the editor.
-    - :attr:`pyqode.core.api.CodeEdit.panels`: Modes manager. Use it to append/remove panels on the editor.
+    - :attr:`pyqode.core.api.CodeEdit.file`:
+        File manager. Use it to open/save files or access the opened file attribute.
+    - :attr:`pyqode.core.api.CodeEdit.backend`:
+        Backend manager. Use it to start/stop the backend or send a work request.
+    - :attr:`pyqode.core.api.CodeEdit.modes`:
+        Modes manager. Use it to append/remove modes on the editor.
+    - :attr:`pyqode.core.api.CodeEdit.panels`:
+        Modes manager. Use it to append/remove panels on the editor.
 
 Controlling the backend
 -----------------------
@@ -172,12 +186,13 @@ To start the backend, use :class:`pyqode.core.managers.BackendManager.start`.
 You can specify a custom interpreter if needed (useful in python for
 working with a python2 interpreter or when using a virtual environment)::
 
-    code_editor.backend.start('path/to/server_script.py')
+    code_editor.backend.start('path/to/server_script.py',
+                              interpreter='/usr/bin/python2.7')
 
 
-To request some work to be done on the backend, just use :class:`pyqode.core.managers.BackendManager.send_request`. You
-can specify a callback to be called when the work has finished, to retrieve
-the results::
+To request some work to be done on the backend, just use :class:`pyqode.core.managers.BackendManager.send_request`.
+You can specify a callback to be called when the work has finished (i.e. to
+retrieve the job results)::
 
     code_editor.backend.send_request(my_worker, {'parameters': None,}, my_callback)
 
@@ -214,12 +229,13 @@ or if you want to extend it.
 Using modes and panels
 ----------------------
 
-To use modes and panels, you must use the corresponding manager:
+To use modes and panels, you must use the corresponding managers:
 
     - :class:`pyqode.core.managers.ModesManager` for modes
     - :class:`pyqode.core.managers.PanelsManager` for panels
 
-Those managers are available as attributes of CodeEditr:
+Those managers are available as attributes of CodeEdit:
+
     - :attr:`pyqode.core.api.CodeEdit.modes`
     - :attr:`pyqode.core.api.CodeEdit.panels`
 
@@ -234,11 +250,19 @@ mode name or the mode class::
     m_class = code_editor.modes.get(MyMode)
     assert m_name == m_class
 
+.. note:: The order of installation of modes is important because some modes
+    have interdependances. Also it is worth noting that the order of
+    installation of modes define the order of reaction to a specific events.
+
+    Usually, this kind of restriction is documented for a specific modes in its
+    class documentation.
 
 Changing editor style and properties
 ------------------------------------
 
-You can change any property of CodeEdit or any of its modes at runtime. E.g.::
+You can change any property of CodeEdit, or any of its modes, at runtime.
+
+E.g.::
 
     # change color scheme
     code_editor.modes.get(PygmentsSyntaxHighlighter).pygments_style = 'monokai'

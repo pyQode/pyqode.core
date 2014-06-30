@@ -1,8 +1,9 @@
 What's New?
 ===========
-This page presents the latest news concerning the pyqode project.
-You will find what the latest release added and what is planned for the next
-versions.
+This page presents the latest news concerning pyQode.
+
+You will find information about the latest release (new feature and bugfixes) and
+what is planned for the next version.
 
 For more specific details about what is planned and what has been
 accomplished, please visit the `issues page on github`_ and the

@@ -14,7 +14,8 @@ All examples requires pyqode.core to be installed.
 Basic example
 -------------
 
-This example show how to use a pre-made editor.
+This is the most basic example. It starts and configures a very simple editor
+with only a few modes and panels.
 
 Frontend:
 +++++++++

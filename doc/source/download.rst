@@ -17,27 +17,31 @@ The following packages will be installed automatically:
 
     - pygments
 
-.. note:: Optionally, you can install chardet to help pyQode detect
+.. note:: Optionally, you can install *chardet* to help pyQode detect
           file encoding automatically.
 
 Supported platforms
 -------------------
 
-pyQode is known to run fine and has been tested on the following platforms:
+pyQode is known to run on the following platforms. It has been tested
+extensively on Ubuntu 12.04 (see our `continuous integration server`_)
 
     - Windows: Xp, Vista, Windows 7 and Windows 8.1
     - GNU/Linux: Ubuntu , Linux Mint, Fedora and ArchLinux
     - Mac OSX (>= 10.9)
 
+.. _continuous integration server: https://travis-ci.org/pyQode/pyqode.core
 
 Using pip
 ---------
 
-pyQode can be installed from *pypi* using *pip*:
+pyQode can be installed from *pypi* using `pip`_:
 
 .. code-block:: bash
 
     $ pip install pyqode.core
+
+.. _pip: https://pypi.python.org/pypi/pip
 
 From source
 -----------
@@ -52,13 +56,16 @@ commands:
     $ cd path/to/source/
     $ pip install .
 
-Alternatively you can clone the repository using git:
+
+Alternatively, you can install directly from master branch using
+``pip git+https``:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:ColinDuquesnoy/pyqode.core.git
-    $ cd pyqode.core
-    $ pip install .
+    $ pip install git+https://github.com/pyQode/pyqode.core.git@master
+
+.. note:: replace ``@master`` by ``@develop`` or any other valid branch name
+    to install the unstable development version
 
 .. _source archive: https://github.com/pyQode/pyqode.core/archive/master.zip
 .. _github repository: https://github.com/pyQode/pyqode.core
