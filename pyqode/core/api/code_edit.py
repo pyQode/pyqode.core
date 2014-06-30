@@ -19,9 +19,9 @@ def _logger():
 
 class CodeEdit(QtWidgets.QPlainTextEdit):
     """
-    Base class for any pyqode source code editor widget.
+    Base class for any pyQode source code editor widget.
 
-    Extends :class:`PyQt5.GtGui.QPlainTextEdit` by adding an extension system (
+    Extends :class:`QPlainTextEdit` by adding an extension system (
     modes and panels) and by adding a series of additional signal and methods.
 
     To interact with the editor content, you may use the Qt Text API (
