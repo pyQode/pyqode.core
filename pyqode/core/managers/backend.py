@@ -22,6 +22,7 @@ class BackendManager(Manager):
 
     def __init__(self, editor):
         super().__init__(editor)
+        #: client socket
         self.socket = JsonTcpClient(editor)
 
     def start(self, script, interpreter=sys.executable, args=None, port=None):

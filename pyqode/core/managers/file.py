@@ -74,8 +74,10 @@ class FileManager(Manager):
         """
         super().__init__(editor)
         self._path = ''
+        #: File mimetype
         self.mimetype = ''
         self._encoding = locale.getpreferredencoding()
+        #: True to replace tabs by spaces
         self.replace_tabs_by_spaces = replace_tabs_by_spaces
 
     def detect_encoding(self, path):

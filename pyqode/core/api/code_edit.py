@@ -89,6 +89,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         Some languages such as cobol starts coding at column 7.
         """
+        
         return self._min_indent_column
 
     @min_indent_column.setter
