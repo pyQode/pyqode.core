@@ -20,6 +20,9 @@ The public API has been heavily refactored to bring you a more pythonic and
 a cleaner API. The project now have a solid test suite and measure its
 coverage.
 
+We have dropped python2 support for the frontend. This means the GUI application
+that use pyqode must be written in python3.
+
 
 Next Version
 ------------

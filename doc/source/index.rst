@@ -1,5 +1,8 @@
-Welcome to pyQode documentation!
-================================
+.. image:: _static/pyqode-banner.png
+    :alt: pyQode
+
+Welcome to the pyqode.core documentation!
+=========================================
 
 pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
 
@@ -20,13 +23,6 @@ generic code editor (similar to gedit, leafpad, notepad++, ...) with only a
 few lines of code.
 
 This documentation will only cover the `pyqode.core`_ package.
-
-
-.. image:: _static/notepad.png
-    :alt: Screenshot of notepad example
-    :width: 400
-    :height: 300
-    :align: center
 
 
 Parts of the documentation:

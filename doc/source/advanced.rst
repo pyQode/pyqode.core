@@ -139,10 +139,10 @@ suggestions to the user. The list of suggestion is made up by collecting the
 suggestions provided by a series of providers (this is done by the backend
 process).
 
-The only step required to add code completion support for your
-favorite language is to implement a new CodeCompletionProvider that returns a
-list of suggestions and set it on
-:class:`pyqode.core.backend.CodeCompletionWorker`(on the backend side).
+The only step required to add code completion support for your favorite language is to implement a
+new CodeCompletionProvider that returns a list of suggestions and set it on
+:class:`pyqode.core.backend.CodeCompletionWorker`.
+
 
 Here is the interface you must implement for a new code completion provider::
 
