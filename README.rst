@@ -1,8 +1,8 @@
 .. image:: https://raw.githubusercontent.com/pyQode/pyqode.core/develop/doc/source/_static/pyqode-banner.png
 
 
-
-
+About
+-----
 
 .. image:: http://img.shields.io/pypi/v/pyqode.core.png
    :target: https://pypi.python.org/pypi/pyqode.core/
@@ -20,9 +20,6 @@
    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master       
    :alt: Coverage Status
 
-
-About pyQode
-------------
 
 pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
 
