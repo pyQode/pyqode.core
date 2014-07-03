@@ -1,6 +1,9 @@
 .. image:: https://raw.githubusercontent.com/pyQode/pyqode.core/develop/doc/source/_static/pyqode-banner.png
 
 
+Status
+------
+
 .. image:: http://img.shields.io/pypi/v/pyqode.core.png
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Latest PyPI version
@@ -8,8 +11,6 @@
 .. image:: http://img.shields.io/pypi/dm/pyqode.core.png
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Number of PyPI downloads
-
-
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   
    :target: https://travis-ci.org/pyQode/pyqode.core                      
