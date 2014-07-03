@@ -1,21 +1,23 @@
 Source Code Editor Widget for PyQt/PySide
 =========================================
 
-===================== ======================================================================= =========================================================
-Package               .. image:: http://img.shields.io/pypi/v/pyqode.core.png                 .. image:: http://img.shields.io/pypi/dm/pyqode.core.png
-                        :target: https://pypi.python.org/pypi/pyqode.core/                      :target: https://pypi.python.org/pypi/pyqode.core/
-                        :alt: Latest PyPI version                                               :alt: Number of PyPI downloads
-===================== ======================================================================= =========================================================
+.. image:: http://img.shields.io/pypi/v/pyqode.core.png
+   :target: https://pypi.python.org/pypi/pyqode.core/
+   :alt: Latest PyPI version
 
-========================== ======================================================================= ==================================================================================
-Stable (`master`_)         .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master  
-                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master                 
-                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                            
-========================== ======================================================================= ==================================================================================
-Unstable (`develop`_)      .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=develop  .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=develop 
-                             :target: https://travis-ci.org/pyQode/pyqode.core                      :target: https://coveralls.io/r/pyQode/pyqode.core?branch=develop                
-                             :alt: Travis-CI build status                                           :alt: Coverage Status                                                            
-========================== ======================================================================= ==================================================================================
+.. image:: http://img.shields.io/pypi/dm/pyqode.core.png
+   :target: https://pypi.python.org/pypi/pyqode.core/
+   :alt: Number of PyPI downloads
+
+
+
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   
+   :target: https://travis-ci.org/pyQode/pyqode.core                      
+   :alt: Travis-CI build status                                                                                                       
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master     
+   :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master       
+   :alt: Coverage Status
 
 
 About pyQode
@@ -29,9 +31,9 @@ to QScintilla.*
 pyQode is organised as a **namespace package** made up of the following
 official packages:
 
-  - `pyqode.core`_: core package
-  - `pyqode.python`_: python support (code completion, ...)
-  - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
+- `pyqode.core`_: core package
+- `pyqode.python`_: python support (code completion, ...)
+- `pyqode.designer`_: Starts Qt designer with all pyqode plugins
 
 **pyqode.core** is the foundation package, it contains the base classes
 (CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
