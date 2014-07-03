@@ -1,5 +1,5 @@
-Source Code Editor Widget for PyQt/PySide
-=========================================
+.. image:: https://raw.githubusercontent.com/pyQode/pyqode.core/develop/doc/source/_static/pyqode-banner.png
+
 
 .. image:: http://img.shields.io/pypi/v/pyqode.core.png
    :target: https://pypi.python.org/pypi/pyqode.core/
