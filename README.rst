@@ -1,62 +1,56 @@
-Python/Qt Code Editor Widget library
-====================================
-
-.. image:: https://api.travis-ci.org/pyQode/pyqode.core.png?branch=master
-    :target: https://travis-ci.org/pyQode/pyqode.core
-    :alt: Travis-CI build status
-
-.. image:: https://pypip.in/d/pyqode.core/badge.png
-    :target: https://crate.io/packages/pyqode.core/
-    :alt: Number of PyPI downloads
-
-.. image:: https://pypip.in/v/pyqode.core/badge.png
-    :target: https://crate.io/packages/pyqode.core/
-    :alt: Latest PyPI version
-
-.. image:: https://badge.waffle.io/pyqode/pyqode.core.png?label=ready&title=Ready 
-    :target: https://waffle.io/pyqode/pyqode.core
-    :alt: 'Stories in Ready'
-
-What is pyQode?
----------------
-
-pyQode is a *flexible source code editor widget* for Python Qt
-applications. **pyQode is a library/widget, not an IDE**. You can see it as an
-alternative to QScintilla.
+.. image:: https://raw.githubusercontent.com/pyQode/pyqode.core/develop/doc/source/_static/pyqode-banner.png
 
 
-pyQode is a **namespace package** made up of the following official packages:
+About
+-----
 
-  - `pyqode.core`_: core package
+.. image:: http://img.shields.io/pypi/v/pyqode.core.png
+   :target: https://pypi.python.org/pypi/pyqode.core/
+   :alt: Latest PyPI version
 
-  - `pyqode.python`_: python support (code completion, ...)
+.. image:: http://img.shields.io/pypi/dm/pyqode.core.png
+   :target: https://pypi.python.org/pypi/pyqode.core/
+   :alt: Number of PyPI downloads
 
-  - `pyqode.widgets`_: useful widgets for pyqode apps
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   
+   :target: https://travis-ci.org/pyQode/pyqode.core                      
+   :alt: Travis-CI build status                                                                                                       
 
-  - `pyqode.designer`_: Starts Qt designer with all pyqode plugins
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master     
+   :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master       
+   :alt: Coverage Status
 
-.. _pyqode.core: https://github.com/pyQode/pyqode.core
-.. _pyqode.python: https://github.com/pyQode/pyqode.python
-.. _pyqode.widgets: https://github.com/pyQode/pyqode.widgets
-.. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 
-**pyqode.core** is the foundation package, it contains the pyqode base classes (QCodeEdit, Mode, Panel) 
-and a set of builtin modes and panels that are useful for any kind of code editor. With pyqode.core you 
-can already create a generic code editor (similar to gedit, notepad++) with only a few lines of code.
+pyQode is a *flexible source code editor widget* for PyQt/PySide applications.
+
+**pyQode is a library/widget, not an IDE**. *You can see it as an alternative
+to QScintilla.*
+
+pyQode is organised as a **namespace package** made up of the following
+official packages:
+
+- `pyqode.core`_: core package
+- `pyqode.python`_: python support (code completion, ...)
+- `pyqode.designer`_: Starts Qt designer with all pyqode plugins
+
+**pyqode.core** is the foundation package, it contains the base classes
+(CodeEdit, Mode, Panel) and a set of builtin modes and panels that are useful
+for any kind of code editor. With pyqode.core you can already create a generic
+code editor (similar to gedit, notepad++) with only a few lines of code.
 
 Features
 --------
 
 Here are the core features:
 
--  supports PySide and/or PyQt4
--  supports Python 2 and/or Python 3
--  simple widget based on QPlainTextEdit
--  easily customisable (modes and panels)
--  native look and feel close to Qt creator
--  builtin modes and panels (folding, line number, code completion,
-   syntax highlighting)
--  Qt Designer plugin
+- support multiple frontend: PyQt5, PyQt4 and PySide
+- simple widget based on QPlainTextEdit
+- easily customisable (modes and panels)
+- native look and feel close to Qt creator
+- builtin modes and panels (line number, code completion,
+  syntax highlighting,...)
+- Qt Designer plugin
+- client/server architecture for smooth, non-blocking UI.
 
 
 License
@@ -70,97 +64,65 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  Python 2.7 or Python 3 (>= 3.2)
--  PyQt4 or PySide
+-  Python 3 (>= 3.2)
+-  PyQt5 or PyQt4 or PySide
 -  pygments
 
 
 Installation
 ------------
-You need to install PyQt4 or PySide by yourself.
+You need to install PyQt or PySide by yourself.
 
-Then you can install pyqode using pip::
+Then you can install pyqode.core using **pip**::
 
-    $ pip install pyqode.core
+    $ pip3 install pyqode.core
 
+Testing
+-------
 
-Usage
------
+pyqode.core now have a test suite and measure its coverage.
 
-The *public API* is exposed by the *pyqode.core* package.
+To run the test, just run the following command (you don't need to install
+anything)::
 
-Here is a `simple example using PyQt4`_:
+    $ python3 runtests.py
+    
+If you need coverage, install pytest-coverage and run::
 
-.. code:: python
+    $ python3 runtests.py --cov pyqode --cov-report term
+    
+If you want to test PEP8 compliance, install pytest-pep8 and run::
 
-    # simple example using PyQt4
-    import sys
-    import PyQt4  # just to tell pyqode we want to use PyQt4.
-    import pyqode.core
-    from PyQt4.QtGui import QApplication
-
-
-    def main():
-        app = QApplication(sys.argv)
-        editor = pyqode.core.QGenericCodeEdit()
-        editor.openFile(__file__)
-        editor.resize(800, 600)
-        editor.show()
-        return app.exec_()
-
-
-    if __name__ == "__main__":
-        sys.exit(main())
-
-.. _simple example using PyQt4: https://gist.github.com/ColinDuquesnoy/6096185
+    $ python3 runtests.py --pep8
 
 Resources
 ---------
 
--  `Downloads`_
--  `Source repository`_
--  `Documentation`_
--  `Wiki`_
+- `Downloads`_
+- `Source repository`_
+- `Documentation`_
+- `Wiki`_
 
+
+Snapshots
+---------
+
+Here are a few snapshots of the notepad example application (snapshots
+taken on a Gnome 3 desktop):
+
+.. image:: doc/source/_static/notepad.png
+    :alt: Default style
+
+.. image:: doc/source/_static/notepad-monokai.png
+    :alt: Monokai style
+    
+    
+.. _pyqode.core: https://github.com/pyQode/pyqode.core
+.. _pyqode.python: https://github.com/pyQode/pyqode.python
+.. _pyqode.designer: https://github.com/pyQode/pyqode.designer
 .. _Downloads: https://github.com/pyQode/pyqode.core/releases
 .. _Source repository: https://github.com/pyQode/pyqode.core/
 .. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/pyQode/pyqode.core/wiki
-
-
-Screenshots
------------
-
-Here are a few screenshots of the gui integration example on several different platforms:
-
-* Windows 7:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/windows7.PNG
-    :alt: Windows 7
-    
-* Ubuntu:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/ubuntu.png
-    :alt: Ubuntu
-    
-* Linux Mint:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/mint.png
-    :alt: Linux mint
-    
-* KDE:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde.png
-    :alt: KDE
-    
-* KDE with a dark color scheme:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/kde-dark.png
-    :alt: KDE dark
-    
-* Gnome:
-
-.. image:: https://raw.github.com/ColinDuquesnoy/pyqode.core/master/screenshots/gnome.png
-    :alt: Gnome
-
-
+.. _master: https://github.com/pyQode/pyqode.core/tree/master
+.. _develop: https://github.com/pyQode/pyqode.core/tree/develop

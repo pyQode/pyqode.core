@@ -1,126 +1,76 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains the care line highlighter mode
 """
-from pyqode.core import constants
-from pyqode.core.mode import Mode
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.system import driftColor
-from pyqode.qt import QtGui
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.mode import Mode
+from pyqode.core.api.utils import drift_color
+from pyqode.core.qt import QtGui
 
 
 class CaretLineHighlighterMode(Mode):
     """
     This mode highlights the caret line (active line).
-
-    Here the properties added by the mode to
-    :attr:`pyqode.core.QCodeEdit.style`:
-
-    ====================== ====================== ======= ====================== =====================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== =====================
-    caretLineBackground    General                QColor  Computed.              This color is computed based on the background color automatically.
-    ====================== ====================== ======= ====================== =====================
-
     """
-    #: The mode identifier
-    IDENTIFIER = "caretLineHighlighterMode"
-    #: The mode description
-    DESCRIPTION = "This mode highlights the caret line"
-
     @property
-    def caretLineBackground(self):
-        return self.editor.style.value("caretLineBackground")
+    def background(self):
+        """
+        Background color of the caret line. Default is to use a color slightly
+        darker/lighter than the background color. You can override the
+        automatic color by setting up this property
+        """
+        if self._color or not self.editor:
+            return self._color
+        else:
+            return drift_color(self.editor.background, 110)
 
-    @caretLineBackground.setter
-    def caretLineBackground(self, value):
-        self.editor.style.setValue("caretLineBackground", value)
+    @background.setter
+    def background(self, value):
+        """
+        Background color of the caret line
+        """
+        self._color = value
+        self.refresh()
 
     def __init__(self):
-        Mode.__init__(self)
-        self.__decoration = None
-        self.__brush = None
-        self.__pos = -1
+        super().__init__()
+        self._decoration = None
+        self._pos = -1
+        self._color = None
 
-    def _onStateChanged(self, state):
+    def on_state_changed(self, state):
         """
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
         if state:
-            self.editor.cursorPositionChanged.connect(self.__updateHighlight)
-            self.editor.newTextSet.connect(self.__updateHighlight)
+            self.editor.cursorPositionChanged.connect(self.refresh)
+            self.editor.new_text_set.connect(self.refresh)
         else:
             self.editor.cursorPositionChanged.disconnect(
-                self.__updateHighlight)
-            self.editor.newTextSet.disconnect(self.__updateHighlight)
-            self.__clearDeco()
+                self.refresh)
+            self.editor.new_text_set.disconnect(self.refresh)
+            self._clear_deco()
 
-    def _onInstall(self, editor):
-        """
-        Installs the mode on the editor and add a style property:
-            - caretLineBackground
-        """
-        Mode._onInstall(self, editor)
-        color = self.editor.style.addProperty(
-            "caretLineBackground", driftColor(constants.EDITOR_BACKGROUND, 110))
-        self.__brush = QtGui.QBrush(QtGui.QColor(color))
-        self.__updateHighlight()
+    def on_install(self, editor):
+        super().on_install(editor)
+        self.refresh()
 
-    def _onStyleChanged(self, section, key):
-        """
-        Changes the highlight brush color and refresh highlighting
-        """
-        if key == "caretLineBackground":
-            self.__brush = QtGui.QBrush(
-                self.editor.style.value("caretLineBackground"))
-            self.__updateHighlight()
-        if not key or key == "background":
-            b = self.editor.style.value("background")
-            factor = 104
-            if b.lightness() < 128:
-                factor = 150
-            if b.lightness() == 0:
-                b = QtGui.QColor("#101010")
-            self.__brush = QtGui.QBrush(
-                self.editor.style.value("caretLineBackground"))
-            self.__updateHighlight()
-            self.editor.style.setValue("caretLineBackground",
-                                       driftColor(b, factor))
+    def _clear_deco(self):
+        """ Clear line decoration """
+        if self._decoration:
+            self.editor.decorations.remove(self._decoration)
 
-    def __clearDeco(self):
-        if self.__decoration:
-            self.editor.removeDecoration(self.__decoration)
-
-    def __updateHighlight(self):
+    def refresh(self):
         """
         Updates the current line decoration
         """
-        self.__clearDeco()
-        self.__decoration = TextDecoration(self.editor.textCursor())
-        self.__decoration.setBackground(self.__brush)
-        self.__decoration.setFullWidth()
-        self.editor.addDecoration(self.__decoration)
+        self._clear_deco()
+        if self._color:
+            color = self._color
+        else:
+            color = drift_color(self.editor.background, 110)
+        brush = QtGui.QBrush(color)
+        self._decoration = TextDecoration(self.editor.textCursor())
+        self._decoration.set_background(brush)
+        self._decoration.set_full_width()
+        self.editor.decorations.append(self._decoration)

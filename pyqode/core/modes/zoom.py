@@ -1,31 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
-from pyqode.core import constants
-from pyqode.core.mode import Mode
-from pyqode.qt import QtCore
+"""
+This module contains the ZoomMode which lets you zoom in and out the editor.
+"""
+from pyqode.core.api.mode import Mode
+from pyqode.core.qt import QtCore
 
 
 class ZoomMode(Mode):
@@ -37,30 +15,25 @@ class ZoomMode(Mode):
       * **zoom in**: *ctrl++* or *ctrl+mouse wheel forward*
       * **reset**: *ctrl + 0*
     """
-    #: Mode identifier
-    IDENTIFIER = "zoomMode"
-    #: Mode description
-    DESCRIPTION = "Zoom the editor with ctrl+mouse wheel"
-
     def __init__(self):
         super(ZoomMode, self).__init__()
         self.prev_delta = 0
-        self.default_font_size = constants.FONT_SIZE
+        self.default_font_size = 10
 
-    def _onStateChanged(self, state):
+    def on_state_changed(self, state):
         """
-        Connects/Disconnects to the mouseWheelActivated and keyPressed event
+        Connects/Disconnects to the mouse_wheel_activated and key_pressed event
         """
         if state:
-            self.editor.mouseWheelActivated.connect(
-                self.__onWheelEvent)
-            self.editor.keyPressed.connect(self.__onKeyPressed)
+            self.editor.mouse_wheel_activated.connect(
+                self._on_wheel_event)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            self.editor.mouseWheelActivated.disconnect(
-                self.__onWheelEvent)
-            self.editor.keyPressed.disconnect(self.__onKeyPressed)
+            self.editor.mouse_wheel_activated.disconnect(
+                self._on_wheel_event)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
 
-    def __onKeyPressed(self, event):
+    def _on_key_pressed(self, event):
         """
         Resets editor font size to the default font size
 
@@ -69,16 +42,16 @@ class ZoomMode(Mode):
         """
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if event.key() == QtCore.Qt.Key_0:
-                self.editor.resetZoom()
+                self.editor.reset_zoom()
                 event.accept()
             if event.key() == QtCore.Qt.Key_Plus:
-                self.editor.zoomIn()
+                self.editor.zoom_in()
                 event.accept()
             if event.key() == QtCore.Qt.Key_Minus:
-                self.editor.zoomOut()
+                self.editor.zoom_out()
                 event.accept()
 
-    def __onWheelEvent(self, event):
+    def _on_wheel_event(self, event):
         """
         Increments or decrements editor fonts settings on mouse wheel event
         if ctrl modifier is on.
@@ -86,11 +59,15 @@ class ZoomMode(Mode):
         :param event: wheel event
         :type event: QWheelEvent
         """
-        delta = event.delta()
+        try:
+            delta = event.angleDelta().y()
+        except AttributeError:
+            # PyQt4/PySide
+            delta = event.delta()
         if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
             if delta < self.prev_delta:
-                self.editor.zoomOut()
+                self.editor.zoom_out()
                 event.accept()
             else:
-                self.editor.zoomIn()
+                self.editor.zoom_in()
                 event.accept()

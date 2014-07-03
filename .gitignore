@@ -20,6 +20,8 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
+.cache
+.coverage*
 nosetests.xml
 # Translations
 *.mo
@@ -31,3 +33,6 @@ nosetests.xml
 .idea
 /*.json
 __pycache__
+htmlcov
+*.log
+*.DS_Store

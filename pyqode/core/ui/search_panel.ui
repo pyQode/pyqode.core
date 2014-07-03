@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>686</width>
-    <height>81</height>
+    <width>692</width>
+    <height>94</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,16 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -35,13 +44,31 @@
       <property name="spacing">
        <number>9</number>
       </property>
-      <property name="margin">
+      <property name="leftMargin">
+       <number>9</number>
+      </property>
+      <property name="topMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>9</number>
+      </property>
+      <property name="bottomMargin">
        <number>9</number>
       </property>
       <item>
        <widget class="QWidget" name="widgetSearch" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -92,7 +119,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonPrevious">
+          <widget class="QToolButton" name="toolButtonPrevious">
            <property name="text">
             <string/>
            </property>
@@ -103,7 +130,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonNext">
+          <widget class="QToolButton" name="toolButtonNext">
            <property name="text">
             <string/>
            </property>
@@ -115,97 +142,6 @@
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxCase">
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -216,97 +152,6 @@
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxWholeWords">
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="WindowText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="Text">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-              <colorrole role="ButtonText">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
            <property name="text">
             <string>Whole words</string>
            </property>
@@ -333,19 +178,13 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonClose">
+          <widget class="QToolButton" name="toolButtonClose">
            <property name="text">
             <string/>
            </property>
            <property name="icon">
             <iconset>
              <normaloff>:/pycode-icons/rc/close.png</normaloff>:/pycode-icons/rc/close.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>12</width>
-             <height>12</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -355,7 +194,16 @@
       <item>
        <widget class="QWidget" name="widgetReplace" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -394,14 +242,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonReplace">
+          <widget class="QToolButton" name="toolButtonReplace">
            <property name="text">
             <string>Replace</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonReplaceAll">
+          <widget class="QToolButton" name="toolButtonReplaceAll">
            <property name="text">
             <string>Replace All</string>
            </property>
@@ -422,8 +270,8 @@
          </item>
         </layout>
         <zorder>lineEditReplace</zorder>
-        <zorder>pushButtonReplace</zorder>
-        <zorder>pushButtonReplaceAll</zorder>
+        <zorder>toolButtonReplace</zorder>
+        <zorder>toolButtonReplaceAll</zorder>
         <zorder>horizontalSpacer_2</zorder>
         <zorder>labelReplace</zorder>
        </widget>
@@ -508,13 +356,13 @@
  <tabstops>
   <tabstop>lineEditSearch</tabstop>
   <tabstop>lineEditReplace</tabstop>
-  <tabstop>pushButtonPrevious</tabstop>
-  <tabstop>pushButtonNext</tabstop>
+  <tabstop>toolButtonPrevious</tabstop>
+  <tabstop>toolButtonNext</tabstop>
   <tabstop>checkBoxCase</tabstop>
   <tabstop>checkBoxWholeWords</tabstop>
-  <tabstop>pushButtonReplace</tabstop>
-  <tabstop>pushButtonReplaceAll</tabstop>
-  <tabstop>pushButtonClose</tabstop>
+  <tabstop>toolButtonReplace</tabstop>
+  <tabstop>toolButtonReplaceAll</tabstop>
+  <tabstop>toolButtonClose</tabstop>
  </tabstops>
  <resources>
   <include location="pyqode_core.qrc"/>

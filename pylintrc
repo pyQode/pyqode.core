@@ -1,0 +1,8 @@
+[MASTER]
+ignore=.git, ui, doc, test, examples
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=79
+# Maximum number of lines in a module
+max-module-lines=2000

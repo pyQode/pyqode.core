@@ -1,0 +1,59 @@
+[run]
+source = pyqode
+omit =
+    # qt design ui files
+    *_ui.py
+    *_rc.py
+    *pyqode/core/qt/*
+    # at the moment, we do not test misc ui elements such as
+    # widgets and dialogs (how could this be possible to test?)
+    *pyqode/core/dialogs/*
+    *pyqode/core/designer_plugins/*
+    *pyqode/core/widgets/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Don't complain about missing debug-only code:
+    def __repr__
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+    raise RuntimeError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+    if not PY33:
+    serve_forever
+    except :
+    except:
+    .debug
+    logger
+    except (TypeError, KeyError):
+    except AttributeError:
+    except RuntimeError:
+    except ImportError
+    pass
+
+    # unknown errors
+    error = -1
+
+    # platform specific code
+    self._font_family
+    .endswith('.exe')
+    if not _py33:
+    self._sel_background
+    self._sel_foreground
+
+    # Don't complain if non importable code is not run
+    except ImportError:
+
+    # Don't complain about _logger function not called
+    logging.getLogger
+
+    # pygments syntax highlighter: some methods are really hard to test
+    def get_tokens_unprocessed
+    def _get_format_from_style
+    def _update_style

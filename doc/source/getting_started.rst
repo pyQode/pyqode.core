@@ -3,186 +3,270 @@ Getting started
 
 This page is a gentle introduction to the pyQode framework.
 
-Before reading this you should have pyqode.core and PySide/PyQt4 :doc:`installed </download>` on your system.
+Before reading this, you should have ``pyqode.core`` and ``PySide/PyQt4/PyQt5``
+:doc:`installed </download>` on your system.
 
+Packages
+--------
 
-.. contents:: :local:
+Here is a brief overview of the content of pyqode.core and how to import it.
 
+pyqode.core is made up of a series of subpackages. Each subpackage defines its
+own api (classes defined in a module of a subpackage are available at the
+subpackage level).
 
-Public API
---------------
+Here are the main subpackages:
 
-The public API is fully exposed by the pyqode.core package.
+    - api: contains the bases classes of the API
+    - backend: classes for controlling the backend process
+    - modes: contains all available modes
+    - panels: contains all available panels
+    - styles: contains a series of pygments styles specific to pyQode
+    - widgets: contains a series of useful widgets.
 
-You only need to import **pyqode.core** to get access to the entire public API::
+.. note:: Not all subpackages are presented here, internal package or very
+          specific one have been left out. You can read more about them in the
+          API reference section.
 
-    import pyqode.core
-    code_edit = pyqode.core.QCodeEdit()
-    text_deco = pyqode.core.TextDecoration()
-    cc_mode = pyqode.core.CodeCompletionMode()
-    line_nbr_panel = pyqode.core.LineNumberPanel()
+To use pyQode, simply import one of those packages::
+
+    from pyqode.core import api
+    from pyqode.core import backend
+    from pyqode.core import modes
+    from pyqode.core import panels
+    from pyqode.core import widgets
+
+    # then you start using pyqode, e.g:
+    editor = api.CodeEdit()
+    editor.modes.append(modes.CodeCompletionMode())
+    editor.panels.append(panels.LineNumberPanel())
+
+    tabWidget = widgets.TabWidget()
+    tabWidget.add_code_edit(editor)
 
 
 Selecting a Qt bindings
-------------------------
+-----------------------
 
-The first thing to do when using pyQode is to specify the Qt bindings you want to use for your application
+The first thing to do when using pyQode is to specify the Qt bindings you want
+to use in your application.
 
-There are multiple ways of doing this but the preferred way is to simply set an
-environment variable at the top of your main module and then import pyqode.core::
+By default, pyQode will try to use PyQt5 and will fallback to PyQt4 or PySide in
+case of import errors. You can enforce the use of a specific bindings by
+setting up the ``QT_API`` environment variable.
+
+For example, to use PySide::
 
     import os
-    os.environ["QT_API"] = "PySide"  # or "PyQt" if you want to use PyQt4
-    import pyqode.core
+    os.environ['QT_API'] = 'PySide'
+    from pyqode.core.qt import QtCore, QtGui, QtWidgets
+    print('Qt version:%s' % QtCore.__version__)
+    print(QtCore.QEvent)
+    print(QtGui.QPainter)
+    print(QtWidgets.QWidget)
 
 
-You can also specify it using the command line arguments:
+.. note:: You can also use the qt package of pyqode.core to write a bindings
+          independent application but you have to be aware that
+          ``pyqode.core.qt`` does not wrap the entire Qt API (it only what was
+          required to write pyQode).
 
-.. code-block:: bash
+The backend
+-----------
 
-    $ python your_script.py --PySide
+pyQode is a client server API, the GUI side is called the ``frontend`` and
+the background process used to perfom heavyweight computation is called the
+``backend``.
 
-or
+When writing a pyQode application, you have to write both the frontend script
+and the backend script. Fortunately, writing the backend script is an easy
+task. All you have to do is to configure the server script
+(sys.path, workers,...) and call :meth:`pyqode.core.backend.serve_forever`
 
-.. code-block:: bash
+Here is an example of server script::
 
-    $ python your_script.py --PyQt
+    from pyqode.core import backend
 
-.. warning:: The QT_API string is case sensitive (this will change with version 1.1)
-
-
-.. note:: You can also write a qt bindings independent application by using the **pyqode.qt** package.
-          pyQode will pick up the first available bindings and expose it through the **qt** package.
-          Simply import QtGui and QtCore module from pyqode.qt to use the automatically chosen binding:
-
-          .. code-block:: python
-
-              import sys
-              from pyqode.qt import QtGui
-
-              app = QtGui.QApplication(sys.argv)
-              win = QtGui.QMainWindow()
-              win.show()
-              print(app)
-              app.exec_()
-
-**Most of the code samples of this documentation are bindings independent and use the pyqode.qt package.**
+    if __name__ == '__main__':
+        backend.CodeCompletionWorker.providers.append(
+            backend.DocumentWordsProvider())
+        backend.serve_forever()
 
 
-The editor widget: QCodeEdit
-------------------------------
+The frontend
+------------
+
+Writing the pyqode frontend is not more complicated than writing the backend.
+
+All you have to do is:
+
+    1) create a :class:`pyqode.core.api.CodeEdit`
+    2) start the backend process
+    3) configure CodeEdit
+    4) open a file or set some text
+    5) run the Qt main loop
+
+Here is a simple example of a frontend script::
+
+    import sys
+    from pyqode.core import api
+    from pyqode.core import modes
+    from pyqode.core import panels
+    from pyqode.core.qt import QtWidgets
+
+
+    if __name__ == "__main__":
+        app = QtWidgets.QApplication(sys.argv)
+
+        # create editor and window
+        window = QtWidgets.QMainWindow()
+        editor = api.CodeEdit()
+        window.setCentralWidget(editor)
+
+        # start the backend as soon as possible
+        editor.backend.start('server.py')
+
+        # append some modes and panels
+        editor.modes.append(modes.CodeCompletionMode())
+        editor.modes.append(modes.PygmentsSyntaxHighlighter(editor.document()))
+        editor.modes.append(modes.CaretLineHighlighterMode())
+        editor.panels.append(panels.SearchAndReplacePanel(),
+                          api.Panel.Position.BOTTOM)
+
+        # open a file
+        editor.file.open(__file__)
+
+        # run
+        window.show()
+        app.exec_()
+
+CodeEdit
+--------
 
 The editor widget is a simple extension to QPlainTextEdit.
 
-It adds a few utility signals/methods and introduces the concept of **Modes and Panels**.
+It adds a few utility signals/methods and introduces the concept of
+**Managers, Modes and Panels**.
 
-A mode/panel is an editor extension that, once installed on a QCodeEdit instance, may modify its behaviour and appearance:
+A **mode/panel** is an editor extension that, once added to a CodeEdit
+instance, may modify its behaviour and appearance:
 
-  * **Modes** are simple objects which connect to the editor signals to add new behaviours (such as automatic indentation, code completion, syntax checking,...)
+  * **Modes** are simple objects which connect to the editor signals to append new behaviours (such as automatic indentation, code completion, syntax checking,...)
 
-  * **Panels** are the combination of a **Mode** and a **QWidget**. They are displayed in the QCodeEdit's content margins.
-    When you install a Panel on a QCodeEdit, you can choose to install it on one of the four following zones:
+  * **Panels** are the combination of a **Mode** and a **QWidget**. They are
+    displayed in the QCodeEdit's content margins.
+
+    When you install a Panel on a CodeEdit, you can choose to install it in
+    one of the four following zones:
 
         .. image:: _static/editor_widget.png
             :align: center
             :width: 600
             :height: 450
 
+A **manager** is an object that literally manage a specific aspect of
+:class:`pyqode.core.api.CodeEdit`. There are managers to manage the list of
+modes/panels, to open/save file and to control the backend:
 
-pyQode tries to keep things simple for the basic user while not preventing advanced user from doing complex things.
+    - :attr:`pyqode.core.api.CodeEdit.file`:
+        File manager. Use it to open/save files or access the opened file attribute.
+    - :attr:`pyqode.core.api.CodeEdit.backend`:
+        Backend manager. Use it to start/stop the backend or send a work request.
+    - :attr:`pyqode.core.api.CodeEdit.modes`:
+        Modes manager. Use it to append/remove modes on the editor.
+    - :attr:`pyqode.core.api.CodeEdit.panels`:
+        Modes manager. Use it to append/remove panels on the editor.
 
-There is actually two way to use pyqode:
+Controlling the backend
+-----------------------
 
-    - use a pre-made editor that already fits your needs (QGenericCodeEdit)
-    - use the raw editor widget and install your own selection of modes and panels.
+To use the backend (from the frontend), you need to use :class:`pyqode.core.managers.BackendManager`.
 
+To start the backend, use :class:`pyqode.core.managers.BackendManager.start`.
+You can specify a custom interpreter if needed (useful in python for
+working with a python2 interpreter or when using a virtual environment)::
 
-.. note:: The editor widget is meant to work with files instead of raw text.
-          Prefer to use the openFile/saveToFile methods instead of the
-          setPlainText/plainText methods.
-
-Using a pre-made editor
-----------------------------
-
-Usually, most of the pyqode packages will expose a pre-made code editor widget with
-a set of modes and panels already installed.
-
-pyqode.core exposes the **QGenericCodeEdit** widget, a widget that is suitable for a
-language independent (not very smart) code editor widget.
-
-Here is a minimal example code:
-
-.. code-block:: python
-
-    import sys
-    from pyqode.qt import QtGui
-    import pyqode.core
+    code_editor.backend.start('path/to/server_script.py',
+                              interpreter='/usr/bin/python2.7')
 
 
-    def main():
-        app = QtGui.QApplication(sys.argv)
-        window = QtGui.QMainWindow()
-        editor = pyqode.core.QGenericCodeEdit()
-        editor.openFile(__file__)
-        window.setCentralWidget(editor)
-        window.show()
-        sys.exit(app.exec_())
+To request some work to be done on the backend, just use :class:`pyqode.core.managers.BackendManager.send_request`.
+You can specify a callback to be called when the work has finished (i.e. to
+retrieve the job results)::
+
+    code_editor.backend.send_request(my_worker, {'parameters': None,}, my_callback)
 
 
-    if __name__ == "__main__":
-        main()
+To stop the backend, just use :class:`pyqode.core.managers.BackendManager.stop`::
 
-Using the raw editor
----------------------
+    code_editor.backend.stop()
 
-Using the raw QCodeEdit widget, you will be able to make your own selection of
-modes and panels:
+You should not need to call it manually as the backend is automatically stopped
+when the editor got deleted by the python interpreter.
 
-.. code-block:: python
+Opening and saving files
+------------------------
 
-    import sys
-    from pyqode.qt import QtGui
-    import pyqode.core
+Opening and saving files is made easy by using the
+:class:`pyqode.core.managers.FileManager`.
 
+Opening a file::
 
-    def main():
-        app = QtGui.QApplication(sys.argv)
-        window = QtGui.QMainWindow()
-        editor = pyqode.core.QCodeEdit()
-        editor.openFile(__file__)
-        editor.installMode(pyqode.core.PygmentsSyntaxHighlighter(editor.document()))
-        editor.installPanel(pyqode.core.SearchAndReplacePanel(),
-                            position=pyqode.core.PanelPosition.TOP)
-        window.setCentralWidget(editor)
-        window.show()
-        sys.exit(app.exec_())
+    code_edit.file.open('/path/to/file.py')
 
+Saving a file::
 
-    if __name__ == "__main__":
-        main()
+    code_editor.file.save()
+
+Saving a file as::
+
+    code_editor.file.save('/path/to/new_file.py')
+
+You can always replace a manager by your own version if you're not happy with it
+or if you want to extend it.
 
 
-Retrieving a mode/Panel
---------------------------------
+Using modes and panels
+----------------------
 
-Installed modes and panels are set as object attributes using their name property as the attribute key::
+To use modes and panels, you must use the corresponding managers:
 
-    editor = QCodeEdit()
-    cc = CodeCompletionMode()
-    cc.name = "cc"
-    editor.installMode(CodeCompletionMode())
-    print(editor.cc)
+    - :class:`pyqode.core.managers.ModesManager` for modes
+    - :class:`pyqode.core.managers.PanelsManager` for panels
 
+Those managers are available as attributes of CodeEdit:
 
-Changing the editor style and settings:
--------------------------------------------
+    - :attr:`pyqode.core.api.CodeEdit.modes`
+    - :attr:`pyqode.core.api.CodeEdit.panels`
 
-Editor style and settings can be easily customised using the editor's style and settings properties:
+To install a mode/panel, use the ``append`` method::
 
-.. code-block:: python
+    code_editor.modes.append(MyMode())
 
-    editor = pyqode.core.QCodeEdit()
-    editor.style.setValue("backgound", QtGui.QColor("#000000"))
-    editor.settings.setValue("tabLength", 4)
+To retrieve a mode/panel, use the ``get`` method. This method accepts either the
+mode name or the mode class::
 
-Styling is more described in the :doc:`advanced </advanced>` section of the documentation
+    m_name = code_editor.modes.get('MyMode')
+    m_class = code_editor.modes.get(MyMode)
+    assert m_name == m_class
+
+.. note:: The order of installation of modes is important because some modes
+    have interdependances. Also it is worth noting that the order of
+    installation of modes define the order of reaction to a specific events.
+
+    Usually, this kind of restriction is documented for a specific modes in its
+    class documentation.
+
+Changing editor style and properties
+------------------------------------
+
+You can change any property of CodeEdit, or any of its modes, at runtime.
+
+E.g.::
+
+    # change color scheme
+    code_editor.modes.get(PygmentsSyntaxHighlighter).pygments_style = 'monokai'
+    # change property
+    code_editor.show_white_spaces = True
+    # change action shortcut
+    code_editor.action_duplicate_line.setShortcut('Ctrl+Shift+Down')

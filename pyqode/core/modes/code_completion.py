@@ -1,155 +1,21 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains the code completion mode and the related classes.
 """
+import logging
 import re
 import sys
-import os
-from pyqode.core import constants, Server, Worker
-from pyqode.core.editor import QCodeEdit
-from pyqode.core.mode import Mode
-from pyqode.core.system import DelayJobRunner, memoized
-from pyqode.core.server import get_server
-from pyqode.qt import QtGui, QtCore
-from pyqode.core import logger
+from pyqode.core.api.mode import Mode
+from pyqode.core.backend import NotConnected
+from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.core.managers.backend import BackendManager
+from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
+from pyqode.core import backend
+# pylint: disable=too-many-instance-attributes, missing-docstring
 
 
-class PreLoadWorker(Worker):
-    """
-    A worker object that will run the preload method on all completion provider
-    in the child process.
-    """
-
-    def __init__(self, providers, *args):
-        """
-        :param providers: The list of completion providers
-
-        :param args: The preload method arguments
-        """
-        self.__providers = providers
-        self.__args = args
-
-    def __call__(self, *args, **kwargs):
-        """
-        Do the work (this will be called in the child process by the
-        SubprocessServer).
-        """
-        results = []
-        for prov in self.__providers:
-            # pass the process dict to every providers
-            setattr(prov, "slotDict", self.slotDict)
-            r = prov.preload(*self.__args)
-            if r:
-                results.append(r)
-        return results
-
-
-class CompletionWorker(Worker):
-    """
-    A worker object that will run the complete method of every providers
-    """
-    def __init__(self, providers, *args):
-        self.__providers = providers
-        self.__args = args
-
-    def __call__(self, *args, **kwargs):
-        """
-        Do the work (this will be called in the child process by the
-        SubprocessServer).
-        """
-        completions = []
-        for prov in self.__providers:
-            # pass the process dict to every providers
-            setattr(prov, "slotDict", self.slotDict)
-            completions.append(prov.complete(*self.__args))
-            if len(completions) > 20:
-                break
-        return completions
-
-
-class Completion(object):
-    """
-    Defines a code completion item.
-
-    A completion is made up of the following elements:
-        - the suggestion text
-        - the suggestion icon. Optional.
-        - the suggestion tooltip. Optional.
-    """
-
-    def __init__(self, text, icon=None, tooltip=None):
-        #: Displayed text.
-        self.text = text.strip()
-        #: filename/resource name of the icon used for the decoration role
-        self.icon = icon
-        # optional description
-        self.tooltip = tooltip
-
-    def isNull(self):
-        return self.text == ""
-
-    def __repr__(self):
-        return self.text
-
-
-class CompletionProvider(object):
-    """
-    Base class for code completion providers, objects that scan some code and
-    return a list of Completion objects.
-
-    There are two methods to override:
-        - preload: preload the list of Completions when a new text is set on the
-                   editor. Optional.
-        - complete: complete the current text. All subclasses needs to implement
-                    this method.
-
-    .. note: As the provider is executed in a child process, your class instance
-             will loose its data every time its run. To store persistent data
-             (such as the preload results), you may use the 'slotDict'
-             attribute. Care must be taken from the key, we suggest a
-             combination of the file path and type(self).__name__.
-
-    """
-    PRIORITY = 0
-
-    def preload(self, code, fileEncoding, filePath):
-        return None
-
-    def complete(self, code, line, column, completionPrefix,
-                 filePath, encodign):
-        """
-        :param code: code string
-        :param line: line number (1 based)
-        :param column: colum number (0 based)
-        :param completionPrefix: The prefix to complete
-        :param filePath: file path of the code to complete
-        :param fileEncoding: encoding of the code to complete
-        """
-        raise NotImplementedError()
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
@@ -159,495 +25,395 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     completion provider(s).
 
     To implement a code completion for a specific language, you only need to
-    implement new :class:`pyqode.core.CompletionProvider`
+    implement new
+    :class:`pyqode.core.backend.workers.CodeCompletionWorker.Provider`
 
-    The completion pop is shown the user press **ctrl+space** or automatically
-    while the user is typing some code (this can be configured using a series
-    of properties described in the below table).
+    The completion popup is shown the user press **ctrl+space** or
+    automatically while the user is typing some code (this can be configured
+    using a series of properties).
 
-    The code completion mode adds the following properties to
-    :attr:`pyqode.core.QCodeEdit.settings`
-
-    ====================== ====================== ======= ====================== ================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== ================
-    triggerKey             Code completion        int     QtCore.Qt.Key_Space    The key that triggers the code completion requests(ctrl + **space**)
-    triggerLength          Code completion        int     1                      The number of character needed to trigger automatic completion requests.
-    triggerSymbols         Code completion        list    ["."]                  The list of symbols that trigger code completion requests(".", "->", ...)
-    showTooltips           Code completion        bool    True                   Show completion tooltip (e.g. to display the underlying type)
-    caseSensitive          Code completion        bool    False                  Case sensitivity (True is case sensitive)
-    ====================== ====================== ======= ====================== ================
-
-    .. note:: The code completion mode automatically starts a unique subprocess
-              (:attr:`pyqode.core.CodeCompletionMode.SERVER`)
-              to run code completion tasks. This process is automatically closed
-              when the application is about to quit. You can use this process
-              to run custom task on the completion process (e.g. setting up some :py:attr:`sys.modules`).
     """
-    #: Mode identifier
-    IDENTIFIER = "codeCompletionMode"
-    #: Mode description
-    DESCRIPTION = "Provides a code completion/suggestion system"
+    @property
+    def trigger_key(self):
+        return self._trigger_key
 
-    #: Code completion server running in a background process and shared among
-    #: all instances. Automatically started the first time a completion mode is
-    #: installed on an editor widget and stopped when the app is about to quit.
-    SERVER = None
-
-    completionsReady = QtCore.Signal(object)
-    waitCursorRequested = QtCore.Signal()
-
-    #: Signal emitted when the preload operation has started.
-    preLoadStarted = QtCore.Signal()
-    #: Signal emitted when the preload operation has completed.
-    preLoadCompleted = QtCore.Signal()
+    @trigger_key.setter
+    def trigger_key(self, value):
+        self._trigger_key = value
 
     @property
-    def triggerKey(self):
-        return self.editor.style.value("triggerKey", section="Code completion")
+    def trigger_length(self):
+        return self._trigger_len
 
-    @triggerKey.setter
-    def triggerKey(self, value):
-        self.editor.style.setValue("triggerKey", value, section="Code Completion")
-
-    @property
-    def triggerLength(self):
-        return self.editor.style.value("triggerLength", section="Code completion")
-
-    @triggerLength.setter
-    def triggerLength(self, value):
-        self.editor.style.setValue("triggerLength", value, section="Code completion")
+    @trigger_length.setter
+    def trigger_length(self, value):
+        self._trigger_len = value
 
     @property
-    def triggerSymbols(self):
-        return self.editor.style.value("triggerSymbols", section="Code completion")
+    def trigger_symbols(self):
+        return self._trigger_symbols
 
-    @triggerSymbols.setter
-    def triggerSymbols(self, value):
-        self.editor.style.setValue("triggerSymbols", value, section="Code completion")
-
-    @property
-    def showTooltips(self):
-        return self.editor.style.value("showTooltips", section="Code completion")
-
-    @showTooltips.setter
-    def showTooltips(self, value):
-        self.editor.style.setValue("showTooltips", value, section="Code completion")
+    @trigger_symbols.setter
+    def trigger_symbols(self, value):
+        self._trigger_symbols = value
 
     @property
-    def caseSensitive(self):
-        return self.editor.style.value("caseSensitive", section="Code completion")
+    def show_tooltips(self):
+        return self._show_tooltips
 
-    @caseSensitive.setter
-    def caseSensitive(self, value):
-        self.editor.style.setValue("caseSensitive", value, section="Code completion")
+    @show_tooltips.setter
+    def show_tooltips(self, value):
+        self._show_tooltips = value
 
     @property
-    def completionPrefix(self):
+    def case_sensitive(self):
+        return self._case_sensitive
+
+    @case_sensitive.setter
+    def case_sensitive(self, value):
+        self._case_sensitive = value
+
+    @property
+    def completion_prefix(self):
         """
         Returns the current completion prefix
         """
-        prefix = self.editor.selectWordUnderCursor().selectedText()
+        prefix = self._helper.word_under_cursor().selectedText()
         if prefix == "":
             try:
-                prefix = self.editor.selectWordUnderCursor(
-                    selectWholeWord=True).selectedText()[0]
+                cursor = self._helper.word_under_cursor(select_whole_word=True)
+                prefix = cursor.selectedText()[0]
             except IndexError:
                 pass
         return prefix.strip()
 
-    def __init__(self, server_port=5000):
-        """
-        :param server_port: Local TCP/IP port to use to start the code
-                            completion server process
-        """
+    def __init__(self):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        self.__currentCompletion = ""
-        self.__triggerKey = None
+        self._current_completion = ""
         # use to display a waiting cursor if completion provider takes too much
         # time
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=1000)
-        self.__providers = []
-        self.__tooltips = {}
-        self.__cursorLine = -1
-        self.__cancelNext = False
-        self.__preloadFinished = False
-        self.__requestCnt = 0
-        self.__lastCompletionPrefix = ""
-        self._server_port = server_port
-        self.waitCursorRequested.connect(self.__setWaitCursor)
+        self._job_runner = DelayJobRunner(delay=1000)
+        self._tooltips = {}
+        self._cursor_line = -1
+        self._cancel_next = False
+        self._request_cnt = 0
+        self._last_completion_prefix = ""
+        self._trigger_key = None
+        self._trigger_len = None
+        self._trigger_symbols = None
+        self._show_tooltips = None
+        self._case_sensitive = None
+        self._data = None
+        self._completer = None
+        self._init_settings()
 
-    def addCompletionProvider(self, provider):
-        """
-        Adds a completion provider to the list of providers used to provide
-        code completion to the user.
+    def _init_settings(self):
+        self._trigger_key = QtCore.Qt.Key_Space
+        self._trigger_len = 1
+        self._trigger_symbols = ['.']
+        self._show_tooltips = True
+        self._case_sensitive = False
 
-        Note that the provider instance will be pickled to be sent to the
-        subprocess, this means that you cannot store data to keep results from
-        run to run. Instead you may use
-        :attr:`pyqode.core.CompletionProvider.slotDict` which is a regular
-        dict attribute that is set on every provider object when run in the
-        subprocess.
-
-        :param provider: The completion provider instance to add.
-        """
-        self.__providers.append(provider)
-        self.__providers = sorted(
-            self.__providers, key=lambda provider: provider.PRIORITY,
-            reverse=True)
-
-    def removeCompletionProvider(self, provider):
-        """
-        Removes a completion provider.
-
-        :param provider: Provider instance to remove
-        :return:
-        """
-        self.__providers.remove(provider)
-        self.__providers = sorted(
-            self.__providers, key=lambda provider: provider.PRIORITY,
-            reverse=True)
-
-    def requestCompletion(self):
+    def request_completion(self):
         """
         Requests a code completion at the current cursor position.
         """
-        if not self.__preloadFinished or self.__requestCnt:
-            return
-        # only check first byte
-        column = self.editor.cursorPosition[1]
-        usd = self.editor.textCursor().block().userData()
-        for start, end in usd.cc_disabled_zones:
-            if start <= column < end:
-                logger.debug("Cancel request, cursor is in a disabled zone")
-                return
-        self.__requestCnt += 1
-        self.__collectCompletions(
-            self.editor.toPlainText(), self.editor.cursorPosition[0],
-            self.editor.cursorPosition[1], self.completionPrefix,
-            self.editor.filePath, self.editor.fileEncoding)
+        helper = TextHelper(self.editor)
+        if not self._request_cnt:
+            # only check first byte
+            column = helper.current_column_nbr()
+            usd = self.editor.textCursor().block().userData()
+            if usd and hasattr(usd, 'cc_disabled_zones'):
+                for start, end in usd.cc_disabled_zones:
+                    if start <= column < end:
+                        _logger().debug(
+                            "cc: cancel request, cursor is in a disabled zone")
+                        return False
+            self._request_cnt += 1
+            self._collect_completions(self.editor.toPlainText(),
+                                      helper.current_line_nbr(),
+                                      helper.current_column_nbr(),
+                                      self.editor.file.path,
+                                      self.editor.file.encoding,
+                                      self.completion_prefix)
+            return True
+        return False
 
-    def requestPreload(self):
-        """
-        Requests a preload of the document.
-        """
-        self.__preloadFinished = False
-        code = self.editor.toPlainText()
-        self.__preload(code, self.editor.filePath, self.editor.fileEncoding)
+    def on_install(self, editor):
+        self._completer = QtWidgets.QCompleter([""], editor)
+        self._completer.setCompletionMode(self._completer.PopupCompletion)
+        self._completer.activated.connect(self._insert_completion)
+        self._completer.highlighted.connect(
+            self._on_selected_completion_changed)
+        self._completer.setModel(QtGui.QStandardItemModel())
+        self._helper = TextHelper(editor)
+        Mode.on_install(self, editor)
 
-    def _onInstall(self, editor):
-        srv = get_server()
-        if srv:
-            srv.signals.workCompleted.connect(self.__onWorkFinished)
-        self.__completer = QtGui.QCompleter([""], editor)
-        self.__completer.setCompletionMode(self.__completer.PopupCompletion)
-        self.__completer.activated.connect(self.__insertCompletion)
-        self.__completer.highlighted.connect(self.__onCompletionChanged)
-        self.__completer.setModel(QtGui.QStandardItemModel())
-        Mode._onInstall(self, editor)
-        self.editor.settings.addProperty(
-            "triggerKey", int(QtCore.Qt.Key_Space), section="Code completion")
-        self.__triggerLength = self.editor.settings.addProperty(
-            "triggerLength", 1, section="Code completion")
-        self.editor.settings.addProperty(
-            "triggerSymbols", ["."], section="Code completion")
-        # todo to removed, replaced by trigger symbols
-        self.editor.settings.addProperty(
-            "triggerKeys", [int(QtCore.Qt.Key_Period)],
-            section="Code completion")
-        self.editor.settings.addProperty("showTooltips", True,
-                                         section="Code completion")
-        self.editor.settings.addProperty("caseSensitive", False,
-                                         section="Code completion")
+    def on_uninstall(self):
+        self._completer = None
 
-    def _onUninstall(self):
-        self.__completer = None
-
-    def _onStateChanged(self, state):
+    def on_state_changed(self, state):
         if state:
-            self.editor.focusedIn.connect(self.__onFocusIn)
-            self.editor.keyPressed.connect(self.__onKeyPressed)
-            self.editor.postKeyPressed.connect(self.__onKeyReleased)
-            self.completionsReady.connect(self.__showCompletions)
-            self.__completer.highlighted.connect(
-                self.__displayCompletionTooltip)
+            self.editor.focused_in.connect(self._on_focus_in)
+            self.editor.key_pressed.connect(self._on_key_pressed)
+            self.editor.post_key_pressed.connect(self._on_key_released)
+            self._completer.highlighted.connect(
+                self._display_completion_tooltip)
             self.editor.cursorPositionChanged.connect(
-                self.__onCursorPositionChanged)
-            self.editor.newTextSet.connect(self.requestPreload)
+                self._on_cursor_position_changed)
         else:
-            self.editor.focusedIn.disconnect(self.__onFocusIn)
-            self.editor.keyPressed.disconnect(self.__onKeyPressed)
-            self.editor.postKeyPressed.disconnect(self.__onKeyReleased)
-            self.completionsReady.disconnect(self.__showCompletions)
-            self.__completer.highlighted.disconnect(
-                self.__displayCompletionTooltip)
+            self.editor.focused_in.disconnect(self._on_focus_in)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
+            self.editor.post_key_pressed.disconnect(self._on_key_released)
+            self._completer.highlighted.disconnect(
+                self._display_completion_tooltip)
             self.editor.cursorPositionChanged.disconnect(
-                self.__onCursorPositionChanged)
-            self.editor.newTextSet.disconnect(self.requestPreload)
+                self._on_cursor_position_changed)
 
-    def __onFocusIn(self, event):
+    def _on_focus_in(self, event):
         """
         Resets completer widget
 
         :param event: QFocusEvents
         """
-        self.__completer.setWidget(self.editor)
+        # pylint: disable=unused-argument
+        self._completer.setWidget(self.editor)
 
-    def __onWorkFinished(self, caller_id, worker, results):
-        if caller_id == id(self) and isinstance(worker, CompletionWorker):
-            logger.debug("Completion request finished")
-            self.editor.setCursor(QtCore.Qt.IBeamCursor)
-            all_results = []
+    def _on_results_available(self, status, results):
+        _logger().debug("cc: got completion results")
+        self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
+        all_results = []
+        if status:
             for res in results:
                 all_results += res
-            self.__requestCnt -= 1
-            self.__showCompletions(all_results)
-        elif caller_id == id(self) and isinstance(worker, PreLoadWorker):
-            logger.debug("Preload request finished")
-            self.__preloadFinished = True
-            self.preLoadCompleted.emit()
+        self._request_cnt -= 1
+        self._show_completions(all_results)
 
-    def __onKeyPressed(self, event):
-        QtGui.QToolTip.hideText()
-        isShortcut = self.__isShortcut(event)
+    def _on_key_pressed(self, event):
+        QtWidgets.QToolTip.hideText()
+        is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
-        if self.__completer.popup().isVisible():
-            self.__handleCompleterEvents(event)
-            if isShortcut:
+        if self._completer.popup().isVisible():
+            self._handle_completer_events(event)
+            if is_shortcut:
                 event.accept()
-        if isShortcut:
-            self.requestCompletion()
+        if is_shortcut:
+            self.request_completion()
             event.accept()
 
-    def __isNavigationKey(self, event):
-        navigationKey = (event.key() == QtCore.Qt.Key_Backspace or
-                         event.key() == QtCore.Qt.Key_Back or
-                         event.key() == QtCore.Qt.Key_Delete or
-                         event.key() == QtCore.Qt.Key_Left or
-                         event.key() == QtCore.Qt.Key_Right or
-                         event.key() == QtCore.Qt.Key_Up or
-                         event.key() == QtCore.Qt.Key_Down or
-                         event.key() == QtCore.Qt.Key_Space or
-                         event.key() == QtCore.Qt.Key_End or
-                         event.key() == QtCore.Qt.Key_Home)
-        return navigationKey
+    @staticmethod
+    def _is_navigation_key(event):
+        return (event.key() == QtCore.Qt.Key_Backspace or
+                event.key() == QtCore.Qt.Key_Back or
+                event.key() == QtCore.Qt.Key_Delete or
+                event.key() == QtCore.Qt.Key_Left or
+                event.key() == QtCore.Qt.Key_Right or
+                event.key() == QtCore.Qt.Key_Up or
+                event.key() == QtCore.Qt.Key_Down or
+                event.key() == QtCore.Qt.Key_Space or
+                event.key() == QtCore.Qt.Key_End or
+                event.key() == QtCore.Qt.Key_Home)
 
-    def __isEndOfWordChar(self, event, isPrintable, symbols):
-        isEndOfWordChar = False
-        if isPrintable and symbols:
+    @staticmethod
+    def _is_end_of_word_char(event, is_printable, symbols, seps):
+        ret_val = False
+        if is_printable and symbols:
             k = event.text()
-            seps = constants.WORD_SEPARATORS
-            isEndOfWordChar = (k in seps and not k in symbols)
-        return isEndOfWordChar
+            ret_val = (k in seps and k not in symbols)
+        return ret_val
 
-    def __onKeyReleased(self, event):
-        if self.__isShortcut(event):
+    def _update_prefix(self, event, is_end_of_word, is_navigation_key):
+        self._completer.setCompletionPrefix(self.completion_prefix)
+        cnt = self._completer.completionCount()
+        if (not cnt or (self.completion_prefix == "" and is_navigation_key) or
+                is_end_of_word or
+                (int(event.modifiers()) and
+                 event.key() == QtCore.Qt.Key_Backspace)):
+            self._hide_popup()
+        else:
+            self._show_popup()
+
+    def _on_key_released(self, event):
+        if self._is_shortcut(event):
             return
-        isPrintable = self.__isPrintableKeyEvent(event)
-        navigationKey = self.__isNavigationKey(event)
-        symbols = self.editor.settings.value(
-            "triggerSymbols", section="Code completion")
-        isEndOfWordChar = self.__isEndOfWordChar(event, isPrintable, symbols)
-        if self.__completer.popup().isVisible():
+        is_printable = self._is_printable_key_event(event)
+        is_navigation_key = self._is_navigation_key(event)
+        symbols = self._trigger_symbols
+        is_end_of_word = self._is_end_of_word_char(
+            event, is_printable, symbols, self.editor.word_separators)
+        if self._completer.popup().isVisible():
             # Update completion prefix
-            self.__completer.setCompletionPrefix(self.completionPrefix)
-            cnt = self.__completer.completionCount()
-            if (not cnt or
-                    (self.completionPrefix == "" and navigationKey) or
-                    isEndOfWordChar or
-                    (int(event.modifiers()) and
-                     event.key() == QtCore.Qt.Key_Backspace)):
-                self.__hidePopup()
-            else:
-                self.__showPopup()
-        # text triggers
-        if isPrintable:
+            self._update_prefix(event, is_end_of_word, is_navigation_key)
+        if is_printable:
             if event.text() == " ":
-                self.__cancelNext = bool(self.__requestCnt)
+                self._cancel_next = self._request_cnt
             else:
                 # trigger symbols
                 if symbols:
-                    tc = self.editor.selectWordUnderCursor()
-                    tc.setPosition(tc.position())
-                    tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-                    textToCursor = tc.selectedText()
+                    cursor = self._helper.word_under_cursor()
+                    cursor.setPosition(cursor.position())
+                    cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+                    text_to_cursor = cursor.selectedText()
                     for symbol in symbols:
-                        if textToCursor.endswith(symbol):
-                            logger.debug("CC: Symbols trigger")
-                            self.__hidePopup()
-                            self.requestCompletion()
+                        if text_to_cursor.endswith(symbol):
+                            _logger().debug("cc: symbols trigger")
+                            self._hide_popup()
+                            self.request_completion()
                             return
                 # trigger length
-                if not self.__completer.popup().isVisible():
-                    prefixLen = len(self.completionPrefix)
-                    if prefixLen == self.editor.settings.value(
-                            "triggerLength", section="Code completion"):
-                        logger.debug("CC: Len trigger")
-                        self.requestCompletion()
+                if not self._completer.popup().isVisible():
+                    prefix_len = len(self.completion_prefix)
+                    if prefix_len == self._trigger_len:
+                        _logger().debug("cc: Len trigger")
+                        self.request_completion()
                         return
-            if self.completionPrefix == "":
-                return self.__hidePopup()
+            if self.completion_prefix == "":
+                return self._hide_popup()
 
-    def __onCompletionChanged(self, completion):
-        self.__currentCompletion = completion
+    def _on_selected_completion_changed(self, completion):
+        self._current_completion = completion
 
-    def __onCursorPositionChanged(self):
-        cl = self.editor.cursorPosition[0]
-        if cl != self.__cursorLine:
-            self.__cursorLine = cl
-            self.__hidePopup()
-            self.__jobRunner.cancelRequests()
-            self.__jobRunner.stopJob()
+    def _on_cursor_position_changed(self):
+        current_line = TextHelper(self.editor).current_line_nbr()
+        if current_line != self._cursor_line:
+            self._cursor_line = current_line
+            self._hide_popup()
+            self._job_runner.cancel_requests()
 
     @QtCore.Slot()
-    def __setWaitCursor(self):
-        self.editor.setCursor(QtCore.Qt.WaitCursor)
+    def _set_wait_cursor(self):
+        self.editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
 
-    def __isLastCharEndOfWord(self):
+    def _is_last_char_end_of_word(self):
         try:
-            tc = self.editor.selectWordUnderCursor()
-            tc.setPosition(tc.position())
-            tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
-            l = tc.selectedText()
-            lastChar = l[len(l) - 1]
-            if lastChar != ' ':
-                symbols = self.editor.settings.value(
-                    "triggerSymbols", section="Code completion")
-                seps = constants.WORD_SEPARATORS
-                return lastChar in seps and not lastChar in symbols
+            cursor = self._helper.word_under_cursor()
+            cursor.setPosition(cursor.position())
+            cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+            line = cursor.selectedText()
+            last_char = line[len(line) - 1]
+            if last_char != ' ':
+                symbols = self._trigger_symbols
+                seps = self.editor.word_separators
+                return last_char in seps and last_char not in symbols
             return False
-        except IndexError:
+        except (IndexError, TypeError):
             return False
-        except TypeError:
-            return False  # no symbols
 
-    def __showCompletions(self, completions):
-        self.__jobRunner.cancelRequests()
+    def _show_completions(self, completions):
+        self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
-        if self.__isLastCharEndOfWord():
-            return
-        # user typed too fast: the user already typed the only suggestion we
-        # have
-        elif (len(completions) == 1 and
-              completions[0].text == self.completionPrefix):
-            return
-        # a request cancel has been set
-        if self.__cancelNext:
-            self.__cancelNext = False
-            return
-        # we can show the completer
-        self._updateCompletionModel(completions,
-                                    self.__completer.model())
-        self.__showPopup()
-        # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        if (not self._cancel_next and not self._is_last_char_end_of_word() and
+                not (len(completions) == 1 and
+                     completions[0]['name'] == self.completion_prefix)):
+            # we can show the completer
+            self._update_model(completions, self._completer.model())
+            self._show_popup()
+        self._cancel_next = False
 
-    def __handleCompleterEvents(self, event):
+    def _handle_completer_events(self, event):
         # complete
         if (event.key() == QtCore.Qt.Key_Enter or
-                event.key() == QtCore.Qt.Key_Return):
-            self.__insertCompletion(self.__currentCompletion)
-            self.__hidePopup()
+                event.key() == QtCore.Qt.Key_Return or
+                event.key() == QtCore.Qt.Key_Tab):
+            self._insert_completion(self._current_completion)
+            self._hide_popup()
             event.accept()
-            return True
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
-                event.key() == QtCore.Qt.Key_Backtab):
-            self.__hidePopup()
+              event.key() == QtCore.Qt.Key_Backtab):
+            self._hide_popup()
             event.accept()
-            return True
-        return False
 
-    def __hidePopup(self):
+    def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-        self.__completer.popup().hide()
-        self.__jobRunner.cancelRequests()
-        QtGui.QToolTip.hideText()
+        self._completer.popup().hide()
+        self._job_runner.cancel_requests()
+        QtWidgets.QToolTip.hideText()
 
-    def __showPopup(self):
-        cnt = self.__completer.completionCount()
-        fullPrefix = self.editor.selectWordUnderCursor(
-            selectWholeWord=True).selectedText()
-        if (fullPrefix == self.__currentCompletion) and cnt == 1:
-            self.__hidePopup()
+    def _show_popup(self):
+        cnt = self._completer.completionCount()
+        full_prefix = self._helper.word_under_cursor(
+            select_whole_word=True).selectedText()
+        if (full_prefix == self._current_completion) and cnt == 1:
+            self._hide_popup()
         else:
-            if self.editor.settings.value("caseSensitive",
-                                          section="Code completion"):
-                self.__completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+            if self._case_sensitive:
+                self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
             else:
-                self.__completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+                self._completer.setCaseSensitivity(
+                    QtCore.Qt.CaseInsensitive)
             # set prefix
-            self.__completer.setCompletionPrefix(self.completionPrefix)
+            self._completer.setCompletionPrefix(self.completion_prefix)
             # compute size and pos
-            cr = self.editor.cursorRect()
-            charWidth = self.editor.fontMetrics().width('A')
-            prefixLen = (len(self.completionPrefix) * charWidth)
-            cr.translate(self.editor.marginSize() - prefixLen,
-                         self.editor.marginSize(0))
-            cr.setWidth(
-                self.__completer.popup().sizeHintForColumn(0) +
-                self.__completer.popup().verticalScrollBar().sizeHint().width())
+            cursor_rec = self.editor.cursorRect()
+            char_width = self.editor.fontMetrics().width('A')
+            prefix_len = (len(self.completion_prefix) * char_width)
+            cursor_rec.translate(self.editor.panels.margin_size() - prefix_len,
+                                 # top
+                                 self.editor.panels.margin_size(0))
+            popup = self._completer.popup()
+            width = popup.verticalScrollBar().sizeHint().width()
+            cursor_rec.setWidth(self._completer.popup().sizeHintForColumn(0) +
+                                width)
             # show the completion list
-            self.__completer.complete(cr)
-            self.__completer.popup().setCurrentIndex(
-                self.__completer.completionModel().index(0, 0))
+            if self.editor.isVisible():
+                try:
+                    self.editor.setFocus(True)
+                except TypeError:
+                    # pyside
+                    self.editor.setFocus()
+                self._completer.complete(cursor_rec)
+                self._completer.popup().setCurrentIndex(
+                    self._completer.completionModel().index(0, 0))
 
-    def __insertCompletion(self, completion):
-        tc = self.editor.selectWordUnderCursor(selectWholeWord=True)
-        tc.insertText(completion)
-        self.editor.setTextCursor(tc)
+    def _insert_completion(self, completion):
+        cursor = self._helper.word_under_cursor(select_whole_word=False)
+        cursor.insertText(completion)
+        self.editor.setTextCursor(cursor)
 
-    def __isShortcut(self, event):
+    def _is_shortcut(self, event):
         """
         Checks if the event's key and modifiers make the completion shortcut
-        (Ctrl+M)
+        (Ctrl+Space)
 
         :param event: QKeyEvent
 
         :return: bool
         """
-        val = int(event.modifiers() & QtCore.Qt.ControlModifier)
-        triggerKey = int(self.editor.settings.value(
-            "triggerKey", section="Code completion"))
-        return val and event.key() == triggerKey
+        modifier = QtCore.Qt.MetaModifier if sys.platform == 'darwin' else QtCore.Qt.ControlModifier
+        valid_modifier = int(event.modifiers() & modifier) == modifier
+        valid_key = event.key() == self._trigger_key
+        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" % (valid_modifier, valid_key))
+        return valid_key and valid_modifier
 
     @staticmethod
-    def strip_control_characters(input):
-        if input:
+    def strip_control_characters(input_txt):
+        if input_txt:
             # unicode invalid characters
-            if sys.version_info[0] == 2:
-                try:
-                    RE_ILLEGAL = eval("""u'([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                                 u'|' + \
-                                 u'([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                                 (unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff),
-                                  unichr(0xd800),unichr(0xdbff),unichr(0xdc00),unichr(0xdfff))""")
-                except SyntaxError:
-                    pass # This is horrible, I know but this is the only way I found to fool this damn python 3.2 interpreter wich hates u"..."
-            else:
-                RE_ILLEGAL = '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
-                             '|' + \
-                             '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
-                             (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
-                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
-                              chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
-            input = re.sub(RE_ILLEGAL, "", input)
+            re_illegal = \
+                '([\u0000-\u0008\u000b-\u000c\u000e-\u001f\ufffe-\uffff])' + \
+                '|' + \
+                '([%s-%s][^%s-%s])|([^%s-%s][%s-%s])|([%s-%s]$)|(^[%s-%s])' % \
+                (chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                 chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff),
+                 chr(0xd800), chr(0xdbff), chr(0xdc00), chr(0xdfff))
+            input_txt = re.sub(re_illegal, "", input_txt)
             # ascii control characters
-            input = re.sub(r"[\x01-\x1F\x7F]", "", input)
-        return input
+            input_txt = re.sub(r"[\x01-\x1F\x7F]", "", input_txt)
+        return input_txt
 
     @staticmethod
-    def __isPrintableKeyEvent(event):
+    def _is_printable_key_event(event):
         return len(CodeCompletionMode.strip_control_characters(
             event.text())) == 1
 
     @staticmethod
     @memoized
-    def __makeIcon(icon):
+    def _make_icon(icon):
         return QtGui.QIcon(icon)
 
-    def _updateCompletionModel(self, completions, cc_model):
+    def _update_model(self, completions, cc_model):
         """
         Creates a QStandardModel that holds the suggestion from the completion
         models for the QCompleter
@@ -656,138 +422,60 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         # build the completion model
         cc_model.clear()
-        displayedTexts = []
-        self.__tooltips.clear()
+        displayed_texts = []
+        self._tooltips.clear()
         for completion in completions:
-            if completion.isNull():
-                continue
+            name = completion['name']
             # skip redundant completion
-            if completion.text != self.completionPrefix and \
-                    not completion.text in displayedTexts:
-                displayedTexts.append(completion.text)
+            if (name and name != self.completion_prefix and
+                    name not in displayed_texts):
+                displayed_texts.append(name)
                 item = QtGui.QStandardItem()
-                item.setData(completion.text, QtCore.Qt.DisplayRole)
-                if completion.tooltip is not None:
-                    self.__tooltips[completion.text] = completion.tooltip
-                if completion.icon is not None:
-                    item.setData(self.__makeIcon(completion.icon),
+                item.setData(name, QtCore.Qt.DisplayRole)
+                if 'tooltip' in completion and completion['tooltip']:
+                    self._tooltips[name] = completion['tooltip']
+                if 'icon' in completion:
+                    item.setData(self._make_icon(completion['icon']),
                                  QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
         return cc_model
 
-    def __displayCompletionTooltip(self, completion):
-        if not self.editor.settings.value("showTooltips",
-                                          section="Code completion"):
+    def _display_completion_tooltip(self, completion):
+        if not self._show_tooltips:
             return
-        if not completion in self.__tooltips:
-            QtGui.QToolTip.hideText()
+        if completion not in self._tooltips:
+            QtWidgets.QToolTip.hideText()
             return
-        tooltip = self.__tooltips[completion].strip()
-        if tooltip:
-            pos = self.__completer.popup().pos()
-            pos.setX(pos.x() + self.__completer.popup().size().width())
-            pos.setY(pos.y() - 15)
-            QtGui.QToolTip.showText(pos, tooltip, self.editor)
-        else:
-            QtGui.QToolTip.hideText()
+        tooltip = self._tooltips[completion].strip()
+        pos = self._completer.popup().pos()
+        pos.setX(pos.x() + self._completer.popup().size().width())
+        pos.setY(pos.y() - 15)
+        QtWidgets.QToolTip.showText(pos, tooltip, self.editor)
 
-    def __collectCompletions(self, *args):
-        logger.debug("Completion requested")
-        self.__jobRunner.requestJob(self.__setWaitCursor, False)
-        worker = CompletionWorker(self.__providers, *args)
-        get_server().requestWork(self, worker)
-
-    def __preload(self, *args):
-        self.preLoadStarted.emit()
-        worker = PreLoadWorker(self.__providers, *args)
-        get_server().requestWork(self, worker)
-
-
-class DocumentWordCompletionProvider(CompletionProvider):
-    """
-    Provides code completions using the document words.
-    """
-
-    def __init__(self):
-        CompletionProvider.__init__(self)
-
-    def preload(self, code, filePath, fileEncoding):
-        return self.parse(code, filePath=filePath)
-
-    def parse(self, code, wordSeparators=constants.WORD_SEPARATORS,
-              filePath=""):
-        """
-        Returns a list of completions based on the code passed as a parameter.
-
-        :param code: The code to parse/tokenize
-        :param wordSeparators: The list of words separators.
-        :param filePath:
-        :return: A list of :class:`pyqode.core.Completion`
-        :rtype: list
-        """
-        completions = []
-        for w in self.split(code, wordSeparators):
-            completions.append(Completion(w))
-        # store results in the subprocess dict for later use
-        self.slotDict["docWords%s-%s" %
-                      (filePath, type(self).__name__)] = completions
-        return completions
-
-    @staticmethod
-    def split(txt, seps):
-        """
-        Splits a text in a meaningful list of words.
-
-        :param txt: Text to split
-
-        :param seps: List of words separators
-
-        :return: A set of words found in the document (excluding punctuations,
-                 numbers, ...)
-        """
-        # replace all possible separators with a default sep
-        default_sep = seps[0]
-        for sep in seps[1:]:
-            if sep:
-                txt = txt.replace(sep, default_sep)
-        # now we can split using the default_sep
-        raw_words = txt.split(default_sep)
-        words = set()
-        for w in raw_words:
-            # w = w.strip()
-            if w.isalpha():
-                words.add(w)
-        return sorted(words)
-
-    def complete(self, code, line, column, completionPrefix,
-                 filePath, fileEncoding):
-        # get previous result from the server process dict
+    def _collect_completions(self, code, line, column, path, encoding,
+                             completion_prefix):
+        # pylint: disable=too-many-arguments
+        _logger().debug("cc: completion requested")
+        data = {'code': code, 'line': line, 'column': column,
+                'path': path, 'encoding': encoding,
+                'prefix': completion_prefix}
         try:
-            words = self.slotDict["docWords%s-%s"
-                                     % (filePath, type(self).__name__)]
-        except KeyError:
-            words = None
-        if not words or not len(words):
-            return self.parse(code, filePath=filePath)
-        return words
+            self.editor.backend.send_request(
+                backend.CodeCompletionWorker, args=data,
+                on_receive=self._on_results_available)
+        except NotConnected:
+            self._data = data
+            QtCore.QTimer.singleShot(100, self._retry_collect)
+        else:
+            self._set_wait_cursor()
 
-
-if __name__ == '__main__':
-
-    class Example(QCodeEdit):
-
-        def __init__(self):
-            QCodeEdit.__init__(self, parent=None)
-            self.resize(QtCore.QSize(1000, 600))
-            self.installMode(CodeCompletionMode())
-            self.codeCompletionMode.addCompletionProvider(
-                DocumentWordCompletionProvider())
-            self.openFile(__file__)
-
-    import sys
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
-    app = QtGui.QApplication(sys.argv)
-    e = Example()
-    e.show()
-    sys.exit(app.exec_())
+    def _retry_collect(self):
+        _logger().debug('retry work request')
+        try:
+            self.editor.backend.send_request(
+                backend.CodeCompletionWorker, args=self._data,
+                on_receive=self._on_results_available)
+        except NotConnected:
+            QtCore.QTimer.singleShot(100, self._retry_collect)
+        else:
+            self._set_wait_cursor()

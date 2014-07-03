@@ -1,40 +1,17 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains the search and replace panel
 """
-from pyqode.qt import QtCore, QtGui
-from pyqode.core import constants
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.panel import Panel
-from pyqode.core.system import DelayJobRunner, driftColor
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.panel import Panel
+from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
+from pyqode.core.qt import QtCore, QtGui
+# pylint: disable=maybe-no-member, missing-docstring
+# pylint: disable=too-many-public-methods, too-many-instance-attributes
 
 
-class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
+class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     """
     This panel allow the user to search and replace some text in the current
     editor.
@@ -46,45 +23,32 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
     To do that, the client code first requests a search using
     :meth:`requestSearch` and connects to
-    :attr:`searchFinished`.
+    :attr:`search_finished`.
 
     The results of the search can then be retrieved using
     :attr:`cptOccurrences` and :meth:`getOccurrences`.
 
-    The client code may now navigate through occurrences using :meth:`selectNext`
-    or :meth:`selectPrevious`, or replace the occurrences with a specific
-    text using :meth:`replaceOccurrence` or :meth:`replaceAll`.
-
-    Here the properties added by the mode to
-    :attr:`pyqode.core.QCodeEdit.style`:
-
-    =========================== ====================== ======= ====================== =====================
-    Key                         Section                Type    Default value          Description
-    =========================== ====================== ======= ====================== =====================
-    searchOccurrenceBackground  General                QColor  #FFFF00                Search occurrences background. Default is Yellow.
-    searchOccurrenceForeground  General                QColor  #000000                Search occurrences foreground. Default is Black.
-    =========================== ====================== ======= ====================== =====================
+    The client code may now navigate through occurrences using
+    :meth:`select_next` or :meth:`select_previous`, or replace the occurrences
+    with a specific text using :meth:`replace` or :meth:`replace_all`.
     """
-    #: The panel identifier
-    IDENTIFIER = "searchAndReplacePanel"
-    #: The panel description
-    DESCRIPTION = "Search and replace text in the editor"
-
     STYLESHEET = """SearchAndReplacePanel
     {
         background-color: %(bck)s;
         color: %(color)s;
     }
 
-    QPushButton
+    QtoolButton
     {
         color: %(color)s;
         background-color: transparent;
         padding: 5px;
+        min-height: 24px;
+        min-width: 24px;
         border: none;
     }
 
-    QPushButton:hover
+    QtoolButton:hover
     {
         background-color: %(highlight)s;
         border: none;
@@ -92,12 +56,12 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         color: %(color)s;
     }
 
-    QPushButton:pressed, QCheckBox:pressed
+    QtoolButton:pressed, QCheckBox:pressed
     {
         border: 1px solid %(bck)s;
     }
 
-    QPushButton:disabled
+    QtoolButton:disabled
     {
         color: %(highlight)s;
     }
@@ -119,137 +83,156 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
              "panelHighlight"]
 
     #: Signal emitted when a search operation finished
-    searchFinished = QtCore.Signal()
+    search_finished = QtCore.Signal()
 
     @property
     def background(self):
-        return self.editor.style.value("searchOccurrenceBackground")
+        """ Text decoration background """
+        return self._bg
 
     @background.setter
     def background(self, value):
-        self.editor.setValue("searchOccurrenceBackground", value)
+        self._bg = value
+        self._refresh_decorations()
 
     @property
     def foreground(self):
-        return self.editor.style.value("searchOccurrenceForeground")
+        """ Text decoration foreground """
+        return self._fg
 
     @foreground.setter
     def foreground(self, value):
-        self.editor.setValue("searchOccurrenceForeground", value)
-
-    def refreshIcons(self, useTheme=True):
-        values = [
-            ("edit-find", "Find", [self.actionSearch], [self.labelSearch]),
-            ("edit-find-replace", "Replace", [self.actionActionSearchAndReplace], [self.labelReplace]),
-            ("go-down", "Next", [self.actionFindNext, self.pushButtonNext], []),
-            ("go-up", "Previous", [self.actionFindPrevious, self.pushButtonPrevious], []),
-            ("application-exit", "Close", [self.pushButtonClose], []),
-        ]
-        for theme, name, actions, labels in values:
-            icon = constants.ICONS[name]
-            if useTheme:
-                icon = QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
-            else:
-                icon = QtGui.QIcon(icon)
-            for action in actions:
-                action.setIcon(icon)
-            for label in labels:
-                label.setPixmap(icon.pixmap(16, 16))
+        self._fg = value
+        self._refresh_decorations()
 
     def __init__(self):
         Panel.__init__(self)
-        DelayJobRunner.__init__(self, self, nbThreadsMax=1, delay=500)
+        self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
-
         #: Occurrences counter
-        self.cptOccurrences = 0
-        self.__previousStylesheet = ""
-        self.__separator = None
-        self.__decorations = []
-        self.__mutex = QtCore.QMutex()
-        self.__occurrences = []
-        self.__current_occurrence = -1
-        self.__updateButtons(txt="")
+        self.cpt_occurences = 0
+        self._previous_stylesheet = ""
+        self._separator = None
+        self._decorations = []
+        self._occurrences = []
+        self._current_occurrence_index = -1
+        self._bg = None
+        self._fg = None
+        self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
-        self.refreshIcons()
+        self._init_actions()
+        self._init_style()
 
-    def _onInstall(self, editor):
-        Panel._onInstall(self, editor)
-        self.__resetStylesheet()
-        self.on_pushButtonClose_clicked()
-        self.editor.style.addProperty("searchOccurrenceBackground",
-                                      constants.SEARCH_OCCURRENCES_BACKGROUND)
-        self.editor.style.addProperty("searchOccurrenceForeground",
-                                      constants.SEARCH_OCCURRENCES_FOREGROUND)
+    def _init_actions(self):
+        def _icon(val):
+            if isinstance(val, tuple):
+                theme, icon = val
+                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+            else:
+                QtGui.QIcon(val)
 
-    def _onStyleChanged(self, section, key):
-        Panel._onStyleChanged(self, section, key)
-        if key in self._KEYS or not key:
-            self.__resetStylesheet()
-        if not key or key in ["searchOccurrenceBackground",
-                              "searchOccurrenceForeground"]:
-            self._refreshDecorations()
+        icon_size = QtCore.QSize(16, 16)
 
-    def _refreshDecorations(self):
-        for d in self.__decorations:
-            self.editor.removeDecoration(d)
-            d.setBackground(QtGui.QBrush(self.background))
-            d.setForeground(QtGui.QBrush(self.foreground))
-            self.editor.addDecoration(d)
+        icon = _icon(('edit-find', ':/pyqode-icons/rc/edit-find.png'))
+        self.actionSearch.setIcon(icon)
+        self.actionSearch.setShortcut(QtGui.QKeySequence.Find)
+        self.labelSearch.setPixmap(icon.pixmap(icon_size))
 
-    def _onStateChanged(self, state):
-        Panel._onStateChanged(self, state)
+        icon = _icon(('edit-find-replace',
+                      ':/pyqode-icons/rc/edit-find-replace.png'))
+        self.actionActionSearchAndReplace.setShortcut(
+            QtGui.QKeySequence.Replace)
+        self.actionActionSearchAndReplace.setIcon(icon)
+        self.labelReplace.setPixmap(icon.pixmap(icon_size))
+
+
+
+        icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
+        self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
+        self.actionFindPrevious.setIcon(icon)
+        self.toolButtonPrevious.setIcon(icon)
+        self.toolButtonPrevious.setIconSize(icon_size)
+
+        icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'))
+        self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
+        self.actionFindNext.setIcon(icon)
+        self.toolButtonNext.setIcon(icon)
+        self.toolButtonNext.setIconSize(icon_size)
+
+        icon = _icon(('window-close', ':/pyqode-icons/rc/close.png'))
+        self.toolButtonClose.setIcon(icon)
+        self.toolButtonClose.setIconSize(icon_size)
+
+    def _init_style(self):
+        self._bg = QtGui.QColor('yellow')
+        self._fg = QtGui.QColor('black')
+
+    def on_install(self, editor):
+        Panel.on_install(self, editor)
+        self.on_toolButtonClose_clicked()
+        self.text_helper= TextHelper(editor)
+
+    def _refresh_decorations(self):
+        for deco in self._decorations:
+            self.editor.decorations.remove(deco)
+            deco.set_background(QtGui.QBrush(self.background))
+            deco.set_foreground(QtGui.QBrush(self.foreground))
+            self.editor.decorations.append(deco)
+
+    def on_state_changed(self, state):
+        Panel.on_state_changed(self, state)
         if state:
-            # add menus
-            self.__separator = self.editor.addSeparator()
-            self.editor.addAction(self.actionSearch)
-            self.editor.addAction(self.actionActionSearchAndReplace)
-            self.editor.addAction(self.actionFindNext)
-            self.editor.addAction(self.actionFindPrevious)
+            # append menus
+            self._separator = self.editor.add_separator()
+            self.editor.add_action(self.actionSearch)
+            self.editor.add_action(self.actionActionSearchAndReplace)
+            self.editor.add_action(self.actionFindNext)
+            self.editor.add_action(self.actionFindPrevious)
             # requestSearch slot
-            self.editor.textChanged.connect(self.requestSearch)
-            self.lineEditSearch.textChanged.connect(self.requestSearch)
-            self.checkBoxCase.stateChanged.connect(self.requestSearch)
-            self.checkBoxWholeWords.stateChanged.connect(self.requestSearch)
+            self.editor.textChanged.connect(self.request_search)
+            self.lineEditSearch.textChanged.connect(self.request_search)
+            self.checkBoxCase.stateChanged.connect(self.request_search)
+            self.checkBoxWholeWords.stateChanged.connect(self.request_search)
             # navigation slots
-            self.pushButtonNext.clicked.connect(self.selectNext)
-            self.actionFindNext.triggered.connect(self.selectNext)
-            self.pushButtonPrevious.clicked.connect(self.selectPrevious)
-            self.actionFindPrevious.triggered.connect(self.selectPrevious)
+            self.toolButtonNext.clicked.connect(self.select_next)
+            self.actionFindNext.triggered.connect(self.select_next)
+            self.toolButtonPrevious.clicked.connect(self.select_previous)
+            self.actionFindPrevious.triggered.connect(self.select_previous)
             # replace slots
-            self.pushButtonReplace.clicked.connect(self.replaceCurrent)
-            self.pushButtonReplaceAll.clicked.connect(self.replaceAll)
+            self.toolButtonReplace.clicked.connect(self.replace)
+            self.toolButtonReplaceAll.clicked.connect(self.replace_all)
             # internal updates slots
-            self.lineEditReplace.textChanged.connect(self.__updateButtons)
-            self.searchFinished.connect(self.__onSearchFinished)
+            self.lineEditReplace.textChanged.connect(self._update_buttons)
+            self.search_finished.connect(self._on_search_finished)
         else:
             # remove menus
-            if self.__separator is not None:
-                self.editor.removeAction(self.__separator)
-            self.editor.removeAction(self.actionSearch)
-            self.editor.removeAction(
+            if self._separator is not None:
+                self.editor.remove_action(self._separator)
+            self.editor.remove_action(self.actionSearch)
+            self.editor.remove_action(
                 self.actionActionSearchAndReplace)
-            self.editor.removeAction(self.actionFindNext)
-            self.editor.removeAction(self.actionFindPrevious)
+            self.editor.remove_action(self.actionFindNext)
+            self.editor.remove_action(self.actionFindPrevious)
             # requestSearch slot
-            self.editor.textChanged.disconnect(self.requestSearch)
-            self.lineEditSearch.textChanged.disconnect(self.requestSearch)
-            self.checkBoxCase.stateChanged.disconnect(self.requestSearch)
-            self.checkBoxWholeWords.stateChanged.disconnect(self.requestSearch)
+            self.editor.textChanged.disconnect(self.request_search)
+            self.lineEditSearch.textChanged.disconnect(self.request_search)
+            self.checkBoxCase.stateChanged.disconnect(self.request_search)
+            self.checkBoxWholeWords.stateChanged.disconnect(
+                self.request_search)
             # navigation slots
-            self.pushButtonNext.clicked.disconnect(self.selectNext)
-            self.actionFindNext.triggered.disconnect(self.selectNext)
-            self.pushButtonPrevious.clicked.disconnect(self.selectPrevious)
+            self.toolButtonNext.clicked.disconnect(self.select_next)
+            self.actionFindNext.triggered.disconnect(self.select_next)
+            self.toolButtonPrevious.clicked.disconnect(self.select_previous)
             # replace slots
-            self.pushButtonReplace.clicked.disconnect(self.replaceCurrent)
-            self.pushButtonReplaceAll.clicked.disconnect(self.replaceAll)
+            self.toolButtonReplace.clicked.disconnect(self.replace)
+            self.toolButtonReplaceAll.clicked.disconnect(self.replace_all)
             # internal updates slots
-            self.lineEditReplace.textChanged.disconnect(self.__updateButtons)
-            self.searchFinished.connect(self.__onSearchFinished)
+            self.lineEditReplace.textChanged.disconnect(self._update_buttons)
+            self.search_finished.connect(self._on_search_finished)
 
-    def closePanel(self):
+    def close_panel(self):
         """
         Closes the panel
         """
@@ -258,44 +241,44 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
-    def on_pushButtonClose_clicked(self):
-        self.closePanel()
+    def on_toolButtonClose_clicked(self):  # pylint: disable=invalid-name
+        self.close_panel()
 
     @QtCore.Slot()
-    def on_actionSearch_triggered(self):
+    def on_actionSearch_triggered(self):  # pylint: disable=invalid-name
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
-        newText = self.editor.selectedText()
-        oldText = self.lineEditSearch.text()
-        textChanged = newText != oldText
-        self.lineEditSearch.setText(newText)
+        new_text = self.text_helper.selected_text()
+        old_text = self.lineEditSearch.text()
+        text_changed = new_text != old_text
+        self.lineEditSearch.setText(new_text)
         self.lineEditSearch.selectAll()
         self.lineEditSearch.setFocus()
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
-        if not textChanged:
-            self.requestSearch(newText)
+        if not text_changed:
+            self.request_search(new_text)
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
+        # pylint: disable=invalid-name
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
-        newText = self.editor.selectedText()
-        oldText = self.lineEditSearch.text()
-        textChanged = newText != oldText
-        self.lineEditSearch.setText(newText)
+        new_txt = self.text_helper.selected_text()
+        old_txt = self.lineEditSearch.text()
+        txt_changed = new_txt != old_txt
+        self.lineEditSearch.setText(new_txt)
         self.lineEditReplace.clear()
         self.lineEditReplace.setFocus()
-        if not textChanged:
-            self.requestSearch(newText)
+        if not txt_changed:
+            self.request_search(new_txt)
 
-    def focusOutEvent(self, event):
-        self.stopJob()
-        self.cancelRequests()
+    def focusOutEvent(self, event):  # pylint: disable=invalid-name
+        self.job_runner.cancel_requests()
         Panel.focusOutEvent(self, event)
 
-    def requestSearch(self, txt=None):
+    def request_search(self, txt=None):
         """
         Requests a search operation.
 
@@ -305,17 +288,16 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
-            self.requestJob(self.__execSearch, True,
-                            txt, self.editor.document().clone(),
-                            self.editor.textCursor(),
-                            self.__getUserSearchFlag())
+            cursor = self.text_helper.word_under_cursor(select_whole_word=True)
+            self.job_runner.request_job(
+                self._exec_search, txt, self.editor.document(),
+                cursor, self._search_flags())
         else:
-            self.cancelRequests()
-            self.stopJob()
-            self.__clearOccurrences()
-            self.__onSearchFinished()
+            self.job_runner.cancel_requests()
+            self._clear_occurrences()
+            self._on_search_finished()
 
-    def getOccurrences(self):
+    def get_occurences(self):
         """
         Returns the list of text occurrences.
 
@@ -323,62 +305,62 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
 
         :return: List of tuple(int, int)
         """
-        self.__mutex.lock()
         retval = []
-        for occ in self.__occurrences:
+        for occ in self._occurrences:
             retval.append(occ)
-        self.__mutex.unlock()
         return retval
 
-    def selectNext(self):
+    def select_next(self):
         """
         Selects the next occurrence.
 
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        cr = self.__getCurrentOccurrence()
-        occurrences = self.getOccurrences()
-        if (cr == -1 or
-                cr == len(occurrences) - 1):
-            cr = 0
+        current_occurences = self._current_occurrence()
+        occurrences = self.get_occurences()
+        if (current_occurences == -1 or
+                current_occurences == len(occurrences) - 1):
+            current_occurences = 0
         else:
-            cr += 1
-        self.__setCurrentOccurrence(cr)
+            current_occurences += 1
+        self._set_current_occurrence(current_occurences)
         try:
-            tc = self.editor.textCursor()
-            tc.setPosition(occurrences[cr][0])
-            tc.setPosition(occurrences[cr][1], tc.KeepAnchor)
-            self.editor.setTextCursor(tc)
+            cursor = self.editor.textCursor()
+            cursor.setPosition(occurrences[current_occurences][0])
+            cursor.setPosition(occurrences[current_occurences][1],
+                               cursor.KeepAnchor)
+            self.editor.setTextCursor(cursor)
             return True
         except IndexError:
             return False
 
-    def selectPrevious(self):
+    def select_previous(self):
         """
         Selects previous occurrence.
 
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        cr = self.__getCurrentOccurrence()
-        occurrences = self.getOccurrences()
-        if (cr == -1 or
-                cr == 0):
-            cr = len(occurrences) - 1
+        current_occurences = self._current_occurrence()
+        occurrences = self.get_occurences()
+        if (current_occurences == -1 or
+                current_occurences == 0):
+            current_occurences = len(occurrences) - 1
         else:
-            cr -= 1
-        self.__setCurrentOccurrence(cr)
+            current_occurences -= 1
+        self._set_current_occurrence(current_occurences)
         try:
-            tc = self.editor.textCursor()
-            tc.setPosition(occurrences[cr][0])
-            tc.setPosition(occurrences[cr][1], tc.KeepAnchor)
-            self.editor.setTextCursor(tc)
+            cursor = self.editor.textCursor()
+            cursor.setPosition(occurrences[current_occurences][0])
+            cursor.setPosition(occurrences[current_occurences][1],
+                               cursor.KeepAnchor)
+            self.editor.setTextCursor(cursor)
             return True
         except IndexError:
             return False
 
-    def replaceCurrent(self, text=None):
+    def replace(self, text=None):
         """
         Replaces the selected occurrence.
 
@@ -390,194 +372,158 @@ class SearchAndReplacePanel(Panel, DelayJobRunner, Ui_SearchPanel):
         """
         if text is None or isinstance(text, bool):
             text = self.lineEditReplace.text()
-        cr = self.__getCurrentOccurrence()
-        occurrences = self.getOccurrences()
-        if cr == -1:
-            self.selectNext()
-            cr = self.__getCurrentOccurrence()
+        current_occurences = self._current_occurrence()
+        occurrences = self.get_occurences()
+        if current_occurences == -1:
+            self.select_next()
+            current_occurences = self._current_occurrence()
         try:
             # prevent search request due to editor textChanged
             try:
-                self.editor.textChanged.disconnect(self.requestSearch)
+                self.editor.textChanged.disconnect(self.request_search)
             except (RuntimeError, TypeError):
                 # already disconnected
                 pass
-            occ = occurrences[cr]
-            tc = self.editor.textCursor()
-            tc.setPosition(occ[0])
-            tc.setPosition(occ[1], tc.KeepAnchor)
-            len_to_replace = len(tc.selectedText())
+            occ = occurrences[current_occurences]
+            cursor = self.editor.textCursor()
+            cursor.setPosition(occ[0])
+            cursor.setPosition(occ[1], cursor.KeepAnchor)
+            len_to_replace = len(cursor.selectedText())
             len_replacement = len(text)
             offset = len_replacement - len_to_replace
-            tc.insertText(text)
-            self.editor.setTextCursor(tc)
-            self.__removeOccurrence(cr, offset)
-            cr -= 1
-            self.__setCurrentOccurrence(cr)
-            self.selectNext()
-            self.cptOccurrences = len(self.getOccurrences())
-            self.__updateLabels()
-            self.__updateButtons()
+            cursor.insertText(text)
+            self.editor.setTextCursor(cursor)
+            self._remove_occurrence(current_occurences, offset)
+            current_occurences -= 1
+            self._set_current_occurrence(current_occurences)
+            self.select_next()
+            self.cpt_occurences = len(self.get_occurences())
+            self._update_label_matches()
+            self._update_buttons()
             return True
         except IndexError:
             return False
         finally:
-            self.editor.textChanged.connect(self.requestSearch)
+            self.editor.textChanged.connect(self.request_search)
 
-    def replaceAll(self, text=None):
+    def replace_all(self, text=None):
         """
         Replaces all occurrences in the editor's document.
 
         :param text: The replacement text. If None, the content of the lineEdit
                      replace will be used instead
         """
-        tc = self.editor.textCursor()
-        tc.beginEditBlock()
-        remains = self.replaceCurrent(text=text)
+        cursor = self.editor.textCursor()
+        cursor.beginEditBlock()
+        remains = self.replace(text=text)
         while remains:
-            remains = self.replaceCurrent(text=text)
-        tc.endEditBlock()
+            remains = self.replace(text=text)
+        cursor.endEditBlock()
 
-    def eventFilter(self, obj, event):
+    def eventFilter(self, obj, event):  # pylint: disable=invalid-name
         if event.type() == QtCore.QEvent.KeyPress:
             if (event.key() == QtCore.Qt.Key_Tab or
                     event.key() == QtCore.Qt.Key_Backtab):
                 return True
             elif (event.key() == QtCore.Qt.Key_Return or
-                    event.key() == QtCore.Qt.Key_Enter):
+                  event.key() == QtCore.Qt.Key_Enter):
                 if obj == self.lineEditReplace:
                     if event.modifiers() & QtCore.Qt.ControlModifier:
-                        self.replaceAll()
+                        self.replace_all()
                     else:
-                        self.replaceCurrent()
+                        self.replace()
                 elif obj == self.lineEditSearch:
-                    self.selectNext()
+                    self.select_next()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
-                self.on_pushButtonClose_clicked()
+                self.on_toolButtonClose_clicked()
         return Panel.eventFilter(self, obj, event)
 
-    def __getUserSearchFlag(self):
+    def _search_flags(self):
         """ Returns the user search flag """
-        searchFlag = QtGui.QTextDocument.FindFlags(0)
+        flags = QtGui.QTextDocument.FindFlags(0)
         if self.checkBoxCase.isChecked():
-            searchFlag |= QtGui.QTextDocument.FindCaseSensitively
+            flags |= QtGui.QTextDocument.FindCaseSensitively
         if self.checkBoxWholeWords.isChecked():
-            searchFlag |= QtGui.QTextDocument.FindWholeWords
-        return searchFlag
+            flags |= QtGui.QTextDocument.FindWholeWords
+        return flags
 
-    def __execSearch(self, text, doc, originalCursor, flags):
-        self.__mutex.lock()
-        self.__occurrences[:] = []
-        self.__current_occurrence = -1
-        if text:
-            cptMatches = 0
-            cursor = doc.find(text, 0, flags)
-            while not cursor.isNull():
-                if self.__compareCursors(cursor, originalCursor):
-                    self.__current_occurrence = cptMatches
-                self.__occurrences.append((cursor.selectionStart(),
-                                          cursor.selectionEnd()))
-                cursor.setPosition(cursor.position() + 1)
-                cursor = doc.find(text, cursor, flags)
-                cptMatches += 1
-        self.__mutex.unlock()
-        self.searchFinished.emit()
+    def _exec_search(self, search_txt, doc, original_cursor, flags):
+        self._occurrences[:] = []
+        self._current_occurrence_index = -1
+        if search_txt:
+            self._occurrences, self._current_occurrence_index = \
+                TextHelper(self.editor).search_text(
+                    original_cursor, search_txt, flags)
+        self.search_finished.emit()
 
-    def __updateLabels(self):
-        self.labelMatches.setText("{0} matches".format(self.cptOccurrences))
+    def _update_label_matches(self):
+        self.labelMatches.setText("{0} matches".format(self.cpt_occurences))
         color = "#DD0000"
-        if self.cptOccurrences:
+        if self.cpt_occurences:
             color = "#00DD00"
         self.labelMatches.setStyleSheet("color: %s" % color)
         if self.lineEditSearch.text() == "":
             self.labelMatches.clear()
 
-    def __onSearchFinished(self):
-        self.__clearDecorations()
-        occurrences = self.getOccurrences()
+    def _on_search_finished(self):
+        self._clear_decorations()
+        occurrences = self.get_occurences()
         for occurrence in occurrences:
-            deco = self.__createDecoration(occurrence[0],
+            deco = self._create_decoration(occurrence[0],
                                            occurrence[1])
-            self.__decorations.append(deco)
-            self.editor.addDecoration(deco)
-        self.cptOccurrences = len(occurrences)
-        if not self.cptOccurrences:
-            self.__current_occurrence = -1
-        self.__updateLabels()
-        self.__updateButtons(txt=self.lineEditReplace.text())
+            self._decorations.append(deco)
+            self.editor.decorations.append(deco)
+        self.cpt_occurences = len(occurrences)
+        if not self.cpt_occurences:
+            self._current_occurrence_index = -1
+        self._update_label_matches()
+        self._update_buttons(txt=self.lineEditReplace.text())
 
-    def __resetStylesheet(self):
-        highlight = driftColor(self.editor.palette().window().color())
-        stylesheet = self.STYLESHEET % {
-            "bck": self.editor.palette().window().color().name(),
-            "color": self.editor.palette().windowText().color().name(),
-            "highlight": highlight.name()}
-        if stylesheet != self.__previousStylesheet:
-            self.setStyleSheet(stylesheet)
-            self.__previousStylesheet = stylesheet
+    def _current_occurrence(self):
+        ret_val = self._current_occurrence_index
+        return ret_val
 
-    def paintEvent(self, event):
-        Panel.paintEvent(self, event)
-        self.__resetStylesheet()
+    def _clear_occurrences(self):
+        self._occurrences[:] = []
 
-    def __getCurrentOccurrence(self):
-        self.__mutex.lock()
-        retVal = self.__current_occurrence
-        self.__mutex.unlock()
-        return retVal
-
-    def __clearOccurrences(self):
-        self.__mutex.lock()
-        self.__occurrences[:] = []
-        self.__mutex.unlock()
-
-    def __createDecoration(self, selection_start, selection_end):
+    def _create_decoration(self, selection_start, selection_end):
         """ Creates the text occurences decoration """
         deco = TextDecoration(self.editor.document(), selection_start,
                               selection_end)
-        deco.setBackground(QtGui.QBrush(self.background))
-        deco.setForeground(QtGui.QBrush(self.foreground))
+        deco.set_background(QtGui.QBrush(self.background))
+        deco.set_foreground(QtGui.QBrush(self.foreground))
         deco.draw_order = 1
         return deco
 
-    def __clearDecorations(self):
+    def _clear_decorations(self):
         """ Remove all decorations """
-        for deco in self.__decorations:
-            self.editor.removeDecoration(deco)
-        self.__decorations[:] = []
+        for deco in self._decorations:
+            self.editor.decorations.remove(deco)
+        self._decorations[:] = []
 
-    def __setCurrentOccurrence(self, cr):
-        self.__mutex.lock()
-        self.__current_occurrence = cr
-        self.__mutex.unlock()
+    def _set_current_occurrence(self, current_occurence_index):
+        self._current_occurrence_index = current_occurence_index
 
-    @staticmethod
-    def __compareCursors(a, b):
-        return (a.selectionStart() == b.selectionStart() and
-                a.selectionEnd() == b.selectionEnd())
-
-    def __removeOccurrence(self, i, offset=0):
-        self.__mutex.lock()
-        self.__occurrences.pop(i)
+    def _remove_occurrence(self, i, offset=0):
+        self._occurrences.pop(i)
         if offset:
             updated_occurences = []
-            for j, occ in enumerate(self.__occurrences):
+            for j, occ in enumerate(self._occurrences):
                 if j >= i:
                     updated_occurences.append(
                         (occ[0] + offset, occ[1] + offset))
                 else:
                     updated_occurences.append((occ[0], occ[1]))
-            self.__occurrences = updated_occurences
-        self.__mutex.unlock()
+            self._occurrences = updated_occurences
 
-    def __updateButtons(self, txt=""):
-        enable = self.cptOccurrences > 1
-        self.pushButtonNext.setEnabled(enable)
-        self.pushButtonPrevious.setEnabled(enable)
+    def _update_buttons(self, txt=""):
+        enable = self.cpt_occurences > 1
+        self.toolButtonNext.setEnabled(enable)
+        self.toolButtonPrevious.setEnabled(enable)
         self.actionFindNext.setEnabled(enable)
         self.actionFindPrevious.setEnabled(enable)
         enable = (txt != self.lineEditSearch.text() and
-                  bool(self.cptOccurrences))
-        self.pushButtonReplace.setEnabled(enable)
-        self.pushButtonReplaceAll.setEnabled(enable)
+                  self.cpt_occurences)
+        self.toolButtonReplace.setEnabled(enable)
+        self.toolButtonReplaceAll.setEnabled(enable)

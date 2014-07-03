@@ -1,153 +1,146 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains the symbol matcher mode
 """
-from pyqode.core.mode import Mode
-from pyqode.core.decoration import TextDecoration
-from pyqode.core.textblockuserdata import TextBlockUserData
-from pyqode.qt import QtGui, QtCore
+from pyqode.core.api.decoration import TextDecoration
+from pyqode.core.api.mode import Mode
+from pyqode.core.api.syntax_highlighter import TextBlockUserData
+from pyqode.core.qt import QtGui
 
 
 class SymbolMatcherMode(Mode):
     """
     Do symbols matches highlighting (parenthesis, braces, ...).
 
-    Here the properties added by the mode to
-    :attr:`pyqode.core.QCodeEdit.style`:
+    .. note:: This mode requires the document to be filled with
+        :class:`pyqode.core.api.TextBlockUserData`, i.e. a
+        :class:`pyqode.core.api.SyntaxHighlighter` must be installed on
+        the editor instance.
 
-    ====================== ====================== ======= ====================== =====================
-    Key                    Section                Type    Default value          Description
-    ====================== ====================== ======= ====================== =====================
-    matchedBraceBackground General                QColor  Computed.              Background color for matching symbols
-    matchedBraceForeground General                QColor  Computed.              Fpreground color for matching symbols
-    ====================== ====================== ======= ====================== =====================
-
-    .. note:: This mode requires the document to be filled with :class:`pyqode.core.TextBlockUserData`,
-              i.e. a :class:`pyqode.core.SyntaxHighlighter` must be installed on
-              the editor instance.
     """
-    IDENTIFIER = "symbolMatcherMode"
-    DESCRIPTION = "Highlight matching symbols (paren, braces, brackets,...)"
+    @property
+    def match_background(self):
+        """
+        Background color of matching symbols.
+        """
+        return self._match_background
+
+    @match_background.setter
+    def match_background(self, value):
+        # pylint: disable=missing-docstring
+        self._match_background = value
+        self._refresh_decorations()
 
     @property
-    def matchedBraceBackground(self):
-        return self.editor.style.value("matchedBraceBackground")
+    def match_foreground(self):
+        """
+        Foreground color of matching symbols.
+        """
+        return self._match_foreground
 
-    @matchedBraceBackground.setter
-    def matchedBraceBackground(self, value):
-        self.editor.style.setValue("matchedBraceBackground", value)
+    @match_foreground.setter
+    def match_foreground(self, value):
+        # pylint: disable=missing-docstring
+        self._match_foreground = value
+        self._refresh_decorations()
 
     @property
-    def matchedBraceForeground(self):
-        return self.editor.style.value("matchedBraceForeground")
+    def unmatch_background(self):
+        """
+        Background color of non-matching symbols.
+        """
+        return self._unmatch_background
 
-    @matchedBraceForeground.setter
-    def matchedBraceForeground(self, value):
-        self.editor.style.setValue("matchedBraceForeground", value)
+    @unmatch_background.setter
+    def unmatch_background(self, value):
+        # pylint: disable=missing-docstring
+        self._unmatch_background = value
+        self._refresh_decorations()
+
+    @property
+    def unmatch_foreground(self):
+        """
+        Foreground color of matching symbols.
+        """
+        return self._unmatch_foreground
+
+    @unmatch_foreground.setter
+    def unmatch_foreground(self, value):
+        # pylint: disable=missing-docstring
+        self._unmatch_foreground = value
+        self._refresh_decorations()
 
     def __init__(self):
-        Mode.__init__(self)
-        self.__decorations = []
+        super().__init__()
+        self._decorations = []
+        self._match_background = QtGui.QBrush(QtGui.QColor('#B4EEB4'))
+        self._match_foreground = QtGui.QColor('red')
+        self._unmatch_background = QtGui.QBrush(QtGui.QColor('transparent'))
+        self._unmatch_foreground = QtGui.QColor('red')
 
-    def _onInstall(self, editor):
-        Mode._onInstall(self, editor)
-        self.editor.style.addProperty("matchedBraceBackground",
-                                      QtGui.QColor("#B4EEB4"))
-        self.editor.style.addProperty("matchedBraceForeground",
-                                      QtGui.QColor("#FF0000"))
+    def _clear_decorations(self):  # pylint: disable=missing-docstring
+        for deco in self._decorations:
+            self.editor.decorations.remove(deco)
+        self._decorations[:] = []
 
-    def _onStyleChanged(self, section, key):
-        if not key or key in ["matchedBraceBackground",
-                              "matchedBraceForeground"]:
-            self._refreshDecorations()
-
-    def _clearDecorations(self):
-        for d in self.__decorations:
-            self.editor.removeDecoration(d)
-        self.__decorations[:] = []
-
-    def getSymbolPos(self, cursor, character='(', type=0):
+    def symbol_pos(self, cursor, character='(', symbol_type=0):
+        """
+        Find the corresponding symbol position (line, column).
+        """
         retval = None, None
-        originalCursor = self.editor.textCursor()
+        original_cursor = self.editor.textCursor()
         self.editor.setTextCursor(cursor)
         block = cursor.block()
         mapping = {0: block.userData().parentheses,
-                   1: block.userData().squareBrackets,
+                   1: block.userData().square_brackets,
                    2: block.userData().braces}
-        self.matchBraces(mapping[type], block.position())
-        for d in self.__decorations:
-            if d.character == character:
-                retval = d.line, d.column
+        self._match_braces(mapping[symbol_type], block.position())
+        for deco in self._decorations:
+            if deco.character == character:
+                retval = deco.line, deco.column
                 break
-        self.editor.setTextCursor(originalCursor)
-        self._clearDecorations()
+        self.editor.setTextCursor(original_cursor)
+        self._clear_decorations()
         return retval
 
-    def _refreshDecorations(self):
-        for d in self.__decorations:
-            self.editor.removeDecoration(d)
-            if d.match:
-                # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
-                f = self.editor.style.value("matchedBraceForeground")
-                if f:
-                    d.setForeground(f)
-                b = self.editor.style.value("matchedBraceBackground")
-                if b:
-                    d.setBackground(b)
-                else:
-                    d.setBackground(QtGui.QColor("transparent"))
+    def _refresh_decorations(self):  # pylint: disable=missing-docstring
+        for deco in self._decorations:
+            self.editor.decorations.remove(deco)
+            if deco.match:
+                deco.set_foreground(self._match_foreground)
+                deco.set_background(self._match_background)
             else:
-                d.setForeground(QtCore.Qt.red)
-            self.editor.addDecoration(d)
+                deco.set_foreground(self._unmatch_foreground)
+                deco.set_background(self._unmatch_background)
+            self.editor.decorations.append(deco)
 
-    def _onStateChanged(self, state):
+    def on_state_changed(self, state):  # pylint: disable=missing-docstring
         if state:
-            self.editor.cursorPositionChanged.connect(self.doSymbolsMatching)
+            self.editor.cursorPositionChanged.connect(self.do_symbols_matching)
         else:
-            self.editor.cursorPositionChanged.disconnect(self.doSymbolsMatching)
+            self.editor.cursorPositionChanged.disconnect(
+                self.do_symbols_matching)
 
-    def matchParentheses(self, parentheses, cursorPosition):
+    def _match_parentheses(self, parentheses, cursor_pos):
+        # pylint: disable=missing-docstring
         for i, info in enumerate(parentheses):
-            cursorPos = (self.editor.textCursor().position() -
-                         self.editor.textCursor().block().position())
-            if info.character == "(" and info.position == cursorPos:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position,
-                    self.matchLeftParenthesis(
+            pos = (self.editor.textCursor().position() -
+                   self.editor.textCursor().block().position())
+            if info.character == "(" and info.position == pos:
+                self._create_decoration(
+                    cursor_pos + info.position,
+                    self._match_left_parenthesis(
                         self.editor.textCursor().block(), i + 1, 0))
-            elif info.character == ")" and info.position == cursorPos - 1:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position,
-                    self.matchRightParenthesis(
+            elif info.character == ")" and info.position == pos - 1:
+                self._create_decoration(
+                    cursor_pos + info.position,
+                    self._match_right_parenthesis(
                         self.editor.textCursor().block(), i - 1, 0))
 
-    def matchLeftParenthesis(self, currentBlock, i, cpt):
+    def _match_left_parenthesis(self, current_block, i, cpt):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
+            data = current_block.userData()
             parentheses = data.parentheses
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
@@ -155,126 +148,133 @@ class SymbolMatcherMode(Mode):
                     cpt += 1
                     continue
                 if info.character == ")" and cpt == 0:
-                    self.createParenthesisSelection(currentBlock.position() +
-                                                    info.position)
+                    self._create_decoration(current_block.position() +
+                                            info.position)
                     return True
                 elif info.character == ")":
                     cpt -= 1
-            currentBlock = currentBlock.next()
-            if currentBlock.isValid():
-                return self.matchLeftParenthesis(currentBlock, 0, cpt)
+            current_block = current_block.next()
+            if current_block.isValid():
+                return self._match_left_parenthesis(current_block, 0, cpt)
             return False
-        except RuntimeError:  # recursion limit exceeded when working with
-                              # big files
+        except RuntimeError:
+            # recursion limit exceeded when working with big files
             return False
 
-    def matchRightParenthesis(self, currentBlock, i, numRightParentheses):
+    def _match_right_parenthesis(self, current_block, i, nb_right_paren):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
+            data = current_block.userData()
             parentheses = data.parentheses
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
                 if info.character == ")":
-                    numRightParentheses += 1
+                    nb_right_paren += 1
                     continue
                 if info.character == "(":
-                    if numRightParentheses == 0:
-                        self.createParenthesisSelection(
-                            currentBlock.position() + info.position)
+                    if nb_right_paren == 0:
+                        self._create_decoration(
+                            current_block.position() + info.position)
                         return True
                     else:
-                        numRightParentheses -= 1
-            currentBlock = currentBlock.previous()
-            if currentBlock.isValid():
-                data = currentBlock.userData()
+                        nb_right_paren -= 1
+            current_block = current_block.previous()
+            if current_block.isValid():
+                data = current_block.userData()
                 parentheses = data.parentheses
-                return self.matchRightParenthesis(
-                    currentBlock, len(parentheses) - 1, numRightParentheses)
+                return self._match_right_parenthesis(
+                    current_block, len(parentheses) - 1, nb_right_paren)
             return False
-        except RuntimeError:  # recursion limit exeeded when working in big files
+        except RuntimeError:
+            # recursion limit exceeded when working in big files
             return False
 
-    def matchSquareBrackets(self, brackets, cursorPosition):
+    def _match_square_brackets(self, brackets, current_pos):
+        # pylint: disable=missing-docstring
         for i, info in enumerate(brackets):
-            cursorPos = (self.editor.textCursor().position() -
-                         self.editor.textCursor().block().position())
-            if info.character == "[" and info.position == cursorPos:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position,
-                    self.matchLeftBracket(
+            pos = (self.editor.textCursor().position() -
+                   self.editor.textCursor().block().position())
+            if info.character == "[" and info.position == pos:
+                self._create_decoration(
+                    current_pos + info.position,
+                    self._match_left_bracket(
                         self.editor.textCursor().block(), i + 1, 0))
-            elif info.character == "]" and info.position == cursorPos - 1:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position, self.matchRightBracket(
+            elif info.character == "]" and info.position == pos - 1:
+                self._create_decoration(
+                    current_pos + info.position, self._match_right_bracket(
                         self.editor.textCursor().block(), i - 1, 0))
 
-    def matchLeftBracket(self, currentBlock, i, cpt):
+    def _match_left_bracket(self, current_block, i, cpt):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
-            parentheses = data.squareBrackets
+            data = current_block.userData()
+            parentheses = data.square_brackets
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
                 if info.character == "[":
                     cpt += 1
                     continue
                 if info.character == "]" and cpt == 0:
-                    self.createParenthesisSelection(
-                        currentBlock.position() + info.position)
+                    self._create_decoration(
+                        current_block.position() + info.position)
                     return True
                 elif info.character == "]":
                     cpt -= 1
-            currentBlock = currentBlock.next()
-            if currentBlock.isValid():
-                return self.matchLeftBracket(currentBlock, 0, cpt)
+            current_block = current_block.next()
+            if current_block.isValid():
+                return self._match_left_bracket(current_block, 0, cpt)
             return False
         except RuntimeError:
             return False
 
-    def matchRightBracket(self, currentBlock, i, numRightParentheses):
+    def _match_right_bracket(self, current_block, i, nb_right):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
-            parentheses = data.squareBrackets
+            data = current_block.userData()
+            parentheses = data.square_brackets
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
                 if info.character == "]":
-                    numRightParentheses += 1
+                    nb_right += 1
                     continue
                 if info.character == "[":
-                    if numRightParentheses == 0:
-                        self.createParenthesisSelection(
-                            currentBlock.position() + info.position)
+                    if nb_right == 0:
+                        self._create_decoration(
+                            current_block.position() + info.position)
                         return True
                     else:
-                        numRightParentheses -= 1
-            currentBlock = currentBlock.previous()
-            if currentBlock.isValid():
-                data = currentBlock.userData()
-                parentheses = data.squareBrackets
-                return self.matchRightBracket(
-                    currentBlock, len(parentheses) - 1, numRightParentheses)
+                        nb_right -= 1
+            current_block = current_block.previous()
+            if current_block.isValid():
+                data = current_block.userData()
+                parentheses = data.square_brackets
+                return self._match_right_bracket(
+                    current_block, len(parentheses) - 1, nb_right)
             return False
         except RuntimeError:
             return False
 
-    def matchBraces(self, braces, cursorPosition):
+    def _match_braces(self, braces, cursor_position):
+        # pylint: disable=missing-docstring
         for i, info in enumerate(braces):
-            cursorPos = (self.editor.textCursor().position() -
-                         self.editor.textCursor().block().position())
-            if info.character == "{" and info.position == cursorPos:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position,
-                    self.matchLeftBrace(
+            pos = (self.editor.textCursor().position() -
+                   self.editor.textCursor().block().position())
+            if info.character == "{" and info.position == pos:
+                self._create_decoration(
+                    cursor_position + info.position,
+                    self._match_left_brace(
                         self.editor.textCursor().block(), i + 1, 0))
-            elif info.character == "}" and info.position == cursorPos - 1:
-                self.createParenthesisSelection(
-                    cursorPosition + info.position, self.matchRightBrace(
+            elif info.character == "}" and info.position == pos - 1:
+                self._create_decoration(
+                    cursor_position + info.position, self._match_right_brace(
                         self.editor.textCursor().block(), i - 1, 0))
 
-    def matchLeftBrace(self, currentBlock, i, cpt):
+    def _match_left_brace(self, current_block, i, cpt):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
+            data = current_block.userData()
             parentheses = data.braces
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
@@ -282,76 +282,74 @@ class SymbolMatcherMode(Mode):
                     cpt += 1
                     continue
                 if info.character == "}" and cpt == 0:
-                    self.createParenthesisSelection(
-                        currentBlock.position() + info.position)
+                    self._create_decoration(
+                        current_block.position() + info.position)
                     return True
                 elif info.character == "}":
                     cpt -= 1
-            currentBlock = currentBlock.next()
-            if currentBlock.isValid():
-                return self.matchLeftBrace(currentBlock, 0, cpt)
+            current_block = current_block.next()
+            if current_block.isValid():
+                return self._match_left_brace(current_block, 0, cpt)
             return False
         except RuntimeError:
             return False
 
-    def matchRightBrace(self, currentBlock, i, numRightParentheses):
+    def _match_right_brace(self, current_block, i, nb_right):
+        # pylint: disable=missing-docstring
         try:
-            data = currentBlock.userData()
+            data = current_block.userData()
             parentheses = data.braces
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
                 if info.character == "}":
-                    numRightParentheses += 1
+                    nb_right += 1
                     continue
                 if info.character == "{":
-                    if numRightParentheses == 0:
-                        self.createParenthesisSelection(
-                            currentBlock.position() + info.position)
+                    if nb_right == 0:
+                        self._create_decoration(
+                            current_block.position() + info.position)
                         return True
                     else:
-                        numRightParentheses -= 1
-            currentBlock = currentBlock.previous()
-            if currentBlock.isValid():
-                data = currentBlock.userData()
+                        nb_right -= 1
+            current_block = current_block.previous()
+            if current_block.isValid():
+                data = current_block.userData()
                 parentheses = data.braces
-                return self.matchRightBrace(
-                    currentBlock, len(parentheses) - 1, numRightParentheses)
+                return self._match_right_brace(
+                    current_block, len(parentheses) - 1, nb_right)
             return False
         except RuntimeError:
             return False
 
-    def doSymbolsMatching(self):
-        for d in self.__decorations:
-            self.editor.removeDecoration(d)
-        self.__decorations[:] = []
+    def do_symbols_matching(self):
+        """
+        Performs symbols matching.
+        """
+        self._clear_decorations()
         data = self.editor.textCursor().block().userData()
         if data and isinstance(data, TextBlockUserData):
             pos = self.editor.textCursor().block().position()
-            self.matchParentheses(data.parentheses, pos)
-            self.matchSquareBrackets(data.squareBrackets, pos)
-            self.matchBraces(data.braces, pos)
+            self._match_parentheses(data.parentheses, pos)
+            self._match_square_brackets(data.square_brackets, pos)
+            self._match_braces(data.braces, pos)
 
-    def createParenthesisSelection(self, pos, match=True):
+    def _create_decoration(self, pos, match=True):
+        # pylint: disable=missing-docstring
         cursor = self.editor.textCursor()
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
-        d = TextDecoration(cursor, draw_order=10)
-        d.line = cursor.blockNumber() + 1
-        d.column = cursor.columnNumber()
-        d.character = cursor.selectedText()
-        d.match = match
+        deco = TextDecoration(cursor, draw_order=10)
+        deco.line = cursor.blockNumber() + 1
+        deco.column = cursor.columnNumber()
+        deco.character = cursor.selectedText()
+        deco.match = match
         if match:
-            # d.setForeground(QtGui.QBrush(QtGui.QColor("#FF8647")))
-            f = self.editor.style.value("matchedBraceForeground")
-            if f:
-                d.setForeground(f)
-            b = self.editor.style.value("matchedBraceBackground")
-            if b:
-                d.setBackground(b)
+            deco.set_foreground(self._match_foreground)
+            deco.set_background(self._match_background)
         else:
-            d.setForeground(QtCore.Qt.red)
-        assert isinstance(cursor, QtGui.QTextCursor)
-        self.__decorations.append(d)
-        self.editor.addDecoration(d)
+            deco.set_foreground(self._unmatch_foreground)
+            deco.set_background(self._unmatch_background)
+        self._decorations.append(deco)
+        self.editor.decorations.append(deco)
         return cursor

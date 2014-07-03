@@ -1,35 +1,16 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-#The MIT License (MIT)
-#
-#Copyright (c) <2013-2014> <Colin Duquesnoy and others, see AUTHORS.txt>
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-#
 """
 This module contains the marker panel
 """
-from pyqode.core import logger
-from pyqode.qt import QtCore, QtGui
-from pyqode.core.panel import Panel
-from pyqode.core.system import DelayJobRunner, memoized
+import logging
+from pyqode.core.api.panel import Panel
+from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
+
+
+def _logger():
+    """ Gets module's logger """
+    return logging.getLogger(__name__)
 
 
 class Marker(QtCore.QObject):
@@ -44,19 +25,19 @@ class Marker(QtCore.QObject):
         Gets the marker position (line number)
         :type: int
         """
-        return self.__position
+        return self._position
 
     @property
     def icon(self):
         """
         Gets the icon file name. Read-only.
         """
-        return self.__icon
+        return self._icon
 
     @property
     def description(self):
         """ Gets the marker description. """
-        return self.__description
+        return self._description
 
     def __init__(self, position, icon="", description="", parent=None):
         """
@@ -71,9 +52,9 @@ class Marker(QtCore.QObject):
         """
         QtCore.QObject.__init__(self, parent)
         #: The position of the marker (line number)
-        self.__position = position
-        self.__icon = icon
-        self.__description = description
+        self._position = position
+        self._icon = icon
+        self._description = description
 
 
 class MarkerPanel(Panel):
@@ -83,55 +64,56 @@ class MarkerPanel(Panel):
     Use addMarker, removeMarker and clearMarkers to manage the collection of
     displayed makers.
 
-    You can create a user editable panel (e.g. a breakpoints panel) by using the
-    following signals:
+    You can create a user editable panel (e.g. a breakpoints panel) by using
+    the following signals:
 
-        - :attr:`pyqode.core.MarkerPanel.addMarkerRequested`
-        - :attr:`pyqode.core.MarkerPanel.removeMarkerRequested`
+      - :attr:`pyqode.core.panels.MarkerPanel.add_marker_requested`
+      - :attr:`pyqode.core.panels.MarkerPanel.remove_marker_requested`
+
     """
-    #: The panel identifier
-    DESCRIPTION = "Draw icons in a side panel"
-    #: The panel description
-    IDENTIFIER = "markerPanel"
-
-    #: Signal emitted when the user clicked in a place where there is no marker.
-    addMarkerRequested = QtCore.Signal(int)
-
+    #: Signal emitted when the user clicked in a place where there is no
+    #: marker.
+    add_marker_requested = QtCore.Signal(int)
     #: Signal emitted when the user clicked on an existing marker.
-    removeMarkerRequested = QtCore.Signal(int)
+    remove_marker_requested = QtCore.Signal(int)
 
     def __init__(self):
         Panel.__init__(self)
-        self.__markers = []
-        self.__icons = {}
-        self.__previousLine = -1
+        self._markers = []
+        self._icons = {}
+        self._previous_line = -1
         self.scrollable = True
-        self.__jobRunner = DelayJobRunner(self, nbThreadsMax=1, delay=100)
+        self._job_runner = DelayJobRunner(delay=100)
         self.setMouseTracking(True)
-        self.__toRemove = []
+        self._to_remove = []
 
-    def addMarker(self, marker):
+    def add_marker(self, marker):
         """
         Adds the marker to the panel.
 
         :param marker: Marker to add
         :type marker: pyqode.core.Marker
         """
-        key, val = self.makeMarkerIcon(marker.icon)
+        key, val = self.make_marker_icon(marker.icon)
         if key and val:
-            self.__icons[key] = val
-        self.__markers.append(marker)
+            self._icons[key] = val
+        self._markers.append(marker)
         doc = self.editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker.position - 1)
-        usrData = block.userData()
-        if hasattr(usrData, "marker"):
-            usrData.marker = marker
+        user_data = block.userData()
+        if hasattr(user_data, "marker"):
+            user_data.marker = marker
         self.repaint()
 
     @staticmethod
     @memoized
-    def makeMarkerIcon(icon):
+    def make_marker_icon(icon):
+        """
+        Make (and memoize) an icon from an icon filename.
+
+        :param icon: Icon filename or tuple (to use a theme).
+        """
         if isinstance(icon, tuple):
             return icon[0], QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
@@ -140,23 +122,23 @@ class MarkerPanel(Panel):
         else:
             return None, None
 
-    def removeMarker(self, marker):
+    def remove_marker(self, marker):
         """
         Removes a marker from the panel
 
         :param marker: Marker to remove
         :type marker: pyqode.core.Marker
         """
-        self.__markers.remove(marker)
-        self.__toRemove.append(marker)
+        self._markers.remove(marker)
+        self._to_remove.append(marker)
         self.repaint()
 
-    def clearMarkers(self):
+    def clear_markers(self):
         """ Clears the markers list """
-        while len(self.__markers):
-            self.removeMarker(self.__markers[0])
+        while len(self._markers):
+            self.remove_marker(self._markers[0])
 
-    def getMarkerForLine(self, line):
+    def marker_for_line(self, line):
         """
         Returns the marker that is displayed at the specified line number if
         any.
@@ -166,98 +148,95 @@ class MarkerPanel(Panel):
         :return: Marker of None
         :rtype: pyqode.core.Marker
         """
-        for marker in self.__markers:
+        for marker in self._markers:
             if line == marker.position:
                 return marker
 
-    def sizeHint(self):
-        fm = QtGui.QFontMetricsF(self.editor.font())
-        size_hint = QtCore.QSize(fm.height(), fm.height())
+    def sizeHint(self):  # pylint: disable=invalid-name
+        """
+        Returns the panel size hint. (fixed with of 16px)
+        """
+        metrics = QtGui.QFontMetricsF(self.editor.font())
+        size_hint = QtCore.QSize(metrics.height(), metrics.height())
         if size_hint.width() > 16:
             size_hint.setWidth(16)
         return size_hint
 
     def paintEvent(self, event):
+        # pylint: disable=invalid-name, unused-variable
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
-        for top, blockNumber, block in self.editor.visibleBlocks:
-            usrData = block.userData()
-            if hasattr(usrData, "marker"):
-                marker = usrData.marker
-                if marker in self.__toRemove:
-                    usrData.marker = None
-                    self.__toRemove.remove(marker)
+        for top, block_nbr, block in self.editor.visible_blocks:
+            user_data = block.userData()
+            if hasattr(user_data, "marker"):
+                marker = user_data.marker
+                if marker in self._to_remove:
+                    user_data.marker = None
+                    self._to_remove.remove(marker)
                     continue
                 if marker and marker.icon:
-                    r = QtCore.QRect()
-                    r.setX(0)
-                    r.setY(top)
-                    r.setWidth(self.sizeHint().width())
-                    r.setHeight(self.sizeHint().height())
+                    rect = QtCore.QRect()
+                    rect.setX(0)
+                    rect.setY(top)
+                    rect.setWidth(self.sizeHint().width())
+                    rect.setHeight(self.sizeHint().height())
                     if isinstance(marker.icon, tuple):
                         key = marker.icon[0]
                     else:
                         key = marker.icon
-                    self.__icons[key].paint(painter, r)
+                    if key not in self._icons:
+                        key, val = self.make_marker_icon(marker.icon)
+                        if key and val:
+                            self._icons[key] = val
+                        else:
+                            continue
+                    self._icons[key].paint(painter, rect)
 
-    def mousePressEvent(self, event):
-        line = self.editor.lineNumber(event.pos().y())
-        if self.getMarkerForLine(line):
-            logger.debug("Remove marker requested")
-            self.removeMarkerRequested.emit(line)
+    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+        """
+        Handle mouse press:
+
+            - emit add marker signal if there were no marker under the mouse
+              cursor
+            - emit remove marker signal if there were one or more markers under
+              the mouse cursor.
+        """
+        line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
+        if self.marker_for_line(line):
+            _logger().debug("remove marker requested")
+            self.remove_marker_requested.emit(line)
         else:
-            logger.debug("Add marker requested")
-            self.addMarkerRequested.emit(line)
+            _logger().debug("add marker requested")
+            self.add_marker_requested.emit(line)
 
-    def mouseMoveEvent(self, event):
-        line = self.editor.lineNumber(event.pos().y())
-        marker = self.getMarkerForLine(line)
+    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+        """
+        Requests a tooltip if the cursor is currently over a marker.
+        """
+        line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
+        marker = self.marker_for_line(line)
         if marker and marker.description:
-            if self.__previousLine != line:
-                self.__jobRunner.requestJob(self.__displayTooltip, False,
-                                            marker.description,
-                                            self.editor.linePos(
-                                                marker.position - 2))
+            if self._previous_line != line:
+                top = TextHelper(self.editor).line_pos_from_number(
+                    marker.position - 2)
+                if top:
+                    self._job_runner.request_job(
+                        self._display_tooltip, marker.description, top)
         else:
-            self.__jobRunner.cancelRequests()
-        self.__previousLine = line
+            self._job_runner.cancel_requests()
+        self._previous_line = line
 
     def leaveEvent(self, *args, **kwargs):
-        QtGui.QToolTip.hideText()
-        self.__previousLine = -1
+        """
+        Hide tooltip when leaving the panel region.
+        """
+        # pylint: disable=invalid-name, unused-argument
+        QtWidgets.QToolTip.hideText()
+        self._previous_line = -1
 
-    def __displayTooltip(self, tooltip, top):
-        QtGui.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
+    def _display_tooltip(self, tooltip, top):
+        """
+        Display tooltip at the specified top position.
+        """
+        QtWidgets.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)
-
-
-if __name__ == '__main__':
-    from pyqode.core import QGenericCodeEdit, constants
-
-    class Example(QGenericCodeEdit):
-
-        def __init__(self):
-            QGenericCodeEdit.__init__(self, parent=None)
-            self.openFile(__file__)
-            self.resize(QtCore.QSize(1000, 600))
-            self.installPanel(MarkerPanel())
-            marker = Marker(5, icon=constants.ACTION_GOTO_LINE[0],
-                            description="First marker")
-            self.markerPanel.addMarker(marker)
-            # add another action in 5s
-            QtCore.QTimer.singleShot(1000, self.addOtherMarker)
-
-        def addOtherMarker(self):
-            m = self.markerPanel.getMarkerForLine(5)
-            m.position = 7
-            marker = Marker(15, icon=constants.ACTION_PASTE[0],
-                            description="Second marker")
-            self.markerPanel.addMarker(marker)
-            # clear all in 2s
-            QtCore.QTimer.singleShot(2000, self.markerPanel.clearMarkers)
-
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    e = Example()
-    e.show()
-    sys.exit(app.exec_())
