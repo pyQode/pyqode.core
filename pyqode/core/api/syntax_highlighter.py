@@ -19,7 +19,9 @@ COLOR_SCHEME_KEYS = (
     "docstring",
     "number",
     "instance",
-    "whitespace"
+    "whitespace",
+    'tag',
+    'self'
 )
 #: A sorted list of available pygments styles, for convenience
 PYGMENTS_STYLES = sorted(list(get_all_styles()))
@@ -75,7 +77,10 @@ class ColorScheme:
             (Token.Literal.String.Doc, 'docstring'),
             (Token.Number, 'number'),
             (Token.Name.Variable, 'instance'),
-            (Token.Text.Whitespace, 'whitespace')
+            (Token.Text.Whitespace, 'whitespace'),
+            (Token.Name.Tag, 'tag'),
+            (Token.Name.Builtin.Pseudo, 'self'),
+            (Token.Name.Decorator, 'decorator')
         ]
         for token, key in token_key_pairs:
             self.formats[key] = self._get_format_from_style(token, style)
@@ -136,14 +141,22 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     Abstract Base class for syntax highlighter modes.
 
-    It fills up the document with our custom user data, setup the parenthesis
-    infos and run the FoldDetector on every text block. It **does not do any
-    syntax highlighting**, this task is left to the sublasses such as
-    :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
+    It fills up the document with our custom user data (string/comment zones,
+    and the list of parenthesis).
+
+    It **does not do any syntax highlighting**, this task is left to the
+    sublasses such as :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
 
     Subclasses **must** override the
     :meth:`pyqode.core.api.SyntaxHighlighter.highlight_block` method to
     apply custom highlighting.
+
+    .. note:: Since version 2.1 and for performance reasons, we do not call
+        setUserData to setup user data set by the highlighter. Instead we set
+        them as an attribute called 'user_data'. As this attribute is lost
+        whenever you retrieve the block from a document, we store those blocks
+        in a list in CodeEdit. You can retrieve them using
+        :meth:`pyqode.core.api.TextHelper.block_user_data`.
 
     **signals**:
       - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_started`
@@ -152,7 +165,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     .. warning:: You should always inherit from this class to create a new
                  syntax highlighter mode.
 
-                 **Never inherit directly from QSyntaxHighlighter.**
+                 **Never inherit directly from QSyntaxHighlighter or parenthesis matching
+                 and disabled zones for cc and autoindent will be lost.**
+
     """
     class ParenthesisInfo(object):
         """
@@ -173,8 +188,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     #: highlighter instance and the current text block
     block_highlight_finished = QtCore.Signal(object, object)
 
-    #: Associated mimetype, use generic
-    mimetype = None
     NORMAL = 0
 
     @property

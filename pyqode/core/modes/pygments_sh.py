@@ -7,16 +7,19 @@ on pygments.
 """
 import logging
 import sys
-
 from pygments.util import ClassNotFound
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
+from pygments.lexers.agile import PythonLexer
+from pygments.lexers.compiled import CLexer, CppLexer
+from pygments.lexers.dotnet import CSharpLexer
+from pygments.styles import get_style_by_name
+from pygments.token import Whitespace, Comment
+from pygments.styles import get_all_styles
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core.api import TextHelper
-
 from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, ColorScheme
 from pyqode.core.qt import QtGui
 from pyqode.core.qt.QtCore import QRegExp
@@ -25,46 +28,6 @@ from pyqode.core.qt.QtCore import QRegExp
 def _logger():
     """ Returns the module's logger """
     return logging.getLogger(__name__)
-
-
-try:
-    # pylint: disable=unused-import
-    from pygments.lexers.agile import PythonLexer
-    from pygments.lexers.text import BashLexer
-    from pygments.lexers.other import BatchLexer
-    from pygments.lexers.other import HtmlLexer
-    from pygments.lexers.compiled import CythonLexer
-    from pygments.lexers.web import XmlLexer
-    from pygments.lexers.dotnet import BooLexer
-    from pygments.lexers.text import MakefileLexer
-    from pygments.lexers.text import CMakeLexer
-    from pygments.lexers.text import RstLexer
-    from pygments.lexers.web import JsonLexer
-
-    from pygments.lexers.dotnet import CSharpLexer
-    from pygments.lexers.web import ActionScriptLexer
-    from pygments.lexers.web import CoffeeScriptLexer
-    from pygments.lexers.web import CssLexer
-    from pygments.lexers.web import JavascriptLexer
-    from pygments.lexers.jvm import JavaLexer
-    from pygments.lexers.web import QmlLexer
-    from pygments.lexers.web import PhpLexer
-    from pygments.lexers.compiled import AdaLexer
-    from pygments.lexers.compiled import CLexer
-    from pygments.lexers.compiled import CppLexer
-    from pygments.lexers.compiled import CudaLexer
-    from pygments.lexers.compiled import DLexer
-    from pygments.lexers.compiled import GLShaderLexer
-    from pygments.lexers.compiled import GoLexer
-    from pygments.lexers.compiled import ObjectiveCLexer
-    from pygments.lexers.compiled import ObjectiveCppLexer
-    from pygments.lexers.compiled import ValaLexer
-except ImportError as exc:  # too new on some systems
-    _logger().exception("failed to import pygments lexers, please update your "
-                        "pygments installation. %s", exc)
-from pygments.styles import get_style_by_name
-from pygments.token import Whitespace, Comment
-from pygments.styles import get_all_styles
 
 
 #: A sorted list of available pygments styles, for convenience
@@ -170,56 +133,19 @@ CSharpLexer.tokens['comment'] = COMMENT_STATE
 
 class PygmentsSH(SyntaxHighlighter):
     """
-    This mode enable syntax highlighting using the pygments library
+    This mode enable syntax highlighting using the pygments library. This is a generic
+    syntax highlighter, it is slower than a native highlighter and does not do any code
+    folding detection. Use it as a fallback for languages that do not have a native
+    highlighter available. Check the other pyqode namespace packages to see what other
+    languages are available (at the time of writing, only python has specialised support).
 
     .. warning:: There are some issues with multi-line comments, they are not
                  properly highlighted until a full re-highlight is triggered.
                  The text is automatically re-highlighted on save.
-
     """
     # pylint: disable=too-many-instance-attributes
     #: Mode description
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
-
-    #: Associates a fold detector to a specific pygments lexer.
-    # try:
-    #     LEXERS_FOLD_DETECTORS = {
-    #         # indent based
-    #         PythonLexer: IndentBasedFoldDetector(),
-    #         CythonLexer: IndentBasedFoldDetector(),
-    #         BashLexer: IndentBasedFoldDetector(),
-    #         BatchLexer: IndentBasedFoldDetector(),
-    #         XmlLexer: IndentBasedFoldDetector(),
-    #         HtmlLexer: IndentBasedFoldDetector(),
-    #         JsonLexer: IndentBasedFoldDetector(),
-    #         BooLexer: IndentBasedFoldDetector(),
-    #         MakefileLexer: IndentBasedFoldDetector(),
-    #         CMakeLexer: IndentBasedFoldDetector(),
-    #         RstLexer: IndentBasedFoldDetector(),
-    #
-    #         # c family
-    #         CLexer: CharBasedFoldDetector(),
-    #         CppLexer: CharBasedFoldDetector(),
-    #         CSharpLexer: CharBasedFoldDetector(),
-    #         ActionScriptLexer: CharBasedFoldDetector(),
-    #         CoffeeScriptLexer: CharBasedFoldDetector(),
-    #         CssLexer: CharBasedFoldDetector(),
-    #         JavascriptLexer: CharBasedFoldDetector(),
-    #         JavaLexer: CharBasedFoldDetector(),
-    #         QmlLexer: CharBasedFoldDetector(),
-    #         PhpLexer: CharBasedFoldDetector(),
-    #         AdaLexer: CharBasedFoldDetector(),
-    #         CudaLexer: CharBasedFoldDetector(),
-    #         DLexer: CharBasedFoldDetector(),
-    #         GLShaderLexer: CharBasedFoldDetector(),
-    #         GoLexer: CharBasedFoldDetector(),
-    #         ObjectiveCLexer: CharBasedFoldDetector(),
-    #         ObjectiveCppLexer: CharBasedFoldDetector(),
-    #         ValaLexer: CharBasedFoldDetector(),
-    #     }
-    # except NameError:
-    #     _logger().exception("failed to setup fold detectors associations.")
-    #     LEXERS_FOLD_DETECTORS = {}
 
     @property
     def pygments_style(self):
