@@ -334,6 +334,11 @@ class TextHelper:
         block = doc.findBlockByNumber(line_nbr - 1)
         return block.text()
 
+    def previous_line_text(self):
+        if self.current_line_nbr() - 1:
+            return self.line_text(self.current_line_nbr() - 1)
+        return ''
+
     def current_line_text(self):
         """
         Returns the text of the current line.
