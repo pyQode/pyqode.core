@@ -9,6 +9,7 @@ class DarculaStyle(Style):
 
     """
     background_color = '#252525'
+    highlight_color = '#353535'
 
     styles = {
         Comment.Multiline: 'italic #808080',

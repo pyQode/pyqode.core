@@ -79,6 +79,10 @@ class FileManager(Manager):
         self._encoding = locale.getpreferredencoding()
         #: True to replace tabs by spaces
         self.replace_tabs_by_spaces = replace_tabs_by_spaces
+        #: Opening flag. Set to true during the opening of a file.
+        self.opening = False
+        #: Saving flag. Set to while saving the editor content to a file.
+        self.saving = True
 
     def detect_encoding(self, path):
         """
@@ -123,6 +127,7 @@ class FileManager(Manager):
 
         :param path: Path of the file to open.
         """
+        self.opening = True
         self._encoding = self.detect_encoding(path)
         _logger().info('file encoding: %s', self.encoding)
         # open file and get its content
@@ -137,6 +142,7 @@ class FileManager(Manager):
             content, self.get_mimetype(path), self.encoding)
         self.editor.setDocumentTitle(self.editor.file.name)
         self.editor.setWindowTitle(self.editor.file.name)
+        self.opening = False
 
     def _save_tmp(self, plain_text, path):
         """
@@ -189,6 +195,7 @@ class FileManager(Manager):
                          file encoding if None.
 
         """
+        self.saving = True
         _logger().debug("saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
             if self.path:
@@ -237,6 +244,7 @@ class FileManager(Manager):
                 self._reset_selection(sel_end, sel_start)
             status = True
         self.editor.text_saved.emit(path)
+        self.saving = False
         return status
 
     def close(self):

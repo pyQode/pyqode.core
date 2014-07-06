@@ -15,11 +15,14 @@ from .code_completion import CodeCompletionMode
 from .filewatcher import FileWatcherMode
 from .indenter import IndenterMode
 from .matcher import SymbolMatcherMode
-from .pygments_highlighter import PygmentsSyntaxHighlighter
-from .pygments_highlighter import PYGMENTS_STYLES
 from .right_margin import RightMarginMode
+from .syntax_highlighters import TextSH, PythonSH
+from .pygments_highlighter import PygmentsSH
 from .wordclick import WordClickMode
 from .zoom import ZoomMode
+# for backward compatibility
+from ..api.syntax_highlighter import PYGMENTS_STYLES
+from .pygments_highlighter import PygmentsSH as PygmentsSyntaxHighlighter
 
 
 __all__ = [
@@ -35,8 +38,10 @@ __all__ = [
     'IndenterMode',
     'PygmentsSyntaxHighlighter',
     'PYGMENTS_STYLES',
+    'PythonSH'
     'RightMarginMode',
     'SymbolMatcherMode',
+    'TextSH'
     'WordClickMode',
     'ZoomMode',
 ]

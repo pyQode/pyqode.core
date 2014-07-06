@@ -31,7 +31,7 @@ def test_add_marker(editor):
                            description='Marker description')
     panel.add_marker(marker)
     QTest.qWait(500)
-    assert panel.marker_for_line(1) == marker
+    assert panel.marker_for_line(1)[0] == marker
 
 
 @editor_open(__file__)

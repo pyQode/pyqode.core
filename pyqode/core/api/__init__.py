@@ -16,6 +16,7 @@ from .manager import Manager
 from .mode import Mode
 from .panel import Panel
 from .syntax_highlighter import SyntaxHighlighter
+from .syntax_highlighter import ColorScheme
 from .syntax_highlighter import TextBlockUserData
 from .utils import TextHelper
 from .utils import DelayJobRunner

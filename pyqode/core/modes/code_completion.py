@@ -123,10 +123,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not self._request_cnt:
             # only check first byte
             column = helper.current_column_nbr()
-            usd = self.editor.textCursor().block().userData()
+            block = self.editor.textCursor().block()
+            usd = TextHelper(self.editor).block_user_data(block)
             if usd and hasattr(usd, 'cc_disabled_zones'):
                 for start, end in usd.cc_disabled_zones:
-                    if start <= column < end:
+                    if start <= column <= end:
                         _logger().debug(
                             "cc: cancel request, cursor is in a disabled zone")
                         return False

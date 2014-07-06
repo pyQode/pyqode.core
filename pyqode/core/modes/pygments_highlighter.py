@@ -15,8 +15,9 @@ from pygments.lexer import RegexLexer
 from pygments.lexer import Text
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
+from pyqode.core.api import TextHelper
 
-from pyqode.core.api.syntax_highlighter import SyntaxHighlighter
+from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, ColorScheme
 from pyqode.core.qt import QtGui
 from pyqode.core.qt.QtCore import QRegExp
 
@@ -167,7 +168,7 @@ CppLexer.tokens['comment'] = COMMENT_STATE
 CSharpLexer.tokens['comment'] = COMMENT_STATE
 
 
-class PygmentsSyntaxHighlighter(SyntaxHighlighter):
+class PygmentsSH(SyntaxHighlighter):
     """
     This mode enable syntax highlighting using the pygments library
 
@@ -232,32 +233,37 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         """
         Gets/Sets the pygments style
         """
+        print('value')
         self._pygments_style = value
         self._update_style()
+        # triggers a rehighlight
+        self.color_scheme = ColorScheme(value)
 
-    def __init__(self, document, lexer=None):
-        super().__init__(document)
+    def __init__(self, document, lexer=None, color_scheme=None):
+        super().__init__(document, color_scheme=color_scheme)
+        self._pygments_style = self.color_scheme.name
+        print(self.pygments_style)
         self._document = document
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
-        self._pygments_style = 'qt'
+
         self._brushes = {}
         self._formats = {}
         self._init_style()
+        self._prev_block = None
 
     def _init_style(self):
         """ Init pygments style """
-        self._pygments_style = 'qt'
         self._update_style()
 
     def on_install(self, editor):
         """
         :type editor: pyqode.code.api.CodeEdit
         """
-        SyntaxHighlighter.on_install(self, editor)
         self._clear_caches()
         self._update_style()
+        super().on_install(editor)
 
     def on_state_changed(self, state):
         self.enabled = state
@@ -267,8 +273,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
             self.set_lexer_from_mime_type(mime_type)
         except:
             pass
-        else:
-            self.rehighlight()
 
     def set_lexer_from_filename(self, filename):
         """
@@ -292,20 +296,20 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
         self._lexer = get_lexer_for_mimetype(mime, **options)
         _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
 
-    def highlight_block(self, text):
+    def highlight_block(self, text, block):
         # pylint: disable=protected-access
         original_text = text
-        block = self.currentBlock()
         if self.editor and self._lexer and self.enabled:
-            prev_data = block.previous().userData()
-            if hasattr(prev_data, "syntax_stack"):
-                self._lexer._saved_state_stack = prev_data.syntax_stack
-            elif hasattr(self._lexer, '_saved_state_stack'):
-                del self._lexer._saved_state_stack
+            if block.blockNumber():
+                prev_data = self._prev_block.user_data
+                if hasattr(prev_data, "syntax_stack"):
+                    self._lexer._saved_state_stack = prev_data.syntax_stack
+                elif hasattr(self._lexer, '_saved_state_stack'):
+                    del self._lexer._saved_state_stack
 
             # Lex the text using Pygments
             index = 0
-            usd = block.userData()
+            usd = block.user_data
             usd.cc_disabled_zones[:] = []
             tokens = list(self._lexer.get_tokens(text))
             for token, text in tokens:
@@ -316,6 +320,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                     usd.cc_disabled_zones.append((index, index + length))
                 if comment and 'multiline' in token_str:
                     self.setCurrentBlockState(1)
+                    usd.cc_disabled_zones.append((index, index + length))
                 self.setFormat(index, length, self._get_format(token))
                 index += length
 
@@ -333,6 +338,7 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                 length = len(expression.cap(0))
                 self.setFormat(index, length, self._get_format(Whitespace))
                 index = expression.indexIn(text, index + length)
+            self._prev_block = block
 
     def _update_style(self):
         """ Sets the style to the specified Pygments style.
@@ -351,35 +357,6 @@ class PygmentsSyntaxHighlighter(SyntaxHighlighter):
                 self._style = get_style_by_name('default')
                 self._pygments_style = 'default'
         self._clear_caches()
-        # update editor bg and fg from pygments style.
-        fgc = self._style.style_for_token(Text)['color']
-        bgc = self._style.background_color
-        if bgc is None:
-            bgc = QtGui.QColor('#ffffff')
-        elif isinstance(bgc, str):
-            if not bgc.startswith('#'):
-                bgc = '#%s' % fgc
-            bgc = QtGui.QColor(bgc)
-        if fgc is None:
-            if bgc.lightness() > 128:
-                fgc = QtGui.QColor('#000000')
-            else:
-                fgc = QtGui.QColor('#FFFFFF')
-        elif isinstance(fgc, str):
-            if not fgc.startswith('#'):
-                fgc = '#%s' % fgc
-            fgc = QtGui.QColor(fgc)
-        if self.editor:
-            self.editor.background = bgc
-            self.editor.foreground = fgc
-            self.editor._reset_stylesheet()  # pylint: disable=protected-access
-            try:
-                mode = self.editor.modes.get('CaretLineHighlighterMode')
-            except KeyError:
-                pass
-            else:
-                mode.refresh()
-        self.rehighlight()
 
     def _clear_caches(self):
         """ Clear caches for brushes and formats.

@@ -10,6 +10,7 @@ class QtStyle(Style):
     default_style = ''
 
     background_color = '#ffffff'
+    highlight_color = '#eeeeee'
 
     styles = {
         Comment.Multiline: 'italic #008000',
@@ -37,6 +38,7 @@ class QtStyle(Style):
         Keyword: '#808000',
         Literal.Number: '#000080',
         Literal.String: '#000080',
+        Literal.String.Doc: '#8080FF italic',
         Name.Attribute: '#800080',
         Name.Builtin.Pseudo: '#AA00AA',
         Name.Builtin: '#AA00AA',
@@ -55,5 +57,6 @@ class QtStyle(Style):
         Name.Variable: '#000000',
         Operator.Word: '#000000',
         Operator: '#000000',
+        Text: '#000000',
         Text.Whitespace: '#BFBFBF',
     }

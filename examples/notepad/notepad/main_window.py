@@ -27,7 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
         self.on_current_tab_changed()
-        self.pygments_style = 'qt'
+        self.styles_group = None
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -110,6 +110,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ setup the style menu for an editor tab """
         menu = QtWidgets.QMenu('Styles', self.menuEdit)
         group = QtWidgets.QActionGroup(self)
+        self.styles_group = group
         current_style = editor.modes.get(
             modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
@@ -150,7 +151,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.menu_recents.update_actions()
             else:
                 self.tabWidget.setCurrentIndex(index)
-            self.refresh_color_scheme()
 
     @QtCore.Slot()
     def on_new(self):
@@ -214,7 +214,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lbl_filename.clear()
 
     def refresh_color_scheme(self):
-        style = self.pygments_style
+        if self.styles_group and self.styles_group.checkedAction():
+            style = self.styles_group.checkedAction().text()
+        else:
+            style = 'qt'
         for i in range(self.tabWidget.count()):
             editor = self.tabWidget.widget(i)
             editor.modes.get(

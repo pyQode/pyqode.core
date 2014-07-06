@@ -72,8 +72,8 @@ def test_add_messages(editor):
               modes.CheckerMessages.INFO]
     mode.add_messages([modes.CheckerMessage('desc', random.choice(status),
                                             10 + i)
-                       for i in range(40)])
-    assert len(mode._messages) == 20
+                       for i in range(500)])
+    assert len(mode._messages) < 500
     QTest.qWait(500)
 
 
@@ -83,14 +83,15 @@ def test_remove_message(editor):
     mode = get_mode(editor)
     status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
               modes.CheckerMessages.INFO]
-    mode.add_messages([modes.CheckerMessage('desc', random.choice(status),
+    mode.add_messages([modes.CheckerMessage('desc', modes.CheckerMessages.ERROR,
                                             10 + i)
-                       for i in range(40)])
-    assert len(mode._messages) == 20
+                       for i in range(500)])
+    QTest.qWait(500)
+    assert len(mode._messages) == mode.limit
     QTest.qWait(500)
     mode.remove_message(mode._messages[10])
     QTest.qWait(500)
-    assert len(mode._messages) == 19
+    assert len(mode._messages) == mode.limit - 1
     mode.clear_messages()
 
 

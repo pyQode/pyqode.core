@@ -664,6 +664,17 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
+    def block_user_data(self, block):
+        """
+        Returns the block user data, this is an O(n) operation.
+        :param block: block or block number (1 based).
+        """
+        if isinstance(block, int):
+            block = self._editor.document().findBlockByNumber(block - 1)
+        for b in self._editor._blocks:
+            if b == block:
+                return b.user_data
+
 
 def keep_tc_pos(func):
     """

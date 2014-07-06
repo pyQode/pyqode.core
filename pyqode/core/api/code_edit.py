@@ -89,7 +89,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         Some languages such as cobol starts coding at column 7.
         """
-        
         return self._min_indent_column
 
     @min_indent_column.setter
@@ -288,6 +287,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
+        # a list of text block with QTextBlockUserData set on
+        # them as user_data. Calling setUserData on each block during
+        # syntax highlighting is too slow.
+        # You must use TextHelper.block_user_data to access them!
+        self._blocks = []
 
         self._backend = BackendManager(self)
         self._file = FileManager(self)
@@ -368,6 +372,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
         self._prev_tooltip_block_nbr = -1
 
+    def clear(self):
+        self._blocks[:] = []
+        super().clear()
+
     def setPlainText(self, txt, mime_type, encoding):
         """
         Extends setPlainText to force the user to set an encoding and a
@@ -383,11 +391,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # pylint: disable=invalid-name
         self.file.mimetype = mime_type
         self.file._encoding = encoding
-        self.clear()
-        highlighter = None
         for mode in self.modes:
             if hasattr(mode, 'set_mime_type'):
-                highlighter = mode
                 try:
                     _logger().debug('setting up lexer from mimetype: %s',
                                     self.file.mimetype)
@@ -402,11 +407,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 break
         self._original_text = txt
         self._modified_lines.clear()
-        if highlighter:
-            highlighter.process_events_on_highlight = True
+        import time
+        t = time.time()
         super().setPlainText(txt)
-        if highlighter:
-            highlighter.process_events_on_highlight = False
+        print(time.time() - t)
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
