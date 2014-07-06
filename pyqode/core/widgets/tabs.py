@@ -213,7 +213,7 @@ class TabWidget(QTabWidget):
                 self.setTabText(self.currentIndex(), code_edit._tab_name)
                 ext = os.path.splitext(path)[1]
                 old_ext = os.path.splitext(old_path)[1]
-                if ext != old_ext:
+                if ext != old_ext or not old_path:
                     icon = QtWidgets.QFileIconProvider().icon(
                         QtCore.QFileInfo(code_edit.file.path))
                     self.setTabIcon(self.currentIndex(), icon)
