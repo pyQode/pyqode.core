@@ -298,7 +298,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         raise NotImplementedError()
 
     def rehighlight(self):
-        self.editor._blocks.clear()
+        self.editor._blocks[:] = []
         QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         super().rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
