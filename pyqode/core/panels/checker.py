@@ -81,19 +81,20 @@ class CheckerPanel(Panel):
         Requests a tooltip if the cursor is currently over a marker.
         """
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
-        markers = self.marker_for_line(line)
-        text = '\n'.join([marker.description for marker in markers if marker.description])
+        if line:
+            markers = self.marker_for_line(line)
+            text = '\n'.join([marker.description for marker in markers if marker.description])
 
-        if len(markers):
-            if self._previous_line != line:
-                top = TextHelper(self.editor).line_pos_from_number(
-                    markers[0].line - 2)
-                if top:
-                    self._job_runner.request_job(self._display_tooltip,
-                                                 text, top)
-        else:
-            self._job_runner.cancel_requests()
-        self._previous_line = line
+            if len(markers):
+                if self._previous_line != line:
+                    top = TextHelper(self.editor).line_pos_from_number(
+                        markers[0].line - 2)
+                    if top:
+                        self._job_runner.request_job(self._display_tooltip,
+                                                     text, top)
+            else:
+                self._job_runner.cancel_requests()
+            self._previous_line = line
 
     def leaveEvent(self, *args, **kwargs):
         """
