@@ -2,6 +2,7 @@
 """
 This module contains the checker mode, a base class for code checker modes.
 """
+import logging
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
@@ -83,9 +84,9 @@ class CheckerMessage(object):
         #: The description of the message, used as a tooltip.
         self.description = description
         #: The status associated with the message. One of:
-        #:    * :const:`pyqode.core.MSG_STATUS_INFO`
-        #:    * :const:`pyqode.core.MSG_STATUS_WARNING`
-        #:    * :const:`pyqode.core.MSG_STATUS_ERROR`
+        #:    * :const:`pyqode.core.modes.CheckerMessages.INFO`
+        #:    * :const:`pyqode.core.modes.CheckerMessages.WARNING`
+        #:    * :const:`pyqode.core.modes.CheckerMessages.ERROR`
         self.status = status
         #: The line of the message
         self.line = line
@@ -108,6 +109,10 @@ class CheckerMessage(object):
 
     def __repr__(self):
         return "{0} {1}".format(self.description, self.line)
+
+
+def _logger(klass):
+    return logging.getLogger('%s [%s]' % (__name__, klass.__name__))
 
 
 class CheckerMode(Mode, QtCore.QObject):
@@ -166,6 +171,8 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
+        # max number of messages
+        self.limit = 50
         self._job_runner = DelayJobRunner(delay=delay)
         self._messages = []
         self._worker = worker
@@ -184,18 +191,36 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         if clear:
             self.clear_messages()
+        self._pending_msg = messages
+        # limit number of messages
+        if len(self._pending_msg) > self.limit:
+            _logger(self.__class__).debug(
+                'too much messages (%s), keeping error messages only' %
+                len(messages))
+            for msg in reversed(self._pending_msg):
+                if msg.status != CheckerMessages.ERROR and \
+                        len(self._pending_msg) > self.limit:
+                    self._pending_msg.remove(msg)
+            if len(self._pending_msg) > self.limit:
+                _logger(self.__class__).info(
+                    'still too much messages (%s), limiting to the 50 first '
+                    'messages' % len(messages))
+                self._pending_msg = self._pending_msg[:self.limit]
+        QtCore.QTimer.singleShot(1, self._add_batch)
+
+    def _add_batch(self):
         marker_panel = None
-        nb_msg = len(messages)
-        if nb_msg > 20:
-            nb_msg = 20
-        for message in messages[0:nb_msg]:
+        try:
+            marker_panel = self.editor.panels.get(MarkerPanel)
+        except KeyError:
+            pass
+        for i in range(10):
+            if not len(self._pending_msg):
+                return
+            message = self._pending_msg.pop(0)
             if message.line:
                 self._messages.append(message)
-                try:
-                    marker_panel = self.editor.panels.get(MarkerPanel)
-                except KeyError:
-                    pass
-                else:
+                if marker_panel:
                     message.marker = Marker(message.line, message.icon,
                                             message.description)
                     marker_panel.add_marker(message.marker)
@@ -209,8 +234,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
                 self.editor.decorations.append(message.decoration)
-        if marker_panel:
-            marker_panel.repaint()
+        QtCore.QTimer.singleShot(1, self._add_batch)
 
     def remove_message(self, message):
         """
