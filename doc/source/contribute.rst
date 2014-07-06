@@ -6,8 +6,9 @@ pyQode is an open-source project, and it needs your help to go on growing and im
 You can contribute in many different ways:
 
     - reports new bugs/features on the `issue tracker`_
-    - create new modes/panels and submit them on the `wiki`_, you can also
-      present your project `here`_
+    - add support for another language by creating a new pyqode namespace package and submitting it on the
+      `issue tracker`_. If your package is good (have tests,...), it might end up being part of the official
+      pyqode packages.
     - fork the project and send pull requests to merge your work
 
 If you have any question, just open an issue on the issue tracker.
@@ -15,6 +16,14 @@ If you have any question, just open an issue on the issue tracker.
 .. _`issue tracker`: https://github.com/pyQode/pyqode.core/issues?state=open
 .. _`wiki`: https://github.com/pyQode/pyqode.core/wiki/Extensions
 .. _`here`: https://github.com/pyQode/pyqode.core/wiki/Projects
+
+
+Adding support for a new language
+---------------------------------
+
+Support for new language must be added through a new pyqode namespace package (as it has been
+done for pyqode.python). To submit the your new package, simply open an issue. If your package meets all
+the requirements, it might end up being part of the official pyqode packages and you as new team member ;)
 
 Tips for submitting a post request:
 -----------------------------------

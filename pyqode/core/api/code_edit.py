@@ -64,6 +64,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
     unindent_requested = QtCore.Signal()
 
+    #: Store the list of mimetypes associated with the editor, for
+    #: specialised editors.
+    mimetypes = []
+
     @property
     def use_spaces_instead_of_tabs(self):
         """ Use spaces instead of tabulations. Default is True. """
@@ -316,6 +320,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._font_size = 10
         self._background = None
         self._font_family = 'monospace'
+        self._mimetypes = []
 
         # Flags/Working variables
         self._last_mouse_pos = QtCore.QPoint(0, 0)

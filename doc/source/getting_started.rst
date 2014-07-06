@@ -6,6 +6,35 @@ This page is a gentle introduction to the pyQode framework.
 Before reading this, you should have ``pyqode.core`` and ``PySide/PyQt4/PyQt5``
 :doc:`installed </download>` on your system.
 
+Design and philosophy
+---------------------
+
+In opposition to what other code editor projects might do, pyqode does not aim to support all
+languages from scratch. Instead it provides a framework that let you build the code editor
+of your dream for your favorite language. pyqode.core really is a toolbox that you will use to build
+your own specialised code editor.
+
+A generic code editor exists in pyqode.core but it is highly inefficient and
+probably not good enough to target your preferred language. It is there to be used as a fallback
+editor for secondary languages (i.e. languages that are not the main target of
+your application, for whatever reason).
+
+There are many reasons why you would want to build a specialised editor instead of using
+:class:`pyqode.core.widgets.GenericCodeEdit`. We can see the following reasons:
+
+    - implement a native highlighter for maximum flexiblity and better load times (the generic
+      pygments highlighter is usually 2-3 times slower than a native one).
+    - implement code folding. Code outline must be detected differently depending on the language. That's
+      why the generic pygments highlighter does not detect code outline at all.
+    - implement a code completion engine. Not every language use the same tools, you will be better
+      served by a specialised completione engine than by trying to use a generic one.
+
+
+Support for new languages are added by external (namespace) packages. That way, the user can only pick
+up what he needs, minimizing the list of dependencies. If you are working on Go editor, you would not want
+to have to download clang, jedi or pyFlakes. The only dependency you will have are the pyqode.core dependencies
+which boil down to pygments and optionally chardet.
+
 Packages
 --------
 
@@ -176,6 +205,12 @@ modes/panels, to open/save file and to control the backend:
         Modes manager. Use it to append/remove modes on the editor.
     - :attr:`pyqode.core.api.CodeEdit.panels`:
         Modes manager. Use it to append/remove panels on the editor.
+
+Starting from version 2.1, CodeEdit defines the :attr:`pyqode.core.api.CodeEdit.mimetypes` class attribute.
+property which is a list of supported mimetypes. An empty list means the CodeEdit is generic.
+**Code edit specialised for a specific language should define this attribute!**
+
+IDE can use that property and and :meth:`mimetypes.guess_type` to make file types-editor associations.
 
 Controlling the backend
 -----------------------

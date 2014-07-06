@@ -14,6 +14,7 @@ pyqode applications:
 
 """
 # pylint: disable=unused-import
+from pyqode.core.widgets.code_edits import TextEdit, GenericCodeEdit
 from pyqode.core.widgets.errors_table import ErrorsTable
 from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
