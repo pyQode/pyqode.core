@@ -3,12 +3,11 @@
 This module contains the checker mode, a base class for code checker modes.
 """
 import logging
+from pyqode.core.api import TextBlockUserData
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
-from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner
-from pyqode.core.panels import Marker, MarkerPanel
 from pyqode.core.qt import QtCore, QtGui
 # pylint: disable=too-many-arguments, maybe-no-member
 
@@ -32,14 +31,6 @@ class CheckerMessage(object):
     :class:`pyqode.core.modes.CheckerMode`.
     """
     # pylint: disable= too-many-instance-attributes
-    #: Default set of icons foreach message status
-    ICONS = {CheckerMessages.INFO: ("marker-info",
-                                    ":/pyqode-icons/rc/dialog-info.png"),
-             CheckerMessages.WARNING: ("marker-warning",
-                                       ":/pyqode-icons/rc/dialog-warning.png"),
-             CheckerMessages.ERROR: ("marker-error",
-                                     ":/pyqode-icons/rc/dialog-error.png")}
-
     #: Default colors foreach message status
     COLORS = {CheckerMessages.INFO: "#4040DD",
               CheckerMessages.WARNING: "#DDDD40",
@@ -98,17 +89,16 @@ class CheckerMessage(object):
         self.color = color
         if self.color is None:
             self.color = self.COLORS[status]
-        #: The icon used for the marker panel. If None, the default icon is
-        #: used (:const:`pyqode.core.CheckerMessage.ICONS`)
-        self.icon = icon
-        if self.icon is None:
-            self.icon = self.ICONS[status]
-        self.marker = None
         self.decoration = None
         self.path = path
+        #: store a reference to the associated QTextBlock, for quick acces
+        self.block = None
 
-    def __repr__(self):
-        return "{0} {1}".format(self.description, self.line)
+    def __str__(self):
+        return "{0} l{1}".format(self.description, self.line)
+
+    def __eq__(self, other):
+        return self.block == other.block and self.description == other.description
 
 
 def _logger(klass):
@@ -147,83 +137,87 @@ class CheckerMode(Mode, QtCore.QObject):
     You can also request an analysis manually using
     :meth:`pyqode.core.modes.CheckerMode.request_analysis`
 
-    Messages are displayed as text decorations on the editor and optional
-    markers can be added to a :class:`pyqode.core.panels.MarkerPanel`
+    Messages are displayed as text decorations on the editor. A checker panel will take
+    care of display message icons next to each line.
     """
     def __init__(self, worker,
                  delay=500,
-                 marker_panel_id="markerPanel",
-                 clear_on_request=True, show_tooltip=False):
+                 show_tooltip=False):
         """
         :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
                       trigger is set to
                       :class:pyqode.core.modes.CheckerTriggers`
-        :param marker_panel_id: Identifier of the marker panel to use to add
-                              checker messages markers.
-        :param clear_on_request: Clear all markers on request. If set to False,
-                            the marker will be cleared only when the analysis
-                            jobs finished. Default is True
-        :param trigger: The kind of trigger. (see
-                        :class:pyqode.core.modes.CheckerTriggers)
         :param show_tooltip: Specify if a tooltip must be displayed when the
                              mouse is over a checker message decoration.
         """
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
-        # max number of messages
-        self.limit = 50
+        # max number of messages to keep good performances
+        self.limit = 200
         self._job_runner = DelayJobRunner(delay=delay)
         self._messages = []
         self._worker = worker
         self._mutex = QtCore.QMutex()
-        self._clear_on_request = clear_on_request
         self._show_tooltip = show_tooltip
-        self._marker_panel_id = marker_panel_id
+        self._pending_msg = []
+        self._finished = True
 
-    def add_messages(self, messages, clear=True):
+    def add_messages(self, messages):
         """
         Adds a message or a list of message.
 
         :param messages: A list of messages or a single message
-        :param clear: Clear messages before displaying the new ones.
-                      Default is True.
         """
-        if clear:
-            self.clear_messages()
+        # remove old messages
+        if len(messages) > self.limit:
+            messages = messages[:self.limit]
+        _logger(self.__class__).debug('adding %s messages' % len(messages))
+        self._finished = False
+        self._new_messages = messages
+        self._to_check = list(self._messages)
         self._pending_msg = messages
-        # limit number of messages
-        if len(self._pending_msg) > self.limit:
-            _logger(self.__class__).debug(
-                'too much messages (%s), keeping error messages only' %
-                len(messages))
-            for msg in reversed(self._pending_msg):
-                if msg.status != CheckerMessages.ERROR and \
-                        len(self._pending_msg) > self.limit:
-                    self._pending_msg.remove(msg)
-            if len(self._pending_msg) > self.limit:
-                _logger(self.__class__).info(
-                    'still too much messages (%s), limiting to the 50 first '
-                    'messages' % len(messages))
-                self._pending_msg = self._pending_msg[:self.limit]
-        QtCore.QTimer.singleShot(1, self._add_batch)
+        # start removing messages, new message won't be added until we
+        # checked all message that need to be removed
+        QtCore.QTimer.singleShot(1, self._remove_batch)
+
+    def _remove_batch(self):
+        for i in range(100):
+            if not len(self._to_check):
+                # all messages checker, start adding messages now
+                QtCore.QTimer.singleShot(1, self._add_batch)
+                self.editor.repaint()
+                return False
+            msg = self._to_check.pop(0)
+            if msg.block is None:
+                msg.block = self.editor.document().findBlockByNumber(msg.line)
+            if msg not in self._new_messages:
+                self.remove_message(msg)
+        self.editor.repaint()
+        QtCore.QTimer.singleShot(1, self._remove_batch)
 
     def _add_batch(self):
-        marker_panel = None
-        try:
-            marker_panel = self.editor.panels.get(MarkerPanel)
-        except KeyError:
-            pass
         for i in range(10):
             if not len(self._pending_msg):
-                return
+                # all pending message added
+                self._finished = True
+                self.editor.repaint()
+                return False
             message = self._pending_msg.pop(0)
             if message.line:
+                try:
+                    usd = message.block.userData()
+                except AttributeError:
+                    message.block = self.editor.document().findBlockByNumber(message.line - 1)
+                    usd = message.block.userData()
+                if usd is None:
+                    usd = TextBlockUserData()
+                    message.block.setUserData(usd)
+                # check if the same message already exists
+                if message in usd.messages:
+                    continue
                 self._messages.append(message)
-                if marker_panel:
-                    message.marker = Marker(message.line, message.icon,
-                                            message.description)
-                    marker_panel.add_marker(message.marker)
+                usd.messages.append(message)
                 tooltip = None
                 if self._show_tooltip:
                     tooltip = message.description
@@ -235,6 +229,8 @@ class CheckerMode(Mode, QtCore.QObject):
                     message.color))
                 self.editor.decorations.append(message.decoration)
         QtCore.QTimer.singleShot(1, self._add_batch)
+        self.editor.repaint()
+        return True
 
     def remove_message(self, message):
         """
@@ -242,14 +238,11 @@ class CheckerMode(Mode, QtCore.QObject):
 
         :param message: Message to remove
         """
+        _logger(self.__class__).debug('removing message %s' % message)
+        usd = message.block.userData()
+        if usd and usd.messages:
+            usd.messages.remove(message)
         self._messages.remove(message)
-        if message.marker:
-            try:
-               pnl = self.editor.panels.get(MarkerPanel)
-            except KeyError:
-                pass
-            else:
-                pnl.remove_marker(message.marker)
         if message.decoration:
             self.editor.decorations.remove(message.decoration)
 
@@ -259,12 +252,6 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         while len(self._messages):
             self.remove_message(self._messages[0])
-        try:
-            pnl = self.editor.panels.get(MarkerPanel)
-        except KeyError:
-            pass
-        else:
-            pnl.repaint()
 
     def on_state_changed(self, state):
         if state:
@@ -272,32 +259,40 @@ class CheckerMode(Mode, QtCore.QObject):
         else:
             self.editor.textChanged.disconnect(self.request_analysis)
 
-    def _on_work_finished(self, status, messages):
+    def _on_work_finished(self, status, results):
         """
         Display results.
 
         :param status: Response status
-        :param messages: Response data, messages.
+        :param results: Response data, messages.
         """
         # pylint: disable=star-args
         if status:
-            messages = [CheckerMessage(*msg) for msg in messages]
+            messages = []
+            for msg in results:
+                msg = CheckerMessage(*msg)
+                block = self.editor.document().findBlockByNumber(msg.line - 1)
+                msg.block = block
+                messages.append(msg)
             self.add_messages(messages)
-        else:
-            self.clear_messages()
 
     def request_analysis(self):
         """
         Requests an analysis.
         """
-        self._job_runner.request_job(self._request)
+        if self._finished:
+            _logger(self.__class__).debug('running analysis')
+            self._job_runner.request_job(self._request)
+        else:
+            # retry later
+            _logger(self.__class__).debug(
+                'delaying analysis (previous analysis not finished)')
+            QtCore.QTimer.singleShot(500, self.request_analysis)
 
     def _request(self):
         """ Requests a checking of the editor content. """
         if not self.editor:
             return
-        if self._clear_on_request:
-            self.clear_messages()
         request_data = {
             'code': self.editor.toPlainText(),
             'path': self.editor.file.path,
@@ -307,4 +302,5 @@ class CheckerMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 self._worker, request_data, on_receive=self._on_work_finished)
         except NotConnected:
+            # retry later
             QtCore.QTimer.singleShot(100, self._request)

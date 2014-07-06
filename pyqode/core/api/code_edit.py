@@ -410,7 +410,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super().setPlainText(txt)
-        print(time.time() - t)
+        _logger().debug('setPlainText took %f' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)

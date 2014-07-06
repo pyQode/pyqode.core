@@ -233,7 +233,6 @@ class PygmentsSH(SyntaxHighlighter):
         """
         Gets/Sets the pygments style
         """
-        print('value')
         self._pygments_style = value
         self._update_style()
         # triggers a rehighlight
@@ -242,7 +241,6 @@ class PygmentsSH(SyntaxHighlighter):
     def __init__(self, document, lexer=None, color_scheme=None):
         super().__init__(document, color_scheme=color_scheme)
         self._pygments_style = self.color_scheme.name
-        print(self.pygments_style)
         self._document = document
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)

@@ -81,12 +81,14 @@ def test_add_messages(editor):
 @preserve_editor_config
 def test_remove_message(editor):
     mode = get_mode(editor)
+    mode.clear_messages()
     status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
               modes.CheckerMessages.INFO]
     mode.add_messages([modes.CheckerMessage('desc', modes.CheckerMessages.ERROR,
                                             10 + i)
-                       for i in range(500)])
-    QTest.qWait(500)
+                       for i in range(mode.limit * 2)])
+    while not mode._finished:
+        QTest.qWait(100)
     assert len(mode._messages) == mode.limit
     QTest.qWait(500)
     mode.remove_message(mode._messages[10])

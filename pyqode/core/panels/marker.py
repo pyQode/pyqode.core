@@ -60,6 +60,7 @@ class Marker(QtCore.QObject):
 
 class MarkerPanel(Panel):
     """
+    General purpose marker panel.
     This panels takes care of drawing icons at a specific line number.
 
     Use addMarker, removeMarker and clearMarkers to manage the collection of
@@ -93,7 +94,7 @@ class MarkerPanel(Panel):
         Adds the marker to the panel.
 
         :param marker: Marker to add
-        :type marker: pyqode.core.Marker
+        :type marker: pyqode.core.modes.Marker
         """
         key, val = self.make_marker_icon(marker.icon)
         if key and val:
@@ -106,6 +107,7 @@ class MarkerPanel(Panel):
         if user_data is None:
             user_data = TextBlockUserData()
             block.setUserData(user_data)
+        marker.panel_ref = self
         user_data.markers.append(marker)
         self.repaint()
 
@@ -176,30 +178,32 @@ class MarkerPanel(Panel):
             if hasattr(user_data, "markers"):
                 markers = user_data.markers
                 for i, marker in enumerate(markers):
-                    if marker in self._to_remove:
-                        try:
-                            user_data.markers.remove(None)
-                            self._to_remove.remove(marker)
-                        except ValueError:
-                            pass
-                        continue
-                    if marker and marker.icon:
-                        rect = QtCore.QRect()
-                        rect.setX(0)
-                        rect.setY(top)
-                        rect.setWidth(self.sizeHint().width())
-                        rect.setHeight(self.sizeHint().height())
-                        if isinstance(marker.icon, tuple):
-                            key = marker.icon[0]
-                        else:
-                            key = marker.icon
-                        if key not in self._icons:
-                            key, val = self.make_marker_icon(marker.icon)
-                            if key and val:
-                                self._icons[key] = val
+                    if hasattr(marker, 'panel_ref') and marker.panel_ref == self:
+                        # only draw our markers
+                        if marker in self._to_remove:
+                            try:
+                                user_data.markers.remove(None)
+                                self._to_remove.remove(marker)
+                            except ValueError:
+                                pass
+                            continue
+                        if marker and marker.icon:
+                            rect = QtCore.QRect()
+                            rect.setX(0)
+                            rect.setY(top)
+                            rect.setWidth(self.sizeHint().width())
+                            rect.setHeight(self.sizeHint().height())
+                            if isinstance(marker.icon, tuple):
+                                key = marker.icon[0]
                             else:
-                                continue
-                        self._icons[key].paint(painter, rect)
+                                key = marker.icon
+                            if key not in self._icons:
+                                key, val = self.make_marker_icon(marker.icon)
+                                if key and val:
+                                    self._icons[key] = val
+                                else:
+                                    continue
+                            self._icons[key].paint(painter, rect)
 
     def mousePressEvent(self, event):  # pylint: disable=invalid-name
         """

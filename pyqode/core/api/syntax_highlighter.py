@@ -64,7 +64,6 @@ class ColorScheme:
         self.formats['background'] = self._get_format_from_color(style.background_color)
         # highlight
         self.formats['highlight'] = self._get_format_from_color(style.highlight_color)
-        print(self.formats['highlight'])
         # token styles
         token_key_pairs = [
             (Token.Keyword, 'keyword'),
@@ -215,6 +214,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             color_scheme = ColorScheme('qt')
         self._color_scheme = color_scheme
         self._spaces_ptrn = QtCore.QRegExp(r'\s+')
+        # current block (with a user_data attribute)
+        self.current_block = None
 
     @staticmethod
     def _detect_parentheses(text, user_data):
@@ -270,6 +271,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         # self.block_highlight_started.emit(self, text)
         # # # setup user data
         block = self.currentBlock()
+        self.current_block = block
         if self.editor:
             if self.editor.file.opening:
                 if block.blockNumber() == 0:
@@ -328,7 +330,9 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
         self.fold_start = False
         #: The block's fold indent
         self.fold_indent = -1
-        #: The :class:`pyqode.core.Marker` associated with the text block
+        #: List of checker messages associated with the block.
+        self.messages = []
+        #: List of markers draw by a marker panel.
         self.markers = []
         #: List of :class:`pyqode.core.ParenthesisInfo` for the "(" and ")"
         #: symbols
