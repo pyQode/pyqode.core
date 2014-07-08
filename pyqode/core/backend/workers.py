@@ -105,7 +105,7 @@ class CodeCompletionWorker(object):
                 results = prov.complete(
                     code, line, column, path, encoding, prefix)
                 completions.append(results)
-                if len(completions) > 20:
+                if len(completions):
                     break
             except:
                 sys.stderr.write('Failed to get completions from provider %r'

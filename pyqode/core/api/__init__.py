@@ -12,6 +12,7 @@ This package contains the base classes of the API:
 """
 from .code_edit import CodeEdit
 from .decoration import TextDecoration
+from .encodings import ENCODINGS_MAP, convert_to_codec_key
 from .manager import Manager
 from .mode import Mode
 from .panel import Panel
@@ -24,8 +25,11 @@ from .utils import TextStyle
 
 
 __all__ = [
+    'convert_to_codec_key'
     'CodeEdit',
+    'ColorScheme'
     'DelayJobRunner',
+    'ENCODINGS_MAP',
     'Manager',
     'Mode',
     'Panel',

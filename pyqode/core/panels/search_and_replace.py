@@ -170,8 +170,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._fg = QtGui.QColor('black')
 
     def on_install(self, editor):
-        Panel.on_install(self, editor)
-        self.on_toolButtonClose_clicked()
+        super().on_install(editor)
+        self.hide()
         self.text_helper= TextHelper(editor)
 
     def _refresh_decorations(self):
@@ -182,7 +182,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):
-        Panel.on_state_changed(self, state)
+        super().on_state_changed(state)
         if state:
             # append menus
             self._separator = self.editor.add_separator()

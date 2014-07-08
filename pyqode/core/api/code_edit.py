@@ -1,7 +1,7 @@
 import logging
 import sys
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core.dialogs.goto import GoToLineDialog
+from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
 from pyqode.core.managers import FileManager
 from pyqode.core.managers import ModesManager
@@ -181,7 +181,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def whitespaces_foreground(self):
         """
-        The editor white spaces' foreground color.
+        The editor white spaces' foreground color. White spaces are highlighter
+        by the syntax highlighter. You should call rehighlight to update their
+        color. This is not done automatically to prevent multiple, useless call to
+        rehighligh which can take some time on big files.
         """
         return self._whitespaces_foreground
 
@@ -189,7 +192,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def whitespaces_foreground(self, value):
         # pylint: disable=missing-docstring
         self._whitespaces_foreground = value
-        self.rehighlight()
 
     @property
     def selection_background(self):
@@ -378,7 +380,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._prev_tooltip_block_nbr = -1
 
     def clear(self):
-        self._blocks[:] = []
         super().clear()
 
     def setPlainText(self, txt, mime_type, encoding):
@@ -415,7 +416,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super().setPlainText(txt)
-        _logger().debug('setPlainText took %f' % (time.time() - t))
+        _logger().info('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -468,7 +469,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         helper = TextHelper(self)
-        line, result = GoToLineDialog.get_line(
+        line, result = DlgGotoLine.get_line(
             self, helper.current_line_nbr(), helper.line_count())
         if not result:
             return

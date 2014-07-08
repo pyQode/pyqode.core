@@ -14,7 +14,8 @@ class Panel(QtWidgets.QWidget, Mode):
 
     A panel is a mode and a QWidget.
 
-    .. note:: A disabled panel will be hidden automatically.
+    .. note:: Use enabled to disable panel actions and setVisible to change the
+        visiblity of the panel.
     """
     class Position:  # pylint: disable=no-init, too-few-public-methods
         """
@@ -82,23 +83,6 @@ class Panel(QtWidgets.QWidget, Mode):
         self._foreground_pen = QtGui.QPen(QtGui.QColor(
             self.palette().windowText().color()))
 
-    def on_state_changed(self, state):
-        """
-        Shows/Hides the Panel
-
-        .. warning:: Don't forget to call **super** if you override this
-            method!
-
-        :param state: True = enabled, False = disabled
-        :type state: bool
-        """
-        if not self.editor.isVisible():
-            return
-        if state is True:
-            self.show()
-        else:
-            self.hide()
-
     def paintEvent(self, event):
         """ Fills the panel background. """
         # pylint: disable=invalid-name
@@ -119,5 +103,6 @@ class Panel(QtWidgets.QWidget, Mode):
         """
         # pylint: disable=invalid-name
         _logger().debug('%s visibility changed', self.name)
-        QtWidgets.QWidget.setVisible(self, visible)
-        self.editor.panels.refresh()
+        super().setVisible(visible)
+        if self.editor:
+            self.editor.panels.refresh()

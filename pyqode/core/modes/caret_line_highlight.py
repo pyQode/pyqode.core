@@ -57,20 +57,21 @@ class CaretLineHighlighterMode(Mode):
 
     def _clear_deco(self):
         """ Clear line decoration """
-        if self._decoration:
+        if self._decoration and self.enabled:
             self.editor.decorations.remove(self._decoration)
 
     def refresh(self):
         """
         Updates the current line decoration
         """
-        self._clear_deco()
-        if self._color:
-            color = self._color
-        else:
-            color = drift_color(self.editor.background, 110)
-        brush = QtGui.QBrush(color)
-        self._decoration = TextDecoration(self.editor.textCursor())
-        self._decoration.set_background(brush)
-        self._decoration.set_full_width()
-        self.editor.decorations.append(self._decoration)
+        if self.enabled:
+            self._clear_deco()
+            if self._color:
+                color = self._color
+            else:
+                color = drift_color(self.editor.background, 110)
+            brush = QtGui.QBrush(color)
+            self._decoration = TextDecoration(self.editor.textCursor())
+            self._decoration.set_background(brush)
+            self._decoration.set_full_width()
+            self.editor.decorations.append(self._decoration)

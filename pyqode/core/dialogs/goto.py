@@ -4,7 +4,7 @@ from pyqode.core.qt import QtWidgets
 __author__ = 'colin'
 
 
-class GoToLineDialog(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
+class DlgGotoLine(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
     """
     Goto line dialog.
     """
@@ -31,7 +31,7 @@ class GoToLineDialog(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
         :returns: tuple(line, status) status is False if the dialog has been
             rejected.
         """
-        dlg = GoToLineDialog(parent, current_line, line_count)
+        dlg = DlgGotoLine(parent, current_line, line_count)
         if dlg.exec_() == dlg.Accepted:
             return dlg.spinBox.value(), True
         return current_line, False
