@@ -143,7 +143,7 @@ def test_save_file(editor):
     assert editor.file.encoding == 'latin-1'
     os.remove('tmp.py')
     editor.file.open(__file__)
-    with pytest.raises(OSError):
+    with pytest.raises(IOError):
         editor.file.save(path='/usr/bin') is False
     editor.file._path = ''
     editor.file.save() is False
