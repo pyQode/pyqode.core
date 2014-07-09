@@ -5,6 +5,7 @@ This module tests the text frontend module (pyqode.core.api.TextHelper)
 import mimetypes
 import os
 import sys
+import pytest
 from pyqode.core.api.utils import TextHelper, keep_tc_pos
 
 from pyqode.core.qt import QtGui
@@ -135,30 +136,17 @@ def test_open_file(editor):
 def test_save_file(editor):
     path = os.path.join(os.getcwd(), 'tmp.py')
     TextHelper(editor).select_lines(1, 2)
-    assert editor.file.save(path, encoding='utf-8') == True
+    editor.file.save(path, encoding='utf-8')
     assert os.path.exists(path)
     assert editor.file.encoding == 'utf-8'
-    assert editor.file.save(path, encoding='latin-1') is True
+    editor.file.save(path, encoding='latin-1')
     assert editor.file.encoding == 'latin-1'
     os.remove('tmp.py')
     editor.file.open(__file__)
-    assert editor.file.save(path='/usr/bin') is False
+    with pytest.raises(OSError):
+        editor.file.save(path='/usr/bin') is False
     editor.file._path = ''
     editor.file.save() is False
-
-@editor_open(__file__)
-@log_test_name
-def test_bug_encoding(editor):
-    # should not raise AttributeError as we now fallback to utf-8 in
-    # case of error with the current encoding
-    editor.file.close()
-    import logging
-    editor.setPlainText("é", mime_type="x/text-python", encoding='ascii')
-    logging.debug(editor.file.encoding)
-    path = os.path.join(os.getcwd(), 'tmp.py')
-    assert editor.file.save(path) is True
-    assert os.path.exists(path)
-    os.remove(path)
 
 
 @editor_open(__file__)
@@ -287,4 +275,4 @@ def test_get_mimetype(editor):
     mimetypes.add_type('text/xml', '.ui')
     assert managers.FileManager.get_mimetype('file.py') == 'text/x-python'
     assert managers.FileManager.get_mimetype('file.ui') == 'text/xml'
-    assert managers.FileManager.get_mimetype('file.foo') == 'text/plain'
+    assert managers.FileManager.get_mimetype('file.foo') == 'text/x-plain'

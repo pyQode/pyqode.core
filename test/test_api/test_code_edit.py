@@ -68,6 +68,7 @@ def test_show_tooltip(editor):
 def test_margin_size(editor):
     for panel in editor.panels:
         panel.enabled = False
+        panel.hide()
 
     # we really need to show the window here to get correct margin size.
     editor.show()
@@ -303,7 +304,7 @@ def test_multiple_panels(editor):
 
 @log_test_name
 def test_resize(editor):
-    editor.resize(200, 300)
+    editor.resize(700, 500)
     QTest.qWait(1000)
     editor.resize(800, 600)
     QTest.qWait(1000)
