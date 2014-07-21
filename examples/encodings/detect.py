@@ -20,15 +20,12 @@ from pyqode.core import api, panels, widgets
 from common import setup_editor, get_file_path
 import chardet
 
-with open(get_file_path(), 'rb') as buf:
+pth = get_file_path()
+with open(pth, 'rb') as buf:
     encoding = chardet.detect(buf.read())['encoding']
 
 app = QtWidgets.QApplication(sys.argv)
 editor = setup_editor(
-    encoding=encoding,
     panels=[(panels.EncodingPanel(), api.Panel.Position.TOP)])
-widgets.EncodingsContextMenu(parent=editor, title='Reload')
-# the menu can be used to reload the file with another encoding in case it
-# loaded without errors but do not display the right characters
-# todo
+editor.file.open(pth, encoding=encoding, use_cached_encoding=False)
 app.exec_()

@@ -122,10 +122,29 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         return False
 
 
+class DlgEncodingsChoice(QtWidgets.QDialog):
+    def __init__(self, parent, path, encoding):
+        super().__init__(parent)
+        self.setWindowTitle('Choose encoding')
+        # avoid circular references with CodeEdit
+        from pyqode.core.ui import dlg_encodings_ui
+        self.ui = dlg_encodings_ui.Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.comboBoxEncodings.current_encoding = encoding
+        self.ui.lblDescription.setText(
+            self.ui.lblDescription.text() %
+            ('There was a problem opening the file %r with encoding: %s' %
+             (path, encoding)))
+
+    @classmethod
+    def choose_encoding(cls, parent, path, encoding):
+        dlg = cls(parent, path, encoding)
+        dlg.exec_()
+        return dlg.ui.comboBoxEncodings.current_encoding
+
+
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    print(DlgPreferredEncodingsEditor.edit_encoding(None))
-    print(Settings().preferred_encodings)
-    app.exec_()
-    print(Settings().preferred_encodings)
+    new_encoding = DlgEncodingsChoice.choose_encoding(None, __file__, 'utf-8')
+    print(new_encoding)

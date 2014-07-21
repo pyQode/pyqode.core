@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'dlg_preferred_encodings_editor.ui'
 #
-# Created: Tue Jul  8 21:19:17 2014
-#      by: PyQt5 UI code generator 5.3
+# Created: Mon Jul 21 18:26:40 2014
+#      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -30,6 +30,8 @@ class Ui_Dialog(object):
         self.gridLayout.setObjectName("gridLayout")
         self.tableWidgetAvailable = QtWidgets.QTableWidget(self.groupBox)
         self.tableWidgetAvailable.setObjectName("tableWidgetAvailable")
+        self.tableWidgetAvailable.setColumnCount(0)
+        self.tableWidgetAvailable.setRowCount(0)
         self.tableWidgetAvailable.horizontalHeader().setDefaultSectionSize(150)
         self.tableWidgetAvailable.horizontalHeader().setSortIndicatorShown(True)
         self.tableWidgetAvailable.horizontalHeader().setStretchLastSection(True)
@@ -81,6 +83,8 @@ class Ui_Dialog(object):
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.tableWidgetPreferred = QtWidgets.QTableWidget(self.groupBox_2)
         self.tableWidgetPreferred.setObjectName("tableWidgetPreferred")
+        self.tableWidgetPreferred.setColumnCount(0)
+        self.tableWidgetPreferred.setRowCount(0)
         self.tableWidgetPreferred.horizontalHeader().setDefaultSectionSize(150)
         self.tableWidgetPreferred.horizontalHeader().setSortIndicatorShown(True)
         self.tableWidgetPreferred.horizontalHeader().setStretchLastSection(True)

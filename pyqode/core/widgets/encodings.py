@@ -149,6 +149,7 @@ class EncodingsContextMenu(EncodingsMenu):
         super().__init__(title, parent, selected_encoding)
         self.reload_requested.connect(self._on_reload_requested)
         parent.new_text_set.connect(self._refresh)
+        self.parent().add_separator()
         self.parent().add_menu(self)
         self._timer = QtCore.QTimer()
         self._timer.setInterval(1)
@@ -167,5 +168,18 @@ class EncodingsContextMenu(EncodingsMenu):
 
     @QtCore.Slot()
     def _reload(self):
-        self.parent().file.reload(self._encoding)
         self._timer.stop()
+        try:
+            self.parent().file.reload(self._encoding)
+        except UnicodeDecodeError:
+            QtWidgets.QMessageBox.warning(
+                self.parent(), 'Decoding error',
+                'Failed to reload file with encoding %s' % self._encoding)
+        else:
+            try:
+                from pyqode.core.panels import EncodingPanel
+                panel = self.parent().panels.get(EncodingPanel)
+            except KeyError:
+                pass
+            else:
+                panel.cancel()

@@ -70,12 +70,13 @@ class EncodingPanel(Panel):
         except AttributeError:
             pass
 
-    def __init__(self):
+    def __init__(self, add_context_menu=True):
         super().__init__()
         # leave it here otherwise you will have circular import errors
         from pyqode.core.ui.pnl_encoding_ui import Ui_Form
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        self.__add_ctx_mnu = add_context_menu
         self._labels = [self.ui.label, self.ui.lblDescription]
         self._color = None
         self.color = QtGui.QColor('#8AADD4')
@@ -84,7 +85,7 @@ class EncodingPanel(Panel):
         self._deco = None
         self.ui.pushButtonRetry.clicked.connect(self._reload)
         self.ui.pushButtonEdit.clicked.connect(self._edit_anyway)
-        self.ui.pushButtonCancel.clicked.connect(self._cancel)
+        self.ui.pushButtonCancel.clicked.connect(self.cancel)
         self.hide()
 
     def enable_caret_line(self, value=True):
@@ -141,25 +142,36 @@ class EncodingPanel(Panel):
             self._background_brush = QtGui.QBrush(self._color)
             painter.fillRect(event.rect(), self._background_brush)
 
+    def on_install(self, editor):
+        super().on_install(editor)
+        if self.__add_ctx_mnu:
+            # add context menu
+            from pyqode.core.widgets import EncodingsContextMenu
+            EncodingsContextMenu(parent=editor)
+
     def _reload(self):
-        self.hide()
-        self.editor.decorations.remove(self._deco)
+        self._rm_deco()
         self.editor.setReadOnly(False)
         self.enable_caret_line(True)
-        self.editor.file.open(
-            self.editor.file.path, self.ui.comboBoxEncodings.current_encoding)
+        self.editor.file.reload(self.ui.comboBoxEncodings.current_encoding)
+        self.hide()
 
     def _edit_anyway(self):
-        self.hide()
-        self.editor.decorations.remove(self._deco)
+        self._rm_deco()
         self.editor.setReadOnly(False)
         self.enable_caret_line(True)
-
-    def _cancel(self):
         self.hide()
-        self.editor.decorations.remove(self._deco)
+
+    def _rm_deco(self):
+        if self._deco:
+            self.editor.decorations.remove(self._deco)
+            self._deco = None
+
+    def cancel(self):
+        self._rm_deco()
         self.enable_caret_line(True)
         self.cancel_requested.emit(self.editor)
+        self.hide()
 
 
 if __name__ == '__main__':
