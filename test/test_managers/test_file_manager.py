@@ -19,7 +19,7 @@ def test_open(editor):
 
 
 def test_open_non_existing_file(editor):
-    with pytest.raises(OSError):
+    with pytest.raises(IOError):
         editor.file.open('qzdjoi')
 
 

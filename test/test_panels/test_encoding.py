@@ -32,7 +32,7 @@ def test_reload(editor):
     assert pnl.ui.comboBoxEncodings.current_encoding == 'utf_8'
     pnl.ui.comboBoxEncodings.current_encoding = 'big5hkscs'
     assert pnl.ui.comboBoxEncodings.current_encoding == 'big5hkscs'
-    pnl.ui.pushButtonRetry.clicked.emit()
+    pnl.ui.pushButtonRetry.clicked.emit(True)
     QTest.qWait(1000)
     assert pnl.isVisible() is False
 
@@ -45,7 +45,7 @@ def test_edit_anyway(editor):
     pnl = get_panel(editor)
     assert pnl.isVisible() is True
     assert pnl.ui.comboBoxEncodings.current_encoding == 'utf_8'
-    pnl.ui.pushButtonEdit.clicked.emit()
+    pnl.ui.pushButtonEdit.clicked.emit(True)
     QTest.qWait(1000)
     assert pnl.isVisible() is False
     assert editor.toPlainText().startswith("b'")
