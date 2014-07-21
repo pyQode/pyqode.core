@@ -8,6 +8,7 @@ from test.helpers import preserve_editor_config
 
 PATH = pth = os.path.join(os.getcwd(), 'test', 'files', 'big5hkscs.txt')
 
+
 def test_open(editor):
     editor.file.open(__file__, encoding='utf-8')
     assert editor.file.path == __file__

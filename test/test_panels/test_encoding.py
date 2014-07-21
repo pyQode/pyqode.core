@@ -59,7 +59,7 @@ def test_cancel(editor):
     pnl = get_panel(editor)
     assert pnl.isVisible() is True
     assert pnl.ui.comboBoxEncodings.current_encoding == 'utf_8'
-    pnl.ui.pushButtonCancel.clicked.emit()
+    pnl.ui.pushButtonCancel.clicked.emit(True)
     QTest.qWait(1000)
     assert pnl.isVisible() is False
     assert editor.toPlainText() == ''
