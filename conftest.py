@@ -34,7 +34,7 @@ def pytest_runtest_setup(item):
             pytest.skip("test skipped when ran on Travis-CI: %r" % item)
         else:
             logging.info("------------------- %s -------------------",
-                         item.name)
+                         item)
 
 
 # -------------------

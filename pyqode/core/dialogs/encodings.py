@@ -5,7 +5,7 @@ you application.
 """
 import locale
 from pyqode.core.api import encodings
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.core.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.settings import Settings
 from pyqode.core.ui import dlg_preferred_encodings_editor_ui
 
@@ -17,7 +17,11 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self._load_preferred()
         self.ui.pushButtonAdd.clicked.connect(self._add)
+        self.ui.pushButtonAdd.setIcon(QtGui.QIcon.fromTheme(
+            "go-next", QtGui.QIcon(':/pyqode-icons/rc/go-next.png')))
         self.ui.pushButtonRemove.clicked.connect(self._remove)
+        self.ui.pushButtonRemove.setIcon(QtGui.QIcon.fromTheme(
+            "go-previous", QtGui.QIcon(':/pyqode-icons/rc/go-previous.png')))
 
     def _load_available(self):
         self.ui.tableWidgetAvailable.setColumnCount(2)

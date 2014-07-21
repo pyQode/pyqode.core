@@ -449,6 +449,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
         self._actions.append(action)
+        self.addAction(action)
         return action
 
     def remove_action(self, action):
@@ -736,6 +737,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._mnu = QtWidgets.QMenu()
         self._mnu.addActions(self._actions)
         for menu in self._menus:
+            self._mnu.addSeparator()
             self._mnu.addMenu(menu)
         self._mnu.popup(self.mapToGlobal(point))
 

@@ -25,8 +25,12 @@ from pyqode.core.api import encodings
 
 
 class Settings:
-    def __init__(self):
-        self._settings = QtCore.QSettings('pyQode', 'pyqode.core')
+    def __init__(self, suffix=''):
+        self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
+
+    def clear(self):
+        self._settings.clear()
+
     @property
     def preferred_encodings(self):
         """

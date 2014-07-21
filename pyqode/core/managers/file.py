@@ -193,7 +193,7 @@ class FileManager(Manager):
         sel_end = self.editor.textCursor().selectionEnd()
         return sel_end, sel_start
 
-    def save(self, path=None, encoding=None):
+    def save(self, path=None, encoding=None, fallback_encoding=None):
         """
         Save the editor content to a file.
 
@@ -201,8 +201,12 @@ class FileManager(Manager):
                      path (save), set a new path to save as.
         :param encoding: optional encoding, will use the current
                          file encoding if None.
+        :param fallback_encoding: Fallback encoding to use in case of encoding
+            error. None to use the locale preferred encoding
 
         """
+        if fallback_encoding is None:
+            fallback_encoding = locale.getpreferredencoding()
         self.saving = True
         _logger().debug("saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
@@ -230,18 +234,10 @@ class FileManager(Manager):
             _logger().debug('saving editor content to temp file: %s', path)
             with open(tmp_path, 'w', encoding=encoding) as file:
                 file.write(plain_text)
-        except UnicodeEncodeError as e:
-            self._rm(tmp_path)
-            self.saving = False
-            self.editor.text_saved.emit(path)
-            # raise UnicodeEncodeError if no EncodingPanel were found,
-            # otherwise let the encoding panel warn the user about failure.
-            try:
-                panel = self.editor.panels.get('EncodingPanel')
-            except KeyError:
-                raise e
-            else:
-                panel.on_save_failed(path, encoding)
+        except UnicodeEncodeError:
+            # fallback to utf-8 in case of error.
+            with open(tmp_path, 'w', encoding=fallback_encoding) as file:
+                file.write(plain_text)
         except (IOError, OSError) as e:
             self._rm(tmp_path)
             self.saving = False
