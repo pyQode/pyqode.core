@@ -105,7 +105,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         return encodings
 
     @classmethod
-    def edit_encodins(cls, parent):
+    def edit_encoding(cls, parent):
         """
         Static helper method that shows the encoding editor dialog
         If the dialog was accepted the new encodings are added to the settings.
@@ -125,7 +125,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    print(DlgPreferredEncodingsEditor.edit_encodins(None))
+    print(DlgPreferredEncodingsEditor.edit_encoding(None))
     print(Settings().preferred_encodings)
     app.exec_()
     print(Settings().preferred_encodings)

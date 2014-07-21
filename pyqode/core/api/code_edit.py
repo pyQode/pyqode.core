@@ -337,6 +337,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         # setup context menu
         self._actions = []
+        self._menus = []
         if create_default_actions:
             self._init_actions()
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -457,6 +458,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param action: Action/seprator to remove.
         """
         self._actions.remove(action)
+        self.removeAction(action)
+
+    def add_menu(self, menu):
+        self._menus.append(menu)
+        self.addActions(menu.actions())
+
+    def remove_menu(self, menu):
+        self._menus.remove(menu)
+        for action in menu.actions():
+            self.removeAction(action)
 
     @QtCore.Slot()
     def delete(self):
@@ -724,6 +735,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Shows the context menu """
         self._mnu = QtWidgets.QMenu()
         self._mnu.addActions(self._actions)
+        for menu in self._menus:
+            self._mnu.addMenu(menu)
         self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):

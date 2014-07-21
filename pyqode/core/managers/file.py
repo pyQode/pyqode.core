@@ -107,7 +107,7 @@ class FileManager(Manager):
         _logger().debug('mimetype detected: %s', mimetype)
         return mimetype
 
-    def open(self, path, encoding=locale.getpreferredencoding(), use_cached_encoding=True):
+    def open(self, path, encoding=None, use_cached_encoding=True):
         """
         Open a file and set its content on the editor widget.
 
@@ -127,6 +127,8 @@ class FileManager(Manager):
         :raises: UnicodeDecodeError in case of error if no EncodingPanel
             were set on the editor.
         """
+        if encoding is None:
+            encoding = locale.getpreferredencoding()
         self.opening = True
         settings = Settings()
         self._path = path
@@ -147,7 +149,7 @@ class FileManager(Manager):
                 from pyqode.core.panels import EncodingPanel
                 panel = self.editor.panels.get(EncodingPanel)
             except KeyError:
-                raise e
+                raise e  # panel not found, not automatic error management
             else:
                 panel.on_open_failed(path, encoding)
         else:
@@ -163,6 +165,16 @@ class FileManager(Manager):
             self.editor.setDocumentTitle(self.editor.file.name)
             self.editor.setWindowTitle(self.editor.file.name)
         self.opening = False
+
+    def reload(self, encoding):
+        """
+        Reload the file with another encoding.
+
+        :param encoding: the new encoding to use to reload the file.
+        """
+        assert os.path.exists(self.path)
+        self.open(self.path, encoding=encoding,
+                  use_cached_encoding=False)
 
     def _rm(self, tmp_path):
         try:

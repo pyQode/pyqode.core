@@ -17,6 +17,8 @@ pyqode applications:
 """
 # pylint: disable=unused-import
 from pyqode.core.widgets.code_edits import TextEdit, GenericCodeEdit
+from pyqode.core.widgets.encodings import (EncodingsComboBox, EncodingsMenu,
+                                           EncodingsContextMenu)
 from pyqode.core.widgets.errors_table import ErrorsTable
 from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
@@ -29,5 +31,8 @@ __all__ = [
     'InteractiveConsole',
     'MenuRecentFiles',
     'RecentFilesManager',
-    'TabWidget'
+    'TabWidget',
+    'EncodingsComboBox',
+    'EncodingsMenu',
+    'EncodingsContextMenu'
 ]
