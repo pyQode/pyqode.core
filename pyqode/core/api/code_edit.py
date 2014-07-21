@@ -1,7 +1,7 @@
 import logging
 import sys
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core.dialogs.goto import GoToLineDialog
+from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
 from pyqode.core.managers import FileManager
 from pyqode.core.managers import ModesManager
@@ -181,7 +181,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def whitespaces_foreground(self):
         """
-        The editor white spaces' foreground color.
+        The editor white spaces' foreground color. White spaces are highlighter
+        by the syntax highlighter. You should call rehighlight to update their
+        color. This is not done automatically to prevent multiple, useless call to
+        rehighligh which can take some time on big files.
         """
         return self._whitespaces_foreground
 
@@ -189,7 +192,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def whitespaces_foreground(self, value):
         # pylint: disable=missing-docstring
         self._whitespaces_foreground = value
-        self.rehighlight()
 
     @property
     def selection_background(self):
@@ -335,6 +337,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         # setup context menu
         self._actions = []
+        self._menus = []
         if create_default_actions:
             self._init_actions()
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -378,7 +381,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._prev_tooltip_block_nbr = -1
 
     def clear(self):
-        self._blocks[:] = []
         super().clear()
 
     def setPlainText(self, txt, mime_type, encoding):
@@ -415,7 +417,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super().setPlainText(txt)
-        _logger().debug('setPlainText took %f' % (time.time() - t))
+        _logger().info('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -447,6 +449,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
         self._actions.append(action)
+        self.addAction(action)
         return action
 
     def remove_action(self, action):
@@ -456,6 +459,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param action: Action/seprator to remove.
         """
         self._actions.remove(action)
+        self.removeAction(action)
+
+    def add_menu(self, menu):
+        self._menus.append(menu)
+        self.addActions(menu.actions())
+
+    def remove_menu(self, menu):
+        self._menus.remove(menu)
+        for action in menu.actions():
+            self.removeAction(action)
 
     @QtCore.Slot()
     def delete(self):
@@ -468,7 +481,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         helper = TextHelper(self)
-        line, result = GoToLineDialog.get_line(
+        line, result = DlgGotoLine.get_line(
             self, helper.current_line_nbr(), helper.line_count())
         if not result:
             return
@@ -723,6 +736,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Shows the context menu """
         self._mnu = QtWidgets.QMenu()
         self._mnu.addActions(self._actions)
+        for menu in self._menus:
+            self._mnu.addSeparator()
+            self._mnu.addMenu(menu)
         self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):

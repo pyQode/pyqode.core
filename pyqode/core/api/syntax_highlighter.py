@@ -1,3 +1,4 @@
+import logging
 from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token
 import sys
@@ -135,6 +136,10 @@ class ColorScheme:
                       int(color[2:4], base=16),
                       int(color[4:6], base=16))
         return qcolor
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
@@ -313,10 +318,13 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         raise NotImplementedError()
 
     def rehighlight(self):
+        start = time.time()
         self.editor._blocks[:] = []
         QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         super().rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
+        end = time.time()
+        _logger().info('rehighlight duration: %fs' % (end - start))
 
     def on_install(self, editor):
         super().on_install(editor)

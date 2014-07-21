@@ -152,6 +152,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
+        self._completer.popup().hide()
         self._completer = None
 
     def on_state_changed(self, state):
@@ -302,6 +303,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def _show_completions(self, completions):
+        _logger().debug("show %d completions" % len(completions))
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
         if (not self._cancel_next and not self._is_last_char_end_of_word() and
@@ -309,7 +311,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
             self._update_model(completions, self._completer.model())
+            _logger().debug("model updated")
             self._show_popup()
+            _logger().debug("popup shown")
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
@@ -359,14 +363,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                 width)
             # show the completion list
             if self.editor.isVisible():
-                try:
-                    self.editor.setFocus(True)
-                except TypeError:
-                    # pyside
-                    self.editor.setFocus()
+                self._on_focus_in(None)
                 self._completer.complete(cursor_rec)
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(0, 0))
+            else:
+                _logger().debug('cannot show popup, editor is unvisible')
 
     def _insert_completion(self, completion):
         cursor = self._helper.word_under_cursor(select_whole_word=False)

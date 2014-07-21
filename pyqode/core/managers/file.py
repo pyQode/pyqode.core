@@ -6,9 +6,11 @@ import locale
 import logging
 import mimetypes
 import os
+from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.core.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.settings import Settings
 
 
 def _logger():
@@ -18,19 +20,23 @@ def _logger():
 class FileManager(Manager):
     """
     Helps manage file operations:
-        - open
-        - save
-        - provide icon
-        - detect encoding
-        - detect mimetype
+        - opening and saving files
+        - providing file icon
+        - detecting mimetype
 
     Example of usage::
 
         editor = CodeEdit()
         assert editor.file.path == ''
+        # open a file with default locale encoding or using the cached one.
         editor.open(__file__)
         assert editor.file.path == __file__
         print(editor.file.encoding)
+
+        # reload with another encoding
+        editor.open(__file__, encoding='cp1252', use_cached_encoding=False)
+        assert editor.file.path == __file__
+        editor.file.encoding == 'cp1252'
 
     """
     @property
@@ -70,12 +76,13 @@ class FileManager(Manager):
         """
         :param editor: Code edit instance to work on.
         :param replace_tabs_by_spaces: True to replace tabs by spaces on
-                                       load/save.
+            load/save.
         """
         super().__init__(editor)
         self._path = ''
         #: File mimetype
         self.mimetype = ''
+        #: store the last file encoding used to open or save the file.
         self._encoding = locale.getpreferredencoding()
         #: True to replace tabs by spaces
         self.replace_tabs_by_spaces = replace_tabs_by_spaces
@@ -83,27 +90,6 @@ class FileManager(Manager):
         self.opening = False
         #: Saving flag. Set to while saving the editor content to a file.
         self.saving = True
-
-    def detect_encoding(self, path):
-        """
-        Detects file encoding
-
-        :param path: file path
-        :return: detected encoding
-        """
-        _logger().debug('detecting file encoding for file: %s', path)
-        with open(path, 'rb') as file:
-            data = file.read()
-        try:
-            import chardet
-        except ImportError:
-            encoding = locale.getpreferredencoding()
-            _logger().warning("chardet not available, using default encoding: "
-                              "%s", encoding)
-        else:
-            encoding = chardet.detect(data)['encoding']
-            _logger().debug('encoding detected using chardet: %s', encoding)
-        return encoding
 
     @staticmethod
     def get_mimetype(path):
@@ -117,58 +103,80 @@ class FileManager(Manager):
         _logger().debug('detecting mimetype for %s', path)
         mimetype = mimetypes.guess_type(path)[0]
         if mimetype is None:
-            mimetype = mimetypes.guess_type('file.txt')[0]
+            mimetype = 'text/x-plain'
         _logger().debug('mimetype detected: %s', mimetype)
         return mimetype
 
-    def open(self, path):
+    def open(self, path, encoding=None, use_cached_encoding=True):
         """
         Open a file and set its content on the editor widget.
 
+        pyqode does not try to guess encoding. It's up to the client code to handle
+        encodings. You can either use a charset detector to detect encoding or rely
+        on a settings in your application. It is also up to you to handle UnicodeDecodeError,
+        unless you've added class:`pyqode.core.panels.EncodingPanel` on the editor.
+
+        pyqode automatically caches file encoding that you can later reuse it
+        automatically.
+
         :param path: Path of the file to open.
+        :param encoding: Default file encoding. Default is to use the locale encoding.
+        :param use_cached_encoding: True to use the cached encoding instead of ``encoding``.
+            Set it to True if you want to force reload with a new encoding.
+
+        :raises: UnicodeDecodeError in case of error if no EncodingPanel
+            were set on the editor.
         """
+        if encoding is None:
+            encoding = locale.getpreferredencoding()
         self.opening = True
-        self._encoding = self.detect_encoding(path)
-        _logger().info('file encoding: %s', self.encoding)
-        # open file and get its content
-        with open(path, 'r', encoding=self.encoding) as file:
-            content = file.read()
-        # replace tabs by spaces
-        if self.replace_tabs_by_spaces:
-            content = content.replace("\t", " " * self.editor.tab_length)
-        # set plain text
+        settings = Settings()
         self._path = path
-        self.editor.setPlainText(
-            content, self.get_mimetype(path), self.encoding)
-        self.editor.setDocumentTitle(self.editor.file.name)
-        self.editor.setWindowTitle(self.editor.file.name)
+        # get encoding from cache
+        if use_cached_encoding:
+            try:
+                cached_encoding = settings.get_file_encoding(path)
+            except KeyError:
+                pass
+            else:
+                encoding = cached_encoding
+        # open file and get its content
+        try:
+            with open(path, 'r', encoding=encoding) as file:
+                content = file.read()
+        except UnicodeDecodeError as e:
+            try:
+                from pyqode.core.panels import EncodingPanel
+                panel = self.editor.panels.get(EncodingPanel)
+            except KeyError:
+                raise e  # panel not found, not automatic error management
+            else:
+                panel.on_open_failed(path, encoding)
+        else:
+            # success! Cache the encoding
+            settings.set_file_encoding(path, encoding)
+            self._encoding = encoding
+            # replace tabs by spaces
+            if self.replace_tabs_by_spaces:
+                content = content.replace("\t", " " * self.editor.tab_length)
+            # set plain text
+            self.editor.setPlainText(
+                content, self.get_mimetype(path), self.encoding)
+            self.editor.setDocumentTitle(self.editor.file.name)
+            self.editor.setWindowTitle(self.editor.file.name)
         self.opening = False
 
-    def _save_tmp(self, plain_text, path):
+    def reload(self, encoding):
         """
-        Save the editor content to a temporary file.
+        Reload the file with another encoding.
 
-        :param plain_text: text to save
-        :param path: path of the file to save
+        :param encoding: the new encoding to use to reload the file.
         """
-        _logger().debug('saving editor content to temp file: %s', path)
-        # fallback to locale preferred encoding (happen for ascii files)
-        for encoding in [self.encoding, locale.getpreferredencoding()]:
-            try:
-                with open(path, 'w', encoding=encoding) as file:
-                    file.write(plain_text)
-            except UnicodeEncodeError as e:
-                if encoding == self.encoding:
-                    _logger().exception(
-                        'failed to save text with encoding %s', encoding)
-                else:
-                    raise e  # even preferred encoding didn't work
-            else:
-                _logger().info('text saved with encoding %s: %s', encoding, path)
-                return True
+        assert os.path.exists(self.path)
+        self.open(self.path, encoding=encoding,
+                  use_cached_encoding=False)
 
-    def _rm_tmp(self, tmp_path):
-        _logger().debug('remove original file: %s', tmp_path)
+    def _rm(self, tmp_path):
         try:
             os.remove(tmp_path)
         except OSError:
@@ -185,7 +193,7 @@ class FileManager(Manager):
         sel_end = self.editor.textCursor().selectionEnd()
         return sel_end, sel_start
 
-    def save(self, path=None, encoding=None):
+    def save(self, path=None, encoding=None, fallback_encoding=None):
         """
         Save the editor content to a file.
 
@@ -193,8 +201,12 @@ class FileManager(Manager):
                      path (save), set a new path to save as.
         :param encoding: optional encoding, will use the current
                          file encoding if None.
+        :param fallback_encoding: Fallback encoding to use in case of encoding
+            error. None to use the locale preferred encoding
 
         """
+        if fallback_encoding is None:
+            fallback_encoding = locale.getpreferredencoding()
         self.saving = True
         _logger().debug("saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
@@ -205,35 +217,41 @@ class FileManager(Manager):
                     'failed to save file, path argument cannot be None if '
                     'FileManager.path is also None')
                 return False
-        # override encoding on demand
-        if encoding is not None:
-            self._encoding = encoding
+        # use cached encoding if None were specified
+        if encoding is None:
+            encoding = self._encoding
         self.editor.text_saving.emit(path)
+        # remember cursor position (clean_document might mess up the
+        # cursor pos)
         sel_end, sel_start = self._get_selection()
         TextHelper(self.editor).clean_document()
         plain_text = self.editor.toPlainText()
         # perform a safe save: we first save to a temporary file, if the save
-        # succeeded we just rename it to the final file name, then we remove
-        # the temporary file.
+        # succeeded we just rename the temporary file to the final file name
+        # and remove it.
         tmp_path = path + '~'
-        status = False
         try:
-            self._save_tmp(plain_text, tmp_path)
-        except (IOError, OSError, UnicodeEncodeError) as e:
-            self._rm_tmp(tmp_path)
-            _logger().exception('failed to save file: %s', path)
+            _logger().debug('saving editor content to temp file: %s', path)
+            with open(tmp_path, 'w', encoding=encoding) as file:
+                file.write(plain_text)
+        except UnicodeEncodeError:
+            # fallback to utf-8 in case of error.
+            with open(tmp_path, 'w', encoding=fallback_encoding) as file:
+                file.write(plain_text)
+        except (IOError, OSError) as e:
+            self._rm(tmp_path)
+            self.saving = False
+            self.editor.text_saved.emit(path)
+            raise e
         else:
             _logger().debug('save to temp file succeeded')
+            Settings().set_file_encoding(path, encoding)
+            self._encoding = encoding
             # remove path and rename temp file
             _logger().debug('rename %s to %s', tmp_path, path)
-            try:
-                # needed on windows as we cannot rename an existing file
-                os.remove(path)
-            except OSError:
-                # first save  (aka save as)
-                pass
+            self._rm(path)
             os.rename(tmp_path, path)
-            self._rm_tmp(tmp_path)
+            self._rm(tmp_path)
             # reset dirty flags
             self.editor._original_text = plain_text
             self.editor.dirty = False
@@ -242,10 +260,8 @@ class FileManager(Manager):
             # reset selection
             if sel_start != sel_end:
                 self._reset_selection(sel_end, sel_start)
-            status = True
         self.editor.text_saved.emit(path)
         self.saving = False
-        return status
 
     def close(self):
         """

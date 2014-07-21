@@ -8,7 +8,7 @@ from pyqode.core.api import TextHelper
 from pyqode.core import modes
 
 from ..helpers import cwd_at, server_path, wait_for_connected
-from ..helpers import editor_open
+from ..helpers import preserve_editor_config
 
 
 def get_mode(editor):
@@ -25,6 +25,7 @@ def ensure_visible(func):
     def wrapper(editor, *args, **kwds):
         QtWidgets.QApplication.setActiveWindow(editor)
         editor.setFocus(True)
+        editor.setReadOnly(False)
         return func(editor, *args, **kwds)
     return wrapper
 
@@ -93,6 +94,7 @@ def test_properties(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
+@preserve_editor_config
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -114,11 +116,13 @@ def test_request_completion(editor):
     assert ret1 is True and ret2 is False
 
 
-@ensure_empty
 @ensure_visible
+@ensure_empty
 @ensure_connected
+@preserve_editor_config
 def test_events(editor):
     assert editor.backend.connected
+    QTest.qWait(1000)
     TextHelper(editor).goto_line(4)
     QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
     QTest.qWait(2000)

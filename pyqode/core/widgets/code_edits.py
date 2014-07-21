@@ -35,6 +35,8 @@ class TextEdit(CodeEdit):
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
+        self.panels.append(panels.EncodingPanel(),
+                           Panel.Position.TOP)
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
@@ -70,6 +72,8 @@ class GenericCodeEdit(CodeEdit):
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
+        self.panels.append(panels.EncodingPanel(),
+                           Panel.Position.TOP)
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
