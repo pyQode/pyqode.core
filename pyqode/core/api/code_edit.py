@@ -297,7 +297,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # them as user_data. Calling setUserData on each block during
         # syntax highlighting is too slow.
         # You must use TextHelper.block_user_data to access them!
-        self._blocks = []
+        self._blocks = {}
 
         self._backend = BackendManager(self)
         self._file = FileManager(self)

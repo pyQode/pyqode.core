@@ -671,14 +671,16 @@ class TextHelper:
 
     def block_user_data(self, block):
         """
-        Returns the block user data, this is an O(n) operation.
+        Returns the block user data.
+
         :param block: block or block number (1 based).
         """
-        if isinstance(block, int):
-            block = self._editor.document().findBlockByNumber(block - 1)
-        for b in self._editor._blocks:
-            if b == block:
-                return b.user_data
+        if isinstance(block, QtGui.QTextBlock):
+            block = block.blockNumber() + 1
+        try:
+            return self._editor._blocks[block].user_data
+        except KeyError:
+            return None
 
 
 def keep_tc_pos(func):

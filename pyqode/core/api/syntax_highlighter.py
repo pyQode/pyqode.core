@@ -291,19 +291,14 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         block = self.currentBlock()
         self.current_block = block
         if self.editor:
-            if self.editor.file.opening:
-                if block.blockNumber() == 0:
-                    self.editor._blocks[:] = []
-                self.editor._blocks.append(block)
-            if self.editor.file.opening:
+            block.user_data = TextHelper(self.editor).block_user_data(block)
+            if block.user_data is None:
                 block.user_data = TextBlockUserData()
-            else:
-                block.user_data = TextHelper(self.editor).block_user_data(block)
-                if block.user_data is None:
-                    block.user_data = TextBlockUserData()
-                    self.editor._blocks.append(block)
-            # # update user data
-            block.user_data.line_number = self.currentBlock().blockNumber() + 1
+            # update stored block
+            line_nbr = self.currentBlock().blockNumber() + 1
+            self.editor._blocks[line_nbr] = block
+            # update user data
+            block.user_data.line_number = line_nbr
             self._detect_parentheses(text, block.user_data)
             self.highlight_block(text, block)
             # t = time.time()
@@ -319,7 +314,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     def rehighlight(self):
         start = time.time()
-        self.editor._blocks[:] = []
         QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         super().rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
