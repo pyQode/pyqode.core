@@ -908,16 +908,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
         self.setFont(QtGui.QFont(self._font_family, self._font_size))
-        qss = """QPlainTextEdit
-        {
-            background-color: %s;
-            color: %s;
-            selection-background-color: %s;
-            selection-color: %s;
-        }""" % (self.background.name(), self.foreground.name(),
-                self.selection_background.name(),
-                self.selection_foreground.name())
-        self.setStyleSheet(qss)
+        p = self.palette()
+        p.setColor(QtGui.QPalette.Base, self.background)
+        p.setColor(QtGui.QPalette.Text, self.foreground)
+        p.setColor(QtGui.QPalette.Highlight, self.selection_background)
+        p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
+        self.setPalette(p)
         self.repaint()
 
     def _do_home_key(self, event=None, select=False):

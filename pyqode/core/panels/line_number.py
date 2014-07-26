@@ -40,7 +40,7 @@ class LineNumberPanel(Panel):
         while count >= 10:
             count /= 10
             digits += 1
-        space = 3 + self.editor.fontMetrics().width("9") * digits
+        space = 5 + self.editor.fontMetrics().width("9") * digits
         return space
 
     def mousePressEvent(self, e):  # pylint: disable=invalid-name
@@ -90,8 +90,8 @@ class LineNumberPanel(Panel):
         Paints the line numbers
         """
         # pylint: disable=invalid-name, unused-argument, too-many-locals
-        self._line_color_u = drift_color(self.editor.background, 200)
-        self._line_color_s = drift_color(self.editor.foreground, 150)
+        self._line_color_u = drift_color(self._background_brush.color(), 250)
+        self._line_color_s = drift_color(self._background_brush.color(), 280)
         Panel.paintEvent(self, event)
         if self.isVisible():
             painter = QtGui.QPainter(self)
@@ -118,5 +118,5 @@ class LineNumberPanel(Panel):
                 else:
                     painter.setPen(pen)
                     painter.setFont(font)
-                painter.drawText(0, top, width, height,
+                painter.drawText(-3, top, width, height,
                                  QtCore.Qt.AlignRight, str(blockNumber))
