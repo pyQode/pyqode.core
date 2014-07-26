@@ -27,12 +27,6 @@ def test_enabled(editor):
 
 
 @editor_open(__file__)
-def test_leave_event(editor):
-    panel = get_panel(editor)
-    panel.leaveEvent()
-
-
-@editor_open(__file__)
 def test_mouse_press(editor):
     mode = get_mode(editor)
     mode.request_analysis()
