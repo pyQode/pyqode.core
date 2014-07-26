@@ -47,18 +47,32 @@ def test_request_analysis(editor):
     mode.clear_messages()
     if editor.backend.connected:
         editor.backend.stop()
+    # 1st analysis will be retried while server is
+    # not connected
     mode.request_analysis()
     QTest.qWait(500)
     editor.backend.start(server_path())
     wait_for_connected(editor)
-    mode.request_analysis()
-    QTest.qWait(3000)
+    # ok now it should complete in a few milliseconds
+    QTest.qWait(500)
+    assert len(mode._messages) == 0
     editor.panels.append(panels.MarkerPanel())
+    # 2nd analysis should return 1 msg
     mode.request_analysis()
     QTest.qWait(3000)
+    assert len(mode._messages) == 1
     mode.clear_messages()
+    # 3rd analtsus should return 40 msgs
     mode.request_analysis()
     QTest.qWait(3000)
+    assert len(mode._messages) == 150
+    mode.request_analysis()
+    QTest.qWait(600)
+    mode.request_analysis()
+    QTest.qWait(3000)
+    mode.request_analysis()
+    QTest.qWait(3000)
+    assert len(mode._messages) == 20
     editor.panels.remove(panels.MarkerPanel)
     mode.clear_messages()
 
@@ -110,11 +124,15 @@ i = 0
 
 def check(data):
     global i
+    print('CHECKER FUNCTION: i = %d' % i)
     if i == 0:
         i += 1
         return False, None
     elif i == 1:
         i += 1
         return True, [('desc', 0, 10)]
+    elif i == 2:
+        i += 1
+        return True, [('desc', i % 3, 10 + i) for i in range(150)]
     else:
-        return True, [('desc', i % 3, 10 + i) for i in range(40)]
+        return True, [('desc', i % 3, 10 + i) for i in range(20)]
