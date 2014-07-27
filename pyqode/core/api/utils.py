@@ -683,6 +683,138 @@ class TextHelper:
             return None
 
 
+class TextBlockhelper:
+    """
+    Helps retrieving the various part of the user state bitmask.
+
+    This helper should be used to replace calls to
+    ``QTextBlock.setUserState``/``QTextBlock.getUserState`` as well as
+    ``QSyntaxHighlighter.setCurrentBlockState``/
+    ``QSyntaxHighlighter.currentBlockState`` and
+    ``QSyntaxHighlighter.previousBlockState``.
+
+    The bitmask is made up of the following fields:
+
+        - bit0 -> bit25: User state (for syntax highlighting)
+        - bit26: disabled flag (disable some mode in literals and comments)
+        - bit27-bit29: fold level (8 level max)
+        - bit30: fold trigger flag
+        - bit31: fold trigger state
+
+    """
+    @staticmethod
+    def get_state(block):
+        state = block.userState()
+        if state == -1:
+            return -1
+        return state & 0x03FFFFFF
+
+    @staticmethod
+    def set_state(block, state):
+        user_state = block.userState()
+        if user_state == -1:
+            user_state = 0
+        higher_part = user_state & 0xFC000000
+        state &= 0x03FFFFFF
+        state |= higher_part
+        block.setUserState(state)
+
+    @staticmethod
+    def get_disabled_flag(block):
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x04000000)
+
+    @staticmethod
+    def set_disabled_flag(block, flg):
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xFBFFFFFF
+        state |= int(flg) << 26
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_lvl(block):
+        """
+        Gets the block fold level
+
+        :param block: block to access.
+        :returns: The block fold level
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return (state & 0x38000000) >> 27
+
+    @staticmethod
+    def set_fold_lvl(block, val):
+        """
+        Sets the block fold level.
+
+        :param block: block to modify
+        :param val: The new fold level [0-7]
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        if val >= 8:
+            val = 7
+        state &= 0xC7FFFFFF
+        state |= val << 27
+        block.setUserState(state)
+
+    @staticmethod
+    def is_fold_trigger(block):
+        """
+        Checks if the block is a fold trigger.
+
+        :param block: block to check
+        :return: True if the block is a fold trigger (represented as a node in
+            the fold panel)
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x40000000)
+
+    @staticmethod
+    def set_fold_trigger(block, val):
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xBFFFFFFF
+        state |= int(val) << 30
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_trigger_state(block):
+        """
+        Gets the fold trigger state.
+        :return: False for an open trigger, True for for closed trigger
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x80000000)
+
+    @staticmethod
+    def set_fold_trigger_state(block, val):
+        """
+        Sets the fold trigger state.
+
+        :param block: The block to modify
+        :param val: The new trigger state (False = open, True = closed)
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0x7FFFFFFF
+        state |= int(val) << 31
+        block.setUserState(state)
+
+
 def keep_tc_pos(func):
     """
     Cache text cursor position and restore it when the wrapped
