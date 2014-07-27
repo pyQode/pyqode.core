@@ -146,8 +146,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     Abstract Base class for syntax highlighter modes.
 
-    It fills up the document with our custom user data (string/comment zones,
-    and the list of parenthesis).
+    It fills up the document with our custom block data (fold levels,
+    triggers,...).
 
     It **does not do any syntax highlighting**, this task is left to the
     sublasses such as :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
@@ -160,17 +160,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         our data in the block user state as bitmask. You should always
         use :class:`pyqode.core.api.TextBlockHelper` to retrieve or modify
         those data.
-
-    **signals**:
-      - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_started`
-      - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_finished`
-
-    .. warning:: You should always inherit from this class to create a new
-                 syntax highlighter mode.
-
-                 **Never inherit directly from QSyntaxHighlighter or parenthesis matching
-                 and disabled zones for cc and autoindent will be lost.**
-
     """
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
@@ -232,13 +221,13 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.current_block = block
         if self.editor:
             self.highlight_block(text, block)
-            self.block_highlight_finished.emit(self, text)
 
-    def highlight_block(self, text, user_data):
+    def highlight_block(self, text, block):
         """
         Abstract method. Override this to apply syntax highlighting.
 
         :param text: Line of text to highlight.
+        :param block: current block
         """
         raise NotImplementedError()
 

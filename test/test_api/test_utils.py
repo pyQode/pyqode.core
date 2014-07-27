@@ -75,66 +75,66 @@ def test_block_helper():
     #
     # test user state
     #
-    utils.TextBlockhelper.set_state(block, 0)
+    utils.TextBlockHelper.set_state(block, 0)
     assert block.userState() == 0
-    utils.TextBlockhelper.set_state(block, 26)
-    assert utils.TextBlockhelper.get_state(block) == 26
+    utils.TextBlockHelper.set_state(block, 26)
+    assert utils.TextBlockHelper.get_state(block) == 26
 
     #
     # test disabled flag (and ensure the last user state values still exisits)
     #
-    flg = utils.TextBlockhelper.get_disabled_flag(block)
+    flg = utils.TextBlockHelper.get_flag(block)
     assert flg is False
-    utils.TextBlockhelper.set_disabled_flag(block, True)
-    flg = utils.TextBlockhelper.get_disabled_flag(block)
+    utils.TextBlockHelper.set_flag(block, True)
+    flg = utils.TextBlockHelper.get_flag(block)
     assert flg is True
-    utils.TextBlockhelper.set_disabled_flag(block, False)
-    flg = utils.TextBlockhelper.get_disabled_flag(block)
+    utils.TextBlockHelper.set_flag(block, False)
+    flg = utils.TextBlockHelper.get_flag(block)
     assert flg is False
-    utils.TextBlockhelper.set_disabled_flag(block, True)
+    utils.TextBlockHelper.set_flag(block, True)
     # ensure other values are intact
-    assert utils.TextBlockhelper.get_state(block) == 26
+    assert utils.TextBlockHelper.get_state(block) == 26
 
     #
     # test fold level
     #
-    lvl = utils.TextBlockhelper.get_fold_lvl(block)
+    lvl = utils.TextBlockHelper.get_fold_lvl(block)
     assert lvl == 0
-    utils.TextBlockhelper.set_fold_lvl(block, 5)
-    lvl = utils.TextBlockhelper.get_fold_lvl(block)
+    utils.TextBlockHelper.set_fold_lvl(block, 5)
+    lvl = utils.TextBlockHelper.get_fold_lvl(block)
     assert lvl == 5
-    utils.TextBlockhelper.set_fold_lvl(block, 8)
-    lvl = utils.TextBlockhelper.get_fold_lvl(block)
+    utils.TextBlockHelper.set_fold_lvl(block, 8)
+    lvl = utils.TextBlockHelper.get_fold_lvl(block)
     assert lvl == 7
     # ensure other values are intact
-    assert utils.TextBlockhelper.get_state(block) == 26
-    assert utils.TextBlockhelper.get_disabled_flag(block) is True
+    assert utils.TextBlockHelper.get_state(block) == 26
+    assert utils.TextBlockHelper.get_flag(block) is True
 
     #
     # Test fold trigger
     #
-    assert utils.TextBlockhelper.is_fold_trigger(block) is False
-    utils.TextBlockhelper.set_fold_trigger(block, True)
-    assert utils.TextBlockhelper.is_fold_trigger(block) is True
-    utils.TextBlockhelper.set_fold_trigger(block, False)
-    assert utils.TextBlockhelper.is_fold_trigger(block) is False
-    utils.TextBlockhelper.set_fold_trigger(block, True)
+    assert utils.TextBlockHelper.is_fold_trigger(block) is False
+    utils.TextBlockHelper.set_fold_trigger(block, True)
+    assert utils.TextBlockHelper.is_fold_trigger(block) is True
+    utils.TextBlockHelper.set_fold_trigger(block, False)
+    assert utils.TextBlockHelper.is_fold_trigger(block) is False
+    utils.TextBlockHelper.set_fold_trigger(block, True)
     # ensure other values are intact
-    assert utils.TextBlockhelper.get_fold_lvl(block) == 7
-    assert utils.TextBlockhelper.get_state(block) == 26
-    assert utils.TextBlockhelper.get_disabled_flag(block) is True
+    assert utils.TextBlockHelper.get_fold_lvl(block) == 7
+    assert utils.TextBlockHelper.get_state(block) == 26
+    assert utils.TextBlockHelper.get_flag(block) is True
 
 
     #
     # Test fold trigger state
     #
-    assert utils.TextBlockhelper.get_fold_trigger_state(block) is False
-    utils.TextBlockhelper.set_fold_trigger_state(block, True)
-    assert utils.TextBlockhelper.get_fold_trigger_state(block) is True
-    utils.TextBlockhelper.set_fold_trigger_state(block, False)
-    assert utils.TextBlockhelper.get_fold_trigger_state(block) is False
+    assert utils.TextBlockHelper.get_fold_trigger_state(block) is False
+    utils.TextBlockHelper.set_fold_trigger_state(block, True)
+    assert utils.TextBlockHelper.get_fold_trigger_state(block) is True
+    utils.TextBlockHelper.set_fold_trigger_state(block, False)
+    assert utils.TextBlockHelper.get_fold_trigger_state(block) is False
     # ensure other values are intact
-    assert utils.TextBlockhelper.is_fold_trigger(block) is True
-    assert utils.TextBlockhelper.get_fold_lvl(block) == 7
-    assert utils.TextBlockhelper.get_state(block) == 26
-    assert utils.TextBlockhelper.get_disabled_flag(block) is True
+    assert utils.TextBlockHelper.is_fold_trigger(block) is True
+    assert utils.TextBlockHelper.get_fold_lvl(block) == 7
+    assert utils.TextBlockHelper.get_state(block) == 26
+    assert utils.TextBlockHelper.get_flag(block) is True

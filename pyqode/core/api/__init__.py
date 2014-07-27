@@ -19,7 +19,7 @@ from .panel import Panel
 from .syntax_highlighter import SyntaxHighlighter
 from .syntax_highlighter import ColorScheme
 from .syntax_highlighter import TextBlockUserData
-from .utils import TextHelper, TextBlockhelper
+from .utils import TextHelper, TextBlockHelper
 from .utils import get_block_symbol_data
 from .utils import DelayJobRunner
 from .utils import TextStyle
@@ -39,6 +39,6 @@ __all__ = [
     'TextBlockUserData',
     'TextDecoration',
     'TextHelper',
-    'TextBlockhelper',
+    'TextBlockHelper',
     'TextStyle'
 ]

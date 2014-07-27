@@ -687,7 +687,7 @@ class TextHelper:
         return False
 
 
-class TextBlockhelper:
+class TextBlockHelper:
     """
     Helps retrieving the various part of the user state bitmask.
 
@@ -699,8 +699,8 @@ class TextBlockhelper:
 
     The bitmask is made up of the following fields:
 
-        - bit0 -> bit25: User state (for syntax highlighting)
-        - bit26: disabled flag (disable some mode in literals and comments)
+        - bit0 -> bit26: User state (for syntax highlighting)
+        - bit26: flag -> general purpose flag
         - bit27-bit29: fold level (8 level max)
         - bit30: fold trigger flag
         - bit31: fold trigger state
@@ -708,6 +708,12 @@ class TextBlockhelper:
     """
     @staticmethod
     def get_state(block):
+        """
+        Gets the user state, generally used for syntax highlighting.
+        :param block: block to access
+        :return: The block state
+
+        """
         state = block.userState()
         if state == -1:
             return -1
@@ -715,6 +721,13 @@ class TextBlockhelper:
 
     @staticmethod
     def set_state(block, state):
+        """
+        Sets the user state, generally used for syntax highlighting.
+
+        :param block: block to modify
+        :param state: new state value.
+        :return:
+        """
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
@@ -724,14 +737,28 @@ class TextBlockhelper:
         block.setUserState(state)
 
     @staticmethod
-    def get_disabled_flag(block):
+    def get_flag(block):
+        """
+        Gets a general purpose flag bit. It is not used internally and can be
+        used by client code for any purpose.
+
+        :param block: Block to access:
+
+        :return: True of False
+        """
         state = block.userState()
         if state == -1:
             state = 0
         return bool(state & 0x04000000)
 
     @staticmethod
-    def set_disabled_flag(block, flg):
+    def set_flag(block, flg):
+        """
+        Sets the general purpose flag value.
+
+        :param block: block to modify
+        :param flg: New flag value
+        """
         state = block.userState()
         if state == -1:
             state = 0
