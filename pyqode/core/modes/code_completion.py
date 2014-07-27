@@ -332,7 +332,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-        self._completer.popup().hide()
+        if self._completer.popup() is not None:
+            self._completer.popup().hide()
         self._job_runner.cancel_requests()
         QtWidgets.QToolTip.hideText()
 
