@@ -286,6 +286,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ TextDecorationManager: manage the list of text decorations """
         return self._decorations
 
+    @property
+    def syntax_highlighter(self):
+        for mode in self.modes:
+            if hasattr(mode, 'highlightBlock'):
+                return mode
+        return None
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
@@ -293,12 +300,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
-        # a list of text block with QTextBlockUserData set on
-        # them as user_data. Calling setUserData on each block during
-        # syntax highlighting is too slow.
-        # You must use TextHelper.block_user_data to access them!
-        self._blocks = {}
-
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)

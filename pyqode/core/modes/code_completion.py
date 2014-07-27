@@ -122,15 +122,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
-            column = helper.current_column_nbr()
-            block = self.editor.textCursor().block()
-            usd = TextHelper(self.editor).block_user_data(block)
-            if usd and hasattr(usd, 'cc_disabled_zones'):
-                for start, end in usd.cc_disabled_zones:
-                    if start <= column <= end:
-                        _logger().debug(
-                            "cc: cancel request, cursor is in a disabled zone")
-                        return False
+            disabled_zone = TextHelper(self.editor).is_comment_or_string(
+                self.editor.textCursor())
+            if disabled_zone:
+                _logger().debug(
+                    "cc: cancel request, cursor is in a disabled zone")
+                return False
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
                                       helper.current_line_nbr(),
@@ -332,7 +329,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-        self._completer.popup().hide()
+        if self._completer.popup() is not None:
+            self._completer.popup().hide()
         self._job_runner.cancel_requests()
         QtWidgets.QToolTip.hideText()
 

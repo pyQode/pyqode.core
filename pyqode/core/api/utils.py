@@ -482,6 +482,8 @@ class TextHelper:
                                          text_cursor.KeepAnchor)
             if apply_selection:
                 editor.setTextCursor(text_cursor)
+            return text_cursor
+        return None
 
     def selection_range(self):
         """
@@ -669,18 +671,236 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
-    def block_user_data(self, block):
-        """
-        Returns the block user data.
+    def is_comment_or_string(self, cursor, formats=None):
+        if formats is None:
+            formats = ["comment", "string", "docstring"]
+        pos = cursor.position() - cursor.block().position()
+        additional_formats = cursor.block().layout().additionalFormats()
+        sh = self._editor.syntax_highlighter
+        if sh:
+            ref_formats = sh.color_scheme.formats
+            for r in additional_formats:
+                if pos >= r.start and pos <= (r.start + r.length):
+                    for fmt_type in formats:
+                        if ref_formats[fmt_type] == r.format:
+                            return True
+        return False
 
-        :param block: block or block number (1 based).
+
+class TextBlockHelper:
+    """
+    Helps retrieving the various part of the user state bitmask.
+
+    This helper should be used to replace calls to
+    ``QTextBlock.setUserState``/``QTextBlock.getUserState`` as well as
+    ``QSyntaxHighlighter.setCurrentBlockState``/
+    ``QSyntaxHighlighter.currentBlockState`` and
+    ``QSyntaxHighlighter.previousBlockState``.
+
+    The bitmask is made up of the following fields:
+
+        - bit0 -> bit26: User state (for syntax highlighting)
+        - bit26: flag -> general purpose flag
+        - bit27-bit29: fold level (8 level max)
+        - bit30: fold trigger flag
+        - bit31: fold trigger state
+
+    """
+    @staticmethod
+    def get_state(block):
         """
-        if isinstance(block, QtGui.QTextBlock):
-            block = block.blockNumber() + 1
-        try:
-            return self._editor._blocks[block].user_data
-        except KeyError:
-            return None
+        Gets the user state, generally used for syntax highlighting.
+        :param block: block to access
+        :return: The block state
+
+        """
+        state = block.userState()
+        if state == -1:
+            return -1
+        return state & 0x03FFFFFF
+
+    @staticmethod
+    def set_state(block, state):
+        """
+        Sets the user state, generally used for syntax highlighting.
+
+        :param block: block to modify
+        :param state: new state value.
+        :return:
+        """
+        user_state = block.userState()
+        if user_state == -1:
+            user_state = 0
+        higher_part = user_state & 0xFC000000
+        state &= 0x03FFFFFF
+        state |= higher_part
+        block.setUserState(state)
+
+    @staticmethod
+    def get_flag(block):
+        """
+        Gets a general purpose flag bit. It is not used internally and can be
+        used by client code for any purpose.
+
+        :param block: Block to access:
+
+        :return: True of False
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x04000000)
+
+    @staticmethod
+    def set_flag(block, flg):
+        """
+        Sets the general purpose flag value.
+
+        :param block: block to modify
+        :param flg: New flag value
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xFBFFFFFF
+        state |= int(flg) << 26
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_lvl(block):
+        """
+        Gets the block fold level
+
+        :param block: block to access.
+        :returns: The block fold level
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return (state & 0x38000000) >> 27
+
+    @staticmethod
+    def set_fold_lvl(block, val):
+        """
+        Sets the block fold level.
+
+        :param block: block to modify
+        :param val: The new fold level [0-7]
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        if val >= 8:
+            val = 7
+        state &= 0xC7FFFFFF
+        state |= val << 27
+        block.setUserState(state)
+
+    @staticmethod
+    def is_fold_trigger(block):
+        """
+        Checks if the block is a fold trigger.
+
+        :param block: block to check
+        :return: True if the block is a fold trigger (represented as a node in
+            the fold panel)
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x40000000)
+
+    @staticmethod
+    def set_fold_trigger(block, val):
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xBFFFFFFF
+        state |= int(val) << 30
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_trigger_state(block):
+        """
+        Gets the fold trigger state.
+        :return: False for an open trigger, True for for closed trigger
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x80000000)
+
+    @staticmethod
+    def set_fold_trigger_state(block, val):
+        """
+        Sets the fold trigger state.
+
+        :param block: The block to modify
+        :param val: The new trigger state (False = open, True = closed)
+        """
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0x7FFFFFFF
+        state |= int(val) << 31
+        block.setUserState(state)
+
+
+class ParenthesisInfo(object):
+    """
+    Stores information about a parenthesis in a line of code.
+    """
+    # pylint: disable=too-few-public-methods
+    def __init__(self, pos, char):
+        #: Position of the parenthesis, expressed as a number of character
+        self.position = pos
+        #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
+        self.character = char
+
+
+def get_block_symbol_data(block):
+    parentheses = []
+    square_brackets = []
+    braces = []
+    # todo check if bracket is not into a string litteral
+    # parentheses
+    text = block.text()
+    left_pos = text.find("(", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "(")
+        parentheses.append(info)
+        left_pos = text.find("(", left_pos + 1)
+    right_pos = text.find(")", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, ")")
+        parentheses.append(info)
+        right_pos = text.find(")", right_pos + 1)
+    # braces
+    left_pos = text.find("{", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "{")
+        braces.append(info)
+        left_pos = text.find("{", left_pos + 1)
+    right_pos = text.find("}", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, "}")
+        braces.append(info)
+        right_pos = text.find("}", right_pos + 1)
+    # square_brackets
+    left_pos = text.find("[", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "[")
+        square_brackets.append(info)
+        left_pos = text.find("[", left_pos + 1)
+    right_pos = text.find("]", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, "]")
+        square_brackets.append(info)
+        right_pos = text.find("]", right_pos + 1)
+    parentheses[:] = sorted(parentheses, key=lambda x: x.position)
+    square_brackets[:] = sorted(square_brackets, key=lambda x: x.position)
+    braces[:] = sorted(braces, key=lambda x: x.position)
+    return parentheses, square_brackets, braces
 
 
 def keep_tc_pos(func):

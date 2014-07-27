@@ -20,7 +20,8 @@ from pygments.token import Whitespace, Comment
 from pygments.styles import get_all_styles
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, ColorScheme
+from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, ColorScheme, \
+    TextBlockUserData
 from pyqode.core.qt import QtGui
 from pyqode.core.qt.QtCore import QRegExp
 
@@ -225,26 +226,22 @@ class PygmentsSH(SyntaxHighlighter):
         original_text = text
         if self.editor and self._lexer and self.enabled:
             if block.blockNumber():
-                prev_data = self._prev_block.user_data
-                if hasattr(prev_data, "syntax_stack"):
-                    self._lexer._saved_state_stack = prev_data.syntax_stack
-                elif hasattr(self._lexer, '_saved_state_stack'):
-                    del self._lexer._saved_state_stack
+                prev_data = self._prev_block.userData()
+                if prev_data:
+                    if hasattr(prev_data, "syntax_stack"):
+                        self._lexer._saved_state_stack = prev_data.syntax_stack
+                    elif hasattr(self._lexer, '_saved_state_stack'):
+                        del self._lexer._saved_state_stack
 
             # Lex the text using Pygments
             index = 0
-            usd = block.user_data
-            usd.cc_disabled_zones[:] = []
+            usd = block.userData()
+            if usd is None:
+                usd = TextBlockUserData()
+                block.setUserData(usd)
             tokens = list(self._lexer.get_tokens(text))
             for token, text in tokens:
                 length = len(text)
-                token_str = str(token).lower()
-                comment = "comment" in token_str
-                if (comment or "string" in token_str) and not text.isspace():
-                    usd.cc_disabled_zones.append((index, index + length))
-                if comment and 'multiline' in token_str:
-                    self.setCurrentBlockState(1)
-                    usd.cc_disabled_zones.append((index, index + length))
                 self.setFormat(index, length, self._get_format(token))
                 index += length
 
@@ -262,6 +259,7 @@ class PygmentsSH(SyntaxHighlighter):
                 length = len(expression.cap(0))
                 self.setFormat(index, length, self._get_format(Whitespace))
                 index = expression.indexIn(text, index + length)
+
             self._prev_block = block
 
     def _update_style(self):

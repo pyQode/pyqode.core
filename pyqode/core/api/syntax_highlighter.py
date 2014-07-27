@@ -146,8 +146,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
     Abstract Base class for syntax highlighter modes.
 
-    It fills up the document with our custom user data (string/comment zones,
-    and the list of parenthesis).
+    It fills up the document with our custom block data (fold levels,
+    triggers,...).
 
     It **does not do any syntax highlighting**, this task is left to the
     sublasses such as :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
@@ -156,35 +156,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     :meth:`pyqode.core.api.SyntaxHighlighter.highlight_block` method to
     apply custom highlighting.
 
-    .. note:: Since version 2.1 and for performance reasons, we do not call
-        setUserData to setup user data set by the highlighter. Instead we set
-        them as an attribute called 'user_data'. As this attribute is lost
-        whenever you retrieve the block from a document, we store those blocks
-        in a list in CodeEdit. You can retrieve them using
-        :meth:`pyqode.core.api.TextHelper.block_user_data`.
-
-    **signals**:
-      - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_started`
-      - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_finished`
-
-    .. warning:: You should always inherit from this class to create a new
-                 syntax highlighter mode.
-
-                 **Never inherit directly from QSyntaxHighlighter or parenthesis matching
-                 and disabled zones for cc and autoindent will be lost.**
-
+    .. note:: Since version 2.1 and for performance reasons, we store all
+        our data in the block user state as bitmask. You should always
+        use :class:`pyqode.core.api.TextBlockHelper` to retrieve or modify
+        those data.
     """
-    class ParenthesisInfo(object):
-        """
-        Stores information about a parenthesis in a line of code.
-        """
-        # pylint: disable=too-few-public-methods
-        def __init__(self, pos, char):
-            #: Position of the parenthesis, expressed as a number of character
-            self.position = pos
-            #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
-            self.character = char
-
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
     block_highlight_started = QtCore.Signal(object, object)
@@ -235,53 +211,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         # current block (with a user_data attribute)
         self.current_block = None
 
-    @staticmethod
-    def _detect_parentheses(text, user_data):
-        """ Detect symbols (parentheses, braces, ...) """
-        user_data.parentheses[:] = []
-        user_data.square_brackets[:] = []
-        user_data.braces[:] = []
-        # todo check if bracket is not into a string litteral
-        # parentheses
-        left_pos = text.find("(", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "(")
-            user_data.parentheses.append(info)
-            left_pos = text.find("(", left_pos + 1)
-        right_pos = text.find(")", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, ")")
-            user_data.parentheses.append(info)
-            right_pos = text.find(")", right_pos + 1)
-        # braces
-        left_pos = text.find("{", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "{")
-            user_data.braces.append(info)
-            left_pos = text.find("{", left_pos + 1)
-        right_pos = text.find("}", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, "}")
-            user_data.braces.append(info)
-            right_pos = text.find("}", right_pos + 1)
-        # square_brackets
-        left_pos = text.find("[", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "[")
-            user_data.square_brackets.append(info)
-            left_pos = text.find("[", left_pos + 1)
-        right_pos = text.find("]", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, "]")
-            user_data.square_brackets.append(info)
-            right_pos = text.find("]", right_pos + 1)
-        user_data.parentheses[:] = sorted(
-            user_data.parentheses, key=lambda x: x.position)
-        user_data.square_brackets[:] = sorted(
-            user_data.square_brackets, key=lambda x: x.position)
-        user_data.braces[:] = sorted(
-            user_data.braces, key=lambda x: x.position)
-
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
         Highlights a block of text.
@@ -291,24 +220,14 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         block = self.currentBlock()
         self.current_block = block
         if self.editor:
-            block.user_data = TextHelper(self.editor).block_user_data(block)
-            if block.user_data is None:
-                block.user_data = TextBlockUserData()
-            # update stored block
-            line_nbr = self.currentBlock().blockNumber() + 1
-            self.editor._blocks[line_nbr] = block
-            # update user data
-            block.user_data.line_number = line_nbr
-            self._detect_parentheses(text, block.user_data)
             self.highlight_block(text, block)
-            # t = time.time()
-            self.block_highlight_finished.emit(self, text)
 
-    def highlight_block(self, text, user_data):
+    def highlight_block(self, text, block):
         """
         Abstract method. Override this to apply syntax highlighting.
 
         :param text: Line of text to highlight.
+        :param block: current block
         """
         raise NotImplementedError()
 
@@ -327,41 +246,14 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
 class TextBlockUserData(QtGui.QTextBlockUserData):
     """
-    Custom text block data. pyQode use text block data for many purposes:
-        - folding detection
-        - symbols matching
-        - mar
+    Custom text block user data, mainly used to store block checker messages
+    and markers.
 
-    You can also add your own data.
     """
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
         super().__init__()
-        #: Line number of the data, for convenience
-        self.line_number = -1
-        #: Specify if the block is folded
-        self.folded = False
-        #: Specify if the block is a fold start
-        self.fold_start = False
-        #: The block's fold indent
-        self.fold_indent = -1
         #: List of checker messages associated with the block.
         self.messages = []
         #: List of markers draw by a marker panel.
         self.markers = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "(" and ")"
-        #: symbols
-        self.parentheses = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "[" and "]"
-        #: symbols
-        self.square_brackets = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "{" and "}"
-        #: symbols
-        self.braces = []
-        #: Zones were Code completion is disabled. List of tuple. Each tuple
-        #: contains the start column and the end column.
-        self.cc_disabled_zones = []
-
-    def __repr__(self):
-        return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}".format(
-            self.line_number, self.folded, self.fold_indent, self.fold_start))

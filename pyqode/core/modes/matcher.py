@@ -2,11 +2,15 @@
 """
 This module contains the symbol matcher mode
 """
-from pyqode.core.api import TextHelper
+from pyqode.core.api import get_block_symbol_data
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
-from pyqode.core.api.syntax_highlighter import TextBlockUserData
 from pyqode.core.qt import QtGui
+
+
+PAREN = 0
+SQUARE = 1
+BRACE = 2
 
 
 class SymbolMatcherMode(Mode):
@@ -92,10 +96,10 @@ class SymbolMatcherMode(Mode):
         original_cursor = self.editor.textCursor()
         self.editor.setTextCursor(cursor)
         block = cursor.block()
-        usd = TextHelper(self.editor).block_user_data(block)
-        mapping = {0: usd.parentheses,
-                   1: usd.square_brackets,
-                   2: usd.braces}
+        data = get_block_symbol_data(block)
+        mapping = {}
+        for i in range(3):
+            mapping[i] = data[i]
         self._match_braces(mapping[symbol_type], block.position())
         for deco in self._decorations:
             if deco.character == character:
@@ -142,8 +146,8 @@ class SymbolMatcherMode(Mode):
     def _match_left_parenthesis(self, current_block, i, cpt):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.parentheses
+            data = get_block_symbol_data(current_block)
+            parentheses = data[PAREN]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
                 if info.character == "(":
@@ -166,8 +170,8 @@ class SymbolMatcherMode(Mode):
     def _match_right_parenthesis(self, current_block, i, nb_right_paren):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.parentheses
+            data = get_block_symbol_data(current_block)
+            parentheses = data[PAREN]
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
@@ -183,8 +187,8 @@ class SymbolMatcherMode(Mode):
                         nb_right_paren -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = TextHelper(self.editor).block_user_data(current_block)
-                parentheses = data.parentheses
+                data = get_block_symbol_data(current_block)
+                parentheses = data[PAREN]
                 return self._match_right_parenthesis(
                     current_block, len(parentheses) - 1, nb_right_paren)
             return False
@@ -210,8 +214,8 @@ class SymbolMatcherMode(Mode):
     def _match_left_bracket(self, current_block, i, cpt):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.square_brackets
+            data = get_block_symbol_data(current_block)
+            parentheses = data[SQUARE]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
                 if info.character == "[":
@@ -233,8 +237,8 @@ class SymbolMatcherMode(Mode):
     def _match_right_bracket(self, current_block, i, nb_right):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.square_brackets
+            data = get_block_symbol_data(current_block)
+            parentheses = data[SQUARE]
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
@@ -250,8 +254,8 @@ class SymbolMatcherMode(Mode):
                         nb_right -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = TextHelper(self.editor).block_user_data(current_block)
-                parentheses = data.square_brackets
+                data = get_block_symbol_data(current_block)
+                parentheses = data[SQUARE]
                 return self._match_right_bracket(
                     current_block, len(parentheses) - 1, nb_right)
             return False
@@ -276,8 +280,8 @@ class SymbolMatcherMode(Mode):
     def _match_left_brace(self, current_block, i, cpt):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.braces
+            data = get_block_symbol_data(current_block)
+            parentheses = data[BRACE]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
                 if info.character == "{":
@@ -299,8 +303,8 @@ class SymbolMatcherMode(Mode):
     def _match_right_brace(self, current_block, i, nb_right):
         # pylint: disable=missing-docstring
         try:
-            data = TextHelper(self.editor).block_user_data(current_block)
-            parentheses = data.braces
+            data = get_block_symbol_data(current_block)
+            parentheses = data[BRACE]
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
@@ -316,8 +320,8 @@ class SymbolMatcherMode(Mode):
                         nb_right -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = TextHelper(self.editor).block_user_data(current_block)
-                parentheses = data.braces
+                data = get_block_symbol_data(current_block)
+                parentheses = data[BRACE]
                 return self._match_right_brace(
                     current_block, len(parentheses) - 1, nb_right)
             return False
@@ -330,12 +334,11 @@ class SymbolMatcherMode(Mode):
         """
         self._clear_decorations()
         current_block = self.editor.textCursor().block()
-        data = TextHelper(self.editor).block_user_data(current_block)
-        if data and isinstance(data, TextBlockUserData):
-            pos = self.editor.textCursor().block().position()
-            self._match_parentheses(data.parentheses, pos)
-            self._match_square_brackets(data.square_brackets, pos)
-            self._match_braces(data.braces, pos)
+        data = get_block_symbol_data(current_block)
+        pos = self.editor.textCursor().block().position()
+        self._match_parentheses(data[PAREN], pos)
+        self._match_square_brackets(data[SQUARE], pos)
+        self._match_braces(data[BRACE], pos)
 
     def _create_decoration(self, pos, match=True):
         # pylint: disable=missing-docstring
