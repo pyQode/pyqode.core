@@ -815,6 +815,63 @@ class TextBlockhelper:
         block.setUserState(state)
 
 
+class ParenthesisInfo(object):
+    """
+    Stores information about a parenthesis in a line of code.
+    """
+    # pylint: disable=too-few-public-methods
+    def __init__(self, pos, char):
+        #: Position of the parenthesis, expressed as a number of character
+        self.position = pos
+        #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
+        self.character = char
+
+
+def get_block_symbol_data(block):
+    parentheses = []
+    square_brackets = []
+    braces = []
+    # todo check if bracket is not into a string litteral
+    # parentheses
+    text = block.text()
+    left_pos = text.find("(", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "(")
+        parentheses.append(info)
+        left_pos = text.find("(", left_pos + 1)
+    right_pos = text.find(")", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, ")")
+        parentheses.append(info)
+        right_pos = text.find(")", right_pos + 1)
+    # braces
+    left_pos = text.find("{", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "{")
+        braces.append(info)
+        left_pos = text.find("{", left_pos + 1)
+    right_pos = text.find("}", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, "}")
+        braces.append(info)
+        right_pos = text.find("}", right_pos + 1)
+    # square_brackets
+    left_pos = text.find("[", 0)
+    while left_pos != -1:
+        info = ParenthesisInfo(left_pos, "[")
+        square_brackets.append(info)
+        left_pos = text.find("[", left_pos + 1)
+    right_pos = text.find("]", 0)
+    while right_pos != -1:
+        info = ParenthesisInfo(right_pos, "]")
+        square_brackets.append(info)
+        right_pos = text.find("]", right_pos + 1)
+    parentheses[:] = sorted(parentheses, key=lambda x: x.position)
+    square_brackets[:] = sorted(square_brackets, key=lambda x: x.position)
+    braces[:] = sorted(braces, key=lambda x: x.position)
+    return parentheses, square_brackets, braces
+
+
 def keep_tc_pos(func):
     """
     Cache text cursor position and restore it when the wrapped

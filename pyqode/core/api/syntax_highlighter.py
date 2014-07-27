@@ -174,17 +174,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
                  and disabled zones for cc and autoindent will be lost.**
 
     """
-    class ParenthesisInfo(object):
-        """
-        Stores information about a parenthesis in a line of code.
-        """
-        # pylint: disable=too-few-public-methods
-        def __init__(self, pos, char):
-            #: Position of the parenthesis, expressed as a number of character
-            self.position = pos
-            #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
-            self.character = char
-
     #: Signal emitted at the start of highlightBlock. Parameters are the
     #: highlighter instance and the current text block
     block_highlight_started = QtCore.Signal(object, object)
@@ -235,53 +224,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         # current block (with a user_data attribute)
         self.current_block = None
 
-    @staticmethod
-    def _detect_parentheses(text, user_data):
-        """ Detect symbols (parentheses, braces, ...) """
-        user_data.parentheses[:] = []
-        user_data.square_brackets[:] = []
-        user_data.braces[:] = []
-        # todo check if bracket is not into a string litteral
-        # parentheses
-        left_pos = text.find("(", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "(")
-            user_data.parentheses.append(info)
-            left_pos = text.find("(", left_pos + 1)
-        right_pos = text.find(")", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, ")")
-            user_data.parentheses.append(info)
-            right_pos = text.find(")", right_pos + 1)
-        # braces
-        left_pos = text.find("{", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "{")
-            user_data.braces.append(info)
-            left_pos = text.find("{", left_pos + 1)
-        right_pos = text.find("}", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, "}")
-            user_data.braces.append(info)
-            right_pos = text.find("}", right_pos + 1)
-        # square_brackets
-        left_pos = text.find("[", 0)
-        while left_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(left_pos, "[")
-            user_data.square_brackets.append(info)
-            left_pos = text.find("[", left_pos + 1)
-        right_pos = text.find("]", 0)
-        while right_pos != -1:
-            info = SyntaxHighlighter.ParenthesisInfo(right_pos, "]")
-            user_data.square_brackets.append(info)
-            right_pos = text.find("]", right_pos + 1)
-        user_data.parentheses[:] = sorted(
-            user_data.parentheses, key=lambda x: x.position)
-        user_data.square_brackets[:] = sorted(
-            user_data.square_brackets, key=lambda x: x.position)
-        user_data.braces[:] = sorted(
-            user_data.braces, key=lambda x: x.position)
-
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
         Highlights a block of text.
@@ -299,7 +241,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.editor._blocks[line_nbr] = block
             # update user data
             block.user_data.line_number = line_nbr
-            self._detect_parentheses(text, block.user_data)
             self.highlight_block(text, block)
             # t = time.time()
             self.block_highlight_finished.emit(self, text)
@@ -327,24 +268,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
 class TextBlockUserData(QtGui.QTextBlockUserData):
     """
-    Custom text block data. pyQode use text block data for many purposes:
-        - folding detection
-        - symbols matching
-        - mar
+    Custom text block user data, mainly used to store block checker messages
+    and markers.
 
-    You can also add your own data.
     """
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
         super().__init__()
         #: Line number of the data, for convenience
         self.line_number = -1
-        #: Specify if the block is folded
-        self.folded = False
-        #: Specify if the block is a fold start
-        self.fold_start = False
-        #: The block's fold indent
-        self.fold_indent = -1
         #: List of checker messages associated with the block.
         self.messages = []
         #: List of markers draw by a marker panel.
