@@ -682,19 +682,6 @@ class TextHelper:
                             return True
         return False
 
-    def block_user_data(self, block):
-        """
-        Returns the block user data.
-
-        :param block: block or block number (1 based).
-        """
-        if isinstance(block, QtGui.QTextBlock):
-            block = block.blockNumber() + 1
-        try:
-            return self._editor._blocks[block].user_data
-        except KeyError:
-            return None
-
 
 class TextBlockhelper:
     """

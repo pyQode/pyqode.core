@@ -156,12 +156,10 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     :meth:`pyqode.core.api.SyntaxHighlighter.highlight_block` method to
     apply custom highlighting.
 
-    .. note:: Since version 2.1 and for performance reasons, we do not call
-        setUserData to setup user data set by the highlighter. Instead we set
-        them as an attribute called 'user_data'. As this attribute is lost
-        whenever you retrieve the block from a document, we store those blocks
-        in a list in CodeEdit. You can retrieve them using
-        :meth:`pyqode.core.api.TextHelper.block_user_data`.
+    .. note:: Since version 2.1 and for performance reasons, we store all
+        our data in the block user state as bitmask. You should always
+        use :class:`pyqode.core.api.TextBlockHelper` to retrieve or modify
+        those data.
 
     **signals**:
       - :attr:`pyqode.core.api.SyntaxHighlighter.block_highlight_started`
@@ -233,16 +231,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         block = self.currentBlock()
         self.current_block = block
         if self.editor:
-            block.user_data = TextHelper(self.editor).block_user_data(block)
-            if block.user_data is None:
-                block.user_data = TextBlockUserData()
-            # update stored block
-            line_nbr = self.currentBlock().blockNumber() + 1
-            self.editor._blocks[line_nbr] = block
-            # update user data
-            block.user_data.line_number = line_nbr
             self.highlight_block(text, block)
-            # t = time.time()
             self.block_highlight_finished.emit(self, text)
 
     def highlight_block(self, text, user_data):

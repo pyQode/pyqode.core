@@ -300,12 +300,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
-        # a list of text block with QTextBlockUserData set on
-        # them as user_data. Calling setUserData on each block during
-        # syntax highlighting is too slow.
-        # You must use TextHelper.block_user_data to access them!
-        self._blocks = {}
-
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)
