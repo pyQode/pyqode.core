@@ -275,25 +275,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
         super().__init__()
-        #: Line number of the data, for convenience
-        self.line_number = -1
         #: List of checker messages associated with the block.
         self.messages = []
         #: List of markers draw by a marker panel.
         self.markers = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "(" and ")"
-        #: symbols
-        self.parentheses = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "[" and "]"
-        #: symbols
-        self.square_brackets = []
-        #: List of :class:`pyqode.core.ParenthesisInfo` for the "{" and "}"
-        #: symbols
-        self.braces = []
-        #: Zones were Code completion is disabled. List of tuple. Each tuple
-        #: contains the start column and the end column.
-        self.cc_disabled_zones = []
-
-    def __repr__(self):
-        return ("#{} - Folded: {}  FoldIndent: {} - FoldStart: {}".format(
-            self.line_number, self.folded, self.fold_indent, self.fold_start))

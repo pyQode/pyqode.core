@@ -122,15 +122,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
-            column = helper.current_column_nbr()
-            block = self.editor.textCursor().block()
-            usd = TextHelper(self.editor).block_user_data(block)
-            if usd and hasattr(usd, 'cc_disabled_zones'):
-                for start, end in usd.cc_disabled_zones:
-                    if start <= column <= end:
-                        _logger().debug(
-                            "cc: cancel request, cursor is in a disabled zone")
-                        return False
+            disabled_zone = TextHelper(self.editor).is_comment_or_string(
+                self.editor.textCursor())
+            if disabled_zone:
+                _logger().debug(
+                    "cc: cancel request, cursor is in a disabled zone")
+                return False
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
                                       helper.current_line_nbr(),

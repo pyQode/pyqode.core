@@ -286,6 +286,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ TextDecorationManager: manage the list of text decorations """
         return self._decorations
 
+    @property
+    def syntax_highlighter(self):
+        for mode in self.modes:
+            if hasattr(mode, 'highlightBlock'):
+                return mode
+        return None
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget

@@ -669,6 +669,19 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
+    def is_comment_or_string(self, cursor):
+        pos = cursor.position()
+        formats = cursor.block().layout().additionalFormats()
+        sh = self._editor.syntax_highlighter
+        if sh:
+            ref_formats = sh.color_scheme.formats
+            for r in formats:
+                if pos >= r.start and pos <= (r.start + r.length):
+                    for fmt_type in ["comment", "string", "docstring"]:
+                        if ref_formats[fmt_type] == r.format:
+                            return True
+        return False
+
     def block_user_data(self, block):
         """
         Returns the block user data.
