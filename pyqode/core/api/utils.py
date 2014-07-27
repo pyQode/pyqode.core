@@ -482,6 +482,8 @@ class TextHelper:
                                          text_cursor.KeepAnchor)
             if apply_selection:
                 editor.setTextCursor(text_cursor)
+            return text_cursor
+        return None
 
     def selection_range(self):
         """
@@ -669,15 +671,17 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
-    def is_comment_or_string(self, cursor):
-        pos = cursor.position()
-        formats = cursor.block().layout().additionalFormats()
+    def is_comment_or_string(self, cursor, formats=None):
+        if formats is None:
+            formats = ["comment", "string", "docstring"]
+        pos = cursor.position() - cursor.block().position()
+        additional_formats = cursor.block().layout().additionalFormats()
         sh = self._editor.syntax_highlighter
         if sh:
             ref_formats = sh.color_scheme.formats
-            for r in formats:
+            for r in additional_formats:
                 if pos >= r.start and pos <= (r.start + r.length):
-                    for fmt_type in ["comment", "string", "docstring"]:
+                    for fmt_type in formats:
                         if ref_formats[fmt_type] == r.format:
                             return True
         return False
