@@ -548,13 +548,16 @@ class TextHelper:
         Returns the indent level of the specified line
 
         :param line_nbr: Number of the line to get indentation (1 base). Pass None
-            to use the current line number.
+            to use the current line number. Note that you can also pass a
+            QTextBlock instance instead of
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
         editor = self._editor
         if line_nbr is None:
             line_nbr = self.current_line_nbr()
+        elif isinstance(line_nbr, QtGui.QTextBlock):
+            line_nbr = line_nbr.blockNumber() + 1
         line = self.line_text(line_nbr)
         indentation = len(line) - len(line.lstrip())
         return indentation
@@ -714,9 +717,11 @@ class TextBlockHelper:
         :return: The block state
 
         """
+        if block is None:
+            return -1
         state = block.userState()
         if state == -1:
-            return -1
+            return state
         return state & 0x03FFFFFF
 
     @staticmethod
@@ -728,6 +733,8 @@ class TextBlockHelper:
         :param state: new state value.
         :return:
         """
+        if block is None:
+            return
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
@@ -746,6 +753,8 @@ class TextBlockHelper:
 
         :return: True of False
         """
+        if block is None:
+            return False
         state = block.userState()
         if state == -1:
             state = 0
@@ -759,6 +768,8 @@ class TextBlockHelper:
         :param block: block to modify
         :param flg: New flag value
         """
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
@@ -774,6 +785,8 @@ class TextBlockHelper:
         :param block: block to access.
         :returns: The block fold level
         """
+        if block is None:
+            return 0
         state = block.userState()
         if state == -1:
             state = 0
@@ -787,6 +800,8 @@ class TextBlockHelper:
         :param block: block to modify
         :param val: The new fold level [0-7]
         """
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
@@ -805,6 +820,8 @@ class TextBlockHelper:
         :return: True if the block is a fold trigger (represented as a node in
             the fold panel)
         """
+        if block is None:
+            return False
         state = block.userState()
         if state == -1:
             state = 0
@@ -812,6 +829,8 @@ class TextBlockHelper:
 
     @staticmethod
     def set_fold_trigger(block, val):
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
@@ -825,6 +844,8 @@ class TextBlockHelper:
         Gets the fold trigger state.
         :return: False for an open trigger, True for for closed trigger
         """
+        if block is None:
+            return False
         state = block.userState()
         if state == -1:
             state = 0
@@ -838,6 +859,8 @@ class TextBlockHelper:
         :param block: The block to modify
         :param val: The new trigger state (False = open, True = closed)
         """
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0

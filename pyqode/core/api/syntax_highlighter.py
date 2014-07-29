@@ -3,7 +3,7 @@ from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token
 import sys
 import time
-from pyqode.core.api.utils import TextHelper
+from pyqode.core.api.utils import TextHelper, TextBlockHelper
 from pyqode.core.api.mode import Mode
 from pyqode.core.qt import QtGui, QtCore, QtWidgets
 
@@ -208,8 +208,21 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             color_scheme = ColorScheme('qt')
         self._color_scheme = color_scheme
         self._spaces_ptrn = QtCore.QRegExp(r'\s+')
-        # current block (with a user_data attribute)
-        self.current_block = None
+
+    def _do_code_folding_detection(self, current_block, previous_block, text):
+        prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
+        if text.strip() == '':
+            # blank line alway have the same level as the previous line.
+            fold_level = prev_fold_level
+        else:
+            fold_level = self.detect_fold_level(
+                previous_block, current_block)
+        # update block fold level
+        TextBlockHelper.set_fold_trigger(
+            previous_block, fold_level > prev_fold_level)
+        TextBlockHelper.set_fold_lvl(current_block, fold_level)
+        from pyqode.core.api.folding import print_tree
+        print_tree(self.editor)
 
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
@@ -217,10 +230,19 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         """
         # self.block_highlight_started.emit(self, text)
         # # # setup user data
-        block = self.currentBlock()
-        self.current_block = block
+        current_block = self.currentBlock()
+        previous_block = (current_block.previous()
+                          if current_block.blockNumber() else None)
+        # find the previous non-blank block
+        while (previous_block and previous_block.blockNumber() and
+                previous_block.text().strip() == ''):
+            previous_block = previous_block.previous()
+
         if self.editor:
-            self.highlight_block(text, block)
+            self._do_code_folding_detection(
+                current_block, previous_block, text)
+            self.highlight_block(text, current_block)
+            # todo make whitespaces highlighting a base feature.
 
     def highlight_block(self, text, block):
         """
@@ -231,9 +253,31 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         """
         raise NotImplementedError()
 
+    def detect_fold_level(self, prev_block, block):
+        """
+        Detects the block fold level.
+
+        The default implementation is based on the block indentation.
+
+        :param prev_block: Previous block or None (first line)
+        :param block: The block to process.
+        :return: Fold level
+        """
+        text = block.text()
+        if text.strip():
+            return (len(text) - len(text.lstrip())) // self.editor.tab_length
+        elif prev_block:
+            return prev_block.user_data.fold_level
+        else:
+            return 0
+
     def rehighlight(self):
+        """
+        Rehighlight the entire document, may be slow.
+        """
         start = time.time()
-        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        QtWidgets.QApplication.setOverrideCursor(
+            QtGui.QCursor(QtCore.Qt.WaitCursor))
         super().rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()
