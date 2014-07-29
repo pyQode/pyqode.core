@@ -32,6 +32,7 @@ class TextEdit(CodeEdit):
         self.backend.start(server_script, interpreter, args)
 
         # append panels
+        self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
@@ -69,6 +70,7 @@ class GenericCodeEdit(CodeEdit):
         self.backend.start(server_script, interpreter, args)
 
         # append panels
+        self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)

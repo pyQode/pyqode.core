@@ -221,8 +221,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         TextBlockHelper.set_fold_trigger(
             previous_block, fold_level > prev_fold_level)
         TextBlockHelper.set_fold_lvl(current_block, fold_level)
-        from pyqode.core.api.folding import print_tree
-        print_tree(self.editor)
 
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """

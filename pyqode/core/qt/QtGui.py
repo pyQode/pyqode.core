@@ -137,6 +137,7 @@ try:
         from PyQt4.QtGui import qRed
         from PyQt4.QtGui import qRgb
         from PyQt4.QtGui import qRgba
+        from PyQt4.QtGui import QStyleOptionViewItemV2
     elif os.environ[QT_API] == PYSIDE_API:
         from PySide.QtGui import QAbstractTextDocumentLayout
         from PySide.QtGui import QActionEvent
@@ -254,6 +255,7 @@ try:
         from PySide.QtGui import QWhatsThisClickedEvent
         from PySide.QtGui import QWheelEvent
         from PySide.QtGui import QWindowStateChangeEvent
+        from PySide.QtGui import QStyleOptionViewItemV2
 except ImportError:
     # allowed when building doc with sphinx (e.g. on readthedocs)
     assert os.environ.get('SPHINX', None) == '1'
