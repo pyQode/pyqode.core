@@ -5,6 +5,7 @@ This module contains the marker panel
 import logging
 import os
 from pyqode.core.api import TextBlockHelper, folding
+from pyqode.core.api.folding import FoldRegion
 from pyqode.core.api.panel import Panel
 from pyqode.core.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api.utils import TextHelper
@@ -58,9 +59,7 @@ class FoldingPanel(Panel):
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line - 1)
-            collapsed = TextBlockHelper.get_fold_trigger_state(block)
-            if not collapsed:
-                self._draw_fold_region_background(block, painter)
+            self._draw_fold_region_background(block, painter)
 
         for top_position, line_number, block in self.editor.visible_blocks:
             if TextBlockHelper.is_fold_trigger(block):
@@ -208,3 +207,16 @@ class FoldingPanel(Panel):
         super().leaveEvent(event)
         self._mouse_over_line = None
         self.repaint()
+
+    def mousePressEvent(self, event):
+        """ Folds/unfolds the pressed indicator if any. """
+        if self._mouse_over_line:
+            block = self.editor.document().findBlockByNumber(
+                self._mouse_over_line - 1)
+            region = FoldRegion(block)
+            if region.collapsed:
+                region.unfold()
+            else:
+                region.fold()
+            TextHelper(self.editor).mark_whole_doc_dirty()
+            self.editor.repaint()
