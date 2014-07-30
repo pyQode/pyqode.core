@@ -214,6 +214,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if text.strip() == '':
             # blank line always have the same level as the previous line.
             fold_level = prev_fold_level
+            TextBlockHelper.set_fold_trigger(current_block, False)
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
@@ -256,13 +257,19 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         """
         Detects the block fold level.
 
-        The default implementation is based on the block indentation.
+        The default implementation is based on the block **indentation**.
+
+        .. note:: Blocks fold level must be contiguous, there cannot be
+            a difference greater than 1 between two successive block fold
+            levels.
 
         :param prev_block: Previous block or None (first line)
         :param block: The block to process.
         :return: Fold level
         """
         text = block.text()
+        # round down to previous indentation guide to ensure contiguous block
+        # fold level evolution.
         return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
     def rehighlight(self):
