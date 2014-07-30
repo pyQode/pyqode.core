@@ -23,6 +23,7 @@ from .utils import TextHelper, TextBlockHelper
 from .utils import get_block_symbol_data
 from .utils import DelayJobRunner
 from .utils import TextStyle
+from . import folding
 
 
 __all__ = [

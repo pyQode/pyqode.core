@@ -212,14 +212,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def _do_code_folding_detection(self, current_block, previous_block, text):
         prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
         if text.strip() == '':
-            # blank line alway have the same level as the previous line.
+            # blank line always have the same level as the previous line.
             fold_level = prev_fold_level
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
         # update block fold level
-        TextBlockHelper.set_fold_trigger(
-            previous_block, fold_level > prev_fold_level)
+        if text.strip():
+            TextBlockHelper.set_fold_trigger(
+                previous_block, fold_level > prev_fold_level)
         TextBlockHelper.set_fold_lvl(current_block, fold_level)
 
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
@@ -237,9 +238,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             previous_block = previous_block.previous()
 
         if self.editor:
+            self.highlight_block(text, current_block)
             self._do_code_folding_detection(
                 current_block, previous_block, text)
-            self.highlight_block(text, current_block)
             # todo make whitespaces highlighting a base feature.
 
     def highlight_block(self, text, block):
@@ -262,12 +263,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         :return: Fold level
         """
         text = block.text()
-        if text.strip():
-            return (len(text) - len(text.lstrip())) // self.editor.tab_length
-        elif prev_block:
-            return prev_block.user_data.fold_level
-        else:
-            return 0
+        return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
     def rehighlight(self):
         """
