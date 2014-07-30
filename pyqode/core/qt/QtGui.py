@@ -90,6 +90,7 @@ try:
         from PyQt4.QtGui import QStaticText
         from PyQt4.QtGui import QStatusTipEvent
         from PyQt4.QtGui import QSyntaxHighlighter
+        from PyQt4.QtGui import QSortFilterProxyModel
         from PyQt4.QtGui import QTabletEvent
         from PyQt4.QtGui import QTextBlock
         from PyQt4.QtGui import QTextBlockFormat
@@ -218,6 +219,7 @@ try:
         from PySide.QtGui import QStandardItemModel
         from PySide.QtGui import QStatusTipEvent
         from PySide.QtGui import QSyntaxHighlighter
+        from PySide.QtGui import QSortFilterProxyModel
         from PySide.QtGui import QTabletEvent
         from PySide.QtGui import QTextBlock
         from PySide.QtGui import QTextBlockFormat
