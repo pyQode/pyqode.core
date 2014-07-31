@@ -703,10 +703,9 @@ class TextBlockHelper:
     The bitmask is made up of the following fields:
 
         - bit0 -> bit26: User state (for syntax highlighting)
-        - bit26: flag -> general purpose flag
+        - bit26: fold trigger state
         - bit27-bit29: fold level (8 level max)
         - bit30: fold trigger flag
-        - bit31: fold trigger state
 
     """
     @staticmethod
@@ -741,40 +740,6 @@ class TextBlockHelper:
         higher_part = user_state & 0xFC000000
         state &= 0x03FFFFFF
         state |= higher_part
-        block.setUserState(state)
-
-    @staticmethod
-    def get_flag(block):
-        """
-        Gets a general purpose flag bit. It is not used internally and can be
-        used by client code for any purpose.
-
-        :param block: Block to access:
-
-        :return: True of False
-        """
-        if block is None:
-            return False
-        state = block.userState()
-        if state == -1:
-            state = 0
-        return bool(state & 0x04000000)
-
-    @staticmethod
-    def set_flag(block, flg):
-        """
-        Sets the general purpose flag value.
-
-        :param block: block to modify
-        :param flg: New flag value
-        """
-        if block is None:
-            return
-        state = block.userState()
-        if state == -1:
-            state = 0
-        state &= 0xFBFFFFFF
-        state |= int(flg) << 26
         block.setUserState(state)
 
     @staticmethod
@@ -849,7 +814,7 @@ class TextBlockHelper:
         state = block.userState()
         if state == -1:
             state = 0
-        return bool(state & 0x80000000)
+        return bool(state & 0x04000000)
 
     @staticmethod
     def set_fold_trigger_state(block, val):
@@ -864,8 +829,8 @@ class TextBlockHelper:
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0x7FFFFFFF
-        state |= int(val) << 31
+        state &= 0xFBFFFFFF
+        state |= int(val) << 26
         block.setUserState(state)
 
 
