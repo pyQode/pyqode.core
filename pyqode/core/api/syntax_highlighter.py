@@ -214,15 +214,30 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if text.strip() == '':
             # blank line always have the same level as the previous line.
             fold_level = prev_fold_level
-            TextBlockHelper.set_fold_trigger(current_block, False)
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
+
         # update block fold level
         if text.strip():
             TextBlockHelper.set_fold_trigger(
                 previous_block, fold_level > prev_fold_level)
         TextBlockHelper.set_fold_lvl(current_block, fold_level)
+
+        # user pressed enter at the beginning of a fold trigger line
+        # the previous blank line will keep the trigger state and the new line
+        # (which actually contains the trigger) must use the prev state (
+        # and prev state must then be reset).
+        prev = current_block.previous()  # real prev block (may be blank)
+        if (prev and prev.isValid() and prev.text().strip() == '' and
+                TextBlockHelper.is_fold_trigger(prev)):
+            # prev line has the correct trigger fold state
+            TextBlockHelper.set_fold_trigger_state(
+                current_block, TextBlockHelper.get_fold_trigger_state(
+                    prev))
+            # make empty line not a trigger
+            TextBlockHelper.set_fold_trigger(prev, False)
+            TextBlockHelper.set_fold_trigger_state(prev, False)
 
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
