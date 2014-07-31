@@ -4,11 +4,11 @@ This module contains the marker panel
 """
 import logging
 import os
-from pyqode.core.api import TextBlockHelper, folding
-from pyqode.core.api.folding import FoldRegion
+from pyqode.core.api import TextBlockHelper, folding, TextDecoration
+from pyqode.core.api.folding import Scope
 from pyqode.core.api.panel import Panel
 from pyqode.core.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api.utils import TextHelper
+from pyqode.core.api.utils import TextHelper, drift_color
 
 
 def _logger():
@@ -38,10 +38,13 @@ class FoldingPanel(Panel):
     def __init__(self):
         Panel.__init__(self)
         self._indic_size = 16
-        self._indicators = []
+        # the list of deco used to highlight the current fold region (
+        # surrounding regions are darker)
+        self._scope_decos = []
         self.setMouseTracking(True)
         self.scrollable = True
         self._mouse_over_line = None
+        self._current_scope = None
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
@@ -54,13 +57,12 @@ class FoldingPanel(Panel):
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QtGui.QPainter(self)
-
         # Draw background over the selected non collapsed fold region
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line - 1)
             self._draw_fold_region_background(block, painter)
-
+        # Draw fold triggers
         for top_position, line_number, block in self.editor.visible_blocks:
             if TextBlockHelper.is_fold_trigger(block):
                 collapsed = TextBlockHelper.get_fold_trigger_state(block)
@@ -77,7 +79,7 @@ class FoldingPanel(Panel):
         :param block: Current block.
         :param painter: QPainter
         """
-        r = folding.FoldRegion(block)
+        r = folding.Scope(block)
         th = TextHelper(self.editor)
         start, end = r.get_range(ignore_blank_lines=True)
         top = th.line_pos_from_number(start - 1)
@@ -171,6 +173,56 @@ class FoldingPanel(Panel):
         self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
                                    opt, painter, self)
 
+    def _find_parent_scope(self, block, original):
+        if not TextBlockHelper.is_fold_trigger(block):
+            # search level of next non blank line
+            while block.text().strip() == '' and block.isValid():
+                block = block.next()
+            ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
+            block = original
+            while (block.blockNumber() and
+                       (not TextBlockHelper.is_fold_trigger(block) or
+                                TextBlockHelper.get_fold_lvl(
+                                        block) > ref_lvl)):
+                block = block.previous()
+        return block
+
+    def _clear_scope_decos(self):
+        for deco in self._scope_decos:
+            self.editor.decorations.remove(deco)
+        self._scope_decos[:] = []
+
+    def _add_scope_decoration(self, start, end):
+        """
+        Show a scope decoration on the editor widget
+
+        :param start: Start line
+        :param end: End line
+        """
+        color = drift_color(self.editor.background, 115)
+        tc = self.editor.textCursor()
+        d = TextDecoration(tc, start_line=1, end_line=start)
+        d.set_full_width(True, clear=False)
+        d.set_background(color)
+        self.editor.decorations.append(d)
+        self._scope_decos.append(d)
+        d = TextDecoration(tc, start_line=end + 1,
+                           end_line=self.editor.document().blockCount())
+        d.set_full_width(True, clear=False)
+        d.set_background(color)
+        self.editor.decorations.append(d)
+        self._scope_decos.append(d)
+
+    def _highlight_surrounding_scopes(self, block):
+        scope = Scope(block)
+        if (self._current_scope is None or
+                self._current_scope.get_range() != scope.get_range()):
+            self._current_scope = scope
+            self._clear_scope_decos()
+            # highlight surrounding parent scopes with a darker color
+            start, end = scope.get_range()
+            self._add_scope_decoration(start, end)
+
     def mouseMoveEvent(self, event):
         """
         Detect mouser over indicator and highlight the current scope in the
@@ -184,18 +236,10 @@ class FoldingPanel(Panel):
         line = th.line_nbr_from_position(event.pos().y())
         if line:
             original = block = self.editor.document().findBlockByNumber(line - 1)
-            if not TextBlockHelper.is_fold_trigger(block):
-                # search level of next non blank line
-                while block.text().strip() == '' and block.isValid():
-                    block = block.next()
-                ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
-                block = original
-                while (block.blockNumber() and
-                       (not TextBlockHelper.is_fold_trigger(block) or
-                       TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
-                    block = block.previous()
+            block = self._find_parent_scope(block, original)
             if TextBlockHelper.is_fold_trigger(block):
                 self._mouse_over_line = block.blockNumber() + 1
+                self._highlight_surrounding_scopes(block)
             else:
                 self._mouse_over_line = None
             self._highlight_active_indicator()
@@ -205,15 +249,17 @@ class FoldingPanel(Panel):
 
     def leaveEvent(self, event):
         super().leaveEvent(event)
+        self._clear_scope_decos()
         self._mouse_over_line = None
-        self.repaint()
+        self._current_scope = None
+        self.editor.repaint()
 
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line - 1)
-            region = FoldRegion(block)
+            region = Scope(block)
             if region.collapsed:
                 region.unfold()
             else:

@@ -212,11 +212,28 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def _do_code_folding_detection(self, current_block, previous_block, text):
         prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
         if text.strip() == '':
-            # blank line always have the same level as the previous line.
+            # blank line always have the same level as the previous line,
             fold_level = prev_fold_level
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
+
+        if fold_level > prev_fold_level:
+            # apply on previous blank lines
+            block = current_block.previous()
+            while block.isValid() and block.text().strip() == '':
+                TextBlockHelper.set_fold_lvl(block, fold_level)
+                block = block.previous()
+            TextBlockHelper.set_fold_trigger(
+                block, True)
+
+        delta_abs = abs(fold_level - prev_fold_level)
+        if delta_abs > 1:
+            _logger().warning('inconsistent fold level, difference between '
+                              'consecutive blocks cannot be greater than 1 '
+                              '(%d)', delta_abs)
+            if fold_level > prev_fold_level:
+                fold_level = prev_fold_level + 1
 
         # update block fold level
         if text.strip():
