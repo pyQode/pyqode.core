@@ -351,16 +351,17 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
-        if not self:
-            return
-        o = self.readAllStandardOutput()
         try:
-            output = bytes(o).decode('utf-8')
-        except TypeError:
-            output = bytes(o.data()).decode('utf-8')
-        output = output[:output.rfind('\n')]
-        for line in output.splitlines():
-            self._srv_logger.debug(line)
+            o = self.readAllStandardOutput()
+            try:
+                output = bytes(o).decode('utf-8')
+            except TypeError:
+                output = bytes(o.data()).decode('utf-8')
+            output = output[:output.rfind('\n')]
+            for line in output.splitlines():
+                self._srv_logger.debug(line)
+        except RuntimeError:
+            pass
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """

@@ -546,14 +546,17 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         only the last one is duplicated.
         """
         cursor = self.textCursor()
+        assert isinstance(cursor, QtGui.QTextCursor)
+        cursor.beginEditBlock()
+        col = cursor.positionInBlock()
         cursor.select(cursor.LineUnderCursor)
         line = cursor.selectedText()
-        cursor.movePosition(cursor.Down, cursor.MoveAnchor)
-        cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-        cursor.insertText(line + "\n")
-        cursor.movePosition(cursor.Left, cursor.MoveAnchor)
+        cursor.movePosition(cursor.EndOfBlock)
+        cursor.insertText('\n' + line)
+        cursor.movePosition(cursor.StartOfBlock)
+        cursor.movePosition(cursor.Right, cursor.MoveAnchor, col)
         self.setTextCursor(cursor)
-        self._do_home_key()
+        cursor.endEditBlock()
 
     @QtCore.Slot()
     def indent(self):

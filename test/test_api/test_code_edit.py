@@ -54,6 +54,23 @@ def test_duplicate_line(editor):
     editor.duplicate_line()
     assert editor.toPlainText().startswith(get_first_line(editor) + '\n' +
                                            get_first_line(editor))
+    editor.setPlainText('foo', '', 'utf-8')
+    editor.duplicate_line()
+    assert editor.toPlainText() == 'foo\nfoo'
+    assert editor.textCursor().position() == 4
+
+
+def test_bug_duplicate_line_undo_stack(editor):
+    """
+    See github issue #142 where the duplicate line messup the undo stack
+    """
+    editor.setPlainText('foo\nbar', '', 'utf-8')
+    editor.textCursor().setPosition(0)
+    editor.indent()
+    editor.duplicate_line()
+    editor.undo()
+    assert editor.toPlainText() == '    foo\nbar'
+    assert editor.textCursor().position() == 4
 
 
 @editor_open(__file__)
