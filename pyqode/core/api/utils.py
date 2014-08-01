@@ -513,11 +513,15 @@ class TextHelper:
         :return: The center position of the line.
         """
         editor = self._editor
-        block = editor.document().findBlockByNumber(line_number)
+        block = editor.document().findBlockByNumber(line_number - 1)
         if block.isValid():
             return int(editor.blockBoundingGeometry(block).translated(
                 editor.contentOffset()).top())
-        return None
+        if line_number <= 0:
+            return 0
+        else:
+            return int(editor.blockBoundingGeometry(block.previous()).translated(
+                editor.contentOffset()).bottom())
 
     def line_nbr_from_position(self, y_pos):
         """

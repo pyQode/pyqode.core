@@ -82,9 +82,14 @@ class FoldingPanel(Panel):
         r = folding.Scope(block)
         th = TextHelper(self.editor)
         start, end = r.get_range(ignore_blank_lines=True)
-        top = th.line_pos_from_number(start - 1)
-        bottom = th.line_pos_from_number(end)
+        if start > 0:
+            top = th.line_pos_from_number(start)
+        else:
+            top = 0
+        bottom = th.line_pos_from_number(end + 1)
         h = bottom - top
+        if h == 0:
+            h = self.sizeHint().height()
         w = self.sizeHint().width()
         self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
 
@@ -201,17 +206,20 @@ class FoldingPanel(Panel):
         """
         color = drift_color(self.editor.background, 115)
         tc = self.editor.textCursor()
-        d = TextDecoration(tc, start_line=1, end_line=start)
-        d.set_full_width(True, clear=False)
-        d.set_background(color)
-        self.editor.decorations.append(d)
-        self._scope_decos.append(d)
-        d = TextDecoration(tc, start_line=end + 1,
-                           end_line=self.editor.document().blockCount())
-        d.set_full_width(True, clear=False)
-        d.set_background(color)
-        self.editor.decorations.append(d)
-        self._scope_decos.append(d)
+        if start != 1:
+            d = TextDecoration(tc, start_line=1, end_line=start)
+            d.set_full_width(True, clear=False)
+            d.set_background(color)
+            self.editor.decorations.append(d)
+            self._scope_decos.append(d)
+        start_line= end + 1
+        end_line= self.editor.document().blockCount()
+        if start_line < end_line:
+            d = TextDecoration(tc, )
+            d.set_full_width(True, clear=False)
+            d.set_background(color)
+            self.editor.decorations.append(d)
+            self._scope_decos.append(d)
 
     def _highlight_surrounding_scopes(self, block):
         scope = Scope(block)
