@@ -134,7 +134,7 @@ class Scope:
                 block = self._trigger.document().findBlockByNumber(start - 1)
                 block.setVisible(True)
                 block = self._trigger.document().findBlockByNumber(bend - 1)
-                while block.blockNumber() > bstart:
+                while block.blockNumber() > bstart - 1:
                     block.setVisible(True)
                     block = block.previous()
 
