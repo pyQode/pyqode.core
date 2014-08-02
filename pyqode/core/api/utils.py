@@ -678,11 +678,19 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
-    def is_comment_or_string(self, cursor, formats=None):
+    def is_comment_or_string(self, cursor_or_block, formats=None):
         if formats is None:
             formats = ["comment", "string", "docstring"]
-        pos = cursor.position() - cursor.block().position()
-        additional_formats = cursor.block().layout().additionalFormats()
+        if isinstance(cursor_or_block, QtGui.QTextCursor):
+            pos = cursor_or_block.position() - cursor_or_block.block(
+                ).position()
+            additional_formats = cursor_or_block.block().layout(
+                ).additionalFormats()
+        elif isinstance(cursor_or_block, QtGui.QTextBlock):
+            pos = len(cursor_or_block.text()) - 1
+            additional_formats = cursor_or_block.layout().additionalFormats()
+        else:
+            additional_formats = []
         sh = self._editor.syntax_highlighter
         if sh:
             ref_formats = sh.color_scheme.formats
