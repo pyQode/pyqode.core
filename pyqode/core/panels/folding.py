@@ -322,9 +322,33 @@ class FoldingPanel(Panel):
         if state:
             self.editor.cursorPositionChanged.connect(
                 self.refresh_decorations)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
             self.editor.cursorPositionChanged.disconnect(
                 self.refresh_decorations)
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
+
+    def _select_scope(self, block, c):
+        start_block = block
+        _, end = Scope(block).get_range()
+        end_block = self.editor.document().findBlockByNumber(end)
+        c.beginEditBlock()
+        c.setPosition(start_block.position())
+        c.setPosition(end_block.position(), c.KeepAnchor)
+        c.deleteChar()
+        c.endEditBlock()
+
+    def _on_key_pressed(self, event):
+        keys = [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace]
+        if event.key() in keys:
+            c = self.editor.textCursor()
+            assert isinstance(c, QtGui.QTextCursor)
+            if c.hasSelection():
+                for deco in self._block_decos:
+                    if c.selectedText() == deco.cursor.selectedText():
+                        block = deco.block
+                        self._select_scope(block, c)
+                        event.accept()
 
     def refresh_decorations(self, force=False):
         cursor = self.editor.textCursor()
@@ -337,5 +361,4 @@ class FoldingPanel(Panel):
                     self._get_scope_highlight_color(), 110))
                 deco.set_background(self._get_scope_highlight_color())
                 self.editor.decorations.append(deco)
-
         self._prev_cursor = cursor
