@@ -183,3 +183,18 @@ class Scope:
                 block = block.previous()
             return Scope(block)
         return None
+
+    def text(self, max_lines=sys.maxsize):
+        """
+        Get the scope text, with a possible maximum number of lines.
+
+        :return: str
+        """
+        ret_val = []
+        block = self._trigger.next()
+        _, end = self.get_range()
+        while (block.isValid() and block.blockNumber() < end and
+               len(ret_val) < max_lines):
+            ret_val.append(block.text())
+            block = block.next()
+        return '\n'.join(ret_val)

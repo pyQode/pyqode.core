@@ -38,13 +38,16 @@ class FoldingPanel(Panel):
     def __init__(self):
         Panel.__init__(self)
         self._indic_size = 16
-        # the list of deco used to highlight the current fold region (
-        # surrounding regions are darker)
+        #: the list of deco used to highlight the current fold region (
+        #: surrounding regions are darker)
         self._scope_decos = []
+        #: the list of folded blocs decorations
+        self._block_decos = []
         self.setMouseTracking(True)
         self.scrollable = True
         self._mouse_over_line = None
         self._current_scope = None
+        self._prev_cursor = None
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
@@ -197,6 +200,13 @@ class FoldingPanel(Panel):
             self.editor.decorations.remove(deco)
         self._scope_decos[:] = []
 
+    def _get_scope_highlight_color(self):
+        color = self.editor.background
+        if color.lightness() > 128:
+            return drift_color(self.editor.background, 105)
+        else:
+            return drift_color(self.editor.background, 130)
+
     def _add_scope_decoration(self, start, end):
         """
         Show a scope decoration on the editor widget
@@ -204,7 +214,7 @@ class FoldingPanel(Panel):
         :param start: Start line
         :param end: End line
         """
-        color = drift_color(self.editor.background, 115)
+        color = self._get_scope_highlight_color()
         tc = self.editor.textCursor()
         if start != 1:
             d = TextDecoration(tc, start_line=1, end_line=start)
@@ -215,7 +225,7 @@ class FoldingPanel(Panel):
         start_line= end + 1
         end_line= self.editor.document().blockCount()
         if start_line < end_line:
-            d = TextDecoration(tc, )
+            d = TextDecoration(tc, start_line=start_line, end_line=end_line)
             d.set_full_width(True, clear=False)
             d.set_background(color)
             self.editor.decorations.append(d)
@@ -229,7 +239,8 @@ class FoldingPanel(Panel):
             self._clear_scope_decos()
             # highlight surrounding parent scopes with a darker color
             start, end = scope.get_range()
-            self._add_scope_decoration(start, end)
+            if not TextBlockHelper.get_fold_trigger_state(block):
+                self._add_scope_decoration(start, end)
 
     def mouseMoveEvent(self, event):
         """
@@ -262,15 +273,69 @@ class FoldingPanel(Panel):
         self._current_scope = None
         self.editor.repaint()
 
+    def _toggle_trigger(self, block):
+        region = Scope(block)
+        if region.collapsed:
+            region.unfold()
+            deco = None
+            for deco in self._block_decos:
+                if deco.block == block:
+                    break
+            if deco is not None:
+                self._block_decos.remove(deco)
+                self.editor.decorations.remove(deco)
+                del deco
+            if self._mouse_over_line:
+                self._add_scope_decoration(*region.get_range())
+        else:
+            region.fold()
+            # add folded deco
+            deco = TextDecoration(block)
+            deco.signals.clicked.connect(self._on_fold_deco_clicked)
+            deco.tooltip = region.text(max_lines=25)
+            deco.draw_order = 1
+            deco.block = block
+            deco.select_line()
+            deco.set_outline(drift_color(
+                self._get_scope_highlight_color(), 110))
+            deco.set_background(self._get_scope_highlight_color())
+            self._block_decos.append(deco)
+            self.editor.decorations.append(deco)
+            self._clear_scope_decos()
+        TextHelper(self.editor).mark_whole_doc_dirty()
+        self.editor.repaint()
+
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line - 1)
-            region = Scope(block)
-            if region.collapsed:
-                region.unfold()
-            else:
-                region.fold()
-            TextHelper(self.editor).mark_whole_doc_dirty()
-            self.editor.repaint()
+            self._toggle_trigger(block)
+
+    def _on_fold_deco_clicked(self, deco):
+        self._toggle_trigger(deco.block)
+
+    def on_state_changed(self, state):
+        """
+        On state changed we (dis)connect to the cursorPositionChanged signal
+        """
+        if state:
+            self.editor.cursorPositionChanged.connect(
+                self.refresh_decorations)
+        else:
+            self.editor.cursorPositionChanged.disconnect(
+                self.refresh_decorations)
+
+    def refresh_decorations(self, force=False):
+        cursor = self.editor.textCursor()
+        if (self._prev_cursor is None or force or
+                self._prev_cursor.blockNumber() != cursor.blockNumber()):
+            for deco in self._block_decos:
+                self.editor.decorations.remove(deco)
+            for deco in self._block_decos:
+                deco.set_outline(drift_color(
+                    self._get_scope_highlight_color(), 110))
+                deco.set_background(self._get_scope_highlight_color())
+                self.editor.decorations.append(deco)
+
+        self._prev_cursor = cursor

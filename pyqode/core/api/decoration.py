@@ -67,8 +67,11 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         :param cursor: The text cursor to test
         :type cursor: QtGui.QTextCursor
         """
-        return self.cursor.selectionStart() <= cursor.position() <= \
-            self.cursor.selectionEnd()
+        start = self.cursor.selectionStart()
+        end = self.cursor.selectionEnd()
+        if cursor.atBlockEnd():
+            end -= 1
+        return start <= cursor.position() <= end
 
     def set_as_bold(self):
         """ Uses bold text """
@@ -100,9 +103,19 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         self.format.setProperty(QtGui.QTextFormat.OutlinePen,
                                 QtGui.QPen(color))
 
+    def select_line(self):
+        """
+        Select the entire line but stops at the last character.
+        :return:
+        """
+        self.cursor.movePosition(self.cursor.StartOfBlock)
+        self.cursor.movePosition(self.cursor.EndOfBlock,
+                                 self.cursor.KeepAnchor)
+
     def set_full_width(self, flag=True, clear=True):
         """
-        Sets full width selection.
+        Enables FullWidthSelection (the selection does not stops at after the
+        character instead it goes up to the right side of the widget).
 
         :param flag: True to use full width selection.
         :type flag: bool

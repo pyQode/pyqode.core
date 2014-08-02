@@ -379,7 +379,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param tooltip: Tooltip text
         """
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
-        self._prev_tooltip_block_nbr = -1
 
     def clear(self):
         super().clear()
@@ -674,7 +673,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor = self.cursorForPosition(event.pos())
         for sel in self.decorations:
             if sel.cursor.blockNumber() == cursor.blockNumber():
-                sel.signals.clicked.emit(sel)
+                if sel.contains_cursor(cursor):
+                    sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             super().mousePressEvent(event)
@@ -710,22 +710,31 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
         """
+        def next_visible_block(block):
+            while not block.isVisible():
+                block = block.next()
+            return block
+
         cursor = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
         block_found = False
         for sel in self.decorations:
-            if (sel.cursor.blockNumber() == cursor.blockNumber() and
-                    sel.tooltip):
-                if self._prev_tooltip_block_nbr != cursor.blockNumber():
+            if sel.contains_cursor(cursor) and sel.tooltip:
+                if (self._prev_tooltip_block_nbr != cursor.blockNumber() or
+                        not QtWidgets.QToolTip.isVisible()):
+                    pos = event.pos()
+                    # add left margin
+                    pos.setX(pos.x() + self.panels.margin_size())
+                    # add top margin
+                    pos.setY(pos.y() + self.panels.margin_size(0))
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
-                        self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
-                self._prev_tooltip_block_nbr = cursor.blockNumber()
+                        self.mapToGlobal(pos), sel.tooltip[0: 1024])
+                    self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
-        if not block_found:
-            if self._prev_tooltip_block_nbr != -1:
-                QtWidgets.QToolTip.hideText()
+        if not block_found and self._prev_tooltip_block_nbr != -1:
+            QtWidgets.QToolTip.hideText()
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
         self.mouse_moved.emit(event)

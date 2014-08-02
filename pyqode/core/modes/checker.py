@@ -142,7 +142,7 @@ class CheckerMode(Mode, QtCore.QObject):
     """
     def __init__(self, worker,
                  delay=500,
-                 show_tooltip=False):
+                 show_tooltip=True):
         """
         :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
@@ -224,7 +224,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 message.decoration = TextDecoration(
                     self.editor.textCursor(), start_line=message.line,
                     tooltip=tooltip, draw_order=3)
-                message.decoration.set_full_width(True)
+                message.decoration.select_line()
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
                 self.editor.decorations.append(message.decoration)

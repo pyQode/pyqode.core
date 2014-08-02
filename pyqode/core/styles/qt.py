@@ -10,7 +10,7 @@ class QtStyle(Style):
     default_style = ''
 
     background_color = '#ffffff'
-    highlight_color = '#eeeeee'
+    highlight_color = '#c7e7f9'
 
     styles = {
         Comment.Multiline: 'italic #008000',

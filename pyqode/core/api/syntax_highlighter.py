@@ -192,6 +192,12 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         else:
             mode.background = color_scheme.highlight
             mode.refresh()
+        try:
+            mode = self.editor.panels.get('FoldingPanel')
+        except KeyError:
+            pass
+        else:
+            mode.refresh_decorations(force=True)
         self.editor._reset_stylesheet()  # pylint: disable=protected-access
 
 
@@ -229,10 +235,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
         delta_abs = abs(fold_level - prev_fold_level)
         if delta_abs > 1:
-            _logger().warning('inconsistent fold level, difference between '
-                              'consecutive blocks cannot be greater than 1 '
-                              '(%d)', delta_abs)
             if fold_level > prev_fold_level:
+                _logger().debug(
+                    '(l%d) inconsistent fold level, difference between '
+                    'consecutive blocks cannot be greater than 1 (%d).',
+                    current_block.blockNumber() + 1, delta_abs)
                 fold_level = prev_fold_level + 1
 
         # update block fold level
