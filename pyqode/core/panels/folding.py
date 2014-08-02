@@ -312,6 +312,7 @@ class FoldingPanel(Panel):
         deco.set_outline(drift_color(
             self._get_scope_highlight_color(), 110))
         deco.set_background(self._get_scope_highlight_color())
+        deco.set_foreground(QtGui.QColor('#808080'))
         self._block_decos.append(deco)
         self.editor.decorations.append(deco)
 
