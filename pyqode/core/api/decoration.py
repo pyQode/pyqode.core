@@ -105,10 +105,17 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
 
     def select_line(self):
         """
-        Select the entire line but stops at the last character.
+        Select the entire line but starts at the first non whitespace character
+        and stops at the non-whitespace character.
         :return:
         """
         self.cursor.movePosition(self.cursor.StartOfBlock)
+        text = self.cursor.block().text()
+        lindent = len(text) - len(text.lstrip())
+        rindent = len(text) - len(text.rstrip())
+        print(lindent, rindent)
+        print(len(text) - lindent - rindent)
+        self.cursor.setPosition(self.cursor.block().position() + lindent)
         self.cursor.movePosition(self.cursor.EndOfBlock,
                                  self.cursor.KeepAnchor)
 
