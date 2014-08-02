@@ -3,6 +3,7 @@ This module contains utility functions to manipulate the fold
 tree.
 
 """
+import logging
 import sys
 from pyqode.core.api.utils import TextBlockHelper
 
@@ -29,7 +30,119 @@ def print_tree(editor, file=sys.stdout, print_blocks=False):
         block = block.next()
 
 
-class Scope:
+def _logger():
+    return logging.getLogger(__name__)
+
+
+class FoldDetector:
+    """
+    Base class for fold detectors.
+
+    A fold detector takes care of detecting the text blocks fold levels that
+    are used by the FoldingPanel to render the document outline.
+
+    To use a FoldDetector, simply set it on a syntax_highlighter::
+
+        editor.syntax_highlighter.fold_detector = my_fold_detector
+    """
+    def __init__(self):
+        #: Reference to the parent editor, automatically set by the syntax
+        #: highlighter before process any block.
+        self.editor = None
+
+    def process_block(self, current_block, previous_block, text):
+        """
+        Processes a block and sets up its folding infos.
+
+        This method call ``detect_fold_level`` and handles most of the tricky
+        corner cases so that all you have to do is focus on getting the proper
+        fold level foreach meaningfull block, skipping the blank ones
+
+        :param current_block: current block to process
+        :param previous_block: previous block
+        :param text: current block text
+        """
+        limit = sys.maxsize
+        prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
+        if text.strip() == '':
+            # blank line always have the same level as the previous line,
+            fold_level = prev_fold_level
+        else:
+            fold_level = self.detect_fold_level(
+                previous_block, current_block)
+            if fold_level > limit:
+                fold_level = limit
+
+        if fold_level > prev_fold_level:
+            # apply on previous blank lines
+            block = current_block.previous()
+            while block.isValid() and block.text().strip() == '':
+                TextBlockHelper.set_fold_lvl(block, fold_level)
+                block = block.previous()
+            TextBlockHelper.set_fold_trigger(
+                block, True)
+
+        delta_abs = abs(fold_level - prev_fold_level)
+        if delta_abs > 1:
+            if fold_level > prev_fold_level:
+                _logger().debug(
+                    '(l%d) inconsistent fold level, difference between '
+                    'consecutive blocks cannot be greater than 1 (%d).',
+                    current_block.blockNumber() + 1, delta_abs)
+                fold_level = prev_fold_level + 1
+
+        # update block fold level
+        if text.strip():
+            TextBlockHelper.set_fold_trigger(
+                previous_block, fold_level > prev_fold_level)
+        TextBlockHelper.set_fold_lvl(current_block, fold_level)
+
+        # user pressed enter at the beginning of a fold trigger line
+        # the previous blank line will keep the trigger state and the new line
+        # (which actually contains the trigger) must use the prev state (
+        # and prev state must then be reset).
+        prev = current_block.previous()  # real prev block (may be blank)
+        if (prev and prev.isValid() and prev.text().strip() == '' and
+                TextBlockHelper.is_fold_trigger(prev)):
+            # prev line has the correct trigger fold state
+            TextBlockHelper.set_fold_trigger_state(
+                current_block, TextBlockHelper.get_fold_trigger_state(
+                    prev))
+            # make empty line not a trigger
+            TextBlockHelper.set_fold_trigger(prev, False)
+            TextBlockHelper.set_fold_trigger_state(prev, False)
+
+    def detect_fold_level(self, prev_block, block):
+        """
+        Detects the block fold level.
+
+        The default implementation is based on the block **indentation**.
+
+        .. note:: Blocks fold level must be contiguous, there cannot be
+            a difference greater than 1 between two successive block fold
+            levels.
+
+        :param prev_block: first previous **non-blank** block or None if this
+            is the first line of the document
+        :param block: The block to process.
+        :return: Fold level
+        """
+        raise NotImplemented
+
+
+class IndentFoldDetector(FoldDetector):
+    """
+    Simple fold detector based on the line indentation level
+    """
+
+    def detect_fold_level(self, prev_block, block):
+        text = block.text()
+        # round down to previous indentation guide to ensure contiguous block
+        # fold level evolution.
+        return (len(text) - len(text.lstrip())) // self.editor.tab_length
+
+
+class FoldScope:
     """
     Utility class for manipulating foldable code scope (fold/unfold,
     get range, child and parent scopes and so on).
@@ -165,14 +278,14 @@ class Scope:
             lvl = TextBlockHelper.get_fold_lvl(block)
             trigger = TextBlockHelper.is_fold_trigger(block)
             if lvl == ref_lvl and trigger:
-                yield Scope(block)
+                yield FoldScope(block)
             block = block.next()
 
     def parent(self):
         """
         Return the parent scope.
 
-        :return: Scope or None
+        :return: FoldScope or None
         """
         if TextBlockHelper.get_fold_lvl(self._trigger) > 0:
             block = self._trigger.previous()
@@ -181,7 +294,7 @@ class Scope:
                     (not TextBlockHelper.is_fold_trigger(block) or
                     TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
                 block = block.previous()
-            return Scope(block)
+            return FoldScope(block)
         return None
 
     def text(self, max_lines=sys.maxsize):

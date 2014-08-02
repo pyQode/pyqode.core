@@ -7,7 +7,8 @@ This module contains core code edits:
 
 """
 import sys
-from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter
+from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
+    IndentFoldDetector
 from pyqode.core import panels
 from pyqode.core import modes
 
@@ -89,3 +90,5 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+
+        self.syntax_highlighter.fold_detector = IndentFoldDetector()

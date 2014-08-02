@@ -5,7 +5,7 @@ This module contains the marker panel
 import logging
 import os
 from pyqode.core.api import TextBlockHelper, folding, TextDecoration
-from pyqode.core.api.folding import Scope
+from pyqode.core.api.folding import FoldScope
 from pyqode.core.api.panel import Panel
 from pyqode.core.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api.utils import TextHelper, drift_color
@@ -108,7 +108,7 @@ class FoldingPanel(Panel):
         :param block: Current block.
         :param painter: QPainter
         """
-        r = folding.Scope(block)
+        r = folding.FoldScope(block)
         th = TextHelper(self.editor)
         start, end = r.get_range(ignore_blank_lines=True)
         if start > 0:
@@ -260,7 +260,7 @@ class FoldingPanel(Panel):
             self._scope_decos.append(d)
 
     def _highlight_surrounding_scopes(self, block):
-        scope = Scope(block)
+        scope = FoldScope(block)
         if (self._current_scope is None or
                 self._current_scope.get_range() != scope.get_range()):
             self._current_scope = scope
@@ -323,7 +323,7 @@ class FoldingPanel(Panel):
         """
         if not TextBlockHelper.is_fold_trigger(block):
             return
-        region = Scope(block)
+        region = FoldScope(block)
         if region.collapsed:
             region.unfold()
             deco = None
@@ -369,7 +369,7 @@ class FoldingPanel(Panel):
 
     def _select_scope(self, block, c):
         start_block = block
-        _, end = Scope(block).get_range()
+        _, end = FoldScope(block).get_range()
         end_block = self.editor.document().findBlockByNumber(end)
         c.beginEditBlock()
         c.setPosition(start_block.position())
@@ -425,7 +425,7 @@ class FoldingPanel(Panel):
                 if lvl == 0:
                     self._show_previous_blank_lines(block)
                 TextBlockHelper.set_fold_trigger_state(block, True)
-                self._add_fold_decoration(block, Scope(block))
+                self._add_fold_decoration(block, FoldScope(block))
             block.setVisible(lvl == 0)
             if block == last and block.text().strip() == '':
                 block.setVisible(True)

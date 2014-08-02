@@ -214,54 +214,18 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             color_scheme = ColorScheme('qt')
         self._color_scheme = color_scheme
         self._spaces_ptrn = QtCore.QRegExp(r'\s+')
+        #: Fold detector. Set it to a valid FoldDetector to get code folding
+        #: to work. Default is None
+        self.fold_detector = None
 
-    def _do_code_folding_detection(self, current_block, previous_block, text):
-        prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
-        if text.strip() == '':
-            # blank line always have the same level as the previous line,
-            fold_level = prev_fold_level
-        else:
-            fold_level = self.detect_fold_level(
-                previous_block, current_block)
-
-        if fold_level > prev_fold_level:
-            # apply on previous blank lines
-            block = current_block.previous()
-            while block.isValid() and block.text().strip() == '':
-                TextBlockHelper.set_fold_lvl(block, fold_level)
-                block = block.previous()
-            TextBlockHelper.set_fold_trigger(
-                block, True)
-
-        delta_abs = abs(fold_level - prev_fold_level)
-        if delta_abs > 1:
-            if fold_level > prev_fold_level:
-                _logger().debug(
-                    '(l%d) inconsistent fold level, difference between '
-                    'consecutive blocks cannot be greater than 1 (%d).',
-                    current_block.blockNumber() + 1, delta_abs)
-                fold_level = prev_fold_level + 1
-
-        # update block fold level
-        if text.strip():
-            TextBlockHelper.set_fold_trigger(
-                previous_block, fold_level > prev_fold_level)
-        TextBlockHelper.set_fold_lvl(current_block, fold_level)
-
-        # user pressed enter at the beginning of a fold trigger line
-        # the previous blank line will keep the trigger state and the new line
-        # (which actually contains the trigger) must use the prev state (
-        # and prev state must then be reset).
-        prev = current_block.previous()  # real prev block (may be blank)
-        if (prev and prev.isValid() and prev.text().strip() == '' and
-                TextBlockHelper.is_fold_trigger(prev)):
-            # prev line has the correct trigger fold state
-            TextBlockHelper.set_fold_trigger_state(
-                current_block, TextBlockHelper.get_fold_trigger_state(
-                    prev))
-            # make empty line not a trigger
-            TextBlockHelper.set_fold_trigger(prev, False)
-            TextBlockHelper.set_fold_trigger_state(prev, False)
+    def _find_prev_non_blank_block(self, current_block):
+        previous_block = (current_block.previous()
+                          if current_block.blockNumber() else None)
+        # find the previous non-blank block
+        while (previous_block and previous_block.blockNumber() and
+                       previous_block.text().strip() == ''):
+            previous_block = previous_block.previous()
+        return previous_block
 
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
@@ -270,18 +234,13 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         # self.block_highlight_started.emit(self, text)
         # # # setup user data
         current_block = self.currentBlock()
-        previous_block = (current_block.previous()
-                          if current_block.blockNumber() else None)
-        # find the previous non-blank block
-        while (previous_block and previous_block.blockNumber() and
-                previous_block.text().strip() == ''):
-            previous_block = previous_block.previous()
-
+        previous_block = self._find_prev_non_blank_block(current_block)
         if self.editor:
             self.highlight_block(text, current_block)
-            self._do_code_folding_detection(
-                current_block, previous_block, text)
-            # todo make whitespaces highlighting a base feature.
+            if self.fold_detector is not None:
+                self.fold_detector.editor = self.editor
+                self.fold_detector.process_block(
+                    current_block, previous_block, text)
 
     def highlight_block(self, text, block):
         """
@@ -291,25 +250,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         :param block: current block
         """
         raise NotImplementedError()
-
-    def detect_fold_level(self, prev_block, block):
-        """
-        Detects the block fold level.
-
-        The default implementation is based on the block **indentation**.
-
-        .. note:: Blocks fold level must be contiguous, there cannot be
-            a difference greater than 1 between two successive block fold
-            levels.
-
-        :param prev_block: Previous block or None (first line)
-        :param block: The block to process.
-        :return: Fold level
-        """
-        text = block.text()
-        # round down to previous indentation guide to ensure contiguous block
-        # fold level evolution.
-        return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
     def rehighlight(self):
         """
