@@ -48,6 +48,32 @@ class FoldingPanel(Panel):
         self._mouse_over_line = None
         self._current_scope = None
         self._prev_cursor = None
+        self.context_menu = None
+        self.action_collapse = None
+        self.action_expand = None
+        self.action_collapse_all = None
+        self.action_expand_all = None
+
+    def on_install(self, editor):
+        super().on_install(editor)
+        self.context_menu = QtWidgets.QMenu('Folding', self.editor)
+        action = self.action_collapse = QtWidgets.QAction(
+            'Collapse', self.context_menu)
+        action.triggered.connect(self._on_action_toggle)
+        self.context_menu.addAction(action)
+        action = self.action_expand = QtWidgets.QAction('Expand', self.context_menu)
+        action.triggered.connect(self._on_action_toggle)
+        self.context_menu.addAction(action)
+        self.context_menu.addSeparator()
+        action = self.action_collapse_all = QtWidgets.QAction(
+            'Collapse all', self.context_menu)
+        action.triggered.connect(self._on_action_collapse_all_triggered)
+        self.context_menu.addAction(action)
+        action = self.action_expand_all = QtWidgets.QAction(
+            'Expand all', self.context_menu)
+        action.triggered.connect(self._on_action_expand_all_triggered)
+        self.context_menu.addAction(action)
+        self.editor.add_menu(self.context_menu)
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
@@ -181,7 +207,8 @@ class FoldingPanel(Panel):
         self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
                                    opt, painter, self)
 
-    def _find_parent_scope(self, block, original):
+    def find_parent_scope(self, block):
+        original = block
         if not TextBlockHelper.is_fold_trigger(block):
             # search level of next non blank line
             while block.text().strip() == '' and block.isValid():
@@ -189,9 +216,8 @@ class FoldingPanel(Panel):
             ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
             block = original
             while (block.blockNumber() and
-                       (not TextBlockHelper.is_fold_trigger(block) or
-                                TextBlockHelper.get_fold_lvl(
-                                        block) > ref_lvl)):
+                   (not TextBlockHelper.is_fold_trigger(block) or
+                    TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
                 block = block.previous()
         return block
 
@@ -219,6 +245,7 @@ class FoldingPanel(Panel):
         if start != 1:
             d = TextDecoration(tc, start_line=1, end_line=start)
             d.set_full_width(True, clear=False)
+            d.draw_order = 1
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -227,6 +254,7 @@ class FoldingPanel(Panel):
         if start_line < end_line:
             d = TextDecoration(tc, start_line=start_line, end_line=end_line)
             d.set_full_width(True, clear=False)
+            d.draw_order = 1
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -254,8 +282,9 @@ class FoldingPanel(Panel):
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
         if line:
-            original = block = self.editor.document().findBlockByNumber(line - 1)
-            block = self._find_parent_scope(block, original)
+
+            block = self.find_parent_scope(
+                self.editor.document().findBlockByNumber(line - 1))
             if TextBlockHelper.is_fold_trigger(block):
                 self._mouse_over_line = block.blockNumber() + 1
                 self._highlight_surrounding_scopes(block)
@@ -273,7 +302,27 @@ class FoldingPanel(Panel):
         self._current_scope = None
         self.editor.repaint()
 
-    def _toggle_trigger(self, block):
+    def _add_fold_decoration(self, block, region):
+        deco = TextDecoration(block)
+        deco.signals.clicked.connect(self._on_fold_deco_clicked)
+        deco.tooltip = region.text(max_lines=25)
+        deco.draw_order = 2
+        deco.block = block
+        deco.select_line()
+        deco.set_outline(drift_color(
+            self._get_scope_highlight_color(), 110))
+        deco.set_background(self._get_scope_highlight_color())
+        self._block_decos.append(deco)
+        self.editor.decorations.append(deco)
+
+    def toggle_fold_trigger(self, block):
+        """
+        Toggle a fold trigger block (expand or collapse it).
+
+        :param block: The QTextBlock to expand/collapse
+        """
+        if not TextBlockHelper.is_fold_trigger(block):
+            return
         region = Scope(block)
         if region.collapsed:
             region.unfold()
@@ -290,17 +339,7 @@ class FoldingPanel(Panel):
         else:
             region.fold()
             # add folded deco
-            deco = TextDecoration(block)
-            deco.signals.clicked.connect(self._on_fold_deco_clicked)
-            deco.tooltip = region.text(max_lines=25)
-            deco.draw_order = 1
-            deco.block = block
-            deco.select_line()
-            deco.set_outline(drift_color(
-                self._get_scope_highlight_color(), 110))
-            deco.set_background(self._get_scope_highlight_color())
-            self._block_decos.append(deco)
-            self.editor.decorations.append(deco)
+            self._add_fold_decoration(block, region)
             self._clear_scope_decos()
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
@@ -310,22 +349,22 @@ class FoldingPanel(Panel):
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line - 1)
-            self._toggle_trigger(block)
+            self.toggle_fold_trigger(block)
 
     def _on_fold_deco_clicked(self, deco):
-        self._toggle_trigger(deco.block)
+        self.toggle_fold_trigger(deco.block)
 
     def on_state_changed(self, state):
         """
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
         if state:
-            self.editor.cursorPositionChanged.connect(
-                self.refresh_decorations)
+            # self.editor.cursorPositionChanged.connect(
+            #     self.refresh_decorations)
             self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            self.editor.cursorPositionChanged.disconnect(
-                self.refresh_decorations)
+            # self.editor.cursorPositionChanged.disconnect(
+            #     self.refresh_decorations)
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _select_scope(self, block, c):
@@ -352,6 +391,7 @@ class FoldingPanel(Panel):
 
     def refresh_decorations(self, force=False):
         cursor = self.editor.textCursor()
+        # todo, see how it works with the if in big files after a collapse all
         if (self._prev_cursor is None or force or
                 self._prev_cursor.blockNumber() != cursor.blockNumber()):
             for deco in self._block_decos:
@@ -362,3 +402,56 @@ class FoldingPanel(Panel):
                 deco.set_background(self._get_scope_highlight_color())
                 self.editor.decorations.append(deco)
         self._prev_cursor = cursor
+
+    def _show_previous_blank_lines(self, block):
+        # set previous blank lines visibles
+        pblock = block.previous()
+        while (pblock.text().strip() == '' and
+                       pblock.blockNumber() >= 0):
+            pblock.setVisible(True)
+            pblock = pblock.previous()
+
+    def collapse_all(self):
+        """
+        Collapses all triggers and makes all blocks with fold level > 0
+        invisible.
+        """
+        block = self.editor.document().firstBlock()
+        last = self.editor.document().lastBlock()
+        while block.isValid():
+            lvl = TextBlockHelper.get_fold_lvl(block)
+            trigger = TextBlockHelper.is_fold_trigger(block)
+            if trigger:
+                if lvl == 0:
+                    self._show_previous_blank_lines(block)
+                TextBlockHelper.set_fold_trigger_state(block, True)
+                self._add_fold_decoration(block, Scope(block))
+            block.setVisible(lvl == 0)
+            if block == last and block.text().strip() == '':
+                block.setVisible(True)
+                self._show_previous_blank_lines(block)
+            block = block.next()
+        TextHelper(self.editor).mark_whole_doc_dirty()
+        self.editor.repaint()
+
+    def expand_all(self):
+        block = self.editor.document().firstBlock()
+        while block.isValid():
+            TextBlockHelper.set_fold_trigger_state(block, False)
+            block.setVisible(True)
+            block = block.next()
+        for deco in self._block_decos:
+            self.editor.decorations.remove(deco)
+        self._block_decos.clear()
+        TextHelper(self.editor).mark_whole_doc_dirty()
+        self.editor.repaint()
+
+    def _on_action_toggle(self):
+        block = self.find_parent_scope(self.editor.textCursor().block())
+        self.toggle_fold_trigger(block)
+
+    def _on_action_collapse_all_triggered(self):
+        self.collapse_all()
+
+    def _on_action_expand_all_triggered(self):
+        self.expand_all()

@@ -108,7 +108,7 @@ class Scope:
         start, end = self.get_range()
         TextBlockHelper.set_fold_trigger_state(self._trigger, True)
         block = self._trigger.next()
-        while block.blockNumber() < end:
+        while block.blockNumber() < end and block.isValid():
             block.setVisible(False)
             if recursively and TextBlockHelper.is_fold_trigger(block):
                 TextBlockHelper.set_fold_trigger_state(self._trigger, True)
