@@ -137,9 +137,14 @@ class FoldingPanel(Panel):
         c = self.get_system_color()
         grad = QtGui.QLinearGradient(rect.topLeft(),
                                      rect.topRight())
-        grad.setColorAt(0, c.lighter(100))
-        grad.setColorAt(1, c.lighter(110))
-        outline = c.darker(110)
+        if sys.platform == 'darwin':
+            grad.setColorAt(0, c.lighter(100))
+            grad.setColorAt(1, c.lighter(110))
+            outline = c.darker(110)
+        else:
+            grad.setColorAt(0, c.lighter(110))
+            grad.setColorAt(1, c.lighter(130))
+            outline = c.darker(100)
         painter.fillRect(rect, grad)
         painter.setPen(QtGui.QPen(outline))
         painter.drawLine(rect.topLeft() +
