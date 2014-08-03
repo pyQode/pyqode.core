@@ -1,6 +1,6 @@
 import logging
 from pygments.styles import get_style_by_name, get_all_styles
-from pygments.token import Token
+from pygments.token import Token, Punctuation
 import sys
 import time
 from pyqode.core.api.utils import TextHelper, TextBlockHelper
@@ -9,20 +9,40 @@ from pyqode.core.qt import QtGui, QtCore, QtWidgets
 
 #: The list of color schemes keys
 COLOR_SCHEME_KEYS = (
+    # editor background
     "background",
+    # highlight color (used for caret line)
     "highlight",
+    # normal text
     "normal",
+    # any keyword
     "keyword",
+    # reserved keyword
+    "keyword_reserved",
+    # any builtin name
     "builtin",
+    # any definition (class or function)
     "definition",
+    # any comment
     "comment",
+    # any string
     "string",
+    # any docstring (python docstring, c++ doxygen comment,...)
     "docstring",
+    # any number
     "number",
+    # any instance variable
     "instance",
+    # whitespace color
     "whitespace",
+    # any tag name (e.g. shinx doctags,...)
     'tag',
-    'self'
+    # self paramter (or this in other languages)
+    'self',
+    # colors of punctuation characters
+    'punctuation',
+    # name or keyword constant
+    'constant'
 )
 #: A sorted list of available pygments styles, for convenience
 PYGMENTS_STYLES = sorted(list(get_all_styles()))
@@ -70,6 +90,7 @@ class ColorScheme:
         # token styles
         token_key_pairs = [
             (Token.Keyword, 'keyword'),
+            (Token.Keyword.Reserved, 'keyword_reserved'),
             (Token.Text, 'normal'),
             (Token.Name.Builtin, 'builtin'),
             (Token.Name.Class, 'definition'),
@@ -81,7 +102,9 @@ class ColorScheme:
             (Token.Text.Whitespace, 'whitespace'),
             (Token.Name.Tag, 'tag'),
             (Token.Name.Builtin.Pseudo, 'self'),
-            (Token.Name.Decorator, 'decorator')
+            (Token.Name.Decorator, 'decorator'),
+            (Punctuation, 'punctuation'),
+            (Token.Name.Constant, 'constant')
         ]
         for token, key in token_key_pairs:
             self.formats[key] = self._get_format_from_style(token, style)
@@ -171,6 +194,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     NORMAL = 0
 
+    WHITESPACES = QtCore.QRegExp(r'\s+')
+
     @property
     def formats(self):
         return self._color_scheme.formats
@@ -213,10 +238,21 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if not color_scheme:
             color_scheme = ColorScheme('qt')
         self._color_scheme = color_scheme
-        self._spaces_ptrn = QtCore.QRegExp(r'\s+')
+        self._spaces_ptrn = QtCore.QRegExp(r'[ \t]+')
         #: Fold detector. Set it to a valid FoldDetector to get code folding
         #: to work. Default is None
         self.fold_detector = None
+
+    def _highlight_whitespaces(self, text):
+        fmt = QtGui.QTextCharFormat()
+        fmt.setForeground(QtGui.QBrush(self.editor.whitespaces_foreground))
+        index = self.WHITESPACES.indexIn(text, 0)
+        while index >= 0:
+            index = self.WHITESPACES.pos(0)
+            length = len(self.WHITESPACES.cap(0))
+            self.setFormat(index, length, self.formats['whitespace'])
+            index = self.WHITESPACES.indexIn(text, index + length)
+
 
     def _find_prev_non_blank_block(self, current_block):
         previous_block = (current_block.previous()
@@ -237,6 +273,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         previous_block = self._find_prev_non_blank_block(current_block)
         if self.editor:
             self.highlight_block(text, current_block)
+            if self.editor.show_whitespaces:
+                self._highlight_whitespaces(text)
             if self.fold_detector is not None:
                 self.fold_detector.editor = self.editor
                 self.fold_detector.process_block(
