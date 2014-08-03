@@ -108,7 +108,6 @@ class EncodingPanel(Panel):
         # binary to recognize the original encoding
         with open(path, 'rb') as file:
             content = str(file.read(16))
-            print(content)
         # set plain text
         self.editor.setPlainText(
             content, self.editor.file.get_mimetype(path),

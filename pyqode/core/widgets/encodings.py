@@ -4,6 +4,10 @@ from pyqode.core.qt import QtCore, QtWidgets
 from pyqode.core.settings import Settings
 
 
+def _logger():
+    return logging.getLogger(__name__)
+
+
 class EncodingsComboBox(QtWidgets.QComboBox):
     """
     This combo box display the list of user preferred encoding.
@@ -48,7 +52,7 @@ class EncodingsComboBox(QtWidgets.QComboBox):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                print('KeyError with encoding:', encoding)
+                _logger().debug('KeyError with encoding:', encoding)
             else:
                 self.addItem('%s (%s)' % (alias, lang))
                 self.setItemData(i, encoding, QtCore.Qt.UserRole)
@@ -108,7 +112,7 @@ class EncodingsMenu(QtWidgets.QMenu):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                print('KeyError with encoding:', encoding)
+                _logger().debug('KeyError with encoding:', encoding)
             else:
                 action = QtWidgets.QAction('%s (%s)' % (alias, lang), self)
                 action.setData(encoding)
