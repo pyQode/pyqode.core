@@ -423,6 +423,7 @@ class FoldingPanel(Panel):
         Collapses all triggers and makes all blocks with fold level > 0
         invisible.
         """
+        self._clear_block_deco()
         block = self.editor.document().firstBlock()
         last = self.editor.document().lastBlock()
         while block.isValid():
@@ -441,15 +442,18 @@ class FoldingPanel(Panel):
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
 
+    def _clear_block_deco(self):
+        for deco in self._block_decos:
+            self.editor.decorations.remove(deco)
+        self._block_decos.clear()
+
     def expand_all(self):
         block = self.editor.document().firstBlock()
         while block.isValid():
             TextBlockHelper.set_fold_trigger_state(block, False)
             block.setVisible(True)
             block = block.next()
-        for deco in self._block_decos:
-            self.editor.decorations.remove(deco)
-        self._block_decos.clear()
+        self._clear_block_deco()
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
 
