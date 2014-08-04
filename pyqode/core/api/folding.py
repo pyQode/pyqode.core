@@ -49,6 +49,9 @@ class FoldDetector:
         #: Reference to the parent editor, automatically set by the syntax
         #: highlighter before process any block.
         self.editor = None
+        #: Fold level limit, any level greater or equal is skipped.
+        #: Default is sys.maxsize (i.e. all levels are accepted)
+        self.limit = sys.maxsize
 
     def process_block(self, current_block, previous_block, text):
         """
@@ -62,7 +65,6 @@ class FoldDetector:
         :param previous_block: previous block
         :param text: current block text
         """
-        limit = sys.maxsize
         prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
         if text.strip() == '':
             # blank line always have the same level as the previous line,
@@ -70,8 +72,8 @@ class FoldDetector:
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
-            if fold_level > limit:
-                fold_level = limit
+            if fold_level > self.limit:
+                fold_level = self.limit
 
         if fold_level > prev_fold_level:
             # apply on previous blank lines
