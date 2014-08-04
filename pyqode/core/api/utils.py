@@ -57,7 +57,7 @@ def drift_color(base_color, factor=110):
         return base_color.darker(factor)
     else:
         if base_color == QtGui.QColor('#000000'):
-            return QtGui.QColor('#202020')
+            return drift_color(QtGui.QColor('#101010'), factor + 20)
         else:
             return base_color.lighter(factor + 10)
 
@@ -913,10 +913,15 @@ def keep_tc_pos(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         """ Decorator """
+        from pyqode.core.api import CodeEdit
+        from pyqode.core.qt import QtWidgets
+        sb = editor.verticalScrollBar()
+        spos = sb.sliderPosition()
         pos = editor.textCursor().position()
         retval = func(editor, *args, **kwds)
         text_cursor = editor.textCursor()
         text_cursor.setPosition(pos)
         editor.setTextCursor(text_cursor)
+        sb.setSliderPosition(spos)
         return retval
     return wrapper

@@ -296,6 +296,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
+
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """

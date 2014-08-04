@@ -9,7 +9,7 @@ from pyqode.core.api import TextBlockHelper, folding, TextDecoration
 from pyqode.core.api.folding import FoldScope
 from pyqode.core.api.panel import Panel
 from pyqode.core.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api.utils import TextHelper, drift_color
+from pyqode.core.api.utils import TextHelper, drift_color, keep_tc_pos
 
 
 def _logger():
@@ -54,6 +54,7 @@ class FoldingPanel(Panel):
         self.action_expand = None
         self.action_collapse_all = None
         self.action_expand_all = None
+        self._original_background = None
 
     def on_install(self, editor):
         super().on_install(editor)
@@ -227,54 +228,139 @@ class FoldingPanel(Panel):
                 block = block.previous()
         return block
 
+    @staticmethod
+    @keep_tc_pos
+    def _clean_whitespaces(editor, decos):
+        """
+        Remove eventual spaces introduced when highlighting scope
+        """
+        for deco in decos:
+            txt = deco.cursor.block().text()
+            if txt.strip() == '' and len(txt):
+                deco.cursor.movePosition(deco.cursor.StartOfBlock)
+                deco.cursor.movePosition(deco.cursor.EndOfBlock,
+                                         deco.cursor.KeepAnchor)
+                deco.cursor.removeSelectedText()
+                editor.setTextCursor(deco.cursor)
+
     def _clear_scope_decos(self):
+        self._clean_whitespaces(self.editor, self._scope_decos)
         for deco in self._scope_decos:
             self.editor.decorations.remove(deco)
         self._scope_decos[:] = []
 
     def _get_scope_highlight_color(self):
         color = self.editor.background
-        if color.lightness() > 128:
-            return drift_color(self.editor.background, 105)
+        if color.lightness() < 128:
+             color = drift_color(color, 130)
         else:
-            return drift_color(self.editor.background, 130)
+             color = drift_color(color, 110)
+        return color
 
-    def _add_scope_decoration(self, start, end):
+    def _add_scope_deco(self, start, end, parent_start, parent_end, base_color,
+                        factor):
+        color = drift_color(base_color, factor=factor)
+        # upper part
+        d = TextDecoration(self.editor.document(),
+                           start_line=parent_start, end_line=start)
+        d.set_full_width(True, clear=False)
+        d.draw_order = 1
+        d.set_background(color)
+        self.editor.decorations.append(d)
+        self._scope_decos.append(d)
+        # lower part
+        d = TextDecoration(self.editor.document(),
+                           start_line=end, end_line=parent_end + 1)
+        d.set_full_width(True, clear=False)
+        d.draw_order = 1
+        d.set_background(color)
+        self.editor.decorations.append(d)
+        self._scope_decos.append(d)
+
+    def _get_scope_trigger_indent(self, block):
+        pblock = block
+        rlvl = TextBlockHelper.get_fold_lvl(block)
+        lvl = TextBlockHelper.get_fold_lvl(pblock)
+        while pblock.isValid() and TextBlockHelper.get_fold_lvl(
+                pblock) == rlvl:
+            lvl = TextBlockHelper.get_fold_lvl(pblock)
+            pblock = pblock.previous()
+        pblock = pblock.next()
+        if TextBlockHelper.is_fold_trigger(pblock) and pblock != block:
+            pblock = pblock.next()
+        indent = TextHelper(self.editor).line_indent(pblock)
+        return indent
+
+    @staticmethod
+    @keep_tc_pos
+    def _replace_blank_lines(editor, block, indent, scope_end):
+        nblock = block
+        while nblock.blockNumber() < scope_end:
+            l = len(nblock.text())
+            if l < indent and nblock.text().strip() == '':
+                tc = editor.textCursor()
+                tc.setPosition(nblock.position())
+                tc.insertText((indent - l) * ' ')
+                editor.setTextCursor(tc)
+            nblock = nblock.next()
+        tc = editor.textCursor()
+
+    def _add_scope_decorations(self, block, start, end):
         """
         Show a scope decoration on the editor widget
 
         :param start: Start line
         :param end: End line
         """
-        color = self._get_scope_highlight_color()
-        tc = self.editor.textCursor()
-        if start != 1:
-            d = TextDecoration(tc, start_line=1, end_line=start)
-            d.set_full_width(True, clear=False)
-            d.draw_order = 1
-            d.set_background(color)
-            self.editor.decorations.append(d)
-            self._scope_decos.append(d)
-        start_line= end + 1
-        end_line= self.editor.document().blockCount()
-        if start_line < end_line:
-            d = TextDecoration(tc, start_line=start_line, end_line=end_line)
-            d.set_full_width(True, clear=False)
-            d.draw_order = 1
-            d.set_background(color)
-            self.editor.decorations.append(d)
-            self._scope_decos.append(d)
+        scope_end = end
+        parent = FoldScope(block).parent()
+        base_color = self._get_scope_highlight_color()
+        factor_step = 5
+        if base_color.lightness() < 128:
+            factor_step = 30
+        factor = 100
+        while parent:
+            # highlight parent scope
+            parent_start, parent_end= parent.get_range()
+            self._add_scope_deco(
+                start, end + 1, parent_start, parent_end, base_color, factor)
+            # next parent scope
+            start = parent_start
+            end = parent_end
+            parent = parent.parent()
+            factor += factor_step
+        # global scope
+        parent_start = 1
+        parent_end = self.editor.document().blockCount()
+        self._add_scope_deco(
+            start, end + 1, parent_start, parent_end, base_color,
+            factor + factor_step)
+        # current block (left and right)
+        # find indent, the indent is the one from the first line in the same
+        # fold level
+        indent = self._get_scope_trigger_indent(block)
+        if indent:
+            self._replace_blank_lines(self.editor, block, indent, scope_end)
+            while block.blockNumber() < scope_end:
+                d = TextDecoration(block, start_pos=block.position(),
+                                   end_pos=block.position() + indent)
+                d.draw_order = 1
+                d.set_background(base_color)
+                self.editor.decorations.append(d)
+                self._scope_decos.append(d)
+                block = block.next()
 
     def _highlight_surrounding_scopes(self, block):
         scope = FoldScope(block)
         if (self._current_scope is None or
                 self._current_scope.get_range() != scope.get_range()):
+            color = self._get_scope_highlight_color()
             self._current_scope = scope
             self._clear_scope_decos()
             # highlight surrounding parent scopes with a darker color
             start, end = scope.get_range()
             if not TextBlockHelper.get_fold_trigger_state(block):
-                self._add_scope_decoration(start, end)
+                self._add_scope_decorations(block, start, end)
 
     def mouseMoveEvent(self, event):
         """
@@ -294,6 +380,7 @@ class FoldingPanel(Panel):
             if TextBlockHelper.is_fold_trigger(block):
                 self._mouse_over_line = block.blockNumber() + 1
                 self._highlight_surrounding_scopes(block)
+                self._highight_block = block
             else:
                 self._mouse_over_line = None
             self._highlight_active_indicator()
@@ -342,7 +429,8 @@ class FoldingPanel(Panel):
                 self.editor.decorations.remove(deco)
                 del deco
             if self._mouse_over_line:
-                self._add_scope_decoration(*region.get_range())
+                self._add_scope_decorations(
+                    region._trigger, *region.get_range())
         else:
             region.fold()
             # add folded deco
@@ -366,12 +454,8 @@ class FoldingPanel(Panel):
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
         if state:
-            # self.editor.cursorPositionChanged.connect(
-            #     self.refresh_decorations)
             self.editor.key_pressed.connect(self._on_key_pressed)
         else:
-            # self.editor.cursorPositionChanged.disconnect(
-            #     self.refresh_decorations)
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _select_scope(self, block, c):
