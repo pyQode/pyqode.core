@@ -98,9 +98,13 @@ class SymbolMatcherMode(Mode):
         block = cursor.block()
         data = get_block_symbol_data(block)
         mapping = {}
+        methods = [self._match_parentheses,
+                   self._match_square_brackets,
+                   self._match_braces]
         for i in range(3):
-            mapping[i] = data[i]
-        self._match_braces(mapping[symbol_type], block.position())
+            mapping[i] = (methods[i], data[i])
+        m, d = mapping[symbol_type]
+        m(d, block.position())
         for deco in self._decorations:
             if deco.character == character:
                 retval = deco.line, deco.column
