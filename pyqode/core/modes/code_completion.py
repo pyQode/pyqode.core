@@ -78,15 +78,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Returns the current completion prefix
         """
-        prefix = self._helper.word_under_cursor().selectedText()
-        if prefix == "":
-            try:
-                cursor = self._helper.word_under_cursor(select_whole_word=True)
-                prefix = cursor.selectedText()[0]
-            except IndexError:
-                pass
-        return prefix.strip()
-
+        return self._helper.word_under_cursor(
+            select_whole_word=False).selectedText().strip()
     def __init__(self):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
@@ -106,6 +99,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._case_sensitive = None
         self._data = None
         self._completer = None
+        self._col = 0
         self._init_settings()
 
     def _init_settings(self):
@@ -119,6 +113,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
+        self._col = self.editor.textCursor().positionInBlock() - len(self.completion_prefix)
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
@@ -210,9 +205,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 event.key() == QtCore.Qt.Key_Right or
                 event.key() == QtCore.Qt.Key_Up or
                 event.key() == QtCore.Qt.Key_Down or
-                event.key() == QtCore.Qt.Key_Space or
-                event.key() == QtCore.Qt.Key_End or
-                event.key() == QtCore.Qt.Key_Home)
+                event.key() == QtCore.Qt.Key_Space)
 
     @staticmethod
     def _is_end_of_word_char(event, is_printable, symbols, seps):
@@ -225,8 +218,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _update_prefix(self, event, is_end_of_word, is_navigation_key):
         self._completer.setCompletionPrefix(self.completion_prefix)
         cnt = self._completer.completionCount()
-        if (not cnt or (self.completion_prefix == "" and is_navigation_key) or
+        n = len(self.editor.textCursor().block().text())
+        c = self.editor.textCursor().positionInBlock()
+        if (not cnt or ((self.completion_prefix == "" and n == 0) and is_navigation_key) or
                 is_end_of_word or
+                c < self._col or
                 (int(event.modifiers()) and
                  event.key() == QtCore.Qt.Key_Backspace)):
             self._hide_popup()
@@ -235,6 +231,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _on_key_released(self, event):
         if self._is_shortcut(event):
+            return
+        if (event.key() == QtCore.Qt.Key_Home or
+            event.key() == QtCore.Qt.Key_End):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
@@ -263,7 +262,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 # trigger length
                 if not self._completer.popup().isVisible():
                     prefix_len = len(self.completion_prefix)
-                    if prefix_len == self._trigger_len:
+                    if prefix_len >= self._trigger_len:
                         _logger().debug("cc: Len trigger")
                         self.request_completion()
                         return
@@ -326,6 +325,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               event.key() == QtCore.Qt.Key_Backtab):
             self._hide_popup()
             event.accept()
+        elif event.key() == QtCore.Qt.Key_Home:
+            self._show_popup(index=0)
+            event.accept()
+        elif event.key() == QtCore.Qt.Key_End:
+            self._show_popup(index=self._completer.completionCount() - 1)
+            event.accept()
 
     def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
@@ -334,7 +339,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._job_runner.cancel_requests()
         QtWidgets.QToolTip.hideText()
 
-    def _show_popup(self):
+    def _show_popup(self, index=0):
         cnt = self._completer.completionCount()
         full_prefix = self._helper.word_under_cursor(
             select_whole_word=True).selectedText()
@@ -361,10 +366,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                 width)
             # show the completion list
             if self.editor.isVisible():
-                self._on_focus_in(None)
+                if not self._completer.popup().isVisible():
+                    self._on_focus_in(None)
                 self._completer.complete(cursor_rec)
                 self._completer.popup().setCurrentIndex(
-                    self._completer.completionModel().index(0, 0))
+                    self._completer.completionModel().index(index, 0))
             else:
                 _logger().debug('cannot show popup, editor is unvisible')
 
