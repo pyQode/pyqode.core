@@ -681,24 +681,25 @@ class TextHelper:
     def is_comment_or_string(self, cursor_or_block, formats=None):
         if formats is None:
             formats = ["comment", "string", "docstring"]
+        layout = None
+        pos = 0
         if isinstance(cursor_or_block, QtGui.QTextCursor):
-            pos = cursor_or_block.position() - cursor_or_block.block(
-                ).position()
-            additional_formats = cursor_or_block.block().layout(
-                ).additionalFormats()
+            b = cursor_or_block.block()
+            pos = cursor_or_block.position() - b.position()
+            layout = cursor_or_block.block().layout()
         elif isinstance(cursor_or_block, QtGui.QTextBlock):
             pos = len(cursor_or_block.text()) - 1
-            additional_formats = cursor_or_block.layout().additionalFormats()
-        else:
-            additional_formats = []
-        sh = self._editor.syntax_highlighter
-        if sh:
-            ref_formats = sh.color_scheme.formats
-            for r in additional_formats:
-                if pos >= r.start and pos <= (r.start + r.length):
-                    for fmt_type in formats:
-                        if ref_formats[fmt_type] == r.format:
-                            return True
+            layout = cursor_or_block.layout()
+        if layout is not None:
+            additional_formats = layout.additionalFormats()
+            sh = self._editor.syntax_highlighter
+            if sh:
+                ref_formats = sh.color_scheme.formats
+                for r in additional_formats:
+                    if r.start <= pos <= (r.start + r.length):
+                        for fmt_type in formats:
+                            if ref_formats[fmt_type] == r.format:
+                                return True
         return False
 
 
