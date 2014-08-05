@@ -32,7 +32,7 @@ def test_drift_color():
            QtGui.QColor("#262626").name()
 
     assert utils.drift_color(QtGui.QColor("#000000")).name() == \
-           QtGui.QColor("#202020").name()
+           QtGui.QColor("#161616").name()
 
 
 def test_text_style():

@@ -244,7 +244,6 @@ class FoldingPanel(Panel):
                 editor.setTextCursor(deco.cursor)
 
     def _clear_scope_decos(self):
-        self._clean_whitespaces(self.editor, self._scope_decos)
         for deco in self._scope_decos:
             self.editor.decorations.remove(deco)
         self._scope_decos[:] = []
@@ -335,20 +334,6 @@ class FoldingPanel(Panel):
         self._add_scope_deco(
             start, end + 1, parent_start, parent_end, base_color,
             factor + factor_step)
-        # current block (left and right)
-        # find indent, the indent is the one from the first line in the same
-        # fold level
-        indent = self._get_scope_trigger_indent(block)
-        if indent:
-            self._replace_blank_lines(self.editor, block, indent, scope_end)
-            while block.blockNumber() < scope_end:
-                d = TextDecoration(block, start_pos=block.position(),
-                                   end_pos=block.position() + indent)
-                d.draw_order = 1
-                d.set_background(base_color)
-                self.editor.decorations.append(d)
-                self._scope_decos.append(d)
-                block = block.next()
 
     def _highlight_surrounding_scopes(self, block):
         scope = FoldScope(block)
