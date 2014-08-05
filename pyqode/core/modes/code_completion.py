@@ -80,6 +80,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         return self._helper.word_under_cursor(
             select_whole_word=False).selectedText().strip()
+
     def __init__(self):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
@@ -126,7 +127,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
                                       helper.current_line_nbr(),
-                                      helper.current_column_nbr(),
+                                      helper.current_column_nbr() -
+                                      len(self.completion_prefix),
                                       self.editor.file.path,
                                       self.editor.file.encoding,
                                       self.completion_prefix)
@@ -243,7 +245,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self._completer.popup().isVisible():
             # Update completion prefix
             self._update_prefix(event, is_end_of_word, is_navigation_key)
-        if is_printable:
+        if is_printable or event.key() in [QtCore.Qt.Key_Backspace,
+                                           QtCore.Qt.Key_Delete]:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
             else:
