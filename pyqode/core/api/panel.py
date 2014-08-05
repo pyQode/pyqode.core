@@ -77,6 +77,7 @@ class Panel(QtWidgets.QWidget, Mode):
         """
         Mode.on_install(self, editor)
         self.setParent(editor)
+        self.setPalette(QtWidgets.QApplication.instance().palette())
         self.editor.panels.refresh()
         self._background_brush = QtGui.QBrush(QtGui.QColor(
             self.palette().window().color()))
