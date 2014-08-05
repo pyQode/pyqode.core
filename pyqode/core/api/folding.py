@@ -185,7 +185,8 @@ class FoldScope:
         :param block: The block **must** be a fold trigger.
         :type block: QTextBlock
         """
-        assert TextBlockHelper.is_fold_trigger(block)
+        if not TextBlockHelper.is_fold_trigger(block):
+            raise ValueError('Not a fold trigger')
         self._trigger = block
 
     def get_range(self, ignore_blank_lines=True):
@@ -289,7 +290,8 @@ class FoldScope:
 
         :return: FoldScope or None
         """
-        if TextBlockHelper.get_fold_lvl(self._trigger) > 0:
+        if TextBlockHelper.get_fold_lvl(self._trigger) > 0 and \
+                self._trigger.blockNumber():
             block = self._trigger.previous()
             ref_lvl = self.trigger_level - 1
             while (block.blockNumber() and
