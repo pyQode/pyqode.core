@@ -101,6 +101,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._data = None
         self._completer = None
         self._col = 0
+        self._skip_next_backspace_released = False
         self._init_settings()
 
     def _init_settings(self):
@@ -197,6 +198,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if is_shortcut:
             self.request_completion()
             event.accept()
+        tc = self.editor.textCursor()
+        tc.movePosition(tc.Left, tc.KeepAnchor, 1)
+        pchar = tc.selectedText()
+        if pchar == ' ' and event.key() == QtCore.Qt.Key_Backspace:
+            self._skip_next_backspace_released = True
 
     @staticmethod
     def _is_navigation_key(event):
@@ -232,6 +238,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._show_popup()
 
     def _on_key_released(self, event):
+        if (event.key() == QtCore.Qt.Key_Backspace and
+                self._skip_next_backspace_released):
+            self._skip_next_backspace_released = False
+            return
         if self._is_shortcut(event):
             return
         if (event.key() == QtCore.Qt.Key_Home or
@@ -249,6 +259,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                                            QtCore.Qt.Key_Delete]:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
+                return
             else:
                 # trigger symbols
                 if symbols:
