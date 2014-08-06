@@ -240,8 +240,11 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         _logger(self.__class__).debug('removing message %s' % message)
         usd = message.block.userData()
-        if usd and usd.messages:
-            usd.messages.remove(message)
+        try:
+            if usd and usd.messages:
+                usd.messages.remove(message)
+        except AttributeError:
+            pass
         self._messages.remove(message)
         if message.decoration:
             self.editor.decorations.remove(message.decoration)
