@@ -464,6 +464,7 @@ class FoldingPanel(Panel):
             # add folded deco
             self._add_fold_decoration(block, region)
             self._clear_scope_decos()
+        self.editor.setFocus(True)
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
 
@@ -560,6 +561,13 @@ class FoldingPanel(Panel):
             block = block.next()
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
+        # fake resize event to refresh scroll bar. We have the same problem as described here:
+        # http://www.qtcentre.org/threads/44803-QPlainTextEdit-inherited-invisibleQTextBlock-INVALID-vertical-scroll-bar
+        # and we apply the same solution (there is no visual effect, the editor does not grow up, even
+        # with a value = 500)
+        s = self.editor.size()
+        s.setWidth(s.width() + 1)
+        self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
 
     def _clear_block_deco(self):
         for deco in self._block_decos:
@@ -574,7 +582,9 @@ class FoldingPanel(Panel):
             block = block.next()
         self._clear_block_deco()
         TextHelper(self.editor).mark_whole_doc_dirty()
-        self.editor.repaint()
+        s = self.editor.size()
+        s.setWidth(s.width() + 1)
+        self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
 
     def _on_action_toggle(self):
         block = self.find_scope(self.editor.textCursor().block())
