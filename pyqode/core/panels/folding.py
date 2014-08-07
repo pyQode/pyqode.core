@@ -145,19 +145,20 @@ class FoldingPanel(Panel):
         :param block: Current block.
         :param painter: QPainter
         """
-        r = folding.FoldScope(block)
-        th = TextHelper(self.editor)
-        start, end = r.get_range(ignore_blank_lines=True)
-        if start > 0:
-            top = th.line_pos_from_number(start)
-        else:
-            top = 0
-        bottom = th.line_pos_from_number(end + 1)
-        h = bottom - top
-        if h == 0:
-            h = self.sizeHint().height()
-        w = self.sizeHint().width()
-        self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
+        if not TextBlockHelper.get_fold_trigger_state(block):
+            r = folding.FoldScope(block)
+            th = TextHelper(self.editor)
+            start, end = r.get_range(ignore_blank_lines=True)
+            if start > 0:
+                top = th.line_pos_from_number(start)
+            else:
+                top = 0
+            bottom = th.line_pos_from_number(end + 1)
+            h = bottom - top
+            if h == 0:
+                h = self.sizeHint().height()
+            w = self.sizeHint().width()
+            self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
 
     def _draw_rect(self, rect, painter):
         """
@@ -400,7 +401,6 @@ class FoldingPanel(Panel):
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
         if line:
-
             block = self.find_scope(
                 self.editor.document().findBlockByNumber(line - 1))
             if TextBlockHelper.is_fold_trigger(block):
@@ -409,10 +409,7 @@ class FoldingPanel(Panel):
                 self._highight_block = block
             else:
                 self._mouse_over_line = None
-            self._highlight_active_indicator()
-
-    def _highlight_active_indicator(self):
-        self.repaint()
+            self.repaint()
 
     def leaveEvent(self, event):
         super().leaveEvent(event)
@@ -464,9 +461,7 @@ class FoldingPanel(Panel):
             # add folded deco
             self._add_fold_decoration(block, region)
             self._clear_scope_decos()
-        self.editor.setFocus(True)
-        TextHelper(self.editor).mark_whole_doc_dirty()
-        self.editor.repaint()
+        self._refresh_editor_and_scrollbars()
 
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
@@ -538,6 +533,17 @@ class FoldingPanel(Panel):
             pblock.setVisible(True)
             pblock = pblock.previous()
 
+    def _refresh_editor_and_scrollbars(self):
+        TextHelper(self.editor).mark_whole_doc_dirty()
+        self.editor.repaint()
+        # fake resize event to refresh scroll bar. We have the same problem as described here:
+        # http://www.qtcentre.org/threads/44803-QPlainTextEdit-inherited-invisibleQTextBlock-INVALID-vertical-scroll-bar
+        # and we apply the same solution (there is no visual effect, the editor does not grow up, even
+        # with a value = 500)
+        s = self.editor.size()
+        s.setWidth(s.width() + 1)
+        self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
+
     def collapse_all(self):
         """
         Collapses all triggers and makes all blocks with fold level > 0
@@ -559,15 +565,10 @@ class FoldingPanel(Panel):
                 block.setVisible(True)
                 self._show_previous_blank_lines(block)
             block = block.next()
-        TextHelper(self.editor).mark_whole_doc_dirty()
-        self.editor.repaint()
-        # fake resize event to refresh scroll bar. We have the same problem as described here:
-        # http://www.qtcentre.org/threads/44803-QPlainTextEdit-inherited-invisibleQTextBlock-INVALID-vertical-scroll-bar
-        # and we apply the same solution (there is no visual effect, the editor does not grow up, even
-        # with a value = 500)
-        s = self.editor.size()
-        s.setWidth(s.width() + 1)
-        self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
+        self._refresh_editor_and_scrollbars()
+        tc = self.editor.textCursor()
+        tc.movePosition(tc.Start)
+        self.editor.setTextCursor(tc)
 
     def _clear_block_deco(self):
         for deco in self._block_decos:
@@ -581,10 +582,7 @@ class FoldingPanel(Panel):
             block.setVisible(True)
             block = block.next()
         self._clear_block_deco()
-        TextHelper(self.editor).mark_whole_doc_dirty()
-        s = self.editor.size()
-        s.setWidth(s.width() + 1)
-        self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
+        self._refresh_editor_and_scrollbars()
 
     def _on_action_toggle(self):
         block = self.find_scope(self.editor.textCursor().block())
