@@ -373,7 +373,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             prefix_len = (len(self.completion_prefix) * char_width)
             cursor_rec.translate(self.editor.panels.margin_size() - prefix_len,
                                  # top
-                                 self.editor.panels.margin_size(0))
+                                 self.editor.panels.margin_size(0) + 5)
             popup = self._completer.popup()
             width = popup.verticalScrollBar().sizeHint().width()
             cursor_rec.setWidth(self._completer.popup().sizeHintForColumn(0) +
