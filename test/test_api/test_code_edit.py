@@ -80,7 +80,7 @@ def test_show_tooltip(editor):
 
 
 @editor_open(__file__)
-# @preserve_editor_config
+@preserve_editor_config
 @log_test_name
 def test_margin_size(editor):
     for panel in editor.panels:

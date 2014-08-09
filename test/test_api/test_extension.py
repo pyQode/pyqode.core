@@ -30,6 +30,7 @@ def test_modes(editor):
     with pytest.raises(KeyError):
         editor.modes.remove(CaseConverterMode)
 
+
 @editor_open(__file__)
 @log_test_name
 @preserve_editor_config
