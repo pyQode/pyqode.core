@@ -133,6 +133,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @font_name.setter
     def font_name(self, value):  # pylint: disable=missing-docstring
+        if value == "":
+            value = 'Source Code Pro'
         self._font_family = value
         self._reset_stylesheet()
 
@@ -290,6 +292,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
+
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """
@@ -318,6 +321,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._background = None
         QtGui.QFontDatabase.addApplicationFont(
                 ':/fonts/rc/SourceCodePro-Regular.ttf')
+        QtGui.QFontDatabase.addApplicationFont(
+                ':/fonts/rc/SourceCodePro-Bold.ttf')
         self._font_family = "Source Code Pro"
         self._mimetypes = []
 
@@ -375,7 +380,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param tooltip: Tooltip text
         """
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
-        self._prev_tooltip_block_nbr = -1
 
     def clear(self):
         super().clear()
@@ -670,7 +674,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor = self.cursorForPosition(event.pos())
         for sel in self.decorations:
             if sel.cursor.blockNumber() == cursor.blockNumber():
-                sel.signals.clicked.emit(sel)
+                if sel.contains_cursor(cursor):
+                    sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             super().mousePressEvent(event)
@@ -706,22 +711,31 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
         """
+        def next_visible_block(block):
+            while not block.isVisible():
+                block = block.next()
+            return block
+
         cursor = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
         block_found = False
         for sel in self.decorations:
-            if (sel.cursor.blockNumber() == cursor.blockNumber() and
-                    sel.tooltip):
-                if self._prev_tooltip_block_nbr != cursor.blockNumber():
+            if sel.contains_cursor(cursor) and sel.tooltip:
+                if (self._prev_tooltip_block_nbr != cursor.blockNumber() or
+                        not QtWidgets.QToolTip.isVisible()):
+                    pos = event.pos()
+                    # add left margin
+                    pos.setX(pos.x() + self.panels.margin_size())
+                    # add top margin
+                    pos.setY(pos.y() + self.panels.margin_size(0))
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
-                        self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
-                self._prev_tooltip_block_nbr = cursor.blockNumber()
+                        self.mapToGlobal(pos), sel.tooltip[0: 1024])
+                    self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
-        if not block_found:
-            if self._prev_tooltip_block_nbr != -1:
-                QtWidgets.QToolTip.hideText()
+        if not block_found and self._prev_tooltip_block_nbr != -1:
+            QtWidgets.QToolTip.hideText()
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
         self.mouse_moved.emit(event)
@@ -872,8 +886,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._sel_background = app.palette().highlight().color()
         self._sel_foreground = app.palette().highlightedText().color()
         self._font_size = 10
-        self.font_name = ""  # platform specific value in property setter
-        # self._reset_stylesheet() -> should be called by font_name setter
+        self.font_name = ""
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """
