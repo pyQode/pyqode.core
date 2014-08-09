@@ -133,6 +133,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @font_name.setter
     def font_name(self, value):  # pylint: disable=missing-docstring
+        if value == "":
+            value = 'Source Code Pro'
         self._font_family = value
         self._reset_stylesheet()
 
@@ -319,6 +321,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._background = None
         QtGui.QFontDatabase.addApplicationFont(
                 ':/fonts/rc/SourceCodePro-Regular.ttf')
+        QtGui.QFontDatabase.addApplicationFont(
+                ':/fonts/rc/SourceCodePro-Bold.ttf')
         self._font_family = "Source Code Pro"
         self._mimetypes = []
 
@@ -882,8 +886,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._sel_background = app.palette().highlight().color()
         self._sel_foreground = app.palette().highlightedText().color()
         self._font_size = 10
-        self.font_name = ""  # platform specific value in property setter
-        # self._reset_stylesheet() -> should be called by font_name setter
+        self.font_name = ""
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """

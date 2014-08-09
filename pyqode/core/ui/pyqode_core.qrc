@@ -29,5 +29,6 @@
   </qresource>
   <qresource prefix="fonts">
     <file>rc/SourceCodePro-Regular.ttf</file>
+    <file>rc/SourceCodePro-Bold.ttf</file>
   </qresource>
 </RCC>
