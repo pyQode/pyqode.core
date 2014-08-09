@@ -27,4 +27,7 @@
     <file>rc/goto-line.png</file>
     <file>rc/go-up.png</file>
   </qresource>
+  <qresource prefix="fonts">
+    <file>rc/SourceCodePro-Regular.ttf</file>
+  </qresource>
 </RCC>
