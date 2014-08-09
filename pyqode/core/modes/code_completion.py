@@ -198,11 +198,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if is_shortcut:
             self.request_completion()
             event.accept()
-        tc = self.editor.textCursor()
-        tc.movePosition(tc.Left, tc.KeepAnchor, 1)
-        pchar = tc.selectedText()
-        if pchar == ' ' and event.key() == QtCore.Qt.Key_Backspace:
-            self._skip_next_backspace_released = True
 
     @staticmethod
     def _is_navigation_key(event):
@@ -255,8 +250,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self._completer.popup().isVisible():
             # Update completion prefix
             self._update_prefix(event, is_end_of_word, is_navigation_key)
-        if is_printable or event.key() in [QtCore.Qt.Key_Backspace,
-                                           QtCore.Qt.Key_Delete]:
+        if is_printable:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
                 return
@@ -373,7 +367,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             prefix_len = (len(self.completion_prefix) * char_width)
             cursor_rec.translate(self.editor.panels.margin_size() - prefix_len,
                                  # top
-                                 self.editor.panels.margin_size(0))
+                                 self.editor.panels.margin_size(0) + 5)
             popup = self._completer.popup()
             width = popup.verticalScrollBar().sizeHint().width()
             cursor_rec.setWidth(self._completer.popup().sizeHintForColumn(0) +
