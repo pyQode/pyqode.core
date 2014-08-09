@@ -134,10 +134,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @font_name.setter
     def font_name(self, value):  # pylint: disable=missing-docstring
         self._font_family = value
-        if not self._font_family:
-            QtGui.QFontDatabase.addApplicationFont(
-                ':/fonts/rc/SourceCodePro-Regular.ttf')
-            self._font_family = "Source Code Pro"
         self._reset_stylesheet()
 
     @property
@@ -320,7 +316,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._tab_length = 4
         self._font_size = 10
         self._background = None
-        self._font_family = 'monospace'
+        QtGui.QFontDatabase.addApplicationFont(
+                ':/fonts/rc/SourceCodePro-Regular.ttf')
+        self._font_family = "Source Code Pro"
         self._mimetypes = []
 
         # Flags/Working variables
