@@ -161,10 +161,7 @@ def test_whitespaces(editor):
 @log_test_name
 def test_font_name(editor):
     system = platform.system().lower()
-    if system == 'linux':
-        assert editor.font_name == 'monospace'
-    elif system == 'windows':
-        assert editor.font_name == 'Consolas'
+    assert editor.font_name == 'Source Code Pro'
     editor.font_name = 'deja vu sans'
     assert editor.font_name == 'deja vu sans'
 

@@ -80,7 +80,7 @@ def preserve_style(func):
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            editor.font_name = ''
+            editor.font_name = 'Source Code Pro'
             editor.font_size = 10
         return ret
     return wrapper
