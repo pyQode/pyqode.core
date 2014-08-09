@@ -13,14 +13,14 @@ class QtStyle(Style):
     highlight_color = '#c7e7f9'
 
     styles = {
-        Comment.Multiline: 'italic #008000',
+        Comment.Multiline: ' #008000',
         Comment.Preproc: '#000080',
-        Comment.Single: 'italic #008000',
-        Comment.Special: 'bold italic #000080',
-        Comment: 'italic #008000',
+        Comment.Single: ' #008000',
+        Comment.Special: 'bold  #000080',
+        Comment: ' #008000',
         Error: '#CC0000',
         Generic.Deleted: 'bg:#ffdddd #000000',
-        Generic.Emph: 'italic #000000',
+        Generic.Emph: ' #000000',
         Generic.Error: '#aa0000',
         Generic.Heading: '#999999',
         Generic.Inserted: 'bg:#ddffdd #000000',
@@ -38,7 +38,7 @@ class QtStyle(Style):
         Keyword: '#808000',
         Literal.Number: '#000080',
         Literal.String: '#000080',
-        Literal.String.Doc: '#8080FF italic',
+        Literal.String.Doc: '#8080FF ',
         Name.Attribute: '#800080',
         Name.Builtin.Pseudo: '#94558D bold',
         Name.Builtin: '#AA00AA',
