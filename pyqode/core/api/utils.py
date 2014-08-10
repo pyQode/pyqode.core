@@ -244,7 +244,8 @@ class TextHelper:
         end_pos = start_pos = text_cursor.position()
         # select char by char until we are at the original cursor position.
         while not text_cursor.atStart():
-            text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
+            text_cursor.movePosition(
+                text_cursor.Left, text_cursor.KeepAnchor, 1)
             try:
                 char = text_cursor.selectedText()[0]
                 word_separators = editor.word_separators
@@ -422,7 +423,8 @@ class TextHelper:
         text_cursor.movePosition(
             text_cursor.Down, text_cursor.MoveAnchor,
             pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
-        text_cursor.movePosition(text_cursor.StartOfLine, text_cursor.MoveAnchor)
+        text_cursor.movePosition(text_cursor.StartOfLine,
+                                 text_cursor.MoveAnchor)
         cpos = text_cursor.position()
         text_cursor.select(text_cursor.LineUnderCursor)
         if text_cursor.selectedText():

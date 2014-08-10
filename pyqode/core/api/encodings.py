@@ -8,7 +8,6 @@ https://docs.python.org/3.4/library/codecs.html#standard-encodings
 
 # : Encodings map, map a codec name to a an alias/language pair.#:
 ENCODINGS_MAP = {
-    #Codec               Alias                  Language
     "ascii": ("US-ASCII", "English"),
     "big5": ("Big5", "Chinese traditional"),
     "big5hkscs": ("Big5-HKSCS", "Chinese traditional"),
