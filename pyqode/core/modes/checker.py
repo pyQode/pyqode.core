@@ -259,8 +259,10 @@ class CheckerMode(Mode, QtCore.QObject):
     def on_state_changed(self, state):
         if state:
             self.editor.textChanged.connect(self.request_analysis)
+            self.editor.new_text_set.connect(self.clear_messages)
         else:
             self.editor.textChanged.disconnect(self.request_analysis)
+            self.editor.new_text_set.disconnect(self.clear_messages)
 
     def _on_work_finished(self, status, results):
         """

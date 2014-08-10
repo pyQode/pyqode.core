@@ -209,7 +209,7 @@ class FoldScope:
             last_line = block.blockNumber() + 1
             block = block.next()
 
-        if ignore_blank_lines:
+        if ignore_blank_lines and last_line:
             block = block.document().findBlockByNumber(last_line - 1)
             while block.blockNumber() and block.text().strip() == '':
                 block = block.previous()

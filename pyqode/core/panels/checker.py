@@ -110,5 +110,3 @@ class CheckerPanel(Panel):
         """
         QtWidgets.QToolTip.showText(self.mapToGlobal(QtCore.QPoint(
             self.sizeHint().width(), top)), tooltip, self)
-
-
