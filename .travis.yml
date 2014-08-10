@@ -2,8 +2,8 @@ language: python
 python:
   - "3.2"
 env:
-  - QT_API=PyQt4
-  - QT_API=PyQt5
+  - QT_API=pyqt4
+  - QT_API=pyqt5
   - PEP8=1
   - COV=1
 matrix:
