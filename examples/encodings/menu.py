@@ -2,7 +2,7 @@
 Use context menu to reload the file with another encoding
 """
 import sys
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 from pyqode.core import widgets
 from common import setup_editor, get_file_path
 

@@ -1,5 +1,5 @@
 import os
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
 from test.helpers import preserve_editor_config
 

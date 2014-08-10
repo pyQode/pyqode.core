@@ -4,7 +4,7 @@ Contains a case converter mode.
 """
 from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class CaseConverterMode(Mode):

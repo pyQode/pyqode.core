@@ -4,7 +4,7 @@ Contains a panel to manage unicode decoding/encoding errors.
 """
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.decoration import TextDecoration
-from pyqode.core.qt import QtCore, QtGui, QtWidgets
+from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
 class EncodingPanel(Panel):

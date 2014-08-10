@@ -2,8 +2,8 @@
 Tests the code completion mode
 """
 import functools
-from pyqode.core.qt import QtCore, QtWidgets
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt.QtTest import QTest
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
 

@@ -1,4 +1,4 @@
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):

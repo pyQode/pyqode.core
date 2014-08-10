@@ -5,7 +5,7 @@ This module contains the care line highlighter mode
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
 from pyqode.core.api.utils import drift_color
-from pyqode.core.qt import QtGui
+from pyqode.qt import QtGui
 
 
 class CaretLineHighlighterMode(Mode):

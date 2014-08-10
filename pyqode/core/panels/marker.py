@@ -5,7 +5,7 @@ This module contains the marker panel
 import logging
 from pyqode.core.api import TextBlockUserData
 from pyqode.core.api.panel import Panel
-from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 
 

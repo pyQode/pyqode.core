@@ -1,6 +1,6 @@
 from pyqode.core.api import utils
-from pyqode.core.qt import QtWidgets, QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtWidgets, QtGui
+from pyqode.qt.QtTest import QTest
 import time
 from pyqode.core.api import CodeEdit
 

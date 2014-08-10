@@ -7,8 +7,8 @@ import logging
 import os
 from pyqode.core.ui.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.modes.filewatcher import FileWatcherMode
-from pyqode.core.qt import QtCore, QtWidgets
-from pyqode.core.qt.QtWidgets import QDialog, QTabBar, QTabWidget
+from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget
 # pylint: disable=too-many-instance-attributes, missing-docstring
 # pylint: disable=protected-access
 

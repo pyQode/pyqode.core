@@ -4,7 +4,7 @@ Contains utility functions
 """
 import functools
 import logging
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 
 
 def _logger():

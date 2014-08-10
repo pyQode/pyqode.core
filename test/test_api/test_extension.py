@@ -2,7 +2,7 @@
 """
 This module tests the classes: Mode an Panels
 """
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 import pytest
 from ..helpers import editor_open

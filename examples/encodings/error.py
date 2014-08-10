@@ -2,7 +2,7 @@
 Show how decoding errors can be automatically handled using the EncodingPanel.
 """
 import sys
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 from common import setup_editor, get_file_path
 
 app = QtWidgets.QApplication(sys.argv)

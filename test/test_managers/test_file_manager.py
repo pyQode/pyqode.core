@@ -2,7 +2,7 @@
 import os
 import pytest
 from pyqode.core import panels
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from test.helpers import preserve_editor_config
 
 

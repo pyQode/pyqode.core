@@ -20,7 +20,7 @@ better handled by the application level.
 """
 import json
 import locale
-from pyqode.core.qt import QtCore
+from pyqode.qt import QtCore
 from pyqode.core.api import encodings
 
 

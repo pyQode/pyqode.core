@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This scripts compile the ui and qrc files using pyqt5-dev-tools then modify
-them to use pyqode.core.qt instead of PyQt5. It also adapts the rc imports so that
+them to use pyqode.qt instead of PyQt5. It also adapts the rc imports so that
 they works with python3
 """
 import glob
@@ -17,7 +17,7 @@ def fix_script(script):
         if l.startswith("import "):
             l = "from . " + l
         if "from PyQt5 import" in l:
-            l = l.replace("from PyQt5 import", "from pyqode.core.qt import")
+            l = l.replace("from PyQt5 import", "from pyqode.qt import")
         new_lines.append(l)
     with open(script, 'w') as f_script:
         f_script.write("\n".join(new_lines))

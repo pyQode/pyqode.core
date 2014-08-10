@@ -3,7 +3,7 @@
 This module contains the ZoomMode which lets you zoom in and out the editor.
 """
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore
+from pyqode.qt import QtCore
 
 
 class ZoomMode(Mode):

@@ -4,7 +4,7 @@ Regroup functions common to all examples.
 import sys
 import os
 from pyqode.core import api
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 
 _window = None
 

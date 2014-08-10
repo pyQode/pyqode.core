@@ -1,5 +1,5 @@
 from pyqode.core.ui import dlg_goto_line_ui
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 
 __author__ = 'colin'
 

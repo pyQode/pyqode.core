@@ -1,5 +1,5 @@
 import random
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import modes, panels
 
 from ..helpers import preserve_editor_config, wait_for_connected, editor_open

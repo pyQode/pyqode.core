@@ -5,7 +5,7 @@ you application.
 """
 import locale
 from pyqode.core.api import encodings
-from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.settings import Settings
 from pyqode.core.ui import dlg_preferred_encodings_editor_ui
 

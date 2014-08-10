@@ -8,9 +8,9 @@ import logging
 import sys
 
 from pyqode.core.api.client import PROCESS_ERROR_STRING
-from pyqode.core.qt.QtCore import Qt, Signal, QProcess
-from pyqode.core.qt.QtWidgets import QTextEdit
-from pyqode.core.qt.QtGui import QColor, QTextCursor, QFont
+from pyqode.qt.QtCore import Qt, Signal, QProcess
+from pyqode.qt.QtWidgets import QTextEdit
+from pyqode.qt.QtGui import QColor, QTextCursor, QFont
 
 
 # pylint: disable=too-many-instance-attributes, missing-docstring

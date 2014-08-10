@@ -88,7 +88,7 @@ For example, to use PySide::
 
     import os
     os.environ['QT_API'] = 'PySide'
-    from pyqode.core.qt import QtCore, QtGui, QtWidgets
+    from pyqode.qt import QtCore, QtGui, QtWidgets
     print('Qt version:%s' % QtCore.__version__)
     print(QtCore.QEvent)
     print(QtGui.QPainter)
@@ -97,7 +97,7 @@ For example, to use PySide::
 
 .. note:: You can also use the qt package of pyqode.core to write a bindings
           independent application but you have to be aware that
-          ``pyqode.core.qt`` does not wrap the entire Qt API (it only what was
+          ``pyqode.qt`` does not wrap the entire Qt API (it only what was
           required to write pyQode).
 
 The backend
@@ -141,7 +141,7 @@ Here is a simple example of a frontend script::
     from pyqode.core import api
     from pyqode.core import modes
     from pyqode.core import panels
-    from pyqode.core.qt import QtWidgets
+    from pyqode.qt import QtWidgets
 
 
     if __name__ == "__main__":

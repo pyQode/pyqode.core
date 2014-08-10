@@ -4,7 +4,7 @@ Contains the mode that control the external changes of file.
 """
 import os
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):

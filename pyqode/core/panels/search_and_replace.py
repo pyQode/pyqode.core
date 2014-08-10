@@ -6,7 +6,7 @@ from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 # pylint: disable=maybe-no-member, missing-docstring
 # pylint: disable=too-many-public-methods, too-many-instance-attributes
 

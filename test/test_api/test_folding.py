@@ -4,7 +4,7 @@ import pytest
 import sys
 from ..helpers import delete_file_on_return, editor_open
 from pyqode.core.api import folding, TextBlockHelper, TextHelper
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 
 class FoldDetectorTestCase:

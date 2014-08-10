@@ -9,7 +9,7 @@ from pyqode.core.managers import TextDecorationsManager
 from pyqode.core.managers import PanelsManager
 # ensure pyqode resource have been imported and are ready to use.
 from pyqode.core.ui import pyqode_core_rc
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 def _logger():

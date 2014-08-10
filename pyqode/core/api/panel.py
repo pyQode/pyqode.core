@@ -1,6 +1,6 @@
 import logging
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 
 def _logger():

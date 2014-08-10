@@ -16,7 +16,7 @@ import sys
 from pyqode.core import api
 from pyqode.core import modes
 from pyqode.core import panels
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 
 
 def main():

@@ -6,8 +6,8 @@ import mimetypes
 import os
 import sys
 
-from pyqode.core.qt import QtCore
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtCore
+from pyqode.qt import QtWidgets
 
 from pyqode.core import api
 from pyqode.core import modes

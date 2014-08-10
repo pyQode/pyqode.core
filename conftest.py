@@ -48,7 +48,7 @@ logging.basicConfig(level=logging.DEBUG,
 # Setup QApplication
 # -------------------
 # 2. create qt application
-from pyqode.core.qt.QtWidgets import QApplication
+from pyqode.qt.QtWidgets import QApplication
 _app = QApplication(sys.argv)
 _widget = None
 

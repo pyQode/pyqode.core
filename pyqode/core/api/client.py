@@ -4,7 +4,7 @@ import socket
 import struct
 import sys
 import uuid
-from pyqode.core.qt import QtCore, QtNetwork
+from pyqode.qt import QtCore, QtNetwork
 from pyqode.core.backend import NotConnected
 
 

@@ -9,7 +9,7 @@ import os
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
-from pyqode.core.qt import QtCore, QtGui, QtWidgets
+from pyqode.qt import QtCore, QtGui, QtWidgets
 from pyqode.core.settings import Settings
 
 

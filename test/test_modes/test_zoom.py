@@ -1,7 +1,7 @@
 import os
-from pyqode.core.qt import QtCore
-from pyqode.core.qt import QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 from pyqode.core import modes
 
 

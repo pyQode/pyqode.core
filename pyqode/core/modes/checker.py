@@ -8,7 +8,7 @@ from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
 from pyqode.core.api.utils import DelayJobRunner
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 # pylint: disable=too-many-arguments, maybe-no-member
 
 

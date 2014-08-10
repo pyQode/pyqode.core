@@ -8,8 +8,8 @@ import sys
 import pytest
 from pyqode.core.api.utils import TextHelper, keep_tc_pos
 
-from pyqode.core.qt import QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 from ..helpers import editor_open
 from ..helpers import log_test_name
 

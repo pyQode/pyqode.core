@@ -1,10 +1,6 @@
-import os
-from pyqode.core.qt import QT_API
-from pyqode.core.qt import PYQT5_API
-from pyqode.core.qt import PYQT4_API
+"""
+This package is deprecated and is meant to be removed in pyqode.core 2.2.
 
-
-if os.environ[QT_API] == PYQT5_API:
-    from PyQt5.QtDesigner import *
-elif os.environ[QT_API] == PYQT4_API:
-    from PyQt4.QtDesigner import *
+You should use (and install) **pyqode.qt.QtDesigner** instead.
+"""
+from pyqode.qt.QtDesigner import *

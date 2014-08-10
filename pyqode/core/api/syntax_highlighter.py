@@ -5,7 +5,7 @@ import sys
 import time
 from pyqode.core.api.utils import TextHelper, TextBlockHelper
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtGui, QtCore, QtWidgets
+from pyqode.qt import QtGui, QtCore, QtWidgets
 
 #: The list of color schemes keys
 COLOR_SCHEME_KEYS = (

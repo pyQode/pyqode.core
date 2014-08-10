@@ -5,9 +5,9 @@ Test the client/server API
 import os
 from pyqode.core.api.client import JsonTcpClient as JsonTcpClient
 from pyqode.core.backend import NotConnected
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 import pytest
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import backend
 from pyqode.core.managers.backend import BackendManager
 from ..helpers import cwd_at, require_python2, python2_path, server_path, wait_for_connected

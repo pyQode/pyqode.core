@@ -8,7 +8,7 @@ import sys
 from pyqode.core.api import TextBlockHelper, folding, TextDecoration
 from pyqode.core.api.folding import FoldScope
 from pyqode.core.api.panel import Panel
-from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api.utils import TextHelper, drift_color, keep_tc_pos
 
 

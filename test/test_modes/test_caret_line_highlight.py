@@ -1,5 +1,5 @@
-from pyqode.core.qt import QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 from pyqode.core import modes
 from test.helpers import preserve_style, editor_open
 

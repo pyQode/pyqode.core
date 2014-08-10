@@ -1,6 +1,6 @@
 import locale
 from pyqode.core.api import ENCODINGS_MAP, convert_to_codec_key
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 from pyqode.core.settings import Settings
 
 

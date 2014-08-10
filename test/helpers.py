@@ -11,7 +11,7 @@ from os.path import dirname
 from pyqode.core.api import CodeEdit, IndentFoldDetector
 from pyqode.core import modes
 from pyqode.core import panels
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 
 test_dir = dirname(abspath(__file__))

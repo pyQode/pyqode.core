@@ -7,7 +7,7 @@ import re
 import sys
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 from pyqode.core import backend

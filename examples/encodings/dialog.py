@@ -2,7 +2,7 @@
 Use the encoding choice dialog to reload file in case of error.
 """
 import sys
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 from pyqode.core import dialogs
 from common import setup_editor, get_file_path
 

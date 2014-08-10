@@ -10,7 +10,7 @@ This package contains the code of the notepad application:
     - server.py: This is the server script for the pyqode backend.
 """
 import sys
-from pyqode.core.qt.QtWidgets import QApplication
+from pyqode.qt.QtWidgets import QApplication
 from .main_window import MainWindow
 
 

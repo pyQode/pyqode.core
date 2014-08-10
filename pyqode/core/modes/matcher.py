@@ -5,7 +5,7 @@ This module contains the symbol matcher mode
 from pyqode.core.api import get_block_symbol_data
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtGui
+from pyqode.qt import QtGui
 
 
 PAREN = 0

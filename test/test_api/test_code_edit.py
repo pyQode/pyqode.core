@@ -10,8 +10,8 @@ from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import TextHelper
 from pyqode.core import panels, modes
 
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt.QtTest import QTest
 
 
 

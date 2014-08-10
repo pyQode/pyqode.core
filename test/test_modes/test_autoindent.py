@@ -1,5 +1,5 @@
-from pyqode.core.qt import QtCore
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt.QtTest import QTest
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
 

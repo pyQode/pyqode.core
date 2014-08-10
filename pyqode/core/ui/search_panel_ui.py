@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.core.qt import QtCore, QtGui, QtWidgets
+from pyqode.qt import QtCore, QtGui, QtWidgets
 
 class Ui_SearchPanel(object):
     def setupUi(self, SearchPanel):
