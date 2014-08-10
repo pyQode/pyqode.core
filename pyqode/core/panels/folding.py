@@ -19,7 +19,7 @@ def _logger():
 
 class FoldingPanel(Panel):
     """
-    Code folding panel display the document oultine and allow user to collapse
+    This panel displays the document outline and lets the user collapse
     or expand blocks of code.
 
     The data represented by the panel come from the text block user state and
@@ -61,10 +61,11 @@ class FoldingPanel(Panel):
                     self.editor.cursorPositionChanged.disconnect(
                         self._highlight_caret_scope)
 
-    def __init__(self):
+    def __init__(self, highlight_caret_scope=False):
         Panel.__init__(self)
         self._block_nbr = -1
         self._highlight_caret = False
+        self.highlight_caret_scope = highlight_caret_scope
         self._indic_size = 16
         #: the list of deco used to highlight the current fold region (
         #: surrounding regions are darker)
@@ -84,6 +85,11 @@ class FoldingPanel(Panel):
         self._original_background = None
 
     def on_install(self, editor):
+        """
+        Add the folding menu to the editor, on install.
+
+        :param editor: editor instance on which the mode has been installed to.
+        """
         super().on_install(editor)
         self.context_menu = QtWidgets.QMenu('Folding', self.editor)
         action = self.action_collapse = QtWidgets.QAction(
@@ -118,6 +124,11 @@ class FoldingPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
+        """
+        Paints the fold indicators and the possible fold region background
+        on the folding panel.
+
+        """
         super().paintEvent(event)
         painter = QtGui.QPainter(self)
         # Draw background over the selected non collapsed fold region
@@ -171,7 +182,7 @@ class FoldingPanel(Panel):
         """
         # c = self.__color
         # if self.__native:
-        c = self.get_system_color()
+        c = self.get_system_bck_color()
         grad = QtGui.QLinearGradient(rect.topLeft(),
                                      rect.topRight())
         if sys.platform == 'darwin':
@@ -201,7 +212,11 @@ class FoldingPanel(Panel):
                          rect.bottomLeft() -
                          QtCore.QPointF(0, 1))
 
-    def get_system_color(self):
+    def get_system_bck_color(self):
+        """
+        Gets a system color for drawing the fold scope background.
+
+        """
         def merged_colors(colorA, colorB, factor):
             maxFactor = 100
             colorA = QtGui.QColor(colorA)
@@ -215,7 +230,7 @@ class FoldingPanel(Panel):
                         (colorB.blue() * (maxFactor - factor)) / maxFactor)
             return tmp
 
-        pal = self.editor.palette()
+        pal = QtWidgets.QApplication.instance().palette()
         b = pal.window().color()
         h = pal.highlight().color()
         return merged_colors(b, h, 50)
@@ -251,6 +266,10 @@ class FoldingPanel(Panel):
                                    opt, painter, self)
 
     def find_scope(self, block):
+        """
+        Find parent scope, if the block is not a fold trigger.
+
+        """
         original = block
         if not TextBlockHelper.is_fold_trigger(block):
             # search level of next non blank line
@@ -264,27 +283,21 @@ class FoldingPanel(Panel):
                 block = block.previous()
         return block
 
-    @staticmethod
-    @keep_tc_pos
-    def _clean_whitespaces(editor, decos):
-        """
-        Remove eventual spaces introduced when highlighting scope
-        """
-        for deco in decos:
-            txt = deco.cursor.block().text()
-            if txt.strip() == '' and len(txt):
-                deco.cursor.movePosition(deco.cursor.StartOfBlock)
-                deco.cursor.movePosition(deco.cursor.EndOfBlock,
-                                         deco.cursor.KeepAnchor)
-                deco.cursor.removeSelectedText()
-                editor.setTextCursor(deco.cursor)
-
     def _clear_scope_decos(self):
+        """
+        Clear scope decorations (on the editor)
+
+        """
         for deco in self._scope_decos:
             self.editor.decorations.remove(deco)
         self._scope_decos[:] = []
 
     def _get_scope_highlight_color(self):
+        """
+        Gets the base scope highlight color (derivated from the editor
+        background)
+
+        """
         color = self.editor.background
         if color.lightness() < 128:
              color = drift_color(color, 130)
@@ -294,6 +307,16 @@ class FoldingPanel(Panel):
 
     def _add_scope_deco(self, start, end, parent_start, parent_end, base_color,
                         factor):
+        """
+        Adds a scope decoration that enclose the current scope
+        :param start: Start of the current scope
+        :param end: End of the current scope
+        :param parent_start: Start of the parent scope
+        :param parent_end: End of the parent scope
+        :param base_color: base color for scope decoration
+        :param factor: color factor to apply on the base color (to make it
+            darker).
+        """
         color = drift_color(base_color, factor=factor)
         # upper part
         if start - 1:
@@ -305,7 +328,7 @@ class FoldingPanel(Panel):
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
         # lower part
-        if end < self.editor.document().blockCount():
+        if end <= self.editor.document().blockCount():
             d = TextDecoration(self.editor.document(),
                                start_line=end, end_line=parent_end + 1)
             d.set_full_width(True, clear=False)
@@ -313,34 +336,6 @@ class FoldingPanel(Panel):
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
-
-    def _get_scope_trigger_indent(self, block):
-        pblock = block
-        rlvl = TextBlockHelper.get_fold_lvl(block)
-        lvl = TextBlockHelper.get_fold_lvl(pblock)
-        while pblock.isValid() and TextBlockHelper.get_fold_lvl(
-                pblock) == rlvl:
-            lvl = TextBlockHelper.get_fold_lvl(pblock)
-            pblock = pblock.previous()
-        pblock = pblock.next()
-        if TextBlockHelper.is_fold_trigger(pblock) and pblock != block:
-            pblock = pblock.next()
-        indent = TextHelper(self.editor).line_indent(pblock)
-        return indent
-
-    @staticmethod
-    @keep_tc_pos
-    def _replace_blank_lines(editor, block, indent, scope_end):
-        nblock = block
-        while nblock.blockNumber() < scope_end:
-            l = len(nblock.text())
-            if l < indent and nblock.text().strip() == '':
-                tc = editor.textCursor()
-                tc.setPosition(nblock.position())
-                tc.insertText((indent - l) * ' ')
-                editor.setTextCursor(tc)
-            nblock = nblock.next()
-        tc = editor.textCursor()
 
     def _add_scope_decorations(self, block, start, end):
         """
@@ -379,6 +374,11 @@ class FoldingPanel(Panel):
             self._clear_scope_decos()
 
     def _highlight_surrounding_scopes(self, block):
+        """
+        Highlights the scopes surrounding the current fold scope.
+
+        :param block: Block that starts the current fold scope.
+        """
         scope = FoldScope(block)
         if (self._current_scope is None or
                 self._current_scope.get_range() != scope.get_range()):
@@ -412,15 +412,27 @@ class FoldingPanel(Panel):
             self.repaint()
 
     def leaveEvent(self, event):
+        """
+        Removes scope decorations and background from the editor and the panel
+        if highlight_caret_scope, else simply update the scope decorations to
+        match the caret scope.
+
+        """
         super().leaveEvent(event)
-        self._clear_scope_decos()
-        self._mouse_over_line = None
-        self._current_scope = None
-        if self._highlight_caret:
+        if not self.highlight_caret_scope:
+            self._clear_scope_decos()
+            self._mouse_over_line = None
+            self._current_scope = None
+        else:
+            self._block_nbr = -1
             self._highlight_caret_scope()
         self.editor.repaint()
 
     def _add_fold_decoration(self, block, region):
+        """
+        Add fold decorations (boxes arround a folded block in the editor
+        widget).
+        """
         deco = TextDecoration(block)
         deco.signals.clicked.connect(self._on_fold_deco_clicked)
         deco.tooltip = region.text(max_lines=25)
@@ -471,6 +483,9 @@ class FoldingPanel(Panel):
             self.toggle_fold_trigger(block)
 
     def _on_fold_deco_clicked(self, deco):
+        """
+        Unfold a folded block that has just been clicked by the user
+        """
         self.toggle_fold_trigger(deco.block)
 
     def on_state_changed(self, state):
@@ -478,19 +493,22 @@ class FoldingPanel(Panel):
         On state changed we (dis)connect to the cursorPositionChanged signal
         """
         if state:
-            self.editor.key_pressed.connect(self._on_key_pressed)
+            # self.editor.key_pressed.connect(self._on_key_pressed)
             if self._highlight_caret:
                 self.editor.cursorPositionChanged.connect(
                     self._highlight_caret_scope)
                 self._block_nbr = -1
         else:
-            self.editor.key_pressed.disconnect(self._on_key_pressed)
+            # self.editor.key_pressed.disconnect(self._on_key_pressed)
             if self._highlight_caret:
                 self.editor.cursorPositionChanged.disconnect(
                     self._highlight_caret_scope)
                 self._block_nbr = -1
 
     def _select_scope(self, block, c):
+        """
+        Select the content of a scope
+        """
         start_block = block
         _, end = FoldScope(block).get_range()
         end_block = self.editor.document().findBlockByNumber(end)
@@ -501,6 +519,10 @@ class FoldingPanel(Panel):
         c.endEditBlock()
 
     def _on_key_pressed(self, event):
+        """
+        Override key press to select the current scope if the user wants
+        to deleted a folded scope (without selecting it).
+        """
         keys = [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace]
         if event.key() in keys:
             c = self.editor.textCursor()
@@ -512,7 +534,24 @@ class FoldingPanel(Panel):
                         self._select_scope(block, c)
                         event.accept()
 
+    def _show_previous_blank_lines(self, block):
+        """
+        Show the block previous blank lines
+        """
+        # set previous blank lines visibles
+        pblock = block.previous()
+        while (pblock.text().strip() == '' and
+                       pblock.blockNumber() >= 0):
+            pblock.setVisible(True)
+            pblock = pblock.previous()
+
     def refresh_decorations(self, force=False):
+        """
+        Refresh decorations colors. This function is called by the syntax
+        highlighter when the style changed so that we may update our
+        decorations colors according to the new style.
+
+        """
         cursor = self.editor.textCursor()
         if (self._prev_cursor is None or force or
                 self._prev_cursor.blockNumber() != cursor.blockNumber()):
@@ -525,21 +564,19 @@ class FoldingPanel(Panel):
                 self.editor.decorations.append(deco)
         self._prev_cursor = cursor
 
-    def _show_previous_blank_lines(self, block):
-        # set previous blank lines visibles
-        pblock = block.previous()
-        while (pblock.text().strip() == '' and
-                       pblock.blockNumber() >= 0):
-            pblock.setVisible(True)
-            pblock = pblock.previous()
-
     def _refresh_editor_and_scrollbars(self):
+        """
+        Refrehes editor content and scollbars.
+
+        We generate a fake resize event to refresh scroll bar.
+
+        We have the same problem as described here:
+        http://www.qtcentre.org/threads/44803 and we apply the same solution
+        (don't worry, there is no visual effect, the editor does not grow up
+        at all, even with a value = 500)
+        """
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
-        # fake resize event to refresh scroll bar. We have the same problem as described here:
-        # http://www.qtcentre.org/threads/44803-QPlainTextEdit-inherited-invisibleQTextBlock-INVALID-vertical-scroll-bar
-        # and we apply the same solution (there is no visual effect, the editor does not grow up, even
-        # with a value = 500)
         s = self.editor.size()
         s.setWidth(s.width() + 1)
         self.editor.resizeEvent(QtGui.QResizeEvent(self.editor.size(), s))
@@ -571,11 +608,17 @@ class FoldingPanel(Panel):
         self.editor.setTextCursor(tc)
 
     def _clear_block_deco(self):
+        """
+        Clear the folded block decorations.
+        """
         for deco in self._block_decos:
             self.editor.decorations.remove(deco)
         self._block_decos.clear()
 
     def expand_all(self):
+        """
+        Expands all fold triggers.
+        """
         block = self.editor.document().firstBlock()
         while block.isValid():
             TextBlockHelper.set_fold_trigger_state(block, False)
@@ -585,21 +628,42 @@ class FoldingPanel(Panel):
         self._refresh_editor_and_scrollbars()
 
     def _on_action_toggle(self):
+        """
+        Toggle the current fold trigger.
+        """
         block = self.find_scope(self.editor.textCursor().block())
         self.toggle_fold_trigger(block)
 
     def _on_action_collapse_all_triggered(self):
+        """
+        Closes all top levels fold triggers recursively
+        """
         self.collapse_all()
 
     def _on_action_expand_all_triggered(self):
+        """
+        Expands all fold triggers
+        :return:
+        """
         self.expand_all()
 
     def _highlight_caret_scope(self):
+        """
+        Highlight the scope surrounding the current caret position.
+
+        This get called only if :attr:`
+        pyqode.core.panels.FoldingPanel.highlight_care_scope` is True.
+        """
         cursor = self.editor.textCursor()
         block_nbr = cursor.blockNumber()
         if self._block_nbr != block_nbr:
-            scope = self.find_scope(self.editor.textCursor().block())
-            self._mouse_over_line = scope.blockNumber() + 1
-            if TextBlockHelper.is_fold_trigger(scope):
-                self._highlight_surrounding_scopes(scope)
+            block = self.find_scope(self.editor.textCursor().block())
+            try:
+                s = FoldScope(block)
+            except ValueError:
+                self._clear_scope_decos()
+            else:
+                self._mouse_over_line = block.blockNumber() + 1
+                if TextBlockHelper.is_fold_trigger(block):
+                    self._highlight_surrounding_scopes(block)
         self._block_nbr = block_nbr

@@ -297,7 +297,10 @@ class FoldScope:
                     (not TextBlockHelper.is_fold_trigger(block) or
                     TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
                 block = block.previous()
-            return FoldScope(block)
+            try:
+                return FoldScope(block)
+            except ValueError:
+                return None
         return None
 
     def text(self, max_lines=sys.maxsize):
