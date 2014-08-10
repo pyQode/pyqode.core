@@ -2,8 +2,9 @@
 This module contains core code edits:
 
     - TextEdit: code edit specialised for plain text
-    - GenericCodeEdit: generic code editor, not that smart and slow. Use it as a fallback and look
-      other pyqode packages for language specific cod edits.
+    - GenericCodeEdit: generic code editor, not that smart and slow.
+      Use it as a fallback and look other pyqode packages for language
+      specific cod edits.
 
 """
 import sys
@@ -57,9 +58,10 @@ class TextEdit(CodeEdit):
 class GenericCodeEdit(CodeEdit):
     """
     This generic code edit uses the PygmentSH for syntax highlighting and
-    commpletion engine based on the document words. It is not very smart and is probably
-    2 times slower than a native specialised code edit. It is meant to be used as a
-    fallback editor in case you're missing a specialised editor.
+    commpletion engine based on the document words. It is not very smart and
+    is probably 2 times slower than a native specialised code edit.
+    It is meant to be used as a fallback editor in case you're missing a
+    specialised editor.
     """
     # generic
     mimetypes = []

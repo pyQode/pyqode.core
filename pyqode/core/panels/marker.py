@@ -178,7 +178,8 @@ class MarkerPanel(Panel):
             if hasattr(user_data, "markers"):
                 markers = user_data.markers
                 for i, marker in enumerate(markers):
-                    if hasattr(marker, 'panel_ref') and marker.panel_ref == self:
+                    if (hasattr(marker, 'panel_ref') and
+                            marker.panel_ref == self):
                         # only draw our markers
                         if marker in self._to_remove:
                             try:
@@ -228,8 +229,8 @@ class MarkerPanel(Panel):
         """
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         markers = self.marker_for_line(line)
-        text = '\n'.join([marker.description for marker in markers if marker.description])
-
+        text = '\n'.join([marker.description for marker in markers if
+                          marker.description])
         if len(markers):
             if self._previous_line != line:
                 top = TextHelper(self.editor).line_pos_from_number(

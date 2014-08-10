@@ -2,8 +2,8 @@
 Checker panels:
 
     - CheckerPanel: draw checker messages in front of each line
-    - GlobalCheckerPanel: draw all checker markers as colored rectangle to offer a global
-      view of all errors
+    - GlobalCheckerPanel: draw all checker markers as colored rectangle to
+      offer a global view of all errors
 """
 from pyqode.core.api import DelayJobRunner, TextHelper
 from pyqode.core.api.panel import Panel, _logger
@@ -35,7 +35,7 @@ class CheckerPanel(Panel):
         :return: Marker of None
         :rtype: pyqode.core.Marker
         """
-        block = self.editor.document().findBlockByNumber(line-1)
+        block = self.editor.document().findBlockByNumber(line - 1)
         try:
             return block.userData().messages
         except AttributeError:
@@ -83,8 +83,8 @@ class CheckerPanel(Panel):
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         if line:
             markers = self.marker_for_line(line)
-            text = '\n'.join([marker.description for marker in markers if marker.description])
-
+            text = '\n'.join([marker.description for marker in markers if
+                              marker.description])
             if len(markers):
                 if self._previous_line != line:
                     top = TextHelper(self.editor).line_pos_from_number(

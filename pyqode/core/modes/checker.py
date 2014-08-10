@@ -98,7 +98,8 @@ class CheckerMessage(object):
         return "{0} l{1}".format(self.description, self.line)
 
     def __eq__(self, other):
-        return self.block == other.block and self.description == other.description
+        return (self.block == other.block and
+                self.description == other.description)
 
 
 def _logger(klass):
@@ -137,8 +138,8 @@ class CheckerMode(Mode, QtCore.QObject):
     You can also request an analysis manually using
     :meth:`pyqode.core.modes.CheckerMode.request_analysis`
 
-    Messages are displayed as text decorations on the editor. A checker panel will take
-    care of display message icons next to each line.
+    Messages are displayed as text decorations on the editor. A checker panel
+    will take care of display message icons next to each line.
     """
     def __init__(self, worker,
                  delay=500,
@@ -208,7 +209,8 @@ class CheckerMode(Mode, QtCore.QObject):
                 try:
                     usd = message.block.userData()
                 except AttributeError:
-                    message.block = self.editor.document().findBlockByNumber(message.line - 1)
+                    message.block = self.editor.document().findBlockByNumber(
+                        message.line - 1)
                     usd = message.block.userData()
                 if usd is None:
                     usd = TextBlockUserData()

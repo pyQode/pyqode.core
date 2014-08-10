@@ -84,12 +84,14 @@ class InteractiveConsole(QTextEdit):
             self._writer = writer
 
     def _on_stdout(self):
-        txt = bytes(self.process.readAllStandardOutput()).decode(locale.getpreferredencoding())
+        txt = bytes(self.process.readAllStandardOutput()).decode(
+            locale.getpreferredencoding())
         logging.debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
-        txt = bytes(self.process.readAllStandardError()).decode(locale.getpreferredencoding())
+        txt = bytes(self.process.readAllStandardError()).decode(
+            locale.getpreferredencoding())
         logging.debug('stderr ready: %s', txt)
         self._writer(self, txt, self.stderr_color)
 
@@ -121,8 +123,8 @@ class InteractiveConsole(QTextEdit):
     @property
     def stderr_color(self):
         """
-        Color for stderr output if :attr:`pyqode.core.widgets.InteractiveConsole.merge_outputs`
-        is False.
+        Color for stderr output if
+        :attr:`pyqode.core.widgets.InteractiveConsole.merge_outputs` is False.
 
         Default is Red.
         """

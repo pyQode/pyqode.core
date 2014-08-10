@@ -105,11 +105,10 @@ RegexLexer.get_tokens_unprocessed = get_tokens_unprocessed
 
 # Even with the above monkey patch to store state, multiline comments do not
 # work since they are stateless (Pygments uses a single multiline regex for
-# these comments, but Qt lexes by line). So we need to append a state for comments
-# to the C and C++ lexers. This means that nested multiline comments will
-# appear
-# to be valid C/C++, but this is better than the alternative for now.
-
+# these comments, but Qt lexes by line). So we need to append a state for
+# comments # to the C and C++ lexers. This means that nested multiline
+# comments will appear to be valid C/C++, but this is better than the
+# alternative for now.
 def replace_pattern(tokens, new_pattern):
     """ Given a RegexLexer token dictionary 'tokens', replace all patterns that
         match the token specified in 'new_pattern' with 'new_pattern'.
@@ -134,11 +133,12 @@ CSharpLexer.tokens['comment'] = COMMENT_STATE
 
 class PygmentsSH(SyntaxHighlighter):
     """
-    This mode enable syntax highlighting using the pygments library. This is a generic
-    syntax highlighter, it is slower than a native highlighter and does not do any code
-    folding detection. Use it as a fallback for languages that do not have a native
-    highlighter available. Check the other pyqode namespace packages to see what other
-    languages are available (at the time of writing, only python has specialised support).
+    This mode enable syntax highlighting using the pygments library. This is a
+    generic syntax highlighter, it is slower than a native highlighter and
+    does not do any code folding detection. Use it as a fallback for languages
+    that do not have a native highlighter available. Check the other pyqode
+    namespace packages to see what other languages are available (at the time
+    of writing, only python has specialised support).
 
     .. warning:: There are some issues with multi-line comments, they are not
                  properly highlighted until a full re-highlight is triggered.
@@ -210,8 +210,9 @@ class PygmentsSH(SyntaxHighlighter):
             filename = filename[0:len(filename) - 1]
         try:
             self._lexer = get_lexer_for_filename(filename)
-            _logger().info('lexer for filename (%s): %r', filename, self._lexer)
-        except :
+            _logger().info('lexer for filename (%s): %r', filename,
+                           self._lexer)
+        except:
             pass  # lexer not found
 
     def set_lexer_from_mime_type(self, mime, **options):
@@ -268,7 +269,8 @@ class PygmentsSH(SyntaxHighlighter):
         try:
             self._style = get_style_by_name(self._pygments_style)
         except ClassNotFound:
-            # unknown style, also happen with plugins style when used from a frozen app.
+            # unknown style, also happen with plugins style when used from a
+            # frozen app.
             if self._pygments_style == 'qt':
                 from pyqode.core.styles import QtStyle
                 self._style = QtStyle

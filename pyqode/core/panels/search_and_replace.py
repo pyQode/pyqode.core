@@ -147,8 +147,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.actionActionSearchAndReplace.setIcon(icon)
         self.labelReplace.setPixmap(icon.pixmap(icon_size))
 
-
-
         icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
         self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
         self.actionFindPrevious.setIcon(icon)
@@ -172,7 +170,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     def on_install(self, editor):
         super().on_install(editor)
         self.hide()
-        self.text_helper= TextHelper(editor)
+        self.text_helper = TextHelper(editor)
 
     def _refresh_decorations(self):
         for deco in self._decorations:

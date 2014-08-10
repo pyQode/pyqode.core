@@ -244,8 +244,7 @@ class TextHelper:
         end_pos = start_pos = text_cursor.position()
         # select char by char until we are at the original cursor position.
         while not text_cursor.atStart():
-            text_cursor.movePosition(
-                text_cursor.Left, text_cursor.KeepAnchor, 1)
+            text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
             try:
                 char = text_cursor.selectedText()[0]
                 word_separators = editor.word_separators
@@ -422,17 +421,14 @@ class TextHelper:
         text_cursor.movePosition(text_cursor.Start)
         text_cursor.movePosition(
             text_cursor.Down, text_cursor.MoveAnchor,
-            pos[0] - 1 if pos[0] <= doc.blockCount() else
-            doc.blockCount() - 1)
-        text_cursor.movePosition(text_cursor.StartOfLine,
-                                 text_cursor.MoveAnchor)
+            pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
+        text_cursor.movePosition(text_cursor.StartOfLine, text_cursor.MoveAnchor)
         cpos = text_cursor.position()
         text_cursor.select(text_cursor.LineUnderCursor)
         if text_cursor.selectedText():
             text_cursor.setPosition(cpos)
             offset = pos[1] - eaten
-            text_cursor.movePosition(text_cursor.Right,
-                                     text_cursor.MoveAnchor,
+            text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
                                      offset)
         else:
             text_cursor.setPosition(cpos)
@@ -450,8 +446,8 @@ class TextHelper:
         This functions apply the selection and returns the text cursor that
         contains the selection.
 
-        Optionally it is possible to prevent the selection from being applied on
-        the code editor widget by setting ``apply_selection`` to False.
+        Optionally it is possible to prevent the selection from being applied
+        on the code editor widget by setting ``apply_selection`` to False.
 
         :param start: Start line number (1 based)
         :param end: End line number (1 based). Use -1 to select up to the
@@ -469,16 +465,16 @@ class TextHelper:
             text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
                                      start - 1)
             if end > start:  # Going down
-                text_cursor.movePosition(text_cursor.Down, text_cursor.KeepAnchor,
-                                         end - start)
+                text_cursor.movePosition(text_cursor.Down,
+                                         text_cursor.KeepAnchor, end - start)
                 text_cursor.movePosition(text_cursor.EndOfLine,
                                          text_cursor.KeepAnchor)
             elif end < start:  # going up
                 # don't miss end of line !
                 text_cursor.movePosition(text_cursor.EndOfLine,
                                          text_cursor.MoveAnchor)
-                text_cursor.movePosition(text_cursor.Up, text_cursor.KeepAnchor,
-                                         start - end)
+                text_cursor.movePosition(text_cursor.Up,
+                                         text_cursor.KeepAnchor, start - end)
                 text_cursor.movePosition(text_cursor.StartOfLine,
                                          text_cursor.KeepAnchor)
             else:
@@ -557,7 +553,7 @@ class TextHelper:
 
         :param line_nbr: Number of the line to get indentation (1 base).
             Pass None to use the current line number. Note that you can also
-            pass a QTextBlock instance instead of
+            pass a QTextBlock instance instead of an int.
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
@@ -687,13 +683,13 @@ class TextHelper:
             formats = ["comment", "string", "docstring"]
         layout = None
         pos = 0
-        if isinstance(cursor_or_block, QtGui.QTextCursor):
+        if isinstance(cursor_or_block, QtGui.QTextBlock):
+            pos = len(cursor_or_block.text()) - 1
+            layout = cursor_or_block.layout()
+        elif isinstance(cursor_or_block, QtGui.QTextCursor):
             b = cursor_or_block.block()
             pos = cursor_or_block.position() - b.position()
             layout = cursor_or_block.block().layout()
-        elif isinstance(cursor_or_block, QtGui.QTextBlock):
-            pos = len(cursor_or_block.text()) - 1
-            layout = cursor_or_block.layout()
         if layout is not None:
             additional_formats = layout.additionalFormats()
             sh = self._editor.syntax_highlighter
@@ -918,8 +914,6 @@ def keep_tc_pos(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         """ Decorator """
-        from pyqode.core.api import CodeEdit
-        from pyqode.core.qt import QtWidgets
         sb = editor.verticalScrollBar()
         spos = sb.sliderPosition()
         pos = editor.textCursor().position()

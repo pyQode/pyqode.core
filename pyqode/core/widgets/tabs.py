@@ -300,7 +300,8 @@ class TabWidget(QTabWidget):
             self._del_code_edit(code_edit)
             return -1
         self._ensure_unique_name(code_edit, name)
-        index = self.addTab(code_edit, code_edit.file.icon, code_edit._tab_name)
+        index = self.addTab(code_edit, code_edit.file.icon,
+                            code_edit._tab_name)
         self.setCurrentIndex(index)
         self.setTabText(index, code_edit._tab_name)
         try:

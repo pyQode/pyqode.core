@@ -115,7 +115,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
-        self._col = self.editor.textCursor().positionInBlock() - len(self.completion_prefix)
+        self._col = self.editor.textCursor().positionInBlock() - len(
+            self.completion_prefix)
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
@@ -223,7 +224,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         cnt = self._completer.completionCount()
         n = len(self.editor.textCursor().block().text())
         c = self.editor.textCursor().positionInBlock()
-        if (not cnt or ((self.completion_prefix == "" and n == 0) and is_navigation_key) or
+        if (not cnt or ((self.completion_prefix == "" and n == 0) and
+                        is_navigation_key) or
                 is_end_of_word or
                 c < self._col or
                 (int(event.modifiers()) and
@@ -240,7 +242,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self._is_shortcut(event):
             return
         if (event.key() == QtCore.Qt.Key_Home or
-            event.key() == QtCore.Qt.Key_End):
+                event.key() == QtCore.Qt.Key_End):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
@@ -396,10 +398,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
         :return: bool
         """
-        modifier = QtCore.Qt.MetaModifier if sys.platform == 'darwin' else QtCore.Qt.ControlModifier
+        modifier = (QtCore.Qt.MetaModifier if sys.platform == 'darwin' else
+                    QtCore.Qt.ControlModifier)
         valid_modifier = int(event.modifiers() & modifier) == modifier
         valid_key = event.key() == self._trigger_key
-        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" % (valid_modifier, valid_key))
+        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" %
+                        (valid_modifier, valid_key))
         return valid_key and valid_modifier
 
     @staticmethod

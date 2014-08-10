@@ -300,9 +300,9 @@ class FoldingPanel(Panel):
         """
         color = self.editor.background
         if color.lightness() < 128:
-             color = drift_color(color, 130)
+            color = drift_color(color, 130)
         else:
-             color = drift_color(color, 105)
+            color = drift_color(color, 105)
         return color
 
     def _add_scope_deco(self, start, end, parent_start, parent_end, base_color,
@@ -360,7 +360,8 @@ class FoldingPanel(Panel):
                 # highlight parent scope
                 parent_start, parent_end = parent.get_range()
                 self._add_scope_deco(
-                    start, end + 1, parent_start, parent_end, base_color, factor)
+                    start, end + 1, parent_start, parent_end,
+                    base_color, factor)
                 # next parent scope
                 start = parent_start
                 end = parent_end
@@ -544,7 +545,7 @@ class FoldingPanel(Panel):
         # set previous blank lines visibles
         pblock = block.previous()
         while (pblock.text().strip() == '' and
-                       pblock.blockNumber() >= 0):
+               pblock.blockNumber() >= 0):
             pblock.setVisible(True)
             pblock = pblock.previous()
 
