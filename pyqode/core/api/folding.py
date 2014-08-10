@@ -19,14 +19,15 @@ def print_tree(editor, file=sys.stdout, print_blocks=False):
         trigger = TextBlockHelper().is_fold_trigger(block)
         trigger_state = TextBlockHelper().get_fold_trigger_state(block)
         lvl = TextBlockHelper().get_fold_lvl(block)
+        visible = 'V' if block.isVisible() else 'I'
         if trigger:
             trigger = '+' if trigger_state else '-'
-            print('l%d: %s%s %s' %
-                  (block.blockNumber() + 1, lvl * 4 * ' ', trigger, lvl),
+            print('l%d:%s%s%s' %
+                  (block.blockNumber() + 1, lvl, trigger, visible),
                   file=file)
         elif print_blocks:
-            print('l%d: %s %s' %
-                  (block.blockNumber() + 1, lvl * 4 * ' ', lvl), file=file)
+            print('l%d:%s%s' %
+                  (block.blockNumber() + 1, lvl, visible), file=file)
         block = block.next()
 
 
@@ -129,7 +130,7 @@ class FoldDetector:
         :param block: The block to process.
         :return: Fold level
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class IndentFoldDetector(FoldDetector):
@@ -215,7 +216,7 @@ class FoldScope:
                 last_line = block.blockNumber() + 1
         return first_line, last_line
 
-    def fold(self, recursively=False):
+    def fold(self):
         """
         Folds the region.
 
@@ -226,8 +227,6 @@ class FoldScope:
         block = self._trigger.next()
         while block.blockNumber() < end and block.isValid():
             block.setVisible(False)
-            if recursively and TextBlockHelper.is_fold_trigger(block):
-                TextBlockHelper.set_fold_trigger_state(self._trigger, True)
             block = block.next()
 
     def unfold(self):

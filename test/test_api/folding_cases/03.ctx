@@ -1,0 +1,3 @@
+input:test/test_api/folding_cases/foo.py
+results:test/test_api/folding_cases/03.results
+actions:goto_line(15,4);fold;goto_line(9,0);fold;unfold

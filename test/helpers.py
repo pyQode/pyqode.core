@@ -41,6 +41,27 @@ def cwd_at(path):
     return decorator
 
 
+def delete_file_on_return(path):
+    """
+    Decorator to run function at `path`.
+
+    :type path: str
+    :arg path: relative path from repository root (e.g., 'pyqode' or 'test').
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwds):
+            try:
+                return func(*args, **kwds)
+            finally:
+                try:
+                    os.remove(path)
+                except (IOError, OSError):
+                    pass
+        return wrapper
+    return decorator
+
+
 def editor_open(path):
     if not os.path.exists(path):
         try:
