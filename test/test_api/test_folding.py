@@ -19,7 +19,7 @@ class FoldDetectorTestCase:
         with open(results_file, 'r') as f:
             self.expected_results_content = f.read()
 
-    # @delete_file_on_return('file_structure')
+    @delete_file_on_return('file_structure')
     def execute(self, editor):
         editor.setPlainText(self.test_file_content, '', '')
         with open('file_structure', 'w') as f:
@@ -157,6 +157,7 @@ class DynamicFoldDetectorTestCase:
                 scope = self._get_scope(editor)
                 assert scope is None
 
+    @delete_file_on_return('file_structure')
     def execute(self, editor):
         editor.setPlainText(self.file_content, '', '')
         self.perform_actions(editor)
