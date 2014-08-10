@@ -24,6 +24,7 @@ exclude_lines =
     raise RuntimeError
 
     # Don't complain if non-runnable code isn't run:
+    if sys.platform == 'darwin':
     if 0:
     if __name__ == .__main__.:
     if not PY33:

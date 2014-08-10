@@ -178,7 +178,7 @@ def server_path():
 
 def setup_editor(code_edit):
         # append panels
-    p = panels.FoldingPanel()
+    p = panels.FoldingPanel(highlight_caret_scope=True)
     code_edit.panels.append(p)
     p.show()
     p = panels.LineNumberPanel()
