@@ -352,8 +352,10 @@ class FoldingPanel(Panel):
             base_color = self._get_scope_highlight_color()
             factor_step = 5
             if base_color.lightness() < 128:
-                factor_step = 30
-            factor = 100
+                factor_step = 10
+                factor = 70
+            else:
+                factor = 100
             while parent:
                 # highlight parent scope
                 parent_start, parent_end = parent.get_range()
