@@ -57,7 +57,7 @@ def drift_color(base_color, factor=110):
         return base_color.darker(factor)
     else:
         if base_color == QtGui.QColor('#000000'):
-            return QtGui.QColor('#202020')
+            return drift_color(QtGui.QColor('#101010'), factor + 20)
         else:
             return base_color.lighter(factor + 10)
 
@@ -513,11 +513,15 @@ class TextHelper:
         :return: The center position of the line.
         """
         editor = self._editor
-        block = editor.document().findBlockByNumber(line_number)
+        block = editor.document().findBlockByNumber(line_number - 1)
         if block.isValid():
             return int(editor.blockBoundingGeometry(block).translated(
                 editor.contentOffset()).top())
-        return None
+        if line_number <= 0:
+            return 0
+        else:
+            return int(editor.blockBoundingGeometry(block.previous()).translated(
+                editor.contentOffset()).bottom())
 
     def line_nbr_from_position(self, y_pos):
         """
@@ -548,13 +552,16 @@ class TextHelper:
         Returns the indent level of the specified line
 
         :param line_nbr: Number of the line to get indentation (1 base). Pass None
-            to use the current line number.
+            to use the current line number. Note that you can also pass a
+            QTextBlock instance instead of
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
         editor = self._editor
         if line_nbr is None:
             line_nbr = self.current_line_nbr()
+        elif isinstance(line_nbr, QtGui.QTextBlock):
+            line_nbr = line_nbr.blockNumber() + 1
         line = self.line_text(line_nbr)
         indentation = len(line) - len(line.lstrip())
         return indentation
@@ -671,19 +678,28 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
-    def is_comment_or_string(self, cursor, formats=None):
+    def is_comment_or_string(self, cursor_or_block, formats=None):
         if formats is None:
             formats = ["comment", "string", "docstring"]
-        pos = cursor.position() - cursor.block().position()
-        additional_formats = cursor.block().layout().additionalFormats()
-        sh = self._editor.syntax_highlighter
-        if sh:
-            ref_formats = sh.color_scheme.formats
-            for r in additional_formats:
-                if pos >= r.start and pos <= (r.start + r.length):
-                    for fmt_type in formats:
-                        if ref_formats[fmt_type] == r.format:
-                            return True
+        layout = None
+        pos = 0
+        if isinstance(cursor_or_block, QtGui.QTextCursor):
+            b = cursor_or_block.block()
+            pos = cursor_or_block.position() - b.position()
+            layout = cursor_or_block.block().layout()
+        elif isinstance(cursor_or_block, QtGui.QTextBlock):
+            pos = len(cursor_or_block.text()) - 1
+            layout = cursor_or_block.layout()
+        if layout is not None:
+            additional_formats = layout.additionalFormats()
+            sh = self._editor.syntax_highlighter
+            if sh:
+                ref_formats = sh.color_scheme.formats
+                for r in additional_formats:
+                    if r.start <= pos <= (r.start + r.length):
+                        for fmt_type in formats:
+                            if ref_formats[fmt_type] == r.format:
+                                return True
         return False
 
 
@@ -700,10 +716,9 @@ class TextBlockHelper:
     The bitmask is made up of the following fields:
 
         - bit0 -> bit26: User state (for syntax highlighting)
-        - bit26: flag -> general purpose flag
+        - bit26: fold trigger state
         - bit27-bit29: fold level (8 level max)
         - bit30: fold trigger flag
-        - bit31: fold trigger state
 
     """
     @staticmethod
@@ -714,9 +729,11 @@ class TextBlockHelper:
         :return: The block state
 
         """
+        if block is None:
+            return -1
         state = block.userState()
         if state == -1:
-            return -1
+            return state
         return state & 0x03FFFFFF
 
     @staticmethod
@@ -728,42 +745,14 @@ class TextBlockHelper:
         :param state: new state value.
         :return:
         """
+        if block is None:
+            return
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
         higher_part = user_state & 0xFC000000
         state &= 0x03FFFFFF
         state |= higher_part
-        block.setUserState(state)
-
-    @staticmethod
-    def get_flag(block):
-        """
-        Gets a general purpose flag bit. It is not used internally and can be
-        used by client code for any purpose.
-
-        :param block: Block to access:
-
-        :return: True of False
-        """
-        state = block.userState()
-        if state == -1:
-            state = 0
-        return bool(state & 0x04000000)
-
-    @staticmethod
-    def set_flag(block, flg):
-        """
-        Sets the general purpose flag value.
-
-        :param block: block to modify
-        :param flg: New flag value
-        """
-        state = block.userState()
-        if state == -1:
-            state = 0
-        state &= 0xFBFFFFFF
-        state |= int(flg) << 26
         block.setUserState(state)
 
     @staticmethod
@@ -774,6 +763,8 @@ class TextBlockHelper:
         :param block: block to access.
         :returns: The block fold level
         """
+        if block is None:
+            return 0
         state = block.userState()
         if state == -1:
             state = 0
@@ -787,6 +778,8 @@ class TextBlockHelper:
         :param block: block to modify
         :param val: The new fold level [0-7]
         """
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
@@ -805,6 +798,8 @@ class TextBlockHelper:
         :return: True if the block is a fold trigger (represented as a node in
             the fold panel)
         """
+        if block is None:
+            return False
         state = block.userState()
         if state == -1:
             state = 0
@@ -812,6 +807,8 @@ class TextBlockHelper:
 
     @staticmethod
     def set_fold_trigger(block, val):
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
@@ -825,10 +822,12 @@ class TextBlockHelper:
         Gets the fold trigger state.
         :return: False for an open trigger, True for for closed trigger
         """
+        if block is None:
+            return False
         state = block.userState()
         if state == -1:
             state = 0
-        return bool(state & 0x80000000)
+        return bool(state & 0x04000000)
 
     @staticmethod
     def set_fold_trigger_state(block, val):
@@ -838,11 +837,13 @@ class TextBlockHelper:
         :param block: The block to modify
         :param val: The new trigger state (False = open, True = closed)
         """
+        if block is None:
+            return
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0x7FFFFFFF
-        state |= int(val) << 31
+        state &= 0xFBFFFFFF
+        state |= int(val) << 26
         block.setUserState(state)
 
 
@@ -913,10 +914,15 @@ def keep_tc_pos(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         """ Decorator """
+        from pyqode.core.api import CodeEdit
+        from pyqode.core.qt import QtWidgets
+        sb = editor.verticalScrollBar()
+        spos = sb.sliderPosition()
         pos = editor.textCursor().position()
         retval = func(editor, *args, **kwds)
         text_cursor = editor.textCursor()
         text_cursor.setPosition(pos)
         editor.setTextCursor(text_cursor)
+        sb.setSliderPosition(spos)
         return retval
     return wrapper

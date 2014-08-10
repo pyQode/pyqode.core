@@ -108,7 +108,6 @@ class EncodingPanel(Panel):
         # binary to recognize the original encoding
         with open(path, 'rb') as file:
             content = str(file.read(16))
-            print(content)
         # set plain text
         self.editor.setPlainText(
             content, self.editor.file.get_mimetype(path),
@@ -150,11 +149,11 @@ class EncodingPanel(Panel):
             EncodingsContextMenu(parent=editor)
 
     def _reload(self):
+        self.hide()
         self._rm_deco()
         self.editor.setReadOnly(False)
         self.enable_caret_line(True)
         self.editor.file.reload(self.ui.comboBoxEncodings.current_encoding)
-        self.hide()
 
     def _edit_anyway(self):
         self._rm_deco()
@@ -168,7 +167,8 @@ class EncodingPanel(Panel):
             self._deco = None
 
     def cancel(self):
-        self.editor.clear()
+        if self.sender():
+            self.editor.clear()
         self._rm_deco()
         self.enable_caret_line(True)
         self.cancel_requested.emit(self.editor)

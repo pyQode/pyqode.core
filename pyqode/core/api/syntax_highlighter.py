@@ -3,7 +3,7 @@ from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token, Punctuation
 import sys
 import time
-from pyqode.core.api.utils import TextHelper
+from pyqode.core.api.utils import TextHelper, TextBlockHelper
 from pyqode.core.api.mode import Mode
 from pyqode.core.qt import QtGui, QtCore, QtWidgets
 
@@ -217,6 +217,12 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         else:
             mode.background = color_scheme.highlight
             mode.refresh()
+        try:
+            mode = self.editor.panels.get('FoldingPanel')
+        except KeyError:
+            pass
+        else:
+            mode.refresh_decorations(force=True)
         self.editor._reset_stylesheet()  # pylint: disable=protected-access
 
 
@@ -233,8 +239,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             color_scheme = ColorScheme('qt')
         self._color_scheme = color_scheme
         self._spaces_ptrn = QtCore.QRegExp(r'[ \t]+')
-        # current block (with a user_data attribute)
-        self.current_block = None
+        #: Fold detector. Set it to a valid FoldDetector to get code folding
+        #: to work. Default is None
+        self.fold_detector = None
 
     def _highlight_whitespaces(self, text):
         fmt = QtGui.QTextCharFormat()
@@ -246,18 +253,32 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setFormat(index, length, self.formats['whitespace'])
             index = self.WHITESPACES.indexIn(text, index + length)
 
+
+    def _find_prev_non_blank_block(self, current_block):
+        previous_block = (current_block.previous()
+                          if current_block.blockNumber() else None)
+        # find the previous non-blank block
+        while (previous_block and previous_block.blockNumber() and
+                       previous_block.text().strip() == ''):
+            previous_block = previous_block.previous()
+        return previous_block
+
     def highlightBlock(self, text):  #: pylint: disable=invalid-name
         """
         Highlights a block of text.
         """
         # self.block_highlight_started.emit(self, text)
         # # # setup user data
-        block = self.currentBlock()
-        self.current_block = block
+        current_block = self.currentBlock()
+        previous_block = self._find_prev_non_blank_block(current_block)
         if self.editor:
-            self.highlight_block(text, block)
+            self.highlight_block(text, current_block)
             if self.editor.show_whitespaces:
                 self._highlight_whitespaces(text)
+            if self.fold_detector is not None:
+                self.fold_detector.editor = self.editor
+                self.fold_detector.process_block(
+                    current_block, previous_block, text)
 
     def highlight_block(self, text, block):
         """
@@ -269,8 +290,12 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         raise NotImplementedError()
 
     def rehighlight(self):
+        """
+        Rehighlight the entire document, may be slow.
+        """
         start = time.time()
-        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        QtWidgets.QApplication.setOverrideCursor(
+            QtGui.QCursor(QtCore.Qt.WaitCursor))
         super().rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()

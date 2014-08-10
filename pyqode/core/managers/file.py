@@ -144,7 +144,7 @@ class FileManager(Manager):
         try:
             with open(path, 'r', encoding=encoding) as file:
                 content = file.read()
-        except UnicodeDecodeError as e:
+        except (UnicodeDecodeError, UnicodeError) as e:
             try:
                 from pyqode.core.panels import EncodingPanel
                 panel = self.editor.panels.get(EncodingPanel)

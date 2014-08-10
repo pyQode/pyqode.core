@@ -32,7 +32,7 @@ def test_drift_color():
            QtGui.QColor("#262626").name()
 
     assert utils.drift_color(QtGui.QColor("#000000")).name() == \
-           QtGui.QColor("#202020").name()
+           QtGui.QColor("#161616").name()
 
 
 def test_text_style():
@@ -81,21 +81,6 @@ def test_block_helper():
     assert utils.TextBlockHelper.get_state(block) == 26
 
     #
-    # test disabled flag (and ensure the last user state values still exisits)
-    #
-    flg = utils.TextBlockHelper.get_flag(block)
-    assert flg is False
-    utils.TextBlockHelper.set_flag(block, True)
-    flg = utils.TextBlockHelper.get_flag(block)
-    assert flg is True
-    utils.TextBlockHelper.set_flag(block, False)
-    flg = utils.TextBlockHelper.get_flag(block)
-    assert flg is False
-    utils.TextBlockHelper.set_flag(block, True)
-    # ensure other values are intact
-    assert utils.TextBlockHelper.get_state(block) == 26
-
-    #
     # test fold level
     #
     lvl = utils.TextBlockHelper.get_fold_lvl(block)
@@ -108,7 +93,6 @@ def test_block_helper():
     assert lvl == 7
     # ensure other values are intact
     assert utils.TextBlockHelper.get_state(block) == 26
-    assert utils.TextBlockHelper.get_flag(block) is True
 
     #
     # Test fold trigger
@@ -122,8 +106,6 @@ def test_block_helper():
     # ensure other values are intact
     assert utils.TextBlockHelper.get_fold_lvl(block) == 7
     assert utils.TextBlockHelper.get_state(block) == 26
-    assert utils.TextBlockHelper.get_flag(block) is True
-
 
     #
     # Test fold trigger state
@@ -137,4 +119,3 @@ def test_block_helper():
     assert utils.TextBlockHelper.is_fold_trigger(block) is True
     assert utils.TextBlockHelper.get_fold_lvl(block) == 7
     assert utils.TextBlockHelper.get_state(block) == 26
-    assert utils.TextBlockHelper.get_flag(block) is True

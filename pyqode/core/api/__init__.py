@@ -23,6 +23,9 @@ from .utils import TextHelper, TextBlockHelper
 from .utils import get_block_symbol_data
 from .utils import DelayJobRunner
 from .utils import TextStyle
+from .folding import FoldDetector
+from .folding import IndentFoldDetector
+from .folding import FoldScope
 
 
 __all__ = [
@@ -32,6 +35,9 @@ __all__ = [
     'ColorScheme'
     'DelayJobRunner',
     'ENCODINGS_MAP',
+    'FoldDetector',
+    'IndentFoldDetector',
+    'FoldScope',
     'Manager',
     'Mode',
     'Panel',

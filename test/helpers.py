@@ -8,7 +8,7 @@ import functools
 import platform
 from os.path import abspath
 from os.path import dirname
-from pyqode.core.api import CodeEdit
+from pyqode.core.api import CodeEdit, IndentFoldDetector
 from pyqode.core import modes
 from pyqode.core import panels
 from pyqode.core.qt.QtTest import QTest
@@ -37,6 +37,27 @@ def cwd_at(path):
                 return func(*args, **kwds)
             finally:
                 os.chdir(oldcwd)
+        return wrapper
+    return decorator
+
+
+def delete_file_on_return(path):
+    """
+    Decorator to run function at `path`.
+
+    :type path: str
+    :arg path: relative path from repository root (e.g., 'pyqode' or 'test').
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwds):
+            try:
+                return func(*args, **kwds)
+            finally:
+                try:
+                    os.remove(path)
+                except (IOError, OSError):
+                    pass
         return wrapper
     return decorator
 
@@ -157,6 +178,9 @@ def server_path():
 
 def setup_editor(code_edit):
         # append panels
+    p = panels.FoldingPanel(highlight_caret_scope=True)
+    code_edit.panels.append(p)
+    p.show()
     p = panels.LineNumberPanel()
     code_edit.panels.append(p)
     p.show()
@@ -185,3 +209,4 @@ def setup_editor(code_edit):
     code_edit.modes.append(modes.SymbolMatcherMode())
     code_edit.modes.append(modes.WordClickMode())
     code_edit.modes.get(modes.FileWatcherMode).auto_reload = True
+    code_edit.syntax_highlighter.fold_detector = IndentFoldDetector()

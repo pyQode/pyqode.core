@@ -109,8 +109,12 @@ def test_select_lines(editor):
 @log_test_name
 def test_line_pos_from_number(editor):
     assert TextHelper(editor).line_pos_from_number(1) is not None
-    assert TextHelper(editor).line_pos_from_number(
-        TextHelper(editor).line_count() + 10) is None
+    # out of range line will return the bottom of the document or the top
+    assert TextHelper(editor).line_pos_from_number(-1) == 0
+    pos = TextHelper(editor).line_pos_from_number(
+        TextHelper(editor).line_count() + 10)
+    assert pos is not None
+    assert pos > 0
 
 
 @editor_open(__file__)

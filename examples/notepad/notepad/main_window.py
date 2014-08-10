@@ -216,6 +216,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def refresh_color_scheme(self):
         if self.styles_group and self.styles_group.checkedAction():
             style = self.styles_group.checkedAction().text()
+            style = style.replace('&', '') # qt5 bug on kde?
         else:
             style = 'qt'
         for i in range(self.tabWidget.count()):

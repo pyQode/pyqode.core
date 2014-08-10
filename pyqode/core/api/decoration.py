@@ -31,7 +31,8 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
 
     # pylint: disable=too-many-arguments
     def __init__(self, cursor_or_bloc_or_doc, start_pos=None, end_pos=None,
-                 start_line=None, end_line=None, draw_order=0, tooltip=None):
+                 start_line=None, end_line=None, draw_order=0, tooltip=None,
+                 full_width=False):
         """
         Creates a text decoration
 
@@ -47,18 +48,20 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         self.signals = self._TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip
-        cursor = QtGui.QTextCursor(cursor_or_bloc_or_doc)
+        self.cursor = QtGui.QTextCursor(cursor_or_bloc_or_doc)
+        if full_width:
+            self.set_full_width(full_width)
         if start_pos is not None:
-            cursor.setPosition(start_pos)
+            self.cursor.setPosition(start_pos)
         if end_pos is not None:
-            cursor.setPosition(end_pos, QtGui.QTextCursor.KeepAnchor)
+            self.cursor.setPosition(end_pos, QtGui.QTextCursor.KeepAnchor)
         if start_line is not None:
-            cursor.movePosition(cursor.Start, cursor.MoveAnchor)
-            cursor.movePosition(cursor.Down, cursor.MoveAnchor, start_line - 1)
+            self.cursor.movePosition(self.cursor.Start, self.cursor.MoveAnchor)
+            self.cursor.movePosition(self.cursor.Down, self.cursor.MoveAnchor,
+                                     start_line - 1)
         if end_line is not None:
-            cursor.movePosition(cursor.Down, cursor.KeepAnchor,
-                                end_line - start_line)
-        self.cursor = cursor
+            self.cursor.movePosition(self.cursor.Down, self.cursor.KeepAnchor,
+                                     end_line - start_line)
 
     def contains_cursor(self, cursor):
         """
@@ -67,8 +70,11 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         :param cursor: The text cursor to test
         :type cursor: QtGui.QTextCursor
         """
-        return self.cursor.selectionStart() <= cursor.position() <= \
-            self.cursor.selectionEnd()
+        start = self.cursor.selectionStart()
+        end = self.cursor.selectionEnd()
+        if cursor.atBlockEnd():
+            end -= 1
+        return start <= cursor.position() <= end
 
     def set_as_bold(self):
         """ Uses bold text """
@@ -100,9 +106,24 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         self.format.setProperty(QtGui.QTextFormat.OutlinePen,
                                 QtGui.QPen(color))
 
+    def select_line(self):
+        """
+        Select the entire line but starts at the first non whitespace character
+        and stops at the non-whitespace character.
+        :return:
+        """
+        self.cursor.movePosition(self.cursor.StartOfBlock)
+        text = self.cursor.block().text()
+        lindent = len(text) - len(text.lstrip())
+        rindent = len(text) - len(text.rstrip())
+        self.cursor.setPosition(self.cursor.block().position() + lindent)
+        self.cursor.movePosition(self.cursor.EndOfBlock,
+                                 self.cursor.KeepAnchor)
+
     def set_full_width(self, flag=True, clear=True):
         """
-        Sets full width selection.
+        Enables FullWidthSelection (the selection does not stops at after the
+        character instead it goes up to the right side of the widget).
 
         :param flag: True to use full width selection.
         :type flag: bool

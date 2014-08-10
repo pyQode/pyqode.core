@@ -44,6 +44,7 @@ class AutoIndentMode(Mode):
             if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
                 cursor = self.editor.textCursor()
                 pre, post = self._get_indent(cursor)
+                cursor.beginEditBlock()
                 cursor.insertText("%s\n%s" % (pre, post))
 
                 # eats possible whitespaces
@@ -53,5 +54,5 @@ class AutoIndentMode(Mode):
                     new_txt = txt.replace(" ", '')
                     if len(txt) > len(new_txt):
                         cursor.insertText(new_txt)
-
+                cursor.endEditBlock()
                 event.accept()

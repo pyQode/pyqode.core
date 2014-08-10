@@ -14,7 +14,7 @@ from ..helpers import editor_open
 @log_test_name
 def test_add_decoration(editor):
     helper = TextHelper(editor)
-    helper.goto_line(2, 2)
+    helper.goto_line(3, 2)
     cursor = helper.word_under_cursor(select_whole_word=True)
     deco = TextDecoration(cursor)
     deco.set_as_bold()

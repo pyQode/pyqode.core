@@ -142,7 +142,7 @@ class CheckerMode(Mode, QtCore.QObject):
     """
     def __init__(self, worker,
                  delay=500,
-                 show_tooltip=False):
+                 show_tooltip=True):
         """
         :param worker: The process function or class to call remotely.
         :param delay: The delay used before running the analysis process when
@@ -224,7 +224,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 message.decoration = TextDecoration(
                     self.editor.textCursor(), start_line=message.line,
                     tooltip=tooltip, draw_order=3)
-                message.decoration.set_full_width(True)
+                message.decoration.select_line()
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
                 self.editor.decorations.append(message.decoration)
@@ -240,8 +240,11 @@ class CheckerMode(Mode, QtCore.QObject):
         """
         _logger(self.__class__).debug('removing message %s' % message)
         usd = message.block.userData()
-        if usd and usd.messages:
-            usd.messages.remove(message)
+        try:
+            if usd and usd.messages:
+                usd.messages.remove(message)
+        except AttributeError:
+            pass
         self._messages.remove(message)
         if message.decoration:
             self.editor.decorations.remove(message.decoration)
@@ -256,8 +259,10 @@ class CheckerMode(Mode, QtCore.QObject):
     def on_state_changed(self, state):
         if state:
             self.editor.textChanged.connect(self.request_analysis)
+            self.editor.new_text_set.connect(self.clear_messages)
         else:
             self.editor.textChanged.disconnect(self.request_analysis)
+            self.editor.new_text_set.disconnect(self.clear_messages)
 
     def _on_work_finished(self, status, results):
         """

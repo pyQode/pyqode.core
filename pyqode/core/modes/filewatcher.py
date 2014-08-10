@@ -72,7 +72,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             # file_path does not exists.
             self._mtime = 0
             self._timer.stop()
-        except TypeError:
+        except (TypeError, AttributeError):
             # file path is none, this happen if you use setPlainText instead of
             # openFile. This is perfectly fine, we just do not have anything to
             # watch
