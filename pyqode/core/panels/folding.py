@@ -614,7 +614,7 @@ class FoldingPanel(Panel):
         """
         for deco in self._block_decos:
             self.editor.decorations.remove(deco)
-        self._block_decos.clear()
+        self._block_decos[:] = []
 
     def expand_all(self):
         """
