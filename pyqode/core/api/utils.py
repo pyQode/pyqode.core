@@ -244,7 +244,8 @@ class TextHelper:
         end_pos = start_pos = text_cursor.position()
         # select char by char until we are at the original cursor position.
         while not text_cursor.atStart():
-            text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
+            text_cursor.movePosition(
+                text_cursor.Left, text_cursor.KeepAnchor, 1)
             try:
                 char = text_cursor.selectedText()[0]
                 word_separators = editor.word_separators
@@ -421,14 +422,17 @@ class TextHelper:
         text_cursor.movePosition(text_cursor.Start)
         text_cursor.movePosition(
             text_cursor.Down, text_cursor.MoveAnchor,
-            pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
-        text_cursor.movePosition(text_cursor.StartOfLine, text_cursor.MoveAnchor)
+            pos[0] - 1 if pos[0] <= doc.blockCount() else
+            doc.blockCount() - 1)
+        text_cursor.movePosition(text_cursor.StartOfLine,
+                                 text_cursor.MoveAnchor)
         cpos = text_cursor.position()
         text_cursor.select(text_cursor.LineUnderCursor)
         if text_cursor.selectedText():
             text_cursor.setPosition(cpos)
             offset = pos[1] - eaten
-            text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
+            text_cursor.movePosition(text_cursor.Right,
+                                     text_cursor.MoveAnchor,
                                      offset)
         else:
             text_cursor.setPosition(cpos)
@@ -520,8 +524,8 @@ class TextHelper:
         if line_number <= 0:
             return 0
         else:
-            return int(editor.blockBoundingGeometry(block.previous()).translated(
-                editor.contentOffset()).bottom())
+            return int(editor.blockBoundingGeometry(
+                block.previous()).translated(editor.contentOffset()).bottom())
 
     def line_nbr_from_position(self, y_pos):
         """
@@ -551,9 +555,9 @@ class TextHelper:
         """
         Returns the indent level of the specified line
 
-        :param line_nbr: Number of the line to get indentation (1 base). Pass None
-            to use the current line number. Note that you can also pass a
-            QTextBlock instance instead of
+        :param line_nbr: Number of the line to get indentation (1 base).
+            Pass None to use the current line number. Note that you can also
+            pass a QTextBlock instance instead of
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
@@ -594,9 +598,9 @@ class TextHelper:
         Inserts text at the cursor position.
 
         :param text: text to insert
-        :param keep_position: Flag that specifies if the cursor position must be
-            kept. Pass False for a regular insert (the cursor will be at the end
-            of the inserted text).
+        :param keep_position: Flag that specifies if the cursor position must
+            be kept. Pass False for a regular insert (the cursor will be at
+            the end of the inserted text).
         """
         text_cursor = self._editor.textCursor()
         if keep_position:
@@ -619,8 +623,8 @@ class TextHelper:
         """
         Moves the cursor on the right.
 
-        :param keep_anchor: True to keep anchor (to select text) or False to move
-            the anchor (no selection)
+        :param keep_anchor: True to keep anchor (to select text) or False to
+            move the anchor (no selection)
         :param nb_chars: Number of characters to move.
         """
         text_cursor = self._editor.textCursor()

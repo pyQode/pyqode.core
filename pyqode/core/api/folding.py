@@ -205,7 +205,7 @@ class FoldScope:
                             # in pyqode.python
             ref_lvl -= 1
         while (block.isValid() and
-            TextBlockHelper.get_fold_lvl(block) > ref_lvl):
+                TextBlockHelper.get_fold_lvl(block) > ref_lvl):
             last_line = block.blockNumber() + 1
             block = block.next()
 
@@ -295,7 +295,7 @@ class FoldScope:
             ref_lvl = self.trigger_level - 1
             while (block.blockNumber() and
                     (not TextBlockHelper.is_fold_trigger(block) or
-                    TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
+                     TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
                 block = block.previous()
             try:
                 return FoldScope(block)

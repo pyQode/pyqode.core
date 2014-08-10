@@ -9,8 +9,9 @@ class Manager:
         - panels management and drawing
         - file manager
 
-    Managers are typically created internally when you create a CodeEdit, You interact with
-    them later, e.g. when you start the backend process, install a mode or a panel::
+    Managers are typically created internally when you create a CodeEdit.
+    You interact with them later, e.g. when you start the backend process,
+    install a mode or a panel::
 
         editor = CodeEdit()
 

@@ -179,8 +179,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         The editor white spaces' foreground color. White spaces are highlighter
         by the syntax highlighter. You should call rehighlight to update their
-        color. This is not done automatically to prevent multiple, useless call to
-        rehighligh which can take some time on big files.
+        color. This is not done automatically to prevent multiple, useless
+        call to rehighligh which can take some time on big files.
         """
         return self._whitespaces_foreground
 
@@ -320,9 +320,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._font_size = 10
         self._background = None
         QtGui.QFontDatabase.addApplicationFont(
-                ':/fonts/rc/SourceCodePro-Regular.ttf')
+            ':/fonts/rc/SourceCodePro-Regular.ttf')
         QtGui.QFontDatabase.addApplicationFont(
-                ':/fonts/rc/SourceCodePro-Bold.ttf')
+            ':/fonts/rc/SourceCodePro-Bold.ttf')
         self._font_family = "Source Code Pro"
         self._mimetypes = []
 

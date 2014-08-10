@@ -22,8 +22,8 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
     """
     class _TextDecorationSignals(QtCore.QObject):
         """
-        Holds the signals for a TextDecoration (since we cannot make it a QObject,
-        we need to store its signals in an external QObject).
+        Holds the signals for a TextDecoration (since we cannot make it a
+        QObject, we need to store its signals in an external QObject).
         """
         # pylint: disable=too-few-public-methods
         #: Signal emitted when a TextDecoration has been clicked.

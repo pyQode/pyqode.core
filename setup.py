@@ -22,7 +22,7 @@ setup(
     name='pyqode.core',
     namespace_packages=['pyqode'],
     version=read_version(),
-    packages=[p for p in find_packages() if not 'test' in p],
+    packages=[p for p in find_packages() if 'test' not in p],
     keywords=["CodeEdit PyQt source code editor widget qt"],
     url='https://github.com/pyQode/pyqode.core',
     license='MIT',

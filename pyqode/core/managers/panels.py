@@ -48,7 +48,7 @@ class PanelsManager(Manager):
             Panel.Position.TOP: 'top'
         }
         _logger().info('adding panel %s at %r', panel.name,
-                        pos_to_string[position])
+                       pos_to_string[position])
         panel.order_in_zone = len(self._panels[position])
         self._panels[position][panel.name] = panel
         panel.position = position

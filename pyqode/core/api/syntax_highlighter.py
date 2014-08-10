@@ -84,9 +84,11 @@ class ColorScheme:
 
     def _load_formats_from_style(self, style):
         # background
-        self.formats['background'] = self._get_format_from_color(style.background_color)
+        self.formats['background'] = self._get_format_from_color(
+            style.background_color)
         # highlight
-        self.formats['highlight'] = self._get_format_from_color(style.highlight_color)
+        self.formats['highlight'] = self._get_format_from_color(
+            style.highlight_color)
         # token styles
         token_key_pairs = [
             (Token.Keyword, 'keyword'),
@@ -225,7 +227,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             mode.refresh_decorations(force=True)
         self.editor._reset_stylesheet()  # pylint: disable=protected-access
 
-
     @color_scheme.setter
     def color_scheme(self, color_scheme):
         self._color_scheme = color_scheme
@@ -233,7 +234,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.rehighlight()
 
     def __init__(self, parent, color_scheme=None):
-        QtGui.QSyntaxHighlighter.__init__(self,  parent)
+        QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         if not color_scheme:
             color_scheme = ColorScheme('qt')
@@ -253,13 +254,12 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setFormat(index, length, self.formats['whitespace'])
             index = self.WHITESPACES.indexIn(text, index + length)
 
-
     def _find_prev_non_blank_block(self, current_block):
         previous_block = (current_block.previous()
                           if current_block.blockNumber() else None)
         # find the previous non-blank block
         while (previous_block and previous_block.blockNumber() and
-                       previous_block.text().strip() == ''):
+               previous_block.text().strip() == ''):
             previous_block = previous_block.previous()
         return previous_block
 

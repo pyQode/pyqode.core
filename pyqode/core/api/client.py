@@ -136,7 +136,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             self._port = self.pick_free_port()
         else:
             self._port = port
-        if hasattr(sys, "frozen") :  # pragma: no cover
+        if hasattr(sys, "frozen"):  # pragma: no cover
             # frozen server script on windows/mac does not need an interpreter
             program = server_script
             pgm_args = [str(self._port)]

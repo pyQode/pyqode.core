@@ -111,18 +111,21 @@ class FileManager(Manager):
         """
         Open a file and set its content on the editor widget.
 
-        pyqode does not try to guess encoding. It's up to the client code to handle
-        encodings. You can either use a charset detector to detect encoding or rely
-        on a settings in your application. It is also up to you to handle UnicodeDecodeError,
-        unless you've added class:`pyqode.core.panels.EncodingPanel` on the editor.
+        pyqode does not try to guess encoding. It's up to the client code to
+        handle encodings. You can either use a charset detector to detect
+        encoding or rely on a settings in your application. It is also up to
+        you to handle UnicodeDecodeError, unless you've added
+        class:`pyqode.core.panels.EncodingPanel` on the editor.
 
         pyqode automatically caches file encoding that you can later reuse it
         automatically.
 
         :param path: Path of the file to open.
-        :param encoding: Default file encoding. Default is to use the locale encoding.
-        :param use_cached_encoding: True to use the cached encoding instead of ``encoding``.
-            Set it to True if you want to force reload with a new encoding.
+        :param encoding: Default file encoding. Default is to use the locale
+                         encoding.
+        :param use_cached_encoding: True to use the cached encoding instead
+            of ``encoding``. Set it to True if you want to force reload with a
+            new encoding.
 
         :raises: UnicodeDecodeError in case of error if no EncodingPanel
             were set on the editor.
@@ -197,8 +200,8 @@ class FileManager(Manager):
         """
         Save the editor content to a file.
 
-        :param path: optional file path. Set it to None to save using the current
-                     path (save), set a new path to save as.
+        :param path: optional file path. Set it to None to save using the
+                     current path (save), set a new path to save as.
         :param encoding: optional encoding, will use the current
                          file encoding if None.
         :param fallback_encoding: Fallback encoding to use in case of encoding
@@ -208,7 +211,8 @@ class FileManager(Manager):
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
         self.saving = True
-        _logger().debug("saving %r to %r with %r encoding", self.path, path, encoding)
+        _logger().debug(
+            "saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
             if self.path:
                 path = self.path
