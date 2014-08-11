@@ -3,6 +3,7 @@ from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token, Punctuation
 import sys
 import time
+from pygments.util import ClassNotFound
 from pyqode.core.api.utils import TextHelper, TextBlockHelper
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtGui, QtCore, QtWidgets
@@ -79,7 +80,15 @@ class ColorScheme:
         self._name = style
         self._brushes = {}
         self.formats = {}
-        style = get_style_by_name(style)
+        try:
+            style = get_style_by_name(style)
+        except ClassNotFound:
+            if style == 'qt':
+                from pyqode.core.styles.qt import QtStyle
+                style = QtStyle
+            elif style == 'darcular':
+                from pyqode.core.styles.darcula import DarculaStyle
+                style = DarculaStyle
         self._load_formats_from_style(style)
 
     def _load_formats_from_style(self, style):
