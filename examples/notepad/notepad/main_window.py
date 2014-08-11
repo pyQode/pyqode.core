@@ -41,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Connects slots to signals """
         self.actionOpen.triggered.connect(self.on_open)
         self.actionNew.triggered.connect(self.on_new)
-        self.actionSave.triggered.connect(self.tabWidget.save_current)
+        self.actionSave.triggered.connect(self.on_save)
         self.actionSave_as.triggered.connect(self.on_save_as)
         self.actionClose_tab.triggered.connect(self.tabWidget.close)
         self.actionClose_other_tabs.triggered.connect(
@@ -173,6 +173,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.open_file(filename)
 
     @QtCore.Slot()
+    def on_save(self):
+        self.tabWidget.save_current()
+        self._update_status_bar(self.tabWidget.currentWidget())
+
+    @QtCore.Slot()
     def on_save_as(self):
         """
         Save the current editor document as.
@@ -185,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tabWidget.save_current(filename)
             self.recent_files_manager.open_file(filename)
             self.menu_recents.update_actions()
+        self._update_status_bar(self.tabWidget.currentWidget())
 
     @QtCore.Slot()
     def on_current_tab_changed(self):
@@ -205,6 +211,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.setup_mnu_edit(editor)
             self.setup_mnu_modes(editor)
             self.setup_mnu_panels(editor)
+        self._update_status_bar(editor)
+
+    def _update_status_bar(self, editor):
+        if editor:
             self.lbl_cursor_pos.setText(
                 '%d:%d' % api.TextHelper(editor).cursor_position())
             self.lbl_encoding.setText(editor.file.encoding)
