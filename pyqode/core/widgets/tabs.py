@@ -273,8 +273,8 @@ class TabWidget(QTabWidget):
             code_edit.backend.stop()
         except AttributeError:
             pass
-        # code_edit.deleteLater()
-        # del code_edit
+        code_edit.deleteLater()
+        del code_edit
 
     def add_code_edit(self, code_edit, name=None):
         """
