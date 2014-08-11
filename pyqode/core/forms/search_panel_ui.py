@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'search_panel.ui'
+# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/forms/search_panel.ui'
 #
-# Created: Sat Aug  9 17:53:23 2014
+# Created: Mon Aug 11 09:22:20 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.qt import QtCore, QtGui, QtWidgets
 
 class Ui_SearchPanel(object):
     def setupUi(self, SearchPanel):

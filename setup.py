@@ -5,6 +5,18 @@ Setup script for pyqode.core
 """
 from setuptools import setup, find_packages
 
+#
+# add ``build_ui command`` (optional, for development only)
+# this command requires the following packages:
+#   - pyqt_distutils
+#   - pyqode-uic
+#
+try:
+    from pyqt_distutils.build_ui import build_ui
+    cmdclass = {'build_ui': build_ui}
+except ImportError:
+    cmdclass = {}
+
 
 def read_version():
     with open("pyqode/core/__init__.py") as f:
@@ -39,6 +51,7 @@ setup(
              'darcula = pyqode.core.styles.darcula:DarculaStyle']
     },
     zip_safe=False,
+    cmdclass=cmdclass,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: X11 Applications :: Qt',

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This scripts compile the ui and qrc files using pyqt5-dev-tools then modify
+This scripts compile the forms and qrc files using pyqt5-dev-tools then modify
 them to use pyqode.qt instead of PyQt5. It also adapts the rc imports so that
 they works with python3
 """
@@ -24,8 +24,8 @@ def fix_script(script):
 
 
 def main():
-    # ui scripts
-    for ui_file in glob.glob("*.ui"):
+    # forms scripts
+    for ui_file in glob.glob("*.forms"):
         base_name = os.path.splitext(ui_file)[0]
         dst = "%s_ui.py" % base_name
         cmd = "pyuic5 --from-import %s -o %s" % (ui_file, dst)

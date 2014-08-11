@@ -276,7 +276,7 @@ def test_keep_tc(editor):
 def test_get_mimetype(editor):
     from pyqode.core import managers
     mimetypes.add_type('text/x-python', '.py')
-    mimetypes.add_type('text/xml', '.ui')
+    mimetypes.add_type('text/xml', '.forms')
     assert managers.FileManager.get_mimetype('file.py') == 'text/x-python'
-    assert managers.FileManager.get_mimetype('file.ui') == 'text/xml'
+    assert managers.FileManager.get_mimetype('file.forms') == 'text/xml'
     assert managers.FileManager.get_mimetype('file.foo') == 'text/x-plain'

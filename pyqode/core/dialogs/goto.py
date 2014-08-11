@@ -1,4 +1,4 @@
-from pyqode.core.ui import dlg_goto_line_ui
+from pyqode.core.forms import dlg_goto_line_ui
 from pyqode.qt import QtWidgets
 
 __author__ = 'colin'

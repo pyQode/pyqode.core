@@ -1,7 +1,7 @@
 #
 # MANIFEST.in
 #
-# Manifest template for creating the pyQode source distribution.
+# Manifest template for creating the pyqode.core source distribution.
 include MANIFEST.in
 
 # setup, license and readme
@@ -12,8 +12,8 @@ include runtests.py
 include pytest.ini
 include conftest.py
 include .coveragerc
-include pylintrc
 
 recursive-include doc *
 recursive-include examples *
+recursive-include forms *
 recursive-include test *

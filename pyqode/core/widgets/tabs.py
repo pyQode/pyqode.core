@@ -5,7 +5,7 @@ show code editor tabs.
 """
 import logging
 import os
-from pyqode.core.ui.dlg_unsaved_files_ui import Ui_Dialog
+from pyqode.core.forms.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.modes.filewatcher import FileWatcherMode
 from pyqode.qt import QtCore, QtWidgets
 from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget

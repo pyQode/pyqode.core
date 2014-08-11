@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'dlg_goto_line.ui'
+# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/forms/dlg_goto_line.ui'
 #
-# Created: Sat Aug  9 17:53:23 2014
+# Created: Mon Aug 11 09:22:19 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.qt import QtCore, QtGui, QtWidgets
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
