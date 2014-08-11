@@ -202,12 +202,10 @@ class TabWidget(QTabWidget):
                 if not path:
                     return False
             old_path = self._current.file.path
-            try:
-                self._current.file.save(path)
-            except AttributeError:
-                self._current.save(path)
-            # path (and icon) may have changed
             code_edit = self._current
+            self._save_editor(code_edit)
+            path = code_edit.file.path
+            # path (and icon) may have changed
             if path and old_path != path:
                 self._ensure_unique_name(code_edit, code_edit.file.name)
                 self.setTabText(self.currentIndex(), code_edit._tab_name)
@@ -284,12 +282,21 @@ class TabWidget(QTabWidget):
         The widget is only added if there is no other editor tab open with the
         same filename, else the already open tab is set as current.
 
+        If the widget file path is empty, i.e. this is a new document that has
+        not been saved to disk, you may provided a formatted string
+        such as 'New document %d.txt' for the document name. The int format
+        will be automatically replaced by the number of new documents
+        (e.g. 'New document 1.txt' then 'New document 2.txt' and so on).
+        If you prefer to use your own code to manage the file names, just
+        ensure that the names are unique.
+
         :param code_edit: The code editor widget tab to append
         :type code_edit: pyqode.core.api.CodeEdit
 
         :param name: Name of the tab. Will use code_edit.file.name if None is
-            supplied. Default is None
-
+            supplied. Default is None. If this is a new document, you should
+            either pass a unique name or a formatted string (with a '%d'
+            format)
         :return: Tab index
         """
         # new empty editor widget (no path set)
@@ -297,9 +304,9 @@ class TabWidget(QTabWidget):
             cnt = 0
             for i in range(self.count()):
                 tab = self.widget(i)
-                if tab.file.path.startswith(name):
+                if tab.file.path.startswith(name[:name.find('%')]):
                     cnt += 1
-            name = '%s %d.py' % (name, cnt + 1)
+            name %= (cnt + 1)
             code_edit.file._path = name
         index = self.index_from_filename(code_edit.file.path)
         if index != -1:

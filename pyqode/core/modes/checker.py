@@ -300,11 +300,14 @@ class CheckerMode(Mode, QtCore.QObject):
         """ Requests a checking of the editor content. """
         if not self.editor:
             return
-        request_data = {
-            'code': self.editor.toPlainText(),
-            'path': self.editor.file.path,
-            'encoding': self.editor.file.encoding
-        }
+        try:
+            request_data = {
+                'code': self.editor.toPlainText(),
+                'path': self.editor.file.path,
+                'encoding': self.editor.file.encoding
+            }
+        except RuntimeError:
+            return
         try:
             self.editor.backend.send_request(
                 self._worker, request_data, on_receive=self._on_work_finished)

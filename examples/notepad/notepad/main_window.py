@@ -157,7 +157,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Add a new empty code editor to the tab widget
         """
-        self.tabWidget.add_code_edit(GenericCodeEdit(self), 'New document.txt')
+        self.tabWidget.add_code_edit(GenericCodeEdit(self),
+                                     'New document %d.txt')
         self.refresh_color_scheme()
 
     @QtCore.Slot()
