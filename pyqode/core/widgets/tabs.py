@@ -203,7 +203,7 @@ class TabWidget(QTabWidget):
                     return False
             old_path = self._current.file.path
             code_edit = self._current
-            self._save_editor(code_edit)
+            self._save_editor(code_edit, path)
             path = code_edit.file.path
             # path (and icon) may have changed
             if path and old_path != path:
@@ -267,11 +267,10 @@ class TabWidget(QTabWidget):
 
     @staticmethod
     def _del_code_edit(code_edit):
-        try:
-            code_edit.backend.stop()
-        except AttributeError:
-            pass
-        code_edit.deleteLater()
+        code_edit.backend.stop()
+        code_edit.modes.clear()
+        code_edit.panels.clear()
+        code_edit.delete()
         del code_edit
 
     def add_code_edit(self, code_edit, name=None):
@@ -350,9 +349,10 @@ class TabWidget(QTabWidget):
                 return True
         return False
 
-    def _save_editor(self, code_edit):
-        path = None
-        if not os.path.exists(code_edit.file.path):
+    def _save_editor(self, code_edit, path=None):
+        if not path:
+            path = code_edit.file.path
+        if not os.path.exists(path):
             path, status = QtWidgets.QFileDialog.getSaveFileName(
                 self, 'Save as (%s)' % code_edit.file.path)
         if path:
