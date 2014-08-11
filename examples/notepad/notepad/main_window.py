@@ -14,7 +14,7 @@ from pyqode.core import modes
 from pyqode.core import widgets
 
 from .editor import GenericCodeEdit
-from .ui.main_window_ui import Ui_MainWindow
+from .forms.main_window_ui import Ui_MainWindow
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -234,6 +234,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
+        action.panel.setVisible(action.isChecked())
 
     @QtCore.Slot()
     def on_mode_state_changed(self):

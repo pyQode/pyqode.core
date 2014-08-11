@@ -9,6 +9,18 @@ import os
 import sys
 from setuptools import setup, find_packages
 
+#
+# add ``build_ui command`` (optional, for development only)
+# this command requires the following packages:
+#   - pyqt_distutils
+#   - pyqode-uic
+#
+try:
+    from pyqt_distutils.build_ui import build_ui
+    cmdclass = {'build_ui': build_ui}
+except ImportError:
+    cmdclass = {}
+
 
 def read_version():
     """
@@ -34,9 +46,8 @@ with open('readme.rst', 'r') as readme:
 requirements = ['pygments>=1.6', 'pyqode.core', 'chardet']
 
 data_files = []
-if sys.platform == "linux" and is_run_as_root():
-    data_files.append(('/usr/share/applications', ['share/notepad.desktop']))
-    data_files.append(('/usr/share/pixmaps', ['share/notepad.png']))
+data_files.append(('share/applications', ['share/notepad.desktop']))
+data_files.append(('share/pixmaps', ['share/notepad.png']))
 
 
 setup(
@@ -53,6 +64,7 @@ setup(
     long_description=long_desc,
     zip_safe=False,
     install_requires=requirements,
+    cmdclass=cmdclass,
     entry_points={'gui_scripts': ['notepad = notepad:main']},
     classifiers=[
         'Development Status :: 5 - Production/Stable',

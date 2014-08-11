@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading forms file 'main_window.forms'
+# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/examples/notepad/forms/main_window.ui'
 #
-# Created: Mon May 19 10:46:05 2014
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Mon Aug 11 09:38:30 2014
+#      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.qt import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
