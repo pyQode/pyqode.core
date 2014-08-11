@@ -292,6 +292,15 @@ class TabWidget(QTabWidget):
 
         :return: Tab index
         """
+        # new empty editor widget (no path set)
+        if code_edit.file.path == '':
+            cnt = 0
+            for i in range(self.count()):
+                tab = self.widget(i)
+                if tab.file.path.startswith(name):
+                    cnt += 1
+            name = '%s %d.py' % (name, cnt + 1)
+            code_edit.file._path = name
         index = self.index_from_filename(code_edit.file.path)
         if index != -1:
             # already open, just show it
@@ -336,9 +345,9 @@ class TabWidget(QTabWidget):
 
     def _save_editor(self, code_edit):
         path = None
-        if not code_edit.file.path:
-            path = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'Choose destination path')
+        if not os.path.exists(code_edit.file.path):
+            path, status = QtWidgets.QFileDialog.getSaveFileName(
+                self, 'Save as (%s)' % code_edit.file.path)
         if path:
             code_edit.file.save(path)
 
@@ -431,7 +440,7 @@ class TabWidget(QTabWidget):
                         if widget.file.path == filename:
                             break
                     if widget != exept:
-                        widget.file.save()
+                        self._save_editor(widget)
                         self.removeTab(self.indexOf(widget))
             return True
         return False
