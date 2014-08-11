@@ -54,10 +54,8 @@ class CaseConverterMode(Mode):
         if state:
             if not self._actions_created:
                 self._create_actions()
-            self.separator = self.editor.add_separator()
             self.editor.add_action(self.action_to_lower)
             self.editor.add_action(self.action_to_upper)
         else:
             self.editor.remove_action(self.action_to_lower)
             self.editor.remove_action(self.action_to_upper)
-            self.editor.remove_action(self.separator)

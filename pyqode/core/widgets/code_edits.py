@@ -43,6 +43,7 @@ class TextEdit(CodeEdit):
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
+        self.add_separator()
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
@@ -82,6 +83,7 @@ class GenericCodeEdit(CodeEdit):
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
+        self.add_separator()
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())

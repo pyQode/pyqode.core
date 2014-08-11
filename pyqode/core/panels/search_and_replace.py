@@ -183,7 +183,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         super().on_state_changed(state)
         if state:
             # append menus
-            self._separator = self.editor.add_separator()
             self.editor.add_action(self.actionSearch)
             self.editor.add_action(self.actionActionSearchAndReplace)
             self.editor.add_action(self.actionFindNext)

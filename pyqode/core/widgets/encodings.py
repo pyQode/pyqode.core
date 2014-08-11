@@ -153,7 +153,6 @@ class EncodingsContextMenu(EncodingsMenu):
         super().__init__(title, parent, selected_encoding)
         self.reload_requested.connect(self._on_reload_requested)
         parent.new_text_set.connect(self._refresh)
-        self.parent().add_separator()
         self.parent().add_menu(self)
         self._timer = QtCore.QTimer()
         self._timer.setInterval(1)
