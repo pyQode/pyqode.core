@@ -28,4 +28,4 @@ pyqode is made up of the following top level packages/modules:
 
 """
 
-__version__ = '2.1.0-dev'
+__version__ = '2.1.0'
