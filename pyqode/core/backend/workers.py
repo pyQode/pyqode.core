@@ -4,7 +4,7 @@ This module contains the worker functions/classes used on the server side.
 
 A worker is a function or a callable which receive one single argument (the
 decoded json object) and returns a tuple made up of a status (bool) and a
-response object (json serialisable).
+response object (json serializable).
 
 A worker is always tightly coupled with its caller, so are the data.
 

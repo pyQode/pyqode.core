@@ -197,25 +197,48 @@ Syntax highlighter mode
 -----------------------
 
 pyQode makes extensive use of QSyntaxHighlighter for various purposes,
-sometimes completely different from syntax highlighting such as code folding and
-parenthesis matching.
+sometimes completely different from syntax highlighting such as code folding
+and parenthesis matching.
 
 To implement a new syntax highlighter for CodeEdit, you **must subclass**
 :class:`pyqode.core.api.SyntaxHighlighter` and **override** ``highlight_block``
 instead of ``highlightBlock``.
 
 For a complete real life example, see :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`
-or :class:`pyqode.python.PythonSyntaxHighlighters`
+or :class:`pyqode.python.modes.sh.PythonSH`
 
 .. warning:: You cannot just create your own QSyntaxHighlighter as you would do
              with a simple QPlainTextEdit because this will break code folding
              and parenthesis matching modes!
 
+Starting from version 2.1, native highlighters may use a Pygments styles
+instead of hard-coding their color values.
+
+
 Code folding
 ------------
 
-**Code folding has been temporarly removed from pyqode 2.0. It will be reintroduced in a future version.**
+The code folding panel draw fold triggers and highlight foldable scopes.
 
+The fold level detection foreach line of code is performed by a
+:class:`pyqode.core.api.FoldDetector` when highlighting a block.
+
+To add code folding support for a new language, sublass FoldDetector and
+implements the following method::
+
+    def detect_fold_level(self, prev_block, block):
+
+This method will be called on any non-empty block. The idea is to associate
+a fold level with each block (forming a sort of implicit fold tree). This fold
+tree is then used by the folding panel to draw the triggers and highlight their
+scopes.
+
+There is a folding API that you can use to easily manipulate the fold tree:
+:mod:`pyqode.core.api.folding`
+
+.. note:: Due to performances issues, we do not store fold data in the block
+          user data, instead we store all those information as a bit-mask
+          combination inside the block user state.
 
 Designer plugins
 ----------------

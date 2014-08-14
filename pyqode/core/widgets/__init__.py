@@ -3,7 +3,7 @@
 This package contains a set of widgets that might be useful when writing
 pyqode applications:
 
-    - TextEdit: code edit specialised for plain text
+    - TextCodeEdit: code edit specialised for plain text
     - GenericCodeEdit: generic code edit, using PygmentsSH.
       Not really fast, not really smart.
     - InteractiveConsole: QTextEdit made for running background process
@@ -15,7 +15,7 @@ pyqode applications:
 
 
 """
-from pyqode.core.widgets.code_edits import TextEdit, GenericCodeEdit
+from pyqode.core.widgets.code_edits import TextCodeEdit, GenericCodeEdit
 from pyqode.core.widgets.encodings import (EncodingsComboBox, EncodingsMenu,
                                            EncodingsContextMenu)
 from pyqode.core.widgets.errors_table import ErrorsTable
@@ -33,5 +33,7 @@ __all__ = [
     'TabWidget',
     'EncodingsComboBox',
     'EncodingsMenu',
-    'EncodingsContextMenu'
+    'EncodingsContextMenu',
+    'TextCodeEdit',
+    'GenericCodeEdit'
 ]

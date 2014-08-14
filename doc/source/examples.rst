@@ -51,32 +51,10 @@ the pygments color scheme.
 .. literalinclude:: /../../examples/simple/style_and_settings.py
    :linenos:
 
-Select Qt bindings
-------------------
-
-Those examples show you how to force the use of a specific qt bindings.
-
-PyQt5 (default)
-+++++++++++++++
-
-.. literalinclude:: /../../examples/select_qt/pyqt5.py
-   :linenos:
-
-PyQt4
-+++++
-
-.. literalinclude:: /../../examples/select_qt/pyqt4.py
-   :linenos:
-
-PySide
-++++++
-
-.. literalinclude:: /../../examples/select_qt/pyside.py
-   :linenos:
 
 Notepad
 -------
 
 This example is a complete but minimal code editor application. It is too large
-to be included here. You should really have a look at it as this example
-combines nealy all the concepts exposed by pyqode.core
+to be included here but you should really have a look at it as this example
+combines nearly all the concepts exposed by pyqode.core

@@ -14,7 +14,7 @@ from pyqode.core import panels
 from pyqode.core import modes
 
 
-class TextEdit(CodeEdit):
+class TextCodeEdit(CodeEdit):
     """
     CodeEdit specialised for plain text.
 
@@ -48,7 +48,7 @@ class TextEdit(CodeEdit):
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
         self.modes.append(modes.RightMarginMode())
-        self.modes.append(TextEdit.TextSH(self.document()))
+        self.modes.append(TextCodeEdit.TextSH(self.document()))
         self.modes.append(modes.ZoomMode())
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.AutoIndentMode())

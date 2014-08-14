@@ -11,6 +11,11 @@ from pyqode.core._forms import dlg_preferred_encodings_editor_ui
 
 
 class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
+    """
+    This dialog is used to edit the preferred encodings that appears in
+    the encodings menu/combo box.
+
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = dlg_preferred_encodings_editor_ui.Ui_Dialog()
@@ -69,7 +74,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
                 self.ui.tableWidgetPreferred.setItem(row, column, item)
         self.ui.tableWidgetPreferred.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
-    def transfer_selected_items(self, source, destination):
+    def _transfer_selected_items(self, source, destination):
         # keeping sorting enabled cause bug for the second transferred item
         destination.setSortingEnabled(False)
         row = source.currentRow()
@@ -94,11 +99,11 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         destination.setSortingEnabled(True)
 
     def _add(self):
-        self.transfer_selected_items(self.ui.tableWidgetAvailable,
+        self._transfer_selected_items(self.ui.tableWidgetAvailable,
                                      self.ui.tableWidgetPreferred)
 
     def _remove(self):
-        self.transfer_selected_items(self.ui.tableWidgetPreferred,
+        self._transfer_selected_items(self.ui.tableWidgetPreferred,
                                      self.ui.tableWidgetAvailable)
 
     def get_preferred_encodings(self):
@@ -127,6 +132,13 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
 
 
 class DlgEncodingsChoice(QtWidgets.QDialog):
+    """
+    This dialogs ask the user to choose an encoding from a combo box.
+
+    You can use it if you're not using the encoding panel when there is a
+    decoding error when opening a file.
+
+    """
     def __init__(self, parent, path, encoding):
         super().__init__(parent)
         self.setWindowTitle('Choose encoding')

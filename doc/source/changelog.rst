@@ -5,6 +5,36 @@ Change Log
 
     These lists are not exhaustive.
 
+2.1.0
+-----
+
+New features:
+   - new code folding API and panel
+   - encodings API (panel, combo box, menu, dialog)
+   - allow to use pygments styles for native highlighters
+   - improved checker mode and syntax highlighter
+   - new CheckerPanel made to draw the new checker mode messages. If you were
+     using MarkerPanel to draw checker messages, you will have to replace it by
+     CheckerPanel!
+   - mimetype property for CodeEdit
+   - optimized API for storing block user data (using a bitmask in block user
+     state)
+   - reworked editor context menu (add a way to add sub-menus)
+   - improved code completion: show popup when typing inside an existing word
+     and always collect completions at the start of the prefix (this gives a
+     lot more suggestions).
+   - add pre-made editors: TextCodeEdit and GenericCodeEdit
+
+Fixed bugs:
+    - wrong cursor position after duplicate line
+    - empty save dialog for new files (without path)
+    - fix style issue on KDE
+    - fix some issues with frozen applications
+    - fix a few bugs in the notepad example
+    - fix a long standing issue in symbol matcher where the mode would
+      match symbols that are inside string literals or comments. This greatly
+      improves the python auto indent mode.
+
 2.0.0
 -----
 

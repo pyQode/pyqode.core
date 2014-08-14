@@ -192,10 +192,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     #: highlighter instance and the current text block
     block_highlight_finished = QtCore.Signal(object, object)
 
-    NORMAL = 0
-
-    WHITESPACES = QtCore.QRegExp(r'\s+')
-
     @property
     def formats(self):
         return self._color_scheme.formats
@@ -241,6 +237,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         #: Fold detector. Set it to a valid FoldDetector to get code folding
         #: to work. Default is None
         self.fold_detector = None
+        self.WHITESPACES = QtCore.QRegExp(r'\s+')
 
     def _highlight_whitespaces(self, text):
         fmt = QtGui.QTextCharFormat()

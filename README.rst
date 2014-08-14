@@ -48,7 +48,7 @@ Here are the core features:
 - easily customisable (modes and panels)
 - native look and feel close to Qt creator
 - builtin modes and panels (line number, code completion,
-  syntax highlighting,...)
+  syntax highlighting, code folding,...)
 - Qt Designer plugin
 - client/server architecture for smooth, non-blocking UI.
 

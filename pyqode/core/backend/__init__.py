@@ -11,7 +11,7 @@ Protocol
 
 We use a worker based json messaging server using the TCP/IP protocol.
 
-We build our own, very simple protocoal where each message is made up of two
+We build our own, very simple protocol where each message is made up of two
 parts:
 
   - a header: simply contains the length of the payload
@@ -55,7 +55,7 @@ E.g::
 Server script
 ~~~~~~~~~~~~~
 
-The server script must be written by the user. Don't worry, its very simple.
+The server script must be written by the user. Don't worry, it's very simple.
 All you have to do is to create and run a JsonTcpServer instance.
 
 We choose to let you write the main script to let you easily configure it.
@@ -75,23 +75,21 @@ Here is the most simple and basic example of a server script:
         backend.serve_forever()
 
 .. warning:: The user can choose the python interpreter that will run the
-    server. That means that classes and functions that run server side (
+    server. That means that classes and functions that run on the server side (
     workers) **should fully support python2 syntax** and that pyqode.core
     should be installed on the target interpreter sys path!!! (even for a
-    virtual env). An alternative is to keep pyqode.core package in a zip
-    archive that you mount on the sys path in your server script.
+    virtual env). An alternative is to keep pyqode.core package (and all
+    dependencies in a zip archive that you mount on the sys path in your
+    server script.
 
 .. note:: print statements on the server side will be logged as debug messages
-    on the client side. To have your messages logged as error message, use
-    sys.stderr instead of print.
+    on the client side. To have your messages logged as error message just
+    print to sys.stderr.
 
 """
-# server
 from .server import JsonServer
 from .server import default_parser
 from .server import serve_forever
-
-# workers
 from .workers import CodeCompletionWorker
 from .workers import DocumentWordsProvider
 from .workers import echo_worker

@@ -9,26 +9,50 @@ For more specific details about what is planned and what has been
 accomplished, please visit the `issues page on github`_ and the
 :doc:`changelog </changelog>`, respectively.
 
-2.0.0
+2.1.0
 -----
 
-The 2.0 version mainly improved stability and usability. No new features were
-added and some were removed (the folding panel has been removed due to some
-peformances issues).
+The 2.1 version brings back the code folding panel and API (the new API is
+faster and a lot more stable than the previous one, it also allows more
+features such as parent scopes highlighting, docstring and imports folding
+for python,...)
 
-The public API has been heavily refactored to bring you a more pythonic and
-a cleaner API. The project now have a solid test suite and measure its
-coverage.
+The other major new feature is that pyqode now provides an API for handling
+encoding errors. We removed automatic charset detection and gives the user some
+means to reload an editor with another encoding. The new encoding panel or the
+encodings dialog can be used for that purpose.
 
-We have dropped python2 support for the frontend. This means the GUI application
-that use pyqode must be written in python3.
+
+We also improved existing modes and panels:
+
+  - the syntax highlighter has been reviewed, it is now possible to use
+    pygments styles for native highlighters. Native highlighters are also faster
+    than before.
+  - improved checker modes: there is no more limitation for the number of
+    messages and the mode does remove only the message that have disappeared
+    from the linter's results. There is a new panel dedicated to rendering
+    checker panels (MarkerPanel is now a general purpose icon panel, e.g. to
+    draw breakpoints or bookmarks).
+
+
+We also fixed quite a lots of small minor bugs (such as wrong cursor position after
+duplicate line,...).
+
+To make your life easier (at least when you're starting with pyqode) we added
+some premade editors:
+
+   - TextCodeEdit: simple code edit specialised for plain text (pretty fast
+     for long files such as log files,...)
+   - GenericCodeEdit: generic code edit with basic support for a lots of
+                      languages but much slower and lot less smarted than a
+                      dedicated code edit.
+
 
 
 Next Version
 ------------
 
-Next version will focus on adding new features and reintroducing features that
-were previously removed (code folding).
+Next version will focus on adding new features!
 
 
 .. _issues page on github: https://github.com/pyQode/pyqode.core/issues

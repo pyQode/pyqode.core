@@ -7,7 +7,11 @@ Here is the complete list:
 
     * Python
     * Qt using PySide or PyQt
-    * Tango icons
+    * Oxygen icons
     * Pygments
 
-The framework has been greatly inspired by the Qt Creator source code.
+The framework has been greatly inspired by the following IDE:
+
+   - QtCreator
+   - PyCharm
+   - Spyder IDE

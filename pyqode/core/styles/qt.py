@@ -1,6 +1,6 @@
 from pygments.style import Style
 from pygments.token import Comment, Error, Generic, Keyword, Literal, Name, \
-    Operator, Text
+    Operator, Text, Punctuation
 
 
 class QtStyle(Style):
@@ -59,4 +59,5 @@ class QtStyle(Style):
         Operator: '#000000',
         Text: '#000000',
         Text.Whitespace: '#BFBFBF',
+        Punctuation: '#202020'
     }

@@ -25,7 +25,7 @@ __all__ = [
     'convert_to_codec_key',
     'get_block_symbol_data',
     'CodeEdit',
-    'ColorScheme'
+    'ColorScheme',
     'DelayJobRunner',
     'ENCODINGS_MAP',
     'FoldDetector',

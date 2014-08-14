@@ -1,6 +1,6 @@
 from pygments.style import Style
 from pygments.token import Comment, Error, Generic, Keyword, Literal, Name, \
-    Operator, Text
+    Operator, Text, Punctuation
 
 
 class DarculaStyle(Style):
@@ -58,4 +58,5 @@ class DarculaStyle(Style):
         Operator: '#A9B7C6',
         Text: '#A9B7C6',
         Text.Whitespace: '#2a2a2a',
+        Punctuation: '#A9B7C6'
     }

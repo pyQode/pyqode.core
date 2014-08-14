@@ -87,7 +87,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
 
     @classmethod
     @memoized
-    def make_icon(cls, status):
+    def _make_icon(cls, status):
         """
         Make icon from icon filename/tuple (if you want to use a theme)
         """
@@ -112,7 +112,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
 
         # type
         item = QtWidgets.QTableWidgetItem(
-            self.make_icon(msg.status), msg.status_string)
+            self._make_icon(msg.status), msg.status_string)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_TYPE, item)
