@@ -63,7 +63,6 @@ class ModesManager(Manager):
         :type name_or_klass: str or type
         :rtype: pyqode.core.api.Mode
         """
-        # pylint: disable=protected-access
         if not isinstance(name_or_klass, str):
             name_or_klass = name_or_klass.__name__
         return self._modes[name_or_klass]

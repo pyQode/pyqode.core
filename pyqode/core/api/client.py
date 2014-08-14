@@ -1,3 +1,9 @@
+"""
+This module contains the client socket API. This API is exposed to the
+user throught the backend manager (
+:class:`pyqode.core.managers.BackendManager`)
+
+"""
 import json
 import logging
 import socket
@@ -61,11 +67,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     It uses a simple message protocol. A message is made up of two parts.
     parts:
-      - header: this simply contains the length of the payload. (4bytes)
-      - payload: this is the actual message data as a json (byte) string.
+      - header: contains the length of the payload. (4bytes)
+      - payload: data as a json string.
 
     """
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, parent):
         super().__init__(parent)

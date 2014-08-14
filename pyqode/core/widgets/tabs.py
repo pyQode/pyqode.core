@@ -5,12 +5,10 @@ show code editor tabs.
 """
 import logging
 import os
-from pyqode.core.forms.dlg_unsaved_files_ui import Ui_Dialog
+from pyqode.core._forms.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.modes.filewatcher import FileWatcherMode
 from pyqode.qt import QtCore, QtWidgets
 from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget
-# pylint: disable=too-many-instance-attributes, missing-docstring
-# pylint: disable=protected-access
 
 
 def _logger():
@@ -76,7 +74,7 @@ class ClosableTabBar(QTabBar):
         QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         QtWidgets.QTabBar.mousePressEvent(self, event)
         if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
@@ -234,7 +232,7 @@ class TabWidget(QTabWidget):
                 pass
         self.setCurrentIndex(initial_index)
 
-    def addAction(self, action):  # pylint: disable=invalid-name
+    def addAction(self, action):
         """
         Adds an action to the TabBar context menu
 
@@ -333,7 +331,7 @@ class TabWidget(QTabWidget):
             file_watcher.file_deleted.connect(self._on_file_deleted)
         return index
 
-    def addTab(self, elem, icon, name):  # pylint: disable=invalid-name
+    def addTab(self, elem, icon, name):
         """
         Extends QTabWidget.addTab to keep an internal list of added tabs.
         """
@@ -394,7 +392,7 @@ class TabWidget(QTabWidget):
         except AttributeError:
             pass  # not an editor widget
 
-    def removeTab(self, index):  # pylint: disable=invalid-name
+    def removeTab(self, index):
         """
         Removes tab at index ``index``.
 
@@ -483,7 +481,7 @@ class TabWidget(QTabWidget):
             pass
         self.dirty_changed.emit(dirty)
 
-    def closeEvent(self, event):  # pylint: disable=invalid-name
+    def closeEvent(self, event):
         """
         On close, we try to close dirty tabs and only process the close
         event if all dirty tabs were closed by the user.

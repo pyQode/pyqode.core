@@ -13,7 +13,6 @@ try:
     import socketserver
     PY33 = True
 except ImportError:
-    # pylint: disable=import-error
     import SocketServer as socketserver
     PY33 = False
 
@@ -135,7 +134,7 @@ class JsonServer(socketserver.TCPServer):
                             'results': result}
                 print('sending response: %r' % response)
                 self.send(response)
-            except:  # pylint: disable=bare-except
+            except:
                 print('error with data=%r' % data)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)

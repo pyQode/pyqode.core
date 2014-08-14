@@ -3,8 +3,7 @@
 This module contains the TabWidget designer plugin.
 """
 from pyqode.core import widgets
-from pyqode.core.designer_plugins import WidgetPlugin
-# pylint: disable=missing-docstring, invalid-name, interface-not-implemented
+from pyqode.core._designer_plugins import WidgetPlugin
 
 
 class TabWidgetPlugin(WidgetPlugin):

@@ -45,7 +45,7 @@ setup(
     install_requires=['pygments', 'pyqode.qt'],
     entry_points={
         'pyqode_plugins':
-            ['code_edit = pyqode.core.designer_plugins'],
+            ['code_edit = pyqode.core._designer_plugins'],
         'pygments.styles':
             ['qt = pyqode.core.styles.qt:QtStyle',
              'darcula = pyqode.core.styles.darcula:DarculaStyle']

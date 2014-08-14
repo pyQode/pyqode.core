@@ -159,7 +159,7 @@ class MarkerPanel(Panel):
                 markers.append(marker)
         return markers
 
-    def sizeHint(self):  # pylint: disable=invalid-name
+    def sizeHint(self):
         """
         Returns the panel size hint. (fixed with of 16px)
         """
@@ -170,7 +170,6 @@ class MarkerPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
-        # pylint: disable=invalid-name, unused-variable
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
         for top, block_nbr, block in self.editor.visible_blocks:
@@ -206,7 +205,7 @@ class MarkerPanel(Panel):
                                     continue
                             self._icons[key].paint(painter, rect)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         """
         Handle mouse press:
 
@@ -223,7 +222,7 @@ class MarkerPanel(Panel):
             _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)
 
-    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+    def mouseMoveEvent(self, event):
         """
         Requests a tooltip if the cursor is currently over a marker.
         """
@@ -246,7 +245,6 @@ class MarkerPanel(Panel):
         """
         Hide tooltip when leaving the panel region.
         """
-        # pylint: disable=invalid-name, unused-argument
         QtWidgets.QToolTip.hideText()
         self._previous_line = -1
 

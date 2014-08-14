@@ -32,7 +32,6 @@ class SymbolMatcherMode(Mode):
 
     @match_background.setter
     def match_background(self, value):
-        # pylint: disable=missing-docstring
         self._match_background = value
         self._refresh_decorations()
 
@@ -45,7 +44,6 @@ class SymbolMatcherMode(Mode):
 
     @match_foreground.setter
     def match_foreground(self, value):
-        # pylint: disable=missing-docstring
         self._match_foreground = value
         self._refresh_decorations()
 
@@ -58,7 +56,6 @@ class SymbolMatcherMode(Mode):
 
     @unmatch_background.setter
     def unmatch_background(self, value):
-        # pylint: disable=missing-docstring
         self._unmatch_background = value
         self._refresh_decorations()
 
@@ -71,7 +68,6 @@ class SymbolMatcherMode(Mode):
 
     @unmatch_foreground.setter
     def unmatch_foreground(self, value):
-        # pylint: disable=missing-docstring
         self._unmatch_foreground = value
         self._refresh_decorations()
 
@@ -83,7 +79,7 @@ class SymbolMatcherMode(Mode):
         self._unmatch_background = QtGui.QBrush(QtGui.QColor('transparent'))
         self._unmatch_foreground = QtGui.QColor('red')
 
-    def _clear_decorations(self):  # pylint: disable=missing-docstring
+    def _clear_decorations(self):
         for deco in self._decorations:
             self.editor.decorations.remove(deco)
         self._decorations[:] = []
@@ -113,7 +109,7 @@ class SymbolMatcherMode(Mode):
         self._clear_decorations()
         return retval
 
-    def _refresh_decorations(self):  # pylint: disable=missing-docstring
+    def _refresh_decorations(self):
         for deco in self._decorations:
             self.editor.decorations.remove(deco)
             if deco.match:
@@ -124,7 +120,7 @@ class SymbolMatcherMode(Mode):
                 deco.set_background(self._unmatch_background)
             self.editor.decorations.append(deco)
 
-    def on_state_changed(self, state):  # pylint: disable=missing-docstring
+    def on_state_changed(self, state):
         if state:
             self.editor.cursorPositionChanged.connect(self.do_symbols_matching)
         else:
@@ -132,7 +128,6 @@ class SymbolMatcherMode(Mode):
                 self.do_symbols_matching)
 
     def _match_parentheses(self, parentheses, cursor_pos):
-        # pylint: disable=missing-docstring
         for i, info in enumerate(parentheses):
             pos = (self.editor.textCursor().position() -
                    self.editor.textCursor().block().position())
@@ -148,7 +143,6 @@ class SymbolMatcherMode(Mode):
                         self.editor.textCursor().block(), i - 1, 0))
 
     def _match_left_parenthesis(self, current_block, i, cpt):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[PAREN]
@@ -172,7 +166,6 @@ class SymbolMatcherMode(Mode):
             return False
 
     def _match_right_parenthesis(self, current_block, i, nb_right_paren):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[PAREN]
@@ -201,7 +194,6 @@ class SymbolMatcherMode(Mode):
             return False
 
     def _match_square_brackets(self, brackets, current_pos):
-        # pylint: disable=missing-docstring
         for i, info in enumerate(brackets):
             pos = (self.editor.textCursor().position() -
                    self.editor.textCursor().block().position())
@@ -216,7 +208,6 @@ class SymbolMatcherMode(Mode):
                         self.editor.textCursor().block(), i - 1, 0))
 
     def _match_left_bracket(self, current_block, i, cpt):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[SQUARE]
@@ -239,7 +230,6 @@ class SymbolMatcherMode(Mode):
             return False
 
     def _match_right_bracket(self, current_block, i, nb_right):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[SQUARE]
@@ -267,7 +257,6 @@ class SymbolMatcherMode(Mode):
             return False
 
     def _match_braces(self, braces, cursor_position):
-        # pylint: disable=missing-docstring
         for i, info in enumerate(braces):
             pos = (self.editor.textCursor().position() -
                    self.editor.textCursor().block().position())
@@ -282,7 +271,6 @@ class SymbolMatcherMode(Mode):
                         self.editor.textCursor().block(), i - 1, 0))
 
     def _match_left_brace(self, current_block, i, cpt):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[BRACE]
@@ -305,7 +293,6 @@ class SymbolMatcherMode(Mode):
             return False
 
     def _match_right_brace(self, current_block, i, nb_right):
-        # pylint: disable=missing-docstring
         try:
             data = get_block_symbol_data(current_block)
             parentheses = data[BRACE]
@@ -345,7 +332,6 @@ class SymbolMatcherMode(Mode):
         self._match_braces(data[BRACE], pos)
 
     def _create_decoration(self, pos, match=True):
-        # pylint: disable=missing-docstring
         cursor = self.editor.textCursor()
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)

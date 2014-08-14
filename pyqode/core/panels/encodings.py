@@ -73,7 +73,7 @@ class EncodingPanel(Panel):
     def __init__(self, add_context_menu=True):
         super().__init__()
         # leave it here otherwise you will have circular import errors
-        from pyqode.core.forms.pnl_encoding_ui import Ui_Form
+        from pyqode.core._forms.pnl_encoding_ui import Ui_Form
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.__add_ctx_mnu = add_context_menu
@@ -133,7 +133,6 @@ class EncodingPanel(Panel):
 
     def paintEvent(self, event):
         """ Fills the panel background. """
-        # pylint: disable=invalid-name
         super().paintEvent(event)
         if self.isVisible():
             # fill background

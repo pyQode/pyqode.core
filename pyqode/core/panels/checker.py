@@ -41,7 +41,7 @@ class CheckerPanel(Panel):
         except AttributeError:
             return []
 
-    def sizeHint(self):  # pylint: disable=invalid-name
+    def sizeHint(self):
         """
         Returns the panel size hint. (fixed with of 16px)
         """
@@ -52,7 +52,6 @@ class CheckerPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
-        # pylint: disable=invalid-name, unused-variable
         super().paintEvent(event)
         painter = QtGui.QPainter(self)
         for top, block_nbr, block in self.editor.visible_blocks:
@@ -76,7 +75,7 @@ class CheckerPanel(Panel):
         }
         return icons[message.status]
 
-    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+    def mouseMoveEvent(self, event):
         """
         Requests a tooltip if the cursor is currently over a marker.
         """
@@ -100,7 +99,6 @@ class CheckerPanel(Panel):
         """
         Hide tooltip when leaving the panel region.
         """
-        # pylint: disable=invalid-name, unused-argument
         QtWidgets.QToolTip.hideText()
         self._previous_line = -1
 

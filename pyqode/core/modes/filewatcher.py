@@ -115,7 +115,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         def inner_action(*args):
             """ Inner action: open file """
-            # pylint: disable=unused-argument
             self.editor.file.open(self.editor.file.path)
 
         args = ("File changed",
@@ -123,7 +122,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 "reload it?" % os.path.basename(self.editor.file.path))
         kwargs = {"expected_action": inner_action}
         if self.editor.hasFocus():
-            # pylint: disable=star-args
             self._notify(*args, **kwargs)
         else:
             self._notification_pending = True

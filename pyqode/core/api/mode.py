@@ -1,3 +1,6 @@
+"""
+This module contains the editor extension API.
+"""
 import weakref
 
 
@@ -49,7 +52,6 @@ class Mode(object):
 
     @enabled.setter
     def enabled(self, enabled):
-        # pylint: disable=missing-docstring
         if enabled != self._enabled:
             self._enabled = enabled
             self.on_state_changed(enabled)

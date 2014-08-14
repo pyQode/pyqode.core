@@ -13,9 +13,6 @@ from pyqode.qt.QtWidgets import QTextEdit
 from pyqode.qt.QtGui import QColor, QTextCursor, QFont
 
 
-# pylint: disable=too-many-instance-attributes, missing-docstring
-
-
 def _logger():
     return logging.getLogger(__name__)
 
@@ -188,7 +185,6 @@ class InteractiveConsole(QTextEdit):
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
 
     def closeEvent(self, *args, **kwargs):
-        # pylint: disable=invalid-name, unused-argument
         if self.process.state() == QProcess.Running:
             self.process.terminate()
 
@@ -230,7 +226,6 @@ class InteractiveConsole(QTextEdit):
         self.process.kill()
 
     def keyPressEvent(self, event):
-        # pylint: disable=invalid-name
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
             self._usr_buffer += "\n"

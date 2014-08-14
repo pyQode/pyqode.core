@@ -1,3 +1,6 @@
+"""
+This module contains the panel API.
+"""
 import logging
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtWidgets, QtGui
@@ -17,7 +20,7 @@ class Panel(QtWidgets.QWidget, Mode):
     .. note:: Use enabled to disable panel actions and setVisible to change the
         visiblity of the panel.
     """
-    class Position:  # pylint: disable=no-init, too-few-public-methods
+    class Position:
         """
         Enumerates the possible panel positions
         """
@@ -48,7 +51,6 @@ class Panel(QtWidgets.QWidget, Mode):
 
     @scrollable.setter
     def scrollable(self, value):
-        # pylint: disable=missing-docstring
         self._scrollable = value
 
     def __init__(self):
@@ -87,7 +89,6 @@ class Panel(QtWidgets.QWidget, Mode):
 
     def paintEvent(self, event):
         """ Fills the panel background. """
-        # pylint: disable=invalid-name
         if self.isVisible():
             # fill background
             self._background_brush = QtGui.QBrush(QtGui.QColor(
@@ -103,7 +104,6 @@ class Panel(QtWidgets.QWidget, Mode):
 
         Automatically call CodeEdit.refresh_panels.
         """
-        # pylint: disable=invalid-name
         _logger().debug('%s visibility changed', self.name)
         super().setVisible(visible)
         if self.editor:

@@ -24,7 +24,6 @@ class AutoCompleteMode(Mode):
         self.logger = logging.getLogger(__name__)
 
     def on_state_changed(self, state):
-        # pylint: disable=missing-docstring
         if state:
             self.editor.post_key_pressed.connect(self._on_post_key_pressed)
             self.editor.key_pressed.connect(self._on_key_pressed)
@@ -33,7 +32,6 @@ class AutoCompleteMode(Mode):
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_post_key_pressed(self, event):
-        # pylint: disable=missing-docstring
         if not event.isAccepted():
             txt = event.text()
             next_char = TextHelper(self.editor).get_right_character()
@@ -45,7 +43,6 @@ class AutoCompleteMode(Mode):
                     TextHelper(self.editor).insert_text(to_insert)
 
     def _on_key_pressed(self, event):
-        # pylint: disable=missing-docstring
         txt = event.text()
         next_char = TextHelper(self.editor).get_right_character()
         self.logger.debug('next char: %s', next_char)

@@ -7,7 +7,7 @@ import locale
 from pyqode.core.api import encodings
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.settings import Settings
-from pyqode.core.forms import dlg_preferred_encodings_editor_ui
+from pyqode.core._forms import dlg_preferred_encodings_editor_ui
 
 
 class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
@@ -131,7 +131,7 @@ class DlgEncodingsChoice(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle('Choose encoding')
         # avoid circular references with CodeEdit
-        from pyqode.core.forms import dlg_encodings_ui
+        from pyqode.core._forms import dlg_encodings_ui
         self.ui = dlg_encodings_ui.Ui_Dialog()
         self.ui.setupUi(self)
         self.ui.comboBoxEncodings.current_encoding = encoding

@@ -43,7 +43,6 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
 
         Monkeypatched to store the final stack on the object itself.
     """
-    # pylint: disable=protected-access,too-many-branches
     pos = 0
     tokendefs = self._tokens
     if hasattr(self, '_saved_state_stack'):
@@ -144,7 +143,6 @@ class PygmentsSH(SyntaxHighlighter):
                  properly highlighted until a full re-highlight is triggered.
                  The text is automatically re-highlighted on save.
     """
-    # pylint: disable=too-many-instance-attributes
     #: Mode description
     DESCRIPTION = "Apply syntax highlighting to the editor using pygments"
 
@@ -223,7 +221,6 @@ class PygmentsSH(SyntaxHighlighter):
         _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
-        # pylint: disable=protected-access
         original_text = text
         if self.editor and self._lexer and self.enabled:
             if block.blockNumber():

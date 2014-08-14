@@ -15,7 +15,6 @@ pyqode applications:
 
 
 """
-# pylint: disable=unused-import
 from pyqode.core.widgets.code_edits import TextEdit, GenericCodeEdit
 from pyqode.core.widgets.encodings import (EncodingsComboBox, EncodingsMenu,
                                            EncodingsContextMenu)

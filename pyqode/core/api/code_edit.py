@@ -1,5 +1,4 @@
 import logging
-import sys
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
@@ -7,8 +6,8 @@ from pyqode.core.managers import FileManager
 from pyqode.core.managers import ModesManager
 from pyqode.core.managers import TextDecorationsManager
 from pyqode.core.managers import PanelsManager
-# ensure pyqode resource have been imported and are ready to use.
-from pyqode.core.forms import pyqode_core_rc
+# ensure pyqode resource have been imported and are ready to be used.
+from pyqode.core._forms import pyqode_core_rc
 from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
@@ -25,14 +24,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     modes and panels) and by adding a series of additional signal and methods.
 
     To interact with the editor content, you may use the Qt Text API (
-    QTextCursor, ...) or use the more high level functions defined in
+    QTextCursor, ...) or use high level API functions defined in
     :mod:`pyqode.core.api.TextHelper`
 
     .. note:: setPlainText has been overridden to force you to define
         a mime type and an encoding.
 
     """
-    # pylint: disable=too-many-instance-attributes, too-many-public-methods
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
@@ -89,7 +87,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def min_indent_column(self):
         """
-        Minimum indent colum.
+        Minimum indent column.
 
         Some languages such as cobol starts coding at column 7.
         """
@@ -102,7 +100,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def save_on_focus_out(self):
         """
-        Automtically saves editor content on focus out.
+        Automatically saves editor content on focus out.
 
         Default is False.
         """
@@ -120,7 +118,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._show_whitespaces
 
     @show_whitespaces.setter
-    def show_whitespaces(self, value):  # pylint: disable=missing-docstring
+    def show_whitespaces(self, value):
         self._show_whitespaces = value
         self._set_whitespaces_flags(value)
 
@@ -132,7 +130,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._font_family
 
     @font_name.setter
-    def font_name(self, value):  # pylint: disable=missing-docstring
+    def font_name(self, value):
         if value == "":
             value = 'Source Code Pro'
         self._font_family = value
@@ -146,7 +144,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._font_size
 
     @font_size.setter
-    def font_size(self, value):  # pylint: disable=missing-docstring
+    def font_size(self, value):
         self._font_size = value
         self._reset_stylesheet()
 
@@ -158,7 +156,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._background
 
     @background.setter
-    def background(self, value):  # pylint: disable=missing-docstring
+    def background(self, value):
         self._background = value
         self._reset_stylesheet()
 
@@ -170,23 +168,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._foreground
 
     @foreground.setter
-    def foreground(self, value):  # pylint: disable=missing-docstring
+    def foreground(self, value):
         self._foreground = value
         self._reset_stylesheet()
 
     @property
     def whitespaces_foreground(self):
         """
-        The editor white spaces' foreground color. White spaces are highlighter
+        The editor white spaces' foreground color. White spaces are highlighted
         by the syntax highlighter. You should call rehighlight to update their
         color. This is not done automatically to prevent multiple, useless
-        call to rehighligh which can take some time on big files.
+        call to rehighlight which can take some time on big files.
         """
         return self._whitespaces_foreground
 
     @whitespaces_foreground.setter
     def whitespaces_foreground(self, value):
-        # pylint: disable=missing-docstring
         self._whitespaces_foreground = value
 
     @property
@@ -197,7 +194,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._sel_background
 
     @selection_background.setter
-    def selection_background(self, value):  # pylint: disable=missing-docstring
+    def selection_background(self, value):
         self._sel_background = value
         self._reset_stylesheet()
 
@@ -209,7 +206,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._sel_foreground
 
     @selection_foreground.setter
-    def selection_foreground(self, value):  # pylint: disable=missing-docstring
+    def selection_foreground(self, value):
         self._sel_foreground = value
         self.rehighlight()
 
@@ -235,7 +232,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._dirty
 
     @dirty.setter
-    def dirty(self, value):  # pylint: disable=missing-docstring
+    def dirty(self, value):
         if self._dirty != value:
             self._dirty = value
             self.dirty_changed.emit(value)
@@ -396,7 +393,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                           pygments lexer.
         :param encoding: text encoding
         """
-        # pylint: disable=invalid-name
         self.file.mimetype = mime_type
         self.file._encoding = encoding
         for mode in self.modes:
@@ -580,7 +576,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.unindent_requested.emit()
 
-    def resizeEvent(self, e):  # pylint: disable=invalid-name
+    def resizeEvent(self, e):
         """
         Overrides resize event to resize the editor's panels.
 
@@ -589,7 +585,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().resizeEvent(e)
         self.panels.resize()
 
-    def paintEvent(self, e):  # pylint: disable=invalid-name
+    def paintEvent(self, e):
         """
         Overrides paint event to update the list of visible blocks and emit
         the painted event.
@@ -600,7 +596,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().paintEvent(e)
         self.painted.emit(e)
 
-    def keyPressEvent(self, event):  # pylint: disable=invalid-name
+    def keyPressEvent(self, event):
         """
         Overrides the keyPressEvent to emit the key_pressed signal.
 
@@ -630,7 +626,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.post_key_pressed.emit(event)
         event.setAccepted(new_state)
 
-    def keyReleaseEvent(self, event):  # pylint: disable=invalid-name
+    def keyReleaseEvent(self, event):
         """
         Overrides keyReleaseEvent to emit the key_released signal.
 
@@ -643,7 +639,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().keyReleaseEvent(event)
 
-    def focusInEvent(self, event):  # pylint: disable=invalid-name
+    def focusInEvent(self, event):
         """
         Overrides focusInEvent to emits the focused_in signal
 
@@ -653,7 +649,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().focusInEvent(event)
         self.repaint()
 
-    def focusOutEvent(self, event):  # pylint: disable=invalid-name
+    def focusOutEvent(self, event):
         """
         Saves content if save_on_focus_out is True.
 
@@ -662,7 +658,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.file.save()
         super().focusOutEvent(event)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         """
         Overrides mousePressEvent to emits mouse_pressed signal
 
@@ -680,7 +676,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event):  # pylint: disable=invalid-name
+    def mouseReleaseEvent(self, event):
         """
         Emits mouse_released signal.
 
@@ -693,7 +689,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().mouseReleaseEvent(event)
 
-    def wheelEvent(self, event):  # pylint: disable=invalid-name
+    def wheelEvent(self, event):
         """
         Emits the mouse_wheel_activated signal.
 
@@ -706,16 +702,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().wheelEvent(event)
 
-    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+    def mouseMoveEvent(self, event):
         """
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
         """
-        def next_visible_block(block):
-            while not block.isVisible():
-                block = block.next()
-            return block
-
         cursor = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()
         block_found = False
@@ -741,7 +732,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.mouse_moved.emit(event)
         super().mouseMoveEvent(event)
 
-    def showEvent(self, event):  # pylint: disable=invalid-name
+    def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         super().showEvent(event)
         _logger().debug('show event')
@@ -891,7 +882,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """
-        #: pylint: disable=unused-argument
         self._visible_blocks[:] = []
         block = self.firstVisibleBlock()
         block_nbr = block.blockNumber()

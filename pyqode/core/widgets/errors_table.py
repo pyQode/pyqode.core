@@ -23,7 +23,6 @@ class ErrorsTable(QtWidgets.QTableWidget):
 
     You clear the table using :meth:`pyqode.core.widgets.ErrorsTable`.
     """
-    # pylint: disable=too-many-public-methods
     #: Signal emitted when a message is activated, the clicked signal is passed
     #: as a parameter
     msg_activated = QtCore.Signal(CheckerMessage)

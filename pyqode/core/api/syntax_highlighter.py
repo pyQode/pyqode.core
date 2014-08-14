@@ -1,55 +1,63 @@
 import logging
-from pygments.styles import get_style_by_name, get_all_styles
-from pygments.token import Token, Punctuation
 import sys
 import time
+from pygments.styles import get_style_by_name, get_all_styles
+from pygments.token import Token, Punctuation
 from pygments.util import ClassNotFound
-from pyqode.core.api.utils import TextHelper, TextBlockHelper
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtGui, QtCore, QtWidgets
 
-#: The list of color schemes keys
-COLOR_SCHEME_KEYS = (
-    # editor background
-    "background",
-    # highlight color (used for caret line)
-    "highlight",
-    # normal text
-    "normal",
-    # any keyword
-    "keyword",
-    # reserved keyword
-    "keyword_reserved",
-    # any builtin name
-    "builtin",
-    # any definition (class or function)
-    "definition",
-    # any comment
-    "comment",
-    # any string
-    "string",
-    # any docstring (python docstring, c++ doxygen comment,...)
-    "docstring",
-    # any number
-    "number",
-    # any instance variable
-    "instance",
-    # whitespace color
-    "whitespace",
-    # any tag name (e.g. shinx doctags,...)
-    'tag',
-    # self paramter (or this in other languages)
-    'self',
-    # colors of punctuation characters
-    'punctuation',
-    # name or keyword constant
-    'constant'
-)
+
+def _logger():
+    return logging.getLogger(__name__)
+
+
 #: A sorted list of available pygments styles, for convenience
 PYGMENTS_STYLES = sorted(list(get_all_styles()))
 
 if hasattr(sys, 'frozen'):
     PYGMENTS_STYLES += ['darcula', 'qt']
+
+
+#: The list of color schemes keys (and their associate pygments token)
+COLOR_SCHEME_KEYS = {
+    # editor background
+    "background": None,
+    # highlight color (used for caret line)
+    "highlight": None,
+    # normal text
+    "normal": Token.Text,
+    # any keyword
+    "keyword": Token.Keyword,
+    # reserved keyword
+    "keyword_reserved": Token.Keyword.Reserved,
+    # any builtin name
+    "builtin": Token.Name.Builtin,
+    # any definition (class or function)
+    "definition": Token.Name.Class,
+    # any comment
+    "comment": Token.Comment,
+    # any string
+    "string": Token.Literal.String,
+    # any docstring (python docstring, c++ doxygen comment,...)
+    "docstring": Token.Literal.String.Doc,
+    # any number
+    "number": Token.Number,
+    # any instance variable
+    "instance": Token.Name.Variable,
+    # whitespace color
+    "whitespace": Token.Text.Whitespace,
+    # any tag name (e.g. shinx doctags,...)
+    'tag': Token.Name.Tag,
+    # self paramter (or this in other languages)
+    'self': Token.Name.Builtin.Pseudo,
+    # python decorators
+    'decorator': Token.Name.Decorator,
+    # colors of punctuation characters
+    'punctuation': Punctuation,
+    # name or keyword constant
+    'constant': Token.Name.Constant
+}
 
 
 class ColorScheme:
@@ -83,7 +91,7 @@ class ColorScheme:
         try:
             style = get_style_by_name(style)
         except ClassNotFound:
-            if style == 'qt':
+            if style == 'qt' or not style:
                 from pyqode.core.styles.qt import QtStyle
                 style = QtStyle
             elif style == 'darcular':
@@ -98,27 +106,9 @@ class ColorScheme:
         # highlight
         self.formats['highlight'] = self._get_format_from_color(
             style.highlight_color)
-        # token styles
-        token_key_pairs = [
-            (Token.Keyword, 'keyword'),
-            (Token.Keyword.Reserved, 'keyword_reserved'),
-            (Token.Text, 'normal'),
-            (Token.Name.Builtin, 'builtin'),
-            (Token.Name.Class, 'definition'),
-            (Token.Comment, 'comment'),
-            (Token.Literal.String, 'string'),
-            (Token.Literal.String.Doc, 'docstring'),
-            (Token.Number, 'number'),
-            (Token.Name.Variable, 'instance'),
-            (Token.Text.Whitespace, 'whitespace'),
-            (Token.Name.Tag, 'tag'),
-            (Token.Name.Builtin.Pseudo, 'self'),
-            (Token.Name.Decorator, 'decorator'),
-            (Punctuation, 'punctuation'),
-            (Token.Name.Constant, 'constant')
-        ]
-        for token, key in token_key_pairs:
-            self.formats[key] = self._get_format_from_style(token, style)
+        for key, token in COLOR_SCHEME_KEYS.items():
+            if token and key:
+                self.formats[key] = self._get_format_from_style(token, style)
 
     def _get_format_from_color(self, color):
         fmt = QtGui.QTextCharFormat()
@@ -172,18 +162,14 @@ class ColorScheme:
         return qcolor
 
 
-def _logger():
-    return logging.getLogger(__name__)
-
-
 class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     """
-    Abstract Base class for syntax highlighter modes.
+    Abstract base class for syntax highlighter modes.
 
     It fills up the document with our custom block data (fold levels,
     triggers,...).
 
-    It **does not do any syntax highlighting**, this task is left to the
+    It **does not do any syntax highlighting**, this task is left to
     sublasses such as :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
 
     Subclasses **must** override the
@@ -191,7 +177,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     apply custom highlighting.
 
     .. note:: Since version 2.1 and for performance reasons, we store all
-        our data in the block user state as bitmask. You should always
+        our data in the block user state as a bit-mask. You should always
         use :class:`pyqode.core.api.TextBlockHelper` to retrieve or modify
         those data.
     """
@@ -234,7 +220,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             pass
         else:
             mode.refresh_decorations(force=True)
-        self.editor._reset_stylesheet()  # pylint: disable=protected-access
+        self.editor._reset_stylesheet()
 
     @color_scheme.setter
     def color_scheme(self, color_scheme):
@@ -272,12 +258,10 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             previous_block = previous_block.previous()
         return previous_block
 
-    def highlightBlock(self, text):  #: pylint: disable=invalid-name
+    def highlightBlock(self, text):
         """
         Highlights a block of text.
         """
-        # self.block_highlight_started.emit(self, text)
-        # # # setup user data
         current_block = self.currentBlock()
         previous_block = self._find_prev_non_blank_block(current_block)
         if self.editor:
@@ -321,7 +305,6 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
     and markers.
 
     """
-    # pylint: disable=too-many-instance-attributes, too-few-public-methods
     def __init__(self):
         super().__init__()
         #: List of checker messages associated with the block.

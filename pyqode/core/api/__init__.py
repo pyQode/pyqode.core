@@ -1,13 +1,6 @@
 """
-This package contains the base classes of the API:
-
-    - CodeEdit
-    - Mode
-    - Panel
-    - Manager
-    - TextDecoration
-    - SyntaxHighlighter
-    - TextBlockUserData
+This package contains the bases classes of pyqode and some utility
+functions.
 
 """
 from .code_edit import CodeEdit

@@ -1,3 +1,7 @@
+"""
+This module contains the text decoration API.
+
+"""
 from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
@@ -25,11 +29,9 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         Holds the signals for a TextDecoration (since we cannot make it a
         QObject, we need to store its signals in an external QObject).
         """
-        # pylint: disable=too-few-public-methods
         #: Signal emitted when a TextDecoration has been clicked.
         clicked = QtCore.Signal(object)
 
-    # pylint: disable=too-many-arguments
     def __init__(self, cursor_or_bloc_or_doc, start_pos=None, end_pos=None,
                  start_line=None, end_line=None, draw_order=0, tooltip=None,
                  full_width=False):

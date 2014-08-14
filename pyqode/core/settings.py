@@ -10,12 +10,12 @@ its favorite encodings). We also cache encoding used to save or load a
 file so that we can reuse it automatically next time the user want to
 open the same file.
 
-In the future, we could use this cache to store some editor states (such as
+In the future, we could use this cache some editor states (such as
 the last cursor position for a specific file path, code completion history to
 show the favorite completions first,...)
 
 We do not store editor styles and settings here. Those kind of settings are
-better handled by the application level.
+better handled at the application level.
 
 """
 import json

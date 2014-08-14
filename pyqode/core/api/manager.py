@@ -1,9 +1,13 @@
+"""
+This module contains the Manager API.
+
+"""
 import weakref
 
 
 class Manager:
     """
-    A manager manages a specific aspect of CodeEdit:
+    A manager manages a specific aspect of a CodeEdit instance:
         - backend management (start/stop server, request work,...)
         - modes management
         - panels management and drawing

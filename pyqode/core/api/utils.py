@@ -12,7 +12,7 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class memoized(object):  # pylint: disable=invalid-name, too-few-public-methods
+class memoized(object):
     """
     Decorator. Caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned
@@ -62,7 +62,7 @@ def drift_color(base_color, factor=110):
             return base_color.lighter(factor + 10)
 
 
-class TextStyle(object):  # pylint: disable=too-few-public-methods
+class TextStyle(object):
     """
     Helper class to define a text format. This class has methods to set the
     text style from a string and to easily be created from a string, making
@@ -532,7 +532,6 @@ class TextHelper:
         :param y_pos: Y pos in the editor
         :return: Line number (1 based)
         """
-        # pylint: disable=unused-variable
         editor = self._editor
         height = editor.fontMetrics().height()
         for top, line, block in editor.visible_blocks:
@@ -853,7 +852,6 @@ class ParenthesisInfo(object):
     """
     Stores information about a parenthesis in a line of code.
     """
-    # pylint: disable=too-few-public-methods
     def __init__(self, pos, char):
         #: Position of the parenthesis, expressed as a number of character
         self.position = pos

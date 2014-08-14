@@ -131,7 +131,6 @@ class PanelsManager(Manager):
 
     def resize(self):
         """ Resizes panels """
-        # pylint: disable=too-many-locals
         content_rect = self.editor.contentsRect()
         viewport_content_rect = self.editor.viewport().contentsRect()
         s_bottom, s_left, s_right, s_top = self._compute_zones_sizes()

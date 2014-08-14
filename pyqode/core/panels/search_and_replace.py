@@ -5,10 +5,8 @@ This module contains the search and replace panel
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core.forms.search_panel_ui import Ui_SearchPanel
+from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
 from pyqode.qt import QtCore, QtGui
-# pylint: disable=maybe-no-member, missing-docstring
-# pylint: disable=too-many-public-methods, too-many-instance-attributes
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
@@ -238,11 +236,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
-    def on_toolButtonClose_clicked(self):  # pylint: disable=invalid-name
+    def on_toolButtonClose_clicked(self):
         self.close_panel()
 
     @QtCore.Slot()
-    def on_actionSearch_triggered(self):  # pylint: disable=invalid-name
+    def on_actionSearch_triggered(self):
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -258,7 +256,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
-        # pylint: disable=invalid-name
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -271,7 +268,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if not txt_changed:
             self.request_search(new_txt)
 
-    def focusOutEvent(self, event):  # pylint: disable=invalid-name
+    def focusOutEvent(self, event):
         self.job_runner.cancel_requests()
         Panel.focusOutEvent(self, event)
 
@@ -417,7 +414,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             remains = self.replace(text=text)
         cursor.endEditBlock()
 
-    def eventFilter(self, obj, event):  # pylint: disable=invalid-name
+    def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if (event.key() == QtCore.Qt.Key_Tab or
                     event.key() == QtCore.Qt.Key_Backtab):

@@ -23,7 +23,6 @@ class AutoIndentMode(Mode):
 
         :returns: Tuple (text before new line, text after new line)
         """
-        # pylint: disable=unused-argument
         indent = TextHelper(self.editor).line_indent() * ' '
         if len(indent) < self.editor.min_indent_column:
             indent = self.editor.min_indent_column * ' '

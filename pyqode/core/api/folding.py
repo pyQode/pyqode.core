@@ -1,6 +1,5 @@
 """
-This module contains utility functions to manipulate the fold
-tree.
+This module contains the code folding API.
 
 """
 import logging

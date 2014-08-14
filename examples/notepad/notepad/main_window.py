@@ -65,7 +65,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setup_mimetypes(self):
         """ Setup additional mime types. """
         # setup some specific mimetypes
-        mimetypes.add_type('text/xml', '.forms')  # qt designer forms forms
+        mimetypes.add_type('text/xml', '.ui')  # qt designer forms forms
         mimetypes.add_type('text/x-rst', '.rst')  # rst docs
         mimetypes.add_type('text/x-cython', '.pyx')  # cython impl files
         mimetypes.add_type('text/x-cython', '.pxd')  # cython def files

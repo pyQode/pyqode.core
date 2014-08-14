@@ -27,7 +27,6 @@ class CaseConverterMode(Mode):
         """
         Converts selected text to upper
         """
-        # pylint: disable=unused-argument
         TextHelper(self.editor).selected_text_to_upper()
 
     @QtCore.Slot()
@@ -35,7 +34,6 @@ class CaseConverterMode(Mode):
         """
         Converts selected text to lower
         """
-        # pylint: disable=unused-argument
         TextHelper(self.editor).selected_text_to_lower()
 
     def _create_actions(self):

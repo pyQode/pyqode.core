@@ -11,7 +11,6 @@ from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 from pyqode.core import backend
-# pylint: disable=too-many-instance-attributes, missing-docstring
 
 
 def _logger():
@@ -175,7 +174,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
         :param event: QFocusEvents
         """
-        # pylint: disable=unused-argument
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, status, results):
@@ -482,7 +480,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
-        # pylint: disable=too-many-arguments
         _logger().debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,

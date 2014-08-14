@@ -1,7 +1,6 @@
 """
 This module contains the list of possible encodings, taken from
-the code standar library documentation:
-
+the standard library documentation:
 https://docs.python.org/3.4/library/codecs.html#standard-encodings
 
 """

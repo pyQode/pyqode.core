@@ -18,8 +18,6 @@ A worker is always tightly coupled with its caller, so are the data.
 """
 import sys
 import traceback
-# pylint: disable=too-many-arguments, too-few-public-methods, bare-except
-# pylint: disable=unused-argument, abstract-class-not-used
 
 
 def echo_worker(data):

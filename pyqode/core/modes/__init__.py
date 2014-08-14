@@ -3,7 +3,6 @@
 This package contains the core modes.
 
 """
-# pylint: disable=unused-import
 from .autocomplete import AutoCompleteMode
 from .autoindent import AutoIndentMode
 from .caret_line_highlight import CaretLineHighlighterMode

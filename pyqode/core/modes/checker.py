@@ -9,14 +9,12 @@ from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
 from pyqode.core.api.utils import DelayJobRunner
 from pyqode.qt import QtCore, QtGui
-# pylint: disable=too-many-arguments, maybe-no-member
 
 
 class CheckerMessages:
     """
     Enumerates the possible checker message types.
     """
-    # pylint: disable=no-init, too-few-public-methods
     #: Status value for an information message.
     INFO = 0
     #: Status value for a warning message.
@@ -30,7 +28,6 @@ class CheckerMessage(object):
     Holds data for a message displayed by the
     :class:`pyqode.core.modes.CheckerMode`.
     """
-    # pylint: disable= too-many-instance-attributes
     #: Default colors foreach message status
     COLORS = {CheckerMessages.INFO: "#4040DD",
               CheckerMessages.WARNING: "#DDDD40",
@@ -273,7 +270,6 @@ class CheckerMode(Mode, QtCore.QObject):
         :param status: Response status
         :param results: Response data, messages.
         """
-        # pylint: disable=star-args
         if status:
             messages = []
             for msg in results:
