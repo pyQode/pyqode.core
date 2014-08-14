@@ -274,7 +274,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             self.request_completion()
                             return
                 # trigger length
-                if not self._completer.popup().isVisible() and event.text().isalnum():
+                if (not self._completer.popup().isVisible() and
+                        event.text().isalnum()):
                     prefix_len = len(self.completion_prefix)
                     if prefix_len >= self._trigger_len:
                         _logger().debug("cc: Len trigger")
@@ -321,7 +322,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
             self._update_model(completions, self._completer.model())
-            _logger().debug("model updated: %d items", self._completer.model().rowCount())
+            _logger().debug("model updated: %d items",
+                            self._completer.model().rowCount())
             self._show_popup()
             _logger().debug("popup shown")
         else:

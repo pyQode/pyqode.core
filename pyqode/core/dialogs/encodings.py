@@ -100,11 +100,11 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
 
     def _add(self):
         self._transfer_selected_items(self.ui.tableWidgetAvailable,
-                                     self.ui.tableWidgetPreferred)
+                                      self.ui.tableWidgetPreferred)
 
     def _remove(self):
         self._transfer_selected_items(self.ui.tableWidgetPreferred,
-                                     self.ui.tableWidgetAvailable)
+                                      self.ui.tableWidgetAvailable)
 
     def get_preferred_encodings(self):
         encodings = []
