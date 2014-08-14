@@ -118,16 +118,11 @@ def preserve_editor_config(func):
             editor.panels.clear()
             setup_editor(editor)
             if not editor.backend.connected:
-                editor.backend.start(editor, server_path())
+                editor.backend.start(server_path())
                 wait_for_connected(editor)
         return ret
         # return func(editor, *args, **kwds)
     return wrapper
-
-
-def preserve_visiblity(func):
-    # todo: decorator to preserve editor visibility
-    pass
 
 
 def require_python2():
