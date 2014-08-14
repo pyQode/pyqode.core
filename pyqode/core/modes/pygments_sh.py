@@ -16,7 +16,7 @@ from pygments.lexers.agile import PythonLexer
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
 from pygments.styles import get_style_by_name
-from pygments.token import Whitespace, Comment
+from pygments.token import Whitespace, Comment, Token
 from pygments.styles import get_all_styles
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
@@ -240,7 +240,11 @@ class PygmentsSH(SyntaxHighlighter):
             tokens = list(self._lexer.get_tokens(text))
             for token, text in tokens:
                 length = len(text)
-                self.setFormat(index, length, self._get_format(token))
+                fmt = self._get_format(token)
+                if token in [Token.Literal.String, Token.Literal.String.Doc,
+                             Token.Comment]:
+                    fmt.setObjectType(fmt.UserObject)
+                self.setFormat(index, length, fmt)
                 index += length
 
             if hasattr(self._lexer, '_saved_state_stack'):
