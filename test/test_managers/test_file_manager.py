@@ -45,8 +45,3 @@ def test_close(editor):
     editor.file.close()
     assert editor.file.path == ''
     assert editor.file.mimetype == ''
-
-
-def test_save(editor):
-    # todo
-    pass
