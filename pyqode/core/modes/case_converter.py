@@ -4,7 +4,7 @@ Contains a case converter mode.
 """
 from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class CaseConverterMode(Mode):
@@ -27,7 +27,6 @@ class CaseConverterMode(Mode):
         """
         Converts selected text to upper
         """
-        # pylint: disable=unused-argument
         TextHelper(self.editor).selected_text_to_upper()
 
     @QtCore.Slot()
@@ -35,7 +34,6 @@ class CaseConverterMode(Mode):
         """
         Converts selected text to lower
         """
-        # pylint: disable=unused-argument
         TextHelper(self.editor).selected_text_to_lower()
 
     def _create_actions(self):
@@ -54,10 +52,8 @@ class CaseConverterMode(Mode):
         if state:
             if not self._actions_created:
                 self._create_actions()
-            self.separator = self.editor.add_separator()
             self.editor.add_action(self.action_to_lower)
             self.editor.add_action(self.action_to_upper)
         else:
             self.editor.remove_action(self.action_to_lower)
             self.editor.remove_action(self.action_to_upper)
-            self.editor.remove_action(self.separator)

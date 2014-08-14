@@ -3,7 +3,6 @@
 This package contains the core modes.
 
 """
-# pylint: disable=unused-import
 from .autocomplete import AutoCompleteMode
 from .autoindent import AutoIndentMode
 from .caret_line_highlight import CaretLineHighlighterMode
@@ -15,11 +14,13 @@ from .code_completion import CodeCompletionMode
 from .filewatcher import FileWatcherMode
 from .indenter import IndenterMode
 from .matcher import SymbolMatcherMode
-from .pygments_highlighter import PygmentsSyntaxHighlighter
-from .pygments_highlighter import PYGMENTS_STYLES
 from .right_margin import RightMarginMode
+from .pygments_sh import PygmentsSH
 from .wordclick import WordClickMode
 from .zoom import ZoomMode
+# for backward compatibility
+from ..api.syntax_highlighter import PYGMENTS_STYLES
+from .pygments_sh import PygmentsSH as PygmentsSyntaxHighlighter
 
 
 __all__ = [
@@ -33,6 +34,7 @@ __all__ = [
     'CodeCompletionMode',
     'FileWatcherMode',
     'IndenterMode',
+    'PygmentsSH',
     'PygmentsSyntaxHighlighter',
     'PYGMENTS_STYLES',
     'RightMarginMode',

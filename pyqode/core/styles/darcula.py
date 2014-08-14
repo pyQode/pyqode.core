@@ -1,6 +1,6 @@
 from pygments.style import Style
 from pygments.token import Comment, Error, Generic, Keyword, Literal, Name, \
-    Operator, Text
+    Operator, Text, Punctuation
 
 
 class DarculaStyle(Style):
@@ -9,16 +9,17 @@ class DarculaStyle(Style):
 
     """
     background_color = '#252525'
+    highlight_color = '#353535'
 
     styles = {
-        Comment.Multiline: 'italic #808080',
+        Comment.Multiline: ' #808080',
         Comment.Preproc: '#808080',
-        Comment.Single: 'italic #808080',
-        Comment.Special: 'bold italic #808080',
-        Comment: 'italic #808080',
+        Comment.Single: ' #808080',
+        Comment.Special: 'bold  #808080',
+        Comment: ' #808080',
         Error: '#CC0000',
         Generic.Deleted: 'bg:#ffdddd #A9B7C6',
-        Generic.Emph: 'italic #A9B7C6',
+        Generic.Emph: ' #A9B7C6',
         Generic.Error: '#aa0000',
         Generic.Heading: '#999999',
         Generic.Inserted: 'bg:#ddffdd #A9B7C6',
@@ -35,20 +36,20 @@ class DarculaStyle(Style):
         Keyword.Type: '#A9B7C6 bold',
         Keyword: '#CC7832',
         Literal.Number: '#6897B3',
-        Literal.String: '#629755 italic',
-        Literal.String.Doc: '#A5C261 italic',
+        Literal.String: '#629755 ',
+        Literal.String.Doc: '#A5C261 ',
         Name.Attribute: '#800080',
-        Name.Builtin.Pseudo: '#cc7832',
+        Name.Builtin.Pseudo: '#94558D',
         Name.Builtin: '#cc7832',
         Name.Class: '#A9B7C6 bold',
         Name.Constant: '#A9B7C6 bold',
-        Name.Decorator: '#BBB529 bold',
+        Name.Decorator: '#BBB529',
         Name.Entity: '#A9B7C6',
         Name.Exception: '#A9B7C6 bold',
         Name.Function: '#A9B7C6 bold',
         Name.Label: '#A9B7C6 bold',
         Name.Namespace: '#A9B7C6',
-        Name.Tag: '#0000FE',
+        Name.Tag: '#A5C261 bold',
         Name.Variable.Class: '#A9B7C6 bold',
         Name.Variable.Global: '#A9B7C6 bold',
         Name.Variable.Instance: '#A9B7C6',
@@ -57,4 +58,5 @@ class DarculaStyle(Style):
         Operator: '#A9B7C6',
         Text: '#A9B7C6',
         Text.Whitespace: '#2a2a2a',
+        Punctuation: '#A9B7C6'
     }

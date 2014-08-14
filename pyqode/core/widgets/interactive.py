@@ -8,12 +8,9 @@ import logging
 import sys
 
 from pyqode.core.api.client import PROCESS_ERROR_STRING
-from pyqode.core.qt.QtCore import Qt, Signal, QProcess
-from pyqode.core.qt.QtWidgets import QTextEdit
-from pyqode.core.qt.QtGui import QColor, QTextCursor, QFont
-
-
-# pylint: disable=too-many-instance-attributes, missing-docstring
+from pyqode.qt.QtCore import Qt, Signal, QProcess
+from pyqode.qt.QtWidgets import QTextEdit
+from pyqode.qt.QtGui import QColor, QTextCursor, QFont
 
 
 def _logger():
@@ -84,12 +81,14 @@ class InteractiveConsole(QTextEdit):
             self._writer = writer
 
     def _on_stdout(self):
-        txt = bytes(self.process.readAllStandardOutput()).decode(locale.getpreferredencoding())
+        txt = bytes(self.process.readAllStandardOutput()).decode(
+            locale.getpreferredencoding())
         logging.debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
-        txt = bytes(self.process.readAllStandardError()).decode(locale.getpreferredencoding())
+        txt = bytes(self.process.readAllStandardError()).decode(
+            locale.getpreferredencoding())
         logging.debug('stderr ready: %s', txt)
         self._writer(self, txt, self.stderr_color)
 
@@ -121,8 +120,8 @@ class InteractiveConsole(QTextEdit):
     @property
     def stderr_color(self):
         """
-        Color for stderr output if :attr:`pyqode.core.widgets.InteractiveConsole.merge_outputs`
-        is False.
+        Color for stderr output if
+        :attr:`pyqode.core.widgets.InteractiveConsole.merge_outputs` is False.
 
         Default is Red.
         """
@@ -186,7 +185,6 @@ class InteractiveConsole(QTextEdit):
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
 
     def closeEvent(self, *args, **kwargs):
-        # pylint: disable=invalid-name, unused-argument
         if self.process.state() == QProcess.Running:
             self.process.terminate()
 
@@ -224,11 +222,10 @@ class InteractiveConsole(QTextEdit):
         Stop the process (by killing it).
         """
         _logger().debug('killing process')
-        self.process.kill()
         self._user_stop = True
+        self.process.kill()
 
     def keyPressEvent(self, event):
-        # pylint: disable=invalid-name
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
             self._usr_buffer += "\n"
@@ -247,8 +244,10 @@ class InteractiveConsole(QTextEdit):
         super().keyPressEvent(event)
 
     def _write_finished(self, exit_code, exit_status):
-        self._writer(self, "\nProcess finished with exit code %d" % exit_code,
-                     self._app_msg_col)
+        if not self._user_stop:
+            self._writer(
+                self, "\nProcess finished with exit code %d" %
+                exit_code, self._app_msg_col)
         self._running = False
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
@@ -264,7 +263,6 @@ class InteractiveConsole(QTextEdit):
         if self._user_stop:
             self._writer(self, '\nProcess stopped by the user',
                          self.app_msg_color)
-            self._user_stop = False
         else:
             self._writer(self, "Failed to start {0} {1}\n".format(
                 self._process, " ".join(self._args)), self.app_msg_color)

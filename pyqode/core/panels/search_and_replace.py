@@ -5,10 +5,8 @@ This module contains the search and replace panel
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core.ui.search_panel_ui import Ui_SearchPanel
-from pyqode.core.qt import QtCore, QtGui
-# pylint: disable=maybe-no-member, missing-docstring
-# pylint: disable=too-many-public-methods, too-many-instance-attributes
+from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
+from pyqode.qt import QtCore, QtGui
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
@@ -147,8 +145,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.actionActionSearchAndReplace.setIcon(icon)
         self.labelReplace.setPixmap(icon.pixmap(icon_size))
 
-
-
         icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
         self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
         self.actionFindPrevious.setIcon(icon)
@@ -170,9 +166,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._fg = QtGui.QColor('black')
 
     def on_install(self, editor):
-        Panel.on_install(self, editor)
-        self.on_toolButtonClose_clicked()
-        self.text_helper= TextHelper(editor)
+        super().on_install(editor)
+        self.hide()
+        self.text_helper = TextHelper(editor)
 
     def _refresh_decorations(self):
         for deco in self._decorations:
@@ -182,10 +178,9 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):
-        Panel.on_state_changed(self, state)
+        super().on_state_changed(state)
         if state:
             # append menus
-            self._separator = self.editor.add_separator()
             self.editor.add_action(self.actionSearch)
             self.editor.add_action(self.actionActionSearchAndReplace)
             self.editor.add_action(self.actionFindNext)
@@ -241,11 +236,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditSearch.clear()
 
     @QtCore.Slot()
-    def on_toolButtonClose_clicked(self):  # pylint: disable=invalid-name
+    def on_toolButtonClose_clicked(self):
         self.close_panel()
 
     @QtCore.Slot()
-    def on_actionSearch_triggered(self):  # pylint: disable=invalid-name
+    def on_actionSearch_triggered(self):
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -261,7 +256,6 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     @QtCore.Slot()
     def on_actionActionSearchAndReplace_triggered(self):
-        # pylint: disable=invalid-name
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -274,7 +268,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if not txt_changed:
             self.request_search(new_txt)
 
-    def focusOutEvent(self, event):  # pylint: disable=invalid-name
+    def focusOutEvent(self, event):
         self.job_runner.cancel_requests()
         Panel.focusOutEvent(self, event)
 
@@ -420,7 +414,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             remains = self.replace(text=text)
         cursor.endEditBlock()
 
-    def eventFilter(self, obj, event):  # pylint: disable=invalid-name
+    def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:
             if (event.key() == QtCore.Qt.Key_Tab or
                     event.key() == QtCore.Qt.Key_Backtab):

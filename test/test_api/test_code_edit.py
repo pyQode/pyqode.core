@@ -10,8 +10,8 @@ from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import TextHelper
 from pyqode.core import panels, modes
 
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt.QtTest import QTest
 
 
 
@@ -37,7 +37,7 @@ def test_set_plain_text(editor):
 @log_test_name
 def test_actions(editor):
     # 13 default shortcuts
-    nb_actions_expected = 22  # 13 default actions + search panel actions + case converter,...
+    nb_actions_expected = 21  # 13 default actions + search panel actions + case converter,...
     assert len(editor.actions()) == nb_actions_expected
     action = QtWidgets.QAction('my_action', editor)
     editor.add_action(action)
@@ -54,6 +54,23 @@ def test_duplicate_line(editor):
     editor.duplicate_line()
     assert editor.toPlainText().startswith(get_first_line(editor) + '\n' +
                                            get_first_line(editor))
+    editor.setPlainText('foo', '', 'utf-8')
+    editor.duplicate_line()
+    assert editor.toPlainText() == 'foo\nfoo'
+    assert editor.textCursor().position() == 4
+
+
+def test_bug_duplicate_line_undo_stack(editor):
+    """
+    See github issue #142 where the duplicate line messup the undo stack
+    """
+    editor.setPlainText('foo\nbar', '', 'utf-8')
+    editor.textCursor().setPosition(0)
+    editor.indent()
+    editor.duplicate_line()
+    editor.undo()
+    assert editor.toPlainText() == '    foo\nbar'
+    assert editor.textCursor().position() == 4
 
 
 @editor_open(__file__)
@@ -63,11 +80,12 @@ def test_show_tooltip(editor):
 
 
 @editor_open(__file__)
-# @preserve_editor_config
+@preserve_editor_config
 @log_test_name
 def test_margin_size(editor):
     for panel in editor.panels:
         panel.enabled = False
+        panel.hide()
 
     # we really need to show the window here to get correct margin size.
     editor.show()
@@ -143,10 +161,7 @@ def test_whitespaces(editor):
 @log_test_name
 def test_font_name(editor):
     system = platform.system().lower()
-    if system == 'linux':
-        assert editor.font_name == 'monospace'
-    elif system == 'windows':
-        assert editor.font_name == 'Consolas'
+    assert editor.font_name == 'Source Code Pro'
     editor.font_name = 'deja vu sans'
     assert editor.font_name == 'deja vu sans'
 
@@ -303,7 +318,7 @@ def test_multiple_panels(editor):
 
 @log_test_name
 def test_resize(editor):
-    editor.resize(200, 300)
+    editor.resize(700, 500)
     QTest.qWait(1000)
     editor.resize(800, 600)
     QTest.qWait(1000)

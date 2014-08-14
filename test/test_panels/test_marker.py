@@ -1,6 +1,6 @@
 from pyqode.core.api import TextHelper
-from pyqode.core.qt import QtCore
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
 from test.helpers import editor_open
 
@@ -31,7 +31,7 @@ def test_add_marker(editor):
                            description='Marker description')
     panel.add_marker(marker)
     QTest.qWait(500)
-    assert panel.marker_for_line(1) == marker
+    assert panel.marker_for_line(1)[0] == marker
 
 
 @editor_open(__file__)

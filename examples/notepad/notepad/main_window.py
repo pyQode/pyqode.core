@@ -6,15 +6,15 @@ import mimetypes
 import os
 import sys
 
-from pyqode.core.qt import QtCore
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtCore
+from pyqode.qt import QtWidgets
 
 from pyqode.core import api
 from pyqode.core import modes
 from pyqode.core import widgets
 
 from .editor import GenericCodeEdit
-from .ui.main_window_ui import Ui_MainWindow
+from .forms.main_window_ui import Ui_MainWindow
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -27,7 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
         self.on_current_tab_changed()
-        self.pygments_style = 'qt'
+        self.styles_group = None
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -41,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Connects slots to signals """
         self.actionOpen.triggered.connect(self.on_open)
         self.actionNew.triggered.connect(self.on_new)
-        self.actionSave.triggered.connect(self.tabWidget.save_current)
+        self.actionSave.triggered.connect(self.on_save)
         self.actionSave_as.triggered.connect(self.on_save_as)
         self.actionClose_tab.triggered.connect(self.tabWidget.close)
         self.actionClose_other_tabs.triggered.connect(
@@ -65,7 +65,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setup_mimetypes(self):
         """ Setup additional mime types. """
         # setup some specific mimetypes
-        mimetypes.add_type('text/xml', '.ui')  # qt designer ui forms
+        mimetypes.add_type('text/xml', '.ui')  # qt designer forms forms
         mimetypes.add_type('text/x-rst', '.rst')  # rst docs
         mimetypes.add_type('text/x-cython', '.pyx')  # cython impl files
         mimetypes.add_type('text/x-cython', '.pxd')  # cython def files
@@ -110,6 +110,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ setup the style menu for an editor tab """
         menu = QtWidgets.QMenu('Styles', self.menuEdit)
         group = QtWidgets.QActionGroup(self)
+        self.styles_group = group
         current_style = editor.modes.get(
             modes.PygmentsSyntaxHighlighter).pygments_style
         group.triggered.connect(self.on_style_changed)
@@ -150,14 +151,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.menu_recents.update_actions()
             else:
                 self.tabWidget.setCurrentIndex(index)
-            self.refresh_color_scheme()
 
     @QtCore.Slot()
     def on_new(self):
         """
         Add a new empty code editor to the tab widget
         """
-        self.tabWidget.add_code_edit(GenericCodeEdit(self), 'New document')
+        self.tabWidget.add_code_edit(GenericCodeEdit(self),
+                                     'New document %d.txt')
         self.refresh_color_scheme()
 
     @QtCore.Slot()
@@ -172,6 +173,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.open_file(filename)
 
     @QtCore.Slot()
+    def on_save(self):
+        self.tabWidget.save_current()
+        self._update_status_bar(self.tabWidget.currentWidget())
+
+    @QtCore.Slot()
     def on_save_as(self):
         """
         Save the current editor document as.
@@ -184,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tabWidget.save_current(filename)
             self.recent_files_manager.open_file(filename)
             self.menu_recents.update_actions()
+        self._update_status_bar(self.tabWidget.currentWidget())
 
     @QtCore.Slot()
     def on_current_tab_changed(self):
@@ -204,6 +211,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.setup_mnu_edit(editor)
             self.setup_mnu_modes(editor)
             self.setup_mnu_panels(editor)
+        self._update_status_bar(editor)
+
+    def _update_status_bar(self, editor):
+        if editor:
             self.lbl_cursor_pos.setText(
                 '%d:%d' % api.TextHelper(editor).cursor_position())
             self.lbl_encoding.setText(editor.file.encoding)
@@ -214,7 +225,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.lbl_filename.clear()
 
     def refresh_color_scheme(self):
-        style = self.pygments_style
+        if self.styles_group and self.styles_group.checkedAction():
+            style = self.styles_group.checkedAction().text()
+            style = style.replace('&', '') # qt5 bug on kde?
+        else:
+            style = 'qt'
         for i in range(self.tabWidget.count()):
             editor = self.tabWidget.widget(i)
             editor.modes.get(
@@ -230,6 +245,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
+        action.panel.setVisible(action.isChecked())
 
     @QtCore.Slot()
     def on_mode_state_changed(self):

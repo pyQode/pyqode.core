@@ -2,7 +2,7 @@ import logging
 import sys
 from pyqode.core.api.code_edit import CodeEdit
 
-from pyqode.core.qt import QtWidgets, QtCore
+from pyqode.qt import QtWidgets, QtCore
 
 from pyqode.core import modes
 

@@ -3,8 +3,8 @@
 Contains a custom QTableWidget for easier displaying of CheckerMessages
 """
 from pyqode.core.api.utils import memoized
-from pyqode.core.modes.checker import CheckerMessage
-from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.core.modes import CheckerMessage, CheckerMessages
+from pyqode.qt import QtCore, QtWidgets, QtGui
 
 
 COL_TYPE = 0
@@ -23,10 +23,15 @@ class ErrorsTable(QtWidgets.QTableWidget):
 
     You clear the table using :meth:`pyqode.core.widgets.ErrorsTable`.
     """
-    # pylint: disable=too-many-public-methods
     #: Signal emitted when a message is activated, the clicked signal is passed
     #: as a parameter
     msg_activated = QtCore.Signal(CheckerMessage)
+
+    ICONS = {
+        CheckerMessages.INFO: ':/ide-icons/rc/accept.png',
+        CheckerMessages.WARNING: ':pyqode-icons/rc/dialog-warning.png',
+        CheckerMessages.ERROR: ':pyqode-icons/rc/dialog-error.png',
+    }
 
     def __init__(self, parent=None):
         QtWidgets.QTableWidget.__init__(self, parent)
@@ -80,12 +85,13 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(
             ["Type", "File name", "Line", "Description"])
 
-    @staticmethod
+    @classmethod
     @memoized
-    def make_icon(icon):
+    def _make_icon(cls, status):
         """
         Make icon from icon filename/tuple (if you want to use a theme)
         """
+        icon = cls.ICONS[status]
         if isinstance(icon, tuple):
             return QtGui.QIcon.fromTheme(
                 icon[0], QtGui.QIcon(icon[1]))
@@ -105,8 +111,8 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.insertRow(row)
 
         # type
-        item = QtWidgets.QTableWidgetItem(self.make_icon(msg.icon),
-                                          msg.status_string)
+        item = QtWidgets.QTableWidgetItem(
+            self._make_icon(msg.status), msg.status_string)
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_TYPE, item)

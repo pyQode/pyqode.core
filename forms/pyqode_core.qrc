@@ -1,0 +1,34 @@
+<RCC>
+  <qresource prefix="pyqode-icons">
+    <file>rc/go-next.png</file>
+    <file>rc/go-previous.png</file>
+    <file>rc/arrow_down_off.png</file>
+    <file>rc/arrow_down_on.png</file>
+    <file>rc/arrow_right_off.png</file>
+    <file>rc/arrow_right_on.png</file>
+    <file>rc/close.png</file>
+    <file>rc/dialog-error.png</file>
+    <file>rc/dialog-info.png</file>
+    <file>rc/dialog-warning.png</file>
+    <file>rc/document-save.png</file>
+    <file>rc/document-save-as.png</file>
+    <file>rc/edit-copy.png</file>
+    <file>rc/edit-cut.png</file>
+    <file>rc/edit-delete.png</file>
+    <file>rc/edit-find.png</file>
+    <file>rc/edit-find-replace.png</file>
+    <file>rc/edit-paste.png</file>
+    <file>rc/edit-redo.png</file>
+    <file>rc/edit-select-all.png</file>
+    <file>rc/edit-undo.png</file>
+    <file>rc/format-indent-less.png</file>
+    <file>rc/format-indent-more.png</file>
+    <file>rc/go-down.png</file>
+    <file>rc/goto-line.png</file>
+    <file>rc/go-up.png</file>
+  </qresource>
+  <qresource prefix="fonts">
+    <file>rc/SourceCodePro-Regular.ttf</file>
+    <file>rc/SourceCodePro-Bold.ttf</file>
+  </qresource>
+</RCC>

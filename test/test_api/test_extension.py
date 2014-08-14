@@ -2,7 +2,7 @@
 """
 This module tests the classes: Mode an Panels
 """
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 import pytest
 from ..helpers import editor_open
@@ -29,6 +29,7 @@ def test_modes(editor):
     assert m == mode
     with pytest.raises(KeyError):
         editor.modes.remove(CaseConverterMode)
+
 
 @editor_open(__file__)
 @log_test_name

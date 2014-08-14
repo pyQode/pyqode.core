@@ -1,18 +1,6 @@
-import os
-from pyqode.core.qt import QT_API
-from pyqode.core.qt import PYQT5_API
-from pyqode.core.qt import PYQT4_API
-from pyqode.core.qt import PYSIDE_API
+"""
+This package is deprecated and is meant to be removed in pyqode.core 2.2.
 
-if os.environ[QT_API] == PYQT5_API:
-    from PyQt5.QtTest import QTest
-elif os.environ[QT_API] == PYQT4_API:
-    from PyQt4.QtTest import QTest as OldQTest
-
-    class QTest(OldQTest):
-        @staticmethod
-        def qWaitForWindowActive(QWidget):
-            OldQTest.qWaitForWindowShown(QWidget)
-
-elif os.environ[QT_API] == PYSIDE_API:
-    raise ImportError('QtTest support is incomplete for PySide')
+You should use (and install) **pyqode.qt.QtTest** instead.
+"""
+from pyqode.qt.QtTest import *

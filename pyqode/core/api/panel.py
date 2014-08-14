@@ -1,6 +1,9 @@
+"""
+This module contains the panel API.
+"""
 import logging
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 
 
 def _logger():
@@ -14,9 +17,10 @@ class Panel(QtWidgets.QWidget, Mode):
 
     A panel is a mode and a QWidget.
 
-    .. note:: A disabled panel will be hidden automatically.
+    .. note:: Use enabled to disable panel actions and setVisible to change the
+        visiblity of the panel.
     """
-    class Position:  # pylint: disable=no-init, too-few-public-methods
+    class Position:
         """
         Enumerates the possible panel positions
         """
@@ -47,7 +51,6 @@ class Panel(QtWidgets.QWidget, Mode):
 
     @scrollable.setter
     def scrollable(self, value):
-        # pylint: disable=missing-docstring
         self._scrollable = value
 
     def __init__(self):
@@ -76,32 +79,16 @@ class Panel(QtWidgets.QWidget, Mode):
         """
         Mode.on_install(self, editor)
         self.setParent(editor)
+        self.setPalette(QtWidgets.QApplication.instance().palette())
+        self.setFont(QtWidgets.QApplication.instance().font())
         self.editor.panels.refresh()
         self._background_brush = QtGui.QBrush(QtGui.QColor(
             self.palette().window().color()))
         self._foreground_pen = QtGui.QPen(QtGui.QColor(
             self.palette().windowText().color()))
 
-    def on_state_changed(self, state):
-        """
-        Shows/Hides the Panel
-
-        .. warning:: Don't forget to call **super** if you override this
-            method!
-
-        :param state: True = enabled, False = disabled
-        :type state: bool
-        """
-        if not self.editor.isVisible():
-            return
-        if state is True:
-            self.show()
-        else:
-            self.hide()
-
     def paintEvent(self, event):
         """ Fills the panel background. """
-        # pylint: disable=invalid-name
         if self.isVisible():
             # fill background
             self._background_brush = QtGui.QBrush(QtGui.QColor(
@@ -117,7 +104,7 @@ class Panel(QtWidgets.QWidget, Mode):
 
         Automatically call CodeEdit.refresh_panels.
         """
-        # pylint: disable=invalid-name
         _logger().debug('%s visibility changed', self.name)
-        QtWidgets.QWidget.setVisible(self, visible)
-        self.editor.panels.refresh()
+        super().setVisible(visible)
+        if self.editor:
+            self.editor.panels.refresh()

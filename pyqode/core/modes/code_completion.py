@@ -7,11 +7,10 @@ import re
 import sys
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotConnected
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 from pyqode.core import backend
-# pylint: disable=too-many-instance-attributes, missing-docstring
 
 
 def _logger():
@@ -78,14 +77,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Returns the current completion prefix
         """
-        prefix = self._helper.word_under_cursor().selectedText()
-        if prefix == "":
-            try:
-                cursor = self._helper.word_under_cursor(select_whole_word=True)
-                prefix = cursor.selectedText()[0]
-            except IndexError:
-                pass
-        return prefix.strip()
+        return self._helper.word_under_cursor(
+            select_whole_word=False).selectedText().strip()
 
     def __init__(self):
         Mode.__init__(self)
@@ -106,6 +99,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._case_sensitive = None
         self._data = None
         self._completer = None
+        self._col = 0
+        self._skip_next_backspace_released = False
         self._init_settings()
 
     def _init_settings(self):
@@ -119,21 +114,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
+        self._col = self.editor.textCursor().positionInBlock() - len(
+            self.completion_prefix)
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
-            column = helper.current_column_nbr()
-            usd = self.editor.textCursor().block().userData()
-            if usd and hasattr(usd, 'cc_disabled_zones'):
-                for start, end in usd.cc_disabled_zones:
-                    if start <= column < end:
-                        _logger().debug(
-                            "cc: cancel request, cursor is in a disabled zone")
-                        return False
+            disabled_zone = TextHelper(self.editor).is_comment_or_string(
+                self.editor.textCursor())
+            if disabled_zone:
+                _logger().debug(
+                    "cc: cancel request, cursor is in a disabled zone")
+                return False
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
                                       helper.current_line_nbr(),
-                                      helper.current_column_nbr(),
+                                      helper.current_column_nbr() -
+                                      len(self.completion_prefix),
                                       self.editor.file.path,
                                       self.editor.file.encoding,
                                       self.completion_prefix)
@@ -151,6 +147,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
+        self._completer.popup().hide()
         self._completer = None
 
     def on_state_changed(self, state):
@@ -177,7 +174,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
         :param event: QFocusEvents
         """
-        # pylint: disable=unused-argument
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, status, results):
@@ -211,9 +207,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 event.key() == QtCore.Qt.Key_Right or
                 event.key() == QtCore.Qt.Key_Up or
                 event.key() == QtCore.Qt.Key_Down or
-                event.key() == QtCore.Qt.Key_Space or
-                event.key() == QtCore.Qt.Key_End or
-                event.key() == QtCore.Qt.Key_Home)
+                event.key() == QtCore.Qt.Key_Space)
 
     @staticmethod
     def _is_end_of_word_char(event, is_printable, symbols, seps):
@@ -226,8 +220,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _update_prefix(self, event, is_end_of_word, is_navigation_key):
         self._completer.setCompletionPrefix(self.completion_prefix)
         cnt = self._completer.completionCount()
-        if (not cnt or (self.completion_prefix == "" and is_navigation_key) or
+        n = len(self.editor.textCursor().block().text())
+        c = self.editor.textCursor().positionInBlock()
+        if (not cnt or ((self.completion_prefix == "" and n == 0) and
+                        is_navigation_key) or
                 is_end_of_word or
+                c < self._col or
                 (int(event.modifiers()) and
                  event.key() == QtCore.Qt.Key_Backspace)):
             self._hide_popup()
@@ -235,26 +233,40 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._show_popup()
 
     def _on_key_released(self, event):
+        if (event.key() == QtCore.Qt.Key_Backspace and
+                self._skip_next_backspace_released):
+            self._skip_next_backspace_released = False
+            return
         if self._is_shortcut(event):
+            return
+        if (event.key() == QtCore.Qt.Key_Home or
+                event.key() == QtCore.Qt.Key_End):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
         symbols = self._trigger_symbols
         is_end_of_word = self._is_end_of_word_char(
             event, is_printable, symbols, self.editor.word_separators)
+        cursor = self._helper.word_under_cursor()
+        cursor.setPosition(cursor.position())
+        cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+        text_to_cursor = cursor.selectedText()
+
         if self._completer.popup().isVisible():
             # Update completion prefix
-            self._update_prefix(event, is_end_of_word, is_navigation_key)
+            if text_to_cursor[-1] in self.editor.word_separators:
+                # move out of the current work
+                self._hide_popup()
+            else:
+                # moving inside word
+                self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
+                return
             else:
                 # trigger symbols
                 if symbols:
-                    cursor = self._helper.word_under_cursor()
-                    cursor.setPosition(cursor.position())
-                    cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
-                    text_to_cursor = cursor.selectedText()
                     for symbol in symbols:
                         if text_to_cursor.endswith(symbol):
                             _logger().debug("cc: symbols trigger")
@@ -262,9 +274,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             self.request_completion()
                             return
                 # trigger length
-                if not self._completer.popup().isVisible():
+                if (not self._completer.popup().isVisible() and
+                        event.text().isalnum()):
                     prefix_len = len(self.completion_prefix)
-                    if prefix_len == self._trigger_len:
+                    if prefix_len >= self._trigger_len:
                         _logger().debug("cc: Len trigger")
                         self.request_completion()
                         return
@@ -301,6 +314,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def _show_completions(self, completions):
+        _logger().debug("show %d completions" % len(completions))
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
         if (not self._cancel_next and not self._is_last_char_end_of_word() and
@@ -308,7 +322,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
             self._update_model(completions, self._completer.model())
+            _logger().debug("model updated: %d items",
+                            self._completer.model().rowCount())
             self._show_popup()
+            _logger().debug("popup shown")
+        else:
+            print('cancel')
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
@@ -324,48 +343,54 @@ class CodeCompletionMode(Mode, QtCore.QObject):
               event.key() == QtCore.Qt.Key_Backtab):
             self._hide_popup()
             event.accept()
+        elif event.key() == QtCore.Qt.Key_Home:
+            self._show_popup(index=0)
+            event.accept()
+        elif event.key() == QtCore.Qt.Key_End:
+            self._show_popup(index=self._completer.completionCount() - 1)
+            event.accept()
 
     def _hide_popup(self):
         # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
-        self._completer.popup().hide()
+        if self._completer.popup() is not None:
+            self._completer.popup().hide()
         self._job_runner.cancel_requests()
         QtWidgets.QToolTip.hideText()
 
-    def _show_popup(self):
-        cnt = self._completer.completionCount()
+    def _show_popup(self, index=0):
         full_prefix = self._helper.word_under_cursor(
             select_whole_word=True).selectedText()
+        if self._case_sensitive:
+                self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        else:
+            self._completer.setCaseSensitivity(
+                QtCore.Qt.CaseInsensitive)
+        # set prefix
+        self._completer.setCompletionPrefix(self.completion_prefix)
+        cnt = self._completer.model().rowCount()
         if (full_prefix == self._current_completion) and cnt == 1:
             self._hide_popup()
         else:
-            if self._case_sensitive:
-                self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
-            else:
-                self._completer.setCaseSensitivity(
-                    QtCore.Qt.CaseInsensitive)
-            # set prefix
-            self._completer.setCompletionPrefix(self.completion_prefix)
             # compute size and pos
             cursor_rec = self.editor.cursorRect()
             char_width = self.editor.fontMetrics().width('A')
             prefix_len = (len(self.completion_prefix) * char_width)
             cursor_rec.translate(self.editor.panels.margin_size() - prefix_len,
                                  # top
-                                 self.editor.panels.margin_size(0))
+                                 self.editor.panels.margin_size(0) + 5)
             popup = self._completer.popup()
             width = popup.verticalScrollBar().sizeHint().width()
             cursor_rec.setWidth(self._completer.popup().sizeHintForColumn(0) +
                                 width)
             # show the completion list
             if self.editor.isVisible():
-                try:
-                    self.editor.setFocus(True)
-                except TypeError:
-                    # pyside
-                    self.editor.setFocus()
+                if not self._completer.popup().isVisible():
+                    self._on_focus_in(None)
                 self._completer.complete(cursor_rec)
                 self._completer.popup().setCurrentIndex(
-                    self._completer.completionModel().index(0, 0))
+                    self._completer.completionModel().index(index, 0))
+            else:
+                _logger().debug('cannot show popup, editor is unvisible')
 
     def _insert_completion(self, completion):
         cursor = self._helper.word_under_cursor(select_whole_word=False)
@@ -381,10 +406,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
         :return: bool
         """
-        modifier = QtCore.Qt.MetaModifier if sys.platform == 'darwin' else QtCore.Qt.ControlModifier
+        modifier = (QtCore.Qt.MetaModifier if sys.platform == 'darwin' else
+                    QtCore.Qt.ControlModifier)
         valid_modifier = int(event.modifiers() & modifier) == modifier
         valid_key = event.key() == self._trigger_key
-        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" % (valid_modifier, valid_key))
+        _logger().debug("CC: Valid Mofifier: %r, Valid Key: %r" %
+                        (valid_modifier, valid_key))
         return valid_key and valid_modifier
 
     @staticmethod
@@ -405,8 +432,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @staticmethod
     def _is_printable_key_event(event):
-        return len(CodeCompletionMode.strip_control_characters(
-            event.text())) == 1
+        txt = CodeCompletionMode.strip_control_characters(event.text())
+        return len(txt) == 1
 
     @staticmethod
     @memoized
@@ -438,6 +465,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     item.setData(self._make_icon(completion['icon']),
                                  QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
+        self._completer.setModel(cc_model)
         return cc_model
 
     def _display_completion_tooltip(self, completion):
@@ -454,7 +482,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _collect_completions(self, code, line, column, path, encoding,
                              completion_prefix):
-        # pylint: disable=too-many-arguments
         _logger().debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,

@@ -8,7 +8,7 @@ Ctrl+D, we also chnage the text to upper case.
 
 """
 import sys
-from pyqode.core.qt import QtWidgets
+from pyqode.qt import QtWidgets
 
 from pyqode.core import api
 from pyqode.core import modes

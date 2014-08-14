@@ -3,8 +3,9 @@
 This module contains the marker panel
 """
 import logging
+from pyqode.core.api import TextBlockUserData
 from pyqode.core.api.panel import Panel
-from pyqode.core.qt import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 
 
@@ -59,6 +60,7 @@ class Marker(QtCore.QObject):
 
 class MarkerPanel(Panel):
     """
+    General purpose marker panel.
     This panels takes care of drawing icons at a specific line number.
 
     Use addMarker, removeMarker and clearMarkers to manage the collection of
@@ -92,7 +94,7 @@ class MarkerPanel(Panel):
         Adds the marker to the panel.
 
         :param marker: Marker to add
-        :type marker: pyqode.core.Marker
+        :type marker: pyqode.core.modes.Marker
         """
         key, val = self.make_marker_icon(marker.icon)
         if key and val:
@@ -102,8 +104,11 @@ class MarkerPanel(Panel):
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker.position - 1)
         user_data = block.userData()
-        if hasattr(user_data, "marker"):
-            user_data.marker = marker
+        if user_data is None:
+            user_data = TextBlockUserData()
+            block.setUserData(user_data)
+        marker.panel_ref = self
+        user_data.markers.append(marker)
         self.repaint()
 
     @staticmethod
@@ -148,11 +153,13 @@ class MarkerPanel(Panel):
         :return: Marker of None
         :rtype: pyqode.core.Marker
         """
+        markers = []
         for marker in self._markers:
             if line == marker.position:
-                return marker
+                markers.append(marker)
+        return markers
 
-    def sizeHint(self):  # pylint: disable=invalid-name
+    def sizeHint(self):
         """
         Returns the panel size hint. (fixed with of 16px)
         """
@@ -163,36 +170,42 @@ class MarkerPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
-        # pylint: disable=invalid-name, unused-variable
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
         for top, block_nbr, block in self.editor.visible_blocks:
             user_data = block.userData()
-            if hasattr(user_data, "marker"):
-                marker = user_data.marker
-                if marker in self._to_remove:
-                    user_data.marker = None
-                    self._to_remove.remove(marker)
-                    continue
-                if marker and marker.icon:
-                    rect = QtCore.QRect()
-                    rect.setX(0)
-                    rect.setY(top)
-                    rect.setWidth(self.sizeHint().width())
-                    rect.setHeight(self.sizeHint().height())
-                    if isinstance(marker.icon, tuple):
-                        key = marker.icon[0]
-                    else:
-                        key = marker.icon
-                    if key not in self._icons:
-                        key, val = self.make_marker_icon(marker.icon)
-                        if key and val:
-                            self._icons[key] = val
-                        else:
+            if hasattr(user_data, "markers"):
+                markers = user_data.markers
+                for i, marker in enumerate(markers):
+                    if (hasattr(marker, 'panel_ref') and
+                            marker.panel_ref == self):
+                        # only draw our markers
+                        if marker in self._to_remove:
+                            try:
+                                user_data.markers.remove(None)
+                                self._to_remove.remove(marker)
+                            except ValueError:
+                                pass
                             continue
-                    self._icons[key].paint(painter, rect)
+                        if marker and marker.icon:
+                            rect = QtCore.QRect()
+                            rect.setX(0)
+                            rect.setY(top)
+                            rect.setWidth(self.sizeHint().width())
+                            rect.setHeight(self.sizeHint().height())
+                            if isinstance(marker.icon, tuple):
+                                key = marker.icon[0]
+                            else:
+                                key = marker.icon
+                            if key not in self._icons:
+                                key, val = self.make_marker_icon(marker.icon)
+                                if key and val:
+                                    self._icons[key] = val
+                                else:
+                                    continue
+                            self._icons[key].paint(painter, rect)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         """
         Handle mouse press:
 
@@ -209,19 +222,21 @@ class MarkerPanel(Panel):
             _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)
 
-    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+    def mouseMoveEvent(self, event):
         """
         Requests a tooltip if the cursor is currently over a marker.
         """
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
-        marker = self.marker_for_line(line)
-        if marker and marker.description:
+        markers = self.marker_for_line(line)
+        text = '\n'.join([marker.description for marker in markers if
+                          marker.description])
+        if len(markers):
             if self._previous_line != line:
                 top = TextHelper(self.editor).line_pos_from_number(
-                    marker.position - 2)
+                    markers[0].position - 2)
                 if top:
-                    self._job_runner.request_job(
-                        self._display_tooltip, marker.description, top)
+                    self._job_runner.request_job(self._display_tooltip,
+                                                 text, top)
         else:
             self._job_runner.cancel_requests()
         self._previous_line = line
@@ -230,7 +245,6 @@ class MarkerPanel(Panel):
         """
         Hide tooltip when leaving the panel region.
         """
-        # pylint: disable=invalid-name, unused-argument
         QtWidgets.QToolTip.hideText()
         self._previous_line = -1
 

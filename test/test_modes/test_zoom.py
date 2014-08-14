@@ -1,7 +1,7 @@
 import os
-from pyqode.core.qt import QtCore
-from pyqode.core.qt import QtGui
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt import QtGui
+from pyqode.qt.QtTest import QTest
 from pyqode.core import modes
 
 
@@ -24,17 +24,17 @@ def test_key_events(editor):
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
             QtCore.QPoint(0, 1), QtCore.QPoint(0, 1), 1,
-            QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+            QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.ControlModifier))
     else:
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), 1,
-            QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+            QtCore.Qt.MidButton, QtCore.Qt.ControlModifier))
     if os.environ['QT_API'].lower() == 'pyqt5':
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), editor.mapToGlobal(QtCore.QPoint(10, 10)),
             QtCore.QPoint(0, -1), QtCore.QPoint(0, -1), -1,
-             QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+             QtCore.Qt.Vertical, QtCore.Qt.MidButton, QtCore.Qt.ControlModifier))
     else:
         editor.wheelEvent(QtGui.QWheelEvent(
             QtCore.QPoint(10, 10), -1,
-            QtCore.Qt.MidButton, QtCore.Qt.NoModifier))
+            QtCore.Qt.MidButton, QtCore.Qt.ControlModifier))

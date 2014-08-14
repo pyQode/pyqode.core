@@ -1,0 +1,13 @@
+#
+# MANIFEST.in
+#
+# Manifest template for creating the pyqode.core source distribution.
+include MANIFEST.in
+
+# setup, license and readme
+include setup.py
+include LICENSE
+include *.rst
+
+recursive-include forms *
+recursive-include share *

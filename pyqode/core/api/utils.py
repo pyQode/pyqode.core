@@ -4,7 +4,7 @@ Contains utility functions
 """
 import functools
 import logging
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 
 
 def _logger():
@@ -12,7 +12,7 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class memoized(object):  # pylint: disable=invalid-name, too-few-public-methods
+class memoized(object):
     """
     Decorator. Caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned
@@ -57,12 +57,12 @@ def drift_color(base_color, factor=110):
         return base_color.darker(factor)
     else:
         if base_color == QtGui.QColor('#000000'):
-            return QtGui.QColor('#202020')
+            return drift_color(QtGui.QColor('#101010'), factor + 20)
         else:
             return base_color.lighter(factor + 10)
 
 
-class TextStyle(object):  # pylint: disable=too-few-public-methods
+class TextStyle(object):
     """
     Helper class to define a text format. This class has methods to set the
     text style from a string and to easily be created from a string, making
@@ -244,7 +244,8 @@ class TextHelper:
         end_pos = start_pos = text_cursor.position()
         # select char by char until we are at the original cursor position.
         while not text_cursor.atStart():
-            text_cursor.movePosition(text_cursor.Left, text_cursor.KeepAnchor, 1)
+            text_cursor.movePosition(
+                text_cursor.Left, text_cursor.KeepAnchor, 1)
             try:
                 char = text_cursor.selectedText()[0]
                 word_separators = editor.word_separators
@@ -334,6 +335,11 @@ class TextHelper:
         block = doc.findBlockByNumber(line_nbr - 1)
         return block.text()
 
+    def previous_line_text(self):
+        if self.current_line_nbr() - 1:
+            return self.line_text(self.current_line_nbr() - 1)
+        return ''
+
     def current_line_text(self):
         """
         Returns the text of the current line.
@@ -417,7 +423,8 @@ class TextHelper:
         text_cursor.movePosition(
             text_cursor.Down, text_cursor.MoveAnchor,
             pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
-        text_cursor.movePosition(text_cursor.StartOfLine, text_cursor.MoveAnchor)
+        text_cursor.movePosition(text_cursor.StartOfLine,
+                                 text_cursor.MoveAnchor)
         cpos = text_cursor.position()
         text_cursor.select(text_cursor.LineUnderCursor)
         if text_cursor.selectedText():
@@ -441,8 +448,8 @@ class TextHelper:
         This functions apply the selection and returns the text cursor that
         contains the selection.
 
-        Optionally it is possible to prevent the selection from being applied on
-        the code editor widget by setting ``apply_selection`` to False.
+        Optionally it is possible to prevent the selection from being applied
+        on the code editor widget by setting ``apply_selection`` to False.
 
         :param start: Start line number (1 based)
         :param end: End line number (1 based). Use -1 to select up to the
@@ -460,16 +467,16 @@ class TextHelper:
             text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
                                      start - 1)
             if end > start:  # Going down
-                text_cursor.movePosition(text_cursor.Down, text_cursor.KeepAnchor,
-                                         end - start)
+                text_cursor.movePosition(text_cursor.Down,
+                                         text_cursor.KeepAnchor, end - start)
                 text_cursor.movePosition(text_cursor.EndOfLine,
                                          text_cursor.KeepAnchor)
             elif end < start:  # going up
                 # don't miss end of line !
                 text_cursor.movePosition(text_cursor.EndOfLine,
                                          text_cursor.MoveAnchor)
-                text_cursor.movePosition(text_cursor.Up, text_cursor.KeepAnchor,
-                                         start - end)
+                text_cursor.movePosition(text_cursor.Up,
+                                         text_cursor.KeepAnchor, start - end)
                 text_cursor.movePosition(text_cursor.StartOfLine,
                                          text_cursor.KeepAnchor)
             else:
@@ -477,6 +484,8 @@ class TextHelper:
                                          text_cursor.KeepAnchor)
             if apply_selection:
                 editor.setTextCursor(text_cursor)
+            return text_cursor
+        return None
 
     def selection_range(self):
         """
@@ -506,11 +515,15 @@ class TextHelper:
         :return: The center position of the line.
         """
         editor = self._editor
-        block = editor.document().findBlockByNumber(line_number)
+        block = editor.document().findBlockByNumber(line_number - 1)
         if block.isValid():
             return int(editor.blockBoundingGeometry(block).translated(
                 editor.contentOffset()).top())
-        return None
+        if line_number <= 0:
+            return 0
+        else:
+            return int(editor.blockBoundingGeometry(
+                block.previous()).translated(editor.contentOffset()).bottom())
 
     def line_nbr_from_position(self, y_pos):
         """
@@ -519,7 +532,6 @@ class TextHelper:
         :param y_pos: Y pos in the editor
         :return: Line number (1 based)
         """
-        # pylint: disable=unused-variable
         editor = self._editor
         height = editor.fontMetrics().height()
         for top, line, block in editor.visible_blocks:
@@ -540,14 +552,17 @@ class TextHelper:
         """
         Returns the indent level of the specified line
 
-        :param line_nbr: Number of the line to get indentation (1 base). Pass None
-            to use the current line number.
+        :param line_nbr: Number of the line to get indentation (1 base).
+            Pass None to use the current line number. Note that you can also
+            pass a QTextBlock instance instead of an int.
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
         editor = self._editor
         if line_nbr is None:
             line_nbr = self.current_line_nbr()
+        elif isinstance(line_nbr, QtGui.QTextBlock):
+            line_nbr = line_nbr.blockNumber() + 1
         line = self.line_text(line_nbr)
         indentation = len(line) - len(line.lstrip())
         return indentation
@@ -580,9 +595,9 @@ class TextHelper:
         Inserts text at the cursor position.
 
         :param text: text to insert
-        :param keep_position: Flag that specifies if the cursor position must be
-            kept. Pass False for a regular insert (the cursor will be at the end
-            of the inserted text).
+        :param keep_position: Flag that specifies if the cursor position must
+            be kept. Pass False for a regular insert (the cursor will be at
+            the end of the inserted text).
         """
         text_cursor = self._editor.textCursor()
         if keep_position:
@@ -605,8 +620,8 @@ class TextHelper:
         """
         Moves the cursor on the right.
 
-        :param keep_anchor: True to keep anchor (to select text) or False to move
-            the anchor (no selection)
+        :param keep_anchor: True to keep anchor (to select text) or False to
+            move the anchor (no selection)
         :param nb_chars: Number of characters to move.
         """
         text_cursor = self._editor.textCursor()
@@ -664,6 +679,224 @@ class TextHelper:
         _logger().debug('occurence index: %d', index)
         return occurrences, index
 
+    def is_comment_or_string(self, cursor_or_block, formats=None):
+        if formats is None:
+            formats = ["comment", "string", "docstring"]
+        layout = None
+        pos = 0
+        if isinstance(cursor_or_block, QtGui.QTextBlock):
+            pos = len(cursor_or_block.text()) - 1
+            layout = cursor_or_block.layout()
+        elif isinstance(cursor_or_block, QtGui.QTextCursor):
+            b = cursor_or_block.block()
+            pos = cursor_or_block.position() - b.position()
+            layout = cursor_or_block.block().layout()
+        if layout is not None:
+            additional_formats = layout.additionalFormats()
+            sh = self._editor.syntax_highlighter
+            if sh:
+                ref_formats = sh.color_scheme.formats
+                for r in additional_formats:
+                    if r.start <= pos < (r.start + r.length):
+                        for fmt_type in formats:
+                            is_user_obj = (r.format.objectType() ==
+                                           r.format.UserObject)
+                            if (ref_formats[fmt_type] == r.format and
+                                    is_user_obj):
+                                return True
+        return False
+
+
+class TextBlockHelper:
+    """
+    Helps retrieving the various part of the user state bitmask.
+
+    This helper should be used to replace calls to
+    ``QTextBlock.setUserState``/``QTextBlock.getUserState`` as well as
+    ``QSyntaxHighlighter.setCurrentBlockState``/
+    ``QSyntaxHighlighter.currentBlockState`` and
+    ``QSyntaxHighlighter.previousBlockState``.
+
+    The bitmask is made up of the following fields:
+
+        - bit0 -> bit26: User state (for syntax highlighting)
+        - bit26: fold trigger state
+        - bit27-bit29: fold level (8 level max)
+        - bit30: fold trigger flag
+
+    """
+    @staticmethod
+    def get_state(block):
+        """
+        Gets the user state, generally used for syntax highlighting.
+        :param block: block to access
+        :return: The block state
+
+        """
+        if block is None:
+            return -1
+        state = block.userState()
+        if state == -1:
+            return state
+        return state & 0x03FFFFFF
+
+    @staticmethod
+    def set_state(block, state):
+        """
+        Sets the user state, generally used for syntax highlighting.
+
+        :param block: block to modify
+        :param state: new state value.
+        :return:
+        """
+        if block is None:
+            return
+        user_state = block.userState()
+        if user_state == -1:
+            user_state = 0
+        higher_part = user_state & 0xFC000000
+        state &= 0x03FFFFFF
+        state |= higher_part
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_lvl(block):
+        """
+        Gets the block fold level
+
+        :param block: block to access.
+        :returns: The block fold level
+        """
+        if block is None:
+            return 0
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return (state & 0x38000000) >> 27
+
+    @staticmethod
+    def set_fold_lvl(block, val):
+        """
+        Sets the block fold level.
+
+        :param block: block to modify
+        :param val: The new fold level [0-7]
+        """
+        if block is None:
+            return
+        state = block.userState()
+        if state == -1:
+            state = 0
+        if val >= 8:
+            val = 7
+        state &= 0xC7FFFFFF
+        state |= val << 27
+        block.setUserState(state)
+
+    @staticmethod
+    def is_fold_trigger(block):
+        """
+        Checks if the block is a fold trigger.
+
+        :param block: block to check
+        :return: True if the block is a fold trigger (represented as a node in
+            the fold panel)
+        """
+        if block is None:
+            return False
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x40000000)
+
+    @staticmethod
+    def set_fold_trigger(block, val):
+        if block is None:
+            return
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xBFFFFFFF
+        state |= int(val) << 30
+        block.setUserState(state)
+
+    @staticmethod
+    def get_fold_trigger_state(block):
+        """
+        Gets the fold trigger state.
+        :return: False for an open trigger, True for for closed trigger
+        """
+        if block is None:
+            return False
+        state = block.userState()
+        if state == -1:
+            state = 0
+        return bool(state & 0x04000000)
+
+    @staticmethod
+    def set_fold_trigger_state(block, val):
+        """
+        Sets the fold trigger state.
+
+        :param block: The block to modify
+        :param val: The new trigger state (False = open, True = closed)
+        """
+        if block is None:
+            return
+        state = block.userState()
+        if state == -1:
+            state = 0
+        state &= 0xFBFFFFFF
+        state |= int(val) << 26
+        block.setUserState(state)
+
+
+class ParenthesisInfo(object):
+    """
+    Stores information about a parenthesis in a line of code.
+    """
+    def __init__(self, pos, char):
+        #: Position of the parenthesis, expressed as a number of character
+        self.position = pos
+        #: The parenthesis character, one of "(", ")", "{", "}", "[", "]"
+        self.character = char
+
+
+def get_block_symbol_data(editor, block):
+    """
+    Gets the list of ParenthesisInfo for specific text block.
+    """
+    def list_symbols(editor, block, character):
+        text = block.text()
+        symbols = []
+        cursor = QtGui.QTextCursor(block)
+        cursor.movePosition(cursor.StartOfBlock)
+        pos = text.find(character, 0)
+        cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
+        if TextHelper(editor).is_comment_or_string(cursor):
+            # skips symbols in string literal or comment
+            pos = -1
+        while pos != -1:
+            info = ParenthesisInfo(pos, character)
+            symbols.append(info)
+            pos = text.find(character, pos + 1)
+            cursor.movePosition(cursor.StartOfBlock)
+            cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
+            if TextHelper(editor).is_comment_or_string(cursor):
+                pos = -1
+        return symbols
+
+    parentheses = sorted(
+        list_symbols(editor, block, '(') + list_symbols(editor, block, ')'),
+        key=lambda x: x.position)
+    square_brackets = sorted(
+        list_symbols(editor, block, '[') + list_symbols(editor, block, ']'),
+        key=lambda x: x.position)
+    braces = sorted(
+        list_symbols(editor, block, '{') + list_symbols(editor, block, '}'),
+        key=lambda x: x.position)
+    return parentheses, square_brackets, braces
+
 
 def keep_tc_pos(func):
     """
@@ -675,10 +908,13 @@ def keep_tc_pos(func):
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
         """ Decorator """
+        sb = editor.verticalScrollBar()
+        spos = sb.sliderPosition()
         pos = editor.textCursor().position()
         retval = func(editor, *args, **kwds)
         text_cursor = editor.textCursor()
         text_cursor.setPosition(pos)
         editor.setTextCursor(text_cursor)
+        sb.setSliderPosition(spos)
         return retval
     return wrapper

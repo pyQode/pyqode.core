@@ -1,7 +1,7 @@
 import os
-from pyqode.core.qt import QtCore
-from pyqode.core.qt import QtWidgets
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt import QtCore
+from pyqode.qt import QtWidgets
+from pyqode.qt.QtTest import QTest
 import datetime
 from pyqode.core import modes
 from test.helpers import editor_open, preserve_settings

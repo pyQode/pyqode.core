@@ -8,10 +8,10 @@ import functools
 import platform
 from os.path import abspath
 from os.path import dirname
-from pyqode.core.api import CodeEdit
+from pyqode.core.api import CodeEdit, IndentFoldDetector
 from pyqode.core import modes
 from pyqode.core import panels
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 
 
 test_dir = dirname(abspath(__file__))
@@ -37,6 +37,27 @@ def cwd_at(path):
                 return func(*args, **kwds)
             finally:
                 os.chdir(oldcwd)
+        return wrapper
+    return decorator
+
+
+def delete_file_on_return(path):
+    """
+    Decorator to run function at `path`.
+
+    :type path: str
+    :arg path: relative path from repository root (e.g., 'pyqode' or 'test').
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwds):
+            try:
+                return func(*args, **kwds)
+            finally:
+                try:
+                    os.remove(path)
+                except (IOError, OSError):
+                    pass
         return wrapper
     return decorator
 
@@ -80,7 +101,7 @@ def preserve_style(func):
         try:
             ret = func(editor, *args, **kwds)
         finally:
-            editor.font_name = ''
+            editor.font_name = 'Source Code Pro'
             editor.font_size = 10
         return ret
     return wrapper
@@ -97,16 +118,11 @@ def preserve_editor_config(func):
             editor.panels.clear()
             setup_editor(editor)
             if not editor.backend.connected:
-                editor.backend.start(editor, server_path())
+                editor.backend.start(server_path())
                 wait_for_connected(editor)
         return ret
         # return func(editor, *args, **kwds)
     return wrapper
-
-
-def preserve_visiblity(func):
-    # todo: decorator to preserve editor visibility
-    pass
 
 
 def require_python2():
@@ -157,10 +173,16 @@ def server_path():
 
 def setup_editor(code_edit):
         # append panels
+    p = panels.FoldingPanel(highlight_caret_scope=True)
+    code_edit.panels.append(p)
+    p.show()
     p = panels.LineNumberPanel()
     code_edit.panels.append(p)
     p.show()
     p = panels.MarkerPanel()
+    code_edit.panels.append(p)
+    p.show()
+    p = panels.CheckerPanel()
     code_edit.panels.append(p)
     p.show()
     p = panels.SearchAndReplacePanel()
@@ -182,3 +204,4 @@ def setup_editor(code_edit):
     code_edit.modes.append(modes.SymbolMatcherMode())
     code_edit.modes.append(modes.WordClickMode())
     code_edit.modes.get(modes.FileWatcherMode).auto_reload = True
+    code_edit.syntax_highlighter.fold_detector = IndentFoldDetector()

@@ -5,12 +5,10 @@ show code editor tabs.
 """
 import logging
 import os
-from pyqode.core.ui.dlg_unsaved_files_ui import Ui_Dialog
+from pyqode.core._forms.dlg_unsaved_files_ui import Ui_Dialog
 from pyqode.core.modes.filewatcher import FileWatcherMode
-from pyqode.core.qt import QtCore, QtWidgets
-from pyqode.core.qt.QtWidgets import QDialog, QTabBar, QTabWidget
-# pylint: disable=too-many-instance-attributes, missing-docstring
-# pylint: disable=protected-access
+from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget
 
 
 def _logger():
@@ -76,7 +74,7 @@ class ClosableTabBar(QTabBar):
         QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         QtWidgets.QTabBar.mousePressEvent(self, event)
         if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
@@ -202,18 +200,16 @@ class TabWidget(QTabWidget):
                 if not path:
                     return False
             old_path = self._current.file.path
-            try:
-                self._current.file.save(path)
-            except AttributeError:
-                self._current.save(path)
-            # path (and icon) may have changed
             code_edit = self._current
+            self._save_editor(code_edit, path)
+            path = code_edit.file.path
+            # path (and icon) may have changed
             if path and old_path != path:
                 self._ensure_unique_name(code_edit, code_edit.file.name)
                 self.setTabText(self.currentIndex(), code_edit._tab_name)
                 ext = os.path.splitext(path)[1]
                 old_ext = os.path.splitext(old_path)[1]
-                if ext != old_ext:
+                if ext != old_ext or not old_path:
                     icon = QtWidgets.QFileIconProvider().icon(
                         QtCore.QFileInfo(code_edit.file.path))
                     self.setTabIcon(self.currentIndex(), icon)
@@ -236,7 +232,7 @@ class TabWidget(QTabWidget):
                 pass
         self.setCurrentIndex(initial_index)
 
-    def addAction(self, action):  # pylint: disable=invalid-name
+    def addAction(self, action):
         """
         Adds an action to the TabBar context menu
 
@@ -269,12 +265,11 @@ class TabWidget(QTabWidget):
 
     @staticmethod
     def _del_code_edit(code_edit):
-        try:
-            code_edit.backend.stop()
-        except AttributeError:
-            pass
-        # code_edit.deleteLater()
-        # del code_edit
+        code_edit.backend.stop()
+        code_edit.modes.clear()
+        code_edit.panels.clear()
+        code_edit.delete()
+        del code_edit
 
     def add_code_edit(self, code_edit, name=None):
         """
@@ -284,14 +279,32 @@ class TabWidget(QTabWidget):
         The widget is only added if there is no other editor tab open with the
         same filename, else the already open tab is set as current.
 
+        If the widget file path is empty, i.e. this is a new document that has
+        not been saved to disk, you may provided a formatted string
+        such as 'New document %d.txt' for the document name. The int format
+        will be automatically replaced by the number of new documents
+        (e.g. 'New document 1.txt' then 'New document 2.txt' and so on).
+        If you prefer to use your own code to manage the file names, just
+        ensure that the names are unique.
+
         :param code_edit: The code editor widget tab to append
         :type code_edit: pyqode.core.api.CodeEdit
 
         :param name: Name of the tab. Will use code_edit.file.name if None is
-            supplied. Default is None
-
+            supplied. Default is None. If this is a new document, you should
+            either pass a unique name or a formatted string (with a '%d'
+            format)
         :return: Tab index
         """
+        # new empty editor widget (no path set)
+        if code_edit.file.path == '':
+            cnt = 0
+            for i in range(self.count()):
+                tab = self.widget(i)
+                if tab.file.path.startswith(name[:name.find('%')]):
+                    cnt += 1
+            name %= (cnt + 1)
+            code_edit.file._path = name
         index = self.index_from_filename(code_edit.file.path)
         if index != -1:
             # already open, just show it
@@ -300,7 +313,8 @@ class TabWidget(QTabWidget):
             self._del_code_edit(code_edit)
             return -1
         self._ensure_unique_name(code_edit, name)
-        index = self.addTab(code_edit, code_edit.file.icon, code_edit._tab_name)
+        index = self.addTab(code_edit, code_edit.file.icon,
+                            code_edit._tab_name)
         self.setCurrentIndex(index)
         self.setTabText(index, code_edit._tab_name)
         try:
@@ -317,7 +331,7 @@ class TabWidget(QTabWidget):
             file_watcher.file_deleted.connect(self._on_file_deleted)
         return index
 
-    def addTab(self, elem, icon, name):  # pylint: disable=invalid-name
+    def addTab(self, elem, icon, name):
         """
         Extends QTabWidget.addTab to keep an internal list of added tabs.
         """
@@ -333,11 +347,12 @@ class TabWidget(QTabWidget):
                 return True
         return False
 
-    def _save_editor(self, code_edit):
-        path = None
-        if not code_edit.file.path:
-            path = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'Choose destination path')
+    def _save_editor(self, code_edit, path=None):
+        if not path:
+            path = code_edit.file.path
+        if not os.path.exists(path):
+            path, status = QtWidgets.QFileDialog.getSaveFileName(
+                self, 'Save as (%s)' % code_edit.file.path)
         if path:
             code_edit.file.save(path)
 
@@ -377,7 +392,7 @@ class TabWidget(QTabWidget):
         except AttributeError:
             pass  # not an editor widget
 
-    def removeTab(self, index):  # pylint: disable=invalid-name
+    def removeTab(self, index):
         """
         Removes tab at index ``index``.
 
@@ -430,7 +445,7 @@ class TabWidget(QTabWidget):
                         if widget.file.path == filename:
                             break
                     if widget != exept:
-                        widget.file.save()
+                        self._save_editor(widget)
                         self.removeTab(self.indexOf(widget))
             return True
         return False
@@ -466,7 +481,7 @@ class TabWidget(QTabWidget):
             pass
         self.dirty_changed.emit(dirty)
 
-    def closeEvent(self, event):  # pylint: disable=invalid-name
+    def closeEvent(self, event):
         """
         On close, we try to close dirty tabs and only process the close
         event if all dirty tabs were closed by the user.

@@ -48,7 +48,7 @@ class PanelsManager(Manager):
             Panel.Position.TOP: 'top'
         }
         _logger().info('adding panel %s at %r', panel.name,
-                        pos_to_string[position])
+                       pos_to_string[position])
         panel.order_in_zone = len(self._panels[position])
         self._panels[position][panel.name] = panel
         panel.position = position
@@ -66,6 +66,7 @@ class PanelsManager(Manager):
         _logger().info('removing panel %r', name_or_klass)
         panel = self.get(name_or_klass)
         panel.on_uninstall()
+        panel.hide()
         return self._panels[panel.position].pop(panel.name, None)
 
     def clear(self):
@@ -125,11 +126,11 @@ class PanelsManager(Manager):
         """ Refreshes the editor panels (resize and update margins) """
         _logger().debug('refresh_panels')
         self.resize()
-        self.update(self.editor.contentsRect(), 0, force_update_margins=True)
+        self.update(self.editor.contentsRect(), 0,
+                    force_update_margins=True)
 
     def resize(self):
         """ Resizes panels """
-        # pylint: disable=too-many-locals
         content_rect = self.editor.contentsRect()
         viewport_content_rect = self.editor.viewport().contentsRect()
         s_bottom, s_left, s_right, s_top = self._compute_zones_sizes()

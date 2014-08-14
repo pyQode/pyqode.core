@@ -7,7 +7,8 @@ A manager is class that takes care of a specific aspect of CodeEdit:
     - BackendManager: manage the backend process (start the process and
       handle communication through sockets).
     - ModesManager: manage the list of modes of an editor
-    - PanelsManager: manage the list of panels and draw them into the editor margins.
+    - PanelsManager: manage the list of panels and draw them into the editor
+      margins.
     - DecorationManager: manage text decorations
 
 """

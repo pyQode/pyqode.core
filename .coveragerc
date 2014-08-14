@@ -4,6 +4,7 @@ omit =
     # qt design ui files
     *_ui.py
     *_rc.py
+    *__init__.py
     *pyqode/core/qt/*
     # at the moment, we do not test misc ui elements such as
     # widgets and dialogs (how could this be possible to test?)
@@ -23,6 +24,7 @@ exclude_lines =
     raise RuntimeError
 
     # Don't complain if non-runnable code isn't run:
+    if sys.platform == 'darwin':
     if 0:
     if __name__ == .__main__.:
     if not PY33:

@@ -1,4 +1,4 @@
-from pyqode.core.qt.QtTest import QTest
+from pyqode.qt.QtTest import QTest
 from pyqode.core import modes
 from test.helpers import editor_open
 

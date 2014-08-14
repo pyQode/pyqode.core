@@ -3,17 +3,21 @@
 This package contains a set of widgets that might be useful when writing
 pyqode applications:
 
+    - TextCodeEdit: code edit specialised for plain text
+    - GenericCodeEdit: generic code edit, using PygmentsSH.
+      Not really fast, not really smart.
     - InteractiveConsole: QTextEdit made for running background process
       interactively. Can be used in an IDE for running programs or to display
       the compiler output,...
     - CodeEditTabWidget: tab widget made to handle CodeEdit instances (or
       any other object that have the same interface).
     - ErrorsTable: a QTableWidget specialised to show CheckerMessage.
-    - QPropertyGrid: a simple property grid that works on pure python object
-      made up of primitive types (int, float, list, string).
+
 
 """
-# pylint: disable=unused-import
+from pyqode.core.widgets.code_edits import TextCodeEdit, GenericCodeEdit
+from pyqode.core.widgets.encodings import (EncodingsComboBox, EncodingsMenu,
+                                           EncodingsContextMenu)
 from pyqode.core.widgets.errors_table import ErrorsTable
 from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
@@ -26,5 +30,10 @@ __all__ = [
     'InteractiveConsole',
     'MenuRecentFiles',
     'RecentFilesManager',
-    'TabWidget'
+    'TabWidget',
+    'EncodingsComboBox',
+    'EncodingsMenu',
+    'EncodingsContextMenu',
+    'TextCodeEdit',
+    'GenericCodeEdit'
 ]

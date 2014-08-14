@@ -36,3 +36,5 @@ __pycache__
 htmlcov
 *.log
 *.DS_Store
+file_to_watch.txt
+

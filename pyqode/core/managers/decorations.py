@@ -21,7 +21,6 @@ class TextDecorationsManager(Manager):
         :param decoration: Text decoration to add
         :type decoration: pyqode.core.api.TextDecoration
         """
-        # pylint: disable=protected-access
         if decoration not in self._decorations:
             self._decorations.append(decoration)
             self._decorations = sorted(

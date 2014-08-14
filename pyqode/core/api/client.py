@@ -1,10 +1,16 @@
+"""
+This module contains the client socket API. This API is exposed to the
+user throught the backend manager (
+:class:`pyqode.core.managers.BackendManager`)
+
+"""
 import json
 import logging
 import socket
 import struct
 import sys
 import uuid
-from pyqode.core.qt import QtCore, QtNetwork
+from pyqode.qt import QtCore, QtNetwork
 from pyqode.core.backend import NotConnected
 
 
@@ -61,11 +67,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     It uses a simple message protocol. A message is made up of two parts.
     parts:
-      - header: this simply contains the length of the payload. (4bytes)
-      - payload: this is the actual message data as a json (byte) string.
+      - header: contains the length of the payload. (4bytes)
+      - payload: data as a json string.
 
     """
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -136,7 +141,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             self._port = self.pick_free_port()
         else:
             self._port = port
-        if hasattr(sys, "frozen") :  # pragma: no cover
+        if hasattr(sys, "frozen") and not server_script.endswith('.py'):
             # frozen server script on windows/mac does not need an interpreter
             program = server_script
             pgm_args = [str(self._port)]
@@ -351,16 +356,17 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
-        if not self:
-            return
-        o = self.readAllStandardOutput()
         try:
-            output = bytes(o).decode('utf-8')
-        except TypeError:
-            output = bytes(o.data()).decode('utf-8')
-        output = output[:output.rfind('\n')]
-        for line in output.splitlines():
-            self._srv_logger.debug(line)
+            o = self.readAllStandardOutput()
+            try:
+                output = bytes(o).decode('utf-8')
+            except TypeError:
+                output = bytes(o.data()).decode('utf-8')
+            output = output[:output.rfind('\n')]
+            for line in output.splitlines():
+                self._srv_logger.debug(line)
+        except RuntimeError:
+            pass
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """

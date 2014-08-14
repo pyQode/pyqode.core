@@ -4,7 +4,7 @@ This module contains the worker functions/classes used on the server side.
 
 A worker is a function or a callable which receive one single argument (the
 decoded json object) and returns a tuple made up of a status (bool) and a
-response object (json serialisable).
+response object (json serializable).
 
 A worker is always tightly coupled with its caller, so are the data.
 
@@ -18,8 +18,6 @@ A worker is always tightly coupled with its caller, so are the data.
 """
 import sys
 import traceback
-# pylint: disable=too-many-arguments, too-few-public-methods, bare-except
-# pylint: disable=unused-argument, abstract-class-not-used
 
 
 def echo_worker(data):
@@ -105,7 +103,7 @@ class CodeCompletionWorker(object):
                 results = prov.complete(
                     code, line, column, path, encoding, prefix)
                 completions.append(results)
-                if len(completions) > 20:
+                if len(completions):
                     break
             except:
                 sys.stderr.write('Failed to get completions from provider %r'

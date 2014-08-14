@@ -4,7 +4,7 @@ This module contains the WordClickMode
 """
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 from pyqode.core.api import TextHelper
 
 

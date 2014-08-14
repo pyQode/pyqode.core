@@ -2,7 +2,7 @@
 """ Contains the automatic generic indenter """
 from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt.QtCore import Qt
+from pyqode.qt.QtCore import Qt
 
 
 class AutoIndentMode(Mode):
@@ -23,7 +23,6 @@ class AutoIndentMode(Mode):
 
         :returns: Tuple (text before new line, text after new line)
         """
-        # pylint: disable=unused-argument
         indent = TextHelper(self.editor).line_indent() * ' '
         if len(indent) < self.editor.min_indent_column:
             indent = self.editor.min_indent_column * ' '
@@ -44,6 +43,7 @@ class AutoIndentMode(Mode):
             if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
                 cursor = self.editor.textCursor()
                 pre, post = self._get_indent(cursor)
+                cursor.beginEditBlock()
                 cursor.insertText("%s\n%s" % (pre, post))
 
                 # eats possible whitespaces
@@ -53,5 +53,5 @@ class AutoIndentMode(Mode):
                     new_txt = txt.replace(" ", '')
                     if len(txt) > len(new_txt):
                         cursor.insertText(new_txt)
-
+                cursor.endEditBlock()
                 event.accept()

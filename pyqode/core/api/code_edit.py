@@ -1,15 +1,14 @@
 import logging
-import sys
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core.dialogs.goto import GoToLineDialog
+from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
 from pyqode.core.managers import FileManager
 from pyqode.core.managers import ModesManager
 from pyqode.core.managers import TextDecorationsManager
 from pyqode.core.managers import PanelsManager
-# ensure pyqode resource have been imported and are ready to use.
-from pyqode.core.ui import pyqode_core_rc
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+# ensure pyqode resource have been imported and are ready to be used.
+from pyqode.core._forms import pyqode_core_rc
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 def _logger():
@@ -25,14 +24,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     modes and panels) and by adding a series of additional signal and methods.
 
     To interact with the editor content, you may use the Qt Text API (
-    QTextCursor, ...) or use the more high level functions defined in
+    QTextCursor, ...) or use high level API functions defined in
     :mod:`pyqode.core.api.TextHelper`
 
     .. note:: setPlainText has been overridden to force you to define
         a mime type and an encoding.
 
     """
-    # pylint: disable=too-many-instance-attributes, too-many-public-methods
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
@@ -64,6 +62,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     #: Signal emitted when the user press the BACK-TAB (Shift+TAB) key
     unindent_requested = QtCore.Signal()
 
+    #: Store the list of mimetypes associated with the editor, for
+    #: specialised editors.
+    mimetypes = []
+
     @property
     def use_spaces_instead_of_tabs(self):
         """ Use spaces instead of tabulations. Default is True. """
@@ -85,11 +87,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def min_indent_column(self):
         """
-        Minimum indent colum.
+        Minimum indent column.
 
         Some languages such as cobol starts coding at column 7.
         """
-        
         return self._min_indent_column
 
     @min_indent_column.setter
@@ -99,7 +100,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def save_on_focus_out(self):
         """
-        Automtically saves editor content on focus out.
+        Automatically saves editor content on focus out.
 
         Default is False.
         """
@@ -117,7 +118,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._show_whitespaces
 
     @show_whitespaces.setter
-    def show_whitespaces(self, value):  # pylint: disable=missing-docstring
+    def show_whitespaces(self, value):
         self._show_whitespaces = value
         self._set_whitespaces_flags(value)
 
@@ -129,14 +130,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._font_family
 
     @font_name.setter
-    def font_name(self, value):  # pylint: disable=missing-docstring
+    def font_name(self, value):
+        if value == "":
+            value = 'Source Code Pro'
         self._font_family = value
-        if not self._font_family:
-            self._font_family = "monospace"
-            if sys.platform == "win32":
-                self._font_family = "Consolas"
-            elif sys.platform == "darwin":
-                self._font_family = 'Monaco'
         self._reset_stylesheet()
 
     @property
@@ -147,7 +144,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._font_size
 
     @font_size.setter
-    def font_size(self, value):  # pylint: disable=missing-docstring
+    def font_size(self, value):
         self._font_size = value
         self._reset_stylesheet()
 
@@ -159,7 +156,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._background
 
     @background.setter
-    def background(self, value):  # pylint: disable=missing-docstring
+    def background(self, value):
         self._background = value
         self._reset_stylesheet()
 
@@ -171,22 +168,23 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._foreground
 
     @foreground.setter
-    def foreground(self, value):  # pylint: disable=missing-docstring
+    def foreground(self, value):
         self._foreground = value
         self._reset_stylesheet()
 
     @property
     def whitespaces_foreground(self):
         """
-        The editor white spaces' foreground color.
+        The editor white spaces' foreground color. White spaces are highlighted
+        by the syntax highlighter. You should call rehighlight to update their
+        color. This is not done automatically to prevent multiple, useless
+        call to rehighlight which can take some time on big files.
         """
         return self._whitespaces_foreground
 
     @whitespaces_foreground.setter
     def whitespaces_foreground(self, value):
-        # pylint: disable=missing-docstring
         self._whitespaces_foreground = value
-        self.rehighlight()
 
     @property
     def selection_background(self):
@@ -196,7 +194,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._sel_background
 
     @selection_background.setter
-    def selection_background(self, value):  # pylint: disable=missing-docstring
+    def selection_background(self, value):
         self._sel_background = value
         self._reset_stylesheet()
 
@@ -208,7 +206,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._sel_foreground
 
     @selection_foreground.setter
-    def selection_foreground(self, value):  # pylint: disable=missing-docstring
+    def selection_foreground(self, value):
         self._sel_foreground = value
         self.rehighlight()
 
@@ -234,7 +232,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._dirty
 
     @dirty.setter
-    def dirty(self, value):  # pylint: disable=missing-docstring
+    def dirty(self, value):
         if self._dirty != value:
             self._dirty = value
             self.dirty_changed.emit(value)
@@ -281,14 +279,21 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ TextDecorationManager: manage the list of text decorations """
         return self._decorations
 
+    @property
+    def syntax_highlighter(self):
+        for mode in self.modes:
+            if hasattr(mode, 'highlightBlock'):
+                return mode
+        return None
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
+
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
-
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)
@@ -311,7 +316,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._tab_length = 4
         self._font_size = 10
         self._background = None
-        self._font_family = 'monospace'
+        QtGui.QFontDatabase.addApplicationFont(
+            ':/fonts/rc/SourceCodePro-Regular.ttf')
+        QtGui.QFontDatabase.addApplicationFont(
+            ':/fonts/rc/SourceCodePro-Bold.ttf')
+        self._font_family = "Source Code Pro"
+        self._mimetypes = []
 
         # Flags/Working variables
         self._last_mouse_pos = QtCore.QPoint(0, 0)
@@ -326,6 +336,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         # setup context menu
         self._actions = []
+        self._menus = []
         if create_default_actions:
             self._init_actions()
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -366,7 +377,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param tooltip: Tooltip text
         """
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
-        self._prev_tooltip_block_nbr = -1
+
+    def clear(self):
+        super().clear()
 
     def setPlainText(self, txt, mime_type, encoding):
         """
@@ -380,14 +393,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                           pygments lexer.
         :param encoding: text encoding
         """
-        # pylint: disable=invalid-name
         self.file.mimetype = mime_type
         self.file._encoding = encoding
-        self.clear()
-        highlighter = None
         for mode in self.modes:
             if hasattr(mode, 'set_mime_type'):
-                highlighter = mode
                 try:
                     _logger().debug('setting up lexer from mimetype: %s',
                                     self.file.mimetype)
@@ -402,11 +411,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 break
         self._original_text = txt
         self._modified_lines.clear()
-        if highlighter:
-            highlighter.process_events_on_highlight = True
+        import time
+        t = time.time()
         super().setPlainText(txt)
-        if highlighter:
-            highlighter.process_events_on_highlight = False
+        _logger().info('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -438,6 +446,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
         self._actions.append(action)
+        self.addAction(action)
         return action
 
     def remove_action(self, action):
@@ -447,6 +456,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param action: Action/seprator to remove.
         """
         self._actions.remove(action)
+        self.removeAction(action)
+
+    def add_menu(self, menu):
+        self._menus.append(menu)
+        self.addActions(menu.actions())
+
+    def remove_menu(self, menu):
+        self._menus.remove(menu)
+        for action in menu.actions():
+            self.removeAction(action)
 
     @QtCore.Slot()
     def delete(self):
@@ -459,7 +478,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Shows goto line dialog and go to the selected line.
         """
         helper = TextHelper(self)
-        line, result = GoToLineDialog.get_line(
+        line, result = DlgGotoLine.get_line(
             self, helper.current_line_nbr(), helper.line_count())
         if not result:
             return
@@ -523,14 +542,17 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         only the last one is duplicated.
         """
         cursor = self.textCursor()
+        assert isinstance(cursor, QtGui.QTextCursor)
+        cursor.beginEditBlock()
+        col = cursor.positionInBlock()
         cursor.select(cursor.LineUnderCursor)
         line = cursor.selectedText()
-        cursor.movePosition(cursor.Down, cursor.MoveAnchor)
-        cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-        cursor.insertText(line + "\n")
-        cursor.movePosition(cursor.Left, cursor.MoveAnchor)
+        cursor.movePosition(cursor.EndOfBlock)
+        cursor.insertText('\n' + line)
+        cursor.movePosition(cursor.StartOfBlock)
+        cursor.movePosition(cursor.Right, cursor.MoveAnchor, col)
         self.setTextCursor(cursor)
-        self._do_home_key()
+        cursor.endEditBlock()
 
     @QtCore.Slot()
     def indent(self):
@@ -554,7 +576,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.unindent_requested.emit()
 
-    def resizeEvent(self, e):  # pylint: disable=invalid-name
+    def resizeEvent(self, e):
         """
         Overrides resize event to resize the editor's panels.
 
@@ -563,7 +585,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().resizeEvent(e)
         self.panels.resize()
 
-    def paintEvent(self, e):  # pylint: disable=invalid-name
+    def paintEvent(self, e):
         """
         Overrides paint event to update the list of visible blocks and emit
         the painted event.
@@ -574,7 +596,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().paintEvent(e)
         self.painted.emit(e)
 
-    def keyPressEvent(self, event):  # pylint: disable=invalid-name
+    def keyPressEvent(self, event):
         """
         Overrides the keyPressEvent to emit the key_pressed signal.
 
@@ -604,7 +626,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.post_key_pressed.emit(event)
         event.setAccepted(new_state)
 
-    def keyReleaseEvent(self, event):  # pylint: disable=invalid-name
+    def keyReleaseEvent(self, event):
         """
         Overrides keyReleaseEvent to emit the key_released signal.
 
@@ -617,7 +639,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().keyReleaseEvent(event)
 
-    def focusInEvent(self, event):  # pylint: disable=invalid-name
+    def focusInEvent(self, event):
         """
         Overrides focusInEvent to emits the focused_in signal
 
@@ -627,7 +649,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().focusInEvent(event)
         self.repaint()
 
-    def focusOutEvent(self, event):  # pylint: disable=invalid-name
+    def focusOutEvent(self, event):
         """
         Saves content if save_on_focus_out is True.
 
@@ -636,7 +658,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.file.save()
         super().focusOutEvent(event)
 
-    def mousePressEvent(self, event):  # pylint: disable=invalid-name
+    def mousePressEvent(self, event):
         """
         Overrides mousePressEvent to emits mouse_pressed signal
 
@@ -648,12 +670,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor = self.cursorForPosition(event.pos())
         for sel in self.decorations:
             if sel.cursor.blockNumber() == cursor.blockNumber():
-                sel.signals.clicked.emit(sel)
+                if sel.contains_cursor(cursor):
+                    sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event):  # pylint: disable=invalid-name
+    def mouseReleaseEvent(self, event):
         """
         Emits mouse_released signal.
 
@@ -666,7 +689,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().mouseReleaseEvent(event)
 
-    def wheelEvent(self, event):  # pylint: disable=invalid-name
+    def wheelEvent(self, event):
         """
         Emits the mouse_wheel_activated signal.
 
@@ -679,7 +702,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super().wheelEvent(event)
 
-    def mouseMoveEvent(self, event):  # pylint: disable=invalid-name
+    def mouseMoveEvent(self, event):
         """
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
@@ -688,24 +711,28 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._last_mouse_pos = event.pos()
         block_found = False
         for sel in self.decorations:
-            if (sel.cursor.blockNumber() == cursor.blockNumber() and
-                    sel.tooltip):
-                if self._prev_tooltip_block_nbr != cursor.blockNumber():
+            if sel.contains_cursor(cursor) and sel.tooltip:
+                if (self._prev_tooltip_block_nbr != cursor.blockNumber() or
+                        not QtWidgets.QToolTip.isVisible()):
+                    pos = event.pos()
+                    # add left margin
+                    pos.setX(pos.x() + self.panels.margin_size())
+                    # add top margin
+                    pos.setY(pos.y() + self.panels.margin_size(0))
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
-                        self.mapToGlobal(event.pos()), sel.tooltip[0: 1024])
-                self._prev_tooltip_block_nbr = cursor.blockNumber()
+                        self.mapToGlobal(pos), sel.tooltip[0: 1024])
+                    self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
-        if not block_found:
-            if self._prev_tooltip_block_nbr != -1:
-                QtWidgets.QToolTip.hideText()
+        if not block_found and self._prev_tooltip_block_nbr != -1:
+            QtWidgets.QToolTip.hideText()
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
         self.mouse_moved.emit(event)
         super().mouseMoveEvent(event)
 
-    def showEvent(self, event):  # pylint: disable=invalid-name
+    def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         super().showEvent(event)
         _logger().debug('show event')
@@ -713,6 +740,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def _show_context_menu(self, point):
         """ Shows the context menu """
         self._mnu = QtWidgets.QMenu()
+        for menu in self._menus:
+            self._mnu.addMenu(menu)
+        self._mnu.addSeparator()
         self._mnu.addActions(self._actions)
         self._mnu.popup(self.mapToGlobal(point))
 
@@ -828,6 +858,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.goto_line)
         self.add_action(action)
         self.action_goto_line = action
+        self.add_separator()
 
     def _init_settings(self):
         """ Init setting """
@@ -847,12 +878,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._sel_background = app.palette().highlight().color()
         self._sel_foreground = app.palette().highlightedText().color()
         self._font_size = 10
-        self.font_name = ""  # platform specific value in property setter
-        # self._reset_stylesheet() -> should be called by font_name setter
+        self.font_name = ""
 
     def _update_visible_blocks(self, *args):
         """ Updates the list of visible blocks """
-        #: pylint: disable=unused-argument
         self._visible_blocks[:] = []
         block = self.firstVisibleBlock()
         block_nbr = block.blockNumber()
@@ -883,16 +912,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
         self.setFont(QtGui.QFont(self._font_family, self._font_size))
-        qss = """QPlainTextEdit
-        {
-            background-color: %s;
-            color: %s;
-            selection-background-color: %s;
-            selection-color: %s;
-        }""" % (self.background.name(), self.foreground.name(),
-                self.selection_background.name(),
-                self.selection_foreground.name())
-        self.setStyleSheet(qss)
+        p = self.palette()
+        p.setColor(QtGui.QPalette.Base, self.background)
+        p.setColor(QtGui.QPalette.Text, self.foreground)
+        p.setColor(QtGui.QPalette.Highlight, self.selection_background)
+        p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
+        self.setPalette(p)
         self.repaint()
 
     def _do_home_key(self, event=None, select=False):

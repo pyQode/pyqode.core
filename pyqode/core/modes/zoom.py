@@ -3,7 +3,7 @@
 This module contains the ZoomMode which lets you zoom in and out the editor.
 """
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore
+from pyqode.qt import QtCore
 
 
 class ZoomMode(Mode):
@@ -40,7 +40,8 @@ class ZoomMode(Mode):
         :param event: wheelEvent
         :type event: QKeyEvent
         """
-        if int(event.modifiers()) & QtCore.Qt.ControlModifier > 0:
+        if (int(event.modifiers()) & QtCore.Qt.ControlModifier > 0 and
+                not int(event.modifiers()) & QtCore.Qt.ShiftModifier):
             if event.key() == QtCore.Qt.Key_0:
                 self.editor.reset_zoom()
                 event.accept()

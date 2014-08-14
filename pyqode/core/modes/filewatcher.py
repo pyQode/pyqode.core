@@ -4,7 +4,7 @@ Contains the mode that control the external changes of file.
 """
 import os
 from pyqode.core.api.mode import Mode
-from pyqode.core.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -72,7 +72,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             # file_path does not exists.
             self._mtime = 0
             self._timer.stop()
-        except TypeError:
+        except (TypeError, AttributeError):
             # file path is none, this happen if you use setPlainText instead of
             # openFile. This is perfectly fine, we just do not have anything to
             # watch
@@ -115,7 +115,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         def inner_action(*args):
             """ Inner action: open file """
-            # pylint: disable=unused-argument
             self.editor.file.open(self.editor.file.path)
 
         args = ("File changed",
@@ -123,7 +122,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 "reload it?" % os.path.basename(self.editor.file.path))
         kwargs = {"expected_action": inner_action}
         if self.editor.hasFocus():
-            # pylint: disable=star-args
             self._notify(*args, **kwargs)
         else:
             self._notification_pending = True

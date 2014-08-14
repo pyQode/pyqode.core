@@ -6,7 +6,7 @@ whitespaces.
 
 """
 import sys
-from pyqode.core.qt import QtWidgets, QtGui
+from pyqode.qt import QtWidgets, QtGui
 from pyqode.core import api
 from pyqode.core import modes
 from pyqode.core import panels

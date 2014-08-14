@@ -1,5 +1,5 @@
 from pyqode.core import modes
-from pyqode.core.qt import QtGui
+from pyqode.qt import QtGui
 
 
 def get_mode(editor):

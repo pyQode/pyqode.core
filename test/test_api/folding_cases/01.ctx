@@ -1,0 +1,3 @@
+input:test/test_api/folding_cases/foo.py
+results:test/test_api/folding_cases/01.results
+actions:goto_line(9,0);assert_no_parent;assert_nb_children(2);fold

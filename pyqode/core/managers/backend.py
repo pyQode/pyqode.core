@@ -25,7 +25,7 @@ class BackendManager(Manager):
         #: client socket
         self.socket = JsonTcpClient(editor)
 
-    def start(self, script, interpreter=sys.executable, args=None, port=None):
+    def start(self, script, interpreter=sys.executable, args=None):
         """
         Starts the backend server process.
 
@@ -42,7 +42,6 @@ class BackendManager(Manager):
             application (frozen servers do not require an interpreter).
         :param args: list of additional command line args to use to start
             the server process.
-        :param port: The tcp port to use. Pass None to use a free random port.
         """
         self.socket.start(script, interpreter=interpreter, args=args)
 

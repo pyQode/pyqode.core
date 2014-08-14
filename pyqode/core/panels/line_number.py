@@ -4,7 +4,7 @@ This module contains the line number panel
 """
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import drift_color, TextHelper
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 
 
 class LineNumberPanel(Panel):
@@ -21,7 +21,7 @@ class LineNumberPanel(Panel):
         self._line_color_s = self.palette().color(
             QtGui.QPalette.Normal, QtGui.QPalette.WindowText)
 
-    def sizeHint(self):  # pylint: disable=invalid-name
+    def sizeHint(self):
         """
         Returns the panel size hint (as the panel is on the left, we only need
         to compute the width
@@ -40,10 +40,10 @@ class LineNumberPanel(Panel):
         while count >= 10:
             count /= 10
             digits += 1
-        space = 3 + self.editor.fontMetrics().width("9") * digits
+        space = 5 + self.editor.fontMetrics().width("9") * digits
         return space
 
-    def mousePressEvent(self, e):  # pylint: disable=invalid-name
+    def mousePressEvent(self, e):
         """
         Starts selecting
         """
@@ -62,21 +62,18 @@ class LineNumberPanel(Panel):
 
     def mouseReleaseEvent(self, event):
         """ Cancels selection """
-        # pylint: disable=invalid-name, unused-argument
         self.cancel_selection()
 
     def leaveEvent(self, event):
         """
         Cancels selection
         """
-        # pylint: disable=invalid-name, unused-argument
         self.cancel_selection()
 
     def mouseMoveEvent(self, e):
         """
         Updates end of selection if we are currently selecting
         """
-        # pylint: disable=invalid-name, unused-argument
         if self._selecting:
             end_pos = e.pos().y()
             start_line = TextHelper(self.editor).line_nbr_from_position(
@@ -89,9 +86,8 @@ class LineNumberPanel(Panel):
         """
         Paints the line numbers
         """
-        # pylint: disable=invalid-name, unused-argument, too-many-locals
-        self._line_color_u = drift_color(self.editor.background, 200)
-        self._line_color_s = drift_color(self.editor.foreground, 150)
+        self._line_color_u = drift_color(self._background_brush.color(), 250)
+        self._line_color_s = drift_color(self._background_brush.color(), 280)
         Panel.paintEvent(self, event)
         if self.isVisible():
             painter = QtGui.QPainter(self)
@@ -109,7 +105,6 @@ class LineNumberPanel(Panel):
             has_sel = sel_start != sel_end
             cl = TextHelper(self.editor).current_line_nbr()
             # draw every visible blocks
-            # pylint: disable=unused-variable
             for top, blockNumber, block in self.editor.visible_blocks:
                 if ((has_sel and sel_start <= blockNumber <= sel_end) or
                         (not has_sel and cl == blockNumber)):
@@ -118,5 +113,5 @@ class LineNumberPanel(Panel):
                 else:
                     painter.setPen(pen)
                     painter.setFont(font)
-                painter.drawText(0, top, width, height,
+                painter.drawText(-3, top, width, height,
                                  QtCore.Qt.AlignRight, str(blockNumber))
