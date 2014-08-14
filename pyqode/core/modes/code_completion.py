@@ -249,9 +249,19 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         symbols = self._trigger_symbols
         is_end_of_word = self._is_end_of_word_char(
             event, is_printable, symbols, self.editor.word_separators)
+        cursor = self._helper.word_under_cursor()
+        cursor.setPosition(cursor.position())
+        cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
+        text_to_cursor = cursor.selectedText()
+
         if self._completer.popup().isVisible():
             # Update completion prefix
-            self._update_prefix(event, is_end_of_word, is_navigation_key)
+            if text_to_cursor[-1] in self.editor.word_separators:
+                # move out of the current work
+                self._hide_popup()
+            else:
+                # moving inside word
+                self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
@@ -259,10 +269,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             else:
                 # trigger symbols
                 if symbols:
-                    cursor = self._helper.word_under_cursor()
-                    cursor.setPosition(cursor.position())
-                    cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
-                    text_to_cursor = cursor.selectedText()
                     for symbol in symbols:
                         if text_to_cursor.endswith(symbol):
                             _logger().debug("cc: symbols trigger")
@@ -270,7 +276,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             self.request_completion()
                             return
                 # trigger length
-                if not self._completer.popup().isVisible():
+                if not self._completer.popup().isVisible() and event.text().isalnum():
                     prefix_len = len(self.completion_prefix)
                     if prefix_len >= self._trigger_len:
                         _logger().debug("cc: Len trigger")
@@ -317,9 +323,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
             self._update_model(completions, self._completer.model())
-            _logger().debug("model updated")
+            _logger().debug("model updated: %d items", self._completer.model().rowCount())
             self._show_popup()
             _logger().debug("popup shown")
+        else:
+            print('cancel')
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
@@ -350,19 +358,19 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         QtWidgets.QToolTip.hideText()
 
     def _show_popup(self, index=0):
-        cnt = self._completer.completionCount()
         full_prefix = self._helper.word_under_cursor(
             select_whole_word=True).selectedText()
+        if self._case_sensitive:
+                self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        else:
+            self._completer.setCaseSensitivity(
+                QtCore.Qt.CaseInsensitive)
+        # set prefix
+        self._completer.setCompletionPrefix(self.completion_prefix)
+        cnt = self._completer.model().rowCount()
         if (full_prefix == self._current_completion) and cnt == 1:
             self._hide_popup()
         else:
-            if self._case_sensitive:
-                self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
-            else:
-                self._completer.setCaseSensitivity(
-                    QtCore.Qt.CaseInsensitive)
-            # set prefix
-            self._completer.setCompletionPrefix(self.completion_prefix)
             # compute size and pos
             cursor_rec = self.editor.cursorRect()
             char_width = self.editor.fontMetrics().width('A')
@@ -424,8 +432,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @staticmethod
     def _is_printable_key_event(event):
-        return len(CodeCompletionMode.strip_control_characters(
-            event.text())) == 1
+        txt = CodeCompletionMode.strip_control_characters(event.text())
+        return len(txt) == 1
 
     @staticmethod
     @memoized
@@ -457,6 +465,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     item.setData(self._make_icon(completion['icon']),
                                  QtCore.Qt.DecorationRole)
                 cc_model.appendRow(item)
+        self._completer.setModel(cc_model)
         return cc_model
 
     def _display_completion_tooltip(self, completion):
