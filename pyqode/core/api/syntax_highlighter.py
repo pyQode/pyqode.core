@@ -120,6 +120,9 @@ class ColorScheme:
         """
         result = QtGui.QTextCharFormat()
         result.setForeground(self._get_brush("#000000"))
+        if token in [Token.Literal.String, Token.Literal.String.Doc,
+                     Token.Comment]:
+            result.setObjectType(result.UserObject)
         for key, value in list(style.style_for_token(token).items()):
             if value:
                 if key == 'color':

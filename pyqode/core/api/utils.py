@@ -697,9 +697,12 @@ class TextHelper:
             if sh:
                 ref_formats = sh.color_scheme.formats
                 for r in additional_formats:
-                    if r.start <= pos <= (r.start + r.length):
+                    if r.start <= pos < (r.start + r.length):
                         for fmt_type in formats:
-                            if ref_formats[fmt_type] == r.format:
+                            is_user_obj = (r.format.objectType() ==
+                                           r.format.UserObject)
+                            if (ref_formats[fmt_type] == r.format and
+                                    is_user_obj):
                                 return True
         return False
 
