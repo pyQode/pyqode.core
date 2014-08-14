@@ -48,7 +48,6 @@ some premade editors:
                       dedicated code edit.
 
 
-
 Next Version
 ------------
 

@@ -63,7 +63,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyqode.core'
-copyright = u'2013, Colin Duquesnoy'
+copyright = u'2013-2014, Colin Duquesnoy'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
