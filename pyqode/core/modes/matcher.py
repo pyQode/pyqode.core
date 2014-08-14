@@ -92,7 +92,7 @@ class SymbolMatcherMode(Mode):
         original_cursor = self.editor.textCursor()
         self.editor.setTextCursor(cursor)
         block = cursor.block()
-        data = get_block_symbol_data(block)
+        data = get_block_symbol_data(self.editor, block)
         mapping = {}
         methods = [self._match_parentheses,
                    self._match_square_brackets,
@@ -144,7 +144,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_left_parenthesis(self, current_block, i, cpt):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[PAREN]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
@@ -167,7 +167,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_right_parenthesis(self, current_block, i, nb_right_paren):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[PAREN]
             for j in range(i, -1, -1):
                 if j >= 0:
@@ -184,7 +184,7 @@ class SymbolMatcherMode(Mode):
                         nb_right_paren -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = get_block_symbol_data(current_block)
+                data = get_block_symbol_data(self.editor, current_block)
                 parentheses = data[PAREN]
                 return self._match_right_parenthesis(
                     current_block, len(parentheses) - 1, nb_right_paren)
@@ -209,7 +209,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_left_bracket(self, current_block, i, cpt):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[SQUARE]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
@@ -231,7 +231,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_right_bracket(self, current_block, i, nb_right):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[SQUARE]
             for j in range(i, -1, -1):
                 if j >= 0:
@@ -248,7 +248,7 @@ class SymbolMatcherMode(Mode):
                         nb_right -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = get_block_symbol_data(current_block)
+                data = get_block_symbol_data(self.editor, current_block)
                 parentheses = data[SQUARE]
                 return self._match_right_bracket(
                     current_block, len(parentheses) - 1, nb_right)
@@ -272,7 +272,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_left_brace(self, current_block, i, cpt):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[BRACE]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
@@ -294,7 +294,7 @@ class SymbolMatcherMode(Mode):
 
     def _match_right_brace(self, current_block, i, nb_right):
         try:
-            data = get_block_symbol_data(current_block)
+            data = get_block_symbol_data(self.editor, current_block)
             parentheses = data[BRACE]
             for j in range(i, -1, -1):
                 if j >= 0:
@@ -311,7 +311,7 @@ class SymbolMatcherMode(Mode):
                         nb_right -= 1
             current_block = current_block.previous()
             if current_block.isValid():
-                data = get_block_symbol_data(current_block)
+                data = get_block_symbol_data(self.editor, current_block)
                 parentheses = data[BRACE]
                 return self._match_right_brace(
                     current_block, len(parentheses) - 1, nb_right)
@@ -325,7 +325,7 @@ class SymbolMatcherMode(Mode):
         """
         self._clear_decorations()
         current_block = self.editor.textCursor().block()
-        data = get_block_symbol_data(current_block)
+        data = get_block_symbol_data(self.editor, current_block)
         pos = self.editor.textCursor().block().position()
         self._match_parentheses(data[PAREN], pos)
         self._match_square_brackets(data[SQUARE], pos)

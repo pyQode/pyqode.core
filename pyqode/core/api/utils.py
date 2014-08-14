@@ -859,48 +859,39 @@ class ParenthesisInfo(object):
         self.character = char
 
 
-def get_block_symbol_data(block):
-    parentheses = []
-    square_brackets = []
-    braces = []
-    # todo check if bracket is not into a string litteral
-    # parentheses
-    text = block.text()
-    left_pos = text.find("(", 0)
-    while left_pos != -1:
-        info = ParenthesisInfo(left_pos, "(")
-        parentheses.append(info)
-        left_pos = text.find("(", left_pos + 1)
-    right_pos = text.find(")", 0)
-    while right_pos != -1:
-        info = ParenthesisInfo(right_pos, ")")
-        parentheses.append(info)
-        right_pos = text.find(")", right_pos + 1)
-    # braces
-    left_pos = text.find("{", 0)
-    while left_pos != -1:
-        info = ParenthesisInfo(left_pos, "{")
-        braces.append(info)
-        left_pos = text.find("{", left_pos + 1)
-    right_pos = text.find("}", 0)
-    while right_pos != -1:
-        info = ParenthesisInfo(right_pos, "}")
-        braces.append(info)
-        right_pos = text.find("}", right_pos + 1)
-    # square_brackets
-    left_pos = text.find("[", 0)
-    while left_pos != -1:
-        info = ParenthesisInfo(left_pos, "[")
-        square_brackets.append(info)
-        left_pos = text.find("[", left_pos + 1)
-    right_pos = text.find("]", 0)
-    while right_pos != -1:
-        info = ParenthesisInfo(right_pos, "]")
-        square_brackets.append(info)
-        right_pos = text.find("]", right_pos + 1)
-    parentheses[:] = sorted(parentheses, key=lambda x: x.position)
-    square_brackets[:] = sorted(square_brackets, key=lambda x: x.position)
-    braces[:] = sorted(braces, key=lambda x: x.position)
+def get_block_symbol_data(editor, block):
+    """
+    Gets the list of ParenthesisInfo for specific text block.
+    """
+    def list_symbols(editor, block, character):
+        text = block.text()
+        symbols = []
+        cursor = QtGui.QTextCursor(block)
+        cursor.movePosition(cursor.StartOfBlock)
+        pos = text.find(character, 0)
+        cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
+        if TextHelper(editor).is_comment_or_string(cursor):
+            # skips symbols in string literal or comment
+            pos = -1
+        while pos != -1:
+            info = ParenthesisInfo(pos, character)
+            symbols.append(info)
+            pos = text.find(character, pos + 1)
+            cursor.movePosition(cursor.StartOfBlock)
+            cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
+            if TextHelper(editor).is_comment_or_string(cursor):
+                pos = -1
+        return symbols
+
+    parentheses = sorted(
+        list_symbols(editor, block, '(') + list_symbols(editor, block, ')'),
+        key=lambda x: x.position)
+    square_brackets = sorted(
+        list_symbols(editor, block, '[') + list_symbols(editor, block, ']'),
+        key=lambda x: x.position)
+    braces = sorted(
+        list_symbols(editor, block, '{') + list_symbols(editor, block, '}'),
+        key=lambda x: x.position)
     return parentheses, square_brackets, braces
 
 
