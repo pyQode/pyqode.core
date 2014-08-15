@@ -393,7 +393,9 @@ class TextHelper:
         eaten = 0
         removed = set()
         for line in editor._modified_lines:
-            for j in range(0, 1):
+            # parse line before and line after modified line (for cases where
+            # key_delete or key_return has been pressed)
+            for j in range(-1, 2):
                 # skip current line
                 if line + j != pos[0]:
                     if line + j >= 0:
@@ -420,9 +422,8 @@ class TextHelper:
         doc = editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         text_cursor.movePosition(text_cursor.Start)
-        text_cursor.movePosition(
-            text_cursor.Down, text_cursor.MoveAnchor,
-            pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
+        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                                 pos[0])
         text_cursor.movePosition(text_cursor.StartOfLine,
                                  text_cursor.MoveAnchor)
         cpos = text_cursor.position()
