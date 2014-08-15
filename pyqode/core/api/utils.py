@@ -873,17 +873,15 @@ def get_block_symbol_data(editor, block):
         cursor.movePosition(cursor.StartOfBlock)
         pos = text.find(character, 0)
         cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
-        if TextHelper(editor).is_comment_or_string(cursor):
-            # skips symbols in string literal or comment
-            pos = -1
+
         while pos != -1:
-            info = ParenthesisInfo(pos, character)
-            symbols.append(info)
+            if not TextHelper(editor).is_comment_or_string(cursor):
+                # skips symbols in string literal or comment
+                info = ParenthesisInfo(pos, character)
+                symbols.append(info)
             pos = text.find(character, pos + 1)
             cursor.movePosition(cursor.StartOfBlock)
             cursor.movePosition(cursor.Right, cursor.MoveAnchor, pos)
-            if TextHelper(editor).is_comment_or_string(cursor):
-                pos = -1
         return symbols
 
     parentheses = sorted(
