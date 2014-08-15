@@ -196,23 +196,23 @@ class FoldScope:
         .. note:: Start line do no encompass the trigger line.
         """
         ref_lvl = self.trigger_level
-        first_line = self._trigger.blockNumber() + 1
+        first_line = self._trigger.blockNumber()
         block = self._trigger.next()
-        last_line = block.blockNumber() + 1
+        last_line = block.blockNumber()
         lvl = self.scope_level
         if ref_lvl == lvl:  # for zone set programmatically such as imports
                             # in pyqode.python
             ref_lvl -= 1
         while (block.isValid() and
                 TextBlockHelper.get_fold_lvl(block) > ref_lvl):
-            last_line = block.blockNumber() + 1
+            last_line = block.blockNumber()
             block = block.next()
 
         if ignore_blank_lines and last_line:
-            block = block.document().findBlockByNumber(last_line - 1)
+            block = block.document().findBlockByNumber(last_line)
             while block.blockNumber() and block.text().strip() == '':
                 block = block.previous()
-                last_line = block.blockNumber() + 1
+                last_line = block.blockNumber()
         return first_line, last_line
 
     def fold(self):
@@ -224,7 +224,7 @@ class FoldScope:
         start, end = self.get_range()
         TextBlockHelper.set_fold_trigger_state(self._trigger, True)
         block = self._trigger.next()
-        while block.blockNumber() < end and block.isValid():
+        while block.blockNumber() <= end and block.isValid():
             block.setVisible(False)
             block = block.next()
 
@@ -245,10 +245,10 @@ class FoldScope:
                 # trigger line
                 start, bstart = region.get_range(ignore_blank_lines=True)
                 _, bend = region.get_range(ignore_blank_lines=False)
-                block = self._trigger.document().findBlockByNumber(start - 1)
+                block = self._trigger.document().findBlockByNumber(start)
                 block.setVisible(True)
-                block = self._trigger.document().findBlockByNumber(bend - 1)
-                while block.blockNumber() > bstart - 1:
+                block = self._trigger.document().findBlockByNumber(bend)
+                while block.blockNumber() > bstart:
                     block.setVisible(True)
                     block = block.previous()
 
@@ -261,7 +261,7 @@ class FoldScope:
         start, end = self.get_range(ignore_blank_lines=ignore_blank_lines)
         block = self._trigger.next()
         ref_lvl = self.scope_level
-        while block.blockNumber() < end and block.isValid():
+        while block.blockNumber() <= end and block.isValid():
             lvl = TextBlockHelper.get_fold_lvl(block)
             trigger = TextBlockHelper.is_fold_trigger(block)
             if lvl == ref_lvl and not trigger:
@@ -275,7 +275,7 @@ class FoldScope:
         start, end = self.get_range()
         block = self._trigger.next()
         ref_lvl = self.scope_level
-        while block.blockNumber() < end and block.isValid():
+        while block.blockNumber() <= end and block.isValid():
             lvl = TextBlockHelper.get_fold_lvl(block)
             trigger = TextBlockHelper.is_fold_trigger(block)
             if lvl == ref_lvl and trigger:
@@ -311,7 +311,7 @@ class FoldScope:
         ret_val = []
         block = self._trigger.next()
         _, end = self.get_range()
-        while (block.isValid() and block.blockNumber() < end and
+        while (block.isValid() and block.blockNumber() <= end and
                len(ret_val) < max_lines):
             ret_val.append(block.text())
             block = block.next()

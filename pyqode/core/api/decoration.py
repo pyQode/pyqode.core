@@ -60,7 +60,7 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         if start_line is not None:
             self.cursor.movePosition(self.cursor.Start, self.cursor.MoveAnchor)
             self.cursor.movePosition(self.cursor.Down, self.cursor.MoveAnchor,
-                                     start_line - 1)
+                                     start_line)
         if end_line is not None:
             self.cursor.movePosition(self.cursor.Down, self.cursor.KeepAnchor,
                                      end_line - start_line)

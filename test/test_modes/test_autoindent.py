@@ -17,5 +17,5 @@ def test_enabled(editor):
 
 def test_indent_eat_whitespaces(editor):
     editor.setPlainText('app = get_app(45, 4)', 'text/x-python', 'utf-8')
-    TextHelper(editor).goto_line(1, 17)
+    TextHelper(editor).goto_line(0, 17)
     QTest.keyPress(editor, QtCore.Qt.Key_Return)

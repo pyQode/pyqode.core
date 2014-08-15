@@ -130,7 +130,7 @@ def get_first_line(editor):
 @log_test_name
 def test_indent(editor):
     editor.modes.get(modes.IndenterMode).enabled = False
-    TextHelper(editor).goto_line(1, move=True)
+    TextHelper(editor).goto_line(0, move=True)
     first_line = get_first_line(editor)
     editor.indent()
     # no indenter mode -> indent should not do anything
@@ -139,8 +139,7 @@ def test_indent(editor):
     assert get_first_line(editor) == first_line
     # append indenter mode, call to indent/un_indent should now work
     editor.modes.get(modes.IndenterMode).enabled = True
-    TextHelper(editor).goto_line(1)
-    TextHelper(editor).goto_line(1)
+    TextHelper(editor).goto_line(0)
     editor.indent()
     assert get_first_line(editor) == '    ' + first_line
     editor.un_indent()

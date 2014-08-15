@@ -61,22 +61,22 @@ def test_matching(editor):
     """
     mode = get_mode(editor)
     # before [
-    TextHelper(editor).goto_line(2, 14)
+    TextHelper(editor).goto_line(1, 14)
     mode.do_symbols_matching()
     # after ]
-    TextHelper(editor).goto_line(5, 1)
+    TextHelper(editor).goto_line(4, 1)
     mode.do_symbols_matching()
     # before {
-    TextHelper(editor).goto_line(6, 14)
+    TextHelper(editor).goto_line(5, 14)
     mode.do_symbols_matching()
     # after }
-    TextHelper(editor).goto_line(9, 1)
+    TextHelper(editor).goto_line(8, 1)
     mode.do_symbols_matching()
     # before (
-    TextHelper(editor).goto_line(10, 16)
+    TextHelper(editor).goto_line(9, 16)
     mode.do_symbols_matching()
     # after )
-    TextHelper(editor).goto_line(13, 1)
+    TextHelper(editor).goto_line(12, 1)
     mode.do_symbols_matching()
 
 
@@ -92,11 +92,11 @@ def test_unmatching(editor):
     mode = get_mode(editor)
     # for this test we need to load uncorrect code with non matching symbols
     editor.setPlainText(malformed_symbols_code, 'text/x-python', 'utf-8')
+    TextHelper(editor).goto_line(0, 4)
+    mode.do_symbols_matching()
     TextHelper(editor).goto_line(1, 4)
     mode.do_symbols_matching()
     TextHelper(editor).goto_line(2, 4)
-    mode.do_symbols_matching()
-    TextHelper(editor).goto_line(3, 4)
     mode.do_symbols_matching()
 
 
@@ -113,22 +113,22 @@ def test_complex_matching(editor):
     mode = get_mode(editor)
     # [
     editor.setPlainText(cplx_code, 'text/x-python', 'utf-8')
-    TextHelper(editor).goto_line(2, 4)
+    TextHelper(editor).goto_line(1, 4)
     mode.do_symbols_matching()
     # ]
-    TextHelper(editor).goto_line(3, 28)
+    TextHelper(editor).goto_line(2, 28)
     mode.do_symbols_matching()
     # {
-    TextHelper(editor).goto_line(3, 6)
+    TextHelper(editor).goto_line(2, 6)
     mode.do_symbols_matching()
     # }
-    TextHelper(editor).goto_line(3, 22)
+    TextHelper(editor).goto_line(2, 22)
     mode.do_symbols_matching()
     # (
-    TextHelper(editor).goto_line(3, 5)
+    TextHelper(editor).goto_line(2, 5)
     mode.do_symbols_matching()
     # )
-    TextHelper(editor).goto_line(3, 27)
+    TextHelper(editor).goto_line(2, 27)
     mode.do_symbols_matching()
 
 
@@ -143,7 +143,7 @@ def test_symbol_pos(editor):
     mode = get_mode(editor)
     editor.file.open(__file__)
     # move to ')'
-    cursor = TextHelper(editor).goto_line(13, 1, move=False)
+    cursor = TextHelper(editor).goto_line(12, 1, move=False)
     l, c = mode.symbol_pos(cursor)
-    assert l == 10
+    assert l == 9
     assert c == 17

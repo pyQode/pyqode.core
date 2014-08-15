@@ -94,7 +94,7 @@ def test_close(editor):
 @editor_open(__file__)
 def test_focus_out_event(editor):
     panel = get_panel(editor)
-    TextHelper(editor).goto_line(1)
+    TextHelper(editor).goto_line(0)
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
     panel.on_actionSearch_triggered()

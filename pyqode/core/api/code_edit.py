@@ -243,7 +243,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Returns the list of visible blocks.
 
         Each element in the list is a tuple made up of the line top position,
-        the line number (already 1 based), and the QTextBlock itself.
+        the line number and the QTextBlock itself.
 
         :return: A list of tuple(top_position, line_number, block)
         :rtype: List of tuple(int, int, QtWidgets.QTextBlock)
@@ -482,8 +482,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self, helper.current_line_nbr(), helper.line_count())
         if not result:
             return
-        if not line:
-            line = 1
         return helper.goto_line(line, move=True)
 
     @QtCore.Slot()
@@ -895,7 +893,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             if not visible:
                 break
             if block.isVisible():
-                self._visible_blocks.append((top, block_nbr + 1, block))
+                self._visible_blocks.append((top, block_nbr, block))
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())

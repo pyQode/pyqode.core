@@ -233,7 +233,7 @@ class MarkerPanel(Panel):
         if len(markers):
             if self._previous_line != line:
                 top = TextHelper(self.editor).line_pos_from_number(
-                    markers[0].position - 2)
+                    markers[0].position)
                 if top:
                     self._job_runner.request_job(self._display_tooltip,
                                                  text, top)

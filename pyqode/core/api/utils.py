@@ -197,7 +197,7 @@ class TextHelper:
         """
         Moves the text cursor to the specified line (and column).
 
-        :param line: Number of the line to go to (1 based)
+        :param line: Number of the line to go to (0 based)
         :param column: Optional column number. Default start of line.
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
@@ -207,7 +207,7 @@ class TextHelper:
         text_cursor = self._editor.textCursor()
         text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
         text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 line - 1)
+                                 line)
         if column:
             text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
                                      column)
@@ -291,11 +291,11 @@ class TextHelper:
     def cursor_position(self):
         """
         Returns the QTextCursor position. The position is a tuple made up of
-        the line number (1 based) and the column number (0 based).
+        the line number (0 based) and the column number (0 based).
 
         :return: tuple(line, column)
         """
-        return (self._editor.textCursor().blockNumber() + 1,
+        return (self._editor.textCursor().blockNumber(),
                 self._editor.textCursor().columnNumber())
 
     def current_line_nbr(self):
@@ -332,11 +332,11 @@ class TextHelper:
         :rtype: str
         """
         doc = self._editor.document()
-        block = doc.findBlockByNumber(line_nbr - 1)
+        block = doc.findBlockByNumber(line_nbr)
         return block.text()
 
     def previous_line_text(self):
-        if self.current_line_nbr() - 1:
+        if self.current_line_nbr():
             return self.line_text(self.current_line_nbr() - 1)
         return ''
 
@@ -360,7 +360,7 @@ class TextHelper:
         text_cursor = editor.textCursor()
         text_cursor.movePosition(text_cursor.Start)
         text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 line_nbr - 1)
+                                 line_nbr)
         text_cursor.select(text_cursor.LineUnderCursor)
         text_cursor.insertText(new_text)
         editor.setTextCursor(text_cursor)
@@ -393,10 +393,12 @@ class TextHelper:
         eaten = 0
         removed = set()
         for line in editor._modified_lines:
+            # parse line before and line after modified line (for cases where
+            # key_delete or key_return has been pressed)
             for j in range(-1, 2):
                 # skip current line
                 if line + j != pos[0]:
-                    if line + j >= 1:
+                    if line + j >= 0:
                         txt = self.line_text(line + j)
                         stxt = txt.rstrip()
                         if txt != stxt:
@@ -407,12 +409,12 @@ class TextHelper:
         # ensure there is only one blank line left at the end of the file
         i = self.line_count()
         while i:
-            line = self.line_text(i)
+            line = self.line_text(i - 1)
             if line.strip():
                 break
             self.remove_last_line()
             i -= 1
-        if self.line_text(self.line_count()):
+        if self.line_text(self.line_count() - 1):
             editor.appendPlainText('')
 
         # restore cursor and scrollbars
@@ -420,9 +422,8 @@ class TextHelper:
         doc = editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
         text_cursor.movePosition(text_cursor.Start)
-        text_cursor.movePosition(
-            text_cursor.Down, text_cursor.MoveAnchor,
-            pos[0] - 1 if pos[0] <= doc.blockCount() else doc.blockCount() - 1)
+        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                                 pos[0])
         text_cursor.movePosition(text_cursor.StartOfLine,
                                  text_cursor.MoveAnchor)
         cpos = text_cursor.position()
@@ -441,7 +442,7 @@ class TextHelper:
         text_cursor.endEditBlock()
         editor._cleaning = False
 
-    def select_lines(self, start=1, end=-1, apply_selection=True):
+    def select_lines(self, start=0, end=-1, apply_selection=True):
         """
         Selects entire lines between start and end line numbers.
 
@@ -451,8 +452,8 @@ class TextHelper:
         Optionally it is possible to prevent the selection from being applied
         on the code editor widget by setting ``apply_selection`` to False.
 
-        :param start: Start line number (1 based)
-        :param end: End line number (1 based). Use -1 to select up to the
+        :param start: Start line number (0 based)
+        :param end: End line number (0 based). Use -1 to select up to the
             end of the document
         :param apply_selection: True to apply the selection before returning
          the QTextCursor.
@@ -460,32 +461,32 @@ class TextHelper:
         """
         editor = self._editor
         if end == -1:
-            end = self.line_count()
-        if start and end:
-            text_cursor = editor.textCursor()
-            text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
-            text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                     start - 1)
-            if end > start:  # Going down
-                text_cursor.movePosition(text_cursor.Down,
-                                         text_cursor.KeepAnchor, end - start)
-                text_cursor.movePosition(text_cursor.EndOfLine,
-                                         text_cursor.KeepAnchor)
-            elif end < start:  # going up
-                # don't miss end of line !
-                text_cursor.movePosition(text_cursor.EndOfLine,
-                                         text_cursor.MoveAnchor)
-                text_cursor.movePosition(text_cursor.Up,
-                                         text_cursor.KeepAnchor, start - end)
-                text_cursor.movePosition(text_cursor.StartOfLine,
-                                         text_cursor.KeepAnchor)
-            else:
-                text_cursor.movePosition(text_cursor.EndOfLine,
-                                         text_cursor.KeepAnchor)
-            if apply_selection:
-                editor.setTextCursor(text_cursor)
-            return text_cursor
-        return None
+            end = self.line_count() - 1
+        if start < 0:
+            start = 0
+        text_cursor = editor.textCursor()
+        text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
+        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
+                                 start)
+        if end > start:  # Going down
+            text_cursor.movePosition(text_cursor.Down,
+                                     text_cursor.KeepAnchor, end - start)
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.KeepAnchor)
+        elif end < start:  # going up
+            # don't miss end of line !
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.MoveAnchor)
+            text_cursor.movePosition(text_cursor.Up,
+                                     text_cursor.KeepAnchor, start - end)
+            text_cursor.movePosition(text_cursor.StartOfLine,
+                                     text_cursor.KeepAnchor)
+        else:
+            text_cursor.movePosition(text_cursor.EndOfLine,
+                                     text_cursor.KeepAnchor)
+        if apply_selection:
+            editor.setTextCursor(text_cursor)
+        return text_cursor
 
     def selection_range(self):
         """
@@ -496,9 +497,9 @@ class TextHelper:
         editor = self._editor
         doc = editor.document()
         start = doc.findBlock(
-            editor.textCursor().selectionStart()).blockNumber() + 1
+            editor.textCursor().selectionStart()).blockNumber()
         end = doc.findBlock(
-            editor.textCursor().selectionEnd()).blockNumber() + 1
+            editor.textCursor().selectionEnd()).blockNumber()
         text_cursor = QtGui.QTextCursor(editor.textCursor())
         text_cursor.setPosition(editor.textCursor().selectionEnd())
         if text_cursor.columnNumber() == 0 and start != end:
@@ -515,7 +516,7 @@ class TextHelper:
         :return: The center position of the line.
         """
         editor = self._editor
-        block = editor.document().findBlockByNumber(line_number - 1)
+        block = editor.document().findBlockByNumber(line_number)
         if block.isValid():
             return int(editor.blockBoundingGeometry(block).translated(
                 editor.contentOffset()).top())
@@ -530,14 +531,14 @@ class TextHelper:
         Returns the line number from the y_pos
 
         :param y_pos: Y pos in the editor
-        :return: Line number (1 based)
+        :return: Line number (0 based)
         """
         editor = self._editor
         height = editor.fontMetrics().height()
         for top, line, block in editor.visible_blocks:
             if top <= y_pos <= top + height:
                 return line
-        return None
+        return 0
 
     def mark_whole_doc_dirty(self):
         """
@@ -558,11 +559,10 @@ class TextHelper:
         :return: Number of spaces that makes the indentation level of the
                  current line
         """
-        editor = self._editor
         if line_nbr is None:
             line_nbr = self.current_line_nbr()
         elif isinstance(line_nbr, QtGui.QTextBlock):
-            line_nbr = line_nbr.blockNumber() + 1
+            line_nbr = line_nbr.blockNumber()
         line = self.line_text(line_nbr)
         indentation = len(line) - len(line.lstrip())
         return indentation

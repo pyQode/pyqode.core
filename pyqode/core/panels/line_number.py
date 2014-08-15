@@ -105,13 +105,13 @@ class LineNumberPanel(Panel):
             has_sel = sel_start != sel_end
             cl = TextHelper(self.editor).current_line_nbr()
             # draw every visible blocks
-            for top, blockNumber, block in self.editor.visible_blocks:
-                if ((has_sel and sel_start <= blockNumber <= sel_end) or
-                        (not has_sel and cl == blockNumber)):
+            for top, line, block in self.editor.visible_blocks:
+                if ((has_sel and sel_start <= line <= sel_end) or
+                        (not has_sel and cl == line)):
                     painter.setPen(pen_selected)
                     painter.setFont(bold_font)
                 else:
                     painter.setPen(pen)
                     painter.setFont(font)
                 painter.drawText(-3, top, width, height,
-                                 QtCore.Qt.AlignRight, str(blockNumber))
+                                 QtCore.Qt.AlignRight, str(line + 1))

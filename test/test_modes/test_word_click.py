@@ -18,7 +18,7 @@ def test_enabled(editor):
 def test_events(editor):
     mode = get_mode(editor)
     mode._add_decoration(editor.textCursor())
-    pt = QtCore.QPoint(10, TextHelper(editor).line_pos_from_number(1))
+    pt = QtCore.QPoint(10, TextHelper(editor).line_pos_from_number(0))
     QTest.mouseMove(editor, pt)
     editor.mouseMoveEvent(QtGui.QMouseEvent(
         QtCore.QEvent.MouseMove, pt,
