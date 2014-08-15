@@ -197,7 +197,7 @@ class TextHelper:
         """
         Moves the text cursor to the specified line (and column).
 
-        :param line: Number of the line to go to (1 based)
+        :param line: Number of the line to go to (0 based)
         :param column: Optional column number. Default start of line.
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
@@ -291,7 +291,7 @@ class TextHelper:
     def cursor_position(self):
         """
         Returns the QTextCursor position. The position is a tuple made up of
-        the line number (1 based) and the column number (0 based).
+        the line number (0 based) and the column number (0 based).
 
         :return: tuple(line, column)
         """
@@ -531,7 +531,7 @@ class TextHelper:
         Returns the line number from the y_pos
 
         :param y_pos: Y pos in the editor
-        :return: Line number (1 based)
+        :return: Line number (0 based)
         """
         editor = self._editor
         height = editor.fontMetrics().height()

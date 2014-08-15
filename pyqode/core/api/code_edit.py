@@ -243,7 +243,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Returns the list of visible blocks.
 
         Each element in the list is a tuple made up of the line top position,
-        the line number (already 1 based), and the QTextBlock itself.
+        the line number and the QTextBlock itself.
 
         :return: A list of tuple(top_position, line_number, block)
         :rtype: List of tuple(int, int, QtWidgets.QTextBlock)

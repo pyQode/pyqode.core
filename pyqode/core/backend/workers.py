@@ -75,7 +75,7 @@ class CodeCompletionWorker(object):
                 - 'tooltip': an optional tooltip string
 
             :param code: code string
-            :param line: line number (1 based)
+            :param line: line number (0 based)
             :param column: column number (0 based)
             :param path: file path
             :param encoding: file encoding
