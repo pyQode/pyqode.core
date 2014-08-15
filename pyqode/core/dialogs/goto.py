@@ -31,7 +31,7 @@ class DlgGotoLine(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
         :returns: tuple(line, status) status is False if the dialog has been
             rejected.
         """
-        dlg = DlgGotoLine(parent, current_line, line_count)
+        dlg = DlgGotoLine(parent, current_line + 1, line_count)
         if dlg.exec_() == dlg.Accepted:
             return dlg.spinBox.value(), True
-        return current_line, False
+        return current_line - 1, False

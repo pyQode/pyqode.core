@@ -27,15 +27,15 @@ def test_line_count(editor):
 def test_goto_line(editor):
     assert editor.textCursor().blockNumber() == 0
     assert editor.textCursor().columnNumber() == 0
-    cursor = TextHelper(editor).goto_line(3, 0, move=False)
+    cursor = TextHelper(editor).goto_line(2, 0, move=False)
     QTest.qWait(100)
     assert editor.textCursor().blockNumber() != cursor.blockNumber()
     assert editor.textCursor().columnNumber() == cursor.columnNumber()
-    cursor = TextHelper(editor).goto_line(10, move=True)
+    cursor = TextHelper(editor).goto_line(9, move=True)
     QTest.qWait(100)
     assert editor.textCursor().blockNumber() == cursor.blockNumber() == 9
     assert editor.textCursor().columnNumber() == cursor.columnNumber() == 0
-    assert TextHelper(editor).current_line_nbr() == 10
+    assert TextHelper(editor).current_line_nbr() == 9
     assert TextHelper(editor).current_column_nbr() == 0
 
 
@@ -43,7 +43,7 @@ def test_goto_line(editor):
 @log_test_name
 def test_selected_text(editor):
     helper = TextHelper(editor)
-    helper.goto_line(3, 1, move=True)
+    helper.goto_line(2, 1, move=True)
     QTest.qWait(100)
     assert helper.word_under_cursor().selectedText() == 'T'
     assert helper.word_under_cursor(
@@ -59,15 +59,15 @@ def test_word_under_mouse_cursor(editor):
 @editor_open(__file__)
 @log_test_name
 def test_line_text(editor):
-    TextHelper(editor).goto_line(3, 0, move=True)
+    TextHelper(editor).goto_line(2, 0, move=True)
     assert TextHelper(editor).current_line_text() == __doc__.splitlines()[1]
 
 
 @editor_open(__file__)
 @log_test_name
 def test_set_line_text(editor):
-    TextHelper(editor).set_line_text(3, 'haha')
-    TextHelper(editor).goto_line(3, 0, move=True)
+    TextHelper(editor).set_line_text(2, 'haha')
+    TextHelper(editor).goto_line(2, 0, move=True)
     assert TextHelper(editor).current_line_text() == 'haha'
 
 
@@ -84,12 +84,12 @@ def test_remove_last_line(editor):
 def test_clean_document(editor):
     TextHelper(editor).clean_document()
     count = TextHelper(editor).line_count()
-    TextHelper(editor).set_line_text(1, '"""   ')
+    TextHelper(editor).set_line_text(0, '"""   ')
     editor.appendPlainText("")
     editor.appendPlainText("")
     editor.appendPlainText("")
     assert TextHelper(editor).line_count() == count + 3
-    TextHelper(editor).select_lines(1, TextHelper(editor).line_count())
+    TextHelper(editor).select_lines(0, TextHelper(editor).line_count())
     TextHelper(editor).clean_document()
     QTest.qWait(100)
     assert TextHelper(editor).line_count() == count
@@ -98,17 +98,19 @@ def test_clean_document(editor):
 @editor_open(__file__)
 @log_test_name
 def test_select_lines(editor):
-    TextHelper(editor).select_lines(1, 5)
+    TextHelper(editor).select_lines(0, 4)
     QTest.qWait(100)
     QTest.qWait(1000)
-    assert TextHelper(editor).selection_range() == (1, 5)
+    assert TextHelper(editor).selection_range() == (0, 4)
+    TextHelper(editor).select_lines(-1, 10)
+    assert TextHelper(editor).selection_range() == (0, 10)
     editor.decorations.clear()
 
 
 @editor_open(__file__)
 @log_test_name
 def test_line_pos_from_number(editor):
-    assert TextHelper(editor).line_pos_from_number(1) is not None
+    assert TextHelper(editor).line_pos_from_number(0) is not None
     # out of range line will return the bottom of the document or the top
     assert TextHelper(editor).line_pos_from_number(-1) == 0
     pos = TextHelper(editor).line_pos_from_number(
@@ -123,8 +125,8 @@ def test_line_nbr_from_position(editor):
     editor.repaint()
     sys.stderr.write(str(editor.visible_blocks))
     assert TextHelper(editor).line_nbr_from_position(
-        TextHelper(editor).line_pos_from_number(1)) is not None
-    assert TextHelper(editor).line_nbr_from_position(0) is None
+        TextHelper(editor).line_pos_from_number(0)) is not None
+    assert TextHelper(editor).line_nbr_from_position(-1) is None
     QTest.qWait(100)
 
 
@@ -139,7 +141,7 @@ def test_open_file(editor):
 @editor_open(__file__)
 def test_save_file(editor):
     path = os.path.join(os.getcwd(), 'tmp.py')
-    TextHelper(editor).select_lines(1, 2)
+    TextHelper(editor).select_lines(0, 1)
     editor.file.save(path, encoding='utf-8')
     assert os.path.exists(path)
     assert editor.file.encoding == 'utf-8'
@@ -168,23 +170,23 @@ src = """def test_mark_whole_doc_dirty(editor):
 @log_test_name
 def test_line_indent(editor):
     editor.setPlainText(src, 'text/x-python', 'utf-8')
-    assert TextHelper(editor).line_indent(1) == 0
-    assert TextHelper(editor).line_indent(2) == 4
+    assert TextHelper(editor).line_indent(0) == 0
+    assert TextHelper(editor).line_indent(1) == 4
     editor.file.open(__file__)
-    assert TextHelper(editor).line_indent(TextHelper(editor).line_count() - 1) == 4
+    assert TextHelper(editor).line_indent(TextHelper(editor).line_count() - 2) == 4
 
 
 @editor_open(__file__)
 @log_test_name
 def test_right_word(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_word() == 'This'
 
 
 def test_right_char(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_character() == 'T'
 
 
@@ -192,14 +194,14 @@ def test_right_char(editor):
 @log_test_name
 def test_insert_text(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     TextHelper(editor).insert_text('haha', keep_position=True)
     assert TextHelper(editor).get_right_word() == 'hahaThis'
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     TextHelper(editor).insert_text('haha', keep_position=False)
     assert TextHelper(editor).get_right_word() == 'This'
-    assert TextHelper(editor).line_text(3).startswith('hahaThis')
+    assert TextHelper(editor).line_text(2).startswith('hahaThis')
 
 
 @editor_open(__file__)
@@ -207,7 +209,7 @@ def test_insert_text(editor):
 def test_clear_selection(editor):
     editor.file.open(__file__)
     helper = TextHelper(editor)
-    TextHelper(editor).select_lines(1, 3)
+    TextHelper(editor).select_lines(0, 2)
     assert helper.selected_text() != ''
     TextHelper(editor).clear_selection()
     assert helper.selected_text() == ''
@@ -217,7 +219,7 @@ def test_clear_selection(editor):
 @log_test_name
 def test_move_right(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     TextHelper(editor).move_right()
     assert TextHelper(editor).get_right_character() == 'h'
 
@@ -226,11 +228,11 @@ def test_move_right(editor):
 @log_test_name
 def test_to_upper(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_word() == 'This'
-    TextHelper(editor).select_lines(3, 2)
+    TextHelper(editor).select_lines(2, 1)
     TextHelper(editor).selected_text_to_upper()
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_word() == 'THIS'
 
 
@@ -238,11 +240,11 @@ def test_to_upper(editor):
 @log_test_name
 def test_to_lower(editor):
     editor.file.open(__file__)
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_word() == 'This'
-    TextHelper(editor).select_lines(3, 2)
+    TextHelper(editor).select_lines(2, 1)
     TextHelper(editor).selected_text_to_lower()
-    TextHelper(editor).goto_line(3)
+    TextHelper(editor).goto_line(2)
     assert TextHelper(editor).get_right_word() == 'this'
 
 
@@ -263,7 +265,7 @@ def test_keep_tc(editor):
     @keep_tc_pos
     def move_cursor(editor, arg):
         assert arg == 'arg'
-        TextHelper(editor).goto_line(5)
+        TextHelper(editor).goto_line(4)
 
     l, c = TextHelper(editor).cursor_position()
     move_cursor(editor, 'arg')

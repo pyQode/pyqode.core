@@ -103,7 +103,7 @@ def test_request_completion(editor):
     # request a completion at start of the document, this request will be
     # skipped because we are in a comment/docstring zone.
     assert mode.request_completion() is False
-    TextHelper(editor).goto_line(4)
+    TextHelper(editor).goto_line(3)
     QTest.qWait(100)
     assert mode.request_completion() is True
     # starts the server after the request to test the retry on NotConnected
@@ -123,7 +123,7 @@ def test_request_completion(editor):
 def test_events(editor):
     assert editor.backend.connected
     QTest.qWait(1000)
-    TextHelper(editor).goto_line(4)
+    TextHelper(editor).goto_line(3)
     QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
     QTest.qWait(2000)
     QTest.keyPress(editor, QtCore.Qt.Key_Escape)
@@ -165,7 +165,7 @@ def test_events(editor):
 @ensure_connected
 def test_insert_completions(editor):
     assert editor.backend.connected
-    TextHelper(editor).goto_line(4)
+    TextHelper(editor).goto_line(3)
     # check insert completions
     QTest.keyPress(editor, 'm')
     QTest.keyPress(editor, 'o')

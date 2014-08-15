@@ -22,11 +22,11 @@ def test_mouse_move(editor):
     panel = get_panel(editor)
     panel.highlight_caret_scope = False
     nb_decos = len(editor.decorations)
-    y_pos = TextHelper(editor).line_pos_from_number(9)
+    y_pos = TextHelper(editor).line_pos_from_number(8)
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos + 5))
     QTest.qWait(1000)
     assert len(editor.decorations) == 2 + nb_decos
-    y_pos = TextHelper(editor).line_pos_from_number(15)
+    y_pos = TextHelper(editor).line_pos_from_number(14)
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos + 5))
     QTest.qWait(1000)
     assert len(editor.decorations) == 4 + nb_decos

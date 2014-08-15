@@ -134,7 +134,7 @@ class FoldingPanel(Panel):
         # Draw background over the selected non collapsed fold region
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
-                self._mouse_over_line - 1)
+                self._mouse_over_line)
             try:
                 self._draw_fold_region_background(block, painter)
             except ValueError:
@@ -405,9 +405,9 @@ class FoldingPanel(Panel):
         line = th.line_nbr_from_position(event.pos().y())
         if line:
             block = self.find_scope(
-                self.editor.document().findBlockByNumber(line - 1))
+                self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
-                self._mouse_over_line = block.blockNumber() + 1
+                self._mouse_over_line = block.blockNumber()
                 self._highlight_surrounding_scopes(block)
                 self._highight_block = block
             else:
@@ -482,7 +482,7 @@ class FoldingPanel(Panel):
         """ Folds/unfolds the pressed indicator if any. """
         if self._mouse_over_line:
             block = self.editor.document().findBlockByNumber(
-                self._mouse_over_line - 1)
+                self._mouse_over_line)
             self.toggle_fold_trigger(block)
 
     def _on_fold_deco_clicked(self, deco):
@@ -667,7 +667,7 @@ class FoldingPanel(Panel):
             except ValueError:
                 self._clear_scope_decos()
             else:
-                self._mouse_over_line = block.blockNumber() + 1
+                self._mouse_over_line = block.blockNumber()
                 if TextBlockHelper.is_fold_trigger(block):
                     self._highlight_surrounding_scopes(block)
         self._block_nbr = block_nbr

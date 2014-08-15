@@ -207,7 +207,7 @@ class CheckerMode(Mode, QtCore.QObject):
                     usd = message.block.userData()
                 except AttributeError:
                     message.block = self.editor.document().findBlockByNumber(
-                        message.line - 1)
+                        message.line)
                     usd = message.block.userData()
                 if usd is None:
                     usd = TextBlockUserData()
@@ -274,7 +274,7 @@ class CheckerMode(Mode, QtCore.QObject):
             messages = []
             for msg in results:
                 msg = CheckerMessage(*msg)
-                block = self.editor.document().findBlockByNumber(msg.line - 1)
+                block = self.editor.document().findBlockByNumber(msg.line)
                 msg.block = block
                 messages.append(msg)
             self.add_messages(messages)

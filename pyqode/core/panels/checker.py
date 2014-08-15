@@ -35,7 +35,7 @@ class CheckerPanel(Panel):
         :return: Marker of None
         :rtype: pyqode.core.Marker
         """
-        block = self.editor.document().findBlockByNumber(line - 1)
+        block = self.editor.document().findBlockByNumber(line)
         try:
             return block.userData().messages
         except AttributeError:
@@ -87,7 +87,7 @@ class CheckerPanel(Panel):
             if len(markers):
                 if self._previous_line != line:
                     top = TextHelper(self.editor).line_pos_from_number(
-                        markers[0].line - 2)
+                        markers[0].line)
                     if top:
                         self._job_runner.request_job(self._display_tooltip,
                                                      text, top)

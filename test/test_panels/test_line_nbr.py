@@ -19,7 +19,7 @@ def test_enabled(editor):
 @editor_open(__file__)
 def test_mouse_press(editor):
     panel = get_panel(editor)
-    y_pos = TextHelper(editor).line_pos_from_number(1)
+    y_pos = TextHelper(editor).line_pos_from_number(0)
     QTest.mousePress(panel, QtCore.Qt.RightButton, QtCore.Qt.NoModifier,
                      QtCore.QPoint(1000, 1000))
     QTest.mousePress(panel, QtCore.Qt.RightButton, QtCore.Qt.NoModifier,
@@ -29,7 +29,7 @@ def test_mouse_press(editor):
 @editor_open(__file__)
 def test_mouse_release(editor):
     panel = get_panel(editor)
-    y_pos = TextHelper(editor).line_pos_from_number(1)
+    y_pos = TextHelper(editor).line_pos_from_number(0)
     QTest.mouseRelease(panel, QtCore.Qt.RightButton, QtCore.Qt.NoModifier,
                        QtCore.QPoint(3, y_pos))
 
@@ -37,7 +37,7 @@ def test_mouse_release(editor):
 @editor_open(__file__)
 def test_mouse_move(editor):
     panel = get_panel(editor)
-    y_pos = TextHelper(editor).line_pos_from_number(1)
+    y_pos = TextHelper(editor).line_pos_from_number(0)
     panel._selecting = True
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos))
     QTest.qWait(1000)
