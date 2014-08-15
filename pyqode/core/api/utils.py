@@ -537,7 +537,7 @@ class TextHelper:
         for top, line, block in editor.visible_blocks:
             if top <= y_pos <= top + height:
                 return line
-        return None
+        return 0
 
     def mark_whole_doc_dirty(self):
         """

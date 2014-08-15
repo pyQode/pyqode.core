@@ -126,7 +126,7 @@ def test_line_nbr_from_position(editor):
     sys.stderr.write(str(editor.visible_blocks))
     assert TextHelper(editor).line_nbr_from_position(
         TextHelper(editor).line_pos_from_number(0)) is not None
-    assert TextHelper(editor).line_nbr_from_position(-1) is None
+    assert TextHelper(editor).line_nbr_from_position(-1) == 0
     QTest.qWait(100)
 
 
