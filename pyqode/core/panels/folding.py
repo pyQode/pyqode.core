@@ -30,11 +30,11 @@ class FoldingPanel(Panel):
     trigger state using :class:`pyqode.core.api.utils.TextBlockHelper` or
     :mod:`pyqode.core.api.folding`
     """
-    #: Signal emitted when the user clicked in a place where there is no
-    #: marker.
-    add_marker_requested = QtCore.Signal(int)
-    #: Signal emitted when the user clicked on an existing marker.
-    remove_marker_requested = QtCore.Signal(int)
+    #: signal emitted when a fold trigger state has changed, parameters are
+    #: the concerned text block and the new state (collapsed or not).
+    trigger_state_changed = QtCore.Signal(QtGui.QTextBlock, bool)
+    collapse_all_triggered = QtCore.Signal()
+    expand_all_triggered = QtCore.Signal()
 
     @property
     def highlight_caret_scope(self):
@@ -477,6 +477,7 @@ class FoldingPanel(Panel):
             self._add_fold_decoration(block, region)
             self._clear_scope_decos()
         self._refresh_editor_and_scrollbars()
+        self.trigger_state_changed.emit(region._trigger, region.collapsed)
 
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
@@ -610,6 +611,7 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.movePosition(tc.Start)
         self.editor.setTextCursor(tc)
+        self.collapse_all_triggered.emit()
 
     def _clear_block_deco(self):
         """
@@ -630,6 +632,7 @@ class FoldingPanel(Panel):
             block = block.next()
         self._clear_block_deco()
         self._refresh_editor_and_scrollbars()
+        self.expand_all_triggered.emit()
 
     def _on_action_toggle(self):
         """
