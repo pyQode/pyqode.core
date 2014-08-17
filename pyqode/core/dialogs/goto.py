@@ -1,8 +1,6 @@
 from pyqode.core._forms import dlg_goto_line_ui
 from pyqode.qt import QtWidgets
 
-__author__ = 'colin'
-
 
 class DlgGotoLine(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
     """
