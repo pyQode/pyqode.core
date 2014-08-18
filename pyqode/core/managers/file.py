@@ -166,7 +166,6 @@ class FileManager(Manager):
             self.editor.setPlainText(
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
-            self.editor.setWindowTitle(self.editor.file.name)
         self.opening = False
 
     def reload(self, encoding):
