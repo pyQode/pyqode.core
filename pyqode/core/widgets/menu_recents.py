@@ -7,7 +7,7 @@ import os
 from pyqode.qt import QtCore, QtWidgets
 
 
-class RecentFilesManager:
+class RecentFilesManager(QtCore.QObject):
     """
     Manages a list of recent files. The list of files is stored in your
     application QSettings.
@@ -15,18 +15,22 @@ class RecentFilesManager:
     """
     #: Maximum number of files kept in the list.
     max_recent_files = 15
+    updated = QtCore.Signal()
 
     def __init__(self, organisation, application):
+        super().__init__()
         self._settings = QtCore.QSettings(organisation, application)
 
     def clear(self):
         """ Clears recent files in QSettings """
         self._settings.setValue('recentFiles', [])
+        self.updated.emit()
 
     def remove(self, filename):
         files = self._settings.value('recentFiles', [])
         files.remove(filename)
         self._settings.setValue('recentFiles', files)
+        self.updated.emit()
 
     def get_recent_files(self):
         """
@@ -62,6 +66,7 @@ class RecentFilesManager:
         # discard old files
         del files[self.max_recent_files:]
         self._settings.setValue('recentFiles', files)
+        self.updated.emit()
 
 
 class MenuRecentFiles(QtWidgets.QMenu):
