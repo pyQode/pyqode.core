@@ -319,7 +319,7 @@ class FoldingPanel(Panel):
         """
         color = drift_color(base_color, factor=factor)
         # upper part
-        if start - 1:
+        if start >= 0:
             d = TextDecoration(self.editor.document(),
                                start_line=parent_start, end_line=start)
             d.set_full_width(True, clear=False)
@@ -368,7 +368,7 @@ class FoldingPanel(Panel):
                 parent = parent.parent()
                 factor += factor_step
             # global scope
-            parent_start = 1
+            parent_start = 0
             parent_end = self.editor.document().blockCount()
             self._add_scope_deco(
                 start, end + 1, parent_start, parent_end, base_color,
