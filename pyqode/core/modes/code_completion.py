@@ -147,6 +147,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
+        super().on_uninstall()
         self._completer.popup().hide()
         self._completer = None
 
