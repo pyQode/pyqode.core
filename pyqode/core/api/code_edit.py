@@ -735,13 +735,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().showEvent(event)
         _logger().debug('show event')
 
+    def get_context_menu(self):
+        """
+        Gets the editor context menu.
+
+        :return: QMenu
+        """
+        mnu = QtWidgets.QMenu()
+        for menu in self._menus:
+            mnu.addMenu(menu)
+        mnu.addSeparator()
+        mnu.addActions(self._actions)
+        return mnu
+
     def _show_context_menu(self, point):
         """ Shows the context menu """
-        self._mnu = QtWidgets.QMenu()
-        for menu in self._menus:
-            self._mnu.addMenu(menu)
-        self._mnu.addSeparator()
-        self._mnu.addActions(self._actions)
+        self._mnu = self.get_context_menu()
         self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
