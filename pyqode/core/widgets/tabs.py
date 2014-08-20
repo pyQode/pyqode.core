@@ -350,9 +350,9 @@ class TabWidget(QTabWidget):
     def _save_editor(self, code_edit, path=None):
         if not path:
             path = code_edit.file.path
-        if not os.path.exists(path):
-            path, status = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'Save as (%s)' % code_edit.file.path)
+            if not os.path.exists(path):
+                path, status = QtWidgets.QFileDialog.getSaveFileName(
+                    self, 'Save as (%s)' % code_edit.file.path)
         if path:
             code_edit.file.save(path)
 
