@@ -20,7 +20,6 @@ class CaseConverterMode(Mode):
         self._actions_created = False
         self.action_to_lower = None
         self.action_to_upper = None
-        self.separator = None
 
     @QtCore.Slot()
     def to_upper(self, *args):
