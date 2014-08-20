@@ -1,7 +1,7 @@
 import locale
 from pyqode.core.api import ENCODINGS_MAP, convert_to_codec_key
 from pyqode.qt import QtCore, QtWidgets
-from pyqode.core.settings import Settings
+from pyqode.core.cache import Cache
 
 
 def _logger():
@@ -47,7 +47,7 @@ class EncodingsComboBox(QtWidgets.QComboBox):
     def _refresh_items(self):
         self._lock = True
         self.clear()
-        for i, encoding in enumerate(sorted(Settings().preferred_encodings)):
+        for i, encoding in enumerate(sorted(Cache().preferred_encodings)):
             encoding = convert_to_codec_key(encoding)
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
@@ -107,7 +107,7 @@ class EncodingsMenu(QtWidgets.QMenu):
 
     def _refresh(self):
         self._clear_actions()
-        for i, encoding in enumerate(sorted(Settings().preferred_encodings)):
+        for i, encoding in enumerate(sorted(Cache().preferred_encodings)):
             encoding = convert_to_codec_key(encoding)
             try:
                 alias, lang = ENCODINGS_MAP[encoding]

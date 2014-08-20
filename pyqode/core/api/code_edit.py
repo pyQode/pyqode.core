@@ -860,7 +860,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # goto
         action = QtWidgets.QAction('Go to line', self)
         action.setShortcut('Ctrl+G')
-        action.setIcon(_icon(('start-here',
+        action.setIcon(_icon(('go-jump',
                               ':/pyqode-icons/rc/goto-line.png')))
         action.triggered.connect(self.goto_line)
         self.add_action(action)

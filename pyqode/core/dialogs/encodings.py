@@ -6,7 +6,7 @@ you application.
 import locale
 from pyqode.core.api import encodings
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.settings import Settings
+from pyqode.core.cache import Cache
 from pyqode.core._forms import dlg_preferred_encodings_editor_ui
 
 
@@ -38,7 +38,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
             'Encoding', 'Language'])
         self.ui.tableWidgetAvailable.verticalHeader().hide()
         self.ui.tableWidgetAvailable.setSortingEnabled(True)
-        preferred = Settings().preferred_encodings
+        preferred = Cache().preferred_encodings
         for key in sorted(encodings.ENCODINGS_MAP.keys()):
             value = encodings.ENCODINGS_MAP[key]
             if key not in preferred:
@@ -63,7 +63,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
             'Encoding', 'Language'])
         self.ui.tableWidgetPreferred.verticalHeader().hide()
         self.ui.tableWidgetPreferred.setSortingEnabled(True)
-        for i, encoding in enumerate(Settings().preferred_encodings):
+        for i, encoding in enumerate(Cache().preferred_encodings):
             encoding = encodings.convert_to_codec_key(encoding)
             value = encodings.ENCODINGS_MAP[encoding]
             row = self.ui.tableWidgetPreferred.rowCount()
@@ -125,7 +125,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         """
         dlg = cls(parent)
         if dlg.exec_() == dlg.Accepted:
-            settings = Settings()
+            settings = Cache()
             settings.preferred_encodings = dlg.get_preferred_encodings()
             return True
         return False

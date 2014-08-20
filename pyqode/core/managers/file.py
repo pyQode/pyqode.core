@@ -10,7 +10,7 @@ from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
 from pyqode.qt import QtCore, QtGui, QtWidgets
-from pyqode.core.settings import Settings
+from pyqode.core.cache import Cache
 
 
 def _logger():
@@ -133,7 +133,7 @@ class FileManager(Manager):
         if encoding is None:
             encoding = locale.getpreferredencoding()
         self.opening = True
-        settings = Settings()
+        settings = Cache()
         self._path = path
         # get encoding from cache
         if use_cached_encoding:
@@ -248,7 +248,7 @@ class FileManager(Manager):
             raise e
         else:
             _logger().debug('save to temp file succeeded')
-            Settings().set_file_encoding(path, encoding)
+            Cache().set_file_encoding(path, encoding)
             self._encoding = encoding
             # remove path and rename temp file
             _logger().debug('rename %s to %s', tmp_path, path)

@@ -24,7 +24,7 @@ from pyqode.qt import QtCore
 from pyqode.core.api import encodings
 
 
-class Settings:
+class Cache:
     def __init__(self, suffix=''):
         self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
 
