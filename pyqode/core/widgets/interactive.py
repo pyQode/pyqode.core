@@ -184,6 +184,10 @@ class InteractiveConsole(QTextEdit):
         else:
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
 
+    @property
+    def is_running(self):
+        return self._running
+
     def closeEvent(self, *args, **kwargs):
         if self.process.state() == QProcess.Running:
             self.process.terminate()
