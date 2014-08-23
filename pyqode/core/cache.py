@@ -21,7 +21,6 @@ better handled at the application level.
 import json
 import locale
 from pyqode.qt import QtCore
-from pyqode.core.api import encodings
 
 
 class Cache:
@@ -38,12 +37,14 @@ class Cache:
         menu/combobox.
 
         """
+        from pyqode.core.api import encodings
         return json.loads(self._settings.value(
             'userDefinedEncodings', '["%s"]' % encodings.convert_to_codec_key(
                 locale.getpreferredencoding())))
 
     @preferred_encodings.setter
     def preferred_encodings(self, value):
+        from pyqode.core.api import encodings
         lst = [encodings.convert_to_codec_key(v) for v in value]
         self._settings.setValue('userDefinedEncodings',
                                 json.dumps(list(set(lst))))
