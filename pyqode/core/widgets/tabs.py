@@ -70,6 +70,8 @@ class ClosableTabBar(QTabBar):
     """
     Custom QTabBar that can be closed using a mouse middle click.
     """
+    double_clicked = QtCore.Signal()
+
     def __init__(self, parent):
         QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
@@ -79,6 +81,9 @@ class ClosableTabBar(QTabBar):
         if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
                 event.pos()))
+
+    def mouseDoubleClickEvent(self, event):
+        self.double_clicked.emit()
 
 
 class TabWidget(QTabWidget):
