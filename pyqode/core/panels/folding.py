@@ -2,7 +2,6 @@
 """
 This module contains the marker panel
 """
-from enum import IntEnum
 import logging
 import os
 import sys
@@ -36,12 +35,6 @@ class FoldingPanel(Panel):
     trigger_state_changed = QtCore.Signal(QtGui.QTextBlock, bool)
     collapse_all_triggered = QtCore.Signal()
     expand_all_triggered = QtCore.Signal()
-    
-    class IconIndices(IntEnum):
-        COLLAPSED_OFF = 0
-        COLLAPSED_ON = 1
-        EXPANDED_OFF = 2
-        EXPANDED_ON = 3
 
     @property
     def native_look(self):
