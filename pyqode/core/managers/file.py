@@ -280,6 +280,7 @@ class FileManager(Manager):
         """
         Cache().set_cursor_position(
             self.path, TextHelper(self.editor).cursor_position())
+        self.editor._original_text = ''
         self.editor.clear()
         self._path = ''
         self.mimetype = ''
