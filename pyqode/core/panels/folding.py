@@ -2,6 +2,7 @@
 """
 This module contains the marker panel
 """
+from enum import IntEnum
 import logging
 import os
 import sys
@@ -35,6 +36,62 @@ class FoldingPanel(Panel):
     trigger_state_changed = QtCore.Signal(QtGui.QTextBlock, bool)
     collapse_all_triggered = QtCore.Signal()
     expand_all_triggered = QtCore.Signal()
+    
+    class IconIndices(IntEnum):
+        COLLAPSED_OFF = 0
+        COLLAPSED_ON = 1
+        EXPANDED_OFF = 2
+        EXPANDED_ON = 3
+
+    @property
+    def native_look(self):
+        """
+        Defines whether the panel will use native indicator icons and color or
+        use custom one.
+
+        If you want to use custom indicator icons and color, you must first
+        set this flag to False.
+        """
+        return self._native
+
+    @native_look.setter
+    def native_look(self, value):
+        self._native = value
+
+    @property
+    def custom_indicators_icons(self):
+        """
+        Gets/sets the custom icon for the fold indicators.
+
+        The list of indicators is interpreted as follow::
+
+            (COLLAPSED_OFF, COLLAPSED_ON, EXPANDED_OFF, EXPANDED_ON)
+
+        To use this property you must first set `native_look` to False.
+
+        :returns: tuple(str, str, str, str)
+        """
+        return self._custom_indicators
+
+    @custom_indicators_icons.setter
+    def custom_indicators_icons(self, value):
+        if len(value) != 4:
+            raise ValueError('The list of custom indicators must contains 4 '
+                             'strings')
+        self._custom_indicators = value
+
+    @property
+    def custom_fold_region_background(self):
+        """
+        Custom base color for the fold region background
+
+        :return: QColor
+        """
+        return self._custom_color
+
+    @custom_fold_region_background.setter
+    def custom_fold_region_background(self, value):
+        self._custom_color = value
 
     @property
     def highlight_caret_scope(self):
@@ -63,6 +120,14 @@ class FoldingPanel(Panel):
 
     def __init__(self, highlight_caret_scope=False):
         Panel.__init__(self)
+        self._native = True
+        self._custom_indicators = (
+            ':/pyqode-icons/rc/arrow_right_off.png',
+            ':/pyqode-icons/rc/arrow_right_on.png',
+            ':/pyqode-icons/rc/arrow_down_off.png',
+            ':/pyqode-icons/rc/arrow_down_on.png'
+        )
+        self._custom_color = QtGui.QColor('gray')
         self._block_nbr = -1
         self._highlight_caret = False
         self.highlight_caret_scope = highlight_caret_scope
@@ -180,9 +245,9 @@ class FoldingPanel(Panel):
 
         :param painter: The widget's painter.
         """
-        # c = self.__color
-        # if self.__native:
-        c = self.get_system_bck_color()
+        c = self._custom_color
+        if self._native:
+            c = self.get_system_bck_color()
         grad = QtGui.QLinearGradient(rect.topLeft(),
                                      rect.topRight())
         if sys.platform == 'darwin':
@@ -244,26 +309,35 @@ class FoldingPanel(Panel):
         :param collapsed: Whether the trigger is collapsed or not.
         :param painter: QPainter
         """
-        if os.environ['QT_API'].lower() != 'pyqt5':
-            opt = QtGui.QStyleOptionViewItemV2()
+        rect = QtCore.QRect(0, top, self.sizeHint().width(),
+                            self.sizeHint().height())
+        if self._native:
+            if os.environ['QT_API'].lower() != 'pyqt5':
+                opt = QtGui.QStyleOptionViewItemV2()
+            else:
+                opt = QtWidgets.QStyleOptionViewItem()
+            opt.rect = rect
+            opt.state = (QtWidgets.QStyle.State_Active |
+                         QtWidgets.QStyle.State_Item |
+                         QtWidgets.QStyle.State_Children)
+            if not collapsed:
+                opt.state |= QtWidgets.QStyle.State_Open
+            if mouse_over:
+                opt.state |= (QtWidgets.QStyle.State_MouseOver |
+                              QtWidgets.QStyle.State_Enabled |
+                              QtWidgets.QStyle.State_Selected)
+                opt.palette.setBrush(QtGui.QPalette.Window,
+                                     self.palette().highlight())
+            opt.rect.translate(-2, 0)
+            self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
+                                       opt, painter, self)
         else:
-            opt = QtWidgets.QStyleOptionViewItem()
-        opt.rect = QtCore.QRect(0, top, self.sizeHint().width(),
-                                self.sizeHint().height())
-        opt.state = (QtWidgets.QStyle.State_Active |
-                     QtWidgets.QStyle.State_Item |
-                     QtWidgets.QStyle.State_Children)
-        if not collapsed:
-            opt.state |= QtWidgets.QStyle.State_Open
-        if mouse_over:
-            opt.state |= (QtWidgets.QStyle.State_MouseOver |
-                          QtWidgets.QStyle.State_Enabled |
-                          QtWidgets.QStyle.State_Selected)
-            opt.palette.setBrush(QtGui.QPalette.Window,
-                                 self.palette().highlight())
-        opt.rect.translate(-2, 0)
-        self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
-                                   opt, painter, self)
+            index = 0
+            if not collapsed:
+                index = 2
+            if mouse_over:
+                index += 1
+            QtGui.QIcon(self._custom_indicators[index]).paint(painter, rect)
 
     def find_scope(self, block):
         """
