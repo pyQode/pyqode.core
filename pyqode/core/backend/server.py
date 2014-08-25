@@ -123,17 +123,24 @@ class JsonServer(socketserver.TCPServer):
                     return False
                 assert data['worker']
                 assert data['request_id']
-                assert data['data']
+                assert data['data'] is not None
                 worker = import_class(data['worker'])
                 if inspect.isclass(worker):
                     worker = worker()
                 print('worker: %r' % worker)
-                status, result = worker(data['data'])
-                response = {'request_id': data['request_id'],
-                            'status': status,
-                            'results': result}
-                print('sending response: %r' % response)
-                self.send(response)
+                print('data: %r' % data['data'])
+                ret_val = worker(data['data'])
+                try:
+                    status, result = ret_val
+                except TypeError:
+                    # nothing to send
+                    pass
+                else:
+                    response = {'request_id': data['request_id'],
+                                'status': status,
+                                'results': result}
+                    print('sending response: %r' % response)
+                    self.send(response)
             except:
                 print('error with data=%r' % data)
                 exc1, exc2, exc3 = sys.exc_info()
