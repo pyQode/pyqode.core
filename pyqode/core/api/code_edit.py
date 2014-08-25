@@ -395,20 +395,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.file.mimetype = mime_type
         self.file._encoding = encoding
-        for mode in self.modes:
-            if hasattr(mode, 'set_mime_type'):
-                try:
-                    _logger().debug('setting up lexer from mimetype: %s',
-                                    self.file.mimetype)
-                    mode.set_mime_type(self.file.mimetype)
-                except ValueError:
-                    _logger().exception(
-                        'Failed to set lexer from mimetype: %s',
-                        self.file.mimetype)
-                    _logger().debug('setting up lexer from file path: %s',
-                                    self.file.path)
-                    mode.set_lexer_from_filename(self.file.path)
-                break
         self._original_text = txt
         self._modified_lines.clear()
         import time

@@ -96,3 +96,7 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
+
+    def setPlainText(self, txt, mime_type, encoding):
+        self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+        super().setPlainText(txt, mime_type, encoding)
