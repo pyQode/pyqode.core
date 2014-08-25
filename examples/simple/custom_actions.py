@@ -34,7 +34,7 @@ def main():
     editor.action_duplicate_line.setText('DUPLICATE LINE')
 
     app.exec_()
-
+    editor.file.close()
     del editor
     del window
     del app

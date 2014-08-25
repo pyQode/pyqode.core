@@ -270,6 +270,7 @@ class TabWidget(QTabWidget):
 
     @staticmethod
     def _del_code_edit(code_edit):
+        code_edit.file.close()
         code_edit.backend.stop()
         code_edit.modes.clear()
         code_edit.panels.clear()
@@ -383,7 +384,10 @@ class TabWidget(QTabWidget):
             return name
 
     def _on_current_changed(self, index):
-        widget = self._widgets[index]
+        if index != -1:
+            widget = self._widgets[index]
+        else:
+            widget = None
         if self._current:
             # needed if the user set save_on_focus_out to True which change
             # the dirty flag
@@ -404,12 +408,12 @@ class TabWidget(QTabWidget):
         This method will emits tab_closed for the removed tab.
 
         """
-        QTabWidget.removeTab(self, index)
         widget = self._widgets.pop(index)
-        if widget == self._current:
-            self._current = None
         self.tab_closed.emit(widget)
         self._del_code_edit(widget)
+        QTabWidget.removeTab(self, index)
+        if widget == self._current:
+            self._current = None
 
     def _on_tab_close_requested(self, index):
         widget = self._widgets[index]

@@ -78,3 +78,34 @@ class Cache:
             map = {}
         map[path] = encoding
         self._settings.setValue('cachedFileEncodings', json.dumps(map))
+
+    def get_cursor_position(self, file_path):
+        """
+        Gets the cached cursor position for file_path
+
+        :param file_path: path of the file in the cache
+        :return Cached cursor position or (0, 0)
+        """
+        try:
+            map = json.loads(self._settings.value('cachedCursorPosition'))
+        except TypeError:
+            map = {}
+        try:
+            pos = map[file_path]
+        except KeyError:
+            pos = (0, 0)
+        return pos
+
+    def set_cursor_position(self, path, position):
+        """
+        Cache encoding for the specified file path.
+
+        :param path: path of the file to cache
+        :param position: cursor position to cache
+        """
+        try:
+            map = json.loads(self._settings.value('cachedCursorPosition'))
+        except TypeError:
+            map = {}
+        map[path] = position
+        self._settings.setValue('cachedCursorPosition', json.dumps(map))

@@ -75,6 +75,7 @@ def editor_open(path):
         @functools.wraps(func)
         def wrapper(editor, *args, **kwds):
             editor.file.open(path)
+            QTest.qWait(100)
             return func(editor, *args, **kwds)
         return wrapper
     return decorator
