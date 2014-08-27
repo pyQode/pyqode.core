@@ -4,7 +4,7 @@ which use your application's QSettings to store the list of recent files.
 
 """
 import os
-from pyqode.qt import QtCore, QtWidgets
+from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
 class RecentFilesManager(QtCore.QObject):
@@ -82,15 +82,26 @@ class MenuRecentFiles(QtWidgets.QMenu):
     clear_requested = QtCore.Signal()
 
     def __init__(self, parent, recent_files_manager=None,
-                 title='Recent files'):
+                 title='Recent files',
+                 icon_provider=QtWidgets.QFileIconProvider(),
+                 clear_icon=('edit-clear', '')):
         """
         :param organisation: name of your organisation as used for your own
                              QSettings
         :param application: name of your application as used for your own
                             QSettings
         :param parent: parent object
+
+        :param icon_provider: Object that provides icon based on the file path.
+        :type icon_provider: QtWidgets.QFileIconProvider
+
+        :param clear_icon: Clear action icon. This parameter is a tuple made up
+            of the icon theme name and the fallback icon path (from your
+            resources). Default is None, clear action has no icons.
         """
         super().__init__(title, parent)
+        self.icon_provider = icon_provider
+        self.clear_icon = clear_icon
         #: Recent files manager
         self.manager = recent_files_manager
         #: List of recent files actions
@@ -106,13 +117,19 @@ class MenuRecentFiles(QtWidgets.QMenu):
         for file in self.manager.get_recent_files():
             action = QtWidgets.QAction(self)
             action.setText(os.path.split(file)[1])
+            action.setToolTip(file)
+            action.setStatusTip(file)
             action.setData(file)
+            action.setIcon(self.icon_provider.icon(QtCore.QFileInfo(file)))
             action.triggered.connect(self._on_action_triggered)
             self.addAction(action)
             self.recent_files_actions.append(action)
         self.addSeparator()
         action_clear = QtWidgets.QAction('Clear list', self)
         action_clear.triggered.connect(self.clear_recent_files)
+        if self.clear_icon and len(self.clear_icon) == 2:
+            action_clear.setIcon(QtGui.QIcon.fromTheme(
+                self.clear_icon[0], QtGui.QIcon(self.clear_icon[1])))
         self.addAction(action_clear)
 
     def clear_recent_files(self):
