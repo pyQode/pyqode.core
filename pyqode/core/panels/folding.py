@@ -214,20 +214,19 @@ class FoldingPanel(Panel):
         :param block: Current block.
         :param painter: QPainter
         """
-        if not TextBlockHelper.get_fold_trigger_state(block):
-            r = folding.FoldScope(block)
-            th = TextHelper(self.editor)
-            start, end = r.get_range(ignore_blank_lines=True)
-            if start > 0:
-                top = th.line_pos_from_number(start)
-            else:
-                top = 0
-            bottom = th.line_pos_from_number(end + 1)
-            h = bottom - top
-            if h == 0:
-                h = self.sizeHint().height()
-            w = self.sizeHint().width()
-            self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
+        r = folding.FoldScope(block)
+        th = TextHelper(self.editor)
+        start, end = r.get_range(ignore_blank_lines=True)
+        if start > 0:
+            top = th.line_pos_from_number(start)
+        else:
+            top = 0
+        bottom = th.line_pos_from_number(end + 1)
+        h = bottom - top
+        if h == 0:
+            h = self.sizeHint().height()
+        w = self.sizeHint().width()
+        self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
 
     def _draw_rect(self, rect, painter):
         """
@@ -390,7 +389,7 @@ class FoldingPanel(Panel):
             d = TextDecoration(self.editor.document(),
                                start_line=parent_start, end_line=start)
             d.set_full_width(True, clear=False)
-            d.draw_order = 1
+            d.draw_order = 2
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -399,7 +398,7 @@ class FoldingPanel(Panel):
             d = TextDecoration(self.editor.document(),
                                start_line=end, end_line=parent_end + 1)
             d.set_full_width(True, clear=False)
-            d.draw_order = 1
+            d.draw_order = 2
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -474,11 +473,15 @@ class FoldingPanel(Panel):
             block = self.find_scope(
                 self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
+                if self._mouse_over_line is None:
+                    QtWidgets.QApplication.setOverrideCursor(
+                        QtGui.QCursor(QtCore.Qt.PointingHandCursor))
                 self._mouse_over_line = block.blockNumber()
                 self._highlight_surrounding_scopes(block)
                 self._highight_block = block
             else:
                 self._mouse_over_line = None
+                QtWidgets.QApplication.restoreOverrideCursor()
             self.repaint()
 
     def leaveEvent(self, event):
@@ -489,6 +492,7 @@ class FoldingPanel(Panel):
 
         """
         super().leaveEvent(event)
+        QtWidgets.QApplication.restoreOverrideCursor()
         if not self.highlight_caret_scope:
             self._clear_scope_decos()
             self._mouse_over_line = None
@@ -506,7 +510,7 @@ class FoldingPanel(Panel):
         deco = TextDecoration(block)
         deco.signals.clicked.connect(self._on_fold_deco_clicked)
         deco.tooltip = region.text(max_lines=25)
-        deco.draw_order = 2
+        deco.draw_order = 1
         deco.block = block
         deco.select_line()
         deco.set_outline(drift_color(
