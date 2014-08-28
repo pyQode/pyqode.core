@@ -471,7 +471,6 @@ class FoldingPanel(Panel):
         super().mouseMoveEvent(event)
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
-        print(line)
         if line >= 0:
             block = self.find_scope(
                 self.editor.document().findBlockByNumber(line))
