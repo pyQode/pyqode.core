@@ -369,13 +369,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.viewport().setCursor(cursor)
 
-    def show_tooltip(self, pos, tooltip):
+    def show_tooltip(self, pos, tooltip, _sender_deco=None):
         """
         Show a tool tip at the specified position
 
         :param pos: Tooltip position
         :param tooltip: Tooltip text
+
+        :param _sender_deco: TextDecoration which is the sender of the show
+            tooltip request. (for internal use only).
         """
+        if _sender_deco is not None and _sender_deco not in self.decorations:
+            return
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
 
     def clear(self):
@@ -715,7 +720,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                     pos.setY(pos.y() + self.panels.margin_size(0))
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
-                        self.mapToGlobal(pos), sel.tooltip[0: 1024])
+                        self.mapToGlobal(pos), sel.tooltip[0: 1024], sel)
                     self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
