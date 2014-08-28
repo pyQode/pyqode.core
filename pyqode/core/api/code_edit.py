@@ -629,6 +629,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QFocusEvent
         """
+        # fix a visual bug if the editor was resized while being hidden (
+        # e.g. a dock # widget has been resized and some editors were in a
+        # tab widget. Non visible editor have a visual bug where horizontal
+        # scroll bar range
+        #
+        TextHelper(self).mark_whole_doc_dirty()
+        s = self.size()
+        s.setWidth(s.width() + 1)
+        self.resizeEvent(QtGui.QResizeEvent(self.size(), s))
+
         self.focused_in.emit(event)
         super().focusInEvent(event)
         self.repaint()
