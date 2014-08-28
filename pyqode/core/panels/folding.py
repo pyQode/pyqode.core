@@ -478,9 +478,14 @@ class FoldingPanel(Panel):
                 if self._mouse_over_line is None:
                     QtWidgets.QApplication.setOverrideCursor(
                         QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-                self._mouse_over_line = block.blockNumber()
-                self._highlight_runner.request_job(
-                    self._highlight_surrounding_scopes, block)
+                if self._mouse_over_line != block.blockNumber() and \
+                        self._mouse_over_line is not None:
+                    self._mouse_over_line = block.blockNumber()
+                    self._highlight_surrounding_scopes(block)
+                else:
+                    self._mouse_over_line = block.blockNumber()
+                    self._highlight_runner.request_job(
+                        self._highlight_surrounding_scopes, block)
                 self._highight_block = block
             else:
                 self._highlight_runner.cancel_requests()
