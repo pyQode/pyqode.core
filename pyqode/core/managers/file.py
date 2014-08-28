@@ -167,7 +167,7 @@ class FileManager(Manager):
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
         self.opening = False
-        QtCore.QTimer.singleShot(1, self._restore_cached_pos)
+        self._restore_cached_pos()
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)

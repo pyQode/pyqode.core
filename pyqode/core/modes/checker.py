@@ -241,7 +241,10 @@ class CheckerMode(Mode, QtCore.QObject):
         usd = message.block.userData()
         try:
             if usd and usd.messages:
-                usd.messages.remove(message)
+                try:
+                    usd.messages.remove(message)
+                except ValueError:
+                    pass
         except AttributeError:
             pass
         self._messages.remove(message)
