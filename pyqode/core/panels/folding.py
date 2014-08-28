@@ -5,7 +5,8 @@ This module contains the marker panel
 import logging
 import os
 import sys
-from pyqode.core.api import TextBlockHelper, folding, TextDecoration
+from pyqode.core.api import TextBlockHelper, folding, TextDecoration, \
+    DelayJobRunner
 from pyqode.core.api.folding import FoldScope
 from pyqode.core.api.panel import Panel
 from pyqode.qt import QtCore, QtWidgets, QtGui
@@ -141,6 +142,7 @@ class FoldingPanel(Panel):
         self.action_collapse_all = None
         self.action_expand_all = None
         self._original_background = None
+        self._highlight_runner = DelayJobRunner(delay=100)
 
     def on_install(self, editor):
         """
@@ -190,7 +192,7 @@ class FoldingPanel(Panel):
         super().paintEvent(event)
         painter = QtGui.QPainter(self)
         # Draw background over the selected non collapsed fold region
-        if self._mouse_over_line:
+        if self._mouse_over_line is not None:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line)
             try:
@@ -469,7 +471,8 @@ class FoldingPanel(Panel):
         super().mouseMoveEvent(event)
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
-        if line:
+        print(line)
+        if line >= 0:
             block = self.find_scope(
                 self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
@@ -477,9 +480,11 @@ class FoldingPanel(Panel):
                     QtWidgets.QApplication.setOverrideCursor(
                         QtGui.QCursor(QtCore.Qt.PointingHandCursor))
                 self._mouse_over_line = block.blockNumber()
-                self._highlight_surrounding_scopes(block)
+                self._highlight_runner.request_job(
+                    self._highlight_surrounding_scopes, block)
                 self._highight_block = block
             else:
+                self._highlight_runner.cancel_requests()
                 self._mouse_over_line = None
                 QtWidgets.QApplication.restoreOverrideCursor()
             self.repaint()
@@ -493,6 +498,7 @@ class FoldingPanel(Panel):
         """
         super().leaveEvent(event)
         QtWidgets.QApplication.restoreOverrideCursor()
+        self._highlight_runner.cancel_requests()
         if not self.highlight_caret_scope:
             self._clear_scope_decos()
             self._mouse_over_line = None
@@ -539,7 +545,7 @@ class FoldingPanel(Panel):
                 self._block_decos.remove(deco)
                 self.editor.decorations.remove(deco)
                 del deco
-            if self._mouse_over_line:
+            if self._mouse_over_line is not None:
                 self._add_scope_decorations(
                     region._trigger, *region.get_range())
         else:
@@ -552,7 +558,7 @@ class FoldingPanel(Panel):
 
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
-        if self._mouse_over_line:
+        if self._mouse_over_line is not None:
             block = self.editor.document().findBlockByNumber(
                 self._mouse_over_line)
             self.toggle_fold_trigger(block)
