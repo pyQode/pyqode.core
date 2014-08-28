@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setup_recent_files_menu(self):
         """ Setup the recent files menu and manager """
         self.recent_files_manager = widgets.RecentFilesManager(
-            'pyqode', 'notepad')
+            'pyQode', 'notepad')
         self.menu_recents = widgets.MenuRecentFiles(
             self.menuFile, title='Recents',
             recent_files_manager=self.recent_files_manager)
