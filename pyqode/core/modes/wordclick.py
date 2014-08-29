@@ -15,6 +15,11 @@ class WordClickMode(Mode, QtCore.QObject):
     It will highlight the click-able word when the user press control and move
     the mouse over a word.
 
+    Detecting whether a word is click-able is the responsability of the
+    subclasses. You must override ``_check_word_cursor`` and call
+    ``_select_word_cursor`` if this is a click-able word (this
+    process might be asynchrone) otherwise _clear_selection.
+
     :attr:`pyqode.core.modes.WordClickMode.word_clicked` is emitted
     when the word is clicked by the user (while keeping control pressed).
     """
@@ -28,6 +33,7 @@ class WordClickMode(Mode, QtCore.QObject):
         self._previous_cursor_start = -1
         self._previous_cursor_end = -1
         self._deco = None
+        self._cursor = None
 
     def on_state_changed(self, state):
         """
@@ -41,7 +47,7 @@ class WordClickMode(Mode, QtCore.QObject):
             self.editor.mouse_moved.disconnect(self._on_mouse_moved)
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
 
-    def _select_word_under_mouse_cursor(self):
+    def _select_word_cursor(self):
         """ Selects the word under the mouse cursor. """
         cursor = TextHelper(self.editor).word_under_mouse_cursor()
         if (self._previous_cursor_start != cursor.selectionStart() and
@@ -51,15 +57,28 @@ class WordClickMode(Mode, QtCore.QObject):
         self._previous_cursor_start = cursor.selectionStart()
         self._previous_cursor_end = cursor.selectionEnd()
 
+    def _clear_selection(self):
+        try:
+            self._remove_decoration()
+        except ValueError:
+            pass
+        self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
+        self._previous_cursor_start = -1
+        self._previous_cursor_end = -1
+
     def _on_mouse_moved(self, event):
         """ mouse moved callback """
         if event.modifiers() & QtCore.Qt.ControlModifier:
-            self._select_word_under_mouse_cursor()
+            cursor = TextHelper(self.editor).word_under_mouse_cursor()
+            if not self._cursor or cursor.position() != self._cursor.position():
+                self._check_word_cursor(cursor)
+            self._cursor = cursor
         else:
-            self._remove_decoration()
-            self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
-            self._previous_cursor_start = -1
-            self._previous_cursor_end = -1
+            self._cursor = None
+            self._clear_selection()
+
+    def _check_word_under_mouse_cursor(self, cursor):
+        raise NotImplementedError()
 
     def _on_mouse_pressed(self, event):
         """ mouse pressed callback """
