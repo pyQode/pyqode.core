@@ -156,7 +156,7 @@ class TextHelper:
             # unfold parent fold trigger if the block is collapsed
             try:
                 folding_panel = self._editor.panels.get('FoldingPanel')
-            except AttributeError:
+            except KeyError:
                 pass
             else:
                 if not block.isVisible() or TextBlockHelper.is_fold_trigger(
