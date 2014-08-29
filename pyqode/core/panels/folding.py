@@ -333,7 +333,8 @@ class FoldingPanel(Panel):
                 index += 1
             QtGui.QIcon(self._custom_indicators[index]).paint(painter, rect)
 
-    def find_scope(self, block):
+    @staticmethod
+    def find_parent_scope(block):
         """
         Find parent scope, if the block is not a fold trigger.
 
@@ -472,7 +473,7 @@ class FoldingPanel(Panel):
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
         if line >= 0:
-            block = self.find_scope(
+            block = self.find_parent_scope(
                 self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
                 if self._mouse_over_line is None:
@@ -719,7 +720,7 @@ class FoldingPanel(Panel):
         """
         Toggle the current fold trigger.
         """
-        block = self.find_scope(self.editor.textCursor().block())
+        block = self.find_parent_scope(self.editor.textCursor().block())
         self.toggle_fold_trigger(block)
 
     def _on_action_collapse_all_triggered(self):
@@ -745,7 +746,7 @@ class FoldingPanel(Panel):
         cursor = self.editor.textCursor()
         block_nbr = cursor.blockNumber()
         if self._block_nbr != block_nbr:
-            block = self.find_scope(self.editor.textCursor().block())
+            block = self.find_parent_scope(self.editor.textCursor().block())
             try:
                 s = FoldScope(block)
             except ValueError:
