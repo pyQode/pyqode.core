@@ -83,13 +83,13 @@ class InteractiveConsole(QTextEdit):
     def _on_stdout(self):
         txt = bytes(self.process.readAllStandardOutput()).decode(
             locale.getpreferredencoding())
-        logging.debug('stdout ready: %s', txt)
+        _logger().debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
         txt = bytes(self.process.readAllStandardError()).decode(
             locale.getpreferredencoding())
-        logging.debug('stderr ready: %s', txt)
+        _logger().debug('%s', txt)
         self._writer(self, txt, self.stderr_color)
 
     @property
