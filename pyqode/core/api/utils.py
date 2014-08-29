@@ -62,66 +62,6 @@ def drift_color(base_color, factor=110):
             return base_color.lighter(factor + 10)
 
 
-class TextStyle(object):
-    """
-    Helper class to define a text format. This class has methods to set the
-    text style from a string and to easily be created from a string, making
-    serialisation extremely easy.
-
-    A text style is made up of a text color and a series of text attributes:
-
-        - bold/nbold
-        - italic/nitalic
-        - underlined/nunderlined.
-
-    Example of usage::
-
-        style = TextStyle('#808000 nbold nitalic nunderlined')
-        print(style)  #should print '#808000 nbold nitalic nunderlined'
-
-    """
-
-    def __init__(self, style=None):
-        """
-        :param style: The style string ("#rrggbb [bold] [italic] [underlined])
-        """
-        self.color = QtGui.QColor()
-        self.bold = False
-        self.italic = False
-        self.underlined = False
-        if style:
-            self.from_string(style)
-
-    def __repr__(self):
-        color = self.color.name()
-        bold = "nbold"
-        if self.bold:
-            bold = "bold"
-        italic = "nitalic"
-        if self.italic:
-            italic = "italic"
-        underlined = "nunderlined"
-        if self.underlined:
-            underlined = "underlined"
-        return " ".join([color, bold, italic, underlined])
-
-    @memoized
-    def from_string(self, string):
-        """ Makes TextStyles from a string """
-        tokens = string.split(" ")
-        assert len(tokens) == 4
-        self.color = QtGui.QColor(tokens[0])
-        self.bold = False
-        if tokens[1] == "bold":
-            self.bold = True
-        self.italic = False
-        if tokens[2] == "italic":
-            self.italic = True
-        self.underlined = False
-        if tokens[3] == "underlined":
-            self.underlined = True
-
-
 class DelayJobRunner(object):
     """
     Utility class for running job after a certain delay. If a new request is

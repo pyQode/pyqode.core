@@ -35,19 +35,6 @@ def test_drift_color():
            QtGui.QColor("#161616").name()
 
 
-def test_text_style():
-    s = utils.TextStyle()
-    s = utils.TextStyle('#808000 bold italic underlined')
-    assert s.color.name() == '#808000'
-    assert s.bold
-    assert s.italic
-    assert s.underlined
-    s = utils.TextStyle('#808000 nbold nitalic nunderlined')
-    assert not s.bold
-    assert not s.italic
-    assert not s.underlined
-
-
 editor = None
 
 
