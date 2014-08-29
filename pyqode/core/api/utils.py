@@ -159,9 +159,11 @@ class TextHelper:
             except AttributeError:
                 pass
             else:
-                if not block.isVisible():
-                    folding_panel.toggle_fold_trigger(
-                        folding_panel.find_parent_scope(block))
+                if not block.isVisible() or TextBlockHelper.is_fold_trigger(
+                        block):
+                    block = folding_panel.find_parent_scope(block)
+                    if TextBlockHelper.get_fold_trigger_state(block):
+                        folding_panel.toggle_fold_trigger(block)
             self._editor.setTextCursor(text_cursor)
         return text_cursor
 
