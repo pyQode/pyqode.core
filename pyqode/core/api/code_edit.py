@@ -925,6 +925,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         p.setColor(QtGui.QPalette.Text, self.foreground)
         p.setColor(QtGui.QPalette.Highlight, self.selection_background)
         p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
+        if QtWidgets.QApplication.instance().styleSheet():
+            print('Set STYLESHEET')
+            self.setStyleSheet(
+            '''
+            QPlainTextEdit
+            {
+                background-color: %s;
+                color: %s;
+            }
+            ''' % (self.background.name(), self.foreground.name()))
+        else:
+            self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()
 
