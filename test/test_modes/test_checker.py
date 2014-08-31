@@ -95,6 +95,7 @@ def test_add_messages(editor):
 @preserve_editor_config
 def test_remove_message(editor):
     mode = get_mode(editor)
+    QTest.qWait(1000)
     mode.clear_messages()
     status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
               modes.CheckerMessages.INFO]
