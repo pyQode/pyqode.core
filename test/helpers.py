@@ -104,6 +104,7 @@ def preserve_style(func):
         finally:
             editor.font_name = 'Source Code Pro'
             editor.font_size = 10
+            editor.reset_zoom()
         return ret
     return wrapper
 

@@ -137,9 +137,24 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._reset_stylesheet()
 
     @property
+    def zoom_level(self):
+        """
+        Gets/Sets the editor zoom level.
+
+        The zoom level is a value that is added to the current editor font
+        size. Negative values are used to zoom  out the editor, positive values
+        are used to zoom in the editor.
+        """
+        return self._zoom_level
+
+    @zoom_level.setter
+    def zoom_level(self, value):
+        self._zoom_level = value
+
+    @property
     def font_size(self):
         """
-        The editor font size.
+        The editor current font size.
         """
         return self._font_size
 
@@ -294,6 +309,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
+        self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)
@@ -314,6 +330,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._foreground = None
         self._sel_foreground = None
         self._tab_length = 4
+        self._zoom_level = 0
         self._font_size = 10
         self._background = None
         QtGui.QFontDatabase.addApplicationFont(
@@ -489,7 +506,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         Resets the zoom value.
         """
-        self._font_size = 10
+        self._zoom_level = 0
         self._reset_stylesheet()
 
     @QtCore.Slot()
@@ -503,7 +520,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged.
         """
-        self._font_size += increment
+        self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
@@ -518,9 +535,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged and trigger an update.
         """
-        self._font_size -= increment
-        if self._font_size <= 0:
-            self._font_size = increment
+        self.zoom_level -= increment
+        if abs(self.zoom_level) >= self._font_size:
+            self.zoom_level = -self._font_size + 1
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
@@ -919,7 +936,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
-        self.setFont(QtGui.QFont(self._font_family, self._font_size))
+        self.setFont(QtGui.QFont(self._font_family, self._font_size + self._zoom_level))
         p = self.palette()
         p.setColor(QtGui.QPalette.Base, self.background)
         p.setColor(QtGui.QPalette.Text, self.foreground)
