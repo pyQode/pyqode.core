@@ -5,6 +5,9 @@ This module contains the file helper implementation
 import locale
 import logging
 import mimetypes
+# needed on windows
+mimetypes.add_type('text/x-python', '.py')
+mimetypes.add_type('text/xml', '.ui')
 import os
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
@@ -100,8 +103,9 @@ class FileManager(Manager):
         :param path: path of the file
         :return: the corresponding mime type.
         """
-        _logger().debug('detecting mimetype for %s', path)
-        mimetype = mimetypes.guess_type(path)[0]
+        filename = os.path.split(path)[1]
+        _logger().debug('detecting mimetype for %s', filename)
+        mimetype = mimetypes.guess_type(filename)[0]
         if mimetype is None:
             mimetype = 'text/x-plain'
         _logger().debug('mimetype detected: %s', mimetype)

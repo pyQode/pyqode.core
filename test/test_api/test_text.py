@@ -133,7 +133,7 @@ def test_line_nbr_from_position(editor):
 @editor_open(__file__)
 @log_test_name
 def test_open_file(editor):
-    editor.file.open(__file__)
+    editor.file.open(__file__, 'text/x-python')
     assert editor.file.path == __file__
     assert editor.file.mimetype == 'text/x-python'
 
@@ -251,8 +251,6 @@ def test_to_lower(editor):
 @editor_open(__file__)
 @log_test_name
 def test_search_text(editor):
-    import os.path
-    editor.file.open(os.path.__file__)
     occurences, index = TextHelper(editor).search_text(
         editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
@@ -277,8 +275,6 @@ def test_keep_tc(editor):
 @log_test_name
 def test_get_mimetype(editor):
     from pyqode.core import managers
-    mimetypes.add_type('text/x-python', '.py')
-    mimetypes.add_type('text/xml', '.ui')
     assert managers.FileManager.get_mimetype('file.py') == 'text/x-python'
     assert managers.FileManager.get_mimetype('file.ui') == 'text/xml'
     assert managers.FileManager.get_mimetype('file.foo') == 'text/x-plain'
