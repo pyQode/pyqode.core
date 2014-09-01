@@ -68,6 +68,10 @@ class RecentFilesManager(QtCore.QObject):
         self._settings.setValue('recentFiles', files)
         self.updated.emit()
 
+    def last_file(self):
+        files = self.get_recent_files()
+        return files[0]
+
 
 class MenuRecentFiles(QtWidgets.QMenu):
     """
