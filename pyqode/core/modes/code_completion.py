@@ -127,7 +127,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 return False
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
-                                      helper.current_line_nbr(),
+                                      helper.current_line_nbr() + 1,
                                       helper.current_column_nbr() -
                                       len(self.completion_prefix),
                                       self.editor.file.path,
