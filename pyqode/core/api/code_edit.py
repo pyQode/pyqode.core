@@ -1,4 +1,5 @@
 import logging
+import platform
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
@@ -942,17 +943,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         p.setColor(QtGui.QPalette.Text, self.foreground)
         p.setColor(QtGui.QPalette.Highlight, self.selection_background)
         p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
-        if QtWidgets.QApplication.instance().styleSheet():
-            print('Set STYLESHEET')
-            self.setStyleSheet(
-            '''
-            QPlainTextEdit
+        if QtWidgets.QApplication.instance().styleSheet() or (
+                hasattr(self, '_flg_stylesheet') and
+                platform.system() == 'Windows'):
+            # on windows, if the application once had a stylesheet, we must
+            # keep on using a stylesheet otherwise strange colors appear
+            # see https://github.com/OpenCobolIDE/OpenCobolIDE/issues/65
+            self._flg_stylesheet = True
+            self.setStyleSheet('''QPlainTextEdit
             {
                 background-color: %s;
                 color: %s;
             }
             ''' % (self.background.name(), self.foreground.name()))
         else:
+            # on linux/osx we just have to set an empty stylesheet to cancel
+            # any previous stylesheet and still keep a correct style for scrollbars
             self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()
