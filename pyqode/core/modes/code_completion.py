@@ -127,7 +127,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 return False
             self._request_cnt += 1
             self._collect_completions(self.editor.toPlainText(),
-                                      helper.current_line_nbr() + 1,
+                                      helper.current_line_nbr(),
                                       helper.current_column_nbr() -
                                       len(self.completion_prefix),
                                       self.editor.file.path,
@@ -255,7 +255,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
         if self._completer.popup().isVisible():
             # Update completion prefix
-            if text_to_cursor[-1] in self.editor.word_separators:
+            if len(text_to_cursor) and \
+                    text_to_cursor[-1] in self.editor.word_separators:
                 # move out of the current work
                 self._hide_popup()
             else:
