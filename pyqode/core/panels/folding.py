@@ -388,7 +388,7 @@ class FoldingPanel(Panel):
         """
         color = drift_color(base_color, factor=factor)
         # upper part
-        if start >= 0:
+        if start > 0:
             d = TextDecoration(self.editor.document(),
                                start_line=parent_start, end_line=start)
             d.set_full_width(True, clear=False)
