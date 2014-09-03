@@ -372,7 +372,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
-        self.setCenterOnScroll(True)
+        self.setCenterOnScroll(False)
         self.setLineWrapMode(self.NoWrap)
 
     def __del__(self):
