@@ -324,6 +324,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
+        nav_key = self._is_navigation_key(event)
+        mod = QtCore.Qt.ControlModifier
+        ctrl = int(event.modifiers() & mod) == mod
         # complete
         if (event.key() == QtCore.Qt.Key_Enter or
                 event.key() == QtCore.Qt.Key_Return or
@@ -333,9 +336,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
-              event.key() == QtCore.Qt.Key_Backtab):
+              event.key() == QtCore.Qt.Key_Backtab or
+              nav_key and ctrl):
             self._hide_popup()
-            event.accept()
+        # move into list
         elif event.key() == QtCore.Qt.Key_Home:
             self._show_popup(index=0)
             event.accept()
