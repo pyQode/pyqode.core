@@ -22,6 +22,7 @@ class AutoCompleteMode(Mode):
     def __init__(self):
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        self._ignore_post = False
 
     def on_state_changed(self, state):
         if state:
@@ -32,7 +33,7 @@ class AutoCompleteMode(Mode):
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_post_key_pressed(self, event):
-        if not event.isAccepted():
+        if not event.isAccepted() and not self._ignore_post:
             txt = event.text()
             next_char = TextHelper(self.editor).get_right_character()
             if txt in self.MAPPING:
@@ -41,9 +42,13 @@ class AutoCompleteMode(Mode):
                         next_char in self.MAPPING.values() or
                         next_char.isspace()):
                     TextHelper(self.editor).insert_text(to_insert)
+        self._ignore_post = False
 
     def _on_key_pressed(self, event):
         txt = event.text()
+        if self.editor.textCursor().hasSelection():
+            self._ignore_post = True
+            return
         next_char = TextHelper(self.editor).get_right_character()
         self.logger.debug('next char: %s', next_char)
         ignore = False
