@@ -241,7 +241,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self._is_shortcut(event):
             return
         if (event.key() == QtCore.Qt.Key_Home or
-                event.key() == QtCore.Qt.Key_End):
+                event.key() == QtCore.Qt.Key_End or
+                event.key() == QtCore.Qt.Key_Shift):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
@@ -249,12 +250,23 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         is_end_of_word = self._is_end_of_word_char(
             event, is_printable, symbols, self.editor.word_separators)
         cursor = self._helper.word_under_cursor()
-        cursor.setPosition(cursor.position())
+        cpos = cursor.position()
+        cursor.setPosition(cpos)
         cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
         text_to_cursor = cursor.selectedText()
+        cursor.setPosition(cpos)
+        cursor.movePosition(cursor.EndOfLine, cursor.KeepAnchor)
 
         if self._completer.popup().isVisible():
-            self._update_prefix(event, is_end_of_word, is_navigation_key)
+            # cursor moved out of the current word (just before the word
+            # is considered as still being in the word).
+            # print(has_text_after_cursor, cursor.atBlockEnd())
+            if (len(text_to_cursor) and
+                    text_to_cursor[-1] in self.editor.word_separators and
+                    not text_to_cursor[-1].isspace()):
+                self._hide_popup()
+            else:
+                self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
                 self._cancel_next = self._request_cnt
