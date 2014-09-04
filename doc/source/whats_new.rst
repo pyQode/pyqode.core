@@ -9,44 +9,23 @@ For more specific details about what is planned and what has been
 accomplished, please visit the `issues page on github`_ and the
 :doc:`changelog </changelog>`, respectively.
 
-2.1.0
+2.2.0
 -----
 
-The 2.1 version brings back the code folding panel and API (the new API is
-faster and a lot more stable than the previous one, it also allows more
-features such as parent scopes highlighting, docstring and imports folding
-for python,...)
+This is mainly a bug fix version but it introduces a possible backward
+incompatible change. We changed a confusing internal convention where line
+numbers are 1 based and column number 0 based. Now both line and column numbers
+are 0 based. This change has been done in order to make integrating pyqode
+in other application an easier task. This follow the Qt Text API convention.
+The only API concerned by this changed is the TextHelper API. If you were not
+using TextHelper, this change won't impact your code. Otherwise you will have
+to update all the line numbers arguments to be 0 based.
 
-The other major new feature is that pyqode now provides an API for handling
-encoding errors. We removed automatic charset detection and gives the user some
-means to reload an editor with another encoding. The new encoding panel or the
-encodings dialog can be used for that purpose.
+The only real new feature is caching of cursor position. We you re-open a document,
+pyqode will try to move the cursor to the last stored position.
 
-
-We also improved existing modes and panels:
-
-  - the syntax highlighter has been reviewed, it is now possible to use
-    pygments styles for native highlighters. Native highlighters are also faster
-    than before.
-  - improved checker modes: there is no more limitation for the number of
-    messages and the mode does remove only the message that have disappeared
-    from the linter's results. There is a new panel dedicated to rendering
-    checker panels (MarkerPanel is now a general purpose icon panel, e.g. to
-    draw breakpoints or bookmarks).
-
-
-We also fixed quite a lots of small minor bugs (such as wrong cursor position after
-duplicate line,...).
-
-To make your life easier (at least when you're starting with pyqode) we added
-some premade editors:
-
-   - TextCodeEdit: simple code edit specialised for plain text (pretty fast
-     for long files such as log files,...)
-   - GenericCodeEdit: generic code edit with basic support for a lots of
-                      languages but much slower and lot less smarted than a
-                      dedicated code edit.
-
+On top of that, we spend sometime polishing the widget and we added a few new
+signals and methods to the API.
 
 Next Version
 ------------

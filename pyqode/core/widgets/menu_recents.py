@@ -87,7 +87,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
 
     def __init__(self, parent, recent_files_manager=None,
                  title='Recent files',
-                 icon_provider=QtWidgets.QFileIconProvider(),
+                 icon_provider=None,
                  clear_icon=('edit-clear', '')):
         """
         :param organisation: name of your organisation as used for your own
@@ -104,7 +104,10 @@ class MenuRecentFiles(QtWidgets.QMenu):
             resources). Default is None, clear action has no icons.
         """
         super().__init__(title, parent)
-        self.icon_provider = icon_provider
+        if icon_provider is None:
+            self.icon_provider = QtWidgets.QFileIconProvider()
+        else:
+            self.icon_provider = icon_provider
         self.clear_icon = clear_icon
         #: Recent files manager
         self.manager = recent_files_manager
