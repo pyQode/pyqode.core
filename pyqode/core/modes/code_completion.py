@@ -256,14 +256,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         text_to_cursor = cursor.selectedText()
         cursor.setPosition(cpos)
         cursor.movePosition(cursor.EndOfLine, cursor.KeepAnchor)
+        text_after_cursor = cursor.selectedText()
 
         if self._completer.popup().isVisible():
-            # cursor moved out of the current word (just before the word
-            # is considered as still being in the word).
-            # print(has_text_after_cursor, cursor.atBlockEnd())
-            if (len(text_to_cursor) and
-                    text_to_cursor[-1] in self.editor.word_separators and
-                    not text_to_cursor[-1].isspace()):
+            # hide popup if the user is moving the cursor out of the current
+            # word boundaries.
+            if (len(text_after_cursor) and is_navigation_key and
+                    text_after_cursor[0] in self.editor.word_separators and
+                    not text_after_cursor[0].isspace()):
                 self._hide_popup()
             else:
                 self._update_prefix(event, is_end_of_word, is_navigation_key)
