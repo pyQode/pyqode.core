@@ -21,6 +21,8 @@ New features:
       automatically when you move the cursor out of the word boundaries)
 
 Fixed bugs:
+    - fix confusing convention: now both line numbers and column numbers starts
+      from 0
     - fix a few issues with code folding (corner cases such as indicator on
       first line not highlighted,...)
     - fix potential circular import with the cache module
