@@ -29,6 +29,12 @@ Backend:
 .. literalinclude:: /../../examples/simple/server.py
    :linenos:
 
+Please note the the frontend script must be run with **python 3**. We do not
+support python 2 for the frontend anymore but the backend must still be able
+to be run with python 2 in order to support python 2 code completion and
+linting in the editor (this is true only for pyqode.core and pyqode.python,
+other languages such as cobol do not care about python 2 compatibility...)
+
 Custom actions
 --------------
 
