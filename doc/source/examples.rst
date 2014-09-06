@@ -46,8 +46,8 @@ shortcut and the text of the ``duplicate lines`` actions.
 .. literalinclude:: /../../examples/simple/custom_actions.py
    :linenos:
 
-Custom actions
---------------
+Change editor properties
+------------------------
 
 This example show you how to change some editor properties. Here we modify
 the pygments color scheme.
