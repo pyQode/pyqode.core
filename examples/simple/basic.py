@@ -43,6 +43,7 @@ def main():
     # run
     window.show()
     app.exec_()
+    editor.file.close()
 
 
 if __name__ == "__main__":

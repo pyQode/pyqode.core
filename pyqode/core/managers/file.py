@@ -5,12 +5,15 @@ This module contains the file helper implementation
 import locale
 import logging
 import mimetypes
+# needed on windows
+mimetypes.add_type('text/x-python', '.py')
+mimetypes.add_type('text/xml', '.ui')
 import os
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
 from pyqode.qt import QtCore, QtGui, QtWidgets
-from pyqode.core.settings import Settings
+from pyqode.core.cache import Cache
 
 
 def _logger():
@@ -100,8 +103,9 @@ class FileManager(Manager):
         :param path: path of the file
         :return: the corresponding mime type.
         """
-        _logger().debug('detecting mimetype for %s', path)
-        mimetype = mimetypes.guess_type(path)[0]
+        filename = os.path.split(path)[1]
+        _logger().debug('detecting mimetype for %s', filename)
+        mimetype = mimetypes.guess_type(filename)[0]
         if mimetype is None:
             mimetype = 'text/x-plain'
         _logger().debug('mimetype detected: %s', mimetype)
@@ -133,7 +137,7 @@ class FileManager(Manager):
         if encoding is None:
             encoding = locale.getpreferredencoding()
         self.opening = True
-        settings = Settings()
+        settings = Cache()
         self._path = path
         # get encoding from cache
         if use_cached_encoding:
@@ -166,8 +170,12 @@ class FileManager(Manager):
             self.editor.setPlainText(
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
-            self.editor.setWindowTitle(self.editor.file.name)
         self.opening = False
+        self._restore_cached_pos()
+
+    def _restore_cached_pos(self):
+        pos = Cache().get_cursor_position(self.path)
+        TextHelper(self.editor).goto_line(pos[0], pos[1])
 
     def reload(self, encoding):
         """
@@ -249,7 +257,7 @@ class FileManager(Manager):
             raise e
         else:
             _logger().debug('save to temp file succeeded')
-            Settings().set_file_encoding(path, encoding)
+            Cache().set_file_encoding(path, encoding)
             self._encoding = encoding
             # remove path and rename temp file
             _logger().debug('rename %s to %s', tmp_path, path)
@@ -274,6 +282,9 @@ class FileManager(Manager):
             - reset file attributes to their default values
 
         """
+        Cache().set_cursor_position(
+            self.path, TextHelper(self.editor).cursor_position())
+        self.editor._original_text = ''
         self.editor.clear()
         self._path = ''
         self.mimetype = ''

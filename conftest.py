@@ -26,15 +26,16 @@ except ImportError:
 # -------------------
 def pytest_runtest_setup(item):
     """
-    Skips tesks marker with a ``skip_on_travis`` marker.
+    Display test method name in active window title bar
     """
-    if isinstance(item, item.Function):
-        travis_platform = True if 'TRAVIS' in os.environ else False
-        if travis_platform and item.get_marker('skip_on_travis'):
-            pytest.skip("test skipped when ran on Travis-CI: %r" % item)
-        else:
-            logging.info("------------------- %s -------------------",
-                         item)
+    global _widget
+    module, line, method = item.location
+    module = module.replace('.py', '.')
+    title = module + method
+    widgets = QApplication.instance().topLevelWidgets()
+    for w in widgets:
+        w.setWindowTitle(title)
+    logging.info("------------------- %s -------------------", title)
 
 
 # -------------------

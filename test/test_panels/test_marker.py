@@ -65,7 +65,7 @@ def test_mouse_press(editor):
     marker = panels.Marker(1, icon=':/pyqode-icons/rc/edit-undo.png',
                            description='Marker description')
     panel.add_marker(marker)
-    y_pos = TextHelper(editor).line_pos_from_number(1)
+    y_pos = TextHelper(editor).line_pos_from_number(0)
     QTest.mousePress(panel, QtCore.Qt.RightButton, QtCore.Qt.NoModifier,
                      QtCore.QPoint(1000, 1000))
     QTest.mousePress(panel, QtCore.Qt.RightButton, QtCore.Qt.NoModifier,
@@ -79,7 +79,7 @@ def test_mouse_move(editor):
     marker = panels.Marker(1, icon=':/pyqode-icons/rc/edit-undo.png',
                            description='Marker description')
     panel.add_marker(marker)
-    y_pos = TextHelper(editor).line_pos_from_number(1)
-    QTest.mouseMove(panel, QtCore.QPoint(3, y_pos ))
+    y_pos = TextHelper(editor).line_pos_from_number(0)
+    QTest.mouseMove(panel, QtCore.QPoint(3, y_pos))
     QTest.qWait(1000)
     QTest.mouseMove(panel, QtCore.QPoint(1000, 1000))

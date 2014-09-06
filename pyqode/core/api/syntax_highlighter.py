@@ -94,7 +94,7 @@ class ColorScheme:
             if style == 'qt' or not style:
                 from pyqode.core.styles.qt import QtStyle
                 style = QtStyle
-            elif style == 'darcular':
+            elif style == 'darcula':
                 from pyqode.core.styles.darcula import DarculaStyle
                 style = DarculaStyle
         self._load_formats_from_style(style)

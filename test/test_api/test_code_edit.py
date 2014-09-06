@@ -107,20 +107,21 @@ def test_margin_size(editor):
 @preserve_style
 @log_test_name
 def test_zoom(editor):
-    assert editor.font_size == 10
+    assert editor.zoom_level == 0
     editor.zoom_in()
-    assert editor.font_size == 11
+    assert editor.zoom_level == 1
     editor.reset_zoom()
-    assert editor.font_size == 10
+    assert editor.zoom_level == 0
     editor.zoom_out()
-    assert editor.font_size == 9
+    assert editor.zoom_level == -1
 
-    while editor.font_size > 1:
+    while abs(editor.zoom_level) < editor.font_size - 1:
         editor.zoom_out()
-        if editor.font_size == 1:
+        if abs(editor.zoom_level) >= editor.font_size:
+            lvl = editor.zoom_level
             editor.zoom_out()
-            assert editor.font_size == 1
-
+            # cannot unzoom any more
+            assert editor.zoom_level == lvl
 
 def get_first_line(editor):
     return editor.toPlainText().splitlines()[0]
@@ -130,7 +131,7 @@ def get_first_line(editor):
 @log_test_name
 def test_indent(editor):
     editor.modes.get(modes.IndenterMode).enabled = False
-    TextHelper(editor).goto_line(1, move=True)
+    TextHelper(editor).goto_line(0, move=True)
     first_line = get_first_line(editor)
     editor.indent()
     # no indenter mode -> indent should not do anything
@@ -139,8 +140,7 @@ def test_indent(editor):
     assert get_first_line(editor) == first_line
     # append indenter mode, call to indent/un_indent should now work
     editor.modes.get(modes.IndenterMode).enabled = True
-    TextHelper(editor).goto_line(1)
-    TextHelper(editor).goto_line(1)
+    TextHelper(editor).goto_line(0)
     editor.indent()
     assert get_first_line(editor) == '    ' + first_line
     editor.un_indent()

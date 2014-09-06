@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def setup_recent_files_menu(self):
         """ Setup the recent files menu and manager """
         self.recent_files_manager = widgets.RecentFilesManager(
-            'pyqode', 'notepad')
+            'pyQode', 'notepad')
         self.menu_recents = widgets.MenuRecentFiles(
             self.menuFile, title='Recents',
             recent_files_manager=self.recent_files_manager)
@@ -215,8 +215,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _update_status_bar(self, editor):
         if editor:
+            l, c = api.TextHelper(editor).cursor_position()
             self.lbl_cursor_pos.setText(
-                '%d:%d' % api.TextHelper(editor).cursor_position())
+                '%d:%d' % (l + 1, c + 1))
             self.lbl_encoding.setText(editor.file.encoding)
             self.lbl_filename.setText(editor.file.path)
         else:
@@ -263,5 +264,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_cursor_pos_changed(self):
         if self.tabWidget.currentWidget():
             editor = self.tabWidget.currentWidget()
+            l, c = api.TextHelper(editor).cursor_position()
             self.lbl_cursor_pos.setText(
-                '%d:%d' % api.TextHelper(editor).cursor_position())
+                '%d:%d' % (l + 1, c + 1))

@@ -207,7 +207,7 @@ class CheckerMode(Mode, QtCore.QObject):
                     usd = message.block.userData()
                 except AttributeError:
                     message.block = self.editor.document().findBlockByNumber(
-                        message.line - 1)
+                        message.line)
                     usd = message.block.userData()
                 if usd is None:
                     usd = TextBlockUserData()
@@ -241,7 +241,10 @@ class CheckerMode(Mode, QtCore.QObject):
         usd = message.block.userData()
         try:
             if usd and usd.messages:
-                usd.messages.remove(message)
+                try:
+                    usd.messages.remove(message)
+                except ValueError:
+                    pass
         except AttributeError:
             pass
         self._messages.remove(message)
@@ -259,9 +262,12 @@ class CheckerMode(Mode, QtCore.QObject):
         if state:
             self.editor.textChanged.connect(self.request_analysis)
             self.editor.new_text_set.connect(self.clear_messages)
+            self.request_analysis()
         else:
             self.editor.textChanged.disconnect(self.request_analysis)
             self.editor.new_text_set.disconnect(self.clear_messages)
+            self._job_runner.cancel_requests()
+            self.clear_messages()
 
     def _on_work_finished(self, status, results):
         """
@@ -274,7 +280,7 @@ class CheckerMode(Mode, QtCore.QObject):
             messages = []
             for msg in results:
                 msg = CheckerMessage(*msg)
-                block = self.editor.document().findBlockByNumber(msg.line - 1)
+                block = self.editor.document().findBlockByNumber(msg.line)
                 msg.block = block
                 messages.append(msg)
             self.add_messages(messages)

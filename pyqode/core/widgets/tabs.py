@@ -70,6 +70,8 @@ class ClosableTabBar(QTabBar):
     """
     Custom QTabBar that can be closed using a mouse middle click.
     """
+    double_clicked = QtCore.Signal()
+
     def __init__(self, parent):
         QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
@@ -79,6 +81,9 @@ class ClosableTabBar(QTabBar):
         if event.button() == QtCore.Qt.MiddleButton:
             self.parentWidget().tabCloseRequested.emit(self.tabAt(
                 event.pos()))
+
+    def mouseDoubleClickEvent(self, event):
+        self.double_clicked.emit()
 
 
 class TabWidget(QTabWidget):
@@ -154,7 +159,7 @@ class TabWidget(QTabWidget):
         self._try_close_dirty_tabs(exept=current_widget)
         i = 0
         while self.count() > 1:
-            widget = self._widgets[i]
+            widget = self.widget(i)
             if widget != current_widget:
                 self.removeTab(i)
             else:
@@ -167,7 +172,7 @@ class TabWidget(QTabWidget):
         """
         if self._try_close_dirty_tabs():
             while self.count():
-                widget = self._widgets[0]
+                widget = self.widget(0)
                 self.removeTab(0)
                 self.tab_closed.emit(widget)
             return True
@@ -255,7 +260,8 @@ class TabWidget(QTabWidget):
         :returns: The tab index if found or -1
         """
         if path:
-            for i, widget in enumerate(self._widgets):
+            for i in range(self.count()):
+                widget = self.widget(i)
                 try:
                     if widget.file.path == path:
                         return i
@@ -265,10 +271,14 @@ class TabWidget(QTabWidget):
 
     @staticmethod
     def _del_code_edit(code_edit):
-        code_edit.backend.stop()
-        code_edit.modes.clear()
-        code_edit.panels.clear()
-        code_edit.delete()
+        try:
+            code_edit.file.close()
+            code_edit.backend.stop()
+            code_edit.modes.clear()
+            code_edit.panels.clear()
+            code_edit.delete()
+        except AttributeError:
+            pass
         del code_edit
 
     def add_code_edit(self, code_edit, name=None):
@@ -350,11 +360,15 @@ class TabWidget(QTabWidget):
     def _save_editor(self, code_edit, path=None):
         if not path:
             path = code_edit.file.path
-        if not os.path.exists(path):
-            path, status = QtWidgets.QFileDialog.getSaveFileName(
-                self, 'Save as (%s)' % code_edit.file.path)
+            if not os.path.exists(path):
+                path, status = QtWidgets.QFileDialog.getSaveFileName(
+                    self, 'Save as (%s)' % code_edit.file.path)
         if path:
-            code_edit.file.save(path)
+            try:
+                code_edit.file.save(path)
+            except AttributeError:
+                # not a code edit, try with a save method
+                code_edit.save(path)
 
     def _rename_duplicate_tabs(self, current, name, path):
         """
@@ -362,13 +376,13 @@ class TabWidget(QTabWidget):
         """
         for i in range(self.count()):
             if self.widget(i)._tab_name == name and self.widget(i) != current:
-                file_path = self._widgets[i].file.path
+                file_path = self.widget(i).file.path
                 if file_path:
                     parent_dir = os.path.split(os.path.abspath(
                         os.path.join(file_path, os.pardir)))[1]
                     new_name = os.path.join(parent_dir, name)
                     self.setTabText(i, new_name)
-                    self._widgets[i]._tab_name = new_name
+                    self.widget(i)._tab_name = new_name
                 break
         if path:
             parent_dir = os.path.split(os.path.abspath(
@@ -378,7 +392,10 @@ class TabWidget(QTabWidget):
             return name
 
     def _on_current_changed(self, index):
-        widget = self._widgets[index]
+        if index != -1:
+            widget = self.widget(index)
+        else:
+            widget = None
         if self._current:
             # needed if the user set save_on_focus_out to True which change
             # the dirty flag
@@ -399,15 +416,19 @@ class TabWidget(QTabWidget):
         This method will emits tab_closed for the removed tab.
 
         """
-        QTabWidget.removeTab(self, index)
-        widget = self._widgets.pop(index)
-        if widget == self._current:
-            self._current = None
+        widget = self.widget(index)
+        try:
+            self._widgets.remove(widget)
+        except ValueError:
+            pass
         self.tab_closed.emit(widget)
         self._del_code_edit(widget)
+        QTabWidget.removeTab(self, index)
+        if widget == self._current:
+            self._current = None
 
     def _on_tab_close_requested(self, index):
-        widget = self._widgets[index]
+        widget = self.widget(index)
         try:
             if not widget.dirty:
                 self.removeTab(index)
@@ -457,7 +478,7 @@ class TabWidget(QTabWidget):
         widgets = []
         filenames = []
         for i in range(self.count()):
-            widget = self._widgets[i]
+            widget = self.widget(i)
             try:
                 if widget.dirty and widget != exept:
                     widgets.append(widget)

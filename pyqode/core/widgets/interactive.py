@@ -5,10 +5,11 @@ This module contains interactive widgets:
 """
 import locale
 import logging
+import os
 import sys
 
 from pyqode.core.api.client import PROCESS_ERROR_STRING
-from pyqode.qt.QtCore import Qt, Signal, QProcess
+from pyqode.qt.QtCore import Qt, Signal, QProcess, QProcessEnvironment
 from pyqode.qt.QtWidgets import QTextEdit
 from pyqode.qt.QtGui import QColor, QTextCursor, QFont
 
@@ -83,13 +84,13 @@ class InteractiveConsole(QTextEdit):
     def _on_stdout(self):
         txt = bytes(self.process.readAllStandardOutput()).decode(
             locale.getpreferredencoding())
-        logging.debug('stdout ready: %s', txt)
+        _logger().debug('stdout ready: %s', txt)
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
         txt = bytes(self.process.readAllStandardError()).decode(
             locale.getpreferredencoding())
-        logging.debug('stderr ready: %s', txt)
+        _logger().debug('%s', txt)
         self._writer(self, txt, self.stderr_color)
 
     @property
@@ -184,11 +185,15 @@ class InteractiveConsole(QTextEdit):
         else:
             self.process.setProcessChannelMode(QProcess.SeparateChannels)
 
+    @property
+    def is_running(self):
+        return self._running
+
     def closeEvent(self, *args, **kwargs):
         if self.process.state() == QProcess.Running:
             self.process.terminate()
 
-    def start_process(self, process, args=None, cwd=None):
+    def start_process(self, process, args=None, cwd=None, env=None):
         """
         Starts a process interactively.
 
@@ -201,11 +206,21 @@ class InteractiveConsole(QTextEdit):
         :param cwd: Working directory
         :type cwd: str
         """
+        if env is None:
+            env = {}
         if args is None:
             args = []
         if not self._running:
             if cwd:
                 self.process.setWorkingDirectory(cwd)
+            e = self.process.systemEnvironment()
+            ev = QProcessEnvironment()
+            for v in e:
+                k, *values = v.split('=')
+                ev.insert(k, '='.join(values))
+            for k, v in env.items():
+                ev.insert(k, v)
+            self.process.setProcessEnvironment(ev)
             self._running = True
             self._process = process
             self._args = args

@@ -125,7 +125,7 @@ class DynamicFoldDetectorTestCase:
                 assert len(matches) == 2
                 line = int(matches[0].group())
                 column = int(matches[1].group())
-                TextHelper(editor).goto_line(line, column)
+                TextHelper(editor).goto_line(line - 1, column)
             elif action.startswith('press('):
                 p = re.compile(r'\b\d+\b')
                 matches = list(p.finditer(action))

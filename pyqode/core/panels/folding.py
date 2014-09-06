@@ -5,7 +5,8 @@ This module contains the marker panel
 import logging
 import os
 import sys
-from pyqode.core.api import TextBlockHelper, folding, TextDecoration
+from pyqode.core.api import TextBlockHelper, folding, TextDecoration, \
+    DelayJobRunner
 from pyqode.core.api.folding import FoldScope
 from pyqode.core.api.panel import Panel
 from pyqode.qt import QtCore, QtWidgets, QtGui
@@ -30,11 +31,61 @@ class FoldingPanel(Panel):
     trigger state using :class:`pyqode.core.api.utils.TextBlockHelper` or
     :mod:`pyqode.core.api.folding`
     """
-    #: Signal emitted when the user clicked in a place where there is no
-    #: marker.
-    add_marker_requested = QtCore.Signal(int)
-    #: Signal emitted when the user clicked on an existing marker.
-    remove_marker_requested = QtCore.Signal(int)
+    #: signal emitted when a fold trigger state has changed, parameters are
+    #: the concerned text block and the new state (collapsed or not).
+    trigger_state_changed = QtCore.Signal(QtGui.QTextBlock, bool)
+    collapse_all_triggered = QtCore.Signal()
+    expand_all_triggered = QtCore.Signal()
+
+    @property
+    def native_look(self):
+        """
+        Defines whether the panel will use native indicator icons and color or
+        use custom one.
+
+        If you want to use custom indicator icons and color, you must first
+        set this flag to False.
+        """
+        return self._native
+
+    @native_look.setter
+    def native_look(self, value):
+        self._native = value
+
+    @property
+    def custom_indicators_icons(self):
+        """
+        Gets/sets the custom icon for the fold indicators.
+
+        The list of indicators is interpreted as follow::
+
+            (COLLAPSED_OFF, COLLAPSED_ON, EXPANDED_OFF, EXPANDED_ON)
+
+        To use this property you must first set `native_look` to False.
+
+        :returns: tuple(str, str, str, str)
+        """
+        return self._custom_indicators
+
+    @custom_indicators_icons.setter
+    def custom_indicators_icons(self, value):
+        if len(value) != 4:
+            raise ValueError('The list of custom indicators must contains 4 '
+                             'strings')
+        self._custom_indicators = value
+
+    @property
+    def custom_fold_region_background(self):
+        """
+        Custom base color for the fold region background
+
+        :return: QColor
+        """
+        return self._custom_color
+
+    @custom_fold_region_background.setter
+    def custom_fold_region_background(self, value):
+        self._custom_color = value
 
     @property
     def highlight_caret_scope(self):
@@ -63,6 +114,14 @@ class FoldingPanel(Panel):
 
     def __init__(self, highlight_caret_scope=False):
         Panel.__init__(self)
+        self._native = True
+        self._custom_indicators = (
+            ':/pyqode-icons/rc/arrow_right_off.png',
+            ':/pyqode-icons/rc/arrow_right_on.png',
+            ':/pyqode-icons/rc/arrow_down_off.png',
+            ':/pyqode-icons/rc/arrow_down_on.png'
+        )
+        self._custom_color = QtGui.QColor('gray')
         self._block_nbr = -1
         self._highlight_caret = False
         self.highlight_caret_scope = highlight_caret_scope
@@ -83,6 +142,7 @@ class FoldingPanel(Panel):
         self.action_collapse_all = None
         self.action_expand_all = None
         self._original_background = None
+        self._highlight_runner = DelayJobRunner(delay=100)
 
     def on_install(self, editor):
         """
@@ -132,9 +192,9 @@ class FoldingPanel(Panel):
         super().paintEvent(event)
         painter = QtGui.QPainter(self)
         # Draw background over the selected non collapsed fold region
-        if self._mouse_over_line:
+        if self._mouse_over_line is not None:
             block = self.editor.document().findBlockByNumber(
-                self._mouse_over_line - 1)
+                self._mouse_over_line)
             try:
                 self._draw_fold_region_background(block, painter)
             except ValueError:
@@ -156,20 +216,19 @@ class FoldingPanel(Panel):
         :param block: Current block.
         :param painter: QPainter
         """
-        if not TextBlockHelper.get_fold_trigger_state(block):
-            r = folding.FoldScope(block)
-            th = TextHelper(self.editor)
-            start, end = r.get_range(ignore_blank_lines=True)
-            if start > 0:
-                top = th.line_pos_from_number(start)
-            else:
-                top = 0
-            bottom = th.line_pos_from_number(end + 1)
-            h = bottom - top
-            if h == 0:
-                h = self.sizeHint().height()
-            w = self.sizeHint().width()
-            self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
+        r = folding.FoldScope(block)
+        th = TextHelper(self.editor)
+        start, end = r.get_range(ignore_blank_lines=True)
+        if start > 0:
+            top = th.line_pos_from_number(start)
+        else:
+            top = 0
+        bottom = th.line_pos_from_number(end + 1)
+        h = bottom - top
+        if h == 0:
+            h = self.sizeHint().height()
+        w = self.sizeHint().width()
+        self._draw_rect(QtCore.QRectF(0, top, w, h), painter)
 
     def _draw_rect(self, rect, painter):
         """
@@ -180,9 +239,9 @@ class FoldingPanel(Panel):
 
         :param painter: The widget's painter.
         """
-        # c = self.__color
-        # if self.__native:
-        c = self.get_system_bck_color()
+        c = self._custom_color
+        if self._native:
+            c = self.get_system_bck_color()
         grad = QtGui.QLinearGradient(rect.topLeft(),
                                      rect.topRight())
         if sys.platform == 'darwin':
@@ -244,28 +303,38 @@ class FoldingPanel(Panel):
         :param collapsed: Whether the trigger is collapsed or not.
         :param painter: QPainter
         """
-        if os.environ['QT_API'].lower() != 'pyqt5':
-            opt = QtGui.QStyleOptionViewItemV2()
+        rect = QtCore.QRect(0, top, self.sizeHint().width(),
+                            self.sizeHint().height())
+        if self._native:
+            if os.environ['QT_API'].lower() != 'pyqt5':
+                opt = QtGui.QStyleOptionViewItemV2()
+            else:
+                opt = QtWidgets.QStyleOptionViewItem()
+            opt.rect = rect
+            opt.state = (QtWidgets.QStyle.State_Active |
+                         QtWidgets.QStyle.State_Item |
+                         QtWidgets.QStyle.State_Children)
+            if not collapsed:
+                opt.state |= QtWidgets.QStyle.State_Open
+            if mouse_over:
+                opt.state |= (QtWidgets.QStyle.State_MouseOver |
+                              QtWidgets.QStyle.State_Enabled |
+                              QtWidgets.QStyle.State_Selected)
+                opt.palette.setBrush(QtGui.QPalette.Window,
+                                     self.palette().highlight())
+            opt.rect.translate(-2, 0)
+            self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
+                                       opt, painter, self)
         else:
-            opt = QtWidgets.QStyleOptionViewItem()
-        opt.rect = QtCore.QRect(0, top, self.sizeHint().width(),
-                                self.sizeHint().height())
-        opt.state = (QtWidgets.QStyle.State_Active |
-                     QtWidgets.QStyle.State_Item |
-                     QtWidgets.QStyle.State_Children)
-        if not collapsed:
-            opt.state |= QtWidgets.QStyle.State_Open
-        if mouse_over:
-            opt.state |= (QtWidgets.QStyle.State_MouseOver |
-                          QtWidgets.QStyle.State_Enabled |
-                          QtWidgets.QStyle.State_Selected)
-            opt.palette.setBrush(QtGui.QPalette.Window,
-                                 self.palette().highlight())
-        opt.rect.translate(-2, 0)
-        self.style().drawPrimitive(QtWidgets.QStyle.PE_IndicatorBranch,
-                                   opt, painter, self)
+            index = 0
+            if not collapsed:
+                index = 2
+            if mouse_over:
+                index += 1
+            QtGui.QIcon(self._custom_indicators[index]).paint(painter, rect)
 
-    def find_scope(self, block):
+    @staticmethod
+    def find_parent_scope(block):
         """
         Find parent scope, if the block is not a fold trigger.
 
@@ -319,11 +388,11 @@ class FoldingPanel(Panel):
         """
         color = drift_color(base_color, factor=factor)
         # upper part
-        if start - 1:
+        if start > 0:
             d = TextDecoration(self.editor.document(),
                                start_line=parent_start, end_line=start)
             d.set_full_width(True, clear=False)
-            d.draw_order = 1
+            d.draw_order = 2
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -332,7 +401,7 @@ class FoldingPanel(Panel):
             d = TextDecoration(self.editor.document(),
                                start_line=end, end_line=parent_end + 1)
             d.set_full_width(True, clear=False)
-            d.draw_order = 1
+            d.draw_order = 2
             d.set_background(color)
             self.editor.decorations.append(d)
             self._scope_decos.append(d)
@@ -368,7 +437,7 @@ class FoldingPanel(Panel):
                 parent = parent.parent()
                 factor += factor_step
             # global scope
-            parent_start = 1
+            parent_start = 0
             parent_end = self.editor.document().blockCount()
             self._add_scope_deco(
                 start, end + 1, parent_start, parent_end, base_color,
@@ -403,15 +472,26 @@ class FoldingPanel(Panel):
         super().mouseMoveEvent(event)
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
-        if line:
-            block = self.find_scope(
-                self.editor.document().findBlockByNumber(line - 1))
+        if line >= 0:
+            block = self.find_parent_scope(
+                self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
-                self._mouse_over_line = block.blockNumber() + 1
-                self._highlight_surrounding_scopes(block)
+                if self._mouse_over_line is None:
+                    QtWidgets.QApplication.setOverrideCursor(
+                        QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+                if self._mouse_over_line != block.blockNumber() and \
+                        self._mouse_over_line is not None:
+                    self._mouse_over_line = block.blockNumber()
+                    self._highlight_surrounding_scopes(block)
+                else:
+                    self._mouse_over_line = block.blockNumber()
+                    self._highlight_runner.request_job(
+                        self._highlight_surrounding_scopes, block)
                 self._highight_block = block
             else:
+                self._highlight_runner.cancel_requests()
                 self._mouse_over_line = None
+                QtWidgets.QApplication.restoreOverrideCursor()
             self.repaint()
 
     def leaveEvent(self, event):
@@ -422,6 +502,8 @@ class FoldingPanel(Panel):
 
         """
         super().leaveEvent(event)
+        QtWidgets.QApplication.restoreOverrideCursor()
+        self._highlight_runner.cancel_requests()
         if not self.highlight_caret_scope:
             self._clear_scope_decos()
             self._mouse_over_line = None
@@ -439,7 +521,7 @@ class FoldingPanel(Panel):
         deco = TextDecoration(block)
         deco.signals.clicked.connect(self._on_fold_deco_clicked)
         deco.tooltip = region.text(max_lines=25)
-        deco.draw_order = 2
+        deco.draw_order = 1
         deco.block = block
         deco.select_line()
         deco.set_outline(drift_color(
@@ -468,7 +550,7 @@ class FoldingPanel(Panel):
                 self._block_decos.remove(deco)
                 self.editor.decorations.remove(deco)
                 del deco
-            if self._mouse_over_line:
+            if self._mouse_over_line is not None:
                 self._add_scope_decorations(
                     region._trigger, *region.get_range())
         else:
@@ -477,12 +559,13 @@ class FoldingPanel(Panel):
             self._add_fold_decoration(block, region)
             self._clear_scope_decos()
         self._refresh_editor_and_scrollbars()
+        self.trigger_state_changed.emit(region._trigger, region.collapsed)
 
     def mousePressEvent(self, event):
         """ Folds/unfolds the pressed indicator if any. """
-        if self._mouse_over_line:
+        if self._mouse_over_line is not None:
             block = self.editor.document().findBlockByNumber(
-                self._mouse_over_line - 1)
+                self._mouse_over_line)
             self.toggle_fold_trigger(block)
 
     def _on_fold_deco_clicked(self, deco):
@@ -610,6 +693,7 @@ class FoldingPanel(Panel):
         tc = self.editor.textCursor()
         tc.movePosition(tc.Start)
         self.editor.setTextCursor(tc)
+        self.collapse_all_triggered.emit()
 
     def _clear_block_deco(self):
         """
@@ -630,12 +714,13 @@ class FoldingPanel(Panel):
             block = block.next()
         self._clear_block_deco()
         self._refresh_editor_and_scrollbars()
+        self.expand_all_triggered.emit()
 
     def _on_action_toggle(self):
         """
         Toggle the current fold trigger.
         """
-        block = self.find_scope(self.editor.textCursor().block())
+        block = self.find_parent_scope(self.editor.textCursor().block())
         self.toggle_fold_trigger(block)
 
     def _on_action_collapse_all_triggered(self):
@@ -661,13 +746,13 @@ class FoldingPanel(Panel):
         cursor = self.editor.textCursor()
         block_nbr = cursor.blockNumber()
         if self._block_nbr != block_nbr:
-            block = self.find_scope(self.editor.textCursor().block())
+            block = self.find_parent_scope(self.editor.textCursor().block())
             try:
                 s = FoldScope(block)
             except ValueError:
                 self._clear_scope_decos()
             else:
-                self._mouse_over_line = block.blockNumber() + 1
+                self._mouse_over_line = block.blockNumber()
                 if TextBlockHelper.is_fold_trigger(block):
                     self._highlight_surrounding_scopes(block)
         self._block_nbr = block_nbr

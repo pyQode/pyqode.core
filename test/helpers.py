@@ -75,6 +75,7 @@ def editor_open(path):
         @functools.wraps(func)
         def wrapper(editor, *args, **kwds):
             editor.file.open(path)
+            QTest.qWait(100)
             return func(editor, *args, **kwds)
         return wrapper
     return decorator
@@ -103,6 +104,7 @@ def preserve_style(func):
         finally:
             editor.font_name = 'Source Code Pro'
             editor.font_size = 10
+            editor.reset_zoom()
         return ret
     return wrapper
 

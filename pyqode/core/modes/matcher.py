@@ -336,7 +336,7 @@ class SymbolMatcherMode(Mode):
         cursor.setPosition(pos)
         cursor.movePosition(cursor.NextCharacter, cursor.KeepAnchor)
         deco = TextDecoration(cursor, draw_order=10)
-        deco.line = cursor.blockNumber() + 1
+        deco.line = cursor.blockNumber()
         deco.column = cursor.columnNumber()
         deco.character = cursor.selectedText()
         deco.match = match

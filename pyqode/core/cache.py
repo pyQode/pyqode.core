@@ -21,10 +21,9 @@ better handled at the application level.
 import json
 import locale
 from pyqode.qt import QtCore
-from pyqode.core.api import encodings
 
 
-class Settings:
+class Cache:
     def __init__(self, suffix=''):
         self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
 
@@ -38,12 +37,14 @@ class Settings:
         menu/combobox.
 
         """
+        from pyqode.core.api import encodings
         return json.loads(self._settings.value(
             'userDefinedEncodings', '["%s"]' % encodings.convert_to_codec_key(
                 locale.getpreferredencoding())))
 
     @preferred_encodings.setter
     def preferred_encodings(self, value):
+        from pyqode.core.api import encodings
         lst = [encodings.convert_to_codec_key(v) for v in value]
         self._settings.setValue('userDefinedEncodings',
                                 json.dumps(list(set(lst))))
@@ -77,3 +78,34 @@ class Settings:
             map = {}
         map[path] = encoding
         self._settings.setValue('cachedFileEncodings', json.dumps(map))
+
+    def get_cursor_position(self, file_path):
+        """
+        Gets the cached cursor position for file_path
+
+        :param file_path: path of the file in the cache
+        :return Cached cursor position or (0, 0)
+        """
+        try:
+            map = json.loads(self._settings.value('cachedCursorPosition'))
+        except TypeError:
+            map = {}
+        try:
+            pos = map[file_path]
+        except KeyError:
+            pos = (0, 0)
+        return pos
+
+    def set_cursor_position(self, path, position):
+        """
+        Cache encoding for the specified file path.
+
+        :param path: path of the file to cache
+        :param position: cursor position to cache
+        """
+        try:
+            map = json.loads(self._settings.value('cachedCursorPosition'))
+        except TypeError:
+            map = {}
+        map[path] = position
+        self._settings.setValue('cachedCursorPosition', json.dumps(map))

@@ -15,7 +15,6 @@ from .syntax_highlighter import TextBlockUserData
 from .utils import TextHelper, TextBlockHelper
 from .utils import get_block_symbol_data
 from .utils import DelayJobRunner
-from .utils import TextStyle
 from .folding import FoldDetector
 from .folding import IndentFoldDetector
 from .folding import FoldScope
@@ -38,6 +37,5 @@ __all__ = [
     'TextBlockUserData',
     'TextDecoration',
     'TextHelper',
-    'TextBlockHelper',
-    'TextStyle'
+    'TextBlockHelper'
 ]

@@ -147,6 +147,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
+        super().on_uninstall()
         self._completer.popup().hide()
         self._completer = None
 
@@ -240,7 +241,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if self._is_shortcut(event):
             return
         if (event.key() == QtCore.Qt.Key_Home or
-                event.key() == QtCore.Qt.Key_End):
+                event.key() == QtCore.Qt.Key_End or
+                event.key() == QtCore.Qt.Key_Shift):
             return
         is_printable = self._is_printable_key_event(event)
         is_navigation_key = self._is_navigation_key(event)
@@ -248,17 +250,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         is_end_of_word = self._is_end_of_word_char(
             event, is_printable, symbols, self.editor.word_separators)
         cursor = self._helper.word_under_cursor()
-        cursor.setPosition(cursor.position())
+        cpos = cursor.position()
+        cursor.setPosition(cpos)
         cursor.movePosition(cursor.StartOfLine, cursor.KeepAnchor)
         text_to_cursor = cursor.selectedText()
+        cursor.setPosition(cpos)
+        cursor.movePosition(cursor.EndOfLine, cursor.KeepAnchor)
+        text_after_cursor = cursor.selectedText()
 
         if self._completer.popup().isVisible():
-            # Update completion prefix
-            if text_to_cursor[-1] in self.editor.word_separators:
-                # move out of the current work
+            # hide popup if the user is moving the cursor out of the current
+            # word boundaries.
+            if (len(text_after_cursor) and is_navigation_key and
+                    text_after_cursor[0] in self.editor.word_separators and
+                    not text_after_cursor[0].isspace()):
                 self._hide_popup()
             else:
-                # moving inside word
                 self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
@@ -326,11 +333,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             self._completer.model().rowCount())
             self._show_popup()
             _logger().debug("popup shown")
-        else:
-            print('cancel')
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
+        nav_key = self._is_navigation_key(event)
+        mod = QtCore.Qt.ControlModifier
+        ctrl = int(event.modifiers() & mod) == mod
         # complete
         if (event.key() == QtCore.Qt.Key_Enter or
                 event.key() == QtCore.Qt.Key_Return or
@@ -340,9 +348,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
         # hide
         elif (event.key() == QtCore.Qt.Key_Escape or
-              event.key() == QtCore.Qt.Key_Backtab):
+              event.key() == QtCore.Qt.Key_Backtab or
+              nav_key and ctrl):
             self._hide_popup()
-            event.accept()
+        # move into list
         elif event.key() == QtCore.Qt.Key_Home:
             self._show_popup(index=0)
             event.accept()
@@ -351,7 +360,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
 
     def _hide_popup(self):
-        # self.editor.viewport().setCursor(QtCore.Qt.IBeamCursor)
         if self._completer.popup() is not None:
             self._completer.popup().hide()
         self._job_runner.cancel_requests()
@@ -359,7 +367,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _show_popup(self, index=0):
         full_prefix = self._helper.word_under_cursor(
-            select_whole_word=True).selectedText()
+            select_whole_word=False).selectedText()
         if self._case_sensitive:
                 self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
         else:
@@ -367,8 +375,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 QtCore.Qt.CaseInsensitive)
         # set prefix
         self._completer.setCompletionPrefix(self.completion_prefix)
-        cnt = self._completer.model().rowCount()
-        if (full_prefix == self._current_completion) and cnt == 1:
+        cnt = self._completer.completionCount()
+        selected = self._completer.currentCompletion()
+        if (full_prefix == selected) and cnt == 1:
             self._hide_popup()
         else:
             # compute size and pos

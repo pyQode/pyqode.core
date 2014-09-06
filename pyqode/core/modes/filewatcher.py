@@ -38,7 +38,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._flg_notify = False
         self._data = (None, None)
         self._timer = QtCore.QTimer()
-        self._timer.setInterval(200)
+        self._timer.setInterval(1000)
         self._timer.timeout.connect(self._check_mtime)
         self._mtime = 0
         self._notification_pending = False

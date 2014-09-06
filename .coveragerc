@@ -9,7 +9,7 @@ omit =
     # at the moment, we do not test misc ui elements such as
     # widgets and dialogs (how could this be possible to test?)
     *pyqode/core/dialogs/*
-    *pyqode/core/designer_plugins/*
+    *pyqode/core/_designer_plugins/*
     *pyqode/core/widgets/*
 
 [report]

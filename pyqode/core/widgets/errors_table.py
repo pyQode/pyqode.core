@@ -126,9 +126,9 @@ class ErrorsTable(QtWidgets.QTableWidget):
 
         # line
         if msg.line <= 0:
-            item = QtWidgets.QTableWidgetItem("----")
+            item = QtWidgets.QTableWidgetItem("-")
         else:
-            item = QtWidgets.QTableWidgetItem(str(msg.line).zfill(4))
+            item = QtWidgets.QTableWidgetItem(str(msg.line + 1))
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         item.setData(QtCore.Qt.UserRole, msg)
         self.setItem(row, COL_LINE_NBR, item)
@@ -150,7 +150,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
         msg = self.currentItem().data(QtCore.Qt.UserRole)
         QtWidgets.QMessageBox.information(
             self, 'Message details',
-            """<p><b>Description:</b>%s</p>
-            <i><p><b>File:</b>%s</p>
-            <p><b>Line</b>: %d</p></i>
-            """ % (msg.description, msg.path, msg.line, ))
+            """<p><b>Description:</b><br/>%s</p>
+            <i><p><b>File:</b><br/>%s</p>
+            <p><b>Line: </b>%d</p></i>
+            """ % (msg.description, msg.path, msg.line + 1, ))

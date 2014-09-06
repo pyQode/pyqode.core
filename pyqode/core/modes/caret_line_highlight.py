@@ -45,6 +45,7 @@ class CaretLineHighlighterMode(Mode):
         if state:
             self.editor.cursorPositionChanged.connect(self.refresh)
             self.editor.new_text_set.connect(self.refresh)
+            self.refresh()
         else:
             self.editor.cursorPositionChanged.disconnect(
                 self.refresh)
@@ -57,8 +58,9 @@ class CaretLineHighlighterMode(Mode):
 
     def _clear_deco(self):
         """ Clear line decoration """
-        if self._decoration and self.enabled:
+        if self._decoration:
             self.editor.decorations.remove(self._decoration)
+            self._decoration = None
 
     def refresh(self):
         """

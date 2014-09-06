@@ -36,6 +36,7 @@ def main():
 
     app.exec_()
 
+    editor.file.close()
     del editor
     del window
     del app

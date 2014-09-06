@@ -1,4 +1,5 @@
 import logging
+import platform
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
@@ -137,9 +138,24 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._reset_stylesheet()
 
     @property
+    def zoom_level(self):
+        """
+        Gets/Sets the editor zoom level.
+
+        The zoom level is a value that is added to the current editor font
+        size. Negative values are used to zoom  out the editor, positive values
+        are used to zoom in the editor.
+        """
+        return self._zoom_level
+
+    @zoom_level.setter
+    def zoom_level(self, value):
+        self._zoom_level = value
+
+    @property
     def font_size(self):
         """
-        The editor font size.
+        The editor current font size.
         """
         return self._font_size
 
@@ -243,7 +259,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Returns the list of visible blocks.
 
         Each element in the list is a tuple made up of the line top position,
-        the line number (already 1 based), and the QTextBlock itself.
+        the line number and the QTextBlock itself.
 
         :return: A list of tuple(top_position, line_number, block)
         :rtype: List of tuple(int, int, QtWidgets.QTextBlock)
@@ -294,6 +310,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super().__init__(parent)
+        self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)
@@ -314,6 +331,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._foreground = None
         self._sel_foreground = None
         self._tab_length = 4
+        self._zoom_level = 0
         self._font_size = 10
         self._background = None
         QtGui.QFontDatabase.addApplicationFont(
@@ -354,7 +372,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
-        self.setCenterOnScroll(True)
+        self.setCenterOnScroll(False)
         self.setLineWrapMode(self.NoWrap)
 
     def __del__(self):
@@ -369,13 +387,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.viewport().setCursor(cursor)
 
-    def show_tooltip(self, pos, tooltip):
+    def show_tooltip(self, pos, tooltip, _sender_deco=None):
         """
         Show a tool tip at the specified position
 
         :param pos: Tooltip position
         :param tooltip: Tooltip text
+
+        :param _sender_deco: TextDecoration which is the sender of the show
+            tooltip request. (for internal use only).
         """
+        if _sender_deco is not None and _sender_deco not in self.decorations:
+            return
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
 
     def clear(self):
@@ -395,20 +418,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.file.mimetype = mime_type
         self.file._encoding = encoding
-        for mode in self.modes:
-            if hasattr(mode, 'set_mime_type'):
-                try:
-                    _logger().debug('setting up lexer from mimetype: %s',
-                                    self.file.mimetype)
-                    mode.set_mime_type(self.file.mimetype)
-                except ValueError:
-                    _logger().exception(
-                        'Failed to set lexer from mimetype: %s',
-                        self.file.mimetype)
-                    _logger().debug('setting up lexer from file path: %s',
-                                    self.file.path)
-                    mode.set_lexer_from_filename(self.file.path)
-                break
         self._original_text = txt
         self._modified_lines.clear()
         import time
@@ -482,8 +491,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self, helper.current_line_nbr(), helper.line_count())
         if not result:
             return
-        if not line:
-            line = 1
         return helper.goto_line(line, move=True)
 
     @QtCore.Slot()
@@ -500,7 +507,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         Resets the zoom value.
         """
-        self._font_size = 10
+        self._zoom_level = 0
         self._reset_stylesheet()
 
     @QtCore.Slot()
@@ -514,7 +521,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged.
         """
-        self._font_size += increment
+        self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
@@ -529,9 +536,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Panels that needs to be resized depending on the font size need to
         implement onStyleChanged and trigger an update.
         """
-        self._font_size -= increment
-        if self._font_size <= 0:
-            self._font_size = increment
+        self.zoom_level -= increment
+        if abs(self.zoom_level) >= self._font_size:
+            self.zoom_level = -self._font_size + 1
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
@@ -645,6 +652,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QFocusEvent
         """
+        # fix a visual bug if the editor was resized while being hidden (
+        # e.g. a dock # widget has been resized and some editors were in a
+        # tab widget. Non visible editor have a visual bug where horizontal
+        # scroll bar range
+        #
+        TextHelper(self).mark_whole_doc_dirty()
+        s = self.size()
+        s.setWidth(s.width() + 1)
+        self.resizeEvent(QtGui.QResizeEvent(self.size(), s))
+
         self.focused_in.emit(event)
         super().focusInEvent(event)
         self.repaint()
@@ -721,7 +738,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                     pos.setY(pos.y() + self.panels.margin_size(0))
                     self._tooltips_runner.request_job(
                         self.show_tooltip,
-                        self.mapToGlobal(pos), sel.tooltip[0: 1024])
+                        self.mapToGlobal(pos), sel.tooltip[0: 1024], sel)
                     self._prev_tooltip_block_nbr = cursor.blockNumber()
                 block_found = True
                 break
@@ -737,13 +754,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super().showEvent(event)
         _logger().debug('show event')
 
+    def get_context_menu(self):
+        """
+        Gets the editor context menu.
+
+        :return: QMenu
+        """
+        mnu = QtWidgets.QMenu()
+        for menu in self._menus:
+            mnu.addMenu(menu)
+        mnu.addSeparator()
+        mnu.addActions(self._actions)
+        return mnu
+
     def _show_context_menu(self, point):
         """ Shows the context menu """
-        self._mnu = QtWidgets.QMenu()
-        for menu in self._menus:
-            self._mnu.addMenu(menu)
-        self._mnu.addSeparator()
-        self._mnu.addActions(self._actions)
+        self._mnu = self.get_context_menu()
         self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
@@ -853,7 +879,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # goto
         action = QtWidgets.QAction('Go to line', self)
         action.setShortcut('Ctrl+G')
-        action.setIcon(_icon(('start-here',
+        action.setIcon(_icon(('go-jump',
                               ':/pyqode-icons/rc/goto-line.png')))
         action.triggered.connect(self.goto_line)
         self.add_action(action)
@@ -895,7 +921,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             if not visible:
                 break
             if block.isVisible():
-                self._visible_blocks.append((top, block_nbr + 1, block))
+                self._visible_blocks.append((top, block_nbr, block))
             block = block.next()
             top = bottom
             bottom = top + int(self.blockBoundingRect(block).height())
@@ -911,12 +937,29 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
-        self.setFont(QtGui.QFont(self._font_family, self._font_size))
+        self.setFont(QtGui.QFont(self._font_family, self._font_size + self._zoom_level))
         p = self.palette()
         p.setColor(QtGui.QPalette.Base, self.background)
         p.setColor(QtGui.QPalette.Text, self.foreground)
         p.setColor(QtGui.QPalette.Highlight, self.selection_background)
         p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
+        if QtWidgets.QApplication.instance().styleSheet() or (
+                hasattr(self, '_flg_stylesheet') and
+                platform.system() == 'Windows'):
+            # on windows, if the application once had a stylesheet, we must
+            # keep on using a stylesheet otherwise strange colors appear
+            # see https://github.com/OpenCobolIDE/OpenCobolIDE/issues/65
+            self._flg_stylesheet = True
+            self.setStyleSheet('''QPlainTextEdit
+            {
+                background-color: %s;
+                color: %s;
+            }
+            ''' % (self.background.name(), self.foreground.name()))
+        else:
+            # on linux/osx we just have to set an empty stylesheet to cancel
+            # any previous stylesheet and still keep a correct style for scrollbars
+            self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()
 
