@@ -93,6 +93,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """ Terminates the server process """
         _logger().debug('terminating backend process')
         self._process.terminate()
+        while not self._process.waitForFinished(1):
+            pass
 
     def close(self):
         """ Closes the socket and terminates the server process. """
