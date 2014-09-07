@@ -1,4 +1,5 @@
 import os
+from signal import SIGKILL
 import sys
 from pyqode.core.api.client import JsonTcpClient as JsonTcpClient
 from pyqode.core.backend import server
@@ -49,3 +50,4 @@ def test_json_server():
         pass  # when closed from client we have a ValueError because of a
               # bad file descriptior, this is not a bug in pyqode but in
               # socketserver
+    os.kill(process.pid, SIGKILL)
