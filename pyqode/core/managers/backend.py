@@ -80,3 +80,15 @@ class BackendManager(Manager):
 
         """
         return self.socket.is_connected
+
+    @property
+    def exit_code(self):
+        """
+        Returns the backend process exit status or None if the
+        process is till running.
+
+        """
+        if self.socket._process.running or self.socket._process.starting:
+            return None
+        else:
+            return self.socket._process.exitCode()

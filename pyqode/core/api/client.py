@@ -239,11 +239,11 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
             # try again, sometimes the server process might not have started
             # its socket yet.
-            if self._connection_attempts < MAX_RETRY:
-                QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
+            if self._process.exitCode():
+                _logger().warning('backend process terminated unexpectedly')
             else:
-                raise RuntimeError('Failed to connect to the server after 100 '
-                                   'unsuccessful attempts.')
+                # the process is still running but not ready, retry
+                QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
 
     def _on_disconnected(self):
         """ Logs disconnected """
@@ -326,12 +326,14 @@ class _ServerProcess(QtCore.QProcess):
         self.readyReadStandardOutput.connect(self._on_process_stdout_ready)
         self.readyReadStandardError.connect(self._on_process_stderr_ready)
         self.running = False
+        self.starting = True
         self._srv_logger = logging.getLogger('pyqode.server')
         self._test_not_deleted = False
 
     def _on_process_started(self):
         """ Logs process started """
         _logger().debug('server process started')
+        self.starting = False
         self.running = True
 
     def _on_process_error(self, error):
