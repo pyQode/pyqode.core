@@ -33,6 +33,7 @@ def ensure_visible(func):
 code = '''"""
 Empty module
 """
+
 '''
 
 
@@ -100,20 +101,47 @@ def test_request_completion(editor):
     QTest.qWait(1000)
     if editor.backend.connected:
         editor.backend.stop()
-    # request a completion at start of the document, this request will be
-    # skipped because we are in a comment/docstring zone.
-    assert mode.request_completion() is False
+    # starts the server after the request to test the retry on NotConnected
+    # mechanism
+    TextHelper(editor).goto_line(0)
+    QTest.qWait(100)
+    mode.request_completion()
+    editor.backend.start(server_path())
+    QTest.qWait(2000)
+
+    # now this should work
     TextHelper(editor).goto_line(3)
     QTest.qWait(100)
     assert mode.request_completion() is True
-    # starts the server after the request to test the retry on NotConnected
-    # mechanism
-    editor.backend.start(server_path())
-    QTest.qWait(2000)
+    QTest.qWait(100)
+
+
+@ensure_empty
+@ensure_visible
+@ensure_connected
+@preserve_editor_config
+def test_completion_in_string_or_comment(editor):
+    mode = get_mode(editor)
+    TextHelper(editor).goto_line(2, column=0)
+    QTest.qWait(100)
+    assert mode.request_completion() is False
+    QTest.qWait(1000)
+
+
+@ensure_empty
+@ensure_visible
+@ensure_connected
+@preserve_editor_config
+def test_successive_requests(editor):
+    mode = get_mode(editor)
+    QTest.qWait(1000)
+    TextHelper(editor).goto_line(3)
     # only the first request should be accepted
     ret1 = mode.request_completion()
     ret2 = mode.request_completion()
-    assert ret1 is True and ret2 is False
+    assert ret1 is True
+    assert ret2 is False
+
 
 
 @ensure_visible

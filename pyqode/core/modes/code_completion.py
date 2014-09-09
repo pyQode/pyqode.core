@@ -120,7 +120,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not self._request_cnt:
             # only check first byte
             tc = self.editor.textCursor()
-            while tc.atBlockEnd():
+            while tc.atBlockEnd() and not tc.atBlockStart() and \
+                    tc.position():
                 tc.movePosition(tc.Left)
             disabled_zone = TextHelper(self.editor).is_comment_or_string(
                 tc)
