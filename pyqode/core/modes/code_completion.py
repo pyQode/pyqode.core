@@ -119,8 +119,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
+            tc = self.editor.textCursor()
+            while tc.atBlockEnd():
+                tc.movePosition(tc.Left)
             disabled_zone = TextHelper(self.editor).is_comment_or_string(
-                self.editor.textCursor())
+                tc)
             if disabled_zone:
                 _logger().debug(
                     "cc: cancel request, cursor is in a disabled zone")
