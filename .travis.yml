@@ -31,7 +31,6 @@ install:
   - sudo apt-get install -qq python-qt4 --fix-missing
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
   - pip install tox
-  - pip install git+https://github.com/pyQode/pyqode.qt.git@develop
 script:
   - tox
 after_script:
