@@ -17,7 +17,7 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
 
     """
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(DlgPreferredEncodingsEditor, self).__init__(parent)
         self.ui = dlg_preferred_encodings_editor_ui.Ui_Dialog()
         self.ui.setupUi(self)
         self._load_preferred()
@@ -140,7 +140,7 @@ class DlgEncodingsChoice(QtWidgets.QDialog):
 
     """
     def __init__(self, parent, path, encoding):
-        super().__init__(parent)
+        super(DlgEncodingsChoice, self).__init__(parent)
         self.setWindowTitle('Choose encoding')
         # avoid circular references with CodeEdit
         from pyqode.core._forms import dlg_encodings_ui

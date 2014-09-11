@@ -18,7 +18,7 @@ class RecentFilesManager(QtCore.QObject):
     updated = QtCore.Signal()
 
     def __init__(self, organisation, application):
-        super().__init__()
+        super(RecentFilesManager, self).__init__()
         self._settings = QtCore.QSettings(organisation, application)
 
     def clear(self):
@@ -103,7 +103,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
             of the icon theme name and the fallback icon path (from your
             resources). Default is None, clear action has no icons.
         """
-        super().__init__(title, parent)
+        super(MenuRecentFiles, self).__init__(title, parent)
         if icon_provider is None:
             self.icon_provider = QtWidgets.QFileIconProvider()
         else:

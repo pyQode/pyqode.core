@@ -2,6 +2,10 @@
 """
 This module contains the code completion mode and the related classes.
 """
+try:
+    from future.builtins import chr
+except:
+    pass  # python 3.2 not supported
 import logging
 import re
 import sys
@@ -151,7 +155,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
-        super().on_uninstall()
+        Mode.on_uninstall(self)
         self._completer.popup().hide()
         self._completer = None
 

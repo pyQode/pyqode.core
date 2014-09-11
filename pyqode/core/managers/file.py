@@ -2,6 +2,11 @@
 This module contains the file helper implementation
 
 """
+try:
+    from future.builtins import open
+    from future.builtins import str
+except :
+    pass  # python 3.2 not supported
 import locale
 import logging
 import mimetypes
@@ -81,7 +86,7 @@ class FileManager(Manager):
         :param replace_tabs_by_spaces: True to replace tabs by spaces on
             load/save.
         """
-        super().__init__(editor)
+        super(FileManager, self).__init__(editor)
         self._path = ''
         #: File mimetype
         self.mimetype = ''
@@ -232,7 +237,7 @@ class FileManager(Manager):
         # use cached encoding if None were specified
         if encoding is None:
             encoding = self._encoding
-        self.editor.text_saving.emit(path)
+        self.editor.text_saving.emit(str(path))
         # remember cursor position (clean_document might mess up the
         # cursor pos)
         sel_end, sel_start = self._get_selection()
@@ -253,7 +258,7 @@ class FileManager(Manager):
         except (IOError, OSError) as e:
             self._rm(tmp_path)
             self.saving = False
-            self.editor.text_saved.emit(path)
+            self.editor.text_saved.emit(str(path))
             raise e
         else:
             _logger().debug('save to temp file succeeded')
@@ -272,7 +277,7 @@ class FileManager(Manager):
             # reset selection
             if sel_start != sel_end:
                 self._reset_selection(sel_end, sel_start)
-        self.editor.text_saved.emit(path)
+        self.editor.text_saved.emit(str(path))
         self.saving = False
 
     def close(self):

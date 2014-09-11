@@ -3,7 +3,7 @@ from pyqode.qt import QtCore
 from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
 from test.helpers import editor_open
-
+from test.helpers import ensure_visible
 
 def get_panel(editor):
     return editor.panels.get(panels.MarkerPanel)
@@ -24,6 +24,7 @@ def test_marker_properties(editor):
     assert m.position == 1
 
 
+@ensure_visible
 @editor_open(__file__)
 def test_add_marker(editor):
     panel = get_panel(editor)
@@ -31,9 +32,10 @@ def test_add_marker(editor):
                            description='Marker description')
     panel.add_marker(marker)
     QTest.qWait(500)
-    assert panel.marker_for_line(1)[0] == marker
+    assert panel.marker_for_line(1)[0] is not None
 
 
+@ensure_visible
 @editor_open(__file__)
 def test_clear_markers(editor):
     panel = get_panel(editor)

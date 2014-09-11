@@ -40,7 +40,7 @@ class InteractiveConsole(QTextEdit):
     process_finished = Signal(int)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(InteractiveConsole, self).__init__(parent)
         self._stdout_col = QColor("#404040")
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
@@ -216,8 +216,8 @@ class InteractiveConsole(QTextEdit):
             e = self.process.systemEnvironment()
             ev = QProcessEnvironment()
             for v in e:
-                k, *values = v.split('=')
-                ev.insert(k, '='.join(values))
+                values = v.split('=')
+                ev.insert(values[0], '='.join(values[1:]))
             for k, v in env.items():
                 ev.insert(k, v)
             self.process.setProcessEnvironment(ev)
@@ -256,7 +256,7 @@ class InteractiveConsole(QTextEdit):
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
-        super().keyPressEvent(event)
+        super(InteractiveConsole, self).keyPressEvent(event)
 
     def _write_finished(self, exit_code, exit_status):
         if not self._user_stop:

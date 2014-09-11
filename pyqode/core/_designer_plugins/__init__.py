@@ -14,7 +14,7 @@ class WidgetPlugin(QtDesigner.QPyDesignerCustomWidgetPlugin):
         - objectName()
     """
     def __init__(self, parent=None):
-        super().__init__(parent=parent)
+        super(WidgetPlugin, self).__init__(parent=parent)
         self.initialized = False
         print(self.name(), self.includeFile(), self.objectName())
 

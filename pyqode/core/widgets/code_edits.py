@@ -30,7 +30,7 @@ class TextCodeEdit(CodeEdit):
     def __init__(self, parent, server_script,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
-        super().__init__(parent, create_default_actions)
+        super(TextCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args)
 
         # append panels
@@ -70,7 +70,7 @@ class GenericCodeEdit(CodeEdit):
     def __init__(self, parent, server_script,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
-        super().__init__(parent, create_default_actions)
+        super(GenericCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args)
 
         # append panels
@@ -99,4 +99,4 @@ class GenericCodeEdit(CodeEdit):
 
     def setPlainText(self, txt, mime_type, encoding):
         self.syntax_highlighter.set_lexer_from_filename(self.file.path)
-        super().setPlainText(txt, mime_type, encoding)
+        super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)

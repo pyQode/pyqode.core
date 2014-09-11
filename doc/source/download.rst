@@ -9,6 +9,7 @@ Requirements:
 
 You will need to install the following packages yourself:
 
+    - python2 >= 2.7 or python3 >= 3.2
     - setuptools
     - pip
     - PySide or PyQt4 or PyQt5
@@ -69,3 +70,39 @@ Alternatively, you can install directly from master branch using
 
 .. _source archive: https://github.com/pyQode/pyqode.core/archive/master.zip
 .. _github repository: https://github.com/pyQode/pyqode.core
+
+
+Testing
+-------
+
+pyqode.core now has a test suite and measure its coverage.
+
+To run the tests, you must first install tox and pytest::
+
+    $ pip install tox pytest
+
+You might also want to install pytest-cov and pytest-pep8.
+
+Then you can run the tests by running the following command::
+
+    tox
+
+To run the tests for a specifc environment, use the -e option. E.g. to run
+tests with python 2.7 and pyqt4, you would run::
+
+    tox -e py27-pyqt4
+
+
+
+Here is the list of test environments:
+
+- py27-pyqt4
+- py27-pyqt5
+- py32-pyqt4
+- py32-pyqt5
+- py33-pyqt4
+- py33-pyqt5
+- py34-pyqt4
+- py34-pyqt5
+- cov
+- pep8

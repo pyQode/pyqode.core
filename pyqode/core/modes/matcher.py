@@ -72,7 +72,7 @@ class SymbolMatcherMode(Mode):
         self._refresh_decorations()
 
     def __init__(self):
-        super().__init__()
+        super(SymbolMatcherMode, self).__init__()
         self._decorations = []
         self._match_background = QtGui.QBrush(QtGui.QColor('#B4EEB4'))
         self._match_foreground = QtGui.QColor('red')

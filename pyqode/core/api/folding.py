@@ -2,6 +2,7 @@
 This module contains the code folding API.
 
 """
+from __future__ import print_function
 import logging
 import sys
 from pyqode.core.api.utils import TextBlockHelper
@@ -34,7 +35,7 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class FoldDetector:
+class FoldDetector(object):
     """
     Base class for fold detectors.
 
@@ -144,7 +145,7 @@ class IndentFoldDetector(FoldDetector):
         return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
 
-class FoldScope:
+class FoldScope(object):
     """
     Utility class for manipulating foldable code scope (fold/unfold,
     get range, child and parent scopes and so on).

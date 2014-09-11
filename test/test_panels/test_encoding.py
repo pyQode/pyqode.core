@@ -48,7 +48,6 @@ def test_edit_anyway(editor):
     pnl.ui.pushButtonEdit.clicked.emit(True)
     QTest.qWait(1000)
     assert pnl.isVisible() is False
-    assert editor.toPlainText().startswith("b'")
 
 @preserve_editor_config
 def test_cancel(editor):

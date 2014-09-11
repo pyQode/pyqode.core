@@ -73,7 +73,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     """
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super(JsonTcpClient, self).__init__(parent)
         self._port = -1
         self.connected.connect(self._on_connected)
         self.error.connect(self._on_error)
@@ -106,7 +106,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 if self._process and self._process.running:
                     self._terminate_server_process()
                     self.is_connected = False
-                super().close()
+                super(JsonTcpClient, self).close()
                 _logger().info('process terminated')
         except (AttributeError, RuntimeError):
             pass
@@ -319,7 +319,7 @@ class _ServerProcess(QtCore.QProcess):
     Also logs everything that is written to the process' stdout/stderr.
     """
     def __init__(self, parent):
-        super().__init__(parent)
+        super(_ServerProcess, self).__init__(parent)
         self.started.connect(self._on_process_started)
         self.error.connect(self._on_process_error)
         self.finished.connect(self._on_process_finished)

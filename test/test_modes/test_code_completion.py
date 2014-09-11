@@ -2,32 +2,19 @@
 Tests the code completion mode
 """
 import functools
-from pyqode.qt import QtCore, QtWidgets
+
+from pyqode.qt import QtCore
 from pyqode.qt.QtTest import QTest
+
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
-
-from ..helpers import cwd_at, server_path, wait_for_connected
+from ..helpers import server_path, wait_for_connected
 from ..helpers import preserve_editor_config
+from ..helpers import ensure_visible
 
 
 def get_mode(editor):
     return editor.modes.get(modes.CodeCompletionMode)
-
-
-def ensure_visible(func):
-    """
-    Ensures the frontend is connect is connected to the server. If that is not
-    the case, the code completion server is started automatically
-    """
-    @functools.wraps(func)
-    @cwd_at('test')
-    def wrapper(editor, *args, **kwds):
-        QtWidgets.QApplication.setActiveWindow(editor)
-        editor.setFocus(True)
-        editor.setReadOnly(False)
-        return func(editor, *args, **kwds)
-    return wrapper
 
 
 code = '''"""
@@ -39,7 +26,6 @@ Empty module
 
 def ensure_empty(func):
     @functools.wraps(func)
-    @cwd_at('test')
     def wrapper(editor, *args, **kwds):
         editor.file._path = None
         editor.setPlainText(code, 'text/x-python', 'utf-8')
@@ -53,7 +39,6 @@ def ensure_connected(func):
     the case, the code completion server is started automatically
     """
     @functools.wraps(func)
-    @cwd_at('test')
     def wrapper(editor, *args, **kwds):
         if not editor.backend.connected:
             editor.backend.start(server_path())

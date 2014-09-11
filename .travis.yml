@@ -1,43 +1,41 @@
 language: python
 python:
-  - "3.2"
+ - "2.7"
+ - "3.2"
 env:
-  - QT_API=pyqt4
-  - QT_API=pyqt5
-  - PEP8=1
-  - COV=1
+  # we only test interpreters who have native python packages
+  # since those tests are running on ubuntu 12.04, pyqt5 cannot be tested
+  - TOXENV=py27-pyqt4
+  - TOXENV=py32-pyqt4
+  - TOXENV=cov
+  - TOXENV=pep8
 matrix:
+    exclude:
+        - python: "2.7"
+          env: TOXENV=cov
+        - python: "2.7"
+          env: TOXENV=pep8
+        - python: "2.7"
+          env: TOXENV=py32-pyqt4
+        - python: "3.2"
+          env: TOXENV=py27-pyqt4
     allow_failures:
-        - env: COV=1
-        - env: PEP8=1
-        - env: QT_API=pyqt5
+        - env: TOXENV=cov
+        - env: TOXENV=pep8
 virtualenv:
   system_site_packages: true
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-  # used for QT_API=pyqt4, COV and PEP8
+  - sudo apt-get install -qq python-qt4 --fix-missing
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
-  # PyQt5 (won't be available untill travis upgrade to ubuntu 14.04
-  - if [ $QT_API = "pyqt5" ]; then
-    sudo apt-get install -qq python3-pyqt5 --fix-missing;
-    fi
+  - pip install tox
+  - pip install git+https://github.com/pyQode/pyqode.qt.git@develop
 script:
-  - pip install .
-  - if [ $QT_API ]; then
-    python3 runtests.py;
-    fi
-  - if [ $PEP8 ]; then
-    pip install pytest-pep8;
-    python3 runtests.py --pep8 -m pep8;
-    fi
-  - if [ $COV ]; then
-    pip install pytest-cov;
-    python3 runtests.py --cov pyqode;
-    fi
+  - tox
 after_script:
-  - if [ $COV ]; then
-    sudo pip install --quiet coveralls;
+  - if [ $TOXENV == "cov" ]; then
+    pip install --quiet --use-mirrors coveralls;
     coveralls;
     fi

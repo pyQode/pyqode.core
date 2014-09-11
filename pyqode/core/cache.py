@@ -23,7 +23,7 @@ import locale
 from pyqode.qt import QtCore
 
 
-class Cache:
+class Cache(object):
     def __init__(self, suffix=''):
         self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
 

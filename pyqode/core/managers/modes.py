@@ -16,7 +16,7 @@ class ModesManager(Manager):
 
     """
     def __init__(self, editor):
-        super().__init__(editor)
+        super(ModesManager, self).__init__(editor)
         self._modes = {}
 
     def append(self, mode):

@@ -13,6 +13,6 @@ class GenericCodeEdit(widgets.GenericCodeEdit):
     It does not have any language specific feature.
     """
     def __init__(self, parent):
-        super().__init__(
+        super(GenericCodeEdit, self).__init__(
             parent, server_script=os.path.join(os.getcwd(), 'server.exe')
             if hasattr(sys, "frozen") else server.__file__)

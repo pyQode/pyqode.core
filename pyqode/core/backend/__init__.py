@@ -101,8 +101,8 @@ class NotConnected(Exception):
     is requested.
     """
     def __init__(self):
-        super().__init__('Client socket not connected or '
-                         'server not started')
+        super(NotConnected, self).__init__(
+            'Client socket not connected or server not started')
 
 
 __all__ = [

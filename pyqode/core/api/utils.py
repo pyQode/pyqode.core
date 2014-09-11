@@ -121,7 +121,7 @@ class DelayJobRunner(object):
         self._job(*self._args, **self._kwargs)
 
 
-class TextHelper:
+class TextHelper(object):
     """
     Text helper helps you manipulate the content of CodeEdit and extends the
     Qt text api for an easier usage.
@@ -659,7 +659,7 @@ class TextHelper:
         return False
 
 
-class TextBlockHelper:
+class TextBlockHelper(object):
     """
     Helps retrieving the various part of the user state bitmask.
 

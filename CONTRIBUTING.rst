@@ -32,9 +32,8 @@ Please use **PEP8** to style your code (PEP8 compliance is tested Travis CI).
 *You can check pep8 compliance before pushing by running the test suite with
 the --pep8 option*::
 
-    ($ pip3 install pytest-pep8)
-    $ python3 runtests.py --pep8
-
+    ($ pip install tox pytest-pep8)
+    $ tox -e pep8
 
 .. _bug tracker: https://github.com/pyQode/pyqode.core/issues?state=open
 .. _waffle.io: https://waffle.io/pyqode/pyqode.core

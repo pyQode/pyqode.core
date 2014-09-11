@@ -150,7 +150,7 @@ class FoldingPanel(Panel):
 
         :param editor: editor instance on which the mode has been installed to.
         """
-        super().on_install(editor)
+        super(FoldingPanel, self).on_install(editor)
         self.context_menu = QtWidgets.QMenu('Folding', self.editor)
         action = self.action_collapse = QtWidgets.QAction(
             'Collapse', self.context_menu)
@@ -189,7 +189,7 @@ class FoldingPanel(Panel):
         on the folding panel.
 
         """
-        super().paintEvent(event)
+        super(FoldingPanel, self).paintEvent(event)
         painter = QtGui.QPainter(self)
         # Draw background over the selected non collapsed fold region
         if self._mouse_over_line is not None:
@@ -469,7 +469,7 @@ class FoldingPanel(Panel):
 
         :param event: event
         """
-        super().mouseMoveEvent(event)
+        super(FoldingPanel, self).mouseMoveEvent(event)
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
         if line >= 0:
@@ -501,7 +501,7 @@ class FoldingPanel(Panel):
         match the caret scope.
 
         """
-        super().leaveEvent(event)
+        super(FoldingPanel, self).leaveEvent(event)
         QtWidgets.QApplication.restoreOverrideCursor()
         self._highlight_runner.cancel_requests()
         if not self.highlight_caret_scope:

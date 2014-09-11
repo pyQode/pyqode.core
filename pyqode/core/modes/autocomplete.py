@@ -20,7 +20,7 @@ class AutoCompleteMode(Mode):
     MAPPING = {'"': '"', "'": "'", "(": ")", "{": "}", "[": "]"}
 
     def __init__(self):
-        super().__init__()
+        super(AutoCompleteMode, self).__init__()
         self.logger = logging.getLogger(__name__)
         self._ignore_post = False
 

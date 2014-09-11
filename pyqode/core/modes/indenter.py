@@ -19,7 +19,7 @@ class IndenterMode(Mode):
     :attr:`pyqode.core.api.CodeEdit.unindent_requested`.
     """
     def __init__(self):
-        super().__init__()
+        super(IndenterMode, self).__init__()
 
     def on_state_changed(self, state):
         if state:

@@ -8,6 +8,7 @@ import functools
 import platform
 from os.path import abspath
 from os.path import dirname
+from pyqode.qt import QtWidgets
 from pyqode.core.api import CodeEdit, IndentFoldDetector
 from pyqode.core import modes
 from pyqode.core import panels
@@ -207,3 +208,19 @@ def setup_editor(code_edit):
     code_edit.modes.append(modes.WordClickMode())
     code_edit.modes.get(modes.FileWatcherMode).auto_reload = True
     code_edit.syntax_highlighter.fold_detector = IndentFoldDetector()
+
+
+def ensure_visible(func):
+    """
+    Ensures the frontend is connect is connected to the server. If that is not
+    the case, the code completion server is started automatically
+    """
+    @functools.wraps(func)
+    def wrapper(editor, *args, **kwds):
+        QtWidgets.QApplication.setActiveWindow(editor)
+        editor.show()
+        editor.raise_()
+        editor.setFocus(True)
+        editor.setReadOnly(False)
+        return func(editor, *args, **kwds)
+    return wrapper

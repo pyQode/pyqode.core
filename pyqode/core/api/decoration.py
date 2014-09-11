@@ -46,7 +46,7 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
-        super().__init__()
+        super(TextDecoration, self).__init__()
         self.signals = self._TextDecorationSignals()
         self.draw_order = draw_order
         self.tooltip = tooltip

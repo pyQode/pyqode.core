@@ -11,7 +11,7 @@ from pyqode.core.api.utils import DelayJobRunner
 from pyqode.qt import QtCore, QtGui
 
 
-class CheckerMessages:
+class CheckerMessages(object):
     """
     Enumerates the possible checker message types.
     """

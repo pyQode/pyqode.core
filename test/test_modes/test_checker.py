@@ -1,5 +1,7 @@
 import random
 from pyqode.qt.QtTest import QTest
+import sys
+import pytest
 from pyqode.core import modes, panels
 
 from ..helpers import preserve_editor_config, wait_for_connected, editor_open
@@ -37,6 +39,9 @@ def test_checker_message():
 
 @editor_open(__file__)
 @preserve_editor_config
+@pytest.mark.skipif(hasattr(sys, 'real_prefix'),
+                    reason="cannot be tested in virtual envs ("
+                           "check function cannot be imported)")
 def test_request_analysis(editor):
     try:
         mode = get_mode(editor)

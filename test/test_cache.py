@@ -8,16 +8,16 @@ from pyqode.core.cache import Cache
 
 
 def test_preferred_encodings():
-    s = Cache(suffix='-pytest')
-    s.clear()
-    encodings = s.preferred_encodings
+    cache = Cache(suffix='-pytest')
+    cache.clear()
+    encodings = cache.preferred_encodings
     assert len(encodings) == 1
     assert encodings[0] == convert_to_codec_key(
         locale.getpreferredencoding())
     encodings.append('utf_16')
-    s.preferred_encodings = encodings
-    s = Cache(suffix='-pytest')
-    assert 'utf_16' in s.preferred_encodings
+    cache.preferred_encodings = encodings
+    cache2 = Cache(suffix='-pytest')
+    assert 'utf_16' in cache2.preferred_encodings
 
 
 def test_cached_encodings():

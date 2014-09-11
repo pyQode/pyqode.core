@@ -63,9 +63,7 @@ def test_client_server():
     del win
 
 
-@cwd_at('test')
-@require_python2()
-def test_client_server_py2(editor, app):
+def test_client_server_py2(editor):
     """
     Test client/server with a python2 server.
     """

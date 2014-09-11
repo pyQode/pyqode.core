@@ -28,7 +28,7 @@ class EncodingsComboBox(QtWidgets.QComboBox):
         self._refresh_items()
 
     def __init__(self, parent, default_encoding=locale.getpreferredencoding()):
-        super().__init__(parent)
+        super(EncodingsComboBox, self).__init__(parent)
         self._current_encoding = default_encoding
         self._lock = False
         self._refresh_items()
@@ -92,7 +92,7 @@ class EncodingsMenu(QtWidgets.QMenu):
 
     def __init__(self, title='Encodings', parent=None,
                  selected_encoding=locale.getpreferredencoding()):
-        super().__init__(parent)
+        super(EncodingsMenu, self).__init__(parent)
         self.setTitle(title)
         self._group = QtWidgets.QActionGroup(self)
         self._edit_action = None
@@ -150,7 +150,8 @@ class EncodingsContextMenu(EncodingsMenu):
                  selected_encoding=locale.getpreferredencoding()):
         from pyqode.core.api import CodeEdit
         assert isinstance(parent, CodeEdit)
-        super().__init__(title, parent, selected_encoding)
+        super(EncodingsContextMenu, self).__init__(
+            title, parent, selected_encoding)
         self.reload_requested.connect(self._on_reload_requested)
         parent.new_text_set.connect(self._refresh)
         self.parent().add_menu(self)
@@ -162,7 +163,7 @@ class EncodingsContextMenu(EncodingsMenu):
     def _refresh(self):
         self._current_encoding = convert_to_codec_key(
             self.parent().file.encoding)
-        super()._refresh()
+        super(EncodingsContextMenu, self)._refresh()
 
     @QtCore.Slot(str)
     def _on_reload_requested(self, encoding):
