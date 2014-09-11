@@ -139,6 +139,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         _logger().debug('running with python %d.%d.%d', major, minor, build)
         self._process = _ServerProcess(self.parent())
         self._process.started.connect(self._on_process_started)
+        server_script = server_script.replace('.pyc', '.py')
         if not port:
             self._port = self.pick_free_port()
         else:
