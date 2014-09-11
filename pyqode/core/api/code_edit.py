@@ -942,7 +942,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
-        self.setFont(QtGui.QFont(self._font_family, self._font_size + self._zoom_level))
+        self.setFont(QtGui.QFont(self._font_family,
+                                 self._font_size + self._zoom_level))
         p = self.palette()
         p.setColor(QtGui.QPalette.Base, self.background)
         p.setColor(QtGui.QPalette.Text, self.foreground)
@@ -963,7 +964,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             ''' % (self.background.name(), self.foreground.name()))
         else:
             # on linux/osx we just have to set an empty stylesheet to cancel
-            # any previous stylesheet and still keep a correct style for scrollbars
+            # any previous stylesheet and still keep a correct style for
+            # scrollbars
             self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()

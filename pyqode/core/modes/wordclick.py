@@ -70,7 +70,8 @@ class WordClickMode(Mode, QtCore.QObject):
         """ mouse moved callback """
         if event.modifiers() & QtCore.Qt.ControlModifier:
             cursor = TextHelper(self.editor).word_under_mouse_cursor()
-            if not self._cursor or cursor.position() != self._cursor.position():
+            if (not self._cursor or
+                    cursor.position() != self._cursor.position()):
                 self._check_word_cursor(cursor)
             self._cursor = cursor
         else:
