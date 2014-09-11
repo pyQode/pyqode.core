@@ -447,10 +447,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             input_txt = re.sub(r"[\x01-\x1F\x7F]", "", input_txt)
         return input_txt
 
-    @staticmethod
-    def _is_printable_key_event(event):
-        txt = CodeCompletionMode.strip_control_characters(event.text())
-        return len(txt) == 1
+    def _is_printable_key_event(self, event):
+        return (event.text().isalnum() or
+                event.text() in self.editor.word_separators)
 
     @staticmethod
     @memoized
