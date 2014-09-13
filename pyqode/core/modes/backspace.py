@@ -31,6 +31,8 @@ class SmartBackSpaceMode(Mode):
                 cursor.setPosition(pos - 1)
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
+            if spaces == 0:
+                spaces = 1
             for _ in range(spaces):
                 cursor.deletePreviousChar()
             cursor.endEditBlock()
