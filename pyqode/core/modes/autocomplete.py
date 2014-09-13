@@ -54,7 +54,8 @@ class AutoCompleteMode(Mode):
             if event.text() in self.MAPPING.keys():
                 first = event.text()
                 last = self.MAPPING[event.text()]
-                cursor.insertText('%s%s%s' % (first, cursor.selectedText(), last))
+                cursor.insertText('%s%s%s' % (
+                    first, cursor.selectedText(), last))
                 self.editor.setTextCursor(cursor)
                 event.accept()
             else:
