@@ -25,6 +25,7 @@ class OccurrencesHighlighterMode(Mode):
         super(OccurrencesHighlighterMode, self).__init__()
         self._decorations = []
         self.timer = DelayJobRunner()
+        self._sub = None
 
     def on_state_changed(self, state):
         if state:
@@ -40,17 +41,22 @@ class OccurrencesHighlighterMode(Mode):
         self._decorations[:] = []
 
     def _request_highlight(self):
-        if self.editor is not None:
+        sub = TextHelper(self.editor).word_under_cursor(
+            select_whole_word=True).selectedText()
+        if self.editor is not None and sub != self._sub:
             self._clear_decos()
             self.timer.request_job(self._send_request)
 
     def _send_request(self):
+        sub = TextHelper(self.editor).word_under_cursor(
+            select_whole_word=True).selectedText()
         if (self.editor is not None and
-                not self.editor.textCursor().hasSelection()):
+                not self.editor.textCursor().hasSelection() and
+                sub != self._sub):
+            self._sub = sub
             request_data = {
                 'string': self.editor.toPlainText(),
-                'sub': TextHelper(self.editor).word_under_cursor(
-                    select_whole_word=True).selectedText(),
+                'sub': self._sub,
                 'regex': False,
                 'whole_word': True,
                 'case_sensitive': True
