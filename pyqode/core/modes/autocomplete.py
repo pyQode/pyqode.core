@@ -46,8 +46,19 @@ class AutoCompleteMode(Mode):
 
     def _on_key_pressed(self, event):
         txt = event.text()
-        if self.editor.textCursor().hasSelection():
-            self._ignore_post = True
+        cursor = self.editor.textCursor()
+        from pyqode.qt import QtGui
+        assert isinstance(cursor, QtGui.QTextCursor)
+        if cursor.hasSelection():
+            # quoting of selected text
+            if event.text() in self.MAPPING.keys():
+                first = event.text()
+                last = self.MAPPING[event.text()]
+                cursor.insertText('%s%s%s' % (first, cursor.selectedText(), last))
+                self.editor.setTextCursor(cursor)
+                event.accept()
+            else:
+                self._ignore_post = True
             return
         next_char = TextHelper(self.editor).get_right_character()
         self.logger.debug('next char: %s', next_char)
@@ -59,6 +70,5 @@ class AutoCompleteMode(Mode):
                 ignore = True
         if ignore:
             event.accept()
-            self.logger.debug('clear selection and move right')
             TextHelper(self.editor).clear_selection()
             TextHelper(self.editor).move_right()
