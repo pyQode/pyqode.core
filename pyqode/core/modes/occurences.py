@@ -48,12 +48,10 @@ class OccurrencesHighlighterMode(Mode):
             self.timer.request_job(self._send_request)
 
     def _send_request(self):
-        sub = TextHelper(self.editor).word_under_cursor(
-            select_whole_word=True).selectedText()
         if (self.editor is not None and
-                not self.editor.textCursor().hasSelection() and
-                sub != self._sub):
-            self._sub = sub
+                not self.editor.textCursor().hasSelection()):
+            self._sub = TextHelper(self.editor).word_under_cursor(
+                select_whole_word=True).selectedText()
             request_data = {
                 'string': self.editor.toPlainText(),
                 'sub': self._sub,
