@@ -96,6 +96,7 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
+        self.modes.append(modes.SmartBackSpaceMode())
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
 

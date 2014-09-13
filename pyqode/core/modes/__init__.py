@@ -5,6 +5,7 @@ This package contains the core modes.
 """
 from .autocomplete import AutoCompleteMode
 from .autoindent import AutoIndentMode
+from .backspace import SmartBackSpaceMode
 from .caret_line_highlight import CaretLineHighlighterMode
 from .case_converter import CaseConverterMode
 from .checker import CheckerMode
@@ -40,6 +41,7 @@ __all__ = [
     'PygmentsSyntaxHighlighter',
     'PYGMENTS_STYLES',
     'RightMarginMode',
+    'SmartBackSpaceMode'
     'SymbolMatcherMode',
     'WordClickMode',
     'ZoomMode',
