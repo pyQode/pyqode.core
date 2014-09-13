@@ -177,7 +177,7 @@ def finditer_noregex(string, sub, whole_word):
             else:
                 pchar = ' '
             try:
-                nchar = string[start+len(sub)]
+                nchar = string[start + len(sub)]
             except IndexError:
                 nchar = ' '
             if nchar in DocumentWordsProvider.separators and \
@@ -214,7 +214,7 @@ def findalliter(string, sub, regex=False, case_sensitive=False,
                 else:
                     pchar = ' '
                 try:
-                    nchar = string[start+len(sub)]
+                    nchar = string[start + len(sub)]
                 except IndexError:
                     # firsr/last word -> whole word
                     nchar = ' '

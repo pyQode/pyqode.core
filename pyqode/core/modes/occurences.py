@@ -30,7 +30,8 @@ class OccurrencesHighlighterMode(Mode):
         if state:
             self.editor.cursorPositionChanged.connect(self._request_highlight)
         elif state:
-            self.editor.cursorPositionChanged.disconnect(self._request_highlight)
+            self.editor.cursorPositionChanged.disconnect(
+                self._request_highlight)
             self.timer.cancel_requests()
 
     def _clear_decos(self):
