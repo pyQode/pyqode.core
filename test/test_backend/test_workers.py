@@ -1,3 +1,4 @@
+import pytest
 from pyqode.core.backend import workers
 
 
@@ -37,3 +38,54 @@ def test_code_completion_worker():
                 found = True
                 break
     assert found
+
+with open('test/files/foo.py', 'r') as f:
+    foo_py = f.read()
+
+@pytest.mark.parametrize('data, nb_expected', [
+    ({
+        'string': foo_py,
+        'sub': 'import',
+        'regex': False,
+        'whole_word': False,
+        'case_sensitive': True}, 2),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'import',
+        'regex': False,
+        'whole_word': False,
+        'case_sensitive': True}, 3),
+    ({
+        'string': 'import importable;\nimport\n',
+        'sub': 'import',
+        'regex': False,
+        'whole_word': True,
+        'case_sensitive': True}, 2),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'import',
+        'regex': False,
+        'whole_word': True,
+        'case_sensitive': True}, 2),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'mport',
+        'regex': False,
+        'whole_word': True,
+        'case_sensitive': True}, 0),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'Import',
+        'regex': False,
+        'whole_word': True,
+        'case_sensitive': True}, 0),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'Import',
+        'regex': False,
+        'whole_word': True,
+        'case_sensitive': False}, 2)
+])
+def test_find_all(data, nb_expected):
+    status, results = workers.findall(data)
+    assert len(results) == nb_expected
