@@ -201,7 +201,7 @@ def findalliter(string, sub, regex=False, case_sensitive=False,
     :return:
     """
     if not sub:
-        return True, []
+        return
     if regex:
         flags = re.MULTILINE
         if not case_sensitive:
