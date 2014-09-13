@@ -200,6 +200,8 @@ def findalliter(string, sub, regex=False, case_sensitive=False,
     :param whole_word: True to returns only whole words
     :return:
     """
+    if not sub:
+        return True, []
     if regex:
         flags = re.MULTILINE
         if not case_sensitive:
