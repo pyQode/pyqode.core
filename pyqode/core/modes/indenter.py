@@ -2,8 +2,13 @@
 """
 Contains the default indenter.
 """
+import logging
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtGui
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class IndenterMode(Mode):
@@ -73,13 +78,19 @@ class IndenterMode(Mode):
         block = doc.findBlock(cursor.selectionStart())
         assert isinstance(block, QtGui.QTextBlock)
         i = 0
+        _logger().debug('unindent selection: %d lines', nb_lines)
         while i < nb_lines:
             txt = block.text()
+            _logger().debug('line to unindent: %s', txt)
+            _logger().debug('self.editor.use_spaces_instead_of_tabs: %r',
+                            self.editor.use_spaces_instead_of_tabs)
             if self.editor.use_spaces_instead_of_tabs:
                 indentation = (len(txt) - len(txt.lstrip()) -
                                self.editor.min_indent_column)
             else:
                 indentation = len(txt) - len(txt.replace('\t', ''))
+            _logger().debug('unindent line %d: %d spaces (min indent=%d)',
+                            i, indentation, self.editor.min_indent_column)
             if indentation > 0:
                 nb_spaces_to_remove = indentation - (indentation - (
                     indentation % tab_len))
@@ -92,6 +103,8 @@ class IndenterMode(Mode):
             block = block.next()
             i += 1
         cursor.endEditBlock()
+        self.editor.setTextCursor(cursor)
+        return cursor
 
     def indent(self):
         """
@@ -119,24 +132,35 @@ class IndenterMode(Mode):
         """
         Un-indents text at cursor position.
         """
+        _logger().debug('unindent')
         cursor = self.editor.textCursor()
-        assert isinstance(cursor, QtGui.QTextCursor)
+        _logger().info('cursor has selection %r', cursor.hasSelection())
         if cursor.hasSelection():
             self.unindent_selection(cursor)
         else:
             tab_len = self.editor.tab_length
-            cursor.beginEditBlock()
             # count the number of spaces deletable, stop at tab len
             spaces = 0
             trav_cursor = QtGui.QTextCursor(cursor)
-            while spaces < tab_len and not self.atBlockStart(trav_cursor):
+            while spaces < tab_len or trav_cursor.atBlockStart():
                 pos = trav_cursor.position()
                 trav_cursor.movePosition(cursor.Left, cursor.KeepAnchor)
                 char = trav_cursor.selectedText()
                 if char == " ":
                     spaces += 1
+                else:
+                    break
                 trav_cursor.setPosition(pos - 1)
-            cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-            for _ in range(spaces):
-                cursor.deleteChar()
-            cursor.endEditBlock()
+            _logger().debug('unindent by %d space' % spaces)
+            if spaces:
+                cursor.beginEditBlock()
+                for _ in range(spaces):
+                    cursor.deletePreviousChar()
+                cursor.endEditBlock()
+            else:
+                cursor.select(cursor.LineUnderCursor)
+                _logger().info('select whole line and unindent selection')
+                _logger().info(cursor.selectedText())
+                cursor = self.unindent_selection(cursor)
+                cursor.clearSelection()
+                _logger().info(cursor.block().text())
