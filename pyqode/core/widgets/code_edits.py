@@ -50,6 +50,7 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.RightMarginMode())
         self.modes.append(TextCodeEdit.TextSH(self.document()))
         self.modes.append(modes.ZoomMode())
+        self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
@@ -94,6 +95,7 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+        self.modes.append(modes.OccurrencesHighlighterMode())
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
 
