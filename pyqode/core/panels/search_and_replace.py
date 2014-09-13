@@ -7,6 +7,7 @@ from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
 from pyqode.qt import QtCore, QtGui
+from pyqode.core.backend.workers import findall
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
@@ -282,10 +283,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
-            cursor = self.text_helper.word_under_cursor(select_whole_word=True)
             self.job_runner.request_job(
-                self._exec_search, txt, self.editor.document(),
-                cursor, self._search_flags())
+                self._exec_search, txt, self._search_flags())
         else:
             self.job_runner.cancel_requests()
             self._clear_occurrences()
@@ -299,10 +298,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
         :return: List of tuple(int, int)
         """
-        retval = []
-        for occ in self._occurrences:
-            retval.append(occ)
-        return retval
+        return self._occurrences
 
     def select_next(self):
         """
@@ -434,22 +430,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         return Panel.eventFilter(self, obj, event)
 
     def _search_flags(self):
-        """ Returns the user search flag """
-        flags = QtGui.QTextDocument.FindFlags(0)
-        if self.checkBoxCase.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
-        if self.checkBoxWholeWords.isChecked():
-            flags |= QtGui.QTextDocument.FindWholeWords
-        return flags
+        """
+        Returns the user search flag: (regex, case_sensitive, whole_words).
+        """
+        return (False,
+                self.checkBoxCase.isChecked(),
+                self.checkBoxWholeWords.isChecked())
 
-    def _exec_search(self, search_txt, doc, original_cursor, flags):
-        self._occurrences[:] = []
-        self._current_occurrence_index = -1
-        if search_txt:
-            self._occurrences, self._current_occurrence_index = \
-                TextHelper(self.editor).search_text(
-                    original_cursor, search_txt, flags)
-        self.search_finished.emit()
+    def _exec_search(self, sub, flags):
+        regex, case_sensitive, whole_word = flags
+        request_data = {
+            'string': self.editor.toPlainText(),
+            'sub': sub,
+            'regex': regex,
+            'whole_word': whole_word,
+            'case_sensitive': case_sensitive
+        }
+        self.editor.backend.send_request(findall, request_data,
+                                         self._on_results_available)
+
+    def _on_results_available(self, status, results):
+        self._occurrences = results
+        self._on_search_finished()
 
     def _update_label_matches(self):
         self.labelMatches.setText("{0} matches".format(self.cpt_occurences))
