@@ -79,7 +79,7 @@ class DelayJobRunner(object):
         to all requests and cannot be changed afterwards.
         """
         self._timer = QtCore.QTimer()
-        self._interval = delay
+        self.delay = delay
         self._timer.timeout.connect(self._exec_requested_job)
         self._args = []
         self._kwargs = {}
@@ -105,7 +105,7 @@ class DelayJobRunner(object):
         self._job = job
         self._args = args
         self._kwargs = kwargs
-        self._timer.start(self._interval)
+        self._timer.start(self.delay)
 
     def cancel_requests(self):
         """
