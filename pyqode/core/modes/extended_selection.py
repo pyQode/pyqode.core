@@ -30,6 +30,8 @@ class ExtendedSelectionMode(Mode):
     extended_sel_modifier = QtCore.Qt.ControlModifier
     matched_sel_modifier = QtCore.Qt.AltModifier
 
+    continuation_characters = ('.',)
+
     def __init__(self):
         super(ExtendedSelectionMode, self).__init__()
         self.word_sel_shortcut = QtGui.QKeySequence('Ctrl+W')
@@ -93,13 +95,18 @@ class ExtendedSelectionMode(Mode):
         elif modifiers & self.matched_sel_modifier:
             # self.editor.textCursor().clearSelection()
             self.perform_matched_selection(event=event)
+        elif int(modifiers) == QtCore.Qt.NoModifier:
+            self.perform_word_selection(event=event)
 
-    def perform_word_selection(self):
+    def perform_word_selection(self, event=None):
         self.editor.setTextCursor(
             TextHelper(self.editor).word_under_cursor(True))
+        if event:
+            event.accept()
 
     def perform_extended_selection(self, event=None):
-        TextHelper(self.editor).select_extended_word()
+        TextHelper(self.editor).select_extended_word(
+            continuation_chars=self.continuation_characters)
         if event:
             event.accept()
 
