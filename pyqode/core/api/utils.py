@@ -701,6 +701,84 @@ class TextHelper(object):
                                 end_pos - start_pos)
             self._editor.setTextCursor(cursor)
 
+    def match_select(self, ignored_symbols=None):
+        """
+        Selects text between matching quotes or parentheses.
+        """
+        def filter_matching(ignored_symbols, matching):
+            if ignored_symbols is not None:
+                for symbol in matching.keys():
+                    if symbol in ignored_symbols:
+                        matching.pop(symbol)
+            return matching
+
+        def find_opening_symbol(cursor, matching):
+            start_pos = None
+            opening_char = None
+            closed = {k: 0 for k in matching.values()
+                  if k not in ['"', "'"]}
+            # go left
+            stop = False
+            while not stop and not cursor.atStart():
+                cursor.clearSelection()
+                cursor.movePosition(cursor.Left, cursor.KeepAnchor)
+                char = cursor.selectedText()
+                if char in closed.keys():
+                    closed[char] += 1
+                elif char in matching.keys():
+                    opposite = matching[char]
+                    if opposite in closed.keys() and closed[opposite]:
+                        closed[opposite] -= 1
+                        continue
+                    else:
+                        # found opening quote or parenthesis
+                        start_pos = cursor.position() + 1
+                        stop = True
+                        opening_char = char
+            return opening_char, start_pos
+
+        def find_closing_symbol(cursor, matching, opening_char, original_pos):
+            end_pos = None
+            cursor.setPosition(original_pos)
+            rev_matching = {v: k for k, v in matching.items()}
+            opened = {k: 0 for k in rev_matching.values()
+                      if k not in ['"', "'"]}
+            stop = False
+            while not stop and not cursor.atEnd():
+                cursor.clearSelection()
+                cursor.movePosition(cursor.Right, cursor.KeepAnchor)
+                char = cursor.selectedText()
+                if char in opened.keys():
+                    opened[char] += 1
+                elif char in rev_matching.keys():
+                    opposite = rev_matching[char]
+                    if opposite in opened.keys() and opened[opposite]:
+                        opened[opposite] -= 1
+                        continue
+                    elif matching[opening_char] == char:
+                        # found opening quote or parenthesis
+                        end_pos = cursor.position() - 1
+                        stop = True
+            return end_pos
+
+        matching = {'(': ')', '{': '}', '[': ']', '"': '"', "'": "'"}
+        filter_matching(ignored_symbols, matching)
+        cursor = self._editor.textCursor()
+        original_pos = cursor.position()
+        end_pos = None
+        opening_char, start_pos = find_opening_symbol(cursor, matching)
+        if opening_char:
+            end_pos = find_closing_symbol(
+                cursor, matching, opening_char, original_pos)
+        if start_pos and end_pos:
+            cursor.setPosition(start_pos)
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor,
+                                end_pos - start_pos)
+            self._editor.setTextCursor(cursor)
+            return True
+        else:
+            return False
+
 
 class TextBlockHelper(object):
     """

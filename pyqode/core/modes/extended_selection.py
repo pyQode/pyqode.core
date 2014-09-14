@@ -22,9 +22,13 @@ class ExtendedSelectionMode(Mode):
         - line selection: select the whole line
         - select all: select entire document
 
+    Extended selection and matched selection can be performed by combining
+    ctrl or alt with a double click (modifiers are configurable through
+    ``extended_sel_modifier`` or ``matched_sel_modifier``).
+
     """
     extended_sel_modifier = QtCore.Qt.ControlModifier
-    matched_sel_modifier = QtCore.Qt.ShiftModifier
+    matched_sel_modifier = QtCore.Qt.AltModifier
 
     def __init__(self):
         super(ExtendedSelectionMode, self).__init__()
@@ -84,21 +88,25 @@ class ExtendedSelectionMode(Mode):
     def _on_double_click(self, event):
         modifiers = event.modifiers()
         if modifiers & self.extended_sel_modifier:
-            self.perform_extended_selection()
-            event.accept()
+            self.editor.textCursor().clearSelection()
+            self.perform_extended_selection(event=event)
         elif modifiers & self.matched_sel_modifier:
-            self.perform_matched_selection()
-            event.accept()
+            # self.editor.textCursor().clearSelection()
+            self.perform_matched_selection(event=event)
 
     def perform_word_selection(self):
         self.editor.setTextCursor(
             TextHelper(self.editor).word_under_cursor(True))
 
-    def perform_extended_selection(self):
+    def perform_extended_selection(self, event=None):
         TextHelper(self.editor).select_extended_word()
+        if event:
+            event.accept()
 
-    def perform_matched_selection(self):
-        print('matched')
+    def perform_matched_selection(self, event):
+        selected = TextHelper(self.editor).match_select()
+        if selected and event:
+            event.accept()
 
     def perform_line_selection(self):
         TextHelper(self.editor).select_whole_line()
