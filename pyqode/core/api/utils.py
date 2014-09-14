@@ -394,6 +394,11 @@ class TextHelper(object):
         text_cursor.endEditBlock()
         editor._cleaning = False
 
+    def select_whole_line(self, line=None, apply_selection=True):
+        if line is None:
+            line = self.current_line_nbr()
+        return self.select_lines(line, line, apply_selection=apply_selection)
+
     def select_lines(self, start=0, end=-1, apply_selection=True):
         """
         Selects entire lines between start and end line numbers.
@@ -519,23 +524,24 @@ class TextHelper(object):
         indentation = len(line) - len(line.lstrip())
         return indentation
 
-    def get_right_word(self):
+    def get_right_word(self, cursor=None):
         """
         Gets the character on the right of the text cursor.
 
         :return: The word that is on the right of the text cursor.
         """
-        text_cursor = self._editor.textCursor()
-        text_cursor.movePosition(QtGui.QTextCursor.WordRight,
+        if cursor is None:
+            cursor = self._editor.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.WordRight,
                                  QtGui.QTextCursor.KeepAnchor)
-        return text_cursor.selectedText().strip()
+        return cursor.selectedText().strip()
 
-    def get_right_character(self):
+    def get_right_character(self, cursor=None):
         """
         Gets the character that is on the right of the text cursor.
 
         """
-        next_char = self.get_right_word()
+        next_char = self.get_right_word(cursor=cursor)
         if len(next_char):
             next_char = next_char[0]
         else:
@@ -657,6 +663,43 @@ class TextHelper(object):
                                     is_user_obj):
                                 return True
         return False
+
+    def select_extended_word(self, continuation_chars=('.',)):
+        cursor = self._editor.textCursor()
+        original_pos = cursor.position()
+        start_pos = None
+        end_pos = None
+        # go left
+        stop = False
+        seps = self._editor.word_separators + [' ']
+        while not stop:
+            cursor.clearSelection()
+            cursor.movePosition(cursor.Left, cursor.KeepAnchor)
+            char = cursor.selectedText()
+            if cursor.atBlockStart():
+                stop = True
+                start_pos = cursor.position()
+            elif char in seps and char not in continuation_chars:
+                stop = True
+                start_pos = cursor.position() + 1
+        # go right
+        cursor.setPosition(original_pos)
+        stop = False
+        while not stop:
+            cursor.clearSelection()
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor)
+            char = cursor.selectedText()
+            if cursor.atBlockEnd():
+                stop = True
+                end_pos = cursor.position()
+            elif char in seps and char not in continuation_chars:
+                stop = True
+                end_pos = cursor.position() - 1
+        if start_pos and end_pos:
+            cursor.setPosition(start_pos)
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor,
+                                end_pos - start_pos)
+            self._editor.setTextCursor(cursor)
 
 
 class TextBlockHelper(object):

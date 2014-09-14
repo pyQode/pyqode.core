@@ -12,6 +12,7 @@ from .checker import CheckerMode
 from .checker import CheckerMessage
 from .checker import CheckerMessages
 from .code_completion import CodeCompletionMode
+from .extended_selection import ExtendedSelectionMode
 from .filewatcher import FileWatcherMode
 from .indenter import IndenterMode
 from .matcher import SymbolMatcherMode
@@ -34,6 +35,7 @@ __all__ = [
     'CheckerMessage',
     'CheckerMessages',
     'CodeCompletionMode',
+    'ExtendedSelectionMode',
     'FileWatcherMode',
     'IndenterMode',
     'OccurrencesHighlighterMode'
