@@ -1,13 +1,12 @@
 [run]
-source = pyqode
+source = *pyqode
+parallel = true
 omit =
     # qt design ui files
     *_ui.py
     *_rc.py
     *__init__.py
     *pyqode/core/qt/*
-    # at the moment, we do not test misc ui elements such as
-    # widgets and dialogs (how could this be possible to test?)
     *pyqode/core/dialogs/*
     *pyqode/core/_designer_plugins/*
     *pyqode/core/widgets/*
