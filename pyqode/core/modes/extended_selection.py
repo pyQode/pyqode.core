@@ -55,7 +55,7 @@ class ExtendedSelectionMode(Mode):
         self.action_select_matched.triggered.connect(
             self.perform_matched_selection)
 
-        self.line_sel_shortcut = QtGui.QKeySequence('Ctrl+R')
+        self.line_sel_shortcut = QtGui.QKeySequence('Ctrl+Shift+R')
         self.action_select_line = QtWidgets.QAction(self.editor)
         self.action_select_line.setText('Select line')
         self.action_select_line.setShortcut(self.line_sel_shortcut)

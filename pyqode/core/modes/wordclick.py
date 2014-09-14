@@ -43,9 +43,15 @@ class WordClickMode(Mode, QtCore.QObject):
         if state:
             self.editor.mouse_moved.connect(self._on_mouse_moved)
             self.editor.mouse_pressed.connect(self._on_mouse_pressed)
+            self.editor.key_released.connect(self._on_key_released)
         else:
             self.editor.mouse_moved.disconnect(self._on_mouse_moved)
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
+
+    def _on_key_released(self, event):
+        if event.key() == QtCore.Qt.Key_Control:
+            self._clear_selection()
+            self._cursor = None
 
     def _select_word_cursor(self):
         """ Selects the word under the mouse cursor. """
