@@ -36,8 +36,8 @@ def import_class(klass):
     try:
         module = __import__(klass[0:path], globals(), locals(), [class_name])
         klass = getattr(module, class_name)
-    except ImportError:
-        raise ImportError(klass)
+    except ImportError as e:
+        raise ImportError('%s: %s' % (klass, str(e)))
     except AttributeError:
         raise ImportError(klass)
     else:
@@ -124,21 +124,29 @@ class JsonServer(socketserver.TCPServer):
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
-                worker = import_class(data['worker'])
-                if inspect.isclass(worker):
-                    worker = worker()
-                print('worker: %r' % worker)
-                print('data: %r' % data['data'])
-                ret_val = worker(data['data'])
+                response = {'request_id': data['request_id'],
+                            'status': False,
+                            'results': []}
                 try:
-                    status, result = ret_val
-                except TypeError:
-                    # nothing to send
-                    pass
+                    worker = import_class(data['worker'])
+                except ImportError as e:
+                    _logger().exception('Failed to import worker class')
                 else:
-                    response = {'request_id': data['request_id'],
-                                'status': status,
-                                'results': result}
+                    if inspect.isclass(worker):
+                        worker = worker()
+                    print('worker: %r' % worker)
+                    print('data: %r' % data['data'])
+                    ret_val = worker(data['data'])
+                    try:
+                        status, result = ret_val
+                    except TypeError:
+                        # nothing to send
+                        pass
+                    else:
+                        response = {'request_id': data['request_id'],
+                                    'status': status,
+                                    'results': result}
+                finally:
                     print('sending response: %r' % response)
                     self.send(response)
             except:
