@@ -31,8 +31,13 @@ install:
   - sudo apt-get install -qq python-qt4 --fix-missing
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
   - pip install tox
+  - pip install pytest-cov
 script:
-  - tox
+  - if [ $TOXENV == "cov" ]; then
+       py.test --cov pyqode --cov-report term
+    else
+       tox
+    fi
 after_script:
   - if [ $TOXENV == "cov" ]; then
     pip install --quiet --use-mirrors coveralls;
