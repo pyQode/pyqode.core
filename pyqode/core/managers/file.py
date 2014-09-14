@@ -98,6 +98,12 @@ class FileManager(Manager):
         self.opening = False
         #: Saving flag. Set to while saving the editor content to a file.
         self.saving = True
+        #: If True, the file is saved to a temporary file first. If the save
+        #: went fine, the temporary file is renamed to the final filename.
+        self.safe_save = True
+        #: True to clean trailing whitespaces of changed lines. Default is
+        #: True
+        self.clean_trailing_whitespaces = True
 
     @staticmethod
     def get_mimetype(path):
@@ -240,13 +246,17 @@ class FileManager(Manager):
         self.editor.text_saving.emit(str(path))
         # remember cursor position (clean_document might mess up the
         # cursor pos)
-        sel_end, sel_start = self._get_selection()
-        TextHelper(self.editor).clean_document()
+        if self.clean_trailing_whitespaces:
+            sel_end, sel_start = self._get_selection()
+            TextHelper(self.editor).clean_document()
         plain_text = self.editor.toPlainText()
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
-        tmp_path = path + '~'
+        if self.safe_save:
+            tmp_path = path + '~'
+        else:
+            tmp_path = path
         try:
             _logger().debug('saving editor content to temp file: %s', path)
             with open(tmp_path, 'w', encoding=encoding) as file:
@@ -264,19 +274,21 @@ class FileManager(Manager):
             _logger().debug('save to temp file succeeded')
             Cache().set_file_encoding(path, encoding)
             self._encoding = encoding
-            # remove path and rename temp file
-            _logger().debug('rename %s to %s', tmp_path, path)
-            self._rm(path)
-            os.rename(tmp_path, path)
-            self._rm(tmp_path)
+            if self.safe_save:
+                # remove path and rename temp file, if safe save is on
+                _logger().debug('rename %s to %s', tmp_path, path)
+                self._rm(path)
+                os.rename(tmp_path, path)
+                self._rm(tmp_path)
             # reset dirty flags
             self.editor._original_text = plain_text
             self.editor.dirty = False
             # remember path for next save
             self._path = path
             # reset selection
-            if sel_start != sel_end:
-                self._reset_selection(sel_end, sel_start)
+            if self.clean_trailing_whitespaces:
+                if sel_start != sel_end:
+                    self._reset_selection(sel_end, sel_start)
         self.editor.text_saved.emit(str(path))
         self.saving = False
 
