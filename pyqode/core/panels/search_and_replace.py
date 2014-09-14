@@ -6,7 +6,7 @@ from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
-from pyqode.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui, QtWidgets
 from pyqode.core.backend.workers import findall
 
 
@@ -162,6 +162,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.toolButtonClose.setIcon(icon)
         self.toolButtonClose.setIconSize(icon_size)
 
+        self.menu = QtWidgets.QMenu(self.editor)
+        self.menu.setTitle('Search')
+        self.menu.menuAction().setIcon(self.actionSearch.icon())
+        self.menu.addAction(self.actionSearch)
+        self.menu.addAction(self.actionActionSearchAndReplace)
+        self.menu.addAction(self.actionFindNext)
+        self.menu.addAction(self.actionFindPrevious)
+
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
         self._fg = QtGui.QColor('black')
@@ -181,11 +189,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     def on_state_changed(self, state):
         super(SearchAndReplacePanel, self).on_state_changed(state)
         if state:
-            # append menus
-            self.editor.add_action(self.actionSearch)
-            self.editor.add_action(self.actionActionSearchAndReplace)
-            self.editor.add_action(self.actionFindNext)
-            self.editor.add_action(self.actionFindPrevious)
+            # menu
+            self.editor.add_action(self.menu.menuAction())
             # requestSearch slot
             self.editor.textChanged.connect(self.request_search)
             self.lineEditSearch.textChanged.connect(self.request_search)
@@ -203,14 +208,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.lineEditReplace.textChanged.connect(self._update_buttons)
             self.search_finished.connect(self._on_search_finished)
         else:
-            # remove menus
-            if self._separator is not None:
-                self.editor.remove_action(self._separator)
-            self.editor.remove_action(self.actionSearch)
-            self.editor.remove_action(
-                self.actionActionSearchAndReplace)
-            self.editor.remove_action(self.actionFindNext)
-            self.editor.remove_action(self.actionFindPrevious)
+            self.editor.remove_action(self.menu.menuAction())
             # requestSearch slot
             self.editor.textChanged.disconnect(self.request_search)
             self.lineEditSearch.textChanged.disconnect(self.request_search)

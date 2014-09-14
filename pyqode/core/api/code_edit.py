@@ -55,6 +55,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     mouse_pressed = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted when a mouse button is released
     mouse_released = QtCore.Signal(QtGui.QMouseEvent)
+    #: Signal emitted when a mouse double click event occured
+    mouse_double_clicked = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted on a wheel event
     mouse_wheel_activated = QtCore.Signal(QtGui.QWheelEvent)
     #: Signal emitted at the end of the key_pressed event
@@ -443,6 +445,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._actions.append(action)
         super(CodeEdit, self).addAction(action)
 
+    def insert_action(self, action, prev_action):
+        index = self._actions.index(prev_action)
+        self._actions.insert(index, action)
+
     def actions(self):
         """
         Returns the list of actions/sepqrators of the context menu.
@@ -473,6 +479,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.removeAction(action)
 
     def add_menu(self, menu):
+        """
+        Adds a menu to the editor context menu.
+
+        Menu are put at the bottom of the context menu.
+
+        .. note:: to add a menu in the middle of the context menu, you can
+            always add its menuAction().
+
+        :param menu: menu to add
+        """
         self._menus.append(menu)
         self.addActions(menu.actions())
 
@@ -651,6 +667,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             event.setAccepted(initial_state)
             super(CodeEdit, self).keyReleaseEvent(event)
 
+    def mouseDoubleClickEvent(self, event):
+        initial_state = event.isAccepted()
+        event.ignore()
+        self.mouse_double_clicked.emit(event)
+        if not event.isAccepted():
+            event.setAccepted(initial_state)
+            super(CodeEdit, self).mouseDoubleClickEvent(event)
+
     def focusInEvent(self, event):
         """
         Overrides focusInEvent to emits the focused_in signal
@@ -766,10 +790,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :return: QMenu
         """
         mnu = QtWidgets.QMenu()
+        mnu.addActions(self._actions)
+        mnu.addSeparator()
         for menu in self._menus:
             mnu.addMenu(menu)
-        mnu.addSeparator()
-        mnu.addActions(self._actions)
         return mnu
 
     def _show_context_menu(self, point):

@@ -45,14 +45,15 @@ class CaseConverterMode(Mode):
         self.action_to_lower.setShortcut('Ctrl+U')
         self.action_to_upper.setText('Convert to UPPER CASE')
         self.action_to_upper.setShortcut('Ctrl+Shift+U')
+        self.menu = QtWidgets.QMenu('Case', self.editor)
+        self.menu.addAction(self.action_to_lower)
+        self.menu.addAction(self.action_to_upper)
         self._actions_created = True
 
     def on_state_changed(self, state):
         if state:
             if not self._actions_created:
                 self._create_actions()
-            self.editor.add_action(self.action_to_lower)
-            self.editor.add_action(self.action_to_upper)
+            self.editor.add_menu(self.menu)
         else:
-            self.editor.remove_action(self.action_to_lower)
-            self.editor.remove_action(self.action_to_upper)
+            self.editor.remove_menu(self.menu)
