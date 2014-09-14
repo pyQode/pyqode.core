@@ -21,11 +21,52 @@ class OccurrencesHighlighterMode(Mode):
     def delay(self, value):
         self.timer.delay = value
 
+    @property
+    def background(self):
+        """
+        Background or underline color (if underlined is True).
+        """
+        return self._background
+
+    @background.setter
+    def background(self, value):
+        self._background = value
+
+    @property
+    def foreground(self):
+        """
+        Foreground color of occurences, not used if underlined is True.
+        """
+        return self._foreground
+
+    @foreground.setter
+    def foreground(self, value):
+        self._foreground = value
+
+    @property
+    def underlined(self):
+        """
+        True to use to underlined occurrences instead of
+        changing the background. Default is True.
+
+        If this mode is ON, the foreground color is ignored, the
+        background color is then used as the underline color.
+
+        """
+        return self._underlined
+
+    @underlined.setter
+    def underlined(self, value):
+        self._underlined = value
+
     def __init__(self):
         super(OccurrencesHighlighterMode, self).__init__()
         self._decorations = []
         self.timer = DelayJobRunner(delay=1000)
         self._sub = None
+        self._background = QtGui.QColor('#80CC80')
+        self._foreground = QtGui.QColor('#404040')
+        self._underlined = True
 
     def on_state_changed(self, state):
         if state:
@@ -46,13 +87,16 @@ class OccurrencesHighlighterMode(Mode):
                 select_whole_word=True).selectedText()
             if sub != self._sub:
                 self._clear_decos()
-                self.timer.request_job(self._send_request)
+                if len(sub) > 1:
+                    self.timer.request_job(self._send_request)
 
     def _send_request(self):
-        if (self.editor is not None and
-                not self.editor.textCursor().hasSelection()):
-            self._sub = TextHelper(self.editor).word_under_cursor(
-                select_whole_word=True).selectedText()
+        if self.editor is None:
+            return
+        cursor = self.editor.textCursor()
+        self._sub = TextHelper(self.editor).word_under_cursor(
+            select_whole_word=True).selectedText()
+        if not cursor.hasSelection() or cursor.selectedText() == self._sub:
             request_data = {
                 'string': self.editor.toPlainText(),
                 'sub': self._sub,
@@ -71,8 +115,11 @@ class OccurrencesHighlighterMode(Mode):
             for start, end in results:
                 deco = TextDecoration(self.editor.textCursor(),
                                       start_pos=start, end_pos=end)
-                deco.set_background(QtGui.QBrush(QtGui.QColor('#80CC80')))
-                deco.set_foreground(QtGui.QColor('#404040'))
+                if self.underlined:
+                    deco.set_as_underlined(self._background)
+                else:
+                    deco.set_background(QtGui.QBrush(self._background))
+                    deco.set_foreground(self._foreground)
                 deco.draw_order = 3
                 self.editor.decorations.append(deco)
                 self._decorations.append(deco)
