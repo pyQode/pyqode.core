@@ -38,6 +38,7 @@ install:
     fi
 script:
   - if [ $TOXENV == "cov" ]; then
+       pip install -e .
        py.test --cov pyqode --cov-report term;
     else
        tox;
