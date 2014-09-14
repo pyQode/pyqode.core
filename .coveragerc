@@ -7,6 +7,7 @@ omit =
     *_rc.py
     *__init__.py
     pyqode/core/qt/*
+    pyqode/core/styles/*
     pyqode/core/dialogs/*
     pyqode/core/_designer_plugins/*
     pyqode/core/widgets/*
