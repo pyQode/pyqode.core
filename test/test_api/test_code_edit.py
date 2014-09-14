@@ -36,9 +36,7 @@ def test_set_plain_text(editor):
 @editor_open(__file__)
 @log_test_name
 def test_actions(editor):
-    # 13 default shortcuts
-    nb_actions_expected = 21  # 13 default actions + search panel actions + case converter,...
-    assert len(editor.actions()) >= nb_actions_expected
+    assert len(editor.actions())
     nb_actions_expected = len(editor.actions())
     action = QtWidgets.QAction('my_action', editor)
     editor.add_action(action)
