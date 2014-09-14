@@ -6,11 +6,11 @@ omit =
     *_ui.py
     *_rc.py
     *__init__.py
-    pyqode/core/qt/*
-    pyqode/core/styles/*
-    pyqode/core/dialogs/*
-    pyqode/core/_designer_plugins/*
-    pyqode/core/widgets/*
+    *pyqode/core/qt/*
+    *pyqode/core/styles/*
+    *pyqode/core/dialogs/*
+    *pyqode/core/_designer_plugins/*
+    *pyqode/core/widgets/*
 
 [report]
 # Regexes for lines to exclude from consideration
