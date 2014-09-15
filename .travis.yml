@@ -44,7 +44,7 @@ script:
         git checkout develop;
         pip install -e .;
         cd ..;
-        pip install .;
+        pip install -e .;
         py.test --cov pyqode --cov-report=term;
     else
         tox;
