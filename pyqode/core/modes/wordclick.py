@@ -5,7 +5,7 @@ This module contains the WordClickMode
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtCore, QtGui
-from pyqode.core.api import TextHelper
+from pyqode.core.api import TextHelper, DelayJobRunner
 
 
 class WordClickMode(Mode, QtCore.QObject):
@@ -34,6 +34,7 @@ class WordClickMode(Mode, QtCore.QObject):
         self._previous_cursor_end = -1
         self._deco = None
         self._cursor = None
+        self._timer = DelayJobRunner(delay=200)
 
     def on_state_changed(self, state):
         """
@@ -44,9 +45,13 @@ class WordClickMode(Mode, QtCore.QObject):
             self.editor.mouse_moved.connect(self._on_mouse_moved)
             self.editor.mouse_pressed.connect(self._on_mouse_pressed)
             self.editor.key_released.connect(self._on_key_released)
+            self.editor.mouse_double_clicked.connect(self._on_mouse_double_clicked)
         else:
             self.editor.mouse_moved.disconnect(self._on_mouse_moved)
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
+
+    def _on_mouse_double_clicked(self):
+        self._timer.cancel_requests()
 
     def _on_key_released(self, event):
         if event.key() == QtCore.Qt.Key_Control:
@@ -92,7 +97,8 @@ class WordClickMode(Mode, QtCore.QObject):
         if event.button() == 1 and self._deco:
             cursor = TextHelper(self.editor).word_under_mouse_cursor()
             if cursor and cursor.selectedText():
-                self.word_clicked.emit(cursor)
+                self._timer.request_job(
+                    self.word_clicked.emit, cursor)
 
     def _add_decoration(self, cursor):
         """
