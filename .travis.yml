@@ -30,11 +30,27 @@ before_install:
 install:
   - sudo apt-get install -qq python-qt4 --fix-missing
   - sudo apt-get install -qq python3-pyqt4 --fix-missing
-  - pip install tox
+  - if [ $TOXENV == "cov" ]; then
+        pip install pytest;
+        pip install pytest-cov;
+    else
+        pip install tox;
+    fi
 script:
-  - tox
+  # note we run coverage without tox, otherwise no data can be collected.
+  - if [ $TOXENV == "cov" ]; then
+        git clone https://github.com/pyQode/pyqode.qt.git;
+        cd pyqode.qt;
+        git checkout develop;
+        pip install -e .;
+        cd ..;
+        pip install .;
+        py.test --cov pyqode --cov-report=term;
+    else
+        tox;
+    fi
 after_script:
   - if [ $TOXENV == "cov" ]; then
-    pip install --quiet --use-mirrors coveralls;
-    coveralls;
+        pip install --quiet --use-mirrors coveralls;
+        coveralls;
     fi
