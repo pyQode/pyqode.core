@@ -1,6 +1,5 @@
 [run]
 source = pyqode
-parallel = true
 omit =
     # qt design ui files
     *_ui.py
