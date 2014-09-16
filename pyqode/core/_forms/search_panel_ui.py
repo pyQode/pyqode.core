@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/forms/search_panel.ui'
+# Form implementation generated from reading ui file '/home/colin/pyqode/core/forms/search_panel.ui'
 #
-# Created: Mon Aug 11 09:22:20 2014
+# Created: Tue Sep 16 08:24:25 2014
 #      by: PyQt5 UI code generator 5.3.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from pyqode.core.qt import QtCore, QtGui, QtWidgets
 class Ui_SearchPanel(object):
     def setupUi(self, SearchPanel):
         SearchPanel.setObjectName("SearchPanel")
-        SearchPanel.resize(692, 94)
+        SearchPanel.resize(732, 90)
         SearchPanel.setStyleSheet("")
         self.verticalLayout = QtWidgets.QVBoxLayout(SearchPanel)
         self.verticalLayout.setSpacing(0)
@@ -44,7 +44,7 @@ class Ui_SearchPanel(object):
         self.labelSearch.setScaledContents(True)
         self.labelSearch.setObjectName("labelSearch")
         self.horizontalLayout.addWidget(self.labelSearch)
-        self.lineEditSearch = QtWidgets.QLineEdit(self.widgetSearch)
+        self.lineEditSearch = PromptLineEdit(self.widgetSearch)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -67,6 +67,9 @@ class Ui_SearchPanel(object):
         self.toolButtonNext.setIcon(icon1)
         self.toolButtonNext.setObjectName("toolButtonNext")
         self.horizontalLayout.addWidget(self.toolButtonNext)
+        self.checkBoxRegex = QtWidgets.QCheckBox(self.widgetSearch)
+        self.checkBoxRegex.setObjectName("checkBoxRegex")
+        self.horizontalLayout.addWidget(self.checkBoxRegex)
         self.checkBoxCase = QtWidgets.QCheckBox(self.widgetSearch)
         self.checkBoxCase.setStyleSheet("")
         self.checkBoxCase.setObjectName("checkBoxCase")
@@ -99,7 +102,7 @@ class Ui_SearchPanel(object):
         self.labelReplace.setScaledContents(True)
         self.labelReplace.setObjectName("labelReplace")
         self.horizontalLayout_2.addWidget(self.labelReplace)
-        self.lineEditReplace = QtWidgets.QLineEdit(self.widgetReplace)
+        self.lineEditReplace = PromptLineEdit(self.widgetReplace)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -153,6 +156,7 @@ class Ui_SearchPanel(object):
     def retranslateUi(self, SearchPanel):
         _translate = QtCore.QCoreApplication.translate
         SearchPanel.setWindowTitle(_translate("SearchPanel", "Form"))
+        self.checkBoxRegex.setText(_translate("SearchPanel", "Regex"))
         self.checkBoxCase.setText(_translate("SearchPanel", "Match case"))
         self.checkBoxWholeWords.setText(_translate("SearchPanel", "Whole words"))
         self.labelMatches.setText(_translate("SearchPanel", "0 matches"))
@@ -171,4 +175,5 @@ class Ui_SearchPanel(object):
         self.actionFindPrevious.setToolTip(_translate("SearchPanel", "Find previous occurrence (upward)"))
         self.actionFindPrevious.setShortcut(_translate("SearchPanel", "Shift+F3"))
 
+from pyqode.core.widgets import PromptLineEdit
 from . import pyqode_core_rc

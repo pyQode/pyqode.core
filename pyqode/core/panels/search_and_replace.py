@@ -2,6 +2,8 @@
 """
 This module contains the search and replace panel
 """
+import re
+import sre_constants
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
@@ -109,6 +111,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
+        self.lineEditReplace.prompt_text = ' Replace'
         #: Occurrences counter
         self.cpt_occurences = 0
         self._previous_stylesheet = ""
@@ -196,6 +199,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.lineEditSearch.textChanged.connect(self.request_search)
             self.checkBoxCase.stateChanged.connect(self.request_search)
             self.checkBoxWholeWords.stateChanged.connect(self.request_search)
+            self.checkBoxRegex.stateChanged.connect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.connect(self.select_next)
             self.actionFindNext.triggered.connect(self.select_next)
@@ -215,6 +219,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxCase.stateChanged.disconnect(self.request_search)
             self.checkBoxWholeWords.stateChanged.disconnect(
                 self.request_search)
+            self.checkBoxRegex.stateChanged.disconnect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.disconnect(self.select_next)
             self.actionFindNext.triggered.disconnect(self.select_next)
@@ -278,6 +283,15 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :param txt: The text to replace. If None, the content of lineEditSearch
                     is used instead.
         """
+        if self.checkBoxRegex.isChecked():
+            try:
+                re.compile(self.lineEditSearch.text(), re.DOTALL)
+            except sre_constants.error as e:
+                self._show_error(e)
+                return
+            else:
+                self._show_error(None)
+
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
@@ -287,6 +301,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.job_runner.cancel_requests()
             self._clear_occurrences()
             self._on_search_finished()
+
+    @staticmethod
+    def _set_widget_background_color(widget, color):
+        """
+        Changes the base color of a widget (background).
+        :param widget: widget to modify
+        :param color: the color to apply
+        """
+        pal = widget.palette()
+        pal.setColor(pal.Base, color)
+        widget.setPalette(pal)
+
+    def _show_error(self, error):
+        if error:
+            self._set_widget_background_color(
+                self.lineEditSearch, QtGui.QColor('#FFCCCC'))
+            self.lineEditSearch.setToolTip(str(error))
+        else:
+            self._set_widget_background_color(
+                self.lineEditSearch, self.palette().color(
+                    self.palette().Base))
+            self.lineEditSearch.setToolTip('')
 
     def get_occurences(self):
         """
@@ -431,7 +467,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         """
         Returns the user search flag: (regex, case_sensitive, whole_words).
         """
-        return (False,
+        return (self.checkBoxRegex.isChecked(),
                 self.checkBoxCase.isChecked(),
                 self.checkBoxWholeWords.isChecked())
 
