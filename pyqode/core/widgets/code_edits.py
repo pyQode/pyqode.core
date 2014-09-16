@@ -10,8 +10,6 @@ This module contains core code edits:
 import sys
 from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
     IndentFoldDetector
-from pyqode.core import panels
-from pyqode.core import modes
 
 
 class TextCodeEdit(CodeEdit):
@@ -30,6 +28,8 @@ class TextCodeEdit(CodeEdit):
     def __init__(self, parent, server_script,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
+        from pyqode.core import panels
+        from pyqode.core import modes
         super(TextCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args)
 
@@ -72,6 +72,9 @@ class GenericCodeEdit(CodeEdit):
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
         super(GenericCodeEdit, self).__init__(parent, create_default_actions)
+        from pyqode.core import panels
+        from pyqode.core import modes
+
         self.backend.start(server_script, interpreter, args)
 
         # append panels

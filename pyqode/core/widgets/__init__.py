@@ -23,6 +23,7 @@ from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
 from pyqode.core.widgets.menu_recents import RecentFilesManager
 from pyqode.core.widgets.tabs import TabWidget
+from pyqode.core.widgets.prompt_line_edit import PromptLineEdit
 
 
 __all__ = [
@@ -35,5 +36,6 @@ __all__ = [
     'EncodingsMenu',
     'EncodingsContextMenu',
     'TextCodeEdit',
-    'GenericCodeEdit'
+    'GenericCodeEdit',
+    'PromptLineEdit'
 ]
