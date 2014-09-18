@@ -84,7 +84,25 @@ with open('test/files/foo.py', 'r') as f:
         'sub': 'Import',
         'regex': False,
         'whole_word': True,
-        'case_sensitive': False}, 2)
+        'case_sensitive': False}, 2),
+    ({
+        'string': 'import importable;\nimport',
+        'sub': 'Import',
+        'regex': True,
+        'whole_word': True,
+        'case_sensitive': False}, 2),
+    ({
+        'string': 'super().__init__(foo, eggs)\nsuper(Foo,self).__init__()',
+        'sub': 'super\(\).',
+        'regex': True,
+        'whole_word': False,
+        'case_sensitive': False}, 1),
+    ({
+        'string': 'super().__init__(foo, eggs)\nsuper(Foo,self).__init__()',
+        'sub': '',
+        'regex': True,
+        'whole_word': False,
+        'case_sensitive': False}, 0)
 ])
 def test_find_all(data, nb_expected):
     status, results = workers.findall(data)

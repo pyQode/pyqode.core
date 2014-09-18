@@ -233,7 +233,7 @@ def test_search_text(editor):
     occurences, index = TextHelper(editor).search_text(
         editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
-    assert len(occurences) == 11
+    assert len(occurences) == 12
 
 
 @editor_open(__file__)
@@ -255,3 +255,53 @@ def test_get_mimetype(editor):
     assert managers.FileManager.get_mimetype('file.py') == 'text/x-python'
     assert managers.FileManager.get_mimetype('file.ui') == 'text/xml'
     assert managers.FileManager.get_mimetype('file.foo') == 'text/x-plain'
+
+
+@editor_open(__file__)
+def test_prev_line_text(editor):
+    TextHelper(editor).goto_line(1)
+    assert TextHelper(editor).previous_line_text() == '# -*- coding: utf-8 -*-'
+
+
+@editor_open(__file__)
+def test_select_whole_line(editor):
+    cursor = TextHelper(editor).select_whole_line(2)
+    assert isinstance(cursor, QtGui.QTextCursor)
+    assert cursor.hasSelection()
+    assert cursor.selectionStart() == 28
+    assert cursor.selectionEnd() == 99
+
+
+def test_extended_selection(editor):
+    for line, column, text in [(8, 15, 'pyqode.core.api.utils'),
+                               (8, 1, 'from')]:
+        editor.file.open(__file__)
+        QTest.qWait(1000)
+        cursor = editor.textCursor()
+        assert not cursor.hasSelection()
+        helper = TextHelper(editor)
+        helper.goto_line(line, column)
+        assert helper.cursor_position()[0] == line
+        assert helper.cursor_position()[1] == column
+        cursor = editor.textCursor()
+        assert text in cursor.block().text()
+        helper.select_extended_word()
+        cursor = editor.textCursor()
+        assert cursor.hasSelection()
+        assert cursor.selectedText() == text
+
+
+@editor_open(__file__)
+def test_matched_selection(editor):
+    line, column, text = 233, 14, '''        editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively'''
+    cursor = editor.textCursor()
+    assert not cursor.hasSelection()
+    helper = TextHelper(editor)
+    helper.goto_line(line, column)
+    assert helper.cursor_position()[0] == line
+    assert helper.cursor_position()[1] == column
+    cursor = editor.textCursor()
+    helper.match_select()
+    cursor = editor.textCursor()
+    assert cursor.hasSelection()
+    assert text in cursor.selectedText()

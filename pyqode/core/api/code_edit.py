@@ -999,13 +999,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # get nb char to first significative char
         delta = (self.textCursor().positionInBlock() -
                  TextHelper(self).line_indent())
+        cursor = self.textCursor()
+        move = QtGui.QTextCursor.MoveAnchor
+        if select:
+            move = QtGui.QTextCursor.KeepAnchor
         if delta:
-            cursor = self.textCursor()
-            move = QtGui.QTextCursor.MoveAnchor
-            if select:
-                move = QtGui.QTextCursor.KeepAnchor
-            cursor.movePosition(
-                QtGui.QTextCursor.Left, move, delta)
-            self.setTextCursor(cursor)
-            if event:
-                event.accept()
+            cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
+        else:
+            cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)
+        self.setTextCursor(cursor)
+        if event:
+            event.accept()
+

@@ -32,7 +32,7 @@ class SmartBackSpaceMode(Mode):
             cursor = self.editor.textCursor()
             cursor.beginEditBlock()
             if spaces == 0:
-                spaces = 1
+                spaces = 1  # no space before cursor, we need to eat 1 char
             for _ in range(spaces):
                 cursor.deletePreviousChar()
             cursor.endEditBlock()

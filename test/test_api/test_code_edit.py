@@ -50,6 +50,8 @@ def test_actions(editor):
 @editor_open(__file__)
 @log_test_name
 def test_duplicate_line(editor):
+    QTest.qWait(1000)
+    TextHelper(editor).goto_line(0)
     editor.duplicate_line()
     assert editor.toPlainText().startswith(get_first_line(editor) + '\n' +
                                            get_first_line(editor))
@@ -345,11 +347,26 @@ def reject_mbox():
             QTest.keyPress(w, QtCore.Qt.Key_Escape)
 
 
-# @log_test_name
-# def test_goto_line_dlg(editor):
-#     QtCore.QTimer.singleShot(1500, accept_mbox)
-#     editor.goto_line()
-#     QTest.qWait(1000)
-#     QtCore.QTimer.singleShot(1500, reject_mbox)
-#     editor.goto_line()
-#     QTest.qWait(1000)
+def test_goto_line_dlg(editor):
+    if os.environ['QT_API'] != 'pyqt5':
+        # accept_mbox/reject_mbox crash with pyqt5. I still don't understand
+        # why but this looks like a bug in pyqt5
+        QtCore.QTimer.singleShot(1500, accept_mbox)
+        editor.goto_line()
+        QTest.qWait(1000)
+        QtCore.QTimer.singleShot(1500, reject_mbox)
+        editor.goto_line()
+        QTest.qWait(1000)
+
+
+@editor_open(__file__)
+def test_do_home_key(editor):
+    QTest.qWait(2000)
+    helper = TextHelper(editor)
+    helper.goto_line(364, 29)
+    assert editor.textCursor().positionInBlock() == 29
+    assert TextHelper(editor).line_indent() == 4
+    editor._do_home_key()
+    assert editor.textCursor().positionInBlock() == 4
+    editor._do_home_key()
+    assert editor.textCursor().positionInBlock() == 0

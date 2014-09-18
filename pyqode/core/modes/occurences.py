@@ -71,7 +71,7 @@ class OccurrencesHighlighterMode(Mode):
     def on_state_changed(self, state):
         if state:
             self.editor.cursorPositionChanged.connect(self._request_highlight)
-        elif state:
+        else:
             self.editor.cursorPositionChanged.disconnect(
                 self._request_highlight)
             self.timer.cancel_requests()

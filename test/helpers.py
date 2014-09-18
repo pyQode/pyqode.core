@@ -208,6 +208,9 @@ def setup_editor(code_edit):
     code_edit.modes.append(modes.WordClickMode())
     code_edit.modes.get(modes.FileWatcherMode).auto_reload = True
     code_edit.syntax_highlighter.fold_detector = IndentFoldDetector()
+    code_edit.modes.append(modes.SmartBackSpaceMode())
+    code_edit.modes.append(modes.ExtendedSelectionMode())
+    code_edit.modes.append(modes.OccurrencesHighlighterMode())
 
 
 def ensure_visible(func):

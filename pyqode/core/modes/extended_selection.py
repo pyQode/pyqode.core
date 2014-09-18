@@ -77,9 +77,13 @@ class ExtendedSelectionMode(Mode):
 
     def on_install(self, editor):
         super(ExtendedSelectionMode, self).on_install(editor)
-        self.editor.remove_action(self.editor.action_select_all)
-        self.editor.insert_action(self.create_menu().menuAction(),
-                                  self.editor.action_duplicate_line)
+        try:
+            self.editor.remove_action(self.editor.action_select_all)
+        except ValueError:
+            pass
+        else:
+            self.editor.insert_action(self.create_menu().menuAction(),
+                                      self.editor.action_duplicate_line)
 
     def on_state_changed(self, state):
         if state:
@@ -88,6 +92,7 @@ class ExtendedSelectionMode(Mode):
             self.editor.mouse_double_clicked.disconnect(self._on_double_click)
 
     def _on_double_click(self, event):
+        print(event.pos(), self.editor.mapToGlobal(event.pos()))
         modifiers = event.modifiers()
         if modifiers & self.extended_sel_modifier:
             self.editor.textCursor().clearSelection()
