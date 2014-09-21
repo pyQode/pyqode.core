@@ -145,6 +145,7 @@ class FileManager(Manager):
         :raises: UnicodeDecodeError in case of error if no EncodingPanel
             were set on the editor.
         """
+        ret_val = False
         if encoding is None:
             encoding = locale.getpreferredencoding()
         self.opening = True
@@ -181,8 +182,10 @@ class FileManager(Manager):
             self.editor.setPlainText(
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
+            ret_val = True
         self.opening = False
         self._restore_cached_pos()
+        return ret_val
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
