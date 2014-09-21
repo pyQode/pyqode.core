@@ -262,7 +262,8 @@ class CheckerMode(Mode, QtCore.QObject):
         while len(self._messages):
             msg = self._messages.pop(0)
             usd = msg.block.userData()
-            usd.messages[:] = []
+            if usd and hasattr(usd, 'messages'):
+                usd.messages[:] = []
             if msg.decoration:
                 self.editor.decorations.remove(msg.decoration)
 
