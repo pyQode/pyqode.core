@@ -88,6 +88,8 @@ class GlobalCheckerPanel(Panel):
         :return: QSize
         """
         h = self.get_marker_height()
+        if h < 1:
+            h = 1
         return QtCore.QSize(self.sizeHint().width()/2, h)
 
     def mousePressEvent(self, event):
