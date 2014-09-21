@@ -23,9 +23,9 @@ import subprocess
 def main():
     global program, args, ret
     print(os.getcwd())
+    ret = 0
     if '--help' in sys.argv or '-h' in sys.argv or len(sys.argv) == 1:
         print(__doc__)
-        sys.exit(0)
     else:
         program = sys.argv[1]
         args = sys.argv[2:]
@@ -33,12 +33,13 @@ def main():
             ret = subprocess.call([program] + args)
         else:
             ret = subprocess.call([program])
-        print('Process terminated with exit code %d' % ret)
-        if sys.version_info[0] == 3:
-            input('Press any key to close this window...')
-        else:
-            raw_input('Press any key to close this window...')
-        sys.exit(ret)
+    print('\nProcess terminated with exit code %d' % ret)
+    prompt = 'Press ENTER to close this window...'
+    if sys.version_info[0] == 3:
+        input(prompt)
+    else:
+        raw_input(prompt)
+    sys.exit(ret)
 
 
 if __name__ == '__main__':
