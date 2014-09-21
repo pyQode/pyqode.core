@@ -10,7 +10,8 @@ import socket
 import struct
 import sys
 import uuid
-from pyqode.qt import QtCore, QtNetwork
+import time
+from pyqode.qt import QtCore, QtNetwork, QtWidgets
 from pyqode.core.backend import NotConnected
 
 
@@ -92,9 +93,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _terminate_server_process(self):
         """ Terminates the server process """
         _logger().debug('terminating backend process')
-        self._process.terminate()
-        while not self._process.waitForFinished(1):
-            pass
+        # self._process.terminate()
+        # while not self._process.isFinished:
+        #     self._process.waitForFinished(1)
+        #     pass
 
     def close(self):
         """ Closes the socket and terminates the server process. """
@@ -102,12 +104,15 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             if self._process and self._process.running:
                 if self.is_connected:
                     # send shutdown request
+                    _logger().debug('sending shutdown request')
                     self.send('shutdown')
-                if self._process and self._process.running:
-                    self._terminate_server_process()
-                    self.is_connected = False
+                    while self._process.running:
+                        _logger().debug('waiting for backend process to finish')
+                        QtWidgets.QApplication.instance().processEvents()
+                        time.sleep(0.001)
+                    _logger.debug('backend process finished')
                 super(JsonTcpClient, self).close()
-                _logger().info('process terminated')
+                _logger().info('backend process properly stopped')
         except (AttributeError, RuntimeError):
             pass
 
