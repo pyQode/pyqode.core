@@ -161,7 +161,7 @@ class PanelsManager(Manager):
             size_hint = panel.sizeHint()
             panel.setGeometry(content_rect.right() - right -
                               size_hint.width() - w_offset,
-                              content_rect.top(), size_hint.width(),
+                              content_rect.top() + s_top, size_hint.width(),
                               content_rect.height() - h_offset)
             right += size_hint.width()
         top = 0
@@ -200,16 +200,13 @@ class PanelsManager(Manager):
                 continue
             panels = list(zone.values())
             for panel in panels:
-                if not panel.scrollable:
-                    continue
-                if delta_y:
+                if panel.scrollable and delta_y:
                     panel.scroll(0, delta_y)
-                else:
-                    line, col = helper.cursor_position()
-                    oline, ocol = self._cached_cursor_pos
-                    if line != oline or col != ocol:
-                        panel.update(0, rect.y(), panel.width(), rect.height())
-                    self._cached_cursor_pos = helper.cursor_position()
+                line, col = helper.cursor_position()
+                oline, ocol = self._cached_cursor_pos
+                if line != oline or col != ocol or panel.scrollable:
+                    panel.update(0, rect.y(), panel.width(), rect.height())
+                self._cached_cursor_pos = helper.cursor_position()
         if (rect.contains(self.editor.viewport().rect()) or
                 force_update_margins):
             # _logger().debug('_update_panels -> _update_viewport_margins')
