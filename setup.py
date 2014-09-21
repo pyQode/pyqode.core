@@ -44,6 +44,9 @@ setup(
     long_description=readme(),
     install_requires=['pygments', 'pyqode.qt', 'future'],
     entry_points={
+        'console_scripts': [
+            'pyqode-console = pyqode.core.tools.console:main'
+        ],
         'pyqode_plugins':
             ['code_edit = pyqode.core._designer_plugins'],
         'pygments.styles':
