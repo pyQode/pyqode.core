@@ -18,7 +18,13 @@ class GlobalCheckerPanel(Panel):
         super(GlobalCheckerPanel, self).__init__()
         self.scrollable = True
 
-    def _draw_markers(self, painter):
+    def _draw_messages(self, painter):
+        """
+        Draw messages from all subclass of CheckerMode currently
+        installed on the editor.
+
+        :type painter: QtGui.QPainter
+        """
         checker_modes = []
         for m in self.editor.modes:
             if isinstance(m, modes.CheckerMode):
@@ -29,14 +35,19 @@ class GlobalCheckerPanel(Panel):
                 color = QtGui.QColor(msg.color)
                 brush = QtGui.QBrush(color)
                 rect = QtCore.QRect()
-                rect.setX(0)
+                rect.setX(self.sizeHint().width() / 4)
                 rect.setY(block.blockNumber() * self.get_marker_height())
                 rect.setSize(self.get_marker_size())
                 painter.fillRect(rect, brush)
-                painter.setPen(QtGui.QPen(color.lighter()))
-                painter.drawRect(rect)
 
     def _draw_visible_area(self, painter):
+        """
+        Draw the visible area.
+
+        This method does not take folded blocks into account.
+
+        :type painter: QtGui.QPainter
+        """
         start = self.editor.visible_blocks[0][-1]
         end = self.editor.visible_blocks[-1][-1]
         rect = QtCore.QRect()
@@ -49,28 +60,40 @@ class GlobalCheckerPanel(Panel):
         painter.fillRect(rect, c)
 
     def paintEvent(self, event):
+        """
+        Pains the messages and the visible area on the panel.
+        :param event: paint event infos
+        """
         super(GlobalCheckerPanel, self).paintEvent(event)
         painter = QtGui.QPainter(self)
-        self._draw_markers(painter)
+        self._draw_messages(painter)
         self._draw_visible_area(painter)
 
-    def _brush_from_message(self, msg):
-        pass
-
     def sizeHint(self):
-        return QtCore.QSize(8, 16)
+        """
+        The panel has a fixed width of 8 pixels.
+        """
+        return QtCore.QSize(12, 16)
 
     def get_marker_height(self):
-        # print(self.editor.viewport().height(), self.height(), self.editor.height())
-        return self.editor.viewport().height() / TextHelper(self.editor).line_count()
+        """
+        Gets the height of message marker.
+        """
+        return self.editor.viewport().height() / TextHelper(
+            self.editor).line_count()
 
     def get_marker_size(self):
+        """
+        Gets the size of a message marker.
+        :return: QSize
+        """
         h = self.get_marker_height()
-        # if h < 1:
-        #     h = 1
-        return QtCore.QSize(self.sizeHint().width(), h)
+        return QtCore.QSize(self.sizeHint().width()/2, h)
 
     def mousePressEvent(self, event):
+        """
+        Moves the editor text cursor to the clicked line.
+        """
         height = event.pos().y()
         line = height//self.get_marker_height()
         TextHelper(self.editor).goto_line(line)
