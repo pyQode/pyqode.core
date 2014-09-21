@@ -191,6 +191,9 @@ def setup_editor(code_edit):
     p = panels.SearchAndReplacePanel()
     code_edit.panels.append(p, p.Position.BOTTOM)
     p.show()
+    p = panels.GlobalCheckerPanel()
+    code_edit.panels.append(p, p.Position.RIGHT)
+    p.show()
 
     # append modes
     code_edit.modes.append(modes.AutoCompleteMode())
