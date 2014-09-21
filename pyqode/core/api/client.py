@@ -90,29 +90,30 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._process = None
         self._connection_attempts = 0
 
-    def _terminate_server_process(self):
-        """ Terminates the server process """
+    def _terminate_backend(self):
         _logger().debug('terminating backend process')
-        # self._process.terminate()
-        # while not self._process.isFinished:
-        #     self._process.waitForFinished(1)
-        #     pass
+        self.send('shutdown')
+        cpt = 0
+        # wait max 200ms max
+        while self._process.running and cpt < 10:
+            QtWidgets.QApplication.instance().processEvents()
+            time.sleep(0.02)
+            cpt += 1
+        # kill process if still running, this happen if the process is already
+        # busy handling a request
+        if self._process.running:
+            _logger().debug('killing backend process')
+            self._process.kill()
+        _logger().info('backend process terminated')
 
     def close(self):
         """ Closes the socket and terminates the server process. """
         try:
             if self._process and self._process.running:
                 if self.is_connected:
-                    # send shutdown request
-                    _logger().debug('sending shutdown request')
-                    self.send('shutdown')
-                    while self._process.running:
-                        _logger().debug('waiting for backend process to finish')
-                        QtWidgets.QApplication.instance().processEvents()
-                        time.sleep(0.001)
-                    _logger.debug('backend process finished')
+                    self._terminate_backend()
                 super(JsonTcpClient, self).close()
-                _logger().info('backend process properly stopped')
+                _logger().debug('socket closed')
         except (AttributeError, RuntimeError):
             pass
 
@@ -236,15 +237,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
-        log_fct = _logger().error
-        if error == 0:
-            # not connected, log it as an info as it happens all the time on
-            # slow machine (the time for the server to run)
-            log_fct = _logger().info
-        log_fct('socket error %d: %s', error, SOCKET_ERROR_STRINGS[error])
+        _logger().debug(SOCKET_ERROR_STRINGS[error])
         if error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
-            # try again, sometimes the server process might not have started
-            # its socket yet.
             if self._process.exitCode():
                 _logger().warning('backend process terminated unexpectedly')
             else:
@@ -352,8 +346,7 @@ class _ServerProcess(QtCore.QProcess):
             pass
         else:
             if self.running:
-                _logger().error('server process error %s: %s', error,
-                                PROCESS_ERROR_STRING[error])
+                _logger().debug(PROCESS_ERROR_STRING[error])
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
