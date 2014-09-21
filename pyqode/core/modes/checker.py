@@ -262,9 +262,9 @@ class CheckerMode(Mode, QtCore.QObject):
         while len(self._messages):
             msg = self._messages.pop(0)
             usd = msg.block.userData()
-            usd.messages.clear()
+            usd.messages[:] = []
             if msg.decoration:
-                self.editor.decorations.remove(message.decoration)
+                self.editor.decorations.remove(msg.decoration)
 
     def on_state_changed(self, state):
         if state:
