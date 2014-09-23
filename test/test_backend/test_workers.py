@@ -89,8 +89,8 @@ with open('test/files/foo.py', 'r') as f:
         'string': 'import importable;\nimport',
         'sub': 'Import',
         'regex': True,
-        'whole_word': True,
-        'case_sensitive': False}, 2),
+        'whole_word': False,
+        'case_sensitive': False}, 3),
     ({
         'string': 'super().__init__(foo, eggs)\nsuper(Foo,self).__init__()',
         'sub': 'super\(\).',

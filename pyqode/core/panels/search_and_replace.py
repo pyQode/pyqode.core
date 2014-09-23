@@ -126,6 +126,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditReplace.installEventFilter(self)
         self._init_actions()
         self._init_style()
+        self.checkBoxRegex.stateChanged.connect(
+            self.checkBoxWholeWords.setDisabled)
 
     def _init_actions(self):
         def _icon(val):

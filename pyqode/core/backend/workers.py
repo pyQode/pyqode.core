@@ -207,22 +207,7 @@ def findalliter(string, sub, regex=False, case_sensitive=False,
         if not case_sensitive:
             flags |= re.IGNORECASE
         for val in re.finditer(sub, string, flags):
-            start, end = val.span()
-            if whole_word:
-                if start:
-                    pchar = string[start - 1]
-                else:
-                    pchar = ' '
-                try:
-                    nchar = string[start + len(sub)]
-                except IndexError:
-                    # firsr/last word -> whole word
-                    nchar = ' '
-                if nchar in DocumentWordsProvider.separators and \
-                        pchar in DocumentWordsProvider.separators:
-                    yield start, end
-            else:
-                yield start, end
+            yield val.span()
     else:
         if not case_sensitive:
             string = string.lower()
