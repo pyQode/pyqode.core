@@ -692,6 +692,8 @@ class TextHelper(object):
             if cursor.atBlockEnd():
                 stop = True
                 end_pos = cursor.position()
+                if char in seps:
+                    end_pos -= 1
             elif char in seps and char not in continuation_chars:
                 stop = True
                 end_pos = cursor.position() - 1
