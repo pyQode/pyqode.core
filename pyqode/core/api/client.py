@@ -8,11 +8,8 @@ import json
 import logging
 import socket
 import struct
-import sys
 import uuid
-import time
-from pyqode.qt import QtCore, QtNetwork, QtWidgets
-from pyqode.core.backend import NotConnected
+from pyqode.qt import QtCore, QtNetwork
 
 
 def _logger():
@@ -58,7 +55,7 @@ PROCESS_ERROR_STRING = {
 class JsonTcpClient(QtNetwork.QTcpSocket):
     """
     A json tcp client socket used to start and communicate with the pyqode
-    server.
+    backend.
 
     It uses a simple message protocol. A message is made up of two parts.
     parts:
@@ -91,7 +88,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _send_request(self):
         """
-        Requests a work on the server.
+        Requests a work on the backend.
 
         :param worker_class_or_function: Class or function to execute remotely.
         :param args: worker args, any Json serializable objects
@@ -99,7 +96,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
 
-        :raise: BackendController.NotConnected if the server cannot
+        :raise: BackendController.NotConnected if the backend cannot
             be reached.
         """
         classname = '%s.%s' % (self._worker.__module__, self._worker.__name__)
@@ -109,7 +106,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def send(self, obj, encoding='utf-8'):
         """
-        Sends a python object to the server. The object must be JSON
+        Sends a python object to the backend. The object must be JSON
         serialisable.
 
         :param obj: object to send
@@ -133,14 +130,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         return free_port
 
     def _connect(self):
-        """ Connects our client socket to the server socket """
+        """ Connects our client socket to the backend socket """
         _logger().debug('connecting to 127.0.0.1:%d', self._port)
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
 
     def _on_connected(self):
         """ Logs connected """
-        _logger().debug('connected to server: %s:%d',
+        _logger().debug('connected to backend: %s:%d',
                         self.peerName(), self.peerPort())
         self.is_connected = True
         self._send_request()
@@ -159,7 +156,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_disconnected(self):
         """ Logs disconnected """
         try:
-            _logger().debug('disconnected from server: %s:%d',
+            _logger().debug('disconnected from backend: %s:%d',
                             self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
@@ -224,7 +221,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
 class ServerProcess(QtCore.QProcess):
     """
-    Extends QProcess with methods to easily manipulate the server process.
+    Extends QProcess with methods to easily manipulate the backend process.
 
     Also logs everything that is written to the process' stdout/stderr.
     """
@@ -237,7 +234,7 @@ class ServerProcess(QtCore.QProcess):
         self.readyReadStandardError.connect(self._on_process_stderr_ready)
         self.running = False
         self.starting = True
-        self._srv_logger = logging.getLogger('pyqode.server')
+        self._srv_logger = logging.getLogger('pyqode.backend')
         self._test_not_deleted = False
 
     def _on_process_started(self):
@@ -260,7 +257,7 @@ class ServerProcess(QtCore.QProcess):
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        _logger().info('server process finished with exit code %d', exit_code)
+        _logger().info('backend process finished with exit code %d', exit_code)
         try:
             self.running = False
         except AttributeError:
