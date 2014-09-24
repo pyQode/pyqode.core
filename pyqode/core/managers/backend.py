@@ -80,6 +80,7 @@ class BackendManager(Manager):
         """
         Stops the backend process.
         """
+        print('Stop')
         try:
             _logger().debug('terminating backend process')
         except NameError:
@@ -88,9 +89,9 @@ class BackendManager(Manager):
             # Console applications on Windows that do not run an event loop,
             # or whose event loop does not handle the WM_CLOSE message, can
             # only be terminated by calling kill().
-            self._process.terminate()
-        else:
             self._process.kill()
+        else:
+            self._process.terminate()
         self._process.waitForFinished(100)
         try:
             _logger().info('backend process terminated')
