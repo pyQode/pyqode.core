@@ -153,6 +153,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
         _logger().debug(SOCKET_ERROR_STRINGS[error])
+        if error == 0:
+            QtCore.QTimer.singleShot(100, self._connect)
 
     def _on_disconnected(self):
         """ Logs disconnected """
@@ -294,4 +296,7 @@ class ServerProcess(QtCore.QProcess):
     def terminate(self):
         """ Terminate the process """
         self.running = False
-        super(ServerProcess, self).terminate()
+        try:
+            super(ServerProcess, self).terminate()
+        except RuntimeError:
+            pass
