@@ -1,6 +1,38 @@
 Change Log
 ==========
 
+2.3.0
+-----
+
+New features:
+
+    - add support for python2. You may now use python2 for writing a pyqode
+      app (backend AND frontend)!
+    - add a mode that highlight word under cursor occurrences
+    - add a smart backspace mode, this mode eats as much whitespace as possible
+      when you press backspace
+    - add GlobalCheckerPanel that shows all errors found in the document
+    - add extented selection mode. Extended selection is a feature that can be
+      found in Ulipad ( https://code.google.com/p/ulipad )
+    - add pyqode-console script that let you run other programs in an external
+      terminal with a final prompt that holds the window after the program
+      finished.
+    - new widget: prompt line edit (a line edit with a prompt text and an icon)
+    - add ability to surround selected text with quotes or parentheses
+    - search and replace: added regex support
+    - search and replace: the search algorithm is now running on the backend
+      (fix issue where gui was blocked while searching text)
+
+Fixed bugs:
+    - fix the code that prevents code completion popup from showing in strings
+      and comments
+    - fix a bug with the default indenter that was eating chars at the start
+      of the line
+    - fix checker request logic (keep the last request instead of the first
+      one)
+    - fix right panels top position
+
+
 2.2.0
 -----
 
