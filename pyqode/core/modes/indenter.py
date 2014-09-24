@@ -134,7 +134,7 @@ class IndenterMode(Mode):
         """
         _logger().debug('unindent')
         cursor = self.editor.textCursor()
-        _logger().info('cursor has selection %r', cursor.hasSelection())
+        _logger().debug('cursor has selection %r', cursor.hasSelection())
         if cursor.hasSelection():
             self.unindent_selection(cursor)
         else:
@@ -159,8 +159,8 @@ class IndenterMode(Mode):
                 cursor.endEditBlock()
             else:
                 cursor.select(cursor.LineUnderCursor)
-                _logger().info('select whole line and unindent selection')
-                _logger().info(cursor.selectedText())
+                _logger().debug('select whole line and unindent selection')
+                _logger().debug(cursor.selectedText())
                 cursor = self.unindent_selection(cursor)
                 cursor.clearSelection()
-                _logger().info(cursor.block().text())
+                _logger().debug(cursor.block().text())

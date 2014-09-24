@@ -383,7 +383,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setLineWrapMode(self.NoWrap)
 
     def __del__(self):
-        self.backend.stop()
+        if self.backend.running:
+            self.backend.stop()
 
     def set_mouse_cursor(self, cursor):
         """

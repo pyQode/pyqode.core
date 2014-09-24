@@ -73,8 +73,8 @@ class BackendManager(Manager):
         if args:
             pgm_args += args
         self._process.start(program, pgm_args)
-        _logger().info('starting server process: %s %s', program,
-                       ' '.join(pgm_args))
+        _logger().debug('starting server process: %s %s', program,
+                        ' '.join(pgm_args))
 
     def stop(self):
         """
@@ -96,7 +96,7 @@ class BackendManager(Manager):
         except RuntimeError:
             pass
         try:
-            _logger().info('backend process terminated')
+            _logger().debug('backend process terminated')
         except NameError:
             pass
 
