@@ -19,16 +19,22 @@ def test_enabled(editor):
 @editor_open(__file__)
 def test_key_pressed(editor):
     QTest.qWait(1000)
-    TextHelper(editor).goto_line(20, 4)
+    TextHelper(editor).goto_line(21, 4)
+    QTest.qWait(2000)
     assert editor.textCursor().positionInBlock() == 4
     QTest.keyPress(editor, QtCore.Qt.Key_Backspace)
+    QTest.qWait(2000)
     assert editor.textCursor().positionInBlock() == 0
     TextHelper(editor).goto_line(19, 5)
+    QTest.qWait(2000)
     assert editor.textCursor().positionInBlock() == 5
     QTest.keyPress(editor, QtCore.Qt.Key_Backspace)
+    QTest.qWait(2000)
     assert editor.textCursor().positionInBlock() == 4
 
     TextHelper(editor).goto_line(20, 0)
+    QTest.qWait(2000)
     assert editor.textCursor().positionInBlock() == 0
     QTest.keyPress(editor, QtCore.Qt.Key_Backspace)
-    assert editor.textCursor().positionInBlock() == 0
+    QTest.qWait(2000)
+    assert editor.textCursor().positionInBlock() == 28
