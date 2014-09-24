@@ -40,7 +40,7 @@ def ensure_connected(func):
     """
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
-        if not editor.backend.connected:
+        if not editor.backend.running:
             editor.backend.start(server_path())
             wait_for_connected(editor)
         return func(editor, *args, **kwds)
@@ -84,7 +84,7 @@ def test_properties(editor):
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
-    if editor.backend.connected:
+    if editor.backend.running:
         editor.backend.stop()
     # starts the server after the request to test the retry on NotConnected
     # mechanism
@@ -134,7 +134,7 @@ def test_successive_requests(editor):
 @ensure_connected
 @preserve_editor_config
 def test_events(editor):
-    assert editor.backend.connected
+    assert editor.backend.running
     QTest.qWait(1000)
     TextHelper(editor).goto_line(3)
     QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
@@ -177,7 +177,7 @@ def test_events(editor):
 @ensure_visible
 @ensure_connected
 def test_insert_completions(editor):
-    assert editor.backend.connected
+    assert editor.backend.running
     TextHelper(editor).goto_line(3)
     # check insert completions
     QTest.keyPress(editor, 'm')

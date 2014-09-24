@@ -120,7 +120,7 @@ def preserve_editor_config(func):
             editor.modes.clear()
             editor.panels.clear()
             setup_editor(editor)
-            if not editor.backend.connected:
+            if not editor.backend.running:
                 editor.backend.start(server_path())
                 wait_for_connected(editor)
         return ret
@@ -150,12 +150,11 @@ def log_test_name(func):
     return wrapper
 
 
-
 # -------------------
 # Helper functions
 # -------------------
 def wait_for_connected(editor):
-    while not editor.backend.connected:
+    while not editor.backend.running:
         QTest.qWait(100)
 
 

@@ -55,12 +55,6 @@ PROCESS_ERROR_STRING = {
 }
 
 
-#: Delay before retrying to connect to server [ms]
-TIMEOUT_BEFORE_RETRY = 100
-#: Max retry
-MAX_RETRY = 100
-
-
 class JsonTcpClient(QtNetwork.QTcpSocket):
     """
     A json tcp client socket used to start and communicate with the pyqode
@@ -72,98 +66,30 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
       - payload: data as a json string.
 
     """
+    #: Internal signal emitted when the backend request finished and the
+    #: socket can be removed from the list of sockets maintained by the
+    #: backend manager
+    finished = QtCore.Signal(QtNetwork.QTcpSocket)
 
-    def __init__(self, parent):
+    def __init__(self, parent, port, worker_class_or_function, args,
+                 on_receive=None):
         super(JsonTcpClient, self).__init__(parent)
-        self._port = -1
-        self.connected.connect(self._on_connected)
-        self.error.connect(self._on_error)
-        self.disconnected.connect(self._on_disconnected)
-        self.readyRead.connect(self._on_ready_read)
+        self._port = port
+        self._worker = worker_class_or_function
+        self._args = args
         self._header_complete = False
         self._header_buf = bytes()
         self._to_read = 0
         self._data_buf = bytes()
-        #: associate request uuid with a callback, popped once executed
-        self._callbacks = {}
+        self._callback = on_receive
         self.is_connected = False
-        self._process = None
-        self._connection_attempts = 0
+        self.connected.connect(self._on_connected)
+        self.error.connect(self._on_error)
+        self.disconnected.connect(self._on_disconnected)
+        self.readyRead.connect(self._on_ready_read)
+        self._connect()
 
-    def _terminate_backend(self):
-        _logger().debug('terminating backend process')
-        self.send('shutdown')
-        cpt = 0
-        # wait max 200ms max
-        while self._process.running and cpt < 10:
-            QtWidgets.QApplication.instance().processEvents()
-            time.sleep(0.02)
-            cpt += 1
-        # kill process if still running, this happen if the process is already
-        # busy handling a request
-        if self._process.running:
-            _logger().debug('killing backend process')
-            self._process.kill()
-        _logger().info('backend process terminated')
-
-    def close(self):
-        """ Closes the socket and terminates the server process. """
-        try:
-            if self._process and self._process.running:
-                if self.is_connected:
-                    self._terminate_backend()
-                super(JsonTcpClient, self).close()
-                _logger().debug('socket closed')
-        except (AttributeError, RuntimeError):
-            pass
-
-    def start(self, server_script, interpreter=sys.executable, args=None,
-              port=None):
-        """
-        Starts a pyqode server (and connect our client socket when the server
-        process has started). The server is started with a random free port
-        on local host (the port number is defined by command line args).
-
-        The server is a python script that starts a
-        :class:`pyqode.core.backend.server.JsonServer`. You (the user) must
-        write the server script so that you can apply your own configuration
-        server side.
-
-        The script can be run with a custom interpreter. The default is to use
-        sys.executable.
-
-        :param str server_script: Path to the server main script.
-        :param str interpreter: The python interpreter to use to run the server
-            script. If None, sys.executable is used unless we are in a frozen
-            application (cx_Freeze). The executable is not used if the
-            executable scripts ends with '.exe' on Windows
-        :param list args: list of additional command line args to use to start
-            the server process.
-
-        """
-        major, minor, build = sys.version_info[:3]
-        _logger().debug('running with python %d.%d.%d', major, minor, build)
-        self._process = _ServerProcess(self.parent())
-        self._process.started.connect(self._on_process_started)
-        server_script = server_script.replace('.pyc', '.py')
-        if not port:
-            self._port = self.pick_free_port()
-        else:
-            self._port = port
-        if hasattr(sys, "frozen") and not server_script.endswith('.py'):
-            # frozen server script on windows/mac does not need an interpreter
-            program = server_script
-            pgm_args = [str(self._port)]
-        else:
-            program = interpreter
-            pgm_args = [server_script, str(self._port)]
-        if args:
-            pgm_args += args
-        self._process.start(program, pgm_args)
-        _logger().info('starting server process: %s %s', program,
-                       ' '.join(pgm_args))
-
-    def request_work(self, worker_class_or_function, args, on_receive=None):
+    def _send_request(self):
         """
         Requests a work on the server.
 
@@ -176,16 +102,10 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :raise: BackendController.NotConnected if the server cannot
             be reached.
         """
-        if not self._process or not self._process.running or \
-                not self.is_connected:
-            raise NotConnected()
-        classname = '%s.%s' % (worker_class_or_function.__module__,
-                               worker_class_or_function.__name__)
-        request_id = str(uuid.uuid4())
-        if on_receive:
-            self._callbacks[request_id] = on_receive
-        self.send({'request_id': request_id, 'worker': classname,
-                   'data': args})
+        classname = '%s.%s' % (self._worker.__module__, self._worker.__name__)
+        self.request_id = str(uuid.uuid4())
+        self.send({'request_id': self.request_id, 'worker': classname,
+                   'data': self._args})
 
     def send(self, obj, encoding='utf-8'):
         """
@@ -203,11 +123,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.write(header)
         self.write(msg)
 
-    def _on_process_started(self):
-        """ Runs a timer to try to connect the server process """
-        # give time to the server to starts its socket
-        QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
-
     @staticmethod
     def pick_free_port():
         """ Picks a free port """
@@ -220,15 +135,15 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _connect(self):
         """ Connects our client socket to the server socket """
         _logger().debug('connecting to 127.0.0.1:%d', self._port)
-        self._connection_attempts += 1
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
 
     def _on_connected(self):
         """ Logs connected """
-        _logger().info('connected to server: %s:%d',
-                       self.peerName(), self.peerPort())
+        _logger().debug('connected to server: %s:%d',
+                        self.peerName(), self.peerPort())
         self.is_connected = True
+        self._send_request()
 
     def _on_error(self, error):
         """
@@ -238,18 +153,12 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
         _logger().debug(SOCKET_ERROR_STRINGS[error])
-        if error == QtNetwork.QAbstractSocket.ConnectionRefusedError:
-            if self._process.exitCode():
-                _logger().warning('backend process terminated unexpectedly')
-            else:
-                # the process is still running but not ready, retry
-                QtCore.QTimer.singleShot(TIMEOUT_BEFORE_RETRY, self._connect)
 
     def _on_disconnected(self):
         """ Logs disconnected """
         try:
-            _logger().info('disconnected from server: %s:%d',
-                           self.peerName(), self.peerPort())
+            _logger().debug('disconnected from server: %s:%d',
+                            self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
@@ -293,15 +202,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             _logger().debug('decoding payload as json object')
             obj = json.loads(data)
             _logger().debug('response received: %r', obj)
-            request_id = obj['request_id']
             results = obj['results']
             status = obj['status']
             # possible callback
-            if request_id in self._callbacks:
-                callback = self._callbacks.pop(request_id)
-                callback(status, results)
+            if self._callback:
+                self._callback(status, results)
             self._header_complete = False
             self._data_buf = bytes()
+            self.finished.emit(self)
 
     def _on_ready_read(self):
         """ Read bytes when ready read """
@@ -312,14 +220,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 self._read_payload()
 
 
-class _ServerProcess(QtCore.QProcess):
+class ServerProcess(QtCore.QProcess):
     """
     Extends QProcess with methods to easily manipulate the server process.
 
     Also logs everything that is written to the process' stdout/stderr.
     """
     def __init__(self, parent):
-        super(_ServerProcess, self).__init__(parent)
+        super(ServerProcess, self).__init__(parent)
         self.started.connect(self._on_process_started)
         self.error.connect(self._on_process_error)
         self.finished.connect(self._on_process_finished)
@@ -332,7 +240,7 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_started(self):
         """ Logs process started """
-        _logger().debug('server process started')
+        _logger().info('backend process started')
         self.starting = False
         self.running = True
 
@@ -350,8 +258,7 @@ class _ServerProcess(QtCore.QProcess):
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        _logger().info('server process finished with exit code %d',
-                       exit_code)
+        _logger().info('server process finished with exit code %d', exit_code)
         try:
             self.running = False
         except AttributeError:
@@ -387,4 +294,4 @@ class _ServerProcess(QtCore.QProcess):
     def terminate(self):
         """ Terminate the process """
         self.running = False
-        super(_ServerProcess, self).terminate()
+        super(ServerProcess, self).terminate()

@@ -50,7 +50,7 @@ def test_request_analysis(editor):
         editor.modes.append(mode)
     editor.backend.stop()
     mode.clear_messages()
-    if editor.backend.connected:
+    if editor.backend.running:
         editor.backend.stop()
     # 1st analysis will be retried while server is
     # not connected

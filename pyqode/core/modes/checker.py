@@ -6,7 +6,7 @@ import logging
 from pyqode.core.api import TextBlockUserData
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
-from pyqode.core.backend import NotConnected
+from pyqode.core.backend import NotRunning
 from pyqode.core.api.utils import DelayJobRunner
 from pyqode.qt import QtCore, QtGui
 
@@ -323,6 +323,6 @@ class CheckerMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 self._worker, request_data, on_receive=self._on_work_finished)
             self._finished = False
-        except NotConnected:
+        except NotRunning:
             # retry later
             QtCore.QTimer.singleShot(100, self._request)

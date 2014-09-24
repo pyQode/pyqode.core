@@ -3,7 +3,7 @@ This module contains the occurrences highlighter mode.
 """
 from pyqode.qt import QtGui
 from pyqode.core.api import Mode, DelayJobRunner, TextHelper, TextDecoration
-from pyqode.core.backend import NotConnected
+from pyqode.core.backend import NotRunning
 from pyqode.core.backend.workers import findall
 
 
@@ -107,7 +107,7 @@ class OccurrencesHighlighterMode(Mode):
             try:
                 self.editor.backend.send_request(findall, request_data,
                                                  self._on_results_available)
-            except NotConnected:
+            except NotRunning:
                 self._request_highlight()
 
     def _on_results_available(self, _, results):

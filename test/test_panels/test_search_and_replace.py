@@ -20,7 +20,7 @@ def test_enabled(editor):
 @editor_open(__file__)
 def test_request_search(editor):
     QTest.qWait(1000)
-    assert editor.backend.connected
+    assert editor.backend.running
     panel = get_panel(editor)
     panel.request_search('import')
     QTest.qWait(2000)

@@ -10,7 +10,7 @@ import logging
 import re
 import sys
 from pyqode.core.api.mode import Mode
-from pyqode.core.backend import NotConnected
+from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
@@ -507,7 +507,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 backend.CodeCompletionWorker, args=data,
                 on_receive=self._on_results_available)
-        except NotConnected:
+        except NotRunning:
             self._data = data
             QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
@@ -519,7 +519,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 backend.CodeCompletionWorker, args=self._data,
                 on_receive=self._on_results_available)
-        except NotConnected:
+        except NotRunning:
             QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
             self._set_wait_cursor()

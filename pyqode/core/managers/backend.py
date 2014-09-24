@@ -1,9 +1,16 @@
 """
 This module contains the backend controller
 """
+import logging
+import socket
 import sys
-from pyqode.core.api.client import JsonTcpClient
+from pyqode.core.api.client import JsonTcpClient, ServerProcess
 from pyqode.core.api.manager import Manager
+from pyqode.core.backend import NotRunning
+
+
+def _logger():
+    return logging.getLogger(__name__)
 
 
 class BackendManager(Manager):
@@ -22,8 +29,17 @@ class BackendManager(Manager):
 
     def __init__(self, editor):
         super(BackendManager, self).__init__(editor)
-        #: client socket
-        self.socket = JsonTcpClient(editor)
+        self._process = ServerProcess(editor)
+        self._sockets = []
+
+    @staticmethod
+    def pick_free_port():
+        """ Picks a free port """
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_socket.bind(('127.0.0.1', 0))
+        free_port = int(test_socket.getsockname()[1])
+        test_socket.close()
+        return free_port
 
     def start(self, script, interpreter=sys.executable, args=None):
         """
@@ -31,7 +47,7 @@ class BackendManager(Manager):
 
         The server is a python script that starts a
         :class:`pyqode.core.backend.JsonServer`. You must write the server
-        script so that you can apply your own configuration on the server side.
+        script so that you can apply your own configuration server side.
 
         The script can be run with a custom interpreter. The default is to use
         sys.executable.
@@ -43,43 +59,87 @@ class BackendManager(Manager):
         :param args: list of additional command line args to use to start
             the server process.
         """
-        self.socket.start(script, interpreter=interpreter, args=args)
+        major, minor, build = sys.version_info[:3]
+        _logger().debug('running with python %d.%d.%d', major, minor, build)
+        server_script = script.replace('.pyc', '.py')
+        self._port = self.pick_free_port()
+        if hasattr(sys, "frozen") and not server_script.endswith('.py'):
+            # frozen server script on windows/mac does not need an interpreter
+            program = server_script
+            pgm_args = [str(self._port)]
+        else:
+            program = interpreter
+            pgm_args = [server_script, str(self._port)]
+        if args:
+            pgm_args += args
+        self._process.start(program, pgm_args)
+        _logger().info('starting server process: %s %s', program,
+                       ' '.join(pgm_args))
 
     def stop(self):
         """
-        Stop backend process (by terminating it).
+        Stops the backend process.
         """
         try:
-            if self.socket:
-                self.socket.close()
-        except RuntimeError:
+            _logger().debug('terminating backend process')
+        except NameError:
+            pass
+        if sys.platform == 'win32':
+            # Console applications on Windows that do not run an event loop,
+            # or whose event loop does not handle the WM_CLOSE message, can
+            # only be terminated by calling kill().
+            self._process.terminate()
+        else:
+            self._process.kill()
+        self._process.waitForFinished(100)
+        try:
+            _logger().info('backend process terminated')
+        except NameError:
             pass
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
-        Request some work to be done server side. You can get notified of the
+        Requests some work to be done server side. You can get notified of the
         work results by passing a callback (on_receive).
 
-        :param: editor: editor instance
         :param worker_class_or_function: Worker class or function
         :param args: worker args, any Json serializable objects
         :param on_receive: an optional callback executed when we receive the
             worker's results. The callback will be called with two arguments:
             the status (bool) and the results (object)
 
-        :raise: backend.NotConnected if the server cannot be reached.
-
+        :raise: backend.NotRunning if the backend process is not running.
         """
-        self.socket.request_work(worker_class_or_function, args,
-                                 on_receive=on_receive)
+        if not self.running:
+            raise NotRunning()
+        else:
+            # create a socket, the request will be send as soon as the socket
+            # has connected
+            socket = JsonTcpClient(
+                self.editor, self._port, worker_class_or_function, args,
+                on_receive=on_receive)
+            socket.finished.connect(self._sockets.remove)
+            self._sockets.append(socket)
+
+    @property
+    def running(self):
+        """
+        Tells whether the backend process is running.
+
+        :return: True if the process is running, otherwise False
+        """
+        return self._process.running
 
     @property
     def connected(self):
         """
         Checks if the client socket is connected to a backend server.
 
+        .. deprecated: Since v2.3, a socket is created per request. Checking
+            for global connection status does not make any sense anymore. This
+            property now returns ``running``.
         """
-        return self.socket.is_connected
+        return self.running
 
     @property
     def exit_code(self):
@@ -88,7 +148,7 @@ class BackendManager(Manager):
         process is till running.
 
         """
-        if self.socket._process.running or self.socket._process.starting:
+        if self.running:
             return None
         else:
-            return self.socket._process.exitCode()
+            return self._process.exitCode()

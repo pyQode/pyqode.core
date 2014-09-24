@@ -8,7 +8,10 @@ import logging
 import json
 import struct
 import sys
+import threading
 import traceback
+import time
+
 try:
     import socketserver
     PY33 = True
@@ -44,7 +47,7 @@ def import_class(klass):
         return klass
 
 
-class JsonServer(socketserver.TCPServer):
+class JsonServer(socketserver.ThreadingTCPServer):
     """
     A server socket based on a json messaging system.
     """
@@ -102,15 +105,8 @@ class JsonServer(socketserver.TCPServer):
             Hanlde the request and keep it alive while shutdown signal
             has not been received
             """
-            running = True
-            while running:
-                print('waiting for data')
-                data = self.read()
-                running = self._handle(data)
-            print('server finished')
-            self.srv.t = logging.threading.Thread(name='shutdown',
-                                                  target=self.srv.shutdown)
-            self.srv.t.start()
+            data = self.read()
+            self._handle(data)
 
         def _handle(self, data):
             """
@@ -118,9 +114,6 @@ class JsonServer(socketserver.TCPServer):
             """
             try:
                 print('handling request %r' % data)
-                if data == 'shutdown':
-                    print('shutdown request received')
-                    return False
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
@@ -153,7 +146,6 @@ class JsonServer(socketserver.TCPServer):
                 print('error with data=%r' % data)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
-            return True
 
     def __init__(self, args=None):
         """
@@ -164,7 +156,6 @@ class JsonServer(socketserver.TCPServer):
         if not args:
             args = default_parser().parse_args()
         self.port = args.port
-        self._shutdown_request = False
         self._Handler.srv = self
         self._running = True
         # print('server running on port %s' % args.port)
@@ -200,10 +191,12 @@ def serve_forever(args=None):
         parser and parse command line arguments.
     """
     server = JsonServer(args=args)
-    try:
-        server.serve_forever()
-    except ValueError:
-        pass
+    server_thread = threading.Thread(target=server.serve_forever)
+    # Exit the server thread when the main thread terminates
+    server_thread.daemon = True
+    server_thread.start()
+    while True:
+        time.sleep(1)
 
 
 # Server script example
