@@ -1,4 +1,5 @@
 import os
+import pytest
 from pyqode.qt import QtCore
 from pyqode.qt import QtWidgets
 from pyqode.qt.QtTest import QTest
@@ -34,6 +35,8 @@ def test_enabled(editor):
 
 @editor_open(file_path)
 @preserve_settings
+@pytest.mark.skipif('TRAVIS' in os.environ,
+                    reason="not tested on travis, require user interaction")
 def test_modif_accept_with_focus(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
@@ -47,6 +50,8 @@ def test_modif_accept_with_focus(editor):
 
 
 @editor_open(file_path)
+@pytest.mark.skipif('TRAVIS' in os.environ,
+                    reason="not tested on travis, require user interaction")
 def test_modif_reject_with_focus(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
@@ -60,6 +65,8 @@ def test_modif_reject_with_focus(editor):
 
 
 @editor_open(file_path)
+@pytest.mark.skipif('TRAVIS' in os.environ,
+                    reason="not tested on travis, require user interaction")
 def test_modif_without_focus(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
