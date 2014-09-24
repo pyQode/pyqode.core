@@ -91,7 +91,10 @@ class BackendManager(Manager):
             self._process.kill()
         else:
             self._process.terminate()
-        self._process.waitForFinished(100)
+        try:
+            self._process.waitForFinished(100)
+        except RuntimeError:
+            pass
         try:
             _logger().info('backend process terminated')
         except NameError:
