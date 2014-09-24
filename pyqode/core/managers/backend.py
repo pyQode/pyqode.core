@@ -80,7 +80,6 @@ class BackendManager(Manager):
         """
         Stops the backend process.
         """
-        print('Stop')
         try:
             _logger().debug('terminating backend process')
         except NameError:

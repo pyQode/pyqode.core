@@ -92,7 +92,6 @@ class ExtendedSelectionMode(Mode):
             self.editor.mouse_double_clicked.disconnect(self._on_double_click)
 
     def _on_double_click(self, event):
-        print(event.pos(), self.editor.mapToGlobal(event.pos()))
         modifiers = event.modifiers()
         if modifiers & self.extended_sel_modifier:
             self.editor.textCursor().clearSelection()
