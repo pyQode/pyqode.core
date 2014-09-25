@@ -22,6 +22,9 @@ New features:
     - search and replace: added regex support
     - search and replace: the search algorithm is now running on the backend
       (fix issue where gui was blocked while searching text)
+    - improvements to the InteractiveConsole: there is now a way to setup
+      colors using a pygments color scheme. Also the console is now readonly
+      when the process is not running
 
 Fixed bugs:
     - fix the code that prevents code completion popup from showing in strings
@@ -31,6 +34,7 @@ Fixed bugs:
     - fix checker request logic (keep the last request instead of the first
       one)
     - fix right panels top position
+    - fix wordclick decoration color on dark color schemes
 
 
 2.2.0
