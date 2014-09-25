@@ -107,7 +107,10 @@ class WordClickMode(Mode, QtCore.QObject):
         if self._deco is None:
             if cursor.selectedText():
                 self._deco = TextDecoration(cursor)
-                self._deco.set_foreground(QtCore.Qt.blue)
+                if self.editor.background.lightness() < 128:
+                    self._deco.set_foreground(QtGui.QColor('#0681e0'))
+                else:
+                    self._deco.set_foreground(QtCore.Qt.blue)
                 self._deco.set_as_underlined()
                 self.editor.decorations.append(self._deco)
                 self.editor.set_mouse_cursor(QtCore.Qt.PointingHandCursor)
