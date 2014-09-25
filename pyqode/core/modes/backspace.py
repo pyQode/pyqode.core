@@ -13,7 +13,8 @@ class SmartBackSpaceMode(Mode):
             self.editor.key_pressed.disconnect(self._on_key_pressed)
 
     def _on_key_pressed(self, event):
-        if event.key() == QtCore.Qt.Key_Backspace:
+        no_modifiers = int(event.modifiers()) == QtCore.Qt.NoModifier
+        if event.key() == QtCore.Qt.Key_Backspace and no_modifiers:
             if self.editor.textCursor().atBlockStart():
                 return
             tab_len = self.editor.tab_length
