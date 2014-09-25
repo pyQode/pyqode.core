@@ -310,3 +310,30 @@ class InteractiveConsole(QTextEdit):
         text_edit.setTextColor(color)
         text_edit.insertPlainText(text)
         text_edit.moveCursor(QTextCursor.End)
+
+    def apply_color_scheme(self, color_scheme):
+        """
+        Apply a pygments color scheme to the console.
+
+        As there is not a 1 to 1 mapping between color scheme formats and
+        console formats, we decided to make the following mapping (it usually
+        looks good for most of the available pygments styles):
+
+            - stdout_color = normal color
+            - stderr_color = red (lighter if background is dark)
+            - stdin_color = numbers color
+            - app_msg_color = string color
+            - bacgorund_color = background
+
+
+        :param color_scheme: pyqode.core.api.ColorScheme to apply
+        """
+        self.stdout_color = color_scheme.formats['normal'].foreground().color()
+        self.stdin_color = color_scheme.formats['number'].foreground().color()
+        self.app_msg_color = color_scheme.formats[
+            'string'].foreground().color()
+        self.background_color = color_scheme.background
+        if self.background_color.lightness() < 128:
+            self.stderr_color = QColor('#FF8080')
+        else:
+            self.stderr_color = QColor('red')
