@@ -51,7 +51,7 @@ class InteractiveConsole(QTextEdit):
         self._clear_on_start = True
         self.process = QProcess()
         self._merge_outputs = False
-        self.process.finished.connect(self._write_finished)
+        self.process.finished.connect(self._on_process_finished)
         self.process.error.connect(self._write_error)
         self.process.readyReadStandardError.connect(self._on_stderr)
         self.process.readyReadStandardOutput.connect(self._on_stdout)
@@ -65,6 +65,7 @@ class InteractiveConsole(QTextEdit):
             font = 'Monaco'
         self._font_family = font
         self.setFont(QFont(font, 10))
+        self.setReadOnly(True)
 
     def set_writer(self, writer):
         """
@@ -206,6 +207,7 @@ class InteractiveConsole(QTextEdit):
         :param cwd: Working directory
         :type cwd: str
         """
+        self.setReadOnly(False)
         if env is None:
             env = {}
         if args is None:
@@ -239,6 +241,7 @@ class InteractiveConsole(QTextEdit):
         _logger().debug('killing process')
         self._user_stop = True
         self.process.kill()
+        self.setReadOnly(True)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -251,14 +254,15 @@ class InteractiveConsole(QTextEdit):
                 txt = event.text()
                 self._usr_buffer += txt
                 self.setTextColor(self._stdin_col)
-            else:
+            elif event.text().isalnum():
                 self._usr_buffer = self._usr_buffer[
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
         super(InteractiveConsole, self).keyPressEvent(event)
+        self.setTextColor(self._stdout_col)
 
-    def _write_finished(self, exit_code, exit_status):
+    def _on_process_finished(self, exit_code, exit_status):
         if not self._user_stop:
             self._writer(
                 self, "\nProcess finished with exit code %d" %
@@ -267,6 +271,7 @@ class InteractiveConsole(QTextEdit):
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
         self.process_finished.emit(exit_code)
+        self.setReadOnly(True)
 
     def _write_started(self):
         self._writer(self, "{0} {1}\n".format(
