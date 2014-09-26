@@ -195,8 +195,11 @@ def serve_forever(args=None):
     # Exit the server thread when the main thread terminates
     server_thread.daemon = True
     server_thread.start()
-    while True:
-        time.sleep(1)
+    if sys.version_info[0] == 2:
+        raw_input('')
+    else:
+        input('')
+    server.shutdown()
 
 
 # Server script example
