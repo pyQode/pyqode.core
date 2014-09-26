@@ -274,8 +274,6 @@ class TabWidget(QTabWidget):
         try:
             code_edit.file.close()
             code_edit.backend.stop()
-            code_edit.modes.clear()
-            code_edit.panels.clear()
             code_edit.delete()
         except AttributeError:
             pass
