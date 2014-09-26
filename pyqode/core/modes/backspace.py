@@ -6,6 +6,11 @@ from pyqode.core.api import Mode
 
 
 class SmartBackSpaceMode(Mode):
+    """
+    Improves backspace behaviour. When you press backspace and there are
+    spaces on the left of the cursor, those spaces will be deleted (at most
+    tab_len spaces). Basically this turns backspace into Shitf+Tab
+    """
     def on_state_changed(self, state):
         if state:
             self.editor.key_pressed.connect(self._on_key_pressed)

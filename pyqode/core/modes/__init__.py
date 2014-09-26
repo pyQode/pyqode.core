@@ -38,12 +38,12 @@ __all__ = [
     'ExtendedSelectionMode',
     'FileWatcherMode',
     'IndenterMode',
-    'OccurrencesHighlighterMode'
+    'OccurrencesHighlighterMode',
     'PygmentsSH',
     'PygmentsSyntaxHighlighter',
     'PYGMENTS_STYLES',
     'RightMarginMode',
-    'SmartBackSpaceMode'
+    'SmartBackSpaceMode',
     'SymbolMatcherMode',
     'WordClickMode',
     'ZoomMode',

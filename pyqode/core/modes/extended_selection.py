@@ -27,13 +27,12 @@ class ExtendedSelectionMode(Mode):
     ``extended_sel_modifier`` or ``matched_sel_modifier``).
 
     """
-    extended_sel_modifier = QtCore.Qt.ControlModifier
-    matched_sel_modifier = QtCore.Qt.AltModifier
-
-    continuation_characters = ('.',)
 
     def __init__(self):
         super(ExtendedSelectionMode, self).__init__()
+        self.extended_sel_modifier = QtCore.Qt.ControlModifier
+        self.matched_sel_modifier = QtCore.Qt.AltModifier
+        self.continuation_characters = ('.',)
         self.word_sel_shortcut = QtGui.QKeySequence('Ctrl+W')
         self.action_select_word = QtWidgets.QAction(self.editor)
         self.action_select_word.setText('Select word')

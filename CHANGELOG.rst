@@ -8,7 +8,7 @@ New features:
 
     - add support for python2. You may now use python2 for writing a pyqode
       app (backend AND frontend)!
-    - add a mode that highlight word under cursor occurrences
+    - add a mode that highlight occurrences of the word under the text cursor
     - add a smart backspace mode, this mode eats as much whitespace as possible
       when you press backspace
     - add GlobalCheckerPanel that shows all errors found in the document
@@ -25,6 +25,11 @@ New features:
     - improvements to the InteractiveConsole: there is now a way to setup
       colors using a pygments color scheme. Also the console is now readonly
       when the process is not running
+    - backend improvements:
+        - the backend is now a ThreadedSocketServer
+        - proper way to close the backend process. we do not use terminate/kill
+          anymore but send a shutdown signal to the process stdin
+
 
 Fixed bugs:
     - fix the code that prevents code completion popup from showing in strings

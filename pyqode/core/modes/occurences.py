@@ -15,6 +15,10 @@ class OccurrencesHighlighterMode(Mode):
     """
     @property
     def delay(self):
+        """
+        Delay before searching for occurrences. The timer is rearmed as soon
+        as the cursor position changed.
+        """
         return self.timer.delay
 
     @delay.setter
@@ -62,6 +66,7 @@ class OccurrencesHighlighterMode(Mode):
     def __init__(self):
         super(OccurrencesHighlighterMode, self).__init__()
         self._decorations = []
+        #: Timer used to run the search request with a specific delay
         self.timer = DelayJobRunner(delay=1000)
         self._sub = None
         self._background = QtGui.QColor('#80CC80')

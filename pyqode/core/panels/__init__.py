@@ -20,4 +20,5 @@ __all__ = [
     'Marker',
     'MarkerPanel',
     'SearchAndReplacePanel',
+    'GlobalCheckerPanel'
 ]
