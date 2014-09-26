@@ -84,7 +84,8 @@ class Mode(object):
         """
         Uninstall the mode
         """
-        pass
+        self.enabled = False
+        self._editor = None
 
     def on_state_changed(self, state):
         """
