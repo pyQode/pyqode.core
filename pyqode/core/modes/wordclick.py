@@ -45,10 +45,13 @@ class WordClickMode(Mode, QtCore.QObject):
             self.editor.mouse_moved.connect(self._on_mouse_moved)
             self.editor.mouse_pressed.connect(self._on_mouse_pressed)
             self.editor.key_released.connect(self._on_key_released)
-            self.editor.mouse_double_clicked.connect(self._on_mouse_double_clicked)
+            self.editor.mouse_double_clicked.connect(
+                self._on_mouse_double_clicked)
         else:
             self.editor.mouse_moved.disconnect(self._on_mouse_moved)
             self.editor.mouse_pressed.disconnect(self._on_mouse_pressed)
+            self.editor.mouse_double_clicked.disconnect(
+                self._on_mouse_double_clicked)
 
     def _on_mouse_double_clicked(self):
         self._timer.cancel_requests()

@@ -90,12 +90,12 @@ class GlobalCheckerPanel(Panel):
         h = self.get_marker_height()
         if h < 1:
             h = 1
-        return QtCore.QSize(self.sizeHint().width()/2, h)
+        return QtCore.QSize(self.sizeHint().width() / 2, h)
 
     def mousePressEvent(self, event):
         """
         Moves the editor text cursor to the clicked line.
         """
         height = event.pos().y()
-        line = height//self.get_marker_height()
+        line = height // self.get_marker_height()
         TextHelper(self.editor).goto_line(line)

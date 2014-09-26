@@ -1011,4 +1011,3 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setTextCursor(cursor)
         if event:
             event.accept()
-

@@ -533,7 +533,7 @@ class TextHelper(object):
         if cursor is None:
             cursor = self._editor.textCursor()
         cursor.movePosition(QtGui.QTextCursor.WordRight,
-                                 QtGui.QTextCursor.KeepAnchor)
+                            QtGui.QTextCursor.KeepAnchor)
         return cursor.selectedText().strip()
 
     def get_right_character(self, cursor=None):
@@ -718,7 +718,7 @@ class TextHelper(object):
             start_pos = None
             opening_char = None
             closed = {k: 0 for k in matching.values()
-                  if k not in ['"', "'"]}
+                      if k not in ['"', "'"]}
             # go left
             stop = False
             while not stop and not cursor.atStart():

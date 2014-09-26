@@ -49,7 +49,7 @@ class PromptLineEdit(QtWidgets.QLineEdit):
         self._prompt_text = prompt
         self.update()
 
-    def paintEvent(self, event ):
+    def paintEvent(self, event):
         """QLineEdit.paintEvent implementation.
         Draws prompt
         """
@@ -67,18 +67,20 @@ class PromptLineEdit(QtWidgets.QLineEdit):
 
             left, top, right, bottom = self.getTextMargins()
 
-            va = self.style().visualAlignment( self.layoutDirection(), self.alignment() )
+            va = self.style().visualAlignment(
+                self.layoutDirection(), self.alignment())
             rect = self.style().subElementRect(
                 QtWidgets.QStyle.SE_LineEditContents, option, self).adjusted(
-                2, 0, 0, 0).adjusted(left, top, -right, -bottom)
+                    2, 0, 0, 0).adjusted(left, top, -right, -bottom)
             fm = QtGui.QFontMetrics(self.font())
-            text = fm.elidedText(self._prompt_text, QtCore.Qt.ElideRight, rect.width())
+            text = fm.elidedText(
+                self._prompt_text, QtCore.Qt.ElideRight, rect.width())
             painter = QtGui.QPainter(self)
             painter.setPen(self.palette().color(
                 QtGui.QPalette.Disabled, QtGui.QPalette.Text))
             painter.drawText(rect, va, text)
 
-    def resizeEvent(self, event ):
+    def resizeEvent(self, event):
         """QLineEdit.resizeEvent implementation
         Adjusts Clear button position
         """
@@ -97,8 +99,7 @@ class PromptLineEdit(QtWidgets.QLineEdit):
             right = 0
         self.setTextMargins(left, top, right, bottom)
 
-    def _on_text_changed(self, text ):
+    def _on_text_changed(self, text):
         """Text changed, update Clear button visibility
         """
         self.set_button_visible(len(text) > 0)
-
