@@ -11,7 +11,7 @@ def _logger():
 
 class TextDecorationsManager(Manager):
     def __init__(self, editor):
-        super().__init__(editor)
+        super(TextDecorationsManager, self).__init__(editor)
         self._decorations = []
 
     def append(self, decoration):

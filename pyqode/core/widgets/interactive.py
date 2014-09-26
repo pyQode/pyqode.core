@@ -40,7 +40,7 @@ class InteractiveConsole(QTextEdit):
     process_finished = Signal(int)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(InteractiveConsole, self).__init__(parent)
         self._stdout_col = QColor("#404040")
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
@@ -51,7 +51,7 @@ class InteractiveConsole(QTextEdit):
         self._clear_on_start = True
         self.process = QProcess()
         self._merge_outputs = False
-        self.process.finished.connect(self._write_finished)
+        self.process.finished.connect(self._on_process_finished)
         self.process.error.connect(self._write_error)
         self.process.readyReadStandardError.connect(self._on_stderr)
         self.process.readyReadStandardOutput.connect(self._on_stdout)
@@ -65,6 +65,7 @@ class InteractiveConsole(QTextEdit):
             font = 'Monaco'
         self._font_family = font
         self.setFont(QFont(font, 10))
+        self.setReadOnly(True)
 
     def set_writer(self, writer):
         """
@@ -206,6 +207,7 @@ class InteractiveConsole(QTextEdit):
         :param cwd: Working directory
         :type cwd: str
         """
+        self.setReadOnly(False)
         if env is None:
             env = {}
         if args is None:
@@ -216,8 +218,8 @@ class InteractiveConsole(QTextEdit):
             e = self.process.systemEnvironment()
             ev = QProcessEnvironment()
             for v in e:
-                k, *values = v.split('=')
-                ev.insert(k, '='.join(values))
+                values = v.split('=')
+                ev.insert(values[0], '='.join(values[1:]))
             for k, v in env.items():
                 ev.insert(k, v)
             self.process.setProcessEnvironment(ev)
@@ -239,6 +241,7 @@ class InteractiveConsole(QTextEdit):
         _logger().debug('killing process')
         self._user_stop = True
         self.process.kill()
+        self.setReadOnly(True)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -251,14 +254,15 @@ class InteractiveConsole(QTextEdit):
                 txt = event.text()
                 self._usr_buffer += txt
                 self.setTextColor(self._stdin_col)
-            else:
+            elif event.text().isalnum():
                 self._usr_buffer = self._usr_buffer[
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
-        super().keyPressEvent(event)
+        super(InteractiveConsole, self).keyPressEvent(event)
+        self.setTextColor(self._stdout_col)
 
-    def _write_finished(self, exit_code, exit_status):
+    def _on_process_finished(self, exit_code, exit_status):
         if not self._user_stop:
             self._writer(
                 self, "\nProcess finished with exit code %d" %
@@ -267,6 +271,7 @@ class InteractiveConsole(QTextEdit):
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
         self.process_finished.emit(exit_code)
+        self.setReadOnly(True)
 
     def _write_started(self):
         self._writer(self, "{0} {1}\n".format(
@@ -305,3 +310,30 @@ class InteractiveConsole(QTextEdit):
         text_edit.setTextColor(color)
         text_edit.insertPlainText(text)
         text_edit.moveCursor(QTextCursor.End)
+
+    def apply_color_scheme(self, color_scheme):
+        """
+        Apply a pygments color scheme to the console.
+
+        As there is not a 1 to 1 mapping between color scheme formats and
+        console formats, we decided to make the following mapping (it usually
+        looks good for most of the available pygments styles):
+
+            - stdout_color = normal color
+            - stderr_color = red (lighter if background is dark)
+            - stdin_color = numbers color
+            - app_msg_color = string color
+            - bacgorund_color = background
+
+
+        :param color_scheme: pyqode.core.api.ColorScheme to apply
+        """
+        self.stdout_color = color_scheme.formats['normal'].foreground().color()
+        self.stdin_color = color_scheme.formats['number'].foreground().color()
+        self.app_msg_color = color_scheme.formats[
+            'string'].foreground().color()
+        self.background_color = color_scheme.background
+        if self.background_color.lightness() < 128:
+            self.stderr_color = QColor('#FF8080')
+        else:
+            self.stderr_color = QColor('red')

@@ -15,7 +15,6 @@ from ..helpers import log_test_name
 
 
 @editor_open(__file__)
-@log_test_name
 def test_line_count(editor):
     with open(__file__, 'r') as f:
         nb_lines = len(f.read().splitlines()) + 1
@@ -23,7 +22,6 @@ def test_line_count(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_goto_line(editor):
     assert editor.textCursor().blockNumber() == 0
     assert editor.textCursor().columnNumber() == 0
@@ -40,7 +38,6 @@ def test_goto_line(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_selected_text(editor):
     helper = TextHelper(editor)
     helper.goto_line(2, 1, move=True)
@@ -51,20 +48,17 @@ def test_selected_text(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_word_under_mouse_cursor(editor):
     assert TextHelper(editor).word_under_mouse_cursor() is not None
 
 
 @editor_open(__file__)
-@log_test_name
 def test_line_text(editor):
     TextHelper(editor).goto_line(2, 0, move=True)
     assert TextHelper(editor).current_line_text() == __doc__.splitlines()[1]
 
 
 @editor_open(__file__)
-@log_test_name
 def test_set_line_text(editor):
     TextHelper(editor).set_line_text(2, 'haha')
     TextHelper(editor).goto_line(2, 0, move=True)
@@ -72,7 +66,6 @@ def test_set_line_text(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_remove_last_line(editor):
     count = TextHelper(editor).line_count()
     TextHelper(editor).remove_last_line()
@@ -80,7 +73,6 @@ def test_remove_last_line(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_clean_document(editor):
     TextHelper(editor).clean_document()
     count = TextHelper(editor).line_count()
@@ -96,7 +88,6 @@ def test_clean_document(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_select_lines(editor):
     TextHelper(editor).select_lines(0, 4)
     QTest.qWait(100)
@@ -108,7 +99,6 @@ def test_select_lines(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_line_pos_from_number(editor):
     assert TextHelper(editor).line_pos_from_number(0) is not None
     # out of range line will return the bottom of the document or the top
@@ -120,7 +110,6 @@ def test_line_pos_from_number(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_line_nbr_from_position(editor):
     editor.repaint()
     sys.stderr.write(str(editor.visible_blocks))
@@ -131,7 +120,6 @@ def test_line_nbr_from_position(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_open_file(editor):
     editor.file.open(__file__, 'text/x-python')
     assert editor.file.path == __file__
@@ -156,7 +144,6 @@ def test_save_file(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_mark_whole_doc_dirty(editor):
     TextHelper(editor).mark_whole_doc_dirty()
 
@@ -167,7 +154,6 @@ src = """def test_mark_whole_doc_dirty(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_line_indent(editor):
     editor.setPlainText(src, 'text/x-python', 'utf-8')
     assert TextHelper(editor).line_indent(0) == 0
@@ -177,7 +163,6 @@ def test_line_indent(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_right_word(editor):
     editor.file.open(__file__)
     TextHelper(editor).goto_line(2)
@@ -191,7 +176,6 @@ def test_right_char(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_insert_text(editor):
     editor.file.open(__file__)
     TextHelper(editor).goto_line(2)
@@ -205,7 +189,6 @@ def test_insert_text(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_clear_selection(editor):
     editor.file.open(__file__)
     helper = TextHelper(editor)
@@ -216,7 +199,6 @@ def test_clear_selection(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_move_right(editor):
     editor.file.open(__file__)
     TextHelper(editor).goto_line(2)
@@ -225,7 +207,6 @@ def test_move_right(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_to_upper(editor):
     editor.file.open(__file__)
     TextHelper(editor).goto_line(2)
@@ -237,7 +218,6 @@ def test_to_upper(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_to_lower(editor):
     editor.file.open(__file__)
     TextHelper(editor).goto_line(2)
@@ -249,16 +229,14 @@ def test_to_lower(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_search_text(editor):
     occurences, index = TextHelper(editor).search_text(
         editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
-    assert len(occurences) == 11
+    assert len(occurences) == 12
 
 
 @editor_open(__file__)
-@log_test_name
 def test_keep_tc(editor):
     @keep_tc_pos
     def move_cursor(editor, arg):
@@ -272,9 +250,58 @@ def test_keep_tc(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_get_mimetype(editor):
     from pyqode.core import managers
     assert managers.FileManager.get_mimetype('file.py') == 'text/x-python'
     assert managers.FileManager.get_mimetype('file.ui') == 'text/xml'
     assert managers.FileManager.get_mimetype('file.foo') == 'text/x-plain'
+
+
+@editor_open(__file__)
+def test_prev_line_text(editor):
+    TextHelper(editor).goto_line(1)
+    assert TextHelper(editor).previous_line_text() == '# -*- coding: utf-8 -*-'
+
+
+@editor_open(__file__)
+def test_select_whole_line(editor):
+    cursor = TextHelper(editor).select_whole_line(2)
+    assert isinstance(cursor, QtGui.QTextCursor)
+    assert cursor.hasSelection()
+    assert cursor.selectionStart() == 28
+    assert cursor.selectionEnd() == 99
+
+
+def test_extended_selection(editor):
+    for line, column, text in [(8, 15, 'pyqode.core.api.utils'),
+                               (8, 1, 'from')]:
+        editor.file.open(__file__)
+        QTest.qWait(1000)
+        cursor = editor.textCursor()
+        assert not cursor.hasSelection()
+        helper = TextHelper(editor)
+        helper.goto_line(line, column)
+        assert helper.cursor_position()[0] == line
+        assert helper.cursor_position()[1] == column
+        cursor = editor.textCursor()
+        assert text in cursor.block().text()
+        helper.select_extended_word()
+        cursor = editor.textCursor()
+        assert cursor.hasSelection()
+        assert cursor.selectedText() == text
+
+
+@editor_open(__file__)
+def test_matched_selection(editor):
+    line, column, text = 233, 14, '''        editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively'''
+    cursor = editor.textCursor()
+    assert not cursor.hasSelection()
+    helper = TextHelper(editor)
+    helper.goto_line(line, column)
+    assert helper.cursor_position()[0] == line
+    assert helper.cursor_position()[1] == column
+    cursor = editor.textCursor()
+    helper.match_select()
+    cursor = editor.textCursor()
+    assert cursor.hasSelection()
+    assert text in cursor.selectedText()

@@ -31,3 +31,8 @@ def test_style(editor):
     mode.background = c
     QTest.qWait(1000)
     assert mode.background.name() == c.name()
+
+
+@editor_open(__file__)
+def test_deco(editor):
+    assert len(editor.decorations) > 0

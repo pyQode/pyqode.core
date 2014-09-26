@@ -6,12 +6,12 @@ import logging
 from pyqode.core.api import TextBlockUserData
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.mode import Mode
-from pyqode.core.backend import NotConnected
+from pyqode.core.backend import NotRunning
 from pyqode.core.api.utils import DelayJobRunner
 from pyqode.qt import QtCore, QtGui
 
 
-class CheckerMessages:
+class CheckerMessages(object):
     """
     Enumerates the possible checker message types.
     """
@@ -138,6 +138,10 @@ class CheckerMode(Mode, QtCore.QObject):
     Messages are displayed as text decorations on the editor. A checker panel
     will take care of display message icons next to each line.
     """
+    @property
+    def messages(self):
+        return self._messages
+
     def __init__(self, worker,
                  delay=500,
                  show_tooltip=True):
@@ -199,6 +203,7 @@ class CheckerMode(Mode, QtCore.QObject):
             if not len(self._pending_msg):
                 # all pending message added
                 self._finished = True
+                _logger(self.__class__).debug('finished')
                 self.editor.repaint()
                 return False
             message = self._pending_msg.pop(0)
@@ -237,26 +242,30 @@ class CheckerMode(Mode, QtCore.QObject):
 
         :param message: Message to remove
         """
+        import time
         _logger(self.__class__).debug('removing message %s' % message)
+        t = time.time()
         usd = message.block.userData()
-        try:
-            if usd and usd.messages:
-                try:
-                    usd.messages.remove(message)
-                except ValueError:
-                    pass
-        except AttributeError:
-            pass
-        self._messages.remove(message)
+        if usd:
+            try:
+                usd.messages.remove(message)
+            except (AttributeError, ValueError):
+                pass
         if message.decoration:
             self.editor.decorations.remove(message.decoration)
+        self._messages.remove(message)
 
     def clear_messages(self):
         """
         Clears all messages.
         """
         while len(self._messages):
-            self.remove_message(self._messages[0])
+            msg = self._messages.pop(0)
+            usd = msg.block.userData()
+            if usd and hasattr(usd, 'messages'):
+                usd.messages[:] = []
+            if msg.decoration:
+                self.editor.decorations.remove(msg.decoration)
 
     def on_state_changed(self, state):
         if state:
@@ -292,7 +301,7 @@ class CheckerMode(Mode, QtCore.QObject):
         if self._finished:
             _logger(self.__class__).debug('running analysis')
             self._job_runner.request_job(self._request)
-        else:
+        elif self.editor:
             # retry later
             _logger(self.__class__).debug(
                 'delaying analysis (previous analysis not finished)')
@@ -313,6 +322,7 @@ class CheckerMode(Mode, QtCore.QObject):
         try:
             self.editor.backend.send_request(
                 self._worker, request_data, on_receive=self._on_work_finished)
-        except NotConnected:
+            self._finished = False
+        except NotRunning:
             # retry later
             QtCore.QTimer.singleShot(100, self._request)

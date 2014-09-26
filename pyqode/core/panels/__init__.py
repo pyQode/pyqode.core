@@ -9,6 +9,7 @@ from .marker import MarkerPanel
 from .checker import CheckerPanel
 from .folding import FoldingPanel
 from .search_and_replace import SearchAndReplacePanel
+from .global_checker import GlobalCheckerPanel
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     'Marker',
     'MarkerPanel',
     'SearchAndReplacePanel',
+    'GlobalCheckerPanel'
 ]

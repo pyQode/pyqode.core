@@ -79,7 +79,7 @@ class DelayJobRunner(object):
         to all requests and cannot be changed afterwards.
         """
         self._timer = QtCore.QTimer()
-        self._interval = delay
+        self.delay = delay
         self._timer.timeout.connect(self._exec_requested_job)
         self._args = []
         self._kwargs = {}
@@ -105,7 +105,7 @@ class DelayJobRunner(object):
         self._job = job
         self._args = args
         self._kwargs = kwargs
-        self._timer.start(self._interval)
+        self._timer.start(self.delay)
 
     def cancel_requests(self):
         """
@@ -121,7 +121,7 @@ class DelayJobRunner(object):
         self._job(*self._args, **self._kwargs)
 
 
-class TextHelper:
+class TextHelper(object):
     """
     Text helper helps you manipulate the content of CodeEdit and extends the
     Qt text api for an easier usage.
@@ -394,6 +394,11 @@ class TextHelper:
         text_cursor.endEditBlock()
         editor._cleaning = False
 
+    def select_whole_line(self, line=None, apply_selection=True):
+        if line is None:
+            line = self.current_line_nbr()
+        return self.select_lines(line, line, apply_selection=apply_selection)
+
     def select_lines(self, start=0, end=-1, apply_selection=True):
         """
         Selects entire lines between start and end line numbers.
@@ -519,23 +524,24 @@ class TextHelper:
         indentation = len(line) - len(line.lstrip())
         return indentation
 
-    def get_right_word(self):
+    def get_right_word(self, cursor=None):
         """
         Gets the character on the right of the text cursor.
 
         :return: The word that is on the right of the text cursor.
         """
-        text_cursor = self._editor.textCursor()
-        text_cursor.movePosition(QtGui.QTextCursor.WordRight,
-                                 QtGui.QTextCursor.KeepAnchor)
-        return text_cursor.selectedText().strip()
+        if cursor is None:
+            cursor = self._editor.textCursor()
+        cursor.movePosition(QtGui.QTextCursor.WordRight,
+                            QtGui.QTextCursor.KeepAnchor)
+        return cursor.selectedText().strip()
 
-    def get_right_character(self):
+    def get_right_character(self, cursor=None):
         """
         Gets the character that is on the right of the text cursor.
 
         """
-        next_char = self.get_right_word()
+        next_char = self.get_right_word(cursor=cursor)
         if len(next_char):
             next_char = next_char[0]
         else:
@@ -658,8 +664,125 @@ class TextHelper:
                                 return True
         return False
 
+    def select_extended_word(self, continuation_chars=('.',)):
+        cursor = self._editor.textCursor()
+        original_pos = cursor.position()
+        start_pos = None
+        end_pos = None
+        # go left
+        stop = False
+        seps = self._editor.word_separators + [' ']
+        while not stop:
+            cursor.clearSelection()
+            cursor.movePosition(cursor.Left, cursor.KeepAnchor)
+            char = cursor.selectedText()
+            if cursor.atBlockStart():
+                stop = True
+                start_pos = cursor.position()
+            elif char in seps and char not in continuation_chars:
+                stop = True
+                start_pos = cursor.position() + 1
+        # go right
+        cursor.setPosition(original_pos)
+        stop = False
+        while not stop:
+            cursor.clearSelection()
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor)
+            char = cursor.selectedText()
+            if cursor.atBlockEnd():
+                stop = True
+                end_pos = cursor.position()
+                if char in seps:
+                    end_pos -= 1
+            elif char in seps and char not in continuation_chars:
+                stop = True
+                end_pos = cursor.position() - 1
+        if start_pos and end_pos:
+            cursor.setPosition(start_pos)
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor,
+                                end_pos - start_pos)
+            self._editor.setTextCursor(cursor)
 
-class TextBlockHelper:
+    def match_select(self, ignored_symbols=None):
+        """
+        Selects text between matching quotes or parentheses.
+        """
+        def filter_matching(ignored_symbols, matching):
+            if ignored_symbols is not None:
+                for symbol in matching.keys():
+                    if symbol in ignored_symbols:
+                        matching.pop(symbol)
+            return matching
+
+        def find_opening_symbol(cursor, matching):
+            start_pos = None
+            opening_char = None
+            closed = {k: 0 for k in matching.values()
+                      if k not in ['"', "'"]}
+            # go left
+            stop = False
+            while not stop and not cursor.atStart():
+                cursor.clearSelection()
+                cursor.movePosition(cursor.Left, cursor.KeepAnchor)
+                char = cursor.selectedText()
+                if char in closed.keys():
+                    closed[char] += 1
+                elif char in matching.keys():
+                    opposite = matching[char]
+                    if opposite in closed.keys() and closed[opposite]:
+                        closed[opposite] -= 1
+                        continue
+                    else:
+                        # found opening quote or parenthesis
+                        start_pos = cursor.position() + 1
+                        stop = True
+                        opening_char = char
+            return opening_char, start_pos
+
+        def find_closing_symbol(cursor, matching, opening_char, original_pos):
+            end_pos = None
+            cursor.setPosition(original_pos)
+            rev_matching = {v: k for k, v in matching.items()}
+            opened = {k: 0 for k in rev_matching.values()
+                      if k not in ['"', "'"]}
+            stop = False
+            while not stop and not cursor.atEnd():
+                cursor.clearSelection()
+                cursor.movePosition(cursor.Right, cursor.KeepAnchor)
+                char = cursor.selectedText()
+                if char in opened.keys():
+                    opened[char] += 1
+                elif char in rev_matching.keys():
+                    opposite = rev_matching[char]
+                    if opposite in opened.keys() and opened[opposite]:
+                        opened[opposite] -= 1
+                        continue
+                    elif matching[opening_char] == char:
+                        # found opening quote or parenthesis
+                        end_pos = cursor.position() - 1
+                        stop = True
+            return end_pos
+
+        matching = {'(': ')', '{': '}', '[': ']', '"': '"', "'": "'"}
+        filter_matching(ignored_symbols, matching)
+        cursor = self._editor.textCursor()
+        original_pos = cursor.position()
+        end_pos = None
+        opening_char, start_pos = find_opening_symbol(cursor, matching)
+        if opening_char:
+            end_pos = find_closing_symbol(
+                cursor, matching, opening_char, original_pos)
+        if start_pos and end_pos:
+            cursor.setPosition(start_pos)
+            cursor.movePosition(cursor.Right, cursor.KeepAnchor,
+                                end_pos - start_pos)
+            self._editor.setTextCursor(cursor)
+            return True
+        else:
+            return False
+
+
+class TextBlockHelper(object):
     """
     Helps retrieving the various part of the user state bitmask.
 

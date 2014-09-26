@@ -346,7 +346,7 @@ class TabWidget(QTabWidget):
         Extends QTabWidget.addTab to keep an internal list of added tabs.
         """
         self._widgets.append(elem)
-        return super().addTab(elem, icon, name)
+        return super(TabWidget, self).addTab(elem, icon, name)
 
     def _name_exists(self, name):
         """

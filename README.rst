@@ -64,7 +64,7 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  Python 3 (>= 3.2)
+-  Python 2 (>=2.7) or Python 3 (>= 3.2)
 -  PyQt5 or PyQt4 or PySide
 -  pygments
 
@@ -75,25 +75,40 @@ You need to install PyQt or PySide by yourself.
 
 Then you can install pyqode.core using **pip**::
 
-    $ pip3 install pyqode.core
+    $ pip install pyqode.core
 
 Testing
 -------
 
-pyqode.core now have a test suite and measure its coverage.
+pyqode.core now has a test suite and measure its coverage.
 
-To run the test, just run the following command (you don't need to install
-anything)::
+To run the tests, you must first install tox and pytest::
 
-    $ python3 runtests.py
-    
-If you need coverage, install pytest-coverage and run::
+    $ pip install tox pytest
 
-    $ python3 runtests.py --cov pyqode --cov-report term
-    
-If you want to test PEP8 compliance, install pytest-pep8 and run::
+You might also want to install pytest-cov and pytest-pep8.
 
-    $ python3 runtests.py --pep8
+Then you can run the tests by running the following command::
+
+    $ tox
+
+To run the tests for a specifc environment, use the -e option. E.g. to run
+tests with python 2.7 and pyqt4, you would run::
+
+    $ tox -e py27-pyqt4
+
+Here is the list of available test environments:
+
+- py27-pyqt4
+- py27-pyqt5
+- py32-pyqt4
+- py32-pyqt5
+- py33-pyqt4
+- py33-pyqt5
+- py34-pyqt4
+- py34-pyqt5
+- cov
+- pep8
 
 Resources
 ---------

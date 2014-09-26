@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="pyqode-icons">
+    <file>rc/clear-left.png</file>
     <file>rc/go-next.png</file>
     <file>rc/go-previous.png</file>
     <file>rc/arrow_down_off.png</file>

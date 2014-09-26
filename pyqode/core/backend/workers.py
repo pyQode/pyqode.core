@@ -16,6 +16,7 @@ A worker is always tightly coupled with its caller, so are the data.
     python2, which might happen in pyqode.python to support python2 syntax).
 
 """
+import re
 import sys
 import traceback
 
@@ -159,3 +160,77 @@ class DocumentWordsProvider(object):
         for word in self.split(code, self.separators):
             completions.append({'name': word})
         return completions
+
+
+def finditer_noregex(string, sub, whole_word):
+    """
+    Search occurrences using str.find instead of regular expressions.
+    """
+    start = 0
+    while True:
+        start = string.find(sub, start)
+        if start == -1:
+            return
+        if whole_word:
+            if start:
+                pchar = string[start - 1]
+            else:
+                pchar = ' '
+            try:
+                nchar = string[start + len(sub)]
+            except IndexError:
+                nchar = ' '
+            if nchar in DocumentWordsProvider.separators and \
+                    pchar in DocumentWordsProvider.separators:
+                yield start
+            start += len(sub)
+        else:
+            yield start
+            start += 1
+
+
+def findalliter(string, sub, regex=False, case_sensitive=False,
+                whole_word=False):
+    """
+    Generator that finds all occurrences of ``sub`` in  ``string``
+    :param string: string to parse
+    :param sub: string to search
+    :param regex: True to search using regex
+    :param case_sensitive: True to match case, False to ignore case
+    :param whole_word: True to returns only whole words
+    :return:
+    """
+    if not sub:
+        return
+    if regex:
+        flags = re.MULTILINE
+        if not case_sensitive:
+            flags |= re.IGNORECASE
+        for val in re.finditer(sub, string, flags):
+            yield val.span()
+    else:
+        if not case_sensitive:
+            string = string.lower()
+            sub = sub.lower()
+        for val in finditer_noregex(string, sub, whole_word):
+            yield val, val + len(sub)
+
+
+def findall(data):
+    """
+    Worker that finds all occurrences of a given string (or regex)
+    in a given text.
+
+    :param data: Request data dict::
+        {
+            'string': string to search in text
+            'sub': input text
+            'regex': True to consider string as a regular expression
+            'whole_word': True to match whole words only.
+            'case_sensitive': True to match case, False to ignore case
+        }
+    :return: status, list of occurrence positions in text
+    """
+    return True, list(findalliter(
+        data['string'], data['sub'], regex=data['regex'],
+        whole_word=data['whole_word'], case_sensitive=data['case_sensitive']))

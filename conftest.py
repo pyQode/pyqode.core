@@ -10,15 +10,13 @@ This scripts configures the test suite. We do two things:
 import logging
 import os
 import sys
-import pytest
-import time
-from pyqode.core.api.code_edit import CodeEdit
-
 try:
     import faulthandler
     faulthandler.enable()
 except ImportError:
     pass
+import pytest
+from pyqode.core.api.code_edit import CodeEdit
 
 
 # -------------------

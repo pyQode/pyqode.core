@@ -2,6 +2,9 @@
 """
 This module contains the main window implementation.
 """
+from __future__ import print_function
+# from future.builtins import super
+
 import mimetypes
 import os
 import sys
@@ -19,7 +22,7 @@ from .forms.main_window_ui import Ui_MainWindow
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
-        super().__init__()
+        super(MainWindow, self).__init__()
         # Load our UI (made in Qt Designer)
         self.setupUi(self)
         self.setup_recent_files_menu()

@@ -2,43 +2,30 @@
 Tests the code completion mode
 """
 import functools
-from pyqode.qt import QtCore, QtWidgets
+
+from pyqode.qt import QtCore
 from pyqode.qt.QtTest import QTest
+
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
-
-from ..helpers import cwd_at, server_path, wait_for_connected
+from ..helpers import server_path, wait_for_connected
 from ..helpers import preserve_editor_config
+from ..helpers import ensure_visible
 
 
 def get_mode(editor):
     return editor.modes.get(modes.CodeCompletionMode)
 
 
-def ensure_visible(func):
-    """
-    Ensures the frontend is connect is connected to the server. If that is not
-    the case, the code completion server is started automatically
-    """
-    @functools.wraps(func)
-    @cwd_at('test')
-    def wrapper(editor, *args, **kwds):
-        QtWidgets.QApplication.setActiveWindow(editor)
-        editor.setFocus(True)
-        editor.setReadOnly(False)
-        return func(editor, *args, **kwds)
-    return wrapper
-
-
 code = '''"""
 Empty module
 """
+
 '''
 
 
 def ensure_empty(func):
     @functools.wraps(func)
-    @cwd_at('test')
     def wrapper(editor, *args, **kwds):
         editor.file._path = None
         editor.setPlainText(code, 'text/x-python', 'utf-8')
@@ -52,9 +39,8 @@ def ensure_connected(func):
     the case, the code completion server is started automatically
     """
     @functools.wraps(func)
-    @cwd_at('test')
     def wrapper(editor, *args, **kwds):
-        if not editor.backend.connected:
+        if not editor.backend.running:
             editor.backend.start(server_path())
             wait_for_connected(editor)
         return func(editor, *args, **kwds)
@@ -98,22 +84,49 @@ def test_properties(editor):
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
-    if editor.backend.connected:
+    if editor.backend.running:
         editor.backend.stop()
-    # request a completion at start of the document, this request will be
-    # skipped because we are in a comment/docstring zone.
-    assert mode.request_completion() is False
+    # starts the server after the request to test the retry on NotConnected
+    # mechanism
+    TextHelper(editor).goto_line(0)
+    QTest.qWait(100)
+    mode.request_completion()
+    editor.backend.start(server_path())
+    QTest.qWait(2000)
+
+    # now this should work
     TextHelper(editor).goto_line(3)
     QTest.qWait(100)
     assert mode.request_completion() is True
-    # starts the server after the request to test the retry on NotConnected
-    # mechanism
-    editor.backend.start(server_path())
-    QTest.qWait(2000)
+    QTest.qWait(100)
+
+
+@ensure_empty
+@ensure_visible
+@ensure_connected
+@preserve_editor_config
+def test_completion_in_string_or_comment(editor):
+    mode = get_mode(editor)
+    TextHelper(editor).goto_line(2, column=0)
+    QTest.qWait(100)
+    assert mode.request_completion() is False
+    QTest.qWait(1000)
+
+
+@ensure_empty
+@ensure_visible
+@ensure_connected
+@preserve_editor_config
+def test_successive_requests(editor):
+    mode = get_mode(editor)
+    QTest.qWait(1000)
+    TextHelper(editor).goto_line(3)
     # only the first request should be accepted
     ret1 = mode.request_completion()
     ret2 = mode.request_completion()
-    assert ret1 is True and ret2 is False
+    assert ret1 is True
+    assert ret2 is False
+
 
 
 @ensure_visible
@@ -121,7 +134,7 @@ def test_request_completion(editor):
 @ensure_connected
 @preserve_editor_config
 def test_events(editor):
-    assert editor.backend.connected
+    assert editor.backend.running
     QTest.qWait(1000)
     TextHelper(editor).goto_line(3)
     QTest.keyPress(editor, QtCore.Qt.Key_Space, QtCore.Qt.ControlModifier)
@@ -164,7 +177,7 @@ def test_events(editor):
 @ensure_visible
 @ensure_connected
 def test_insert_completions(editor):
-    assert editor.backend.connected
+    assert editor.backend.running
     TextHelper(editor).goto_line(3)
     # check insert completions
     QTest.keyPress(editor, 'm')

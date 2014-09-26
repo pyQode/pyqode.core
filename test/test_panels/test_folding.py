@@ -1,8 +1,10 @@
+import os
+import pytest
 from pyqode.core.api import TextHelper, TextBlockHelper
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
-from test.helpers import editor_open, preserve_editor_config
+from test.helpers import editor_open, preserve_editor_config, ensure_visible
 
 
 def get_panel(editor):
@@ -16,8 +18,11 @@ def test_enabled(editor):
     panel.enabled = True
 
 
+@ensure_visible
 @preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
+@pytest.mark.skipif('TRAVIS' not in os.environ,
+                    reason="tested only on travis")
 def test_mouse_move(editor):
     panel = get_panel(editor)
     panel.highlight_caret_scope = False
@@ -25,17 +30,18 @@ def test_mouse_move(editor):
     y_pos = TextHelper(editor).line_pos_from_number(8)
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos + 5))
     QTest.qWait(1000)
-    assert len(editor.decorations) == 2 + nb_decos
+    assert len(editor.decorations) >= 2
     y_pos = TextHelper(editor).line_pos_from_number(14)
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos + 5))
     QTest.qWait(1000)
-    assert len(editor.decorations) == 4 + nb_decos
+    assert len(editor.decorations) >= 4
     QTest.mouseMove(panel, QtCore.QPoint(0, 0))
     panel.leaveEvent(None)
     editor.setFocus(True)
     panel.highlight_caret_scope = True
 
 
+@ensure_visible
 def toggle_fold_trigger(editor, line, panel):
     y_pos = TextHelper(editor).line_pos_from_number(line) + 5
     QTest.mouseMove(panel, QtCore.QPoint(3, y_pos))
@@ -45,8 +51,11 @@ def toggle_fold_trigger(editor, line, panel):
     QTest.qWait(1000)
 
 
+@ensure_visible
 @preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
+@pytest.mark.skipif('TRAVIS' not in os.environ,
+                    reason="tested only on travis")
 def test_mouse_press(editor):
     panel = get_panel(editor)
     panel.highlight_caret_scope = False
@@ -89,8 +98,11 @@ def test_mouse_press(editor):
     panel.highlight_caret_scope = True
 
 
+@ensure_visible
 @preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
+@pytest.mark.skipif('TRAVIS' not in os.environ,
+                    reason="tested only on travis")
 def test_collapse_all(editor):
     panel = get_panel(editor)
     QTest.qWait(1000)
@@ -109,6 +121,7 @@ def test_collapse_all(editor):
         block = block.next()
 
 
+@ensure_visible
 @preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
 def test_expand_all(editor):

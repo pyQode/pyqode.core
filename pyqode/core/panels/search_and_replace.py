@@ -2,11 +2,14 @@
 """
 This module contains the search and replace panel
 """
+import re
+import sre_constants
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
-from pyqode.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.backend.workers import findall
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
@@ -108,6 +111,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
+        self.lineEditReplace.prompt_text = ' Replace'
         #: Occurrences counter
         self.cpt_occurences = 0
         self._previous_stylesheet = ""
@@ -122,6 +126,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditReplace.installEventFilter(self)
         self._init_actions()
         self._init_style()
+        self.checkBoxRegex.stateChanged.connect(
+            self.checkBoxWholeWords.setDisabled)
 
     def _init_actions(self):
         def _icon(val):
@@ -161,12 +167,20 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.toolButtonClose.setIcon(icon)
         self.toolButtonClose.setIconSize(icon_size)
 
+        self.menu = QtWidgets.QMenu(self.editor)
+        self.menu.setTitle('Search')
+        self.menu.menuAction().setIcon(self.actionSearch.icon())
+        self.menu.addAction(self.actionSearch)
+        self.menu.addAction(self.actionActionSearchAndReplace)
+        self.menu.addAction(self.actionFindNext)
+        self.menu.addAction(self.actionFindPrevious)
+
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
         self._fg = QtGui.QColor('black')
 
     def on_install(self, editor):
-        super().on_install(editor)
+        super(SearchAndReplacePanel, self).on_install(editor)
         self.hide()
         self.text_helper = TextHelper(editor)
 
@@ -178,18 +192,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):
-        super().on_state_changed(state)
+        super(SearchAndReplacePanel, self).on_state_changed(state)
         if state:
-            # append menus
-            self.editor.add_action(self.actionSearch)
-            self.editor.add_action(self.actionActionSearchAndReplace)
-            self.editor.add_action(self.actionFindNext)
-            self.editor.add_action(self.actionFindPrevious)
+            # menu
+            self.editor.add_action(self.menu.menuAction())
             # requestSearch slot
             self.editor.textChanged.connect(self.request_search)
             self.lineEditSearch.textChanged.connect(self.request_search)
             self.checkBoxCase.stateChanged.connect(self.request_search)
             self.checkBoxWholeWords.stateChanged.connect(self.request_search)
+            self.checkBoxRegex.stateChanged.connect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.connect(self.select_next)
             self.actionFindNext.triggered.connect(self.select_next)
@@ -202,20 +214,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.lineEditReplace.textChanged.connect(self._update_buttons)
             self.search_finished.connect(self._on_search_finished)
         else:
-            # remove menus
-            if self._separator is not None:
-                self.editor.remove_action(self._separator)
-            self.editor.remove_action(self.actionSearch)
-            self.editor.remove_action(
-                self.actionActionSearchAndReplace)
-            self.editor.remove_action(self.actionFindNext)
-            self.editor.remove_action(self.actionFindPrevious)
+            self.editor.remove_action(self.menu.menuAction())
             # requestSearch slot
             self.editor.textChanged.disconnect(self.request_search)
             self.lineEditSearch.textChanged.disconnect(self.request_search)
             self.checkBoxCase.stateChanged.disconnect(self.request_search)
             self.checkBoxWholeWords.stateChanged.disconnect(
                 self.request_search)
+            self.checkBoxRegex.stateChanged.disconnect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.disconnect(self.select_next)
             self.actionFindNext.triggered.disconnect(self.select_next)
@@ -279,17 +285,46 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :param txt: The text to replace. If None, the content of lineEditSearch
                     is used instead.
         """
+        if self.checkBoxRegex.isChecked():
+            try:
+                re.compile(self.lineEditSearch.text(), re.DOTALL)
+            except sre_constants.error as e:
+                self._show_error(e)
+                return
+            else:
+                self._show_error(None)
+
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
-            cursor = self.text_helper.word_under_cursor(select_whole_word=True)
             self.job_runner.request_job(
-                self._exec_search, txt, self.editor.document(),
-                cursor, self._search_flags())
+                self._exec_search, txt, self._search_flags())
         else:
             self.job_runner.cancel_requests()
             self._clear_occurrences()
             self._on_search_finished()
+
+    @staticmethod
+    def _set_widget_background_color(widget, color):
+        """
+        Changes the base color of a widget (background).
+        :param widget: widget to modify
+        :param color: the color to apply
+        """
+        pal = widget.palette()
+        pal.setColor(pal.Base, color)
+        widget.setPalette(pal)
+
+    def _show_error(self, error):
+        if error:
+            self._set_widget_background_color(
+                self.lineEditSearch, QtGui.QColor('#FFCCCC'))
+            self.lineEditSearch.setToolTip(str(error))
+        else:
+            self._set_widget_background_color(
+                self.lineEditSearch, self.palette().color(
+                    self.palette().Base))
+            self.lineEditSearch.setToolTip('')
 
     def get_occurences(self):
         """
@@ -299,10 +334,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
         :return: List of tuple(int, int)
         """
-        retval = []
-        for occ in self._occurrences:
-            retval.append(occ)
-        return retval
+        return self._occurrences
 
     def select_next(self):
         """
@@ -434,22 +466,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         return Panel.eventFilter(self, obj, event)
 
     def _search_flags(self):
-        """ Returns the user search flag """
-        flags = QtGui.QTextDocument.FindFlags(0)
-        if self.checkBoxCase.isChecked():
-            flags |= QtGui.QTextDocument.FindCaseSensitively
-        if self.checkBoxWholeWords.isChecked():
-            flags |= QtGui.QTextDocument.FindWholeWords
-        return flags
+        """
+        Returns the user search flag: (regex, case_sensitive, whole_words).
+        """
+        return (self.checkBoxRegex.isChecked(),
+                self.checkBoxCase.isChecked(),
+                self.checkBoxWholeWords.isChecked())
 
-    def _exec_search(self, search_txt, doc, original_cursor, flags):
-        self._occurrences[:] = []
-        self._current_occurrence_index = -1
-        if search_txt:
-            self._occurrences, self._current_occurrence_index = \
-                TextHelper(self.editor).search_text(
-                    original_cursor, search_txt, flags)
-        self.search_finished.emit()
+    def _exec_search(self, sub, flags):
+        regex, case_sensitive, whole_word = flags
+        request_data = {
+            'string': self.editor.toPlainText(),
+            'sub': sub,
+            'regex': regex,
+            'whole_word': whole_word,
+            'case_sensitive': case_sensitive
+        }
+        self.editor.backend.send_request(findall, request_data,
+                                         self._on_results_available)
+
+    def _on_results_available(self, status, results):
+        self._occurrences = results
+        self._on_search_finished()
 
     def _update_label_matches(self):
         self.labelMatches.setText("{0} matches".format(self.cpt_occurences))

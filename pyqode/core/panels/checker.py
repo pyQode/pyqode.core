@@ -13,7 +13,7 @@ from pyqode.qt import QtCore, QtGui, QtWidgets
 
 class CheckerPanel(Panel):
     def __init__(self):
-        super().__init__()
+        super(CheckerPanel, self).__init__()
         self._previous_line = -1
         self.scrollable = True
         self._job_runner = DelayJobRunner(delay=100)
@@ -52,7 +52,7 @@ class CheckerPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
-        super().paintEvent(event)
+        super(CheckerPanel, self).paintEvent(event)
         painter = QtGui.QPainter(self)
         for top, block_nbr, block in self.editor.visible_blocks:
             user_data = block.userData()

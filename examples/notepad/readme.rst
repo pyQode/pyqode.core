@@ -5,12 +5,12 @@ show you how to distribute a pyqode based application.
 
 To **run** the example, just run::
 
-    python3 notepad.py
+    python notepad.py
 
 
 To **install** the package *on linux*, just run::
 
-    sudo python3 setup.py install
+    sudo python setup.py install
 
 To **freeze the application on Windows**, you first need to install cx_Freeze.
 Then you can run::

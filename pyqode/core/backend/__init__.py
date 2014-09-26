@@ -99,10 +99,24 @@ class NotConnected(Exception):
     """
     Raised if the client is not connected to the server when an operation
     is requested.
+
+    .. deprecated:: Since v2.3, you should instead use ``NotRunning``
+
     """
     def __init__(self):
-        super().__init__('Client socket not connected or '
-                         'server not started')
+        super(NotConnected, self).__init__(
+            'Client socket not connected or server not started')
+
+
+class NotRunning(Exception):
+    """
+    Raise if the backend process is not running and a backend operation
+    is requested.
+
+    """
+    def __init__(self):
+        super(NotRunning, self).__init__(
+            'Backend process not running')
 
 
 __all__ = [
@@ -112,5 +126,6 @@ __all__ = [
     'CodeCompletionWorker',
     'DocumentWordsProvider',
     'echo_worker',
-    'NotConnected'
+    'NotConnected',
+    'NotRunning'
 ]

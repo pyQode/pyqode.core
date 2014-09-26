@@ -24,3 +24,11 @@ def test_key_pressed(editor):
     editor.setPlainText(')', 'text/x-python', 'utf-8')
     TextHelper(editor).goto_line(0, 0)
     QTest.keyPress(editor, ')')
+
+
+def test_quoting_selection(editor):
+    editor.setPlainText('foo', '', 'utf-8')
+    TextHelper(editor).goto_line(0, 0)
+    editor.selectAll()
+    QTest.keyPress(editor, '(')
+    assert editor.toPlainText() == '(foo)'

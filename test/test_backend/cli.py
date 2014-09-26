@@ -1,9 +1,9 @@
-import logging
+import os
 import sys
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.getcwd(), '..', '..', '..')))
 from pyqode.core.api.code_edit import CodeEdit
-
 from pyqode.qt import QtWidgets, QtCore
-
 from pyqode.core import modes
 
 

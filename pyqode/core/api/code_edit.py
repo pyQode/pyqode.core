@@ -1,3 +1,8 @@
+from __future__ import print_function
+try:
+    from future.builtins import str, super
+except:
+    pass
 import logging
 import platform
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
@@ -50,6 +55,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     mouse_pressed = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted when a mouse button is released
     mouse_released = QtCore.Signal(QtGui.QMouseEvent)
+    #: Signal emitted when a mouse double click event occured
+    mouse_double_clicked = QtCore.Signal(QtGui.QMouseEvent)
     #: Signal emitted on a wheel event
     mouse_wheel_activated = QtCore.Signal(QtGui.QWheelEvent)
     #: Signal emitted at the end of the key_pressed event
@@ -309,7 +316,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param create_default_actions: Specify if the default actions (copy,
             paste, ...) must be created or not. Default is True.
         """
-        super().__init__(parent)
+        super(CodeEdit, self).__init__(parent)
         self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
@@ -376,7 +383,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setLineWrapMode(self.NoWrap)
 
     def __del__(self):
-        self.backend.stop()
+        if self.backend.running:
+            self.backend.stop()
 
     def set_mouse_cursor(self, cursor):
         """
@@ -402,7 +410,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
 
     def clear(self):
-        super().clear()
+        super(CodeEdit, self).clear()
 
     def setPlainText(self, txt, mime_type, encoding):
         """
@@ -422,7 +430,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._modified_lines.clear()
         import time
         t = time.time()
-        super().setPlainText(txt)
+        super(CodeEdit, self).setPlainText(txt)
         _logger().info('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
@@ -436,7 +444,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param action: QtWidgets.QAction
         """
         self._actions.append(action)
-        super().addAction(action)
+        super(CodeEdit, self).addAction(action)
+
+    def insert_action(self, action, prev_action):
+        index = self._actions.index(prev_action)
+        self._actions.insert(index, action)
 
     def actions(self):
         """
@@ -468,6 +480,16 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.removeAction(action)
 
     def add_menu(self, menu):
+        """
+        Adds a menu to the editor context menu.
+
+        Menu are put at the bottom of the context menu.
+
+        .. note:: to add a menu in the middle of the context menu, you can
+            always add its menuAction().
+
+        :param menu: menu to add
+        """
         self._menus.append(menu)
         self.addActions(menu.actions())
 
@@ -589,7 +611,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param e: resize event
         """
-        super().resizeEvent(e)
+        super(CodeEdit, self).resizeEvent(e)
         self.panels.resize()
 
     def paintEvent(self, e):
@@ -600,7 +622,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param e: paint event
         """
         self._update_visible_blocks(e)
-        super().paintEvent(e)
+        super(CodeEdit, self).paintEvent(e)
         self.painted.emit(e)
 
     def keyPressEvent(self, event):
@@ -627,7 +649,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                     event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
             if not event.isAccepted():
                 event.setAccepted(initial_state)
-                super().keyPressEvent(event)
+                super(CodeEdit, self).keyPressEvent(event)
         new_state = event.isAccepted()
         event.setAccepted(state)
         self.post_key_pressed.emit(event)
@@ -644,7 +666,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.key_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            super().keyReleaseEvent(event)
+            super(CodeEdit, self).keyReleaseEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        initial_state = event.isAccepted()
+        event.ignore()
+        self.mouse_double_clicked.emit(event)
+        if not event.isAccepted():
+            event.setAccepted(initial_state)
+            super(CodeEdit, self).mouseDoubleClickEvent(event)
 
     def focusInEvent(self, event):
         """
@@ -663,7 +693,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.resizeEvent(QtGui.QResizeEvent(self.size(), s))
 
         self.focused_in.emit(event)
-        super().focusInEvent(event)
+        super(CodeEdit, self).focusInEvent(event)
         self.repaint()
 
     def focusOutEvent(self, event):
@@ -673,7 +703,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         if self.save_on_focus_out and self.dirty and self.file.path:
             self.file.save()
-        super().focusOutEvent(event)
+        super(CodeEdit, self).focusOutEvent(event)
 
     def mousePressEvent(self, event):
         """
@@ -691,7 +721,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                     sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            super().mousePressEvent(event)
+            super(CodeEdit, self).mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         """
@@ -704,7 +734,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.mouse_released.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            super().mouseReleaseEvent(event)
+            super(CodeEdit, self).mouseReleaseEvent(event)
 
     def wheelEvent(self, event):
         """
@@ -717,7 +747,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.mouse_wheel_activated.emit(event)
         if not event.isAccepted():
             event.setAccepted(initial_state)
-            super().wheelEvent(event)
+            super(CodeEdit, self).wheelEvent(event)
 
     def mouseMoveEvent(self, event):
         """
@@ -747,11 +777,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self._prev_tooltip_block_nbr = -1
             self._tooltips_runner.cancel_requests()
         self.mouse_moved.emit(event)
-        super().mouseMoveEvent(event)
+        super(CodeEdit, self).mouseMoveEvent(event)
 
     def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
-        super().showEvent(event)
+        super(CodeEdit, self).showEvent(event)
         _logger().debug('show event')
 
     def get_context_menu(self):
@@ -761,10 +791,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :return: QMenu
         """
         mnu = QtWidgets.QMenu()
+        mnu.addActions(self._actions)
+        mnu.addSeparator()
         for menu in self._menus:
             mnu.addMenu(menu)
-        mnu.addSeparator()
-        mnu.addActions(self._actions)
         return mnu
 
     def _show_context_menu(self, point):
@@ -892,7 +922,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._tab_length = 4
         self._use_spaces_instead_of_tabs = True
         self.setTabStopWidth(self._tab_length *
-                             self.fontMetrics().widthChar(" "))
+                             self.fontMetrics().width(" "))
         self._set_whitespaces_flags(self._show_whitespaces)
 
     def _init_style(self):
@@ -937,7 +967,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
-        self.setFont(QtGui.QFont(self._font_family, self._font_size + self._zoom_level))
+        self.setFont(QtGui.QFont(self._font_family,
+                                 self._font_size + self._zoom_level))
         p = self.palette()
         p.setColor(QtGui.QPalette.Base, self.background)
         p.setColor(QtGui.QPalette.Text, self.foreground)
@@ -958,7 +989,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             ''' % (self.background.name(), self.foreground.name()))
         else:
             # on linux/osx we just have to set an empty stylesheet to cancel
-            # any previous stylesheet and still keep a correct style for scrollbars
+            # any previous stylesheet and still keep a correct style for
+            # scrollbars
             self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()
@@ -968,13 +1000,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # get nb char to first significative char
         delta = (self.textCursor().positionInBlock() -
                  TextHelper(self).line_indent())
+        cursor = self.textCursor()
+        move = QtGui.QTextCursor.MoveAnchor
+        if select:
+            move = QtGui.QTextCursor.KeepAnchor
         if delta:
-            cursor = self.textCursor()
-            move = QtGui.QTextCursor.MoveAnchor
-            if select:
-                move = QtGui.QTextCursor.KeepAnchor
-            cursor.movePosition(
-                QtGui.QTextCursor.Left, move, delta)
-            self.setTextCursor(cursor)
-            if event:
-                event.accept()
+            cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
+        else:
+            cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)
+        self.setTextCursor(cursor)
+        if event:
+            event.accept()

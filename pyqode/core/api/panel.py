@@ -20,7 +20,7 @@ class Panel(QtWidgets.QWidget, Mode):
     .. note:: Use enabled to disable panel actions and setVisible to change the
         visiblity of the panel.
     """
-    class Position:
+    class Position(object):
         """
         Enumerates the possible panel positions
         """
@@ -105,6 +105,6 @@ class Panel(QtWidgets.QWidget, Mode):
         Automatically call CodeEdit.refresh_panels.
         """
         _logger().debug('%s visibility changed', self.name)
-        super().setVisible(visible)
+        super(Panel, self).setVisible(visible)
         if self.editor:
             self.editor.panels.refresh()

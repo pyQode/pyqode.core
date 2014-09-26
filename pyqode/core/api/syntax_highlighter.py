@@ -60,7 +60,7 @@ COLOR_SCHEME_KEYS = {
 }
 
 
-class ColorScheme:
+class ColorScheme(object):
     """
     Translates a pygments style into a dictionary of colors assoociated with a
     style key.
@@ -289,13 +289,13 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         start = time.time()
         QtWidgets.QApplication.setOverrideCursor(
             QtGui.QCursor(QtCore.Qt.WaitCursor))
-        super().rehighlight()
+        super(SyntaxHighlighter, self).rehighlight()
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()
         _logger().info('rehighlight duration: %fs' % (end - start))
 
     def on_install(self, editor):
-        super().on_install(editor)
+        super(SyntaxHighlighter, self).on_install(editor)
         self.refresh_editor(self.color_scheme)
 
 
@@ -306,7 +306,7 @@ class TextBlockUserData(QtGui.QTextBlockUserData):
 
     """
     def __init__(self):
-        super().__init__()
+        super(TextBlockUserData, self).__init__()
         #: List of checker messages associated with the block.
         self.messages = []
         #: List of markers draw by a marker panel.

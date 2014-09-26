@@ -14,7 +14,7 @@ from pyqode.core import backend
 if __name__ == '__main__':
     print('Server started')
     print(sys.path)
-    print(os.getcwd())
+    print(os.getcwd(), sys.stderr)
     backend.CodeCompletionWorker.providers.append(
         backend.DocumentWordsProvider())
     backend.serve_forever()

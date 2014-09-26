@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Setup script for notepad
@@ -49,7 +49,7 @@ data_files = []
 data_files.append(('share/applications', ['share/notepad.desktop']))
 data_files.append(('share/pixmaps', ['share/notepad.png']))
 
-
+ 
 setup(
     name='notepad',
     version=read_version(),

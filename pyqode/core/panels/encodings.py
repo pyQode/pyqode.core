@@ -71,7 +71,7 @@ class EncodingPanel(Panel):
             pass
 
     def __init__(self, add_context_menu=True):
-        super().__init__()
+        super(EncodingPanel, self).__init__()
         # leave it here otherwise you will have circular import errors
         from pyqode.core._forms.pnl_encoding_ui import Ui_Form
         self.ui = Ui_Form()
@@ -119,7 +119,7 @@ class EncodingPanel(Panel):
         QtCore.QTimer.singleShot(1, self.show)
 
     def show(self):
-        super().show()
+        super(EncodingPanel, self).show()
         self.editor.selectAll()
         self._deco = TextDecoration(self.editor.textCursor())
         self._deco.set_background(QtCore.Qt.red)
@@ -133,7 +133,7 @@ class EncodingPanel(Panel):
 
     def paintEvent(self, event):
         """ Fills the panel background. """
-        super().paintEvent(event)
+        super(EncodingPanel, self).paintEvent(event)
         if self.isVisible():
             # fill background
             painter = QtGui.QPainter(self)
@@ -141,7 +141,7 @@ class EncodingPanel(Panel):
             painter.fillRect(event.rect(), self._background_brush)
 
     def on_install(self, editor):
-        super().on_install(editor)
+        super(EncodingPanel, self).on_install(editor)
         if self.__add_ctx_mnu:
             # add context menu
             from pyqode.core.widgets import EncodingsContextMenu

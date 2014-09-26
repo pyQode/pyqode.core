@@ -2,11 +2,15 @@
 """
 This module contains the code completion mode and the related classes.
 """
+try:
+    from future.builtins import chr
+except:
+    pass  # python 3.2 not supported
 import logging
 import re
 import sys
 from pyqode.core.api.mode import Mode
-from pyqode.core.backend import NotConnected
+from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets, QtCore, QtGui
 from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
@@ -119,8 +123,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         helper = TextHelper(self.editor)
         if not self._request_cnt:
             # only check first byte
+            tc = self.editor.textCursor()
+            while tc.atBlockEnd() and not tc.atBlockStart() and \
+                    tc.position():
+                tc.movePosition(tc.Left)
             disabled_zone = TextHelper(self.editor).is_comment_or_string(
-                self.editor.textCursor())
+                tc)
             if disabled_zone:
                 _logger().debug(
                     "cc: cancel request, cursor is in a disabled zone")
@@ -147,7 +155,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Mode.on_install(self, editor)
 
     def on_uninstall(self):
-        super().on_uninstall()
+        Mode.on_uninstall(self)
         self._completer.popup().hide()
         self._completer = None
 
@@ -179,13 +187,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     def _on_results_available(self, status, results):
         _logger().debug("cc: got completion results")
-        self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
-        all_results = []
-        if status:
-            for res in results:
-                all_results += res
-        self._request_cnt -= 1
-        self._show_completions(all_results)
+        if self.editor:
+            self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
+            all_results = []
+            if status:
+                for res in results:
+                    all_results += res
+            self._request_cnt -= 1
+            self._show_completions(all_results)
 
     def _on_key_pressed(self, event):
         QtWidgets.QToolTip.hideText()
@@ -439,10 +448,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             input_txt = re.sub(r"[\x01-\x1F\x7F]", "", input_txt)
         return input_txt
 
-    @staticmethod
-    def _is_printable_key_event(event):
-        txt = CodeCompletionMode.strip_control_characters(event.text())
-        return len(txt) == 1
+    def _is_printable_key_event(self, event):
+        return (event.text().isalnum() or
+                event.text() in self.editor.word_separators)
 
     @staticmethod
     @memoized
@@ -499,7 +507,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 backend.CodeCompletionWorker, args=data,
                 on_receive=self._on_results_available)
-        except NotConnected:
+        except NotRunning:
             self._data = data
             QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
@@ -511,7 +519,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.backend.send_request(
                 backend.CodeCompletionWorker, args=self._data,
                 on_receive=self._on_results_available)
-        except NotConnected:
+        except NotRunning:
             QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
             self._set_wait_cursor()

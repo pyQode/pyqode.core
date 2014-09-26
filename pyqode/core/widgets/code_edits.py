@@ -10,8 +10,6 @@ This module contains core code edits:
 import sys
 from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
     IndentFoldDetector
-from pyqode.core import panels
-from pyqode.core import modes
 
 
 class TextCodeEdit(CodeEdit):
@@ -30,7 +28,9 @@ class TextCodeEdit(CodeEdit):
     def __init__(self, parent, server_script,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
-        super().__init__(parent, create_default_actions)
+        from pyqode.core import panels
+        from pyqode.core import modes
+        super(TextCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args)
 
         # append panels
@@ -50,6 +50,7 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.RightMarginMode())
         self.modes.append(TextCodeEdit.TextSH(self.document()))
         self.modes.append(modes.ZoomMode())
+        self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
@@ -70,7 +71,10 @@ class GenericCodeEdit(CodeEdit):
     def __init__(self, parent, server_script,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True):
-        super().__init__(parent, create_default_actions)
+        super(GenericCodeEdit, self).__init__(parent, create_default_actions)
+        from pyqode.core import panels
+        from pyqode.core import modes
+
         self.backend.start(server_script, interpreter, args)
 
         # append panels
@@ -94,9 +98,12 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+        self.modes.append(modes.OccurrencesHighlighterMode())
+        self.modes.append(modes.SmartBackSpaceMode())
+        self.modes.append(modes.ExtendedSelectionMode())
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
 
     def setPlainText(self, txt, mime_type, encoding):
         self.syntax_highlighter.set_lexer_from_filename(self.file.path)
-        super().setPlainText(txt, mime_type, encoding)
+        super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)

@@ -8,6 +8,7 @@ import functools
 import platform
 from os.path import abspath
 from os.path import dirname
+from pyqode.qt import QtWidgets
 from pyqode.core.api import CodeEdit, IndentFoldDetector
 from pyqode.core import modes
 from pyqode.core import panels
@@ -119,7 +120,7 @@ def preserve_editor_config(func):
             editor.modes.clear()
             editor.panels.clear()
             setup_editor(editor)
-            if not editor.backend.connected:
+            if not editor.backend.running:
                 editor.backend.start(server_path())
                 wait_for_connected(editor)
         return ret
@@ -149,12 +150,11 @@ def log_test_name(func):
     return wrapper
 
 
-
 # -------------------
 # Helper functions
 # -------------------
 def wait_for_connected(editor):
-    while not editor.backend.connected:
+    while not editor.backend.running:
         QTest.qWait(100)
 
 
@@ -190,6 +190,9 @@ def setup_editor(code_edit):
     p = panels.SearchAndReplacePanel()
     code_edit.panels.append(p, p.Position.BOTTOM)
     p.show()
+    p = panels.GlobalCheckerPanel()
+    code_edit.panels.append(p, p.Position.RIGHT)
+    p.show()
 
     # append modes
     code_edit.modes.append(modes.AutoCompleteMode())
@@ -207,3 +210,22 @@ def setup_editor(code_edit):
     code_edit.modes.append(modes.WordClickMode())
     code_edit.modes.get(modes.FileWatcherMode).auto_reload = True
     code_edit.syntax_highlighter.fold_detector = IndentFoldDetector()
+    code_edit.modes.append(modes.SmartBackSpaceMode())
+    code_edit.modes.append(modes.ExtendedSelectionMode())
+    code_edit.modes.append(modes.OccurrencesHighlighterMode())
+
+
+def ensure_visible(func):
+    """
+    Ensures the frontend is connect is connected to the server. If that is not
+    the case, the code completion server is started automatically
+    """
+    @functools.wraps(func)
+    def wrapper(editor, *args, **kwds):
+        QtWidgets.QApplication.setActiveWindow(editor)
+        editor.show()
+        editor.raise_()
+        editor.setFocus(True)
+        editor.setReadOnly(False)
+        return func(editor, *args, **kwds)
+    return wrapper

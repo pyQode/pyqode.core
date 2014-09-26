@@ -164,7 +164,7 @@ class PygmentsSH(SyntaxHighlighter):
         self.color_scheme = ColorScheme(value)
 
     def __init__(self, document, lexer=None, color_scheme=None):
-        super().__init__(document, color_scheme=color_scheme)
+        super(PygmentsSH, self).__init__(document, color_scheme=color_scheme)
         self._pygments_style = self.color_scheme.name
         self._document = document
         self._style = None
@@ -186,7 +186,7 @@ class PygmentsSH(SyntaxHighlighter):
         """
         self._clear_caches()
         self._update_style()
-        super().on_install(editor)
+        super(PygmentsSH, self).on_install(editor)
 
     def on_state_changed(self, state):
         self.enabled = state

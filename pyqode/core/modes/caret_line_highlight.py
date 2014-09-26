@@ -33,7 +33,7 @@ class CaretLineHighlighterMode(Mode):
         self.refresh()
 
     def __init__(self):
-        super().__init__()
+        super(CaretLineHighlighterMode, self).__init__()
         self._decoration = None
         self._pos = -1
         self._color = None
@@ -53,7 +53,7 @@ class CaretLineHighlighterMode(Mode):
             self._clear_deco()
 
     def on_install(self, editor):
-        super().on_install(editor)
+        super(CaretLineHighlighterMode, self).on_install(editor)
         self.refresh()
 
     def _clear_deco(self):
