@@ -56,7 +56,9 @@ COLOR_SCHEME_KEYS = {
     # colors of punctuation characters
     'punctuation': Punctuation,
     # name or keyword constant
-    'constant': Token.Name.Constant
+    'constant': Token.Name.Constant,
+    # function definition
+    'function': Token.Name.Function,
 }
 
 
