@@ -84,14 +84,10 @@ class BackendManager(Manager):
             _logger().debug('terminating backend process')
         except NameError:
             pass
-        # if sys.platform == 'win32':
-        #     # Console applications on Windows that do not run an event loop,
-        #     # or whose event loop does not handle the WM_CLOSE message, can
-        #     # only be terminated by calling kill().
-        #     self._process.kill()
-        # else:
-        #     self._process.terminate()
-        self._process.write(b'\n')
+        try:
+            self._process.write(b'\n')
+        except RuntimeError:
+            pass
         try:
             self._process.waitForFinished(500)
         except RuntimeError:
