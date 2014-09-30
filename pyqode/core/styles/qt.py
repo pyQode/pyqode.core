@@ -42,7 +42,7 @@ class QtStyle(Style):
         Name.Attribute: '#800080',
         Name.Builtin.Pseudo: '#94558D bold',
         Name.Builtin: '#AA00AA',
-        Name.Class: '#800080',
+        Name.Class: '#800080 bold',
         Name.Constant: '#800080',
         Name.Decorator: '#808000',
         Name.Entity: '#000000',
