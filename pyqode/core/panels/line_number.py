@@ -8,9 +8,7 @@ from pyqode.qt import QtCore, QtGui
 
 
 class LineNumberPanel(Panel):
-    """
-    The liner number panel displays the document line numbers.
-    """
+    """ Displays the document line numbers. """
     def __init__(self):
         Panel.__init__(self)
         self.scrollable = True

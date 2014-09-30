@@ -22,10 +22,11 @@ def _logger():
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
-    """
-    This mode provides code completion system wich is extensible. It takes care
-    of running the completion request in a background process using one or more
-    completion provider(s).
+    """ Provides code completions when typing or when pressing Ctrl+Space.
+
+    This mode provides a code completion system which is extensible. µ
+    It takes care of running the completion request in a background process
+    using one or more completion provider.
 
     To implement a code completion for a specific language, you only need to
     implement new

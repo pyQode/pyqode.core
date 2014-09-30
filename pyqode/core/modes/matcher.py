@@ -14,8 +14,7 @@ BRACE = 2
 
 
 class SymbolMatcherMode(Mode):
-    """
-    Do symbols matches highlighting (parenthesis, braces, ...).
+    """ Highlights matching symbols (parentheses, braces,...)
 
     .. note:: This mode requires the document to be filled with
         :class:`pyqode.core.api.TextBlockUserData`, i.e. a

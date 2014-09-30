@@ -12,6 +12,7 @@ from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
 class CheckerPanel(Panel):
+    """ Shows messages collected by one or more checker modes """
     def __init__(self):
         super(CheckerPanel, self).__init__()
         self._previous_line = -1

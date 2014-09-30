@@ -19,9 +19,7 @@ def _logger():
 
 
 class FoldingPanel(Panel):
-    """
-    This panel displays the document outline and lets the user collapse
-    or expand blocks of code.
+    """ Displays the document outline and lets the user collapse/expand blocks.
 
     The data represented by the panel come from the text block user state and
     is set by the SyntaxHighlighter mode.

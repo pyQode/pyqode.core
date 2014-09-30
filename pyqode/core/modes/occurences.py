@@ -8,8 +8,7 @@ from pyqode.core.backend.workers import findall
 
 
 class OccurrencesHighlighterMode(Mode):
-    """
-    This mode highlights occurrences of word under the text text cursor.
+    """ Highlights occurrences of the word under the text text cursor.
 
     The ``delay`` before searching for occurrences is configurable.
     """

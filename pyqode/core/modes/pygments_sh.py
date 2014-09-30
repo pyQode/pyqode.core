@@ -131,7 +131,8 @@ CSharpLexer.tokens['comment'] = COMMENT_STATE
 
 
 class PygmentsSH(SyntaxHighlighter):
-    """
+    """ Highlights code using the pygments parser.
+
     This mode enable syntax highlighting using the pygments library. This is a
     generic syntax highlighter, it is slower than a native highlighter and
     does not do any code folding detection. Use it as a fallback for languages

@@ -9,8 +9,7 @@ from pyqode.core.api import TextHelper, DelayJobRunner
 
 
 class WordClickMode(Mode, QtCore.QObject):
-    """
-    This mode adds support for document word click.
+    """ Adds support for word click events.
 
     It will highlight the click-able word when the user press control and move
     the mouse over a word.

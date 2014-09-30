@@ -8,7 +8,8 @@ from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
 class EncodingPanel(Panel):
-    """
+    """ Displays a warning when an encoding error occured and let you reload.
+
     This panel display a warning in case encoding/decoding error and
     give the user the possibility to try out another encoding, to edit any way
     or to close the editor.
