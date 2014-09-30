@@ -61,8 +61,7 @@ def test_client_server():
     with pytest.raises(NotRunning):
         backend_manager.send_request(
             backend.echo_worker, 'some data', on_receive=_on_receive)
-    backend_manager.start(os.path.join(os.getcwd(), 'server.py'),
-                          args=['-s', '/path'])
+    backend_manager.start(os.path.join(os.getcwd(), 'server.py'))
     backend_manager._process.started.connect(_send_request)
     QTest.qWait(1000)
     backend_manager.stop()
@@ -94,4 +93,4 @@ def test_frozen_server():
     with pytest.raises(NotRunning):
         backend_manager.send_request(
             backend.echo_worker, 'some data', on_receive=_on_receive)
-    backend_manager.start('server.exe', args=['-s', '/path'])
+    backend_manager.start('server.exe')

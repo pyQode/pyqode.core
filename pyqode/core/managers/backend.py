@@ -84,7 +84,8 @@ class BackendManager(Manager):
             socket.close()
         import time
         t = time.time()
-        while not self._process.waitForFinished(1):
+        while self._process.state() != self._process.NotRunning:
+            self._process.waitForFinished(1)
             if sys.platform == 'win32':
                 # Console applications on Windows that do not run an event
                 # loop, or whose event loop does not handle the WM_CLOSE
