@@ -141,7 +141,10 @@ class JsonServer(socketserver.ThreadingTCPServer):
                                     'results': result}
                 finally:
                     print('sending response: %r' % response)
-                    self.send(response)
+                    try:
+                        self.send(response)
+                    except ConnectionAbortedError:
+                        pass
             except:
                 print('error with data=%r' % data)
                 exc1, exc2, exc3 = sys.exc_info()
@@ -199,7 +202,10 @@ def serve_forever(args=None):
         raw_input('')
     else:
         input('')
+    import time
+    t = time.time()
     server.shutdown()
+    print('SRV SHUTDOWN TIME: %f' % (time.time() - t), sys.stderr)
 
 
 # Server script example

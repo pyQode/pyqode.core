@@ -41,7 +41,6 @@ class TextDecorationsManager(Manager):
             self.editor.setExtraSelections(self._decorations)
             return True
         except ValueError:
-            _logger().exception('cannot remove decoration %r', decoration)
             return False
 
     def clear(self):
