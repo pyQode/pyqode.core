@@ -6,7 +6,8 @@ from pyqode.core.api.mode import Mode
 
 
 class AutoCompleteMode(Mode):
-    """
+    """ Automatically complete quotes and parentheses
+
     Generic auto complete mode that automatically completes the following
     symbols:
 

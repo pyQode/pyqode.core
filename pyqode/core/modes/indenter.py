@@ -12,8 +12,7 @@ def _logger():
 
 
 class IndenterMode(Mode):
-    """
-    Implements classic indentation/tabulation.
+    """ Implements classic indentation/tabulation (Tab/Shift+Tab)
 
     It inserts/removes tabulations (a series of spaces defined by the
     tabLength settings) at the cursor position if there is no selection,

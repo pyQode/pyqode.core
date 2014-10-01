@@ -23,14 +23,20 @@ class RecentFilesManager(QtCore.QObject):
 
     def clear(self):
         """ Clears recent files in QSettings """
-        self._settings.setValue('recentFiles', [])
+        self.set_value('list', [])
         self.updated.emit()
 
     def remove(self, filename):
-        files = self._settings.value('recentFiles', [])
+        files = self.get_value('list', [])
         files.remove(filename)
-        self._settings.setValue('recentFiles', files)
+        self.set_value('list', files)
         self.updated.emit()
+
+    def get_value(self, key, default=None):
+        return self._settings.value('recent_files/%s' % key, default)
+
+    def set_value(self, key, value):
+        self._settings.setValue('recent_files/%s' % key, value)
 
     def get_recent_files(self):
         """
@@ -38,7 +44,7 @@ class RecentFilesManager(QtCore.QObject):
         are automatically filtered)
         """
         ret_val = []
-        files = self._settings.value('recentFiles', [])
+        files = self.get_value('list', [])
         # empty list
         if files is None:
             files = []
@@ -65,7 +71,7 @@ class RecentFilesManager(QtCore.QObject):
         files.insert(0, file)
         # discard old files
         del files[self.max_recent_files:]
-        self._settings.setValue('recentFiles', files)
+        self.set_value('list', files)
         self.updated.emit()
 
     def last_file(self):

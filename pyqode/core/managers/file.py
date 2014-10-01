@@ -104,6 +104,9 @@ class FileManager(Manager):
         #: True to clean trailing whitespaces of changed lines. Default is
         #: True
         self.clean_trailing_whitespaces = True
+        #: True to restore cursor position (if the document has already been
+        # opened once).
+        self.restore_cursor = True
 
     @staticmethod
     def get_mimetype(path):
@@ -184,12 +187,14 @@ class FileManager(Manager):
             self.editor.setDocumentTitle(self.editor.file.name)
             ret_val = True
         self.opening = False
-        self._restore_cached_pos()
+        if self.restore_cursor:
+            self._restore_cached_pos()
         return ret_val
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
         TextHelper(self.editor).goto_line(pos[0], pos[1])
+        QtCore.QTimer.singleShot(1, self.editor.centerCursor)
 
     def reload(self, encoding):
         """

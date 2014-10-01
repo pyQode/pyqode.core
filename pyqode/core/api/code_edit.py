@@ -382,9 +382,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(False)
         self.setLineWrapMode(self.NoWrap)
 
-    def __del__(self):
-        if self.backend.running:
-            self.backend.stop()
+    def close(self):
+        super().close()
+        self.decorations.clear()
+        self.modes.clear()
+        self.panels.clear()
+        self.file.close()
+        self.backend.stop()
+        _logger().info('closed')
 
     def set_mouse_cursor(self, cursor):
         """

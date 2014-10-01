@@ -8,8 +8,7 @@ from pyqode.qt import QtGui
 
 
 class RightMarginMode(Mode):
-    """
-    Display a right margin at column 80 by default.
+    """ Displays a right margin at column the specified position.
 
     """
     @property

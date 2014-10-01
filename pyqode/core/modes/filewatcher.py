@@ -8,7 +8,8 @@ from pyqode.qt import QtCore, QtWidgets
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
-    """
+    """ Watches the current file for external modifications.
+
     FileWatcher mode, check if the opened file has changed externally.
 
     """

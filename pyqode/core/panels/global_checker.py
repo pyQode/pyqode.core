@@ -8,9 +8,9 @@ from pyqode.core.qt import QtCore, QtGui
 
 
 class GlobalCheckerPanel(Panel):
-    """
-    This panel display all errors found in the document. The user can click on
-    a marker to quickly go the the error line.
+    """ Displays all checker messages found in the document.
+
+    The user can click on a marker to quickly go the the error line.
 
     """
 
@@ -48,16 +48,17 @@ class GlobalCheckerPanel(Panel):
 
         :type painter: QtGui.QPainter
         """
-        start = self.editor.visible_blocks[0][-1]
-        end = self.editor.visible_blocks[-1][-1]
-        rect = QtCore.QRect()
-        rect.setX(0)
-        rect.setY(start.blockNumber() * self.get_marker_height())
-        rect.setWidth(self.sizeHint().width())
-        rect.setBottom(end.blockNumber() * self.get_marker_height())
-        c = self.palette().window().color().darker(110)
-        c.setAlpha(128)
-        painter.fillRect(rect, c)
+        if self.editor.visible_blocks:
+            start = self.editor.visible_blocks[0][-1]
+            end = self.editor.visible_blocks[-1][-1]
+            rect = QtCore.QRect()
+            rect.setX(0)
+            rect.setY(start.blockNumber() * self.get_marker_height())
+            rect.setWidth(self.sizeHint().width())
+            rect.setBottom(end.blockNumber() * self.get_marker_height())
+            c = self.palette().window().color().darker(110)
+            c.setAlpha(128)
+            painter.fillRect(rect, c)
 
     def paintEvent(self, event):
         """

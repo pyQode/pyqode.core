@@ -6,7 +6,8 @@ from pyqode.core.api import Mode, TextHelper
 
 
 class ExtendedSelectionMode(Mode):
-    """
+    """ Adds extended selection capabilities (Ctrl/Alt + Double click).
+
     This mode adds extended selections capabilities to CodeEdit.
 
     Extended selection is a feature that can be found in the Ulipad editor:

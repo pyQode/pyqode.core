@@ -9,9 +9,7 @@ from pyqode.qt import QtGui
 
 
 class CaretLineHighlighterMode(Mode):
-    """
-    This mode highlights the caret line (active line).
-    """
+    """ Highlights the caret line """
     @property
     def background(self):
         """

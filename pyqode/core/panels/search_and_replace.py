@@ -13,25 +13,18 @@ from pyqode.core.backend.workers import findall
 
 
 class SearchAndReplacePanel(Panel, Ui_SearchPanel):
-    """
-    This panel allow the user to search and replace some text in the current
-    editor.
+    """ Lets the user search and replace text in the current document.
 
-    It uses the QTextDocument API to search for some text. Search operation is
-    performed in a background thread.
+    It uses the backend API to search for some text. Search operation is
+    performed in a background process (the backend process)..
 
-    The search panel can also be used programatically.
-
-    To do that, the client code first requests a search using
-    :meth:`requestSearch` and connects to
-    :attr:`search_finished`.
-
-    The results of the search can then be retrieved using
-    :attr:`cptOccurrences` and :meth:`getOccurrences`.
-
-    The client code may now navigate through occurrences using
-    :meth:`select_next` or :meth:`select_previous`, or replace the occurrences
-    with a specific text using :meth:`replace` or :meth:`replace_all`.
+    The search panel can also be used programatically. To do that, the client
+    code must first requests a search using :meth:`requestSearch` and connects
+    to :attr:`search_finished`. The results of the search can then be
+    retrieved using :attr:`cpt_occurences` and :meth:`get_oOccurrences`. The
+    client code may now navigate through occurrences using :meth:`select_next`
+    or :meth:`select_previous`, or replace the occurrences with a specific
+    text using :meth:`replace` or :meth:`replace_all`.
     """
     STYLESHEET = """SearchAndReplacePanel
     {

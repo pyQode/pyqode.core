@@ -272,8 +272,7 @@ class TabWidget(QTabWidget):
     @staticmethod
     def _del_code_edit(code_edit):
         try:
-            code_edit.file.close()
-            code_edit.backend.stop()
+            code_edit.close()
             code_edit.delete()
         except AttributeError:
             pass

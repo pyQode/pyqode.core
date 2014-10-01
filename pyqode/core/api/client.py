@@ -138,7 +138,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_connected(self):
         """ Logs connected """
         _logger().debug('connected to backend: %s:%d',
-                        self.peerName(), self.peerPort())
+                      self.peerName(), self.peerPort())
         self.is_connected = True
         self._send_request()
 
@@ -157,7 +157,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """ Logs disconnected """
         try:
             _logger().debug('disconnected from backend: %s:%d',
-                            self.peerName(), self.peerPort())
+                          self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
@@ -219,14 +219,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 self._read_payload()
 
 
-class ServerProcess(QtCore.QProcess):
+class BackendProcess(QtCore.QProcess):
     """
     Extends QProcess with methods to easily manipulate the backend process.
 
     Also logs everything that is written to the process' stdout/stderr.
     """
     def __init__(self, parent):
-        super(ServerProcess, self).__init__(parent)
+        super(BackendProcess, self).__init__(parent)
         self.started.connect(self._on_process_started)
         self.error.connect(self._on_process_error)
         self.finished.connect(self._on_process_finished)
@@ -257,7 +257,7 @@ class ServerProcess(QtCore.QProcess):
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        _logger().info('backend process finished with exit code %d', exit_code)
+        _logger().debug('backend process finished with exit code %d', exit_code)
         try:
             self.running = False
         except AttributeError:
@@ -294,6 +294,6 @@ class ServerProcess(QtCore.QProcess):
         """ Terminate the process """
         self.running = False
         try:
-            super(ServerProcess, self).terminate()
+            super(BackendProcess, self).terminate()
         except RuntimeError:
             pass

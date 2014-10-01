@@ -8,7 +8,8 @@ from pyqode.qt import QtCore, QtWidgets
 
 
 class CaseConverterMode(Mode):
-    """
+    """ Provides context actions for converting case of the selected text.
+
     Converts selected text to lower case or UPPER case.
 
     It does so by adding two new menu entries to the editor's context menu:

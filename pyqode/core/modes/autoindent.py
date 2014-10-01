@@ -6,7 +6,7 @@ from pyqode.qt.QtCore import Qt
 
 
 class AutoIndentMode(Mode):
-    """
+    """ Indents text automatically.
     Generic indenter mode that indents the text when the user press RETURN.
 
     You can customize this mode by overriding

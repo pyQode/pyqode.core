@@ -4,7 +4,7 @@ This module contains the backend controller
 import logging
 import socket
 import sys
-from pyqode.core.api.client import JsonTcpClient, ServerProcess
+from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
 from pyqode.core.backend import NotRunning
 
@@ -29,7 +29,7 @@ class BackendManager(Manager):
 
     def __init__(self, editor):
         super(BackendManager, self).__init__(editor)
-        self._process = ServerProcess(editor)
+        self._process = BackendProcess(editor)
         self._sockets = []
 
     @staticmethod
@@ -43,67 +43,62 @@ class BackendManager(Manager):
 
     def start(self, script, interpreter=sys.executable, args=None):
         """
-        Starts the backend server process.
+        Starts the backend process.
 
-        The server is a python script that starts a
-        :class:`pyqode.core.backend.JsonServer`. You must write the server
-        script so that you can apply your own configuration server side.
+        The backend is a python script that starts a
+        :class:`pyqode.core.backend.JsonServer`. You must write the backend
+        script so that you can apply your own backend configuration.
 
         The script can be run with a custom interpreter. The default is to use
         sys.executable.
 
-        :param script: Path to the server main script.
-        :param interpreter: The python interpreter to use to run the server
+        :param script: Path to the backend script.
+        :param interpreter: The python interpreter to use to run the backend
             script. If None, sys.executable is used unless we are in a frozen
-            application (frozen servers do not require an interpreter).
+            application (frozen backends do not require an interpreter).
         :param args: list of additional command line args to use to start
-            the server process.
+            the backend process.
         """
-        major, minor, build = sys.version_info[:3]
-        _logger().debug('running with python %d.%d.%d', major, minor, build)
-        server_script = script.replace('.pyc', '.py')
+        backend_script = script.replace('.pyc', '.py')
         self._port = self.pick_free_port()
-        if hasattr(sys, "frozen") and not server_script.endswith('.py'):
-            # frozen server script on windows/mac does not need an interpreter
-            program = server_script
+        if hasattr(sys, "frozen") and not backend_script.endswith('.py'):
+            # frozen backend script on windows/mac does not need an interpreter
+            program = backend_script
             pgm_args = [str(self._port)]
         else:
             program = interpreter
-            pgm_args = [server_script, str(self._port)]
+            pgm_args = [backend_script, str(self._port)]
         if args:
             pgm_args += args
         self._process.start(program, pgm_args)
-        _logger().debug('starting server process: %s %s', program,
+        _logger().debug('starting backend process: %s %s', program,
                         ' '.join(pgm_args))
 
     def stop(self):
         """
         Stops the backend process.
         """
-        try:
-            _logger().debug('terminating backend process')
-        except NameError:
-            pass
-        # if sys.platform == 'win32':
-        #     # Console applications on Windows that do not run an event loop,
-        #     # or whose event loop does not handle the WM_CLOSE message, can
-        #     # only be terminated by calling kill().
-        #     self._process.kill()
-        # else:
-        #     self._process.terminate()
-        self._process.write(b'\n')
-        try:
-            self._process.waitForFinished(500)
-        except RuntimeError:
-            pass
-        try:
-            _logger().debug('backend process terminated')
-        except NameError:
-            pass
+        # close all sockets
+        for socket in self._sockets:
+            socket._callback = None
+            socket.close()
+        import time
+        t = time.time()
+        while self._process.state() != self._process.NotRunning:
+            self._process.waitForFinished(1)
+            if sys.platform == 'win32':
+                # Console applications on Windows that do not run an event
+                # loop, or whose event loop does not handle the WM_CLOSE
+                # message, can only be terminated by calling kill().
+                self._process.kill()
+            else:
+                self._process.terminate()
+        _logger().info('stopping backend took %f [s]', time.time() - t)
+        _logger().info('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
-        Requests some work to be done server side. You can get notified of the
+        Requests some work to be done by the backend. You can get notified of the
         work results by passing a callback (on_receive).
 
         :param worker_class_or_function: Worker class or function
@@ -132,12 +127,12 @@ class BackendManager(Manager):
 
         :return: True if the process is running, otherwise False
         """
-        return self._process.running
+        return self._process.state() != self._process.NotRunning
 
     @property
     def connected(self):
         """
-        Checks if the client socket is connected to a backend server.
+        Checks if the client socket is connected to the backend.
 
         .. deprecated: Since v2.3, a socket is created per request. Checking
             for global connection status does not make any sense anymore. This
