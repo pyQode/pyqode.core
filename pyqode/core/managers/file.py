@@ -194,6 +194,7 @@ class FileManager(Manager):
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
         TextHelper(self.editor).goto_line(pos[0], pos[1])
+        QtCore.QTimer.singleShot(1, self.editor.centerCursor)
 
     def reload(self, encoding):
         """
