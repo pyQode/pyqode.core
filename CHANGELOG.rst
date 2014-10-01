@@ -1,6 +1,22 @@
 Change Log
 ==========
 
+2.3.2
+-----
+
+Fixed bugs:
+
+    - fix occasional crash when closing an editor
+    - fix restore cursor position: center cursor
+    - fix useeless rehighlights
+
+2.3.1
+-----
+
+Fixed bugs:
+
+    - Fix segfault on windows
+
 2.3.0
 -----
 
