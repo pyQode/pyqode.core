@@ -225,9 +225,10 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     @color_scheme.setter
     def color_scheme(self, color_scheme):
-        self._color_scheme = color_scheme
-        self.refresh_editor(color_scheme)
-        self.rehighlight()
+        if color_scheme.name != self._color_scheme.name:
+            self._color_scheme = color_scheme
+            self.refresh_editor(color_scheme)
+            self.rehighlight()
 
     def __init__(self, parent, color_scheme=None):
         QtGui.QSyntaxHighlighter.__init__(self, parent)
