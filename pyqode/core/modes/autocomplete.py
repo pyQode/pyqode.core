@@ -19,6 +19,10 @@ class AutoCompleteMode(Mode):
     """
     #: Auto complete mapping, maps input key with completion text.
     MAPPING = {'"': '"', "'": "'", "(": ")", "{": "}", "[": "]"}
+    #: The format to use for each symbol in mapping when there is a selection
+    SELECTED_QUOTES_FORMATS = {key: '%s%s%s' for key in MAPPING.keys()}
+    #: The format to use for each symbol in mapping when there is no selection
+    QUOTES_FORMATS = {key: '%s' for key in MAPPING.keys()}
 
     def __init__(self):
         super(AutoCompleteMode, self).__init__()
@@ -42,7 +46,8 @@ class AutoCompleteMode(Mode):
                 if (not next_char or next_char in self.MAPPING.keys() or
                         next_char in self.MAPPING.values() or
                         next_char.isspace()):
-                    TextHelper(self.editor).insert_text(to_insert)
+                    TextHelper(self.editor).insert_text(
+                        self.QUOTES_FORMATS[txt] % to_insert)
         self._ignore_post = False
 
     def _on_key_pressed(self, event):
@@ -55,8 +60,9 @@ class AutoCompleteMode(Mode):
             if event.text() in self.MAPPING.keys():
                 first = event.text()
                 last = self.MAPPING[event.text()]
-                cursor.insertText('%s%s%s' % (
-                    first, cursor.selectedText(), last))
+                cursor.insertText(
+                    self.SELECTED_QUOTES_FORMATS[event.text()] % (
+                        first, cursor.selectedText(), last))
                 self.editor.setTextCursor(cursor)
                 event.accept()
             else:
