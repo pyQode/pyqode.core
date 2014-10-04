@@ -36,7 +36,7 @@ class QtStyle(Style):
         Keyword.Reserved: '#808000 bold',
         Keyword.Type: '#800080',
         Keyword: '#808000',
-        Literal.Number: '#000080',
+        Literal.Number: '#FF00FF',
         Literal.String: '#000080',
         Literal.String.Doc: '#8080FF ',
         Name.Attribute: '#800080',
