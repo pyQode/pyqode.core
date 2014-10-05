@@ -159,9 +159,10 @@ class TextHelper(object):
             except KeyError:
                 pass
             else:
+                from pyqode.core.api.folding import FoldScope
                 if not block.isVisible() or TextBlockHelper.is_fold_trigger(
                         block):
-                    block = folding_panel.find_parent_scope(block)
+                    block = FoldScope.find_parent_scope(block)
                     if TextBlockHelper.get_fold_trigger_state(block):
                         folding_panel.toggle_fold_trigger(block)
             self._editor.setTextCursor(text_cursor)
