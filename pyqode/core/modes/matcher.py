@@ -8,10 +8,12 @@ from pyqode.core.api.mode import Mode
 from pyqode.qt import QtGui
 
 
+#: symbols indices in SymbolMatcherMode.SYMBOLS map
 PAREN = 0
 SQUARE = 1
 BRACE = 2
-SYMBOLS = {PAREN: ('(', ')'), SQUARE: ('[', ']'), BRACE: ('{', '}')}
+
+#: character indices in SymbolMatcherMode.SYMBOLS map
 OPEN = 0
 CLOSE = 1
 
@@ -25,6 +27,14 @@ class SymbolMatcherMode(Mode):
         the editor instance.
 
     """
+    #: known symbols {SYMBOL: (OPEN, CLOSE)}, you can customise this map to
+    #: add support for other symbols
+    SYMBOLS = {
+        PAREN: ('(', ')'),
+        SQUARE: ('[', ']'),
+        BRACE: ('{', '}')
+    }
+
     @property
     def match_background(self):
         """
@@ -86,9 +96,15 @@ class SymbolMatcherMode(Mode):
             self.editor.decorations.remove(deco)
         self._decorations[:] = []
 
-    def symbol_pos(self, cursor, character='(', symbol_type=0):
+    def symbol_pos(self, cursor, character_type=OPEN, symbol_type=PAREN):
         """
-        Find the corresponding symbol position (line, column).
+        Find the corresponding symbol position (line, column) of the specified
+        symbol. If symbol type is PAREN and character_type is OPEN, the
+        function will look for '('.
+
+        :param cursor: QTextCursor
+        :param character_type: character type to look for (open or close char)
+        :param symbol_type: symbol type (index in the SYMBOLS map).
         """
         retval = None, None
         original_cursor = self.editor.textCursor()
@@ -97,7 +113,7 @@ class SymbolMatcherMode(Mode):
         data = get_block_symbol_data(self.editor, block)
         self._match(symbol_type, data, block.position())
         for deco in self._decorations:
-            if deco.character == character:
+            if deco.character == self.SYMBOLS[symbol_type][character_type]:
                 retval = deco.line, deco.column
                 break
         self.editor.setTextCursor(original_cursor)
@@ -127,13 +143,13 @@ class SymbolMatcherMode(Mode):
         for i, info in enumerate(symbols):
             pos = (self.editor.textCursor().position() -
                    self.editor.textCursor().block().position())
-            if info.character == SYMBOLS[symbol][OPEN] and \
+            if info.character == self.SYMBOLS[symbol][OPEN] and \
                     info.position == pos:
                 self._create_decoration(
                     cursor_pos + info.position,
                     self._match_left(
                         symbol, self.editor.textCursor().block(), i + 1, 0))
-            elif info.character == SYMBOLS[symbol][CLOSE] and \
+            elif info.character == self.SYMBOLS[symbol][CLOSE] and \
                     info.position == pos - 1:
                 self._create_decoration(
                     cursor_pos + info.position,
@@ -146,14 +162,14 @@ class SymbolMatcherMode(Mode):
             parentheses = data[symbol]
             for j in range(i, len(parentheses)):
                 info = parentheses[j]
-                if info.character == SYMBOLS[symbol][OPEN]:
+                if info.character == self.SYMBOLS[symbol][OPEN]:
                     cpt += 1
                     continue
-                if info.character == SYMBOLS[symbol][CLOSE] and cpt == 0:
+                if info.character == self.SYMBOLS[symbol][CLOSE] and cpt == 0:
                     self._create_decoration(current_block.position() +
                                             info.position)
                     return True
-                elif info.character == SYMBOLS[symbol][CLOSE]:
+                elif info.character == self.SYMBOLS[symbol][CLOSE]:
                     cpt -= 1
             current_block = current_block.next()
             i = 0
@@ -166,10 +182,10 @@ class SymbolMatcherMode(Mode):
             for j in range(i, -1, -1):
                 if j >= 0:
                     info = parentheses[j]
-                if info.character == SYMBOLS[symbol][CLOSE]:
+                if info.character == self.SYMBOLS[symbol][CLOSE]:
                     nb_right_paren += 1
                     continue
-                if info.character == SYMBOLS[symbol][OPEN]:
+                if info.character == self.SYMBOLS[symbol][OPEN]:
                     if nb_right_paren == 0:
                         self._create_decoration(
                             current_block.position() + info.position)
