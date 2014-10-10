@@ -43,10 +43,7 @@ class IndenterMode(Mode):
         tab_len = self.editor.tab_length
         cursor.beginEditBlock()
         nb_lines = len(cursor.selection().toPlainText().splitlines())
-        # if nb_lines == 0:
-        #     nb_lines = 1
         block = doc.findBlock(cursor.selectionStart())
-        assert isinstance(block, QtGui.QTextBlock)
         i = 0
         # indent every lines
         while i < nb_lines:
@@ -95,10 +92,10 @@ class IndenterMode(Mode):
                     indentation % tab_len))
                 if not nb_spaces_to_remove:
                     nb_spaces_to_remove = tab_len
-                cursor = QtGui.QTextCursor(block)
-                cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
+                c = QtGui.QTextCursor(block)
+                c.movePosition(c.StartOfLine, cursor.MoveAnchor)
                 for _ in range(nb_spaces_to_remove):
-                    cursor.deleteChar()
+                    c.deleteChar()
             block = block.next()
             i += 1
         cursor.endEditBlock()
