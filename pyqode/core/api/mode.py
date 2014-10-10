@@ -113,4 +113,4 @@ class Mode(object):
             split feature). You should also make sure any properties will be
             propagated to the clones.
         """
-        assert type(original) == type(self)
+        pass

@@ -3,7 +3,7 @@ import mimetypes
 import os
 import uuid
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api import utils, CodeEdit
+from pyqode.core.api import utils, CodeEdit, ColorScheme
 from pyqode.core.dialogs import DlgUnsavedFiles
 from .tab_bar import TabBar
 from .code_edits import GenericCodeEdit, TextCodeEdit
@@ -277,14 +277,15 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _restore_original(self, clones):
         try:
-            # first clone become the original
             first = clones[0]
+        except (IndexError, TypeError):
+            # empty or None
+            pass
+        else:
             first.clones = clones[1:]
             first.original = None
             for c in first.clones:
                 c.original = first
-        except (IndexError, AttributeError, TypeError):
-            pass
 
     def remove_tab(self, index):
         """
@@ -314,8 +315,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _on_current_changed(self, index):
         tab = self.widget(index)
-        if tab:
-            tab.setFocus(True)
 
     def _on_tab_move_request(self, widget, new_index):
         parent = widget.parent_tab_widget
@@ -415,7 +414,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             self.main_tab_widget.indexOf(tab))
         self.main_tab_widget.show()
         tab._uuid = self._uuid
-        tab.setFocus()
+        tab.horizontalScrollBar().setValue(0)
+        tab.setFocus(True)
         self._on_focus_changed(None, tab)
 
     def _make_splitter(self):
@@ -623,22 +623,22 @@ class CodeEditTabWidget(BaseTabWidget):
         :return: False if there was a problem saving the editor (e.g. the save
         as dialog has been canceled by the user, or a permission error,...)
         """
+        if editor.original:
+            editor = editor.original
         if editor.file.path is None or not os.path.exists(editor.file.path):
             # save as
             path, filter = cls._ask_path(editor)
             if not path:
                 return False
+            if not os.path.splitext(path)[1]:
+                if len(editor.mimetypes):
+                    path += mimetypes.guess_extension(editor.mimetypes[0])
             editor.file._path = path
         text = os.path.split(editor.file.path)[1]
         editor.file.save()
         tw = editor.parent_tab_widget
         tw.setTabText(tw.indexOf(editor), text)
-
-        clones = editor.clones
-        if editor.original is not None:
-            clones = editor.original.clones
-            clones.append(editor.original)
-        for clone in clones:
+        for clone in [editor] + editor.clones:
             if clone != editor:
                 tw = clone.parent_tab_widget
                 tw.setTabText(tw.indexOf(clone), text)
@@ -646,6 +646,25 @@ class CodeEditTabWidget(BaseTabWidget):
 
     def _get_widget_path(self, editor):
         return editor.file.path
+
+    def _restore_original(self, clones):
+        super(CodeEditTabWidget, self)._restore_original(clones)
+        try:
+            first = clones[0]
+        except (IndexError, TypeError):
+            # empty or None
+            pass
+        else:
+            try:
+                # remove original highlighter (otherwise we get a runtime error
+                # saying the original c++ object has been deleted)
+                new_sh = first.syntax_highlighter.__class__(
+                    first.document(), color_scheme=ColorScheme(
+                        first.syntax_highlighter.color_scheme.name))
+                first.modes.remove(first.syntax_highlighter.name)
+                first.modes.append(new_sh)
+            except (AttributeError, TypeError):
+                pass
 
 
 class SplittableCodeEditTabWidget(SplittableTabWidget):
@@ -695,6 +714,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 _logger().warn('editor for mimetype already registered, '
                                'skipping')
             cls.editors[mimetype] = code_edit_class
+        print(cls.editors)
 
     def save_current_as(self):
         """
@@ -704,6 +724,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         self._current.file._path = None
         if not self.main_tab_widget.save_widget(self._current):
             self._current.file._path = mem
+        return self._current.file.path
 
     def save_current(self):
         """
@@ -719,7 +740,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         for w in self.widgets():
             self.main_tab_widget.save_widget(w)
 
-    def _create_code_edit(self, mimetype):
+    def _create_code_edit(self, mimetype, *args, **kwargs):
         """
         Create a code edit instance based on the mimetype of the file to
         open/create.
@@ -728,7 +749,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         :return: CodeEdit instance
         """
         if mimetype in self.editors.keys():
-            return self.editors[mimetype](parent=self.main_tab_widget)
+            return self.editors[mimetype](
+                *args, parent=self.main_tab_widget, **kwargs)
         return self.fallback_editor(parent=self.main_tab_widget)
 
     def create_new_document(self, base_name='New Document', extension='.txt'):
@@ -749,11 +771,15 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
 
-    def open_document(self, path):
+    def open_document(self, path, *args, **kwargs):
         """
         Opens a document.
 
         :type path: Path of the document to open
+
+        :param args: additional args to pass to the widget constructor.
+        :param kwargs: addtional keyword args to pass to the widget
+                       constructor.
         :return: The created code editor
         """
         paths = []
@@ -772,7 +798,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             assert os.path.exists(path)
             name = os.path.split(path)[1]
-            tab = self._create_code_edit(mimetypes.guess_type(path)[0])
+            tab = self._create_code_edit(mimetypes.guess_type(path)[0],
+                                         *args, **kwargs)
             tab.file.open(path)
             tab.setDocumentTitle(name)
             icon = self._icon(name)
