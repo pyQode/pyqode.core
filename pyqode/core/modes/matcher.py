@@ -46,6 +46,13 @@ class SymbolMatcherMode(Mode):
     def match_background(self, value):
         self._match_background = value
         self._refresh_decorations()
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).match_background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def match_foreground(self):
@@ -58,6 +65,13 @@ class SymbolMatcherMode(Mode):
     def match_foreground(self, value):
         self._match_foreground = value
         self._refresh_decorations()
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).match_foreground = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def unmatch_background(self):
@@ -70,6 +84,13 @@ class SymbolMatcherMode(Mode):
     def unmatch_background(self, value):
         self._unmatch_background = value
         self._refresh_decorations()
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).unmatch_background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def unmatch_foreground(self):
@@ -82,6 +103,13 @@ class SymbolMatcherMode(Mode):
     def unmatch_foreground(self, value):
         self._unmatch_foreground = value
         self._refresh_decorations()
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).unmatch_foreground = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         super(SymbolMatcherMode, self).__init__()
@@ -227,3 +255,9 @@ class SymbolMatcherMode(Mode):
         self._decorations.append(deco)
         self.editor.decorations.append(deco)
         return cursor
+
+    def clone_settings(self, original):
+        self.match_background = original.match_background
+        self.match_foreground = original.match_foreground
+        self.unmatch_background = original.unmatch_background
+        self.unmatch_foreground = original.unmatch_foreground

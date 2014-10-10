@@ -51,6 +51,14 @@ class EncodingPanel(Panel):
     def color(self, value):
         self._color = value
         self._refresh_stylesheet()
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).color = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def foreground(self):
@@ -60,6 +68,14 @@ class EncodingPanel(Panel):
     def foreground(self, value):
         self._foreground = value
         self._refresh_stylesheet()
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).foreground = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def _refresh_stylesheet(self):
         try:
@@ -173,6 +189,10 @@ class EncodingPanel(Panel):
         self.enable_caret_line(True)
         self.cancel_requested.emit(self.editor)
         self.hide()
+
+    def clone_settings(self, original):
+        self.color = original.color
+        self.foreground = original.foreground
 
 
 if __name__ == '__main__':

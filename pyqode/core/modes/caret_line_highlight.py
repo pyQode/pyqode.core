@@ -29,6 +29,14 @@ class CaretLineHighlighterMode(Mode):
         """
         self._color = value
         self.refresh()
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         super(CaretLineHighlighterMode, self).__init__()
@@ -75,3 +83,6 @@ class CaretLineHighlighterMode(Mode):
             self._decoration.set_background(brush)
             self._decoration.set_full_width()
             self.editor.decorations.append(self._decoration)
+
+    def clone_settings(self, original):
+        self.background = original.background

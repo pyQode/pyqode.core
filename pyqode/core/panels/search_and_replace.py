@@ -88,6 +88,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     def background(self, value):
         self._bg = value
         self._refresh_decorations()
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def foreground(self):
@@ -98,6 +106,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     def foreground(self, value):
         self._fg = value
         self._refresh_decorations()
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).foreground = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         Panel.__init__(self)
@@ -164,9 +180,16 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.menu.setTitle('Search')
         self.menu.menuAction().setIcon(self.actionSearch.icon())
         self.menu.addAction(self.actionSearch)
+        self.actionSearch.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self.menu.addAction(self.actionActionSearchAndReplace)
+        self.actionActionSearchAndReplace.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
         self.menu.addAction(self.actionFindNext)
+        self.actionFindNext.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
         self.menu.addAction(self.actionFindPrevious)
+        self.actionFindPrevious.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
 
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
@@ -552,3 +575,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                   self.cpt_occurences)
         self.toolButtonReplace.setEnabled(enable)
         self.toolButtonReplaceAll.setEnabled(enable)
+
+    def clone_settings(self, original):
+        self.background = original.background
+        self.foreground = original.foreground

@@ -290,7 +290,7 @@ class FileManager(Manager):
                 self._rm(tmp_path)
             # reset dirty flags
             self.editor._original_text = plain_text
-            self.editor.dirty = False
+            self.editor.document().setModified(False)
             # remember path for next save
             self._path = path
             # reset selection
@@ -300,7 +300,7 @@ class FileManager(Manager):
         self.editor.text_saved.emit(str(path))
         self.saving = False
 
-    def close(self):
+    def close(self, clear=True):
         """
         Close the file open in the editor:
             - clear editor content
@@ -310,7 +310,14 @@ class FileManager(Manager):
         Cache().set_cursor_position(
             self.path, TextHelper(self.editor).cursor_position())
         self.editor._original_text = ''
-        self.editor.clear()
+        if clear:
+            self.editor.clear()
         self._path = ''
         self.mimetype = ''
         self._encoding = locale.getpreferredencoding()
+
+    def clone_settings(self, original):
+        self.replace_tabs_by_spaces = original.replace_tabs_by_spaces
+        self.safe_save = original.replace_tabs_by_spaces
+        self.clean_trailing_whitespaces = original.clean_trailing_whitespaces
+        self.restore_cursor = original.restore_cursor

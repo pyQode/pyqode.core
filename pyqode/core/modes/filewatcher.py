@@ -31,6 +31,14 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Automatically reloads changed files
         """
         self._auto_reload = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(FileWatcherMode).auto_reload = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -145,3 +153,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         False then reload the changed file in the editor
         """
         self.file_deleted.emit(self.editor)
+
+    def clone_settings(self, original):
+        self.auto_reload = original.auto_reload

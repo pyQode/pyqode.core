@@ -138,7 +138,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_connected(self):
         """ Logs connected """
         _logger().debug('connected to backend: %s:%d',
-                      self.peerName(), self.peerPort())
+                        self.peerName(), self.peerPort())
         self.is_connected = True
         self._send_request()
 
@@ -157,7 +157,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """ Logs disconnected """
         try:
             _logger().debug('disconnected from backend: %s:%d',
-                          self.peerName(), self.peerPort())
+                            self.peerName(), self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
@@ -257,7 +257,8 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        _logger().debug('backend process finished with exit code %d', exit_code)
+        _logger().debug('backend process finished with exit code %d',
+                        exit_code)
         try:
             self.running = False
         except AttributeError:
