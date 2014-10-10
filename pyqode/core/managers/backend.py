@@ -31,6 +31,9 @@ class BackendManager(Manager):
         super(BackendManager, self).__init__(editor)
         self._process = BackendProcess(editor)
         self._sockets = []
+        self.server_script = None
+        self.interpreter = None
+        self.args = None
 
     @staticmethod
     def pick_free_port():
@@ -59,6 +62,12 @@ class BackendManager(Manager):
         :param args: list of additional command line args to use to start
             the backend process.
         """
+        if self.running:
+            # already started
+            return
+        self.server_script = script
+        self.interpreter = interpreter
+        self.args = args
         backend_script = script.replace('.pyc', '.py')
         self._port = self.pick_free_port()
         if hasattr(sys, "frozen") and not backend_script.endswith('.py'):
@@ -98,8 +107,8 @@ class BackendManager(Manager):
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
-        Requests some work to be done by the backend. You can get notified of the
-        work results by passing a callback (on_receive).
+        Requests some work to be done by the backend. You can get notified of
+        the work results by passing a callback (on_receive).
 
         :param worker_class_or_function: Worker class or function
         :param args: worker args, any Json serializable objects

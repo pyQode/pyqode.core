@@ -31,6 +31,14 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Automatically reloads changed files
         """
         self._auto_reload = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(FileWatcherMode).auto_reload = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -52,18 +60,43 @@ class FileWatcherMode(Mode, QtCore.QObject):
         if state:
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
-            self.editor.text_saved.connect(self._update_mtime)
-            self.editor.text_saved.connect(self._timer.start)
-            self.editor.text_saving.connect(self._timer.stop)
+            # self.editor.text_saved.connect(self._update_mtime)
+            # self.editor.text_saved.connect(self._timer.start)
+            # self.editor.text_saving.connect(self._timer.stop)
+            self.editor.text_saving.connect(self._cancel_next_change)
+            self.editor.text_saved.connect(self._restart_monitoring)
             self.editor.focused_in.connect(self._check_for_pending)
         else:
             self._timer.stop()
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
-            self.editor.text_saved.disconnect(self._update_mtime)
-            self.editor.text_saved.disconnect(self._timer.start)
-            self.editor.text_saving.disconnect(self._timer.stop)
+            # self.editor.text_saved.disconnect(self._update_mtime)
+            # self.editor.text_saved.disconnect(self._timer.start)
+            # self.editor.text_saving.disconnect(self._timer.stop)
+            self.editor.text_saving.disconnect(self._cancel_next_change)
+            self.editor.text_saved.disconnect(self._restart_monitoring)
             self.editor.focused_in.disconnect(self._check_for_pending)
+
+    def _cancel_next_change(self):
+        self._timer.stop()
+        for e in self.editor.clones:
+            try:
+                w = e.modes.get(self.__class__)
+            except KeyError:
+                pass
+            else:
+                w._cancel_next_change()
+
+    def _restart_monitoring(self):
+        self._update_mtime()
+        for e in self.editor.clones:
+            try:
+                w = e.modes.get(self.__class__)
+            except KeyError:
+                pass
+            else:
+                w._restart_monitoring()
+        self._timer.start()
 
     def _update_mtime(self):
         """ Updates modif time """
@@ -145,3 +178,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         False then reload the changed file in the editor
         """
         self.file_deleted.emit(self.editor)
+
+    def clone_settings(self, original):
+        self.auto_reload = original.auto_reload

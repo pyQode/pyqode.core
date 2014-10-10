@@ -23,7 +23,10 @@ from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
 from pyqode.core.widgets.menu_recents import RecentFilesManager
 from pyqode.core.widgets.tabs import TabWidget
+from pyqode.core.widgets.tab_bar import TabBar
 from pyqode.core.widgets.prompt_line_edit import PromptLineEdit
+from pyqode.core.widgets.splittable_tab_widget import (
+    SplittableTabWidget, SplittableCodeEditTabWidget)
 
 
 __all__ = [
@@ -37,5 +40,8 @@ __all__ = [
     'EncodingsContextMenu',
     'TextCodeEdit',
     'GenericCodeEdit',
-    'PromptLineEdit'
+    'PromptLineEdit',
+    'SplittableTabWidget',
+    'SplittableCodeEditTabWidget',
+    'TabBar'
 ]

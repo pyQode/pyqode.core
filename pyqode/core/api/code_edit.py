@@ -5,6 +5,7 @@ except:
     pass
 import logging
 import platform
+from pyqode.core.cache import Cache
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
 from pyqode.core.managers import BackendManager
@@ -82,6 +83,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @use_spaces_instead_of_tabs.setter
     def use_spaces_instead_of_tabs(self, value):
         self._use_spaces_instead_of_tabs = value
+        for c in self.clones:
+            c.use_spaces_instead_of_tabs = value
 
     @property
     def tab_length(self):
@@ -91,6 +94,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @tab_length.setter
     def tab_length(self, value):
         self._tab_length = value
+        for c in self.clones:
+            c.tab_length = value
 
     @property
     def min_indent_column(self):
@@ -104,6 +109,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @min_indent_column.setter
     def min_indent_column(self, value):
         self._min_indent_column = value
+        for c in self.clones:
+            c.min_indent_column = value
 
     @property
     def save_on_focus_out(self):
@@ -117,6 +124,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @save_on_focus_out.setter
     def save_on_focus_out(self, value):
         self._save_on_focus_out = value
+        for c in self.clones:
+            c.save_on_focus_out = value
 
     @property
     def show_whitespaces(self):
@@ -129,6 +138,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def show_whitespaces(self, value):
         self._show_whitespaces = value
         self._set_whitespaces_flags(value)
+        for c in self.clones:
+            c.show_whitespaces = value
 
     @property
     def font_name(self):
@@ -143,6 +154,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             value = 'Source Code Pro'
         self._font_family = value
         self._reset_stylesheet()
+        for c in self.clones:
+            c.font_name = value
 
     @property
     def zoom_level(self):
@@ -170,6 +183,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def font_size(self, value):
         self._font_size = value
         self._reset_stylesheet()
+        for c in self.clones:
+            c.font_size = value
 
     @property
     def background(self):
@@ -182,6 +197,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def background(self, value):
         self._background = value
         self._reset_stylesheet()
+        for c in self.clones:
+            c.background = value
 
     @property
     def foreground(self):
@@ -194,6 +211,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def foreground(self, value):
         self._foreground = value
         self._reset_stylesheet()
+        for c in self.clones:
+            c.foreground = value
 
     @property
     def whitespaces_foreground(self):
@@ -208,6 +227,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @whitespaces_foreground.setter
     def whitespaces_foreground(self, value):
         self._whitespaces_foreground = value
+        for c in self.clones:
+            c.whitespaces_foreground = value
 
     @property
     def selection_background(self):
@@ -220,6 +241,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def selection_background(self, value):
         self._sel_background = value
         self._reset_stylesheet()
+        for c in self.clones:
+            c.selection_background = value
 
     @property
     def selection_foreground(self):
@@ -231,7 +254,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @selection_foreground.setter
     def selection_foreground(self, value):
         self._sel_foreground = value
-        self.rehighlight()
+        for c in self.clones:
+            c.selection_foreground = value
 
     @property
     def word_separators(self):
@@ -242,8 +266,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return self._word_separators
 
     @word_separators.setter
-    def word_separators(self, separators):
-        self._word_separators = separators
+    def word_separators(self, value):
+        self._word_separators = value
+        for c in self.clones:
+            c._word_separators = value
 
     @property
     def dirty(self):
@@ -252,13 +278,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :type: bool
         """
-        return self._dirty
-
-    @dirty.setter
-    def dirty(self, value):
-        if self._dirty != value:
-            self._dirty = value
-            self.dirty_changed.emit(value)
+        return self.document().isModified()
 
     @property
     def visible_blocks(self):
@@ -317,12 +337,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             paste, ...) must be created or not. Default is True.
         """
         super(CodeEdit, self).__init__(parent)
+        self.clones = []
         self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
         self._modes = ModesManager(self)
         self._panels = PanelsManager(self)
         self._decorations = TextDecorationsManager(self)
+        self.document().modificationChanged.connect(self._emit_dirty_changed)
 
         self._word_separators = [
             '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '{',
@@ -382,13 +404,81 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(False)
         self.setLineWrapMode(self.NoWrap)
 
-    def close(self):
-        super().close()
+    def split(self):
+        """
+        Split the code editor widget, return a clone of the widget ready to
+        be used and synchronised with its original.
+
+        Splitting the widget is done in 2 steps:
+            - first we clone the widget, you can override ``clone`` if your
+              widget needs additional arguments.
+
+            - then we link the two text document and disable somes modes such
+              as the watcher mode.
+        """
+        # cache cursor position so that the clone open at the current cursor
+        # pos
+        l, c = TextHelper(self).cursor_position()
+        clone = self.clone()
+        self.link(clone)
+        TextHelper(clone).goto_line(l, c)
+        self.clones.append(clone)
+        return clone
+
+    def clone(self):
+        """
+        Clone ourself, return an instance of the same class, using the default
+        QWidget constructor.
+        """
+        clone = self.__class__(parent=self.parent())
+        return clone
+
+    def link(self, clone):
+        """
+        Links the clone with the original. We copy the file manager infos
+        (path, mimetype, ...) and setup the clone text document as reference
+        to our text document.
+
+        :param clone: clone to link.
+        """
+        clone.file._path = self.file.path
+        clone.file._encoding = self.file.encoding
+        clone.file._mimetype = self.file.mimetype
+        clone.setDocument(self.document())
+        for original_mode, mode in zip(list(self.modes), list(clone.modes)):
+            mode.enabled = original_mode.enabled
+            mode.clone_settings(original_mode)
+        for original_panel, panel in zip(
+                list(self.panels), list(clone.panels)):
+            panel.enabled = original_panel.isEnabled()
+            panel.clone_settings(original_panel)
+        clone.use_spaces_instead_of_tabs = self.use_spaces_instead_of_tabs
+        clone.tab_length = self.tab_length
+        clone.min_indent_column = self.min_indent_column
+        clone.save_on_focus_out = self.save_on_focus_out
+        clone.show_whitespaces = self.show_whitespaces
+        clone.font_name = self.font_name
+        clone.font_size = self.font_size
+        clone.zoom_level = self.zoom_level
+        clone.background = self.background
+        clone.foreground = self.foreground
+        clone.whitespaces_foreground = self.whitespaces_foreground
+        clone.selection_background = self.selection_background
+        clone.selection_foreground = self.selection_foreground
+        clone.word_separators = self.word_separators
+        clone.file.clone_settings(self.file)
+
+    def close(self, clear=True):
+        """
+        Closes the editor
+        """
         self.decorations.clear()
         self.modes.clear()
         self.panels.clear()
-        self.file.close()
         self.backend.stop()
+        Cache().set_cursor_position(
+            self.file.path, TextHelper(self).cursor_position())
+        super(CodeEdit, self).close()
         _logger().info('closed')
 
     def set_mouse_cursor(self, cursor):
@@ -440,7 +530,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
-        self.dirty = False
 
     def add_action(self, action):
         """
@@ -449,10 +538,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param action: QtWidgets.QAction
         """
         self._actions.append(action)
+        action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         super(CodeEdit, self).addAction(action)
 
     def insert_action(self, action, prev_action):
         index = self._actions.index(prev_action)
+        action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self._actions.insert(index, action)
 
     def actions(self):
@@ -496,6 +587,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param menu: menu to add
         """
         self._menus.append(menu)
+        for action in menu.actions():
+            action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self.addActions(menu.actions())
 
     def remove_menu(self, menu):
@@ -719,11 +812,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         initial_state = event.isAccepted()
         event.ignore()
         self.mouse_pressed.emit(event)
-        cursor = self.cursorForPosition(event.pos())
-        for sel in self.decorations:
-            if sel.cursor.blockNumber() == cursor.blockNumber():
-                if sel.contains_cursor(cursor):
-                    sel.signals.clicked.emit(sel)
+        if event.button() == QtCore.Qt.LeftButton:
+            cursor = self.cursorForPosition(event.pos())
+            for sel in self.decorations:
+                if sel.cursor.blockNumber() == cursor.blockNumber():
+                    if sel.contains_cursor(cursor):
+                        sel.signals.clicked.emit(sel)
         if not event.isAccepted():
             event.setAccepted(initial_state)
             super(CodeEdit, self).mousePressEvent(event)
@@ -967,8 +1061,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if not self._cleaning:
             ln = TextHelper(self).cursor_position()[0]
             self._modified_lines.add(ln)
-            txt = self.toPlainText()
-            self.dirty = (txt != self._original_text)
 
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
@@ -1016,3 +1108,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setTextCursor(cursor)
         if event:
             event.accept()
+
+    def _emit_dirty_changed(self, state):
+        self.dirty_changed.emit(state)
+        for c in self.clones:
+            c.dirty_changed.emit(state)

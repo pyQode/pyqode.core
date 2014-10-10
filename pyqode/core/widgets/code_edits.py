@@ -8,8 +8,9 @@ This module contains core code edits:
 
 """
 import sys
+from pyqode.core.backend import server
 from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
-    IndentFoldDetector
+    IndentFoldDetector, ColorScheme
 
 
 class TextCodeEdit(CodeEdit):
@@ -23,11 +24,11 @@ class TextCodeEdit(CodeEdit):
         def highlight_block(self, text, user_data):
             pass
 
-    mimetypes = ['text/x-plain', 'text/x-log']
+    mimetypes = ['text/x-plain', 'text/x-log', 'text/plain']
 
-    def __init__(self, parent, server_script,
+    def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
-                 create_default_actions=True):
+                 create_default_actions=True, color_scheme='qt'):
         from pyqode.core import panels
         from pyqode.core import modes
         super(TextCodeEdit, self).__init__(parent, create_default_actions)
@@ -48,13 +49,21 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
         self.modes.append(modes.RightMarginMode())
-        self.modes.append(TextCodeEdit.TextSH(self.document()))
+        self.modes.append(TextCodeEdit.TextSH(
+            self.document(), ColorScheme(color_scheme)))
         self.modes.append(modes.ZoomMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+
+    def clone(self):
+        clone = self.__class__(
+            parent=self.parent(), server_script=self.backend.server_script,
+            interpreter=self.backend.interpreter, args=self.backend.args,
+            color_scheme=self.syntax_highlighter.color_scheme.name)
+        return clone
 
 
 class GenericCodeEdit(CodeEdit):
@@ -68,15 +77,13 @@ class GenericCodeEdit(CodeEdit):
     # generic
     mimetypes = []
 
-    def __init__(self, parent, server_script,
+    def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
-                 create_default_actions=True):
+                 create_default_actions=True, color_scheme='qt'):
         super(GenericCodeEdit, self).__init__(parent, create_default_actions)
         from pyqode.core import panels
         from pyqode.core import modes
-
         self.backend.start(server_script, interpreter, args)
-
         # append panels
         self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
@@ -92,7 +99,8 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
         self.modes.append(modes.RightMarginMode())
-        self.modes.append(modes.PygmentsSyntaxHighlighter(self.document()))
+        self.modes.append(modes.PygmentsSyntaxHighlighter(
+            self.document(), color_scheme=ColorScheme(color_scheme)))
         self.modes.append(modes.ZoomMode())
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.AutoIndentMode())
@@ -104,6 +112,17 @@ class GenericCodeEdit(CodeEdit):
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
 
-    def setPlainText(self, txt, mime_type, encoding):
+    def setPlainText(self, txt, mime_type='', encoding=''):
+        if mime_type is None:
+            mime_type = self.file.mimetype
+        if encoding is None:
+            encoding = self.file.encoding
         self.syntax_highlighter.set_lexer_from_filename(self.file.path)
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
+
+    def clone(self):
+        clone = self.__class__(
+            parent=self.parent(), server_script=self.backend.server_script,
+            interpreter=self.backend.interpreter, args=self.backend.args,
+            color_scheme=self.syntax_highlighter.color_scheme.name)
+        return clone

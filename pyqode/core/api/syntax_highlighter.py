@@ -93,12 +93,12 @@ class ColorScheme(object):
         try:
             style = get_style_by_name(style)
         except ClassNotFound:
-            if style == 'qt' or not style:
-                from pyqode.core.styles.qt import QtStyle
-                style = QtStyle
-            elif style == 'darcula':
+            if style == 'darcula':
                 from pyqode.core.styles.darcula import DarculaStyle
                 style = DarculaStyle
+            else:
+                from pyqode.core.styles.qt import QtStyle
+                style = QtStyle
         self._load_formats_from_style(style)
 
     def _load_formats_from_style(self, style):
@@ -292,7 +292,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         start = time.time()
         QtWidgets.QApplication.setOverrideCursor(
             QtGui.QCursor(QtCore.Qt.WaitCursor))
-        super(SyntaxHighlighter, self).rehighlight()
+        try:
+            super(SyntaxHighlighter, self).rehighlight()
+        except RuntimeError:
+            # cloned widget, no need to rehighlight the same document twice ;)
+            pass
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()
         _logger().info('rehighlight duration: %fs' % (end - start))
@@ -300,6 +304,9 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def on_install(self, editor):
         super(SyntaxHighlighter, self).on_install(editor)
         self.refresh_editor(self.color_scheme)
+
+    def clone_settings(self, original):
+        self._color_scheme = original.color_scheme
 
 
 class TextBlockUserData(QtGui.QTextBlockUserData):

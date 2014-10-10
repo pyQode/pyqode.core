@@ -18,6 +18,7 @@ from pyqode.core import widgets
 
 from .editor import GenericCodeEdit
 from .forms.main_window_ui import Ui_MainWindow
+from pyqode.core.api import ColorScheme
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -29,8 +30,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setup_actions()
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
-        self.on_current_tab_changed()
+        self.on_current_tab_changed(None)
         self.styles_group = None
+        self.tabWidget.dirty_changed.connect(self.actionSave.setEnabled)
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -46,12 +48,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionNew.triggered.connect(self.on_new)
         self.actionSave.triggered.connect(self.on_save)
         self.actionSave_as.triggered.connect(self.on_save_as)
-        self.actionClose_tab.triggered.connect(self.tabWidget.close)
-        self.actionClose_other_tabs.triggered.connect(
-            self.tabWidget.close_others)
-        self.actionClose_all_tabs.triggered.connect(self.tabWidget.close_all)
         self.actionQuit.triggered.connect(QtWidgets.QApplication.instance().quit)
-        self.tabWidget.currentChanged.connect(self.on_current_tab_changed)
+        self.tabWidget.current_changed.connect(
+            self.on_current_tab_changed)
         self.actionAbout.triggered.connect(self.on_about)
 
     def setup_recent_files_menu(self):
@@ -114,8 +113,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         menu = QtWidgets.QMenu('Styles', self.menuEdit)
         group = QtWidgets.QActionGroup(self)
         self.styles_group = group
-        current_style = editor.modes.get(
-            modes.PygmentsSyntaxHighlighter).pygments_style
+        current_style = editor.syntax_highlighter.color_scheme.name
         group.triggered.connect(self.on_style_changed)
         for s in sorted(modes.PYGMENTS_STYLES):
             a = QtWidgets.QAction(menu)
@@ -143,25 +141,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :param path: Path of the file to open
         """
         if path:
-            index = self.tabWidget.index_from_filename(path)
-            if index == -1:
-                editor = GenericCodeEdit(self)
-                editor.file.open(path)
-                editor.cursorPositionChanged.connect(
-                    self.on_cursor_pos_changed)
-                self.tabWidget.add_code_edit(editor)
-                self.recent_files_manager.open_file(path)
-                self.menu_recents.update_actions()
-            else:
-                self.tabWidget.setCurrentIndex(index)
+            editor = self.tabWidget.open_document(path)
+            editor.cursorPositionChanged.connect(
+                self.on_cursor_pos_changed)
+            self.recent_files_manager.open_file(path)
+            self.menu_recents.update_actions()
 
     @QtCore.Slot()
     def on_new(self):
         """
         Add a new empty code editor to the tab widget
         """
-        self.tabWidget.add_code_edit(GenericCodeEdit(self),
-                                     'New document %d.txt')
+        editor = self.tabWidget.create_new_document()
+        editor.cursorPositionChanged.connect(self.on_cursor_pos_changed)
         self.refresh_color_scheme()
 
     @QtCore.Slot()
@@ -178,29 +170,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.Slot()
     def on_save(self):
         self.tabWidget.save_current()
-        self._update_status_bar(self.tabWidget.currentWidget())
+        self._update_status_bar(self.tabWidget.current_widget())
 
     @QtCore.Slot()
     def on_save_as(self):
         """
         Save the current editor document as.
         """
-        path = self.tabWidget.currentWidget().file.path
-        path = os.path.dirname(path) if path else ''
-        filename, filter = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Save', path)
-        if filename:
-            self.tabWidget.save_current(filename)
-            self.recent_files_manager.open_file(filename)
-            self.menu_recents.update_actions()
-        self._update_status_bar(self.tabWidget.currentWidget())
+        self.tabWidget.save_current_as()
+        self._update_status_bar(self.tabWidget.current_widget())
 
-    @QtCore.Slot()
-    def on_current_tab_changed(self):
+    @QtCore.Slot(QtWidgets.QWidget)
+    def on_current_tab_changed(self, editor):
         self.menuEdit.clear()
         self.menuModes.clear()
         self.menuPanels.clear()
-        editor = self.tabWidget.currentWidget()
         self.menuEdit.setEnabled(editor is not None)
         self.menuModes.setEnabled(editor is not None)
         self.menuPanels.setEnabled(editor is not None)
@@ -231,13 +215,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def refresh_color_scheme(self):
         if self.styles_group and self.styles_group.checkedAction():
             style = self.styles_group.checkedAction().text()
-            style = style.replace('&', '') # qt5 bug on kde?
+            style = style.replace('&', '')  # qt5 bug on kde?
         else:
             style = 'qt'
-        for i in range(self.tabWidget.count()):
-            editor = self.tabWidget.widget(i)
-            editor.modes.get(
-                modes.PygmentsSyntaxHighlighter).pygments_style = style
+        for editor in self.tabWidget.widgets():
+            editor.syntax_highlighter.color_scheme = ColorScheme(style)
             editor.modes.get(modes.CaretLineHighlighterMode).refresh()
 
     @QtCore.Slot(QtWidgets.QAction)
@@ -265,8 +247,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.Slot()
     def on_cursor_pos_changed(self):
-        if self.tabWidget.currentWidget():
-            editor = self.tabWidget.currentWidget()
+        if self.tabWidget.current_widget():
+            editor = self.tabWidget.current_widget()
             l, c = api.TextHelper(editor).cursor_position()
             self.lbl_cursor_pos.setText(
                 '%d:%d' % (l + 1, c + 1))

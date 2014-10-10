@@ -210,4 +210,7 @@ def serve_forever(args=None):
 
 # Server script example
 if __name__ == '__main__':
+    from pyqode.core import backend
+    backend.CodeCompletionWorker.providers.append(
+        backend.DocumentWordsProvider())
     serve_forever()

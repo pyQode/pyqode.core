@@ -39,6 +39,8 @@ class ExtendedSelectionMode(Mode):
         self.action_select_word.setText('Select word')
         self.action_select_word.setShortcut(self.word_sel_shortcut)
         self.action_select_word.triggered.connect(self.perform_word_selection)
+        self.action_select_word.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
 
         self.extended_sel_shortcut = QtGui.QKeySequence('Ctrl+Shift+W')
         self.action_select_extended_word = QtWidgets.QAction(self.editor)
@@ -47,6 +49,8 @@ class ExtendedSelectionMode(Mode):
             self.extended_sel_shortcut)
         self.action_select_extended_word.triggered.connect(
             self.perform_extended_selection)
+        self.action_select_extended_word.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
 
         self.matched_sel_shortcut = QtGui.QKeySequence('Ctrl+E')
         self.action_select_matched = QtWidgets.QAction(self.editor)
@@ -54,12 +58,16 @@ class ExtendedSelectionMode(Mode):
         self.action_select_matched.setShortcut(self.matched_sel_shortcut)
         self.action_select_matched.triggered.connect(
             self.perform_matched_selection)
+        self.action_select_matched.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
 
         self.line_sel_shortcut = QtGui.QKeySequence('Ctrl+Shift+R')
         self.action_select_line = QtWidgets.QAction(self.editor)
         self.action_select_line.setText('Select line')
         self.action_select_line.setShortcut(self.line_sel_shortcut)
         self.action_select_line.triggered.connect(self.perform_line_selection)
+        self.action_select_line.setShortcutContext(
+            QtCore.Qt.WidgetShortcut)
 
     def create_menu(self):
         # setup menu
@@ -84,6 +92,9 @@ class ExtendedSelectionMode(Mode):
         else:
             self.editor.insert_action(self.create_menu().menuAction(),
                                       self.editor.action_duplicate_line)
+            self.editor.addActions([
+                self.action_select_extended_word, self.action_select_line,
+                self.action_select_matched, self.action_select_word])
 
     def on_state_changed(self, state):
         if state:
