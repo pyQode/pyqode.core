@@ -63,10 +63,7 @@ Alternatively, you can install directly from master branch using
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/pyQode/pyqode.core.git@master
-
-.. note:: replace ``@master`` by ``@develop`` or any other valid branch name
-    to install the unstable development version
+    $ pip install git+https://github.com/pyQode/pyqode.core.git
 
 .. _source archive: https://github.com/pyQode/pyqode.core/archive/master.zip
 .. _github repository: https://github.com/pyQode/pyqode.core

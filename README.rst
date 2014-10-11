@@ -140,4 +140,3 @@ taken on a Gnome 3 desktop):
 .. _Documentation: http://pyqodecore.readthedocs.org/en/latest/
 .. _Wiki: https://github.com/pyQode/pyqode.core/wiki
 .. _master: https://github.com/pyQode/pyqode.core/tree/master
-.. _develop: https://github.com/pyQode/pyqode.core/tree/develop

@@ -41,7 +41,6 @@ script:
   - if [ $TOXENV == "cov" ]; then
         git clone https://github.com/pyQode/pyqode.qt.git;
         cd pyqode.qt;
-        git checkout develop;
         pip install --quiet -e .;
         cd ..;
         pip install --quiet -e .;
