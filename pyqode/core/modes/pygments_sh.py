@@ -152,7 +152,7 @@ class PygmentsSH(SyntaxHighlighter):
         """
         Gets/Sets the pygments style
         """
-        return self._pygments_style
+        return self.color_scheme.name
 
     @pygments_style.setter
     def pygments_style(self, value):
@@ -222,6 +222,9 @@ class PygmentsSH(SyntaxHighlighter):
         _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
+        if self.color_scheme.name != self._pygments_style:
+            self._pygments_style = self.color_scheme.name
+            self._update_style()
         original_text = text
         if self.editor and self._lexer and self.enabled:
             if block.blockNumber():

@@ -99,3 +99,18 @@ class Mode(object):
         :type state: bool
         """
         pass
+
+    def clone_settings(self, original):
+        """
+        Clone the settings from another mode (same class).
+
+        This method is called when splitting an editor widget.
+
+        :param original: other mode (must be the same class).
+
+        .. note:: The base method does not do anything, you must implement
+            this method for every new mode/panel (if you plan on using the
+            split feature). You should also make sure any properties will be
+            propagated to the clones.
+        """
+        pass

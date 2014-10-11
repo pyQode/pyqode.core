@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/examples/notepad/forms/main_window.ui'
+# Form implementation generated from reading ui file '/home/colin/Documents/pyQode/core/examples/notepad/forms/main_window.ui'
 #
-# Created: Mon Aug 11 09:38:30 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created: Tue Oct  7 11:12:03 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -20,12 +20,13 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.tabWidget = TabWidget(self.centralwidget)
+        self.tabWidget = SplittableCodeEditTabWidget(self.centralwidget)
+        self.tabWidget.setOrientation(QtCore.Qt.Horizontal)
         self.tabWidget.setObjectName("tabWidget")
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 27))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -91,12 +92,9 @@ class Ui_MainWindow(object):
         self.actionAbout.setObjectName("actionAbout")
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_as)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionClose_tab)
-        self.menuFile.addAction(self.actionClose_other_tabs)
-        self.menuFile.addAction(self.actionClose_all_tabs)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
         self.menu.addAction(self.actionAbout)
@@ -139,5 +137,5 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionAbout.setShortcut(_translate("MainWindow", "F1"))
 
-from pyqode.core.widgets.tabs import TabWidget
+from pyqode.core.widgets import SplittableCodeEditTabWidget
 from . import resources_rc

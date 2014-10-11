@@ -5,85 +5,16 @@ show code editor tabs.
 """
 import logging
 import os
-from pyqode.core._forms.dlg_unsaved_files_ui import Ui_Dialog
+
+from pyqode.core.dialogs.unsaved_files import DlgUnsavedFiles
 from pyqode.core.modes.filewatcher import FileWatcherMode
+from pyqode.core.widgets.tab_bar import TabBar
 from pyqode.qt import QtCore, QtWidgets
-from pyqode.qt.QtWidgets import QDialog, QTabBar, QTabWidget
+from pyqode.qt.QtWidgets import QTabBar, QTabWidget
 
 
 def _logger():
     return logging.getLogger(__name__)
-
-
-class DlgUnsavedFiles(QDialog, Ui_Dialog):
-    """
-    This dialog shows the list of unsaved file in the CodeEditTabWidget.
-
-    Use can choose to:
-        - cancel: nothing changed, no tab will be closed
-        - save all/save selected: save the selected files or all files
-        - discard all changes: nothing will be saved but all tabs will be
-        closed.
-
-    """
-    def __init__(self, parent, files=None):
-        if files is None:
-            files = []
-        QtWidgets.QDialog.__init__(self, parent)
-        Ui_Dialog.__init__(self)
-        self.setupUi(self)
-        self.bt_save_all = self.buttonBox.button(
-            QtWidgets.QDialogButtonBox.SaveAll)
-        self.bt_save_all.clicked.connect(self.accept)
-        self.discarded = False
-        self.bt_discard = self.buttonBox.button(
-            QtWidgets.QDialogButtonBox.Discard)
-        self.bt_discard.clicked.connect(self._set_discarded)
-        self.bt_discard.clicked.connect(self.accept)
-        for file in files:
-            self._add_file(file)
-        self.listWidget.itemSelectionChanged.connect(
-            self._on_selection_changed)
-        self._on_selection_changed()
-
-    def _add_file(self, path):
-        icon = QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(path))
-        item = QtWidgets.QListWidgetItem(icon, path)
-        self.listWidget.addItem(item)
-
-    def _set_discarded(self):
-        self.discarded = True
-
-    def _on_selection_changed(self):
-        nb_items = len(self.listWidget.selectedItems())
-        if nb_items == 0:
-            self.bt_save_all.setText("Save")
-            self.bt_save_all.setEnabled(False)
-        else:
-            self.bt_save_all.setEnabled(True)
-            self.bt_save_all.setText("Save selected")
-            if nb_items == self.listWidget.count():
-                self.bt_save_all.setText("Save all")
-
-
-class ClosableTabBar(QTabBar):
-    """
-    Custom QTabBar that can be closed using a mouse middle click.
-    """
-    double_clicked = QtCore.Signal()
-
-    def __init__(self, parent):
-        QtWidgets.QTabBar.__init__(self, parent)
-        self.setTabsClosable(True)
-
-    def mousePressEvent(self, event):
-        QtWidgets.QTabBar.mousePressEvent(self, event)
-        if event.button() == QtCore.Qt.MiddleButton:
-            self.parentWidget().tabCloseRequested.emit(self.tabAt(
-                event.pos()))
-
-    def mouseDoubleClickEvent(self, event):
-        self.double_clicked.emit()
 
 
 class TabWidget(QTabWidget):
@@ -126,7 +57,7 @@ class TabWidget(QTabWidget):
         self._current = None
         self.currentChanged.connect(self._on_current_changed)
         self.tabCloseRequested.connect(self._on_tab_close_requested)
-        tab_bar = ClosableTabBar(self)
+        tab_bar = TabBar(self)
         tab_bar.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         tab_bar.customContextMenuRequested.connect(self._show_tab_context_menu)
         self.setTabBar(tab_bar)

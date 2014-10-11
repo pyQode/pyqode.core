@@ -159,9 +159,10 @@ class TextHelper(object):
             except KeyError:
                 pass
             else:
+                from pyqode.core.api.folding import FoldScope
                 if not block.isVisible() or TextBlockHelper.is_fold_trigger(
                         block):
-                    block = folding_panel.find_parent_scope(block)
+                    block = FoldScope.find_parent_scope(block)
                     if TextBlockHelper.get_fold_trigger_state(block):
                         folding_panel.toggle_fold_trigger(block)
             self._editor.setTextCursor(text_cursor)
@@ -799,6 +800,12 @@ class TextBlockHelper(object):
         - bit27-bit29: fold level (8 level max)
         - bit30: fold trigger flag
 
+        - bit0 -> bit15: 16 bits for syntax highlighter user state (
+          for syntax highlighting)
+        - bit16-bit25: 10 bits for the fold level (1024 levels)
+        - bit26: 1 bit for the fold trigger flag (trigger or not trigger)
+        - bit27: 1 bit for the fold trigger state (expanded/collapsed)
+
     """
     @staticmethod
     def get_state(block):
@@ -813,7 +820,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             return state
-        return state & 0x03FFFFFF
+        return state & 0x0000FFFF
 
     @staticmethod
     def set_state(block, state):
@@ -829,8 +836,8 @@ class TextBlockHelper(object):
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
-        higher_part = user_state & 0xFC000000
-        state &= 0x03FFFFFF
+        higher_part = user_state & 0xFFFF0000
+        state &= 0x0000FFFF
         state |= higher_part
         block.setUserState(state)
 
@@ -847,7 +854,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        return (state & 0x38000000) >> 27
+        return (state & 0x03FF0000) >> 16
 
     @staticmethod
     def set_fold_lvl(block, val):
@@ -862,10 +869,10 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        if val >= 8:
-            val = 7
-        state &= 0xC7FFFFFF
-        state |= val << 27
+        if val >= 0x3FF:
+            val = 0x3FF
+        state &= 0xFC00FFFF
+        state |= val << 16
         block.setUserState(state)
 
     @staticmethod
@@ -882,7 +889,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        return bool(state & 0x40000000)
+        return bool(state & 0x04000000)
 
     @staticmethod
     def set_fold_trigger(block, val):
@@ -891,8 +898,8 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xBFFFFFFF
-        state |= int(val) << 30
+        state &= 0xFBFFFFFF
+        state |= int(val) << 26
         block.setUserState(state)
 
     @staticmethod
@@ -906,7 +913,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        return bool(state & 0x04000000)
+        return bool(state & 0x08000000)
 
     @staticmethod
     def set_fold_trigger_state(block, val):
@@ -921,8 +928,8 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xFBFFFFFF
-        state |= int(val) << 26
+        state &= 0xF7FFFFFF
+        state |= int(val) << 27
         block.setUserState(state)
 
 

@@ -75,9 +75,9 @@ def test_block_helper():
     utils.TextBlockHelper.set_fold_lvl(block, 5)
     lvl = utils.TextBlockHelper.get_fold_lvl(block)
     assert lvl == 5
-    utils.TextBlockHelper.set_fold_lvl(block, 8)
+    utils.TextBlockHelper.set_fold_lvl(block, 1024)
     lvl = utils.TextBlockHelper.get_fold_lvl(block)
-    assert lvl == 7
+    assert lvl == 1023
     # ensure other values are intact
     assert utils.TextBlockHelper.get_state(block) == 26
 
@@ -91,7 +91,7 @@ def test_block_helper():
     assert utils.TextBlockHelper.is_fold_trigger(block) is False
     utils.TextBlockHelper.set_fold_trigger(block, True)
     # ensure other values are intact
-    assert utils.TextBlockHelper.get_fold_lvl(block) == 7
+    assert utils.TextBlockHelper.get_fold_lvl(block) == 1023
     assert utils.TextBlockHelper.get_state(block) == 26
 
     #
@@ -104,5 +104,5 @@ def test_block_helper():
     assert utils.TextBlockHelper.get_fold_trigger_state(block) is False
     # ensure other values are intact
     assert utils.TextBlockHelper.is_fold_trigger(block) is True
-    assert utils.TextBlockHelper.get_fold_lvl(block) == 7
+    assert utils.TextBlockHelper.get_fold_lvl(block) == 1023
     assert utils.TextBlockHelper.get_state(block) == 26

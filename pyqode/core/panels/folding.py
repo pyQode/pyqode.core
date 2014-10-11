@@ -49,6 +49,14 @@ class FoldingPanel(Panel):
     @native_look.setter
     def native_look(self, value):
         self._native = value
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).native_look = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def custom_indicators_icons(self):
@@ -71,6 +79,15 @@ class FoldingPanel(Panel):
             raise ValueError('The list of custom indicators must contains 4 '
                              'strings')
         self._custom_indicators = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(
+                        self.__class__).custom_indicators_icons = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def custom_fold_region_background(self):
@@ -84,6 +101,15 @@ class FoldingPanel(Panel):
     @custom_fold_region_background.setter
     def custom_fold_region_background(self, value):
         self._custom_color = value
+        # propagate changes to every clone
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(
+                        self.__class__).custom_fold_region_background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def highlight_caret_scope(self):
@@ -109,6 +135,14 @@ class FoldingPanel(Panel):
                     self._block_nbr = -1
                     self.editor.cursorPositionChanged.disconnect(
                         self._highlight_caret_scope)
+                for clone in self.editor.clones:
+                    try:
+                        clone.modes.get(
+                            self.__class__).highlight_caret_scope = value
+                    except KeyError:
+                        # this should never happen since we're working with
+                        # clones
+                        pass
 
     def __init__(self, highlight_caret_scope=False):
         Panel.__init__(self)
@@ -204,6 +238,18 @@ class FoldingPanel(Panel):
                 mouse_over = self._mouse_over_line == line_number
                 self._draw_fold_indicator(
                     top_position, mouse_over, collapsed, painter)
+                if collapsed:
+                    for deco in self._block_decos:
+                        if deco.block == block:
+                            return
+                    self._add_fold_decoration(block, FoldScope(block))
+                else:
+                    for deco in self._block_decos:
+                        if deco.block == block:
+                            self._block_decos.remove(deco)
+                            self.editor.decorations.remove(deco)
+                            del deco
+                            return
 
     def _draw_fold_region_background(self, block, painter):
         """
@@ -471,7 +517,7 @@ class FoldingPanel(Panel):
         th = TextHelper(self.editor)
         line = th.line_nbr_from_position(event.pos().y())
         if line >= 0:
-            block = self.find_parent_scope(
+            block = FoldScope.find_parent_scope(
                 self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
                 if self._mouse_over_line is None:
@@ -720,7 +766,7 @@ class FoldingPanel(Panel):
         """
         Toggle the current fold trigger.
         """
-        block = self.find_parent_scope(self.editor.textCursor().block())
+        block = FoldScope.find_parent_scope(self.editor.textCursor().block())
         self.toggle_fold_trigger(block)
 
     def _on_action_collapse_all_triggered(self):
@@ -746,7 +792,8 @@ class FoldingPanel(Panel):
         cursor = self.editor.textCursor()
         block_nbr = cursor.blockNumber()
         if self._block_nbr != block_nbr:
-            block = self.find_parent_scope(self.editor.textCursor().block())
+            block = FoldScope.find_parent_scope(
+                self.editor.textCursor().block())
             try:
                 s = FoldScope(block)
             except ValueError:
@@ -756,3 +803,10 @@ class FoldingPanel(Panel):
                 if TextBlockHelper.is_fold_trigger(block):
                     self._highlight_surrounding_scopes(block)
         self._block_nbr = block_nbr
+
+    def clone_settings(self, original):
+        self.native_look = original.native_look
+        self.custom_indicators_icons = original.custom_indicators_icons
+        self.highlight_caret_scope = original.highlight_caret_scope
+        self.custom_fold_region_background = \
+            original.custom_fold_region_background

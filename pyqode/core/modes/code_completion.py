@@ -44,6 +44,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @trigger_key.setter
     def trigger_key(self, value):
         self._trigger_key = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).trigger_key = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def trigger_length(self):
@@ -52,6 +60,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @trigger_length.setter
     def trigger_length(self, value):
         self._trigger_len = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).trigger_length = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def trigger_symbols(self):
@@ -60,6 +76,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @trigger_symbols.setter
     def trigger_symbols(self, value):
         self._trigger_symbols = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).trigger_symbols = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def show_tooltips(self):
@@ -68,6 +92,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @show_tooltips.setter
     def show_tooltips(self, value):
         self._show_tooltips = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).show_tooltips = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def case_sensitive(self):
@@ -76,6 +108,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @case_sensitive.setter
     def case_sensitive(self, value):
         self._case_sensitive = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).case_sensitive = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def completion_prefix(self):
@@ -189,7 +229,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _on_results_available(self, status, results):
         _logger().debug("cc: got completion results")
         if self.editor:
-            self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
+            # self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
             all_results = []
             if status:
                 for res in results:
@@ -313,7 +353,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @QtCore.Slot()
     def _set_wait_cursor(self):
-        self.editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
+        # self.editor.set_mouse_cursor(QtCore.Qt.WaitCursor)
+        pass
 
     def _is_last_char_end_of_word(self):
         try:
@@ -524,3 +565,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             QtCore.QTimer.singleShot(100, self._retry_collect)
         else:
             self._set_wait_cursor()
+
+    def clone_settings(self, original):
+        self.trigger_key = original.trigger_key
+        self.trigger_length = original.trigger_length
+        self.trigger_symbols = original.trigger_symbols
+        self.show_tooltips = original.show_tooltips
+        self.case_sensitive = original.case_sensitive

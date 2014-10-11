@@ -317,3 +317,22 @@ class FoldScope(object):
             ret_val.append(block.text())
             block = block.next()
         return '\n'.join(ret_val)
+
+    @staticmethod
+    def find_parent_scope(block):
+        """
+        Find parent scope, if the block is not a fold trigger.
+
+        """
+        original = block
+        if not TextBlockHelper.is_fold_trigger(block):
+            # search level of next non blank line
+            while block.text().strip() == '' and block.isValid():
+                block = block.next()
+            ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
+            block = original
+            while (block.blockNumber() and
+                   (not TextBlockHelper.is_fold_trigger(block) or
+                    TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
+                block = block.previous()
+        return block

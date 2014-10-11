@@ -16,3 +16,7 @@ class GenericCodeEdit(widgets.GenericCodeEdit):
         super(GenericCodeEdit, self).__init__(
             parent, server_script=os.path.join(os.getcwd(), 'server.exe')
             if hasattr(sys, "frozen") else server.__file__)
+
+    def clone(self):
+        clone = self.__class__(parent=self.parent())
+        return clone

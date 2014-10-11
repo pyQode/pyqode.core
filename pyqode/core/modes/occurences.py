@@ -23,6 +23,13 @@ class OccurrencesHighlighterMode(Mode):
     @delay.setter
     def delay(self, value):
         self.timer.delay = value
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).delay = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def background(self):
@@ -34,6 +41,13 @@ class OccurrencesHighlighterMode(Mode):
     @background.setter
     def background(self, value):
         self._background = value
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).background = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def foreground(self):
@@ -45,6 +59,13 @@ class OccurrencesHighlighterMode(Mode):
     @foreground.setter
     def foreground(self, value):
         self._foreground = value
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).foreground = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def underlined(self):
@@ -61,6 +82,13 @@ class OccurrencesHighlighterMode(Mode):
     @underlined.setter
     def underlined(self, value):
         self._underlined = value
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).underlined = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         super(OccurrencesHighlighterMode, self).__init__()
@@ -127,3 +155,9 @@ class OccurrencesHighlighterMode(Mode):
                 deco.draw_order = 3
                 self.editor.decorations.append(deco)
                 self._decorations.append(deco)
+
+    def clone_settings(self, original):
+        self.delay = original.delay
+        self.background = original.background
+        self.foreground = original.foreground
+        self.underlined = original.underlined

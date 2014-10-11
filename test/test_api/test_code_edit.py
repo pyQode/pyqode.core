@@ -263,8 +263,6 @@ def test_key_released_event(editor):
 @editor_open(__file__)
 def test_focus_out(editor):
     editor.save_on_focus_out = True
-    editor.dirty = True
-    assert editor.dirty is True
     editor.focusOutEvent(QtGui.QFocusEvent(QtCore.QEvent.FocusOut))
 
 
@@ -370,3 +368,13 @@ def test_do_home_key(editor):
     assert editor.textCursor().positionInBlock() == 4
     editor._do_home_key()
     assert editor.textCursor().positionInBlock() == 0
+
+
+@editor_open(__file__)
+def test_clone(editor):
+    assert len(editor.clones) == 0
+    new = editor.split()
+    assert editor != new
+    assert len(editor.clones) == 1
+    assert new in editor.clones
+    assert editor.document() == new.document()

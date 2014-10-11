@@ -27,6 +27,13 @@ class RightMarginMode(Mode):
         self._pen = QtGui.QPen(self._color)
         TextHelper(self.editor).mark_whole_doc_dirty()
         self.editor.repaint()
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).color = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     @property
     def position(self):
@@ -41,6 +48,13 @@ class RightMarginMode(Mode):
         Gets/sets the position of the margin
         """
         self._margin_pos = value
+        if self.editor:
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(self.__class__).position = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
 
     def __init__(self):
         Mode.__init__(self)
@@ -73,3 +87,7 @@ class RightMarginMode(Mode):
         painter = QtGui.QPainter(self.editor.viewport())
         painter.setPen(self._pen)
         painter.drawLine(x80, 0, x80, 2 ** 16)
+
+    def clone_settings(self, original):
+        self.color = original.color
+        self.position = original.position
