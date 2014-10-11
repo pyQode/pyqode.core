@@ -10,10 +10,10 @@ Pull Requests are great (on the develop branch)!
 
 Readme/Documentation changes are ok in the master branch.
 
-   1) Fork the Repo on github.
-   2) If you are adding functionality or fixing a bug, please add a test!
-   3) Add your name to AUTHORS.rst
-   4) Push to your fork and submit a pull request to **the develop branch**.
+1) Fork the Repo on github.
+2) If you are adding functionality or fixing a bug, please add a test!
+3) Add your name to AUTHORS.rst
+4) Push to your fork and submit a pull request to **the develop branch**.
 
 The master branch is the stable branch and reflects the latest pypi version,
 following the `git workflow`_
