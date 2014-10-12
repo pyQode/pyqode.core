@@ -35,7 +35,7 @@ specialised editor for a given language.
 License
 -------
 
-pyQode is licensed under the MIT license.
+pyqode.core is licensed under the MIT license.
 
 
 Requirements
@@ -59,7 +59,7 @@ Then you can install pyqode.core using **pip**::
 Testing
 -------
 
-pyqode.core now has a test suite and measure its coverage.
+pyqode.core has a test suite and measure its coverage.
 
 To run the tests, you must first install tox and pytest::
 
