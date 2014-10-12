@@ -36,7 +36,7 @@ specialised editor for a given language.
 License
 -------
 
-pyqode.core is licensed under the MIT license.
+pyqode.core is licensed under the **MIT license**.
 
 
 Requirements
@@ -44,9 +44,9 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  Python 2 (>=2.7) or Python 3 (>= 3.2)
--  PyQt5 or PyQt4 or PySide
--  pygments
+-  Python 2 (**>=2.7**) or Python 3 (**>= 3.2**)
+-  **PyQt5** or **PyQt4** or **PySide**
+-  **pygments**
 
 
 Installation
