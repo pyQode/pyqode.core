@@ -27,6 +27,8 @@ to create a code editor specialised for a given language. It also provides a
 basic generic code editor that you can use as a fallback when there is no
 specialised editor for a given language.
 
+- `Changelog`_
+- `Contributing`_
 - `Issue tracker`_
 - `Wiki`_
 - `API reference`_
@@ -91,6 +93,8 @@ Here is the list of available test environments:
 - pep8
 
 
+.. _Changelog: https://github.com/pyQode/pyqode.core/blob/master/CHANGELOG.rst
+.. _Contributing: https://github.com/pyQode/pyqode.core/blob/master/CONTRIBUTING.rst
 .. _pyQode: https://github.com/pyQode/pyQode
 .. _Screenshots: https://github.com/pyQode/pyQode/wiki/Screenshots-and-videos#pyqodecore-screenshots
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
