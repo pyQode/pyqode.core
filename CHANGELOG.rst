@@ -48,6 +48,7 @@ New features:
 
 
 Fixed bugs:
+
 - fix the code that prevents code completion popup from showing in strings
   and comments
 - fix a bug with the default indenter that was eating chars at the start
