@@ -25,18 +25,48 @@ def _logger():
 
 class CodeEdit(QtWidgets.QPlainTextEdit):
     """
-    Base class for any pyQode source code editor widget.
+    The editor widget is a simple extension to QPlainTextEdit.
 
-    Extends :class:`QPlainTextEdit` by adding an extension system (
-    modes and panels) and by adding a series of additional signal and methods.
+    It adds a few utility signals/methods and introduces the concepts of
+    **Managers, Modes and Panels**.
 
-    To interact with the editor content, you may use the Qt Text API (
-    QTextCursor, ...) or use high level API functions defined in
-    :mod:`pyqode.core.api.TextHelper`
+    A **mode/panel** is an editor extension that, once added to a CodeEdit
+    instance, may modify its behaviour and appearance:
 
-    .. note:: setPlainText has been overridden to force you to define
-        a mime type and an encoding.
+      * **Modes** are simple objects which connect to the editor signals to
+        append new behaviours (such as automatic indentation, code completion,
+        syntax checking,...)
 
+      * **Panels** are the combination of a **Mode** and a **QWidget**.
+        They are displayed in the CodeEdit's content margins.
+
+        When you install a Panel on a CodeEdit, you can choose to install it in
+        one of the four following zones:
+
+            .. image:: _static/editor_widget.png
+                :align: center
+                :width: 600
+                :height: 450
+
+    A **manager** is an object that literally manage a specific aspect of
+    :class:`pyqode.core.api.CodeEdit`. There are managers to manage the list of
+    modes/panels, to open/save file and to control the backend:
+
+        - :attr:`pyqode.core.api.CodeEdit.file`:
+            File manager. Use it to open/save files or access the opened file attribute.
+        - :attr:`pyqode.core.api.CodeEdit.backend`:
+            Backend manager. Use it to start/stop the backend or send a work request.
+        - :attr:`pyqode.core.api.CodeEdit.modes`:
+            Modes manager. Use it to append/remove modes on the editor.
+        - :attr:`pyqode.core.api.CodeEdit.panels`:
+            Modes manager. Use it to append/remove panels on the editor.
+
+    Starting from version 2.1, CodeEdit defines the
+    :attr:`pyqode.core.api.CodeEdit.mimetypes` class attribute.
+
+    This property is a list of supported mimetypes. An empty list means the
+    CodeEdit is generic. **Code edit specialised for a specific language
+    should define the mime types they support!**
     """
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
