@@ -89,7 +89,8 @@ Here is the list of available test environments:
 - cov
 - pep8
 
-    
+
+.. _pyQode: https://github.com/pyQode/pyQode
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
 .. _Wiki: https://github.com/pyQode/pyQode/wiki
 .. _API reference: http://pyqodecore.readthedocs.org/en/latest/
