@@ -6,56 +6,56 @@ Change Log
 
 Fixed bugs:
 
-    - fix occasional crash when closing an editor
-    - fix restore cursor position: center cursor
-    - fix useeless rehighlights
+- fix occasional crash when closing an editor
+- fix restore cursor position: center cursor
+- fix useeless rehighlights
 
 2.3.1
 -----
 
 Fixed bugs:
 
-    - Fix segfault on windows
+- Fix segfault on windows
 
 2.3.0
 -----
 
 New features:
 
-    - add support for python2. You may now use python2 for writing a pyqode
-      app (backend AND frontend)!
-    - add a mode that highlight occurrences of the word under the text cursor
-    - add a smart backspace mode, this mode eats as much whitespace as possible
-      when you press backspace
-    - add GlobalCheckerPanel that shows all errors found in the document
-    - add extented selection mode. Extended selection is a feature that can be
-      found in Ulipad ( https://code.google.com/p/ulipad )
-    - add pyqode-console script that let you run other programs in an external
-      terminal with a final prompt that holds the window after the program
-      finished.
-    - new widget: prompt line edit (a line edit with a prompt text and an icon)
-    - add ability to surround selected text with quotes or parentheses
-    - search and replace: added regex support
-    - search and replace: the search algorithm is now running on the backend
-      (fix issue where gui was blocked while searching text)
-    - improvements to the InteractiveConsole: there is now a way to setup
-      colors using a pygments color scheme. Also the console is now readonly
-      when the process is not running
-    - backend improvements:
-        - the backend is now a ThreadedSocketServer
-        - proper way to close the backend process. we do not use terminate/kill
-          anymore but send a shutdown signal to the process stdin
+- add support for python2. You may now use python2 for writing a pyqode
+  app (backend AND frontend)!
+- add a mode that highlight occurrences of the word under the text cursor
+- add a smart backspace mode, this mode eats as much whitespace as possible
+  when you press backspace
+- add GlobalCheckerPanel that shows all errors found in the document
+- add extented selection mode. Extended selection is a feature that can be
+  found in Ulipad ( https://code.google.com/p/ulipad )
+- add pyqode-console script that let you run other programs in an external
+  terminal with a final prompt that holds the window after the program
+  finished.
+- new widget: prompt line edit (a line edit with a prompt text and an icon)
+- add ability to surround selected text with quotes or parentheses
+- search and replace: added regex support
+- search and replace: the search algorithm is now running on the backend
+  (fix issue where gui was blocked while searching text)
+- improvements to the InteractiveConsole: there is now a way to setup
+  colors using a pygments color scheme. Also the console is now readonly
+  when the process is not running
+- backend improvements:
+- the backend is now a ThreadedSocketServer
+- proper way to close the backend process. we do not use terminate/kill
+  anymore but send a shutdown signal to the process stdin
 
 
 Fixed bugs:
-    - fix the code that prevents code completion popup from showing in strings
-      and comments
-    - fix a bug with the default indenter that was eating chars at the start
-      of the line
-    - fix checker request logic (keep the last request instead of the first
-      one)
-    - fix right panels top position
-    - fix wordclick decoration color on dark color schemes
+- fix the code that prevents code completion popup from showing in strings
+  and comments
+- fix a bug with the default indenter that was eating chars at the start
+  of the line
+- fix checker request logic (keep the last request instead of the first
+  one)
+- fix right panels top position
+- fix wordclick decoration color on dark color schemes
 
 
 2.2.0
