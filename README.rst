@@ -30,6 +30,7 @@ specialised editor for a given language.
 - `Issue tracker`_
 - `Wiki`_
 - `API reference`_
+- `Screenshots`_
 
 
 License
@@ -91,6 +92,7 @@ Here is the list of available test environments:
 
 
 .. _pyQode: https://github.com/pyQode/pyQode
+.. _Screenshots: https://github.com/pyQode/pyQode/wiki/Screenshots-and-videos#pyqodecore-screenshots
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
 .. _Wiki: https://github.com/pyQode/pyQode/wiki
 .. _API reference: http://pyqodecore.readthedocs.org/en/latest/
