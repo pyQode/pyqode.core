@@ -1,7 +1,7 @@
 Main Authors
 ============
 
-Colin Duquesnooy (@ColinDuquesnoy) <colin.duquesnoy@gmail.com>
+Colin Duquesnoy (@ColinDuquesnoy) <colin.duquesnoy@gmail.com>
 
 Code Contributors
 =================
