@@ -5,7 +5,7 @@ Submodules
 ----------
 
 pyqode.core.tools.console module
---------------------------------
+++++++++++++++++++++++++++++++++
 
 .. automodule:: pyqode.core.tools.console
     :members:

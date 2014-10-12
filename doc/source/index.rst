@@ -14,7 +14,7 @@ API reference:
 .. toctree::
    :maxdepth: 4
 
-   pyqode
+   pyqode.core
 
 Examples:
 =========

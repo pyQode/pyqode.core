@@ -53,7 +53,7 @@ E.g::
     }
 
 Server script
-~~~~~~~~~~~~~
+-------------
 
 The server script must be written by the user. Don't worry, it's very simple.
 All you have to do is to create and run a JsonTcpServer instance.
