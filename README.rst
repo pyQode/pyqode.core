@@ -27,12 +27,12 @@ to create a code editor specialised for a given language. It also provides a
 basic generic code editor that you can use as a fallback when there is no
 specialised editor for a given language.
 
-- `Changelog`_
 - `Contributing`_
 - `Issue tracker`_
 - `Wiki`_
 - `API reference`_
 - `Screenshots`_
+- `Changelog`_
 
 
 License
