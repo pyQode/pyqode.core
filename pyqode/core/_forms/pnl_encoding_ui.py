@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/colin/Development/pyQode/core/forms/pnl_encoding.ui'
+# Form implementation generated from reading ui file '/home/colin/Documents/pyqode/core/forms/pnl_encoding.ui'
 #
-# Created: Mon Aug 11 09:22:19 2014
-#      by: PyQt5 UI code generator 5.3.1
+# Created: Sun Oct 12 17:19:31 2014
+#      by: PyQt5 UI code generator 5.3.2
 #
 # WARNING! All changes made in this file will be lost!
 
-from pyqode.core.qt import QtCore, QtGui, QtWidgets
+from pyqode.qt import QtCore, QtGui, QtWidgets
 
 class Ui_Form(object):
     def setupUi(self, Form):
