@@ -539,6 +539,9 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self.hide()
         self.setParent(None)
         self.main_tab_widget.hide()
+        if not self.root:
+            self._parent_splitter.child_splitters.remove(self)
+            self._parent_splitter = None
 
     def _on_last_child_tab_closed(self):
         if not self.has_children():
@@ -861,8 +864,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if old:
             try:
                 old.dirty_changed.disconnect(self.dirty_changed.emit)
-            except TypeError:
-                pass
+            except (TypeError, RuntimeError):
+                old = None
         if new:
             new.dirty_changed.connect(self.dirty_changed.emit)
         self.dirty_changed.emit(new.dirty)
