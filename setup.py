@@ -42,7 +42,7 @@ setup(
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
     long_description=readme(),
-    install_requires=['pygments', 'pyqode.qt', 'future'],
+    install_requires=['pygments<2.0', 'pyqode.qt', 'future'],
     entry_points={
         'console_scripts': [
             'pyqode-console = pyqode.core.tools.console:main'
