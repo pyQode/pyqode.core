@@ -184,6 +184,8 @@ class CheckerMode(Mode, QtCore.QObject):
         QtCore.QTimer.singleShot(1, self._remove_batch)
 
     def _remove_batch(self):
+        if self.editor is None:
+            return
         for i in range(100):
             if not len(self._to_check):
                 # all messages checker, start adding messages now
@@ -199,6 +201,8 @@ class CheckerMode(Mode, QtCore.QObject):
         QtCore.QTimer.singleShot(1, self._remove_batch)
 
     def _add_batch(self):
+        if self.editor is None:
+            return
         for i in range(10):
             if not len(self._pending_msg):
                 # all pending message added

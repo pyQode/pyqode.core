@@ -7,7 +7,7 @@ import sys
 from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
 from pyqode.core.backend import NotRunning
-
+import time
 
 def _logger():
     return logging.getLogger(__name__)
@@ -91,7 +91,6 @@ class BackendManager(Manager):
         for socket in self._sockets:
             socket._callback = None
             socket.close()
-        import time
         t = time.time()
         while self._process.state() != self._process.NotRunning:
             self._process.waitForFinished(1)
