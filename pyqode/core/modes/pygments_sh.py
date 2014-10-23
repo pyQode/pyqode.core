@@ -58,13 +58,16 @@ def get_tokens_unprocessed(self, text, stack=('root',)):
         for rexmatch, action, new_state in statetokens:
             match = rexmatch(text, pos)
             if match:
-                if type(action) is _TokenType:
-                    yield pos, action, match.group()
-                else:
-                    for item in action(self, match):
-                        yield item
+                try:
+                    if type(action) is _TokenType:
+                        yield pos, action, match.group()
+                    else:
+                        for item in action(self, match):
+                            yield item
+                except TypeError:
+                    pass
                 pos = match.end()
-                if new_state is not None:
+                if new_state is not None or action is None:
                     # state transition
                     if isinstance(new_state, tuple):
                         for state in new_state:

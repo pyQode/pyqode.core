@@ -11,6 +11,8 @@ from setuptools import setup, find_packages
 #   - pyqt_distutils
 #   - pyqode-uic
 #
+import sys
+
 try:
     from pyqt_distutils.build_ui import build_ui
     cmdclass = {'build_ui': build_ui}
@@ -30,6 +32,12 @@ def readme():
     return str(open('README.rst').read())
 
 
+pygments_req = 'pygments'
+if sys.version_info[0] == 3 and sys.version_info[1] == 2:
+    # pygment 2 does not support Python 3.2
+    pygments_req += "==1.6"
+
+
 setup(
     name='pyqode.core',
     namespace_packages=['pyqode'],
@@ -42,7 +50,7 @@ setup(
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
     long_description=readme(),
-    install_requires=['pygments==1.6', 'pyqode.qt', 'future'],
+    install_requires=[pygments_req, 'pyqode.qt', 'future'],
     entry_points={
         'console_scripts': [
             'pyqode-console = pyqode.core.tools.console:main'
