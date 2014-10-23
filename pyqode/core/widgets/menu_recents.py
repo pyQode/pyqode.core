@@ -53,7 +53,7 @@ class RecentFilesManager(QtCore.QObject):
             files = [files]
         # filter files, remove files that do not exist anymore
         for file in files:
-            if os.path.exists(file):
+            if file is not None and os.path.exists(file):
                 ret_val.append(file)
         return ret_val
 
