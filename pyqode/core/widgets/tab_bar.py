@@ -1,6 +1,5 @@
 from pyqode.qt import QtWidgets, QtCore
-
-__author__ = 'colin'
+from pyqode.core.api import DelayJobRunner
 
 
 class TabBar(QtWidgets.QTabBar):
@@ -13,12 +12,14 @@ class TabBar(QtWidgets.QTabBar):
     def __init__(self, parent):
         QtWidgets.QTabBar.__init__(self, parent)
         self.setTabsClosable(True)
+        self._timer = DelayJobRunner(delay=1)
 
     def mousePressEvent(self, event):
         QtWidgets.QTabBar.mousePressEvent(self, event)
         if event.button() == QtCore.Qt.MiddleButton:
-            self.parentWidget().tabCloseRequested.emit(self.tabAt(
-                event.pos()))
+            tab = self.tabAt(event.pos())
+            self._timer.request_job(
+                self.parentWidget().tabCloseRequested.emit, tab)
 
     def mouseDoubleClickEvent(self, event):
         self.double_clicked.emit()
