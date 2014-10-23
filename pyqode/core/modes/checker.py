@@ -56,7 +56,7 @@ class CheckerMessage(object):
         """
         return self.status_to_string(self.status)
 
-    def __init__(self, description, status, line, col=None, icon=None,
+    def __init__(self, description, status, line, col=None,
                  color=None, path=None):
         """
         :param description: The message description (used as a tooltip)
@@ -64,7 +64,6 @@ class CheckerMessage(object):
         :param line: The message line number
         :param col: The message start column (at the moment the message ends at
                     the end of the line).
-        :param icon: Icon used for the marker panel
         :param color: Text decoration color
         :param path: file path. Optional
         """

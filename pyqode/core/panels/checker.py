@@ -20,11 +20,14 @@ class CheckerPanel(Panel):
         self._job_runner = DelayJobRunner(delay=100)
         self.setMouseTracking(True)
         #: Info icon
-        self.info_icon = QtGui.QIcon(':pyqode-icons/rc/dialog-info.png')
+        self.info_icon = QtGui.QIcon.fromTheme(
+            'dialog-info', QtGui.QIcon(':pyqode-icons/rc/dialog-info.png'))
         #: Warning icon
-        self.warning_icon = QtGui.QIcon(':pyqode-icons/rc/dialog-warning.png')
+        self.warning_icon = QtGui.QIcon.fromTheme(
+            'dialog-warning', QtGui.QIcon(':pyqode-icons/rc/dialog-warning.png'))
         #: Error icon
-        self.error_icon = QtGui.QIcon(':pyqode-icons/rc/dialog-error.png')
+        self.error_icon = QtGui.QIcon.fromTheme(
+            'dialog-error', QtGui.QIcon(':pyqode-icons/rc/dialog-error.png'))
 
     def marker_for_line(self, line):
         """
