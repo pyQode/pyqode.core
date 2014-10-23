@@ -6,11 +6,7 @@ omit =
     *_rc.py
     # deprecated stuff
     *pyqode/core/qt/*
-    # we do no test widgets/dialogs, the focus is really on the code editor
-    # widget
-    *pyqode/core/styles/*
-    *pyqode/core/dialogs/*
-    *pyqode/core/widgets/*
+    # do not test designer forms and designer plugins
     *pyqode/core/_designer_plugins/*
     *pyqode/core/_forms/*
 
@@ -45,6 +41,6 @@ exclude_lines =
     .endswith('.exe')
     'frozen'
 
-    # Don't complain about _logger function not called
+    # Don't complain about _logger function not being called
     logging.getLogger
     _logger
