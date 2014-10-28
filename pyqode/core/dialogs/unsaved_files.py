@@ -8,10 +8,10 @@ class DlgUnsavedFiles(QDialog, Ui_Dialog):
     This dialog shows the list of unsaved file in the CodeEditTabWidget.
 
     Use can choose to:
-        - cancel: nothing changed, no tab will be closed
-        - save all/save selected: save the selected files or all files
-        - discard all changes: nothing will be saved but all tabs will be
-        closed.
+    - cancel: nothing changed, no tab will be closed
+    - save all/save selected: save the selected files or all files
+    - discard all changes: nothing will be saved but all tabs will be
+    closed.
 
     """
     def __init__(self, parent, files=None):

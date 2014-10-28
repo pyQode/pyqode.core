@@ -64,7 +64,7 @@ COLOR_SCHEME_KEYS = {
 
 class ColorScheme(object):
     """
-    Translates a pygments style into a dictionary of colors assoociated with a
+    Translates a pygments style into a dictionary of colors associated with a
     style key.
 
     See :attr:`pyqode.core.api.syntax_highligter.COLOR_SCHEM_KEYS` for the

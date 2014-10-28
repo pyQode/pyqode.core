@@ -84,7 +84,7 @@ class Cache(object):
         Gets the cached cursor position for file_path
 
         :param file_path: path of the file in the cache
-        :return Cached cursor position or (0, 0)
+        :return: Cached cursor position or (0, 0)
         """
         try:
             map = json.loads(self._settings.value('cachedCursorPosition'))

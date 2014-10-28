@@ -21,7 +21,7 @@ Submodules
 ----------
 
 pyqode.core.cache module
-------------------------
+++++++++++++++++++++++++
 
 .. automodule:: pyqode.core.cache
     :members:

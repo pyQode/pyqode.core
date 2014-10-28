@@ -9,18 +9,6 @@ widget, i.e. pyqode.core is a generic code editor widget.
 
 pyQode is a client-server API. The client side API is called frontend while the
 server side API is called backend.
-
-pyqode is made up of the following top level packages/modules:
-    - api
-    - backend
-    - dialogs
-    - managers
-    - modes
-    - panels
-    - qt: DEPRECATED (use pyqode.qt instead)
-    - styles
-    - widgets
-
 """
 
 __version__ = '2.4.dev'

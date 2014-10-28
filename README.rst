@@ -23,9 +23,9 @@ About
 
 **pyqode.core** is the core framework of the `pyQode`_ project. It contains the
 base classes and a set of extensions (modes/panels/managers) that you can use
-to create a code editor specialised for a given language. It also provides a
-basic generic code editor that you can use as a fallback when there is no
-specialised editor for a given language.
+to create a specialised code editor. It also provides a basic generic code
+editor that you can use as a fallback when there is no specialised editor for
+a given language.
 
 - `Issue tracker`_
 - `Wiki`_
