@@ -1,0 +1,1 @@
+fake exe should not be shown in the tree view (.exe is ignored by default).
