@@ -174,7 +174,7 @@ class FoldingPanel(Panel):
         self.action_collapse_all = None
         self.action_expand_all = None
         self._original_background = None
-        self._highlight_runner = DelayJobRunner(delay=100)
+        self._highlight_runner = DelayJobRunner(delay=250)
 
     def on_install(self, editor):
         """
@@ -239,17 +239,26 @@ class FoldingPanel(Panel):
                 self._draw_fold_indicator(
                     top_position, mouse_over, collapsed, painter)
                 if collapsed:
+                    # check if the block already has a decoration, it might
+                    # have been folded by the parent editor/document in the
+                    # case of cloned editor
                     for deco in self._block_decos:
                         if deco.block == block:
-                            return
-                    self._add_fold_decoration(block, FoldScope(block))
+                            # no need to add a deco, just go to the next block
+                            break
+                    else:
+                        self._add_fold_decoration(block, FoldScope(block))
                 else:
                     for deco in self._block_decos:
+                        # check if the block decoration has been removed, it
+                        # might have been unfolded by the parent
+                        # editor/document in the case of cloned editor
                         if deco.block == block:
+                            # remove it and
                             self._block_decos.remove(deco)
                             self.editor.decorations.remove(deco)
                             del deco
-                            return
+                            break
 
     def _draw_fold_region_background(self, block, painter):
         """
@@ -521,18 +530,23 @@ class FoldingPanel(Panel):
                 self.editor.document().findBlockByNumber(line))
             if TextBlockHelper.is_fold_trigger(block):
                 if self._mouse_over_line is None:
+                    # mouse enter fold scope
                     QtWidgets.QApplication.setOverrideCursor(
                         QtGui.QCursor(QtCore.Qt.PointingHandCursor))
                 if self._mouse_over_line != block.blockNumber() and \
                         self._mouse_over_line is not None:
+                    # fold scope changed, a previous block was highlighter so
+                    # we quickly update our highlighting
                     self._mouse_over_line = block.blockNumber()
                     self._highlight_surrounding_scopes(block)
                 else:
+                    # same fold scope, request highlight
                     self._mouse_over_line = block.blockNumber()
                     self._highlight_runner.request_job(
                         self._highlight_surrounding_scopes, block)
                 self._highight_block = block
             else:
+                # no fold scope to highlight, cancel any pending requests
                 self._highlight_runner.cancel_requests()
                 self._mouse_over_line = None
                 QtWidgets.QApplication.restoreOverrideCursor()
@@ -562,6 +576,7 @@ class FoldingPanel(Panel):
         Add fold decorations (boxes arround a folded block in the editor
         widget).
         """
+        _logger().debug('add fold deco %r', block)
         deco = TextDecoration(block)
         deco.signals.clicked.connect(self._on_fold_deco_clicked)
         deco.tooltip = region.text(max_lines=25)
@@ -586,21 +601,11 @@ class FoldingPanel(Panel):
         region = FoldScope(block)
         if region.collapsed:
             region.unfold()
-            deco = None
-            for deco in self._block_decos:
-                if deco.block == block:
-                    break
-            if deco is not None:
-                self._block_decos.remove(deco)
-                self.editor.decorations.remove(deco)
-                del deco
             if self._mouse_over_line is not None:
                 self._add_scope_decorations(
                     region._trigger, *region.get_range())
         else:
             region.fold()
-            # add folded deco
-            self._add_fold_decoration(block, region)
             self._clear_scope_decos()
         self._refresh_editor_and_scrollbars()
         self.trigger_state_changed.emit(region._trigger, region.collapsed)
@@ -729,7 +734,6 @@ class FoldingPanel(Panel):
                 if lvl == 0:
                     self._show_previous_blank_lines(block)
                 TextBlockHelper.set_fold_trigger_state(block, True)
-                self._add_fold_decoration(block, FoldScope(block))
             block.setVisible(lvl == 0)
             if block == last and block.text().strip() == '':
                 block.setVisible(True)
