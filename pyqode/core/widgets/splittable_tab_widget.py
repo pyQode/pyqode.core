@@ -173,9 +173,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         return _context_mnu
 
     def _show_tab_context_menu(self, position):
-        self._menu_pos = position
-        # self._context_mnu.popup(self.mapToGlobal(position))
-        self._context_mnu.popup(self.tabBar().mapToGlobal(position))
+        if self.count():
+            self._menu_pos = position
+            # self._context_mnu.popup(self.mapToGlobal(position))
+            self._context_mnu.popup(self.tabBar().mapToGlobal(position))
 
     def _collect_dirty_tabs(self, skip=None):
         """
