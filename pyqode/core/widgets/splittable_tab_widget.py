@@ -345,6 +345,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             self._on_tab_move_request(m.tab, index)
             event.acceptProposedAction()
 
+    def addTab(self, tab, *args):
+        tab.parent_tab_widget = self
+        super(BaseTabWidget, self).addTab(tab, *args)
+
 
 class SplittableTabWidget(QtWidgets.QSplitter):
     """
@@ -584,7 +588,6 @@ class CodeEditTabWidget(BaseTabWidget):
         some helper attributes.
         """
         widget.dirty_changed.connect(self._on_dirty_changed)
-        widget.parent_tab_widget = self
         super(CodeEditTabWidget, self).addTab(widget, *args)
 
     def _on_dirty_changed(self, dirty):
