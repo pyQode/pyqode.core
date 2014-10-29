@@ -227,11 +227,11 @@ class BaseTabWidget(QtWidgets.QTabWidget):
     def _on_tab_close_requested(self, index):
         widget = self.widget(index)
         dirty = False
-        if widget.original is None:
-            try:
+        try:
+            if widget.original is None:
                 dirty = widget.dirty
-            except AttributeError:
-                pass
+        except AttributeError:
+            pass
         if not dirty:
             self.remove_tab(index)
         else:
@@ -805,9 +805,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                                          *args, **kwargs)
             tab.file.open(path)
             tab.setDocumentTitle(name)
-            icon = self._icon(name)
+            icon = self._icon(path)
             self.add_tab(tab, title=name, icon=icon)
-            self.add_tab(tab, title=name, icon=self._icon(path))
             return tab
 
     def closeEvent(self, event):
