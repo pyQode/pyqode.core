@@ -717,7 +717,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 _logger().warn('editor for mimetype already registered, '
                                'skipping')
             cls.editors[mimetype] = code_edit_class
-        print(cls.editors)
+        _logger().info('registered editors: %r', cls.editors)
 
     def save_current_as(self):
         """
