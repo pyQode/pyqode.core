@@ -494,8 +494,11 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         widgets = []
         for i in range(self.main_tab_widget.count()):
             widget = self.main_tab_widget.widget(i)
-            if widget.original is None or include_clones:
-                widgets.append(widget)
+            try:
+                if widget.original is None or include_clones:
+                    widgets.append(widget)
+            except AttributeError:
+                pass
         for child in self.child_splitters:
             widgets += child.widgets(include_clones=include_clones)
         return widgets
