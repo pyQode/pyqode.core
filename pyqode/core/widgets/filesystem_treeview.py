@@ -16,11 +16,13 @@ class FilterProxyModel(QtCore.QSortFilterProxyModel):
     Excludes ``ignored_directories`` and ``ignored_extensions`` from the file
     system model
     """
-    #: The list of directories to exclude
-    ignored_directories = ['__pycache__', 'build', 'dist']
-    #: The list of file extension to exclude
-    ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                          '.egg-info', '.coverage']
+    def __init__(self):
+        super().__init__()
+        #: The list of directories to exclude
+        self.ignored_directories = ['__pycache__', 'build', 'dist']
+        #: The list of file extension to exclude
+        self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
+                                   '.egg-info', '.coverage']
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         """
@@ -31,10 +33,10 @@ class FilterProxyModel(QtCore.QSortFilterProxyModel):
         finfo = self.sourceModel().fileInfo(index0)
         fn = finfo.fileName()
         extension = '.%s' % finfo.suffix()
-        if fn in FilterProxyModel.ignored_directories:
+        if fn in self.ignored_directories:
             _logger().debug('excluding directory: %s', finfo.filePath())
             return False
-        if extension in FilterProxyModel.ignored_extensions:
+        if extension in self.ignored_extensions:
             _logger().debug('excluding file: %s', finfo.filePath())
             return False
         _logger().debug('accepting %s', finfo.filePath())
@@ -63,6 +65,30 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.context_menu = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
+
+    def add_to_ignored_directories(self, *directories):
+        """
+        Adds the specified directories to the list of ignored directories.
+
+        This must be done before calling set_root_path!
+
+        :param directories: the directories to ignore
+        """
+        for d in directories:
+            self.fs_model_proxy.ignored_directories.append(d)
+
+    def add_to_ignored_extensions(self, *extensions):
+        """
+        Adds the specified extensions to the list of ignored directories.
+
+        This must be done before calling set_root_path!
+
+        :param extensions: the extensions to ignore
+
+        .. note:: extension must have the dot: '.py' and not 'py'
+        """
+        for d in extensions:
+            self.fs_model_proxy.ignored_extensions.append(d)
 
     def set_context_menu(self, context_menu):
         self.context_menu = context_menu
@@ -98,7 +124,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         return self.fs_model_source.fileInfo(self.fs_model_proxy.mapToSource(index))
 
     def _show_context_menu(self, point):
-        self.context_menu.exec_(self.mapToGlobal(point))
+        if self.context_menu:
+            self.context_menu.exec_(self.mapToGlobal(point))
 
 
 class UrlListMimeData(QtCore.QMimeData):
