@@ -101,6 +101,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         Sets the root path to watch
         :param path: root path - str
         """
+        if os.path.isfile(path):
+            path = os.path.abspath(os.path.join(path, os.pardir))
         index = self.fs_model_source.setRootPath(path)
         root_index = self.fs_model_proxy.mapFromSource(index)
         self.setRootIndex(root_index)
