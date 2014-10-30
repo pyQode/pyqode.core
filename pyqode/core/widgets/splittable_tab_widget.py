@@ -316,7 +316,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _on_current_changed(self, index):
         tab = self.widget(index)
-        tab.setFocus(True)
+        if tab:
+            tab.setFocus(True)
 
     def _on_tab_move_request(self, widget, new_index):
         parent = widget.parent_tab_widget

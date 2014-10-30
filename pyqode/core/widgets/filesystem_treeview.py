@@ -260,7 +260,10 @@ class _FSHelper:
         if rep == QtWidgets.QMessageBox.Yes:
             for fn in urls:
                 try:
-                    os.remove(fn)
+                    if os.path.isfile(fn):
+                        os.remove(fn)
+                    else:
+                        os.rmdir(fn)
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
