@@ -28,14 +28,12 @@ from pyqode.core.widgets.prompt_line_edit import PromptLineEdit
 from pyqode.core.widgets.splittable_tab_widget import (
     SplittableTabWidget, SplittableCodeEditTabWidget)
 from pyqode.core.widgets.filesystem_treeview import FileSystemTreeView
-from pyqode.core.widgets.filesystem_treeview import FilterProxyModel
 from pyqode.core.widgets.filesystem_treeview import FileSystemContextMenu
 
 __all__ = [
     'ErrorsTable',
     'FileSystemContextMenu',
     'FileSystemTreeView',
-    'FilterProxyModel',
     'InteractiveConsole',
     'MenuRecentFiles',
     'RecentFilesManager',
