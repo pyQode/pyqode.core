@@ -348,7 +348,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.addSeparator()
         # Rename
         self.action_rename = QtWidgets.QAction('Rename', self)
-        self.action_rename.setShortcut('F2')
+        self.action_rename.setShortcut('Shift+F2')
         self.action_rename.triggered.connect(self._on_rename_triggered)
         self.addAction(self.action_rename)
         # Delete
