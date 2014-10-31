@@ -56,7 +56,10 @@ class GlobalCheckerPanel(Panel):
             rect.setY(start.blockNumber() * self.get_marker_height())
             rect.setWidth(self.sizeHint().width())
             rect.setBottom(end.blockNumber() * self.get_marker_height())
-            c = self.palette().window().color().darker(110)
+            if self.editor.background.lightness() < 128:
+                c = self.editor.background.darker(150)
+            else:
+                c = self.editor.background.darker(110)
             c.setAlpha(128)
             painter.fillRect(rect, c)
 
@@ -65,10 +68,13 @@ class GlobalCheckerPanel(Panel):
         Pains the messages and the visible area on the panel.
         :param event: paint event infos
         """
-        super(GlobalCheckerPanel, self).paintEvent(event)
-        painter = QtGui.QPainter(self)
-        self._draw_messages(painter)
-        self._draw_visible_area(painter)
+        if self.isVisible():
+            # fill background
+            self._background_brush = QtGui.QBrush(self.editor.background)
+            painter = QtGui.QPainter(self)
+            painter.fillRect(event.rect(), self._background_brush)
+            self._draw_messages(painter)
+            self._draw_visible_area(painter)
 
     def sizeHint(self):
         """
