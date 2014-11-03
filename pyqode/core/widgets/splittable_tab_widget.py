@@ -783,6 +783,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
 
+    @utils.with_wait_cursor
     def open_document(self, path, *args, **kwargs):
         """
         Opens a document.

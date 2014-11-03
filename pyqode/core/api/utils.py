@@ -4,7 +4,7 @@ Contains utility functions
 """
 import functools
 import logging
-from pyqode.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
 def _logger():
@@ -997,4 +997,15 @@ def keep_tc_pos(func):
         editor.setTextCursor(text_cursor)
         sb.setSliderPosition(spos)
         return retval
+    return wrapper
+
+
+def with_wait_cursor(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        QtWidgets.QApplication.setOverrideCursor(
+            QtGui.QCursor(QtCore.Qt.WaitCursor))
+        ret_val = func(*args, **kwargs)
+        QtWidgets.QApplication.restoreOverrideCursor()
+        return ret_val
     return wrapper
