@@ -263,7 +263,7 @@ class _FSHelper:
                     if os.path.isfile(fn):
                         os.remove(fn)
                     else:
-                        os.rmdir(fn)
+                        shutil.rmtree(fn)
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
