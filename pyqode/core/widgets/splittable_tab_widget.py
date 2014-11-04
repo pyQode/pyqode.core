@@ -734,8 +734,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         mem = self._current.file.path
         self._current.file._path = None
+        CodeEditTabWidget.default_directory = os.path.dirname(mem)
         if not self.main_tab_widget.save_widget(self._current):
             self._current.file._path = mem
+        CodeEditTabWidget.default_directory = os.path.expanduser('~')
         return self._current.file.path
 
     def save_current(self):
