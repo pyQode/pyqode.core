@@ -562,6 +562,12 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             else:
                 self._remove_from_parent()
 
+    def count(self):
+        c = self.main_tab_widget.count()
+        for child in self.child_splitters:
+            c += child.count()
+        return c
+
 
 class CodeEditTabWidget(BaseTabWidget):
     """
