@@ -431,7 +431,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.selectionChanged.connect(self.update)
 
         self.setMouseTracking(True)
-        self.setCenterOnScroll(False)
+        self.setCenterOnScroll(True)
         self.setLineWrapMode(self.NoWrap)
 
     def split(self):
