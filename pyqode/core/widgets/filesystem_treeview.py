@@ -32,10 +32,19 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         def __init__(self):
             super().__init__()
             #: The list of directories to exclude
-            self.ignored_directories = ['__pycache__', 'build', 'dist']
+            self.ignored_items = ['__pycache__']
             #: The list of file extension to exclude
             self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                       '.egg-info', '.coverage']
+                                       '.egg-info', '.coverage', '.DS_Store']
+            self._ignored_unused = []
+
+        def set_root_path(self, path):
+            parent_dir = os.path.dirname(path)
+            for item in os.listdir(parent_dir):
+                item_path = os.path.join(parent_dir, item)
+                if item_path != path:
+                    # TODO need test on unix-like systems
+                    self._ignored_unused.append(item_path.replace('\\', '/'))
 
         def filterAcceptsRow(self, sourceRow, sourceParent):
             """
@@ -45,8 +54,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             index0 = self.sourceModel().index(sourceRow, 0, sourceParent)
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
+            fp = finfo.filePath()
             extension = '.%s' % finfo.suffix()
-            if fn in self.ignored_directories:
+
+            if fp in self._ignored_unused:
+                _logger().debug('excluding directory (unused): %s', finfo.filePath())
+                return False
+            if fn in self.ignored_items:
                 _logger().debug('excluding directory: %s', finfo.filePath())
                 return False
             if extension in self.ignored_extensions:
@@ -108,10 +122,14 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
-        self.root_path = path
-        file_root_index = self._fs_model_source.setRootPath(path)
+        self._fs_model_proxy.set_root_path(path)
+        self.root_path = os.path.dirname(path)
+        file_root_index = self._fs_model_source.setRootPath(self.root_path)
         root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
+        # Expand first entry (project name)
+        file_parent_index = self._fs_model_source.index(path)
+        self.setExpanded(self._fs_model_proxy.mapFromSource(file_parent_index), True)
 
     def filePath(self, index):
         """
@@ -302,6 +320,12 @@ class _FSHelper:
             self.tree_view, 'Create directory', 'Name:',
             QtWidgets.QLineEdit.Normal, '')
         if status:
+            fatal_names = ['.', '..']
+            for i in fatal_names:
+                if i in name:
+                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent directory name")
+                    return
+
             if os.path.isfile(src):
                 src = os.path.dirname(src)
             os.makedirs(os.path.join(src, name), exist_ok=True)
@@ -312,6 +336,12 @@ class _FSHelper:
             self.tree_view, 'Create new file', 'File name:',
             QtWidgets.QLineEdit.Normal, '')
         if status:
+            fatal_names = ['.', '..', os.sep]
+            for i in fatal_names:
+                if i in name:
+                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent file name")
+                    return
+
             if os.path.isfile(src):
                 src = os.path.dirname(src)
             f = open(os.path.join(src, name), 'w')
