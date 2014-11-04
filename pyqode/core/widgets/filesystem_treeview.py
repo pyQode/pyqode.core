@@ -62,6 +62,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self.setModel(self._fs_model_proxy)
         self.context_menu = None
+        self.root_path = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
 
@@ -107,8 +108,9 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
-        index = self._fs_model_source.setRootPath(path)
-        root_index = self._fs_model_proxy.mapFromSource(index)
+        self.root_path = path
+        file_root_index = self._fs_model_source.setRootPath(path)
+        root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
 
     def filePath(self, index):
@@ -274,6 +276,9 @@ class _FSHelper:
     def _current_path(self):
         path = self.tree_view.fileInfo(
             self.tree_view.currentIndex()).filePath()
+        # https://github.com/pyQode/pyQode/issues/6
+        if not path:
+            path = self.tree_view.root_path
         return path
 
     def copy_path_to_clipboard(self):
@@ -302,6 +307,18 @@ class _FSHelper:
                 src = os.path.dirname(src)
             os.makedirs(os.path.join(src, name), exist_ok=True)
 
+    def create_file(self):
+        src = self._current_path()
+        name, status = QtWidgets.QInputDialog.getText(
+            self.tree_view, 'Create new file', 'File name:',
+            QtWidgets.QLineEdit.Normal, '')
+        if status:
+            if os.path.isfile(src):
+                src = os.path.dirname(src)
+            print(os.path.join(src, name))
+            f = open(os.path.join(src, name), 'w')
+            f.close()
+
 
 class FileSystemContextMenu(QtWidgets.QMenu):
     """
@@ -329,10 +346,23 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         def _icon(theme, rc_path):
             return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(rc_path))
 
-        # Rename
-        self.action_create_directory = QtWidgets.QAction('Create direcotry', self)
+        # New - submenu
+        self.menu_new = self.addMenu("&New")
+        # New file
+        self.action_create_file = QtWidgets.QAction('&File', self)
+        self.action_create_file.triggered.connect(self._on_create_file_triggered)
+        self.menu_new.addAction(self.action_create_file)
+        # New directory
+        self.action_create_directory = QtWidgets.QAction('&Directory', self)
         self.action_create_directory.triggered.connect(self._on_create_directory_triggered)
-        self.addAction(self.action_create_directory)
+        self.menu_new.addAction(self.action_create_directory)
+        # https://github.com/pyQode/pyqode.core/pull/153
+        new_user_actions = self.get_new_user_actions()
+        if len(new_user_actions) > 0:
+            self.menu_new.addSeparator()
+            for user_new_action in self.get_new_user_actions():
+                self.menu_new.addAction(user_new_action)
+
         # cut
         self.action_cut = QtWidgets.QAction('Cut', self)
         self.action_cut.setShortcut(QtGui.QKeySequence.Cut)
@@ -393,3 +423,19 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def _on_create_directory_triggered(self):
         _FSHelper(self.tree_view).create_directory()
+
+    def _on_create_file_triggered(self):
+        _FSHelper(self.tree_view).create_file()
+
+    def get_new_user_actions(self):
+        """
+        Return user actions for "new" menu.
+
+        Example:
+        >>> actions = []
+        >>> action_python_package = QtWidgets.QAction('&Python package', self)
+        >>> action_python_package.triggered.connect(self._on_create_python_package_triggered)
+        >>> actions.append(action_python_package)
+        >>> return actions
+        """
+        return []
