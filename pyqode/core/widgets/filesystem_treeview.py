@@ -292,6 +292,16 @@ class _FSHelper:
             print(src, dest)
             os.rename(src, dest)
 
+    def create_directory(self):
+        src = self._current_path()
+        name, status = QtWidgets.QInputDialog.getText(
+            self.tree_view, 'Create directory', 'Name:',
+            QtWidgets.QLineEdit.Normal, '')
+        if status:
+            if os.path.isfile(src):
+                src = os.path.dirname(src)
+            os.makedirs(os.path.join(src, name), exist_ok=True)
+
 
 class FileSystemContextMenu(QtWidgets.QMenu):
     """
@@ -319,6 +329,10 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         def _icon(theme, rc_path):
             return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(rc_path))
 
+        # Rename
+        self.action_create_directory = QtWidgets.QAction('Create direcotry', self)
+        self.action_create_directory.triggered.connect(self._on_create_directory_triggered)
+        self.addAction(self.action_create_directory)
         # cut
         self.action_cut = QtWidgets.QAction('Cut', self)
         self.action_cut.setShortcut(QtGui.QKeySequence.Cut)
@@ -376,3 +390,6 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def _on_rename_triggered(self):
         _FSHelper(self.tree_view).rename()
+
+    def _on_create_directory_triggered(self):
+        _FSHelper(self.tree_view).create_directory()
