@@ -294,7 +294,6 @@ class _FSHelper:
             QtWidgets.QLineEdit.Normal, name)
         if status:
             dest = os.path.join(pardir, new_name)
-            print(src, dest)
             os.rename(src, dest)
 
     def create_directory(self):
@@ -315,7 +314,6 @@ class _FSHelper:
         if status:
             if os.path.isfile(src):
                 src = os.path.dirname(src)
-            print(os.path.join(src, name))
             f = open(os.path.join(src, name), 'w')
             f.close()
 
