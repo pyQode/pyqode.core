@@ -282,6 +282,16 @@ class FileSystemHelper:
                 _logger().info('removing source (cut operation)')
                 os.remove(src)
 
+    def _get_files(self, path):
+        """
+        Returns the list of files contained in path (recursively).
+        """
+        ret_val = []
+        for root, _, files in os.walk(path):
+            for f in files:
+                ret_val.append(os.path.join(root, f))
+        return ret_val
+
     def delete(self):
         """
         Delete the selected file items.
@@ -294,18 +304,22 @@ class FileSystemHelper:
             QtWidgets.QMessageBox.Yes)
         if rep == QtWidgets.QMessageBox.Yes:
             for fn in urls:
+                deleted_files = []
                 try:
                     if os.path.isfile(fn):
                         os.remove(fn)
+                        deleted_files.append(fn)
                     else:
+                        deleted_files = self._get_files(fn)
                         shutil.rmtree(fn)
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
                     _logger().exception('failed to remove %s', fn)
                 else:
-                    _logger().info('%s removed', fn)
-                    self.tree_view.file_deleted.emit(fn)
+                    for fn in deleted_files:
+                        _logger().info('%s removed', fn)
+                        self.tree_view.file_deleted.emit(fn)
 
     def get_current_path(self):
         path = self.tree_view.fileInfo(
