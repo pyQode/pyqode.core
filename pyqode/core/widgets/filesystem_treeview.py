@@ -92,6 +92,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.root_path = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
+        self.helper = FileSystemHelper(self)
 
     def ignore_directories(self, *directories):
         """
@@ -167,7 +168,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             self.context_menu.exec_(self.mapToGlobal(point))
 
 
-class _FSHelper:
+class FileSystemHelper:
     """
     File system helper. Helps manipulating the clipboard for file operations
     on the tree view (drag & drop, context menu, ...).
@@ -207,7 +208,7 @@ class _FSHelper:
         Copy the selected items to the clipboard
         :param copy: True to copy, False to cut.
         """
-        urls = self._selected_urls()
+        urls = self.selected_urls()
         if not urls:
             return
         mime = self.UrlListMimeData(copy)
@@ -215,7 +216,7 @@ class _FSHelper:
         clipboard = QtWidgets.QApplication.clipboard()
         clipboard.setMimeData(mime)
 
-    def _selected_urls(self):
+    def selected_urls(self):
         """
         Gets the list of selected items file path (url)
         """
@@ -231,7 +232,7 @@ class _FSHelper:
         """
         Paste files from clipboard.
         """
-        to = self._current_path()
+        to = self.get_current_path()
         if os.path.isfile(to):
             to = os.path.abspath(os.path.join(to, os.pardir))
         mime = QtWidgets.QApplication.clipboard().mimeData()
@@ -284,7 +285,7 @@ class _FSHelper:
         """
         Delete the selected file items.
         """
-        urls = self._selected_urls()
+        urls = self.selected_urls()
         rep = QtWidgets.QMessageBox.question(
             self.tree_view, 'Confirm delete',
             'Are you sure about deleting the selected files?',
@@ -305,7 +306,7 @@ class _FSHelper:
                     _logger().info('%s removed', fn)
                     self.tree_view.file_deleted.emit(fn)
 
-    def _current_path(self):
+    def get_current_path(self):
         path = self.tree_view.fileInfo(
             self.tree_view.currentIndex()).filePath()
         # https://github.com/pyQode/pyQode/issues/6
@@ -314,12 +315,12 @@ class _FSHelper:
         return path
 
     def copy_path_to_clipboard(self):
-        path = self._current_path()
+        path = self.get_current_path()
         QtWidgets.QApplication.clipboard().setText(path)
         _logger().info('path copied: %s' % path)
 
     def rename(self):
-        src = self._current_path()
+        src = self.get_current_path()
         pardir, name = os.path.split(src)
         new_name, status = QtWidgets.QInputDialog.getText(
             self.tree_view, 'Rename file', 'New name:',
@@ -330,7 +331,7 @@ class _FSHelper:
             self.tree_view.file_renamed.emit(src, dest)
 
     def create_directory(self):
-        src = self._current_path()
+        src = self.get_current_path()
         name, status = QtWidgets.QInputDialog.getText(
             self.tree_view, 'Create directory', 'Name:',
             QtWidgets.QLineEdit.Normal, '')
@@ -347,7 +348,7 @@ class _FSHelper:
             os.makedirs(os.path.join(src, name), exist_ok=True)
 
     def create_file(self):
-        src = self._current_path()
+        src = self.get_current_path()
         name, status = QtWidgets.QInputDialog.getText(
             self.tree_view, 'Create new file', 'File name:',
             QtWidgets.QLineEdit.Normal, '')
@@ -459,28 +460,28 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.addAction(self.action_delete)
 
     def _on_copy_triggered(self):
-        _FSHelper(self.tree_view).copy_to_clipboard()
+        self.tree_view.helper.copy_to_clipboard()
 
     def _on_cut_triggered(self):
-        _FSHelper(self.tree_view).copy_to_clipboard(copy=False)
+        self.tree_view.helper.copy_to_clipboard(copy=False)
 
     def _on_paste_triggered(self):
-        _FSHelper(self.tree_view).paste_from_clipboard()
+        self.tree_view.helper.paste_from_clipboard()
 
     def _on_delete_triggered(self):
-        _FSHelper(self.tree_view).delete()
+        self.tree_view.helper.delete()
 
     def _on_copy_path_triggered(self):
-        _FSHelper(self.tree_view).copy_path_to_clipboard()
+        self.tree_view.helper.copy_path_to_clipboard()
 
     def _on_rename_triggered(self):
-        _FSHelper(self.tree_view).rename()
+        self.tree_view.helper.rename()
 
     def _on_create_directory_triggered(self):
-        _FSHelper(self.tree_view).create_directory()
+        self.tree_view.helper.create_directory()
 
     def _on_create_file_triggered(self):
-        _FSHelper(self.tree_view).create_file()
+        self.tree_view.helper.create_file()
 
     def get_new_user_actions(self):
         """
