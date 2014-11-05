@@ -687,10 +687,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         implement onStyleChanged and trigger an update.
         """
         self.zoom_level -= increment
+        # make sure font size remains > 0
         if self.font_size + self.zoom_level <= 0:
             self.zoom_level = -self._font_size + 1
-        # if abs(self.zoom_level) >= self._font_size:
-        #     self.zoom_level = -self._font_size + 1
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
