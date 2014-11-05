@@ -43,8 +43,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             for item in os.listdir(parent_dir):
                 item_path = os.path.join(parent_dir, item)
                 if item_path != path:
-                    # TODO need test on unix-like systems
-                    self._ignored_unused.append(item_path.replace('\\', '/'))
+                    self._ignored_unused.append(os.path.normpath(item_path))
 
         def filterAcceptsRow(self, sourceRow, sourceParent):
             """
@@ -89,7 +88,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param directories: the directories to ignore
         """
         for d in directories:
-            self._fs_model_proxy.ignored_directories.append(d)
+            self._fs_model_proxy.ignored_items.append(d)
 
     def ignore_extensions(self, *extensions):
         """
@@ -323,7 +322,8 @@ class _FSHelper:
             fatal_names = ['.', '..']
             for i in fatal_names:
                 if i in name:
-                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent directory name")
+                    QtWidgets.QMessageBox.error(
+                        self.tree_view, "Error", "Wrong directory name")
                     return
 
             if os.path.isfile(src):
@@ -338,8 +338,9 @@ class _FSHelper:
         if status:
             fatal_names = ['.', '..', os.sep]
             for i in fatal_names:
-                if i in name:
-                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent file name")
+                if i in os.path.splitext(name)[0]:
+                    QtWidgets.QMessageBox.error(
+                        self.tree_view, "Error", "Wrong file name")
                     return
 
             if os.path.isfile(src):
@@ -376,42 +377,50 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
         # New - submenu
         self.menu_new = self.addMenu("&New")
-        # New file
-        self.action_create_file = QtWidgets.QAction('&File', self)
-        self.action_create_file.triggered.connect(self._on_create_file_triggered)
-        self.menu_new.addAction(self.action_create_file)
-        # New directory
-        self.action_create_directory = QtWidgets.QAction('&Directory', self)
-        self.action_create_directory.triggered.connect(self._on_create_directory_triggered)
-        self.menu_new.addAction(self.action_create_directory)
+        self.menu_new.setIcon(QtGui.QIcon.fromTheme('document-new'))
         # https://github.com/pyQode/pyqode.core/pull/153
         new_user_actions = self.get_new_user_actions()
         if len(new_user_actions) > 0:
             self.menu_new.addSeparator()
             for user_new_action in self.get_new_user_actions():
                 self.menu_new.addAction(user_new_action)
+        # New file
+        self.action_create_file = QtWidgets.QAction('&File', self)
+        self.action_create_file.triggered.connect(
+            self._on_create_file_triggered)
+        icon_provider = QtWidgets.QFileIconProvider()
+        self.action_create_file.setIcon(icon_provider.icon(icon_provider.File))
+        self.menu_new.addAction(self.action_create_file)
+        # New directory
+        self.action_create_directory = QtWidgets.QAction('&Directory', self)
+        self.action_create_directory.triggered.connect(
+            self._on_create_directory_triggered)
+        self.action_create_directory.setIcon(icon_provider.icon(
+            icon_provider.Folder))
+        self.menu_new.addAction(self.action_create_directory)
+        self.addSeparator()
 
         # cut
-        self.action_cut = QtWidgets.QAction('Cut', self)
+        self.action_cut = QtWidgets.QAction('&Cut', self)
         self.action_cut.setShortcut(QtGui.QKeySequence.Cut)
         self.action_cut.setIcon(_icon(
             'edit-cut', ':/pyqode-icons/rc/edit-cut.png'))
         self.addAction(self.action_cut)
         self.action_cut.triggered.connect(self._on_cut_triggered)
         # copy
-        self.action_copy = QtWidgets.QAction('Copy', self)
+        self.action_copy = QtWidgets.QAction('&Copy', self)
         self.action_copy.setShortcut(QtGui.QKeySequence.Copy)
         self.action_copy.setIcon(_icon(
             'edit-copy', ':/pyqode-icons/rc/edit-copy.png'))
         self.addAction(self.action_copy)
         self.action_copy.triggered.connect(self._on_copy_triggered)
         # copy path
-        self.action_copy_path = QtWidgets.QAction('Copy path', self)
+        self.action_copy_path = QtWidgets.QAction('&Copy path', self)
         self.action_copy_path.setShortcut('Ctrl+Shift+C')
         self.addAction(self.action_copy_path)
         self.action_copy_path.triggered.connect(self._on_copy_path_triggered)
         # Paste
-        self.action_paste = QtWidgets.QAction('Paste', self)
+        self.action_paste = QtWidgets.QAction('&Paste', self)
         self.action_paste.setShortcut(QtGui.QKeySequence.Paste)
         self.action_paste.setIcon(_icon(
             'edit-paste', ':/pyqode-icons/rc/edit-paste.png'))
@@ -419,12 +428,12 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.addAction(self.action_paste)
         self.addSeparator()
         # Rename
-        self.action_rename = QtWidgets.QAction('Rename', self)
+        self.action_rename = QtWidgets.QAction('&Rename', self)
         self.action_rename.setShortcut('Shift+F2')
         self.action_rename.triggered.connect(self._on_rename_triggered)
         self.addAction(self.action_rename)
         # Delete
-        self.action_delete = QtWidgets.QAction('Delete', self)
+        self.action_delete = QtWidgets.QAction('&Delete', self)
         self.action_delete.setShortcut(QtGui.QKeySequence.Delete)
         self.action_delete.setIcon(_icon(
             'edit-delete', ':/pyqode-icons/rc/edit-delete.png'))
