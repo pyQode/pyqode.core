@@ -32,10 +32,19 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         def __init__(self):
             super().__init__()
             #: The list of directories to exclude
-            self.ignored_directories = ['__pycache__', 'build', 'dist']
+            self.ignored_items = ['__pycache__']
             #: The list of file extension to exclude
             self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                       '.egg-info', '.coverage']
+                                       '.egg-info', '.coverage', '.DS_Store']
+            self._ignored_unused = []
+
+        def set_root_path(self, path):
+            parent_dir = os.path.dirname(path)
+            for item in os.listdir(parent_dir):
+                item_path = os.path.join(parent_dir, item)
+                if item_path != path:
+                    # TODO need test on unix-like systems
+                    self._ignored_unused.append(item_path.replace('\\', '/'))
 
         def filterAcceptsRow(self, sourceRow, sourceParent):
             """
@@ -45,8 +54,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             index0 = self.sourceModel().index(sourceRow, 0, sourceParent)
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
+            fp = finfo.filePath()
             extension = '.%s' % finfo.suffix()
-            if fn in self.ignored_directories:
+
+            if fp in self._ignored_unused:
+                _logger().debug('excluding directory (unused): %s', finfo.filePath())
+                return False
+            if fn in self.ignored_items:
                 _logger().debug('excluding directory: %s', finfo.filePath())
                 return False
             if extension in self.ignored_extensions:
@@ -62,6 +76,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self.setModel(self._fs_model_proxy)
         self.context_menu = None
+        self.root_path = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
 
@@ -107,9 +122,14 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
-        index = self._fs_model_source.setRootPath(path)
-        root_index = self._fs_model_proxy.mapFromSource(index)
+        self._fs_model_proxy.set_root_path(path)
+        self.root_path = os.path.dirname(path)
+        file_root_index = self._fs_model_source.setRootPath(self.root_path)
+        root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
+        # Expand first entry (project name)
+        file_parent_index = self._fs_model_source.index(path)
+        self.setExpanded(self._fs_model_proxy.mapFromSource(file_parent_index), True)
 
     def filePath(self, index):
         """
@@ -263,7 +283,7 @@ class _FSHelper:
                     if os.path.isfile(fn):
                         os.remove(fn)
                     else:
-                        os.rmdir(fn)
+                        shutil.rmtree(fn)
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
@@ -274,6 +294,9 @@ class _FSHelper:
     def _current_path(self):
         path = self.tree_view.fileInfo(
             self.tree_view.currentIndex()).filePath()
+        # https://github.com/pyQode/pyQode/issues/6
+        if not path:
+            path = self.tree_view.root_path
         return path
 
     def copy_path_to_clipboard(self):
@@ -289,8 +312,40 @@ class _FSHelper:
             QtWidgets.QLineEdit.Normal, name)
         if status:
             dest = os.path.join(pardir, new_name)
-            print(src, dest)
             os.rename(src, dest)
+
+    def create_directory(self):
+        src = self._current_path()
+        name, status = QtWidgets.QInputDialog.getText(
+            self.tree_view, 'Create directory', 'Name:',
+            QtWidgets.QLineEdit.Normal, '')
+        if status:
+            fatal_names = ['.', '..']
+            for i in fatal_names:
+                if i in name:
+                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent directory name")
+                    return
+
+            if os.path.isfile(src):
+                src = os.path.dirname(src)
+            os.makedirs(os.path.join(src, name), exist_ok=True)
+
+    def create_file(self):
+        src = self._current_path()
+        name, status = QtWidgets.QInputDialog.getText(
+            self.tree_view, 'Create new file', 'File name:',
+            QtWidgets.QLineEdit.Normal, '')
+        if status:
+            fatal_names = ['.', '..', os.sep]
+            for i in fatal_names:
+                if i in name:
+                    QtWidgets.QMessageBox.about(self.tree_view, "Error", "Incorrent file name")
+                    return
+
+            if os.path.isfile(src):
+                src = os.path.dirname(src)
+            f = open(os.path.join(src, name), 'w')
+            f.close()
 
 
 class FileSystemContextMenu(QtWidgets.QMenu):
@@ -318,6 +373,23 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _init_actions(self):
         def _icon(theme, rc_path):
             return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(rc_path))
+
+        # New - submenu
+        self.menu_new = self.addMenu("&New")
+        # New file
+        self.action_create_file = QtWidgets.QAction('&File', self)
+        self.action_create_file.triggered.connect(self._on_create_file_triggered)
+        self.menu_new.addAction(self.action_create_file)
+        # New directory
+        self.action_create_directory = QtWidgets.QAction('&Directory', self)
+        self.action_create_directory.triggered.connect(self._on_create_directory_triggered)
+        self.menu_new.addAction(self.action_create_directory)
+        # https://github.com/pyQode/pyqode.core/pull/153
+        new_user_actions = self.get_new_user_actions()
+        if len(new_user_actions) > 0:
+            self.menu_new.addSeparator()
+            for user_new_action in self.get_new_user_actions():
+                self.menu_new.addAction(user_new_action)
 
         # cut
         self.action_cut = QtWidgets.QAction('Cut', self)
@@ -376,3 +448,22 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def _on_rename_triggered(self):
         _FSHelper(self.tree_view).rename()
+
+    def _on_create_directory_triggered(self):
+        _FSHelper(self.tree_view).create_directory()
+
+    def _on_create_file_triggered(self):
+        _FSHelper(self.tree_view).create_file()
+
+    def get_new_user_actions(self):
+        """
+        Return user actions for "new" menu.
+
+        Example:
+        >>> actions = []
+        >>> action_python_package = QtWidgets.QAction('&Python package', self)
+        >>> action_python_package.triggered.connect(self._on_create_python_package_triggered)
+        >>> actions.append(action_python_package)
+        >>> return actions
+        """
+        return []
