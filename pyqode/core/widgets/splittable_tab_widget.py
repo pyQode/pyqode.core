@@ -827,6 +827,32 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             self.add_tab(tab, title=name, icon=icon)
             return tab
 
+    def close_document(self, path):
+        to_close = []
+        for widget in self.widgets(include_clones=True):
+            if widget.file.path == path:
+                to_close.append(widget)
+        for widget in to_close:
+            tw = widget.parent_tab_widget
+            tw.remove_tab(tw.indexOf(widget))
+
+    def rename_document(self, old_path, new_path):
+        """
+        Renames an already opened document (this will not rename the file,
+        just update the file path and tab title).
+
+        Use that function to update a file that has been renamed externally.
+        """
+        to_rename = []
+        title = os.path.split(new_path)[1]
+        for widget in self.widgets(include_clones=True):
+            if widget.file.path == old_path:
+                to_rename.append(widget)
+        for widget in to_rename:
+            tw = widget.parent_tab_widget
+            widget.file._path = new_path
+            tw.setTabText(tw.indexOf(widget), title)
+
     def closeEvent(self, event):
         """
         Saves dirty editors on close and cancel the event if the user choosed
