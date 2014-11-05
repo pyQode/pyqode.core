@@ -292,7 +292,7 @@ class FileManager(Manager):
             self.editor._original_text = plain_text
             self.editor.document().setModified(False)
             # remember path for next save
-            self._path = path
+            self._path = os.path.normpath(path)
             # reset selection
             if self.clean_trailing_whitespaces:
                 if sel_start != sel_end:

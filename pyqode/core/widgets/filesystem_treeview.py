@@ -320,7 +320,7 @@ class FileSystemHelper:
                 else:
                     for fn in deleted_files:
                         _logger().info('%s removed', fn)
-                        self.tree_view.file_deleted.emit(fn)
+                        self.tree_view.file_deleted.emit(os.path.normpath(fn))
 
     def get_current_path(self):
         path = self.tree_view.fileInfo(
@@ -344,7 +344,8 @@ class FileSystemHelper:
         if status:
             dest = os.path.join(pardir, new_name)
             os.rename(src, dest)
-            self.tree_view.file_renamed.emit(src, dest)
+            self.tree_view.file_renamed.emit(os.path.normpath(src),
+                                             os.path.normpath(dest))
 
     def create_directory(self):
         src = self.get_current_path()
@@ -381,7 +382,7 @@ class FileSystemHelper:
             path = os.path.join(src, name)
             with open(path, 'w'):
                 pass
-            self.tree_view.file_created.emit(path)
+            self.tree_view.file_created.emit(os.path.normpath(path))
 
 
 class FileSystemContextMenu(QtWidgets.QMenu):
