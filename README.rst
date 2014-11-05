@@ -53,7 +53,8 @@ pyqode.core depends on the following libraries:
 
 Installation
 ------------
-You need to install PyQt or PySide by yourself.
+You need to install PyQt or PySide by yourself. Note that you should prefer
+**PyQt5 on Mac OSX** (retina screen support, better integration).
 
 Then you can install pyqode.core using **pip**::
 

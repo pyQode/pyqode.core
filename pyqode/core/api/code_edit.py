@@ -1,4 +1,6 @@
 from __future__ import print_function
+import sys
+
 try:
     from future.builtins import str, super
 except:
@@ -105,6 +107,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     #: specialised editors.
     mimetypes = []
 
+    _DEFAULT_FONT = 'Source Code Pro' if sys.platform != 'darwin' else 'Monaco'
+
+
     @property
     def use_spaces_instead_of_tabs(self):
         """ Use spaces instead of tabulations. Default is True. """
@@ -181,7 +186,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @font_name.setter
     def font_name(self, value):
         if value == "":
-            value = 'Source Code Pro'
+            value = self._DEFAULT_FONT
         self._font_family = value
         self._reset_stylesheet()
         for c in self.clones:
@@ -397,7 +402,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             ':/fonts/rc/SourceCodePro-Regular.ttf')
         QtGui.QFontDatabase.addApplicationFont(
             ':/fonts/rc/SourceCodePro-Bold.ttf')
-        self._font_family = "Source Code Pro"
+        self._font_family = self._DEFAULT_FONT
         self._mimetypes = []
 
         # Flags/Working variables
