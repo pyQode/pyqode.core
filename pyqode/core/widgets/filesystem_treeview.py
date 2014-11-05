@@ -39,6 +39,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             self._ignored_unused = []
 
         def set_root_path(self, path):
+            self._ignored_unused = []
             parent_dir = os.path.dirname(path)
             for item in os.listdir(parent_dir):
                 item_path = os.path.join(parent_dir, item)
