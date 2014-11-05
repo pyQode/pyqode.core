@@ -93,6 +93,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
+        self.setSelectionMode(self.ExtendedSelection)
 
     def ignore_directories(self, *directories):
         """
