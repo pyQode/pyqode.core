@@ -54,7 +54,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             index0 = self.sourceModel().index(sourceRow, 0, sourceParent)
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
-            fp = finfo.filePath()
+            fp = os.path.normpath(finfo.filePath())
             extension = '.%s' % finfo.suffix()
 
             if fp in self._ignored_unused:
