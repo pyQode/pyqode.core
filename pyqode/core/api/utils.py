@@ -1005,7 +1005,9 @@ def with_wait_cursor(func):
     def wrapper(*args, **kwargs):
         QtWidgets.QApplication.setOverrideCursor(
             QtGui.QCursor(QtCore.Qt.WaitCursor))
-        ret_val = func(*args, **kwargs)
-        QtWidgets.QApplication.restoreOverrideCursor()
+        try:
+            ret_val = func(*args, **kwargs)
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
         return ret_val
     return wrapper
