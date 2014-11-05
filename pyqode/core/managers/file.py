@@ -50,7 +50,7 @@ class FileManager(Manager):
     @property
     def path(self):
         """ Gets the file path """
-        return self._path
+        return os.path.normpath(self._path)
 
     @property
     def name(self):
