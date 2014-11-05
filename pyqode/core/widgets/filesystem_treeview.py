@@ -68,6 +68,20 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             _logger().debug('accepting %s', finfo.filePath())
             return True
 
+    #: signal emitted when the user deleted a file
+    #: Parameters:
+    #:  - path (str): path of the file that got deleted
+    file_deleted = QtCore.Signal(str)
+    #: signal emitted when the user renamed a file
+    #: Parameters:
+    #:  - old (str): old path
+    #:  - new (str): new path
+    file_renamed = QtCore.Signal(str, str)
+    #: signal emitted when the user created a file
+    #: Parameters:
+    #:  - path (str): path of the file that got created
+    file_created = QtCore.Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._fs_model_source = QtWidgets.QFileSystemModel()
@@ -289,6 +303,7 @@ class _FSHelper:
                     _logger().exception('failed to remove %s', fn)
                 else:
                     _logger().info('%s removed', fn)
+                    self.tree_view.file_deleted.emit(fn)
 
     def _current_path(self):
         path = self.tree_view.fileInfo(
@@ -312,6 +327,7 @@ class _FSHelper:
         if status:
             dest = os.path.join(pardir, new_name)
             os.rename(src, dest)
+            self.tree_view.file_renamed.emit(src, dest)
 
     def create_directory(self):
         src = self._current_path()
@@ -345,8 +361,10 @@ class _FSHelper:
 
             if os.path.isfile(src):
                 src = os.path.dirname(src)
-            f = open(os.path.join(src, name), 'w')
-            f.close()
+            path = os.path.join(src, name)
+            with open(path, 'w'):
+                pass
+            self.tree_view.file_created.emit(path)
 
 
 class FileSystemContextMenu(QtWidgets.QMenu):
