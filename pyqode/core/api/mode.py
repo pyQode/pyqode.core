@@ -7,8 +7,7 @@ import weakref
 class Mode(object):
     """
     Base class for editor extensions. An extension is a "thing" that can be
-    installed on an editor to add new behaviours or to modify the
-    appearance.
+    installed on an editor to add new behaviours or to modify its appearance.
 
     A mode is added to an editor by using the ModesManager/PanelsManager:
 
@@ -21,14 +20,14 @@ class Mode(object):
         - :meth:`pyqode.core.api.Mode.on_uninstall`
         - :meth:`pyqode.core.api.Mode.on_state_changed`
 
-    The mode will be identified by its class name, this means that there cannot
-    be two modes of the same type on a editor!
+    ..warning: The mode will be identified by its class name, this means that
+    **there cannot be two modes of the same type on the same editor instance!**
     """
 
     @property
     def editor(self):
         """
-        Provides easy access to the parent editor widget (weakref)
+        Returns a reference to the parent editor widget.
 
         **READ ONLY**
 
@@ -42,9 +41,9 @@ class Mode(object):
     @property
     def enabled(self):
         """
-        Tell if the mode is enabled,
-        :meth:`pyqode.core.api.Mode.on_state_changed` is called when the
-        state changed.
+        Tells if the mode is enabled,
+        :meth:`pyqode.core.api.Mode.on_state_changed` will be called as soon
+        as the mode state changed.
 
         :type: bool
         """
@@ -82,14 +81,14 @@ class Mode(object):
 
     def on_uninstall(self):
         """
-        Uninstall the mode
+        Uninstalls the mode from the editor.
         """
         self.enabled = False
         self._editor = None
 
     def on_state_changed(self, state):
         """
-        Called when the enable state changed.
+        Called when the enable state has changed.
 
         This method does not do anything, you may override it if you need
         to connect/disconnect to the editor's signals (connect when state is

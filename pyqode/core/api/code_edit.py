@@ -64,10 +64,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             Modes manager. Use it to append/remove panels on the editor.
 
     Starting from version 2.1, CodeEdit defines the
-    :attr:`pyqode.core.api.CodeEdit.mimetypes` class attribute.
-
-    This property is a list of supported mimetypes. An empty list means the
-    CodeEdit is generic. **Code edit specialised for a specific language
+    :attr:`pyqode.core.api.CodeEdit.mimetypes` class attribute that can be used
+    by IDE to determine which editor to use for a given mime type. This
+    property is a list of supported mimetypes. An empty list means the
+    CodeEdit is generic. **Code editors specialised for a specific language
     should define the mime types they support!**
     """
     #: Paint hook
@@ -165,7 +165,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def show_whitespaces(self):
         """
-        Shows/Hides white spaces highlighting.
+        Shows/Hides virtual white spaces.
         """
         return self._show_whitespaces
 
@@ -198,7 +198,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Gets/Sets the editor zoom level.
 
         The zoom level is a value that is added to the current editor font
-        size. Negative values are used to zoom  out the editor, positive values
+        size. Negative values are used to zoom out the editor, positive values
         are used to zoom in the editor.
         """
         return self._zoom_level
@@ -210,7 +210,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def font_size(self):
         """
-        The editor current font size.
+        The font point size.
+
+        .. note:: Please, **never use setFontPointSize/setFontFamily functions
+            directly** as the values you define there will be overwritten as
+            soon as the user zoom the editor or as soon as a stylesheet
+            property has changed.
         """
         return self._font_size
 
@@ -224,7 +229,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def background(self):
         """
-        The editor background color.
+        The editor background color (QColor)
         """
         return self._background
 
@@ -238,7 +243,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def foreground(self):
         """
-        The editor foreground color.
+        The editor foreground color (QColor)
         """
         return self._foreground
 
@@ -255,7 +260,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         The editor white spaces' foreground color. White spaces are highlighted
         by the syntax highlighter. You should call rehighlight to update their
         color. This is not done automatically to prevent multiple, useless
-        call to rehighlight which can take some time on big files.
+        call to ``rehighlight`` which can take some time on big files.
         """
         return self._whitespaces_foreground
 
@@ -309,7 +314,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @property
     def dirty(self):
         """
-        Gets/sets the dirty flag.
+        Tells whethere the content of editor has been modified.
+
+        (this is just a shortcut to QTextDocument.isModified
 
         :type: bool
         """
@@ -330,35 +337,62 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def file(self):
-        """ FileManager used to open/save file on the editor """
+        """
+        Returns a reference to the :class:`pyqode.core.managers.FileManager`
+        used to open/save file on the editor
+        """
         return self._file
 
     @file.setter
     def file(self, file_manager):
+        """
+        Sets a custom file manager.
+
+        :param file_manager: custom file manager instance.
+        """
         self._file = file_manager
 
     @property
     def backend(self):
-        """ BackendManager used to control the backend process """
+        """
+        Returns a reference to the :class:`pyqode.core.managers.BackendManager`
+        used to control the backend process.
+        """
         return self._backend
 
     @property
     def modes(self):
-        """ ModesManager used to append modes to the editor """
+        """
+        Returns a reference to the :class:`pyqode.core.managers.ModesManager`
+        used to manage the collection of installed modes.
+        """
         return self._modes
 
     @property
     def panels(self):
-        """ PanelsManager used to append panels to the editor """
+        """
+        Returns a reference to the :class:`pyqode.core.managers.PanelsManager`
+        used to manage the collection of installed panels
+        """
         return self._panels
 
     @property
     def decorations(self):
-        """ TextDecorationManager: manage the list of text decorations """
+        """
+        Returns a reference to the
+        :class:`pyqode.core.managers.TextDecorationManager` used to manage the
+        list of :class:`pyqode.core.api.TextDecoration`
+        """
         return self._decorations
 
     @property
     def syntax_highlighter(self):
+        """
+        Returns a reference to the syntax highlighter mode currently used to
+        highlight the editor content.
+
+        :return: :class:`pyqode.core.api.SyntaxHighlighter`
+        """
         for mode in self.modes:
             if hasattr(mode, 'highlightBlock'):
                 return mode
@@ -368,8 +402,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         :param parent: Parent widget
 
-        :param create_default_actions: Specify if the default actions (copy,
-            paste, ...) must be created or not. Default is True.
+        :param create_default_actions: True to create the default context
+            menu actions (copy, paste, edit)
         """
         super(CodeEdit, self).__init__(parent)
         self.clones = []
@@ -442,14 +476,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def split(self):
         """
         Split the code editor widget, return a clone of the widget ready to
-        be used and synchronised with its original.
+        be used (and synchronised with its original).
 
         Splitting the widget is done in 2 steps:
             - first we clone the widget, you can override ``clone`` if your
               widget needs additional arguments.
 
-            - then we link the two text document and disable somes modes such
-              as the watcher mode.
+            - then we link the two text document and disable some modes on the
+                cloned instance (such as the watcher mode).
         """
         # cache cursor position so that the clone open at the current cursor
         # pos
@@ -462,15 +496,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def clone(self):
         """
-        Clone ourself, return an instance of the same class, using the default
-        QWidget constructor.
+        Clone ourselves, return an instance of the same class, using the
+        default QWidget constructor.
         """
         clone = self.__class__(parent=self.parent())
         return clone
 
     def link(self, clone):
         """
-        Links the clone with the original. We copy the file manager infos
+        Links the clone with its original. We copy the file manager infos
         (path, mimetype, ...) and setup the clone text document as reference
         to our text document.
 
@@ -505,7 +539,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def close(self, clear=True):
         """
-        Closes the editor
+        Closes the editor, stops the backend and removes any installed
+        mode/panel.
+
+        This is also where we cache the cursor position.
         """
         self.decorations.clear()
         self.modes.clear()
@@ -539,12 +576,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             return
         QtWidgets.QToolTip.showText(pos, tooltip[0: 1024], self)
 
-    def clear(self):
-        super(CodeEdit, self).clear()
-
     def setPlainText(self, txt, mime_type, encoding):
         """
-        Extends setPlainText to force the user to set an encoding and a
+        Extends setPlainText to force the user to setup an encoding and a
         mime type.
 
         Emits the new_text_set signal.
@@ -577,6 +611,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super(CodeEdit, self).addAction(action)
 
     def insert_action(self, action, prev_action):
+        """
+        Inserts an action to the editor's context menu
+
+        :param action: action to insert
+        :param prev_action: the action after which the new action must be
+            inserted
+        """
         index = self._actions.index(prev_action)
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self._actions.insert(index, action)
@@ -612,7 +653,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def add_menu(self, menu):
         """
-        Adds a menu to the editor context menu.
+        Adds a sub-menu to the editor context menu.
 
         Menu are put at the bottom of the context menu.
 
@@ -627,6 +668,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.addActions(menu.actions())
 
     def remove_menu(self, menu):
+        """
+        Removes a sub-menu from the context menu.
+        :param menu: Sub-menu to remove.
+        """
         self._menus.remove(menu)
         for action in menu.actions():
             self.removeAction(action)
@@ -639,7 +684,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @QtCore.Slot()
     def goto_line(self):
         """
-        Shows goto line dialog and go to the selected line.
+        Shows the *go to line dialog* and go to the selected line.
         """
         helper = TextHelper(self)
         line, result = DlgGotoLine.get_line(
@@ -651,16 +696,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @QtCore.Slot()
     def rehighlight(self):
         """
-        Calls rehighlight on the installed syntax highlighter mode.
+        Calls ``rehighlight`` on the installed syntax highlighter mode.
         """
-        for mode in self.modes:
-            if hasattr(mode, 'rehighlight'):
-                mode.rehighlight()
+        if self.syntax_highlighter:
+            self.syntax_highlighter.rehighlight()
 
     @QtCore.Slot()
     def reset_zoom(self):
         """
-        Resets the zoom value.
+        Resets the zoom level.
         """
         self._zoom_level = 0
         self._reset_stylesheet()
@@ -668,13 +712,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @QtCore.Slot()
     def zoom_in(self, increment=1):
         """
-        Zooms in the editor.
-
-        The effect is achieved by increasing the editor font size by the
-        increment value.
-
-        Panels that needs to be resized depending on the font size need to
-        implement onStyleChanged.
+        Zooms in the editor (makes the font bigger).
         """
         self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
@@ -683,13 +721,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @QtCore.Slot()
     def zoom_out(self, increment=1):
         """
-        Zooms out the editor.
-
-        The effect is achieved by decreasing the editor font size by the
-        increment value.
-
-        Panels that needs to be resized depending on the font size need to
-        implement onStyleChanged and trigger an update.
+        Zooms out the editor (makes the font smaller).
         """
         self.zoom_level -= increment
         # make sure font size remains > 0

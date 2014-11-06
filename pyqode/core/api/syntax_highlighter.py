@@ -16,10 +16,11 @@ def _logger():
 PYGMENTS_STYLES = sorted(list(get_all_styles()))
 
 if hasattr(sys, 'frozen'):
+    # frozen executables won't see the builtin pyqode pygments style.
     PYGMENTS_STYLES += ['darcula', 'qt']
 
 
-#: The list of color schemes keys (and their associate pygments token)
+#: The list of color schemes keys (and their associated pygments token)
 COLOR_SCHEME_KEYS = {
     # editor background
     "background": None,
@@ -73,14 +74,26 @@ class ColorScheme(object):
     """
     @property
     def name(self):
+        """
+        Name of the color scheme, this is usually the name of the associated
+        pygments style.
+        """
         return self._name
 
     @property
     def background(self):
+        """
+        Gets the background color.
+        :return:
+        """
         return self.formats['background'].background().color()
 
     @property
     def highlight(self):
+        """
+        Gets the highlight color.
+        :return:
+        """
         return self.formats['highlight'].background().color()
 
     def __init__(self, style):
@@ -89,6 +102,8 @@ class ColorScheme(object):
         """
         self._name = style
         self._brushes = {}
+        #: Dictionary of formats colors (keys are the same as for
+        #: :attr:`pyqode.core.api.COLOR_SCHEME_KEYS`
         self.formats = {}
         try:
             style = get_style_by_name(style)
@@ -174,7 +189,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     It fills up the document with our custom block data (fold levels,
     triggers,...).
 
-    It **does not do any syntax highlighting**, this task is left to
+    It **does not do any syntax highlighting**, that task is left to
     sublasses such as :class:`pyqode.core.modes.PygmentsSyntaxHighlighter`.
 
     Subclasses **must** override the

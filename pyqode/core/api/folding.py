@@ -56,11 +56,11 @@ class FoldDetector(object):
 
     def process_block(self, current_block, previous_block, text):
         """
-        Processes a block and sets up its folding infos.
+        Processes a block and setup its folding info.
 
         This method call ``detect_fold_level`` and handles most of the tricky
         corner cases so that all you have to do is focus on getting the proper
-        fold level foreach meaningfull block, skipping the blank ones
+        fold level foreach meaningful block, skipping the blank ones.
 
         :param current_block: current block to process
         :param previous_block: previous block
@@ -88,6 +88,7 @@ class FoldDetector(object):
         delta_abs = abs(fold_level - prev_fold_level)
         if delta_abs > 1:
             if fold_level > prev_fold_level:
+                # try to fix inconsistent fold level
                 _logger().debug(
                     '(l%d) inconsistent fold level, difference between '
                     'consecutive blocks cannot be greater than 1 (%d).',
@@ -147,7 +148,7 @@ class IndentFoldDetector(FoldDetector):
 
 class FoldScope(object):
     """
-    Utility class for manipulating foldable code scope (fold/unfold,
+    Utility class for manipulating fold-able code scope (fold/unfold,
     get range, child and parent scopes and so on).
 
     A scope is built from a fold trigger (QTextBlock).
@@ -174,17 +175,19 @@ class FoldScope(object):
     @property
     def collapsed(self):
         """
-        Whether the scope is collasped.
+        Returns True if the block is collasped, False if it is expanded.
 
         """
         return TextBlockHelper.get_fold_trigger_state(self._trigger)
 
     def __init__(self, block):
         """
-        Create a foldable region from a fold trigger block.
+        Create a fold-able region from a fold trigger block.
 
         :param block: The block **must** be a fold trigger.
         :type block: QTextBlock
+
+        :raise: `ValueError` if the text block is not a fold trigger.
         """
         if not TextBlockHelper.is_fold_trigger(block):
             raise ValueError('Not a fold trigger')
@@ -192,9 +195,11 @@ class FoldScope(object):
 
     def get_range(self, ignore_blank_lines=True):
         """
-        Get the fold region range (start and end line).
+        Gets the fold region range (start and end line).
 
         .. note:: Start line do no encompass the trigger line.
+
+        :returns: tuple(int, int)
         """
         ref_lvl = self.trigger_level
         first_line = self._trigger.blockNumber()
@@ -219,8 +224,6 @@ class FoldScope(object):
     def fold(self):
         """
         Folds the region.
-
-        :param recursively: Fold all sub regions.
         """
         start, end = self.get_range()
         TextBlockHelper.set_fold_trigger_state(self._trigger, True)

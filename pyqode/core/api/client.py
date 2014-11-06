@@ -88,16 +88,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _send_request(self):
         """
-        Requests a work on the backend.
-
-        :param worker_class_or_function: Class or function to execute remotely.
-        :param args: worker args, any Json serializable objects
-        :param on_receive: an optional callback executed when we receive the
-            worker's results. The callback will be called with two arguments:
-            the status (bool) and the results (object)
-
-        :raise: BackendController.NotConnected if the backend cannot
-            be reached.
+        Sends the request to the backend.
         """
         classname = '%s.%s' % (self._worker.__module__, self._worker.__name__)
         self.request_id = str(uuid.uuid4())
@@ -106,8 +97,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def send(self, obj, encoding='utf-8'):
         """
-        Sends a python object to the backend. The object must be JSON
-        serialisable.
+        Sends a python object to the backend. The object **must be JSON
+        serialisable**.
 
         :param obj: object to send
         :param encoding: encoding used to encode the json message into a
@@ -136,17 +127,12 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self.connectToHost(address, self._port)
 
     def _on_connected(self):
-        """ Logs connected """
         _logger().debug('connected to backend: %s:%d',
                         self.peerName(), self.peerPort())
         self.is_connected = True
         self._send_request()
 
     def _on_error(self, error):
-        """
-        Logs socket error, retry connecting if error is
-        ConnectionRefusedError
-        """
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
         _logger().debug(SOCKET_ERROR_STRINGS[error])
@@ -154,7 +140,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             QtCore.QTimer.singleShot(100, self._connect)
 
     def _on_disconnected(self):
-        """ Logs disconnected """
         try:
             _logger().debug('disconnected from backend: %s:%d',
                             self.peerName(), self.peerPort())
@@ -168,7 +153,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             pass
 
     def _read_header(self):
-        """ Reads message header """
         _logger().debug('reading header')
         self._header_buf += self.read(4)
         if len(self._header_buf) == 4:

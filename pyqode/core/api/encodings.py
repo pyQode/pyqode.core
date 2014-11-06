@@ -96,5 +96,9 @@ ENCODINGS_MAP = {
 
 
 def convert_to_codec_key(value):
+    """
+    Normalize code key value (encoding codecs must be lower case and must
+    not contain any dashes).
+    """
     # UTF-8 -> utf_8
     return value.replace('-', '_').lower()

@@ -14,9 +14,10 @@ class Manager(object):
         - file manager
 
     Managers are typically created internally when you create a CodeEdit.
-    You interact with them later, e.g. when you start the backend process,
-    install a mode or a panel::
+    You interact with them later, e.g. when you want to start the backend
+    process or when you want to install/retrieve a mode or a panel.
 
+    ::
         editor = CodeEdit()
 
         # use the backend manager to start the backend server

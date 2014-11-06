@@ -8,13 +8,13 @@ from pyqode.qt import QtWidgets, QtCore, QtGui
 class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
     """
     Helper class to quickly create a text decoration. The text decoration is an
-    utility class that adds a few utility methods over Qt's ExtraSelection.
+    utility class that adds a few utility methods to QTextEdit.ExtraSelection.
 
     In addition to the helper methods, a tooltip can be added to a decoration.
-    (useful for errors marks and so on...)
+    (useful for errors markers and so on...)
 
-    Text decoration expose 1 **clicked** signal stored in a separate QObject:
-        :attr:`pyqode.core.api.TextDecoration.signals`
+    Text decoration expose a **clicked** signal stored in a separate QObject:
+        :attr:`pyqode.core.api.TextDecoration.Signals`
 
     .. code-block:: python
 
@@ -24,7 +24,7 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         def a_slot(decoration):
             print(decoration)
     """
-    class _TextDecorationSignals(QtCore.QObject):
+    class Signals(QtCore.QObject):
         """
         Holds the signals for a TextDecoration (since we cannot make it a
         QObject, we need to store its signals in an external QObject).
@@ -36,18 +36,29 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
                  start_line=None, end_line=None, draw_order=0, tooltip=None,
                  full_width=False):
         """
-        Creates a text decoration
+        Creates a text decoration.
 
-        :param cursor_or_bloc_or_doc: Selection
-        :type cursor_or_bloc_or_doc: QTextCursor or QTextBlock or QTextDocument
+        .. note:: start_pos/end_pos and start_line/end_line pairs let you
+            easily specify the selected text. You should use one pair or the
+            other or they will conflict between each others. If you don't
+            specify any values, the selection will be based on the cursor.
 
-        :param start_pos: Selection start pos
-        :param end_pos: Selection end pos
+        :param cursor_or_bloc_or_doc: Reference to a valid
+            QTextCursor/QTextBlock/QTextDocument
+        :param start_pos: Selection start position
+        :param end_pos: Selection end position
+        :param start_line: Selection start line.
+        :param end_line: Selection end line.
+        :param draw_order: The draw order of the selection, highest values will
+            appear on top of the lowest values.
+        :param tooltip: An optional tooltips that will be automatically shown
+            when the mouse cursor hover the decoration.
+        :param full_width: True to select the full line width.
 
         .. note:: Use the cursor selection if startPos and endPos are none.
         """
         super(TextDecoration, self).__init__()
-        self.signals = self._TextDecorationSignals()
+        self.signals = self.Signals()
         self.draw_order = draw_order
         self.tooltip = tooltip
         self.cursor = QtGui.QTextCursor(cursor_or_bloc_or_doc)
@@ -71,6 +82,8 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
 
         :param cursor: The text cursor to test
         :type cursor: QtGui.QTextCursor
+
+        :returns: True if the cursor is over the selection
         """
         start = self.cursor.selectionStart()
         end = self.cursor.selectionEnd()

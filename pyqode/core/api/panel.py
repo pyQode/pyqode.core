@@ -18,7 +18,7 @@ class Panel(QtWidgets.QWidget, Mode):
     A panel is a mode and a QWidget.
 
     .. note:: Use enabled to disable panel actions and setVisible to change the
-        visiblity of the panel.
+        visibility of the panel.
     """
     class Position(object):
         """
@@ -88,7 +88,7 @@ class Panel(QtWidgets.QWidget, Mode):
             self.palette().windowText().color()))
 
     def paintEvent(self, event):
-        """ Fills the panel background. """
+        """ Fills the panel background using QPalette """
         if self.isVisible():
             # fill background
             self._background_brush = QtGui.QBrush(QtGui.QColor(
