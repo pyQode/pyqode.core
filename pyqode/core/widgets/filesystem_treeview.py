@@ -3,7 +3,9 @@ This module contains the file system tree view.
 """
 import logging
 import os
+import platform
 import shutil
+import subprocess
 from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
@@ -475,6 +477,26 @@ class FileSystemContextMenu(QtWidgets.QMenu):
             'edit-delete', ':/pyqode-icons/rc/edit-delete.png'))
         self.action_delete.triggered.connect(self._on_delete_triggered)
         self.addAction(self.action_delete)
+        self.addSeparator()
+        action = self.addAction('Show in explorer')
+        action.triggered.connect(self._on_show_in_explorer_triggered)
+
+    def get_new_user_actions(self):
+        """
+        Returns user actions for "new" sub-menu.
+
+        Example:
+        >>> def get_new_user_actions(self):
+        >>>     actions = []
+        >>>     action_python_package = QtWidgets.QAction(
+        >>>         '&Python package', self)
+        >>>     action_python_package.triggered.connect(
+        >>>         self._on_create_python_package_triggered)
+        >>>     actions.append(action_python_package)
+        >>>     return actions
+        """
+        return []
+
 
     def _on_copy_triggered(self):
         self.tree_view.helper.copy_to_clipboard()
@@ -500,15 +522,17 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _on_create_file_triggered(self):
         self.tree_view.helper.create_file()
 
-    def get_new_user_actions(self):
-        """
-        Return user actions for "new" menu.
-
-        Example:
-        >>> actions = []
-        >>> action_python_package = QtWidgets.QAction('&Python package', self)
-        >>> action_python_package.triggered.connect(self._on_create_python_package_triggered)
-        >>> actions.append(action_python_package)
-        >>> return actions
-        """
-        return []
+    def _on_show_in_explorer_triggered(self):
+        path = self.tree_view.helper.get_current_path()
+        if platform.system() == 'Linux':
+            output = subprocess.check_output(
+                ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
+            explorer = output.splitlines()[0].replace('.desktop', '')
+            if explorer in ['nautilus', 'dolphin']:
+                subprocess.Popen([explorer, '--select', path])
+            else:
+                if os.path.isfile(path):
+                    path = os.path.dirname(path)
+                subprocess.Popen([explorer, path])
+        else:
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(path))
