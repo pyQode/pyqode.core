@@ -524,7 +524,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
-        if platform.system() == 'Linux':
+        system = platform.system()
+        if system == 'Linux':
             output = subprocess.check_output(
                 ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
             explorer = output.splitlines()[0].replace('.desktop', '')
@@ -534,5 +535,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
                 if os.path.isfile(path):
                     path = os.path.dirname(path)
                 subprocess.Popen([explorer, path])
-        else:
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl(path))
+        elif system == 'Windows':
+            subprocess.Popen(r'explorer /select,"%s"' % os.path.normpath(path))
+        elif system == 'Darwin':
+            # todo: need to be tested on OSX
+            subprocess.Popen(['open', '-R', path])
