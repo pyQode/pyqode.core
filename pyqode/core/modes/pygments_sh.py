@@ -20,8 +20,9 @@ from pygments.token import Whitespace, Comment, Token
 from pygments.styles import get_all_styles
 from pygments.lexer import _TokenType
 from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core.api.syntax_highlighter import SyntaxHighlighter, ColorScheme, \
-    TextBlockUserData
+from pyqode.core.api.syntax_highlighter import SyntaxHighlighter
+from pyqode.core.api.syntax_highlighter import ColorScheme
+from pyqode.core.api.syntax_highlighter import TextBlockUserData
 from pyqode.qt import QtGui
 from pyqode.qt.QtCore import QRegExp
 

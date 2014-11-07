@@ -9,6 +9,7 @@ from pyqode.core.api.manager import Manager
 from pyqode.core.backend import NotRunning
 import time
 
+
 def _logger():
     return logging.getLogger(__name__)
 

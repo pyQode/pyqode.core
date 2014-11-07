@@ -24,7 +24,8 @@ class CheckerPanel(Panel):
             'dialog-info', QtGui.QIcon(':pyqode-icons/rc/dialog-info.png'))
         #: Warning icon
         self.warning_icon = QtGui.QIcon.fromTheme(
-            'dialog-warning', QtGui.QIcon(':pyqode-icons/rc/dialog-warning.png'))
+            'dialog-warning',
+            QtGui.QIcon(':pyqode-icons/rc/dialog-warning.png'))
         #: Error icon
         self.error_icon = QtGui.QIcon.fromTheme(
             'dialog-error', QtGui.QIcon(':pyqode-icons/rc/dialog-error.png'))

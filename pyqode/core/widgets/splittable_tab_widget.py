@@ -157,8 +157,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         """
         Saves the widget. The base implementation does nothing.
 
-        The function must return a bool that tells whether the save 
-        succeeded or not.
+        The function must return a bool that tells whether the save succeeded
+        or not.
 
         :param editor: editor widget to save.
         """
@@ -512,8 +512,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         """
         Recursively gets the list of widgets.
 
-        :param include_clones: True to retrieve all tabs, including clones, 
-                               otherwise only original widgets are returned/
+        :param include_clones: True to retrieve all tabs, including clones,
+            otherwise only original widgets are returned.
         """
         widgets = []
         for i in range(self.main_tab_widget.count()):

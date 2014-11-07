@@ -28,8 +28,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
     """
     class FilterProxyModel(QtCore.QSortFilterProxyModel):
         """
-        Excludes ``ignored_directories`` and ``ignored_extensions`` from the file
-        system model
+        Excludes ``ignored_directories`` and ``ignored_extensions`` from the
+        file system model
         """
         def __init__(self):
             super().__init__()
@@ -60,7 +60,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             extension = '.%s' % finfo.suffix()
 
             if fp in self._ignored_unused:
-                _logger().debug('excluding directory (unused): %s', finfo.filePath())
+                _logger().debug('excluding directory (unused): %s',
+                                finfo.filePath())
                 return False
             if fn in self.ignored_items:
                 _logger().debug('excluding directory: %s', finfo.filePath())
@@ -147,7 +148,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.setRootIndex(root_index)
         # Expand first entry (project name)
         file_parent_index = self._fs_model_source.index(path)
-        self.setExpanded(self._fs_model_proxy.mapFromSource(file_parent_index), True)
+        self.setExpanded(self._fs_model_proxy.mapFromSource(
+            file_parent_index), True)
 
     def filePath(self, index):
         """
@@ -156,7 +158,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param index: item index - QModelIndex
         :return: str
         """
-        return self._fs_model_source.filePath(self._fs_model_proxy.mapToSource(index))
+        return self._fs_model_source.filePath(
+            self._fs_model_proxy.mapToSource(index))
 
     def fileInfo(self, index):
         """
@@ -165,7 +168,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param index: item index - QModelIndex
         :return: QFileInfo
         """
-        return self._fs_model_source.fileInfo(self._fs_model_proxy.mapToSource(index))
+        return self._fs_model_source.fileInfo(
+            self._fs_model_proxy.mapToSource(index))
 
     def _show_context_menu(self, point):
         if self.context_menu:
@@ -257,8 +261,8 @@ class FileSystemHelper:
             paste_operation = False
         if paste_operation is not None:
             self._paste(
-                self._UrlListMimeData.list_from(mime, copy=paste_operation), to,
-                copy=paste_operation)
+                self._UrlListMimeData.list_from(mime, copy=paste_operation),
+                to, copy=paste_operation)
 
     def _paste(self, sources, destination, copy):
         """
@@ -522,7 +526,6 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         >>>     return actions
         """
         return []
-
 
     def _on_copy_triggered(self):
         self.tree_view.helper.copy_to_clipboard()

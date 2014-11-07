@@ -58,9 +58,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     modes/panels, to open/save file and to control the backend:
 
         - :attr:`pyqode.core.api.CodeEdit.file`:
-            File manager. Use it to open/save files or access the opened file attribute.
+            File manager. Use it to open/save files or access the opened file
+            attribute.
         - :attr:`pyqode.core.api.CodeEdit.backend`:
-            Backend manager. Use it to start/stop the backend or send a work request.
+            Backend manager. Use it to start/stop the backend or send a work
+            request.
         - :attr:`pyqode.core.api.CodeEdit.modes`:
             Modes manager. Use it to append/remove modes on the editor.
         - :attr:`pyqode.core.api.CodeEdit.panels`:
@@ -111,7 +113,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     mimetypes = []
 
     _DEFAULT_FONT = 'Source Code Pro' if sys.platform != 'darwin' else 'Monaco'
-
 
     @property
     def use_spaces_instead_of_tabs(self):
