@@ -64,7 +64,12 @@ class JsonServer(socketserver.ThreadingTCPServer):
         """
 
         def read_bytes(self, size):
-            """ Read x bytes """
+            """
+            Read x bytes
+
+            :param size: number of bytes to read.
+
+            """
             if not PY33:
                 data = ''
             else:

@@ -53,25 +53,21 @@ class LineNumberPanel(Panel):
 
     def cancel_selection(self):
         """
-        Cancel line selection.
+        Cancels line selection.
         """
         self._selecting = False
         self._sel_start = -1
 
     def mouseReleaseEvent(self, event):
-        """ Cancels selection """
+        # Cancels selection
         self.cancel_selection()
 
     def leaveEvent(self, event):
-        """
-        Cancels selection
-        """
+        # Cancels selection
         self.cancel_selection()
 
     def mouseMoveEvent(self, e):
-        """
-        Updates end of selection if we are currently selecting
-        """
+        # Updates end of selection if we are currently selecting
         if self._selecting:
             end_pos = e.pos().y()
             start_line = TextHelper(self.editor).line_nbr_from_position(
@@ -81,9 +77,7 @@ class LineNumberPanel(Panel):
             TextHelper(self.editor).select_lines(start_line, end_line)
 
     def paintEvent(self, event):
-        """
-        Paints the line numbers
-        """
+        # Paints the line numbers
         self._line_color_u = drift_color(self._background_brush.color(), 250)
         self._line_color_s = drift_color(self._background_brush.color(), 280)
         Panel.paintEvent(self, event)

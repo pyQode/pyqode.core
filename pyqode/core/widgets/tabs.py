@@ -36,6 +36,11 @@ class TabWidget(QTabWidget):
     your applications( dirty_changed, save_current, save_all, close_all,
     close_current, close_others).
 
+
+    .. deprecated: starting from version 2.4, this widget is considered as
+        deprecated. You should use
+        :class:`pyqode.core.widgets.SplittableTabWidget` instead.
+
     """
     #: Signal emitted when a tab dirty flag changed
     dirty_changed = QtCore.Signal(bool)
@@ -128,6 +133,9 @@ class TabWidget(QTabWidget):
         is None, the function will call
         ``QtWidgets.QFileDialog.getSaveFileName`` to get a valid save filename.
 
+        :param path: path of the file to save, leave it None to overwrite
+            existing file.
+
         """
         try:
             if not path and not self._current.file.path:
@@ -188,6 +196,7 @@ class TabWidget(QTabWidget):
         """
         Checks if the path is already open in an editor tab.
 
+        :param path: path to check
         :returns: The tab index if found or -1
         """
         if path:
@@ -272,6 +281,10 @@ class TabWidget(QTabWidget):
     def addTab(self, elem, icon, name):
         """
         Extends QTabWidget.addTab to keep an internal list of added tabs.
+
+        :param elem: tab widget
+        :param icon: tab icon
+        :param name: tab name
         """
         self._widgets.append(elem)
         return super(TabWidget, self).addTab(elem, icon, name)
@@ -343,6 +356,7 @@ class TabWidget(QTabWidget):
 
         This method will emits tab_closed for the removed tab.
 
+        :param index: index of the tab to remove.
         """
         widget = self.widget(index)
         try:
@@ -431,10 +445,8 @@ class TabWidget(QTabWidget):
         self.dirty_changed.emit(dirty)
 
     def closeEvent(self, event):
-        """
-        On close, we try to close dirty tabs and only process the close
-        event if all dirty tabs were closed by the user.
-        """
+        # On close, we try to close dirty tabs and only process the close
+        # event if all dirty tabs were closed by the user.
         if not self.close_all():
             event.ignore()
         else:
@@ -443,5 +455,7 @@ class TabWidget(QTabWidget):
     def _on_file_deleted(self, editor):
         """
         Removes deleted files from the tab widget.
+
+        ;:param editor: CodeEdit to remove
         """
         self.removeTab(self.indexOf(editor))

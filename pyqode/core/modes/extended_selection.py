@@ -70,6 +70,9 @@ class ExtendedSelectionMode(Mode):
             QtCore.Qt.WidgetShortcut)
 
     def create_menu(self):
+        """
+        Creates the extended selection menu.
+        """
         # setup menu
         menu = QtWidgets.QMenu(self.editor)
         menu.setTitle('Selection')
@@ -114,21 +117,36 @@ class ExtendedSelectionMode(Mode):
             self.perform_word_selection(event=event)
 
     def perform_word_selection(self, event=None):
+        """
+        Performs word selection
+        :param event: QMouseEvent
+        """
         self.editor.setTextCursor(
             TextHelper(self.editor).word_under_cursor(True))
         if event:
             event.accept()
 
     def perform_extended_selection(self, event=None):
+        """
+        Performs extended word selection.
+        :param event: QMouseEvent
+        """
         TextHelper(self.editor).select_extended_word(
             continuation_chars=self.continuation_characters)
         if event:
             event.accept()
 
     def perform_matched_selection(self, event):
+        """
+        Performs matched selection.
+        :param event: QMouseEvent
+        """
         selected = TextHelper(self.editor).match_select()
         if selected and event:
             event.accept()
 
     def perform_line_selection(self):
+        """
+        Performs line selection (select the entire line).
+        """
         TextHelper(self.editor).select_whole_line()

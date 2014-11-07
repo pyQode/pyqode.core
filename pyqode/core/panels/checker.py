@@ -80,9 +80,7 @@ class CheckerPanel(Panel):
         return icons[message.status]
 
     def mouseMoveEvent(self, event):
-        """
-        Requests a tooltip if the cursor is currently over a marker.
-        """
+        # Requests a tooltip if the cursor is currently over a marker.
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         if line:
             markers = self.marker_for_line(line)
@@ -99,7 +97,7 @@ class CheckerPanel(Panel):
                 self._job_runner.cancel_requests()
             self._previous_line = line
 
-    def leaveEvent(self, *args, **kwargs):
+    def leaveEvent(self):
         """
         Hide tooltip when leaving the panel region.
         """

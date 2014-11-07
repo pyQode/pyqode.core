@@ -10,6 +10,10 @@ def _logger():
 
 
 class TextDecorationsManager(Manager):
+    """
+    Manages the collection of TextDecoration that have been set on the editor
+    widget.
+    """
     def __init__(self, editor):
         super(TextDecorationsManager, self).__init__(editor)
         self._decorations = []

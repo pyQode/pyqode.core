@@ -21,6 +21,9 @@ import subprocess
 
 
 def main():
+    """
+    pyqode-console main function.
+    """
     global program, args, ret
     print(os.getcwd())
     ret = 0

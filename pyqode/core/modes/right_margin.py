@@ -20,9 +20,6 @@ class RightMarginMode(Mode):
 
     @color.setter
     def color(self, value):
-        """
-        Gets/sets the color of the margin
-        """
         self._color = value
         self._pen = QtGui.QPen(self._color)
         TextHelper(self.editor).mark_whole_doc_dirty()
@@ -44,9 +41,6 @@ class RightMarginMode(Mode):
 
     @position.setter
     def position(self, value):
-        """
-        Gets/sets the position of the margin
-        """
         self._margin_pos = value
         if self.editor:
             for clone in self.editor.clones:

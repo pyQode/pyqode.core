@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Contains utility functions
+This module contains utility functions/classes.
 """
 import functools
 import logging
@@ -50,6 +50,7 @@ def drift_color(base_color, factor=110):
     otherwise is is lighter.
 
     :param base_color: The base color to drift from
+    ;:param factor: drift factor (%)
     :return A lighter or darker color.
     """
     base_color = QtGui.QColor(base_color)
@@ -93,13 +94,8 @@ class DelayJobRunner(object):
 
         :param job: job.
         :type job: callable
-
-        :param force: Specify if we must force the job execution by stopping
-                      the job that is currently running (if any).
-        :type force: bool
-
-        :param args: args
-        :param kwargs: kwargs
+        :param args: job's position arguments
+        :param kwargs: job's keyworded arguments
         """
         self.cancel_requests()
         self._job = job
@@ -135,10 +131,10 @@ class TextHelper(object):
 
     def goto_line(self, line, column=0, move=True):
         """
-        Moves the text cursor to the specified line (and column).
+        Moves the text cursor to the specified position..
 
         :param line: Number of the line to go to (0 based)
-        :param column: Optional column number. Default start of line.
+        :param column: Optional column number. Default is 0 (start of line).
         :param move: True to move the cursor. False will return the cursor
                      without setting it on the editor.
         :return: The new text cursor
@@ -289,6 +285,10 @@ class TextHelper(object):
         return block.text()
 
     def previous_line_text(self):
+        """
+        Gets the previous line text (relative to the current cursor pos).
+        :return: previous line text (str)
+        """
         if self.current_line_nbr():
             return self.line_text(self.current_line_nbr() - 1)
         return ''
@@ -305,7 +305,7 @@ class TextHelper(object):
         """
         Replace an entire line with ``new_text``.
 
-        :param editor: editor instance
+        :param line_nbr: line number of the line to change.
         :param new_text: The replacement text.
 
         """
@@ -396,6 +396,15 @@ class TextHelper(object):
         editor._cleaning = False
 
     def select_whole_line(self, line=None, apply_selection=True):
+        """
+        Selects an entire line.
+
+        :param line: Line to select
+        :param apply_selection: True to apply selection on the text editor
+            widget, False to just return the text cursor without setting it
+            on the editor.
+        :return: QTextCursor
+        """
         if line is None:
             line = self.current_line_nbr()
         return self.select_lines(line, line, apply_selection=apply_selection)
@@ -529,6 +538,8 @@ class TextHelper(object):
         """
         Gets the character on the right of the text cursor.
 
+        :param cursor: QTextCursor where the search will start.
+
         :return: The word that is on the right of the text cursor.
         """
         if cursor is None:
@@ -541,6 +552,8 @@ class TextHelper(object):
         """
         Gets the character that is on the right of the text cursor.
 
+        :param cursor: QTextCursor that defines the position where the search
+            will start.
         """
         next_char = self.get_right_word(cursor=cursor)
         if len(next_char):
@@ -590,11 +603,7 @@ class TextHelper(object):
         self._editor.setTextCursor(text_cursor)
 
     def selected_text_to_lower(self):
-        """
-        Replaces the selected text by its lower version
-
-        :param editor: CodeEdit instance
-        """
+        """ Replaces the selected text by its lower version """
         text_cursor = self._editor.textCursor()
         text_cursor.insertText(text_cursor.selectedText().lower())
         self._editor.setTextCursor(text_cursor)
@@ -619,6 +628,15 @@ class TextHelper(object):
 
         """
         def compare_cursors(cursor_a, cursor_b):
+            """
+            Compares two QTextCursor
+
+            :param cursor_a: cursor a
+            :param cursor_b: cursor b
+
+            :returns; True if both cursor are identical (same position, same
+                selection)
+            """
             return (cursor_b.selectionStart() >= cursor_a.selectionStart() and
                     cursor_b.selectionEnd() <= cursor_a.selectionEnd())
 
@@ -639,6 +657,13 @@ class TextHelper(object):
         return occurrences, index
 
     def is_comment_or_string(self, cursor_or_block, formats=None):
+        """
+        Checks if a block/cursor is a string or a comment.
+        :param cursor_or_block: QTextCursor or QTextBlock
+        :param formats: the list of color scheme formats to consider. By
+            default, it will consider the following keys: 'comment', 'string',
+            'docstring'.
+        """
         if formats is None:
             formats = ["comment", "string", "docstring"]
         layout = None
@@ -666,6 +691,14 @@ class TextHelper(object):
         return False
 
     def select_extended_word(self, continuation_chars=('.',)):
+        """
+        Performs extended word selection. Extended selection consists in
+        selecting the word under cursor and any other words that are linked
+        by a ``continuation_chars``.
+
+        :param continuation_chars: the list of characters that may extend a
+            word.
+        """
         cursor = self._editor.textCursor()
         original_pos = cursor.position()
         start_pos = None
@@ -706,9 +739,15 @@ class TextHelper(object):
 
     def match_select(self, ignored_symbols=None):
         """
-        Selects text between matching quotes or parentheses.
+        Performs matched selection, selects text between matching quotes or
+        parentheses.
+
+        :param ignored_symbols; matching symbols to ignore.
         """
         def filter_matching(ignored_symbols, matching):
+            """
+            Removes any ignored symbol from the match dict.
+            """
             if ignored_symbols is not None:
                 for symbol in matching.keys():
                     if symbol in ignored_symbols:
@@ -716,6 +755,11 @@ class TextHelper(object):
             return matching
 
         def find_opening_symbol(cursor, matching):
+            """
+            Find the position ot the opening symbol
+            :param cursor: Current text cursor
+            :param matching: symbol matches map
+            """
             start_pos = None
             opening_char = None
             closed = {k: 0 for k in matching.values()
@@ -741,6 +785,14 @@ class TextHelper(object):
             return opening_char, start_pos
 
         def find_closing_symbol(cursor, matching, opening_char, original_pos):
+            """
+            Finds the position of the closing symbol
+
+            :param cursor: current text cursor
+            :param matching: symbold matching dict
+            :param opening_char: the opening character
+            :param original_pos: position of the opening character.
+            """
             end_pos = None
             cursor.setPosition(original_pos)
             rev_matching = {v: k for k, v in matching.items()}
@@ -893,6 +945,13 @@ class TextBlockHelper(object):
 
     @staticmethod
     def set_fold_trigger(block, val):
+        """
+        Set the block fold trigger flag (True means the block is a fold
+        trigger).
+
+        :param block: block to set
+        :param val: value to set
+        """
         if block is None:
             return
         state = block.userState()
@@ -906,6 +965,8 @@ class TextBlockHelper(object):
     def get_fold_trigger_state(block):
         """
         Gets the fold trigger state.
+
+        :param block: QTextBlock
         :return: False for an open trigger, True for for closed trigger
         """
         if block is None:
@@ -947,8 +1008,18 @@ class ParenthesisInfo(object):
 def get_block_symbol_data(editor, block):
     """
     Gets the list of ParenthesisInfo for specific text block.
+
+    :param editor: Code edit instance
+    :param block: block to parse
     """
     def list_symbols(editor, block, character):
+        """
+        Retuns  a list of symbols found in the block text
+
+        :param editor: code edit instance
+        :param block: block to parse
+        :param character: character to look for.
+        """
         text = block.text()
         symbols = []
         cursor = QtGui.QTextCursor(block)
@@ -984,6 +1055,8 @@ def keep_tc_pos(func):
     function exits.
 
     This decorator can only be used on modes or panels.
+
+    :param func: wrapped function
     """
     @functools.wraps(func)
     def wrapper(editor, *args, **kwds):
@@ -1001,6 +1074,12 @@ def keep_tc_pos(func):
 
 
 def with_wait_cursor(func):
+    """
+    Show a wait cursor while the wrapped function is running. The cursor is
+    restored as soon as the function exits.
+
+    :param func: wrapped function
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         QtWidgets.QApplication.setOverrideCursor(

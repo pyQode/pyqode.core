@@ -39,6 +39,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     """
     @property
     def trigger_key(self):
+        """
+        The key that triggers code completion (Default is **Space**:
+        Ctrl + Space).
+        """
         return self._trigger_key
 
     @trigger_key.setter
@@ -55,6 +59,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @property
     def trigger_length(self):
+        """
+        The trigger length defines the word length required to run code
+        completion.
+        """
         return self._trigger_len
 
     @trigger_length.setter
@@ -71,6 +79,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @property
     def trigger_symbols(self):
+        """
+        Defines the list of symbols that immediately trigger a code completion
+        requiest. BY default, this list contains the dot character.
+
+        For C++, we would add the '->' operator to that list.
+        """
         return self._trigger_symbols
 
     @trigger_symbols.setter
@@ -87,6 +101,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @property
     def show_tooltips(self):
+        """
+        True to show tooltips next to the current completion.
+        """
         return self._show_tooltips
 
     @show_tooltips.setter
@@ -103,6 +120,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @property
     def case_sensitive(self):
+        """
+        True to performs case sensitive completion matching.
+        """
         return self._case_sensitive
 
     @case_sensitive.setter
@@ -476,6 +496,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @staticmethod
     def strip_control_characters(input_txt):
+        """
+        Strips control character from ``input_txt``
+        :param input_txt: text to strip.
+        :return: stripped text
+        """
         if input_txt:
             # unicode invalid characters
             re_illegal = \

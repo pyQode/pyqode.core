@@ -1,3 +1,6 @@
+"""
+This module contains the encodings related widgets (combox, menus,...)
+"""
 import locale
 from pyqode.core.api import ENCODINGS_MAP, convert_to_codec_key
 from pyqode.qt import QtCore, QtWidgets
@@ -20,6 +23,9 @@ class EncodingsComboBox(QtWidgets.QComboBox):
     """
     @property
     def current_encoding(self):
+        """
+        Gets/Sets the current encoding
+        """
         return self._current_encoding
 
     @current_encoding.setter

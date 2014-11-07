@@ -22,9 +22,6 @@ class ZoomMode(Mode):
         self.default_font_size = 10
 
     def on_state_changed(self, state):
-        """
-        Connects/Disconnects to the mouse_wheel_activated and key_pressed event
-        """
         if state:
             self.editor.mouse_wheel_activated.connect(
                 self._on_wheel_event)

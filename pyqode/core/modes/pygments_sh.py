@@ -159,9 +159,6 @@ class PygmentsSH(SyntaxHighlighter):
 
     @pygments_style.setter
     def pygments_style(self, value):
-        """
-        Gets/Sets the pygments style
-        """
         self._pygments_style = value
         self._update_style()
         # triggers a rehighlight
@@ -196,6 +193,10 @@ class PygmentsSH(SyntaxHighlighter):
         self.enabled = state
 
     def set_mime_type(self, mime_type):
+        """
+        Update the highlighter lexer based on a mime type.
+        :param mime_type: mime type of the new lexer to setup.
+        """
         try:
             self.set_lexer_from_mime_type(mime_type)
         except:
@@ -220,11 +221,20 @@ class PygmentsSH(SyntaxHighlighter):
     def set_lexer_from_mime_type(self, mime, **options):
         """
         Sets the pygments lexer from mime type.
+
+        :param mime: mime type
+        ;:param options: optional addtional options.
         """
         self._lexer = get_lexer_for_mimetype(mime, **options)
         _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
+        """
+        Highlights the block using a pygments lexer.
+
+        :param text: text of the block to highlith
+        :param block: block to highlight
+        """
         if self.color_scheme.name != self._pygments_style:
             self._pygments_style = self.color_scheme.name
             self._update_style()

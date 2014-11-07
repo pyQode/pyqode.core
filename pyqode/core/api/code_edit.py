@@ -1,3 +1,6 @@
+"""
+This module contains the base code editor widget.
+"""
 from __future__ import print_function
 import sys
 
@@ -543,6 +546,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         mode/panel.
 
         This is also where we cache the cursor position.
+
+        :param clear: True to clear the editor content before closing.
         """
         self.decorations.clear()
         self.modes.clear()
@@ -713,17 +718,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def zoom_in(self, increment=1):
         """
         Zooms in the editor (makes the font bigger).
+
+        :param increment: zoom level increment. Default is 1.
         """
         self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
     @QtCore.Slot()
-    def zoom_out(self, increment=1):
+    def zoom_out(self, decrement=1):
         """
         Zooms out the editor (makes the font smaller).
+
+        :param decrement: zoom level decrement. Default is 1. The value is
+            given as an absolute value.
         """
-        self.zoom_level -= increment
+        self.zoom_level -= decrement
         # make sure font size remains > 0
         if self.font_size + self.zoom_level <= 0:
             self.zoom_level = -self._font_size + 1
@@ -863,10 +873,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.repaint()
 
     def focusOutEvent(self, event):
-        """
-        Saves content if save_on_focus_out is True.
-
-        """
+        # Saves content if save_on_focus_out is True.
         if self.save_on_focus_out and self.dirty and self.file.path:
             self.file.save()
         super(CodeEdit, self).focusOutEvent(event)
@@ -920,6 +927,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         Overrides mouseMovedEvent to display any decoration tooltip and emits
         the mouse_moved event.
+
+        :param event: QMouseEvent
         """
         cursor = self.cursorForPosition(event.pos())
         self._last_mouse_pos = event.pos()

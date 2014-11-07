@@ -35,7 +35,7 @@ class ModesManager(Manager):
         """
         Removes a mode from the editor.
 
-        :param name: The name (or class) of the mode to remove.
+        :param name_or_klass: The name (or class) of the mode to remove.
         :returns: The removed mode.
         """
         _logger().debug('removing mode %r', name_or_klass)

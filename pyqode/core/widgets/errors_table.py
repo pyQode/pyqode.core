@@ -75,11 +75,11 @@ class ErrorsTable(QtWidgets.QTableWidget):
         """ Shows the context menu """
         self.context_mnu.exec_(self.mapToGlobal(pos))
 
-    def clear(self, *args, **kwargs):
+    def clear(self):
         """
         Clears the tables and the message list
         """
-        QtWidgets.QTableWidget.clear(self, *args, **kwargs)
+        QtWidgets.QTableWidget.clear(self)
         self.setRowCount(0)
         self.setColumnCount(4)
         self.setHorizontalHeaderLabels(
@@ -147,6 +147,9 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.msg_activated.emit(msg)
 
     def showDetails(self):
+        """
+        Shows the error details.
+        """
         msg = self.currentItem().data(QtCore.Qt.UserRole)
         QtWidgets.QMessageBox.information(
             self, 'Message details',

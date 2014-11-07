@@ -140,6 +140,9 @@ class CheckerMode(Mode, QtCore.QObject):
     """
     @property
     def messages(self):
+        """
+        Returns the entire list of checker messages.
+        """
         return self._messages
 
     def __init__(self, worker,

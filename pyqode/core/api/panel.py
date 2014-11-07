@@ -88,7 +88,7 @@ class Panel(QtWidgets.QWidget, Mode):
             self.palette().windowText().color()))
 
     def paintEvent(self, event):
-        """ Fills the panel background using QPalette """
+        # Fills the panel background using QPalette
         if self.isVisible():
             # fill background
             self._background_brush = QtGui.QBrush(QtGui.QColor(
@@ -103,6 +103,8 @@ class Panel(QtWidgets.QWidget, Mode):
         Shows/Hides the panel
 
         Automatically call CodeEdit.refresh_panels.
+
+        :param visible: Visible state
         """
         _logger().debug('%s visibility changed', self.name)
         super(Panel, self).setVisible(visible)

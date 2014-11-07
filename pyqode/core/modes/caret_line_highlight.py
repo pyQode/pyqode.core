@@ -24,9 +24,6 @@ class CaretLineHighlighterMode(Mode):
 
     @background.setter
     def background(self, value):
-        """
-        Background color of the caret line
-        """
         self._color = value
         self.refresh()
         # propagate changes to every clone
@@ -45,9 +42,6 @@ class CaretLineHighlighterMode(Mode):
         self._color = None
 
     def on_state_changed(self, state):
-        """
-        On state changed we (dis)connect to the cursorPositionChanged signal
-        """
         if state:
             self.editor.cursorPositionChanged.connect(self.refresh)
             self.editor.new_text_set.connect(self.refresh)

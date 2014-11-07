@@ -107,6 +107,10 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
                                       self.ui.tableWidgetAvailable)
 
     def get_preferred_encodings(self):
+        """
+        Gets the list of preferred encodings.
+        :return: list
+        """
         encodings = []
         for row in range(self.ui.tableWidgetPreferred.rowCount()):
             item = self.ui.tableWidgetPreferred.item(row, 0)
@@ -154,6 +158,14 @@ class DlgEncodingsChoice(QtWidgets.QDialog):
 
     @classmethod
     def choose_encoding(cls, parent, path, encoding):
+        """
+        Show the encodings dialog and returns the user choice.
+
+        :param parent: parent widget.
+        :param path: file path
+        :param encoding: current file encoding
+        :return: selected encoding
+        """
         dlg = cls(parent, path, encoding)
         dlg.exec_()
         return dlg.ui.comboBoxEncodings.current_encoding

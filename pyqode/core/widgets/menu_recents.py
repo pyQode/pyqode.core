@@ -27,15 +27,30 @@ class RecentFilesManager(QtCore.QObject):
         self.updated.emit()
 
     def remove(self, filename):
+        """
+        Remove a file path from the list of recent files.
+        :param filename: Path of the file to remove
+        """
         files = self.get_value('list', [])
         files.remove(filename)
         self.set_value('list', files)
         self.updated.emit()
 
     def get_value(self, key, default=None):
+        """
+        Reads value from QSettings
+        :param key: value key
+        :param default: default value.
+        :return: value
+        """
         return self._settings.value('recent_files/%s' % key, default)
 
     def set_value(self, key, value):
+        """
+        Set the recent files value in QSettings.
+        :param key: value key
+        :param value: new value
+        """
         self._settings.setValue('recent_files/%s' % key, value)
 
     def get_recent_files(self):
@@ -62,6 +77,8 @@ class RecentFilesManager(QtCore.QObject):
         Adds a file to the list (and move it to the top of the list if the
         file already exists)
 
+        :param file: file path to add the list of recent files.
+
         """
         files = self.get_recent_files()
         try:
@@ -75,6 +92,9 @@ class RecentFilesManager(QtCore.QObject):
         self.updated.emit()
 
     def last_file(self):
+        """
+        Returns the path to the last opened file.
+        """
         files = self.get_recent_files()
         return files[0]
 

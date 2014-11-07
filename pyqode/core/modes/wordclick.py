@@ -36,10 +36,6 @@ class WordClickMode(Mode, QtCore.QObject):
         self._timer = DelayJobRunner(delay=200)
 
     def on_state_changed(self, state):
-        """
-        Connects/disconnects slots to/from signals when the mode state
-        changed.
-        """
         if state:
             self.editor.mouse_moved.connect(self._on_mouse_moved)
             self.editor.mouse_pressed.connect(self._on_mouse_pressed)

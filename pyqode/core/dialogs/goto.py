@@ -1,3 +1,6 @@
+"""
+This module contains the go to line dialog.
+"""
 from pyqode.core._forms import dlg_goto_line_ui
 from pyqode.qt import QtWidgets
 
@@ -25,6 +28,10 @@ class DlgGotoLine(QtWidgets.QDialog, dlg_goto_line_ui.Ui_Dialog):
     def get_line(cls, parent, current_line, line_count):
         """
         Gets user selected line.
+
+        :param parent: Parent widget
+        :param current_line: Current line number
+        :param line_count: Number of lines in the current text document.
 
         :returns: tuple(line, status) status is False if the dialog has been
             rejected.

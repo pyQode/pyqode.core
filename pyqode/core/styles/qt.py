@@ -1,3 +1,6 @@
+"""
+This module contains the Qt pygments style.
+"""
 from pygments.style import Style
 from pygments.token import Comment, Error, Generic, Keyword, Literal, Name, \
     Operator, Text, Punctuation

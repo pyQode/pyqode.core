@@ -45,9 +45,8 @@ with open('readme.rst', 'r') as readme:
 # install requirements
 requirements = ['pygments>=1.6', 'pyqode.core', 'chardet']
 
-data_files = []
-data_files.append(('share/applications', ['share/notepad.desktop']))
-data_files.append(('share/pixmaps', ['share/notepad.png']))
+data_files = [('share/applications', ['share/notepad.desktop']),
+              ('share/pixmaps', ['share/notepad.png'])]
 
  
 setup(

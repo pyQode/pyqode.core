@@ -216,11 +216,8 @@ class FoldingPanel(Panel):
         return size_hint
 
     def paintEvent(self, event):
-        """
-        Paints the fold indicators and the possible fold region background
-        on the folding panel.
-
-        """
+        # Paints the fold indicators and the possible fold region background
+        # on the folding panel.
         super(FoldingPanel, self).paintEvent(event)
         painter = QtGui.QPainter(self)
         # Draw background over the selected non collapsed fold region
@@ -324,10 +321,10 @@ class FoldingPanel(Panel):
                          rect.bottomLeft() -
                          QtCore.QPointF(0, 1))
 
-    def get_system_bck_color(self):
+    @staticmethod
+    def get_system_bck_color():
         """
         Gets a system color for drawing the fold scope background.
-
         """
         def merged_colors(colorA, colorB, factor):
             maxFactor = 100
@@ -672,7 +669,8 @@ class FoldingPanel(Panel):
                         event.accept()
                         break
 
-    def _show_previous_blank_lines(self, block):
+    @staticmethod
+    def _show_previous_blank_lines(block):
         """
         Show the block previous blank lines
         """

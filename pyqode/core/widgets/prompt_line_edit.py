@@ -39,20 +39,17 @@ class PromptLineEdit(QtWidgets.QLineEdit):
 
     @property
     def prompt_text(self):
-        return self._promptText
+        """
+        Gets/Sets the prompt text.
+        """
+        return self._prompt_text
 
     @prompt_text.setter
     def prompt_text(self, prompt):
-        """
-        Sets prompt text.
-        """
         self._prompt_text = prompt
         self.update()
 
     def paintEvent(self, event):
-        """QLineEdit.paintEvent implementation.
-        Draws prompt
-        """
         super(PromptLineEdit, self).paintEvent(event)
 
         if self._prompt_text and not self.text() and self.isEnabled():
@@ -81,15 +78,16 @@ class PromptLineEdit(QtWidgets.QLineEdit):
             painter.drawText(rect, va, text)
 
     def resizeEvent(self, event):
-        """QLineEdit.resizeEvent implementation
-        Adjusts Clear button position
-        """
+        # Adjusts Clear button position
         super(PromptLineEdit, self).resizeEvent(event)
         self.button.resize(QtCore.QSize(self._margin, self.height() - 2))
         self.button.move(self.width() - self._margin - 3, 0)
 
     def set_button_visible(self, visible):
-        """Set Clear button visible
+        """
+        Sets the clear button as ``visible``
+
+        :param visible: Visible state (True = visible, False = hidden).
         """
         self.button.setVisible(visible)
         left, top, right, bottom = self.getTextMargins()

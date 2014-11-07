@@ -1,3 +1,6 @@
+"""
+This module contains the splittable tab widget API
+"""
 import logging
 import mimetypes
 import os
@@ -62,6 +65,7 @@ class DraggableTabBar(TabBar):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
+        # drop a tab in a split (may be the same split or another one).
         m = event.mimeData()
         index = self.tabAt(event.pos())
         # Tell interested objects that a tab should be moved.
@@ -108,6 +112,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         self.setAcceptDrops(True)
 
     def tab_under_menu(self):
+        """
+        Returns the tab that sits under the context menu.
+        :return: QWidget
+        """
         return self.tabBar().tabAt(self._menu_pos)
 
     @QtCore.Slot()
@@ -151,6 +159,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
         The function must return a bool that tells whether the save 
         succeeded or not.
+
+        :param editor: editor widget to save.
         """
         return True
 
@@ -249,7 +259,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                 if rm:
                     self.remove_tab(index)
 
-    def _close_widget(self, widget):
+    @staticmethod
+    def _close_widget(widget):
         """
         Closes the given widgets and handles cases where the widget has been
         clone or is a clone of another widget
@@ -291,6 +302,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
     def remove_tab(self, index):
         """
         Overrides removeTab to emit tab_closed and last_tab_closed signals.
+
+        :param index: index of the tab to remove.
         """
         widget = self.widget(index)
         clones = self._close_widget(widget)
@@ -348,6 +361,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             event.acceptProposedAction()
 
     def addTab(self, tab, *args):
+        """
+        Adds a tab to the tab widget, this function set the parent_tab_widget
+        attribute on the tab instance.
+        """
         tab.parent_tab_widget = self
         super(BaseTabWidget, self).addTab(tab, *args)
 
@@ -440,7 +457,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         """
         Split the the current widget in new SplittableTabWidget.
 
-        :param base: widget to split
+        :param widget: widget to split
         :param orientation: orientation of the splitter
         :return: the new splitter
         """
@@ -563,6 +580,10 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 self._remove_from_parent()
 
     def count(self):
+        """
+        Returns the number of widgets currently displayed (takes child splits
+        into account).
+        """
         c = self.main_tab_widget.count()
         for child in self.child_splitters:
             c += child.count()
@@ -594,6 +615,9 @@ class CodeEditTabWidget(BaseTabWidget):
         """
         Re-implements addTab to connect to the dirty changed signal and setup
         some helper attributes.
+
+        :param widget: widget to add
+        :param args: optional addtional arguments (name and/or icon).
         """
         widget.dirty_changed.connect(self._on_dirty_changed)
         super(CodeEditTabWidget, self).addTab(widget, *args)
@@ -828,6 +852,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return tab
 
     def close_document(self, path):
+        """
+        Closes a text document.
+        :param path: Path of the document to close.
+        """
         to_close = []
         for widget in self.widgets(include_clones=True):
             if widget.file.path == path:
@@ -842,6 +870,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         just update the file path and tab title).
 
         Use that function to update a file that has been renamed externally.
+
+        :param old_path: old path (path of the widget to rename with
+            ``new_path``
+        :param new_path: new path that will be used to rename the tab.
         """
         to_rename = []
         title = os.path.split(new_path)[1]

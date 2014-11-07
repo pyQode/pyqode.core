@@ -25,6 +25,7 @@ def echo_worker(data):
     """
     Example of worker that simply echoes back the received data.
 
+    :param data: Request data dict.
     :returns: True, data
     """
     print('echo worker running')
@@ -155,6 +156,9 @@ class DocumentWordsProvider(object):
     def complete(self, code, *args):
         """
         Provides completions based on the document words.
+
+        :param code: code to complete
+        :param args: additional (unused) arguments.
         """
         completions = []
         for word in self.split(code, self.separators):
@@ -165,6 +169,10 @@ class DocumentWordsProvider(object):
 def finditer_noregex(string, sub, whole_word):
     """
     Search occurrences using str.find instead of regular expressions.
+
+    :param string: string to parse
+    :param sub: search string
+    :param whole_word: True to select whole words only
     """
     start = 0
     while True:

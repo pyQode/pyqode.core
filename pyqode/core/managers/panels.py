@@ -30,14 +30,14 @@ class PanelsManager(Manager):
             Panel.Position.BOTTOM: {}
         }
         editor.blockCountChanged.connect(self._update_viewport_margins)
-        editor.updateRequest.connect(self.update)
+        editor.updateRequest.connect(self._update)
 
     def append(self, panel, position=Panel.Position.LEFT):
         """
-        Install a panel on the editor.
+        Installs a panel on the editor.
 
         :param panel: Panel to install
-        :param position: Panel position
+        :param position: Position where the panel must be installed.
         :return: The installed panel
         """
         assert panel is not None
@@ -126,8 +126,8 @@ class PanelsManager(Manager):
         """ Refreshes the editor panels (resize and update margins) """
         _logger().debug('refresh_panels')
         self.resize()
-        self.update(self.editor.contentsRect(), 0,
-                    force_update_margins=True)
+        self._update(self.editor.contentsRect(), 0,
+                     force_update_margins=True)
 
     def resize(self):
         """ Resizes panels """
@@ -190,7 +190,7 @@ class PanelsManager(Manager):
                 size_hint.height())
             bottom += size_hint.height()
 
-    def update(self, rect, delta_y, force_update_margins=False):
+    def _update(self, rect, delta_y, force_update_margins=False):
         """ Updates panels """
         helper = TextHelper(self.editor)
         if not self:

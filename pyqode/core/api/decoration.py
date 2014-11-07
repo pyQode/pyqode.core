@@ -153,6 +153,8 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
     def set_as_underlined(self, color=QtCore.Qt.blue):
         """
         Underlines the text
+
+        :param color: underline color.
         """
         self.format.setUnderlineStyle(
             QtGui.QTextCharFormat.SingleUnderline)

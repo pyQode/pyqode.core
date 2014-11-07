@@ -208,7 +208,8 @@ class FileManager(Manager):
         self.open(self.path, encoding=encoding,
                   use_cached_encoding=False)
 
-    def _rm(self, tmp_path):
+    @staticmethod
+    def _rm(tmp_path):
         try:
             os.remove(tmp_path)
         except OSError:
@@ -308,6 +309,7 @@ class FileManager(Manager):
             - clear editor content
             - reset file attributes to their default values
 
+        :param clear: True to clear the editor content. Default is True.
         """
         Cache().set_cursor_position(
             self.path, TextHelper(self.editor).cursor_position())

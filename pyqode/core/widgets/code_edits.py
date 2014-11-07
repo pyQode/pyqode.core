@@ -21,7 +21,14 @@ class TextCodeEdit(CodeEdit):
     highlighter does not do anything.
     """
     class TextSH(SyntaxHighlighter):
+        """
+        Empty highlighter, does not do anything (very fast at loading very
+        big files).
+        """
         def highlight_block(self, text, user_data):
+            """
+            Does nothing
+            """
             pass
 
     mimetypes = ['text/x-plain', 'text/x-log', 'text/plain']

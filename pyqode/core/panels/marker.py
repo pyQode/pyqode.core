@@ -206,14 +206,11 @@ class MarkerPanel(Panel):
                             self._icons[key].paint(painter, rect)
 
     def mousePressEvent(self, event):
-        """
-        Handle mouse press:
-
-            - emit add marker signal if there were no marker under the mouse
-              cursor
-            - emit remove marker signal if there were one or more markers under
-              the mouse cursor.
-        """
+        # Handle mouse press:
+        # - emit add marker signal if there were no marker under the mouse
+        #   cursor
+        # - emit remove marker signal if there were one or more markers under
+        #   the mouse cursor.
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         if self.marker_for_line(line):
             _logger().debug("remove marker requested")
@@ -223,9 +220,7 @@ class MarkerPanel(Panel):
             self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):
-        """
-        Requests a tooltip if the cursor is currently over a marker.
-        """
+        # Requests a tooltip if the cursor is currently over a marker.
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         markers = self.marker_for_line(line)
         text = '\n'.join([marker.description for marker in markers if

@@ -76,6 +76,8 @@ class InteractiveConsole(QTextEdit):
         .. code-block:: python
 
             def write(text_edit, text, color)
+
+        :param writer: write function as described above.
         """
         if self._writer != writer and self._writer:
             self._writer = None
@@ -188,6 +190,10 @@ class InteractiveConsole(QTextEdit):
 
     @property
     def is_running(self):
+        """
+        Checks if the process is running.
+        :return:
+        """
         return self._running
 
     def closeEvent(self, *args, **kwargs):
@@ -206,6 +212,8 @@ class InteractiveConsole(QTextEdit):
 
         :param cwd: Working directory
         :type cwd: str
+
+        :param env: environment variables (dict).
         """
         self.setReadOnly(False)
         if env is None:

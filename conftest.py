@@ -25,6 +25,7 @@ from pyqode.core.api.code_edit import CodeEdit
 def pytest_runtest_setup(item):
     """
     Display test method name in active window title bar
+    ;param item: test item to run
     """
     global _widget
     module, line, method = item.location
@@ -57,12 +58,21 @@ _widget = None
 # -------------------
 @pytest.fixture(scope="session")
 def app(request):
+    """
+    Application fixture, returns a reference to the main QApplication.
+    :param request:
+    :return:
+    """
     global _app
     return app
 
 
 @pytest.fixture(scope="session")
 def editor(request):
+    """
+    Editor fixture, returns a reference to the test editor widget.
+    :param request: fixture request
+    """
     global _app, _widget
     from test import helpers
 
@@ -78,6 +88,9 @@ def editor(request):
     _widget.save_on_focus_out = False
 
     def fin():
+        """
+        Finalize fixture, stop backend and delete editor widget.
+        """
         global _widget
         logging.info('teardown session editor')
         _widget.backend.stop()

@@ -13,6 +13,9 @@ def print_tree(editor, file=sys.stdout, print_blocks=False):
     Prints the editor fold tree to stdout, for debugging purpose.
 
     :param editor: CodeEdit instance.
+    :param file: file handle where the tree will be printed. Default is stdout.
+    :param print_blocks: True to print all blocks, False to only print blocks
+        that are fold triggers
     """
     block = editor.document().firstBlock()
     while block.isValid():
@@ -140,6 +143,12 @@ class IndentFoldDetector(FoldDetector):
     """
 
     def detect_fold_level(self, prev_block, block):
+        """
+        Detects fold level by looking at the block indentation.
+
+        :param prev_block: previous text block
+        ;:param block; current block to highlight
+        """
         text = block.text()
         # round down to previous indentation guide to ensure contiguous block
         # fold level evolution.
@@ -199,6 +208,9 @@ class FoldScope(object):
 
         .. note:: Start line do no encompass the trigger line.
 
+        :param ignore_blank_lines: True to ignore blank lines at the end of the
+            scope (the method will rewind to find that last meaningful block
+            that is part of the fold scope).
         :returns: tuple(int, int)
         """
         ref_lvl = self.trigger_level
@@ -261,6 +273,7 @@ class FoldScope(object):
         This generator generates the list of blocks directly under the fold
         region. This list does not contain blocks from child regions.
 
+        :param ignore_blank_lines: True to ignore last blank lines.
         """
         start, end = self.get_range(ignore_blank_lines=ignore_blank_lines)
         block = self._trigger.next()
@@ -310,6 +323,7 @@ class FoldScope(object):
         """
         Get the scope text, with a possible maximum number of lines.
 
+        :param max_lines: limit the number of lines returned to a maximum.
         :return: str
         """
         ret_val = []
@@ -326,6 +340,7 @@ class FoldScope(object):
         """
         Find parent scope, if the block is not a fold trigger.
 
+        :param block: block from which the research will start
         """
         original = block
         if not TextBlockHelper.is_fold_trigger(block):

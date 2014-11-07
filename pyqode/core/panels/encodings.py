@@ -45,6 +45,9 @@ class EncodingPanel(Panel):
 
     @property
     def color(self):
+        """
+        Returns the panel color.
+        """
         return self._color
 
     @color.setter

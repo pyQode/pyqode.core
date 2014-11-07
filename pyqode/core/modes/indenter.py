@@ -66,6 +66,8 @@ class IndenterMode(Mode):
     def unindent_selection(self, cursor):
         """
         Un-indents selected text
+
+        :param cursor: QTextCursor
         """
         doc = self.editor.document()
         tab_len = self.editor.tab_length
@@ -119,10 +121,6 @@ class IndenterMode(Mode):
             else:
                 cursor.insertText('\t')
             cursor.endEditBlock()
-
-    def atBlockStart(self, cursor):
-        assert isinstance(cursor, QtGui.QTextCursor)
-        return cursor.columnNumber() <= self.editor.min_indent_column
 
     def unindent(self):
         """

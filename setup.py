@@ -4,6 +4,7 @@
 Setup script for pyqode.core
 """
 from setuptools import setup, find_packages
+from pyqode.core import __version__
 
 #
 # add ``build_ui command`` (optional, for development only)
@@ -20,18 +21,6 @@ except ImportError:
     cmdclass = {}
 
 
-def read_version():
-    with open("pyqode/core/__init__.py") as f:
-        lines = f.read().splitlines()
-        for l in lines:
-            if "__version__" in l:
-                return l.split("=")[1].strip().replace("'", '')
-
-
-def readme():
-    return str(open('README.rst').read())
-
-
 pygments_req = 'pygments'
 if sys.version_info[0] == 3 and sys.version_info[1] == 2:
     # pygment 2 does not support Python 3.2
@@ -41,7 +30,7 @@ if sys.version_info[0] == 3 and sys.version_info[1] == 2:
 setup(
     name='pyqode.core',
     namespace_packages=['pyqode'],
-    version=read_version(),
+    version=__version__,
     packages=[p for p in find_packages() if 'test' not in p],
     keywords=["CodeEdit PyQt source code editor widget qt"],
     url='https://github.com/pyQode/pyqode.core',
@@ -49,7 +38,7 @@ setup(
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
     description='Python/Qt Code Editor widget',
-    long_description=readme(),
+    long_description=str(open('README.rst').read()),
     install_requires=[pygments_req, 'pyqode.qt', 'future'],
     entry_points={
         'console_scripts': [

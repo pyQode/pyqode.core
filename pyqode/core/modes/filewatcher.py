@@ -27,9 +27,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
 
     @auto_reload.setter
     def auto_reload(self, value):
-        """
-        Automatically reloads changed files
-        """
         self._auto_reload = value
         if self.editor:
             # propagate changes to every clone
@@ -54,9 +51,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._processing = False
 
     def on_state_changed(self, state):
-        """
-        Connects/Disconnects to the mouse_wheel_activated and key_pressed event
-        """
         if state:
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
@@ -174,8 +168,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
 
     def _notify_deleted_file(self):
         """
-        Notify user from external file removal if autoReloadChangedFiles is
-        False then reload the changed file in the editor
+        Notify user from external file deletion.
         """
         self.file_deleted.emit(self.editor)
 

@@ -41,6 +41,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             self._ignored_unused = []
 
         def set_root_path(self, path):
+            """
+            Sets the root path to watch.
+            :param path: root path (str).
+            """
             self._ignored_unused = []
             parent_dir = os.path.dirname(path)
             for item in os.listdir(parent_dir):
@@ -48,12 +52,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
                 if item_path != path:
                     self._ignored_unused.append(os.path.normpath(item_path))
 
-        def filterAcceptsRow(self, sourceRow, sourceParent):
-            """
-            Filters model indices based on the list of ``ignored_directories``
-            and ``ignored_extensions``.
-            """
-            index0 = self.sourceModel().index(sourceRow, 0, sourceParent)
+        def filterAcceptsRow(self, row, parent):
+            index0 = self.sourceModel().index(row, 0, parent)
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
             fp = os.path.normpath(finfo.filePath())
@@ -177,12 +177,15 @@ class FileSystemHelper:
     File system helper. Helps manipulating the clipboard for file operations
     on the tree view (drag & drop, context menu, ...).
     """
-    class UrlListMimeData(QtCore.QMimeData):
+    class _UrlListMimeData(QtCore.QMimeData):
         def __init__(self, copy=True):
             super().__init__()
             self.copy = copy
 
         def set_list(self, urls):
+            """
+            Sets the lis of urls into the mime type data.
+            """
             lst = []
             for url in urls:
                 lst.append(url)
@@ -190,6 +193,12 @@ class FileSystemHelper:
 
         @classmethod
         def list_from(cls, mime_data, copy=True):
+            """
+            Returns a list of url from mimetype data
+            :param mime_data: mime data from which we must read the list of
+                urls
+            :param copy: True to copy, False to cut
+            """
             string = bytes(mime_data.data(cls.format(copy))).decode('utf-8')
             lst = string.split('\n')
             urls = []
@@ -209,13 +218,13 @@ class FileSystemHelper:
 
     def copy_to_clipboard(self, copy=True):
         """
-        Copy the selected items to the clipboard
+        Copies the selected items to the clipboard
         :param copy: True to copy, False to cut.
         """
         urls = self.selected_urls()
         if not urls:
             return
-        mime = self.UrlListMimeData(copy)
+        mime = self._UrlListMimeData(copy)
         mime.set_list(urls)
         clipboard = QtWidgets.QApplication.clipboard()
         clipboard.setMimeData(mime)
@@ -234,7 +243,7 @@ class FileSystemHelper:
 
     def paste_from_clipboard(self):
         """
-        Paste files from clipboard.
+        Pastes files from clipboard.
         """
         to = self.get_current_path()
         if os.path.isfile(to):
@@ -242,13 +251,13 @@ class FileSystemHelper:
         mime = QtWidgets.QApplication.clipboard().mimeData()
 
         paste_operation = None
-        if mime.hasFormat(self.UrlListMimeData.format(copy=True)):
+        if mime.hasFormat(self._UrlListMimeData.format(copy=True)):
             paste_operation = True
-        elif mime.hasFormat(self.UrlListMimeData.format(copy=False)):
+        elif mime.hasFormat(self._UrlListMimeData.format(copy=False)):
             paste_operation = False
         if paste_operation is not None:
             self._paste(
-                self.UrlListMimeData.list_from(mime, copy=paste_operation), to,
+                self._UrlListMimeData.list_from(mime, copy=paste_operation), to,
                 copy=paste_operation)
 
     def _paste(self, sources, destination, copy):
@@ -285,7 +294,8 @@ class FileSystemHelper:
                 _logger().info('removing source (cut operation)')
                 os.remove(src)
 
-    def _get_files(self, path):
+    @staticmethod
+    def _get_files(path):
         """
         Returns the list of files contained in path (recursively).
         """
@@ -297,7 +307,7 @@ class FileSystemHelper:
 
     def delete(self):
         """
-        Delete the selected file items.
+        Deletes the selected items.
         """
         urls = self.selected_urls()
         rep = QtWidgets.QMessageBox.question(
@@ -320,11 +330,14 @@ class FileSystemHelper:
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
                     _logger().exception('failed to remove %s', fn)
                 else:
-                    for fn in deleted_files:
-                        _logger().info('%s removed', fn)
-                        self.tree_view.file_deleted.emit(os.path.normpath(fn))
+                    for d in deleted_files:
+                        _logger().info('%s removed', d)
+                        self.tree_view.file_deleted.emit(os.path.normpath(d))
 
     def get_current_path(self):
+        """
+        Gets the path of the currently selected item.
+        """
         path = self.tree_view.fileInfo(
             self.tree_view.currentIndex()).filePath()
         # https://github.com/pyQode/pyQode/issues/6
@@ -333,11 +346,17 @@ class FileSystemHelper:
         return path
 
     def copy_path_to_clipboard(self):
+        """
+        Copies the file path to the clipboard
+        """
         path = self.get_current_path()
         QtWidgets.QApplication.clipboard().setText(path)
         _logger().info('path copied: %s' % path)
 
     def rename(self):
+        """
+        Renames the selected item in the tree view
+        """
         src = self.get_current_path()
         pardir, name = os.path.split(src)
         new_name, status = QtWidgets.QInputDialog.getText(
@@ -350,6 +369,10 @@ class FileSystemHelper:
                                              os.path.normpath(dest))
 
     def create_directory(self):
+        """
+        Creates a directory under the selected directory (if the selected item
+        is a file, the parent directory is used).
+        """
         src = self.get_current_path()
         name, status = QtWidgets.QInputDialog.getText(
             self.tree_view, 'Create directory', 'Name:',
@@ -367,6 +390,9 @@ class FileSystemHelper:
             os.makedirs(os.path.join(src, name), exist_ok=True)
 
     def create_file(self):
+        """
+        Creates a file under the current directory.
+        """
         src = self.get_current_path()
         name, status = QtWidgets.QInputDialog.getText(
             self.tree_view, 'Create new file', 'File name:',

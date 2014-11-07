@@ -1,3 +1,6 @@
+"""
+This module contains the syntax highlighter API.
+"""
 import logging
 import sys
 import time
@@ -211,13 +214,32 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     @property
     def formats(self):
+        """
+        Returns the color shcme formats dict.
+        """
         return self._color_scheme.formats
 
     @property
     def color_scheme(self):
+        """
+        Returns a reference to the current color scheme.
+        """
         return self._color_scheme
 
+    @color_scheme.setter
+    def color_scheme(self, color_scheme):
+        if color_scheme.name != self._color_scheme.name:
+            self._color_scheme = color_scheme
+            self.refresh_editor(color_scheme)
+            self.rehighlight()
+
     def refresh_editor(self, color_scheme):
+        """
+        Refresh editor settings (background and highlight colors) when color
+        scheme changed.
+
+        :param color_scheme: new color scheme.
+        """
         self.editor.background = color_scheme.background
         self.editor.foreground = color_scheme.formats[
             'normal'].foreground().color()
@@ -238,14 +260,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             mode.refresh_decorations(force=True)
         self.editor._reset_stylesheet()
 
-    @color_scheme.setter
-    def color_scheme(self, color_scheme):
-        if color_scheme.name != self._color_scheme.name:
-            self._color_scheme = color_scheme
-            self.refresh_editor(color_scheme)
-            self.rehighlight()
-
     def __init__(self, parent, color_scheme=None):
+        """
+        :param parent: parent document (QTextDocument)
+        :param color_scheme: color scheme to use.
+        """
         QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         if not color_scheme:
@@ -267,7 +286,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             self.setFormat(index, length, self.formats['whitespace'])
             index = self.WHITESPACES.indexIn(text, index + length)
 
-    def _find_prev_non_blank_block(self, current_block):
+    @staticmethod
+    def _find_prev_non_blank_block(current_block):
         previous_block = (current_block.previous()
                           if current_block.blockNumber() else None)
         # find the previous non-blank block
@@ -278,7 +298,11 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
     def highlightBlock(self, text):
         """
-        Highlights a block of text.
+        Highlights a block of text. Please do not override, this method.
+        Instead you should implement
+        :func:`pyqode.core.api.SyntaxHighlighter.highlight_block`.
+
+        :param text: text to highlight.
         """
         current_block = self.currentBlock()
         previous_block = self._find_prev_non_blank_block(current_block)
@@ -326,9 +350,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
 class TextBlockUserData(QtGui.QTextBlockUserData):
     """
-    Custom text block user data, mainly used to store block checker messages
-    and markers.
-
+    Custom text block user data, mainly used to store checker messages and
+    markers.
     """
     def __init__(self):
         super(TextBlockUserData, self).__init__()
