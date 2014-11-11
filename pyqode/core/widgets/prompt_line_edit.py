@@ -56,6 +56,9 @@ class PromptLineEdit(QtWidgets.QLineEdit):
             if os.environ['QT_API'].lower() == 'pyqt4':
                 from PyQt4.QtGui import QStyleOptionFrameV3
                 option = QStyleOptionFrameV3()
+            elif os.environ['QT_API'].lower() == 'pyside':
+                from PySide.QtGui import QStyleOptionFrameV3
+                option = QStyleOptionFrameV3()
             else:
                 from PyQt5.QtWidgets import QStyleOptionFrame
                 option = QStyleOptionFrame()
