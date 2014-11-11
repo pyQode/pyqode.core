@@ -126,8 +126,11 @@ class BackendManager(Manager):
             socket = JsonTcpClient(
                 self.editor, self._port, worker_class_or_function, args,
                 on_receive=on_receive)
-            socket.finished.connect(self._sockets.remove)
+            socket.finished.connect(self._rm_socket)
             self._sockets.append(socket)
+
+    def _rm_socket(self, socket):
+        self._sockets.remove(socket)
 
     @property
     def running(self):

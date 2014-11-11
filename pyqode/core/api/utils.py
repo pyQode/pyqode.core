@@ -674,7 +674,7 @@ class TextHelper(object):
         elif isinstance(cursor_or_block, QtGui.QTextCursor):
             b = cursor_or_block.block()
             pos = cursor_or_block.position() - b.position()
-            layout = cursor_or_block.block().layout()
+            layout = b.layout()
         if layout is not None:
             additional_formats = layout.additionalFormats()
             sh = self._editor.syntax_highlighter
