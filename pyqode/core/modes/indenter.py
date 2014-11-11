@@ -71,8 +71,9 @@ class IndenterMode(Mode):
         """
         doc = self.editor.document()
         tab_len = self.editor.tab_length
-        cursor.beginEditBlock()
         nb_lines = len(cursor.selection().toPlainText().splitlines())
+        if nb_lines == 0:
+            nb_lines = 1
         block = doc.findBlock(cursor.selectionStart())
         assert isinstance(block, QtGui.QTextBlock)
         i = 0
@@ -100,8 +101,6 @@ class IndenterMode(Mode):
                     c.deleteChar()
             block = block.next()
             i += 1
-        cursor.endEditBlock()
-        self.editor.setTextCursor(cursor)
         return cursor
 
     def indent(self):
@@ -130,7 +129,10 @@ class IndenterMode(Mode):
         cursor = self.editor.textCursor()
         _logger().debug('cursor has selection %r', cursor.hasSelection())
         if cursor.hasSelection():
+            cursor.beginEditBlock()
             self.unindent_selection(cursor)
+            cursor.endEditBlock()
+            self.editor.setTextCursor(cursor)
         else:
             tab_len = self.editor.tab_length
             # count the number of spaces deletable, stop at tab len
@@ -146,15 +148,14 @@ class IndenterMode(Mode):
                     break
                 trav_cursor.setPosition(pos - 1)
             _logger().debug('unindent by %d space' % spaces)
+            cursor.beginEditBlock()
             if spaces:
-                cursor.beginEditBlock()
                 for _ in range(spaces):
                     cursor.deletePreviousChar()
-                cursor.endEditBlock()
             else:
-                cursor.select(cursor.LineUnderCursor)
-                _logger().debug('select whole line and unindent selection')
+                _logger().debug('select whole line and un-indent selection')
                 _logger().debug(cursor.selectedText())
                 cursor = self.unindent_selection(cursor)
-                cursor.clearSelection()
-                _logger().debug(cursor.block().text())
+            cursor.endEditBlock()
+            self.editor.setTextCursor(cursor)
+            _logger().debug(cursor.block().text())
