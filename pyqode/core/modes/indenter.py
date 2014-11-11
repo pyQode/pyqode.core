@@ -125,16 +125,7 @@ class IndenterMode(Mode):
         """
         Un-indents text at cursor position.
         """
-        _logger().debug('unindent')
-        cursor = self.editor.textCursor()
-        _logger().debug('cursor has selection %r', cursor.hasSelection())
-        if cursor.hasSelection():
-            cursor.beginEditBlock()
-            self.unindent_selection(cursor)
-            cursor.endEditBlock()
-            self.editor.setTextCursor(cursor)
-        else:
-            tab_len = self.editor.tab_length
+        def count_deletable_spaces(cursor, tab_len):
             # count the number of spaces deletable, stop at tab len
             spaces = 0
             trav_cursor = QtGui.QTextCursor(cursor)
@@ -147,14 +138,28 @@ class IndenterMode(Mode):
                 else:
                     break
                 trav_cursor.setPosition(pos - 1)
-            _logger().debug('unindent by %d space' % spaces)
+            return spaces
+
+        _logger().debug('unindent')
+        cursor = self.editor.textCursor()
+        _logger().debug('cursor has selection %r', cursor.hasSelection())
+        if cursor.hasSelection():
+            cursor.beginEditBlock()
+            self.unindent_selection(cursor)
+            cursor.endEditBlock()
+            self.editor.setTextCursor(cursor)
+        else:
+            tab_len = self.editor.tab_length
+            spaces = count_deletable_spaces(cursor, tab_len)
+            _logger().debug('deleting %d space before cursor' % spaces)
             cursor.beginEditBlock()
             if spaces:
+                # delete spaces before cursor
                 for _ in range(spaces):
                     cursor.deletePreviousChar()
             else:
-                _logger().debug('select whole line and un-indent selection')
-                _logger().debug(cursor.selectedText())
+                # un-indent whole line
+                _logger().debug('un-indent whole line')
                 cursor = self.unindent_selection(cursor)
             cursor.endEditBlock()
             self.editor.setTextCursor(cursor)
