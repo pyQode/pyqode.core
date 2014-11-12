@@ -59,7 +59,7 @@ class EncodingsComboBox(QtWidgets.QComboBox):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                _logger().warning('KeyError with encoding:', encoding)
+                _logger().warning('KeyError with encoding: %s', encoding)
             else:
                 self.addItem('%s (%s)' % (alias, lang))
                 self.setItemData(i, encoding, QtCore.Qt.UserRole)

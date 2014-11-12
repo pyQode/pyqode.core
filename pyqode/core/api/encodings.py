@@ -103,4 +103,44 @@ def convert_to_codec_key(value):
     :param value: value to convert.
     """
     # UTF-8 -> utf_8
-    return value.replace('-', '_').lower()
+    converted = value.replace('-', '_').lower()
+    # fix some corner cases
+    all_aliases = {
+        'ascii': [
+            'us_ascii',
+            'us',
+            'ansi_x3.4_1968',
+            'cp367',
+            'csascii',
+            'ibm367',
+            'iso_ir_6',
+            'iso646_us',
+            'iso_646.irv:1991'
+        ],
+        'utf-7': [
+            'csunicode11utf7',
+            'unicode_1_1_utf_7',
+            'unicode_2_0_utf_7',
+            'x_unicode_1_1_utf_7',
+            'x_unicode_2_0_utf_7',
+        ],
+        'utf_8': [
+            'unicode_1_1_utf_8',
+            'unicode_2_0_utf_8',
+            'x_unicode_1_1_utf_8',
+            'x_unicode_2_0_utf_8',
+        ],
+        'utf_16': [
+            'utf_16le',
+            'ucs_2',
+            'unicode',
+            'iso_10646_ucs2'
+        ],
+        'latin_1': ['iso_8859_1']
+    }
+
+    for key, aliases in all_aliases.items():
+        if converted in aliases:
+            print('key', key, converted, aliases)
+            return key
+    return converted
