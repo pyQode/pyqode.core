@@ -98,7 +98,7 @@ class CheckerPanel(Panel):
                 self._job_runner.cancel_requests()
             self._previous_line = line
 
-    def leaveEvent(self):
+    def leaveEvent(self, *args):
         """
         Hide tooltip when leaving the panel region.
         """
