@@ -104,7 +104,7 @@ def convert_to_codec_key(value):
     """
     # UTF-8 -> utf_8
     converted = value.replace('-', '_').lower()
-    # fix some corner cases
+    # fix some corner cases, see https://github.com/pyQode/pyQode/issues/11
     all_aliases = {
         'ascii': [
             'us_ascii',
@@ -141,6 +141,5 @@ def convert_to_codec_key(value):
 
     for key, aliases in all_aliases.items():
         if converted in aliases:
-            print('key', key, converted, aliases)
             return key
     return converted
