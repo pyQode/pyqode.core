@@ -2,6 +2,7 @@
 This module contains the encodings related widgets (combox, menus,...)
 """
 import locale
+import logging
 from pyqode.core.api import ENCODINGS_MAP, convert_to_codec_key
 from pyqode.qt import QtCore, QtWidgets
 from pyqode.core.cache import Cache
@@ -58,7 +59,7 @@ class EncodingsComboBox(QtWidgets.QComboBox):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                _logger().debug('KeyError with encoding:', encoding)
+                _logger().warning('KeyError with encoding:', encoding)
             else:
                 self.addItem('%s (%s)' % (alias, lang))
                 self.setItemData(i, encoding, QtCore.Qt.UserRole)
