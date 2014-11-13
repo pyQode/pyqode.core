@@ -2,11 +2,11 @@
 
 |
 
-.. image:: http://img.shields.io/pypi/v/pyqode.core.png
+.. image:: https://pypip.in/version/pyqode.core/badge.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Latest PyPI version
 
-.. image:: http://img.shields.io/pypi/dm/pyqode.core.png
+.. image:: https://pypip.in/download/pyqode.core/badge.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Number of PyPI downloads
 
