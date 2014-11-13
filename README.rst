@@ -1,7 +1,5 @@
 .. image:: https://raw.githubusercontent.com/pyQode/pyQode/master/media/pyqode-banner.png
-
 |
-
 .. image:: https://pypip.in/version/pyqode.core/badge.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Latest PyPI version
@@ -15,8 +13,6 @@
    :alt: Supported python version
    
 .. image:: https://pypip.in/license/pyqode.core/badge.svg
-
-|
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
    :target: https://travis-ci.org/pyQode/pyqode.core
