@@ -13,6 +13,8 @@
 .. image:: https://pypip.in/py_versions/pyqode.core/badge.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Supported python version
+   
+.. image:: https://pypip.in/license/pyqode.core/badge.svg
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
    :target: https://travis-ci.org/pyQode/pyqode.core
@@ -36,12 +38,6 @@ a given language.
 - `Contributing`_
 - `Changelog`_
 - `Screenshots`_
-
-
-License
--------
-
-pyqode.core is licensed under the **MIT license**.
 
 
 Requirements
