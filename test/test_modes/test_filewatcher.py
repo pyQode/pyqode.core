@@ -43,7 +43,7 @@ def test_modif_accept_with_focus(editor):
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
             f2.write("test file %s" % datetime.datetime.now())
-    editor.setFocus(True)
+    editor.setFocus()
     QtCore.QTimer.singleShot(1500, accept_mbox)
     # wait for the message box to appear
     QTest.qWait(1000)
@@ -58,7 +58,7 @@ def test_modif_reject_with_focus(editor):
     with open(file_path, 'r') as f:
         with open(file_path, 'w') as f2:
             f2.write("test file %s" % datetime.datetime.now())
-    editor.setFocus(True)
+    editor.setFocus()
     QtCore.QTimer.singleShot(1500, reject_mbox)
     # wait for the message box to appear
     QTest.qWait(1000)

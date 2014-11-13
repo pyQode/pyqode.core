@@ -313,7 +313,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         if self.count() == 0:
             self.last_tab_closed.emit()
 
-    @QtCore.Slot()
     def _on_split_requested(self):
         """
         Emits the split requested signal with the desired orientation.
@@ -330,7 +329,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
     def _on_current_changed(self, index):
         tab = self.widget(index)
         if tab:
-            tab.setFocus(True)
+            tab.setFocus()
 
     def _on_tab_move_request(self, widget, new_index):
         parent = widget.parent_tab_widget
@@ -341,7 +340,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         widget.parent_tab_widget = self
         self.insertTab(new_index, widget, icon, text)
         self.setCurrentIndex(new_index)
-        widget.setFocus(True)
+        widget.setFocus()
         if parent.count() == 0:
             parent.last_tab_closed.emit()
 
@@ -439,7 +438,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self.main_tab_widget.show()
         tab._uuid = self._uuid
         tab.horizontalScrollBar().setValue(0)
-        tab.setFocus(True)
+        tab.setFocus()
         self._on_focus_changed(None, tab)
 
     def _make_splitter(self):
@@ -461,6 +460,10 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         :param orientation: orientation of the splitter
         :return: the new splitter
         """
+        if orientation == int(QtCore.Qt.Horizontal):
+            orientation = QtCore.Qt.Horizontal
+        else:
+            orientation = QtCore.Qt.Vertical
         self.setOrientation(orientation)
         splitter = self._make_splitter()
         splitter.show()

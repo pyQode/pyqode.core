@@ -654,7 +654,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param action: Action/seprator to remove.
         """
-        self._actions.remove(action)
+        try:
+            self._actions.remove(action)
+        except ValueError:
+            pass
         self.removeAction(action)
 
     def add_menu(self, menu):

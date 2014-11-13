@@ -265,7 +265,7 @@ class TabWidget(QTabWidget):
         self.setCurrentIndex(index)
         self.setTabText(index, code_edit._tab_name)
         try:
-            code_edit.setFocus(True)
+            code_edit.setFocus()
         except TypeError:
             # PySide
             code_edit.setFocus()

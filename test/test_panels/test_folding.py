@@ -37,7 +37,7 @@ def test_mouse_move(editor):
     assert len(editor.decorations) >= 4
     QTest.mouseMove(panel, QtCore.QPoint(0, 0))
     panel.leaveEvent(None)
-    editor.setFocus(True)
+    editor.setFocus()
     panel.highlight_caret_scope = True
 
 
@@ -94,7 +94,7 @@ def test_mouse_press(editor):
     # cleanup
     QTest.mouseMove(panel, QtCore.QPoint(0, 0))
     panel.leaveEvent(None)
-    editor.setFocus(True)
+    editor.setFocus()
     panel.highlight_caret_scope = True
 
 

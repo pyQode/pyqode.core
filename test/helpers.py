@@ -225,7 +225,7 @@ def ensure_visible(func):
         QtWidgets.QApplication.setActiveWindow(editor)
         editor.show()
         editor.raise_()
-        editor.setFocus(True)
+        editor.setFocus()
         editor.setReadOnly(False)
         return func(editor, *args, **kwds)
     return wrapper

@@ -104,7 +104,7 @@ def test_focus_out_event(editor):
     assert not panel.hasFocus()
     # reopen panel for next tests
     panel.on_actionSearch_triggered()
-    panel.setFocus(True)
+    panel.setFocus()
 
 
 @editor_open(__file__)
