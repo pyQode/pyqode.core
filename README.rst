@@ -1,8 +1,6 @@
 .. image:: https://raw.githubusercontent.com/pyQode/pyQode/master/media/pyqode-banner.png
 
-
-About
------
+|
 
 .. image:: http://img.shields.io/pypi/v/pyqode.core.png
    :target: https://pypi.python.org/pypi/pyqode.core/
@@ -12,15 +10,20 @@ About
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master   
-   :target: https://travis-ci.org/pyQode/pyqode.core                      
-   :alt: Travis-CI build status                                                                                                       
+.. image:: https://pypip.in/py_versions/pyqode.core/badge.svg
+   :target: https://pypi.python.org/pypi/pyqode.core/
+   :alt: Supported python version
 
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master     
-   :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master       
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
+   :target: https://travis-ci.org/pyQode/pyqode.core
+   :alt: Travis-CI build status
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master
+   :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master
    :alt: Coverage Status
 
-
+About
+-----
 **pyqode.core** is the core framework of the `pyQode`_ project. It contains the
 base classes and a set of extensions (modes/panels/managers) that you can use
 to create a specialised code editor. It also provides a basic generic code
