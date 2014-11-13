@@ -16,6 +16,8 @@
    
 .. image:: https://pypip.in/license/pyqode.core/badge.svg
 
+|
+
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
    :target: https://travis-ci.org/pyQode/pyqode.core
    :alt: Travis-CI build status
