@@ -42,6 +42,24 @@ ErrorsTable
     :undoc-members:
     :show-inheritance:
 
+FileSystemContextMenu
++++++++++++++++++++++
+
+.. autoclass:: pyqode.core.widgets.FileSystemContextMenu
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+FileSystemTreeView
+++++++++++++++++++
+
+.. autoclass:: pyqode.core.widgets.FileSystemTreeView
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 GenericCodeEdit
 +++++++++++++++
 

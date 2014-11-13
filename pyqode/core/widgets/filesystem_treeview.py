@@ -23,18 +23,21 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
     Provides methods to retrieve file info from model index.
 
-    .. note:: There is no context menu for copying/moving files, and so on as
-        this is usually application specific.
+    By default there is no context menu and no file operations are possible. We
+    provide a standard context menu with basic file system operation (
+    :class:`FileSystemContextMenu`) that you can extend and
+    set on the tree view using :meth:`FileSystemTreeView.set_context_menu`
+
     """
     class FilterProxyModel(QtCore.QSortFilterProxyModel):
         """
-        Excludes ``ignored_directories`` and ``ignored_extensions`` from the
-        file system model
+        Excludes :attr:`ignored_directories` and :attr:`ignored_extensions`
+        from the file system model.
         """
         def __init__(self):
             super().__init__()
             #: The list of directories to exclude
-            self.ignored_items = ['__pycache__']
+            self.ignored_directories = ['__pycache__']
             #: The list of file extension to exclude
             self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
                                        '.egg-info', '.coverage', '.DS_Store']
@@ -63,7 +66,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
                 _logger().debug('excluding directory (unused): %s',
                                 finfo.filePath())
                 return False
-            if fn in self.ignored_items:
+            if fn in self.ignored_directories:
                 _logger().debug('excluding directory: %s', finfo.filePath())
                 return False
             if extension in self.ignored_extensions:
@@ -74,16 +77,16 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
     #: signal emitted when the user deleted a file
     #: Parameters:
-    #:  - path (str): path of the file that got deleted
+    #: - path (str): path of the file that got deleted
     file_deleted = QtCore.Signal(str)
     #: signal emitted when the user renamed a file
     #: Parameters:
-    #:  - old (str): old path
-    #:  - new (str): new path
+    #: - old (str): old path
+    #: - new (str): new path
     file_renamed = QtCore.Signal(str, str)
     #: signal emitted when the user created a file
     #: Parameters:
-    #:  - path (str): path of the file that got created
+    #: - path (str): path of the file that got created
     file_created = QtCore.Signal(str)
 
     def __init__(self, parent=None):
@@ -108,7 +111,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param directories: the directories to ignore
         """
         for d in directories:
-            self._fs_model_proxy.ignored_items.append(d)
+            self._fs_model_proxy.ignored_directories.append(d)
 
     def ignore_extensions(self, *extensions):
         """
@@ -515,15 +518,17 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         """
         Returns user actions for "new" sub-menu.
 
-        Example:
-        >>> def get_new_user_actions(self):
-        >>>     actions = []
-        >>>     action_python_package = QtWidgets.QAction(
-        >>>         '&Python package', self)
-        >>>     action_python_package.triggered.connect(
-        >>>         self._on_create_python_package_triggered)
-        >>>     actions.append(action_python_package)
-        >>>     return actions
+        Example::
+
+            def get_new_user_actions(self):
+                actions = []
+                action_python_package = QtWidgets.QAction(
+                    '&Python package', self)
+                action_python_package.triggered.connect(
+                    self._on_create_python_package_triggered)
+                actions.append(action_python_package)
+                return actions
+
         """
         return []
 

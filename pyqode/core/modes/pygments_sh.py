@@ -196,6 +196,7 @@ class PygmentsSH(SyntaxHighlighter):
     def set_mime_type(self, mime_type):
         """
         Update the highlighter lexer based on a mime type.
+
         :param mime_type: mime type of the new lexer to setup.
         """
         try:
@@ -224,7 +225,7 @@ class PygmentsSH(SyntaxHighlighter):
         Sets the pygments lexer from mime type.
 
         :param mime: mime type
-        ;:param options: optional addtional options.
+        :param options: optional addtional options.
         """
         self._lexer = get_lexer_for_mimetype(mime, **options)
         _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
