@@ -26,7 +26,7 @@ a given language.
 .. _Screenshots: https://github.com/pyQode/pyQode/wiki/Screenshots-and-videos#pyqodecore-screenshots
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
 .. _Wiki: https://github.com/pyQode/pyQode/wiki
-.. _API reference: http://pyqodecore.readthedocs.org/en/latest/
+.. _API reference: https://pythonhosted.org/pyqode.core/
 .. _Readme: https://github.com/pyQode/pyqode.core/blob/master/README.rst
 
 This documentation contains the **API reference documentation** and the

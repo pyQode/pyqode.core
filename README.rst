@@ -100,4 +100,4 @@ Here is the list of available test environments:
 .. _Screenshots: https://github.com/pyQode/pyQode/wiki/Screenshots-and-videos#pyqodecore-screenshots
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
 .. _Wiki: https://github.com/pyQode/pyQode/wiki
-.. _API reference: http://pyqodecore.readthedocs.org/en/latest/
+.. _API reference: https://pythonhosted.org/pyqode.core/
