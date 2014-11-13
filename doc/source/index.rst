@@ -27,11 +27,13 @@ a given language.
 .. _Issue tracker: https://github.com/pyQode/pyQode/issues
 .. _Wiki: https://github.com/pyQode/pyQode/wiki
 .. _API reference: http://pyqodecore.readthedocs.org/en/latest/
+.. _Readme: https://github.com/pyQode/pyqode.core/blob/master/README.rst
 
 This documentation contains the **API reference documentation** and the
 **official examples**.
 
-*We recommend to start with the* `Wiki`_ *before reading into this document*.
+.. note:: We recommend you to start with the `Readme`_ and the `Wiki`_ before
+          reading this document*.
 
 
 API reference:
