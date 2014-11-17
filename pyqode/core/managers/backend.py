@@ -148,7 +148,7 @@ class BackendManager(Manager):
 
         .. deprecated: Since v2.3, a socket is created per request. Checking
             for global connection status does not make any sense anymore. This
-            property now returns ``running``.
+            property now returns ``running``. This will be removed in v2.5
         """
         return self.running
 

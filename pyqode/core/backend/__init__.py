@@ -100,7 +100,8 @@ class NotConnected(Exception):
     Raised if the client is not connected to the server when an operation
     is requested.
 
-    .. deprecated:: Since v2.3, you should instead use ``NotRunning``
+    .. deprecated:: Since v2.3, you should instead use ``NotRunning``.
+        This will be removed in v2.5
 
     """
     def __init__(self):

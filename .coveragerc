@@ -4,8 +4,6 @@ omit =
     # qt design ui files
     *_ui.py
     *_rc.py
-    # deprecated stuff
-    *pyqode/core/qt/*
     # do not test designer forms and designer plugins
     *pyqode/core/_designer_plugins/*
     *pyqode/core/_forms/*

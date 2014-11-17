@@ -39,7 +39,8 @@ class TabWidget(QTabWidget):
 
     .. deprecated: starting from version 2.4, this widget is considered as
         deprecated. You should use
-        :class:`pyqode.core.widgets.SplittableTabWidget` instead.
+        :class:`pyqode.core.widgets.SplittableTabWidget` instead. It will be
+        removed in version 2.6.
 
     """
     #: Signal emitted when a tab dirty flag changed
