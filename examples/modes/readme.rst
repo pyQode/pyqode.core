@@ -1,0 +1,1 @@
+This directory contains examples for using the various core modes

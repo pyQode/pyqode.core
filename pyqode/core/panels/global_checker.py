@@ -4,7 +4,7 @@ This module contains the GlobalCheckerPanel.
 """
 from pyqode.core import modes
 from pyqode.core.api import Panel, TextHelper
-from pyqode.core.qt import QtCore, QtGui
+from pyqode.qt import QtCore, QtGui
 
 
 class GlobalCheckerPanel(Panel):

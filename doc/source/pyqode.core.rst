@@ -12,7 +12,6 @@ Subpackages
     pyqode.core.managers
     pyqode.core.modes
     pyqode.core.panels
-    pyqode.core.qt
     pyqode.core.styles
     pyqode.core.tools
     pyqode.core.widgets

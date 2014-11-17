@@ -3,7 +3,7 @@ This module contains the PromptLineEdit widget implementation.
 
 """
 import os
-from pyqode.core.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QtWidgets, QtCore, QtGui
 
 
 class PromptLineEdit(QtWidgets.QLineEdit):
