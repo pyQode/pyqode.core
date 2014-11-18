@@ -5,13 +5,10 @@ This module tests the extension frontend module
 """
 from pyqode.core.api import TextHelper, TextDecoration
 from pyqode.qt import QtGui
-
-from ..helpers import log_test_name
 from ..helpers import editor_open
 
 
 @editor_open(__file__)
-@log_test_name
 def test_add_decoration(editor):
     helper = TextHelper(editor)
     helper.goto_line(2, 2)
@@ -27,7 +24,6 @@ def test_add_decoration(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_remove_decoration(editor):
     helper = TextHelper(editor)
     TextHelper(editor).goto_line(1, 2)
@@ -45,7 +41,6 @@ def test_remove_decoration(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_clear_decoration(editor):
     # should work even when there are no more decorations
     helper = TextHelper(editor)
@@ -62,7 +57,6 @@ def test_clear_decoration(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_constructors(editor):
     deco = TextDecoration(editor.textCursor(),
                                    start_pos=10, end_pos=15)
@@ -71,7 +65,6 @@ def test_constructors(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_formats(editor):
     deco = TextDecoration(editor.textCursor(),
                                    start_line=10, end_line=15)

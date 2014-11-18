@@ -11,7 +11,6 @@ from pyqode.core.api.utils import TextHelper, keep_tc_pos
 from pyqode.qt import QtGui
 from pyqode.qt.QtTest import QTest
 from ..helpers import editor_open
-from ..helpers import log_test_name
 
 
 @editor_open(__file__)
@@ -233,7 +232,7 @@ def test_search_text(editor):
     occurences, index = TextHelper(editor).search_text(
         editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
-    assert len(occurences) == 12
+    assert len(occurences) == 11
 
 
 @editor_open(__file__)
@@ -293,7 +292,7 @@ def test_extended_selection(editor):
 
 @editor_open(__file__)
 def test_matched_selection(editor):
-    line, column, text = 233, 14, '''        editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively'''
+    line, column, text = 232, 14, '''        editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively'''
     cursor = editor.textCursor()
     assert not cursor.hasSelection()
     helper = TextHelper(editor)

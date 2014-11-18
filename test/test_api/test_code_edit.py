@@ -15,7 +15,7 @@ from pyqode.qt.QtTest import QTest
 
 
 
-from test.helpers import log_test_name, preserve_style, preserve_settings, preserve_editor_config
+from test.helpers import preserve_style, preserve_settings
 from test.helpers import editor_open
 
 
@@ -24,7 +24,6 @@ original_text = None
 
 
 @editor_open(__file__)
-@log_test_name
 def test_set_plain_text(editor):
     with pytest.raises(TypeError):
         editor.setPlainText('Some text')
@@ -34,7 +33,6 @@ def test_set_plain_text(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_actions(editor):
     assert len(editor.actions())
     nb_actions_expected = len(editor.actions())
@@ -48,7 +46,6 @@ def test_actions(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_duplicate_line(editor):
     QTest.qWait(1000)
     TextHelper(editor).goto_line(0)
@@ -75,14 +72,11 @@ def test_bug_duplicate_line_undo_stack(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_show_tooltip(editor):
     editor.show_tooltip(QtCore.QPoint(0, 0), 'A tooltip')
 
 
 @editor_open(__file__)
-@preserve_editor_config
-@log_test_name
 def test_margin_size(editor):
     for panel in editor.panels:
         panel.enabled = False
@@ -105,8 +99,6 @@ def test_margin_size(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_zoom(editor):
     assert editor.zoom_level == 0
     editor.zoom_in()
@@ -129,28 +121,25 @@ def get_first_line(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_indent(editor):
+    # disable indenter mode -> indent should not do anything
     editor.modes.get(modes.IndenterMode).enabled = False
     TextHelper(editor).goto_line(0, move=True)
     first_line = get_first_line(editor)
     editor.indent()
-    # no indenter mode -> indent should not do anything
     assert get_first_line(editor) == first_line
     editor.un_indent()
     assert get_first_line(editor) == first_line
-    # append indenter mode, call to indent/un_indent should now work
+    # enable indenter mode, call to indent/un_indent should now work
     editor.modes.get(modes.IndenterMode).enabled = True
     TextHelper(editor).goto_line(0)
     editor.indent()
-    assert get_first_line(editor) == '    ' + first_line
+    assert get_first_line(editor) == editor.tab_length * ' ' + first_line
     editor.un_indent()
     assert get_first_line(editor) == first_line
 
 
 @editor_open(__file__)
-@preserve_settings
-@log_test_name
 def test_whitespaces(editor):
     assert not editor.show_whitespaces
     editor.show_whitespaces = True
@@ -158,8 +147,6 @@ def test_whitespaces(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_font_name(editor):
     system = platform.system().lower()
     assert editor.font_name == 'Source Code Pro'
@@ -168,8 +155,6 @@ def test_font_name(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_font_size(editor):
     assert editor.font_size != 20
     editor.font_size = 20
@@ -177,15 +162,11 @@ def test_font_size(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_foreground(editor):
     assert editor.foreground.name()
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_whitespaces_foreground(editor):
     assert editor.whitespaces_foreground.name()
     editor.whitespaces_foreground = QtGui.QColor("#FF0000")
@@ -194,8 +175,6 @@ def test_whitespaces_foreground(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_selection_background(editor):
     assert editor.selection_background.name()
     editor.selection_background = QtGui.QColor("#FF0000")
@@ -204,8 +183,6 @@ def test_selection_background(editor):
 
 
 @editor_open(__file__)
-@preserve_style
-@log_test_name
 def test_selection_foreground(editor):
     assert editor.selection_foreground.name()
     editor.selection_foreground = QtGui.QColor("#FF0000")
@@ -214,7 +191,6 @@ def test_selection_foreground(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_file_attribs(editor):
     # cannot change path directly, use save/open
     with pytest.raises(AttributeError):
@@ -224,14 +200,12 @@ def test_file_attribs(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_setPlainText(editor):
     editor.setPlainText('', 'text/x-python', 'utf-8')
     assert editor.toPlainText() == ''
 
 
 @editor_open(__file__)
-@log_test_name
 def test_delete(editor):
     txt = editor.toPlainText()
     TextHelper(editor).select_lines(1, 1)
@@ -240,13 +214,11 @@ def test_delete(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_rehighlight(editor):
     editor.rehighlight()
 
 
 @editor_open(__file__)
-@log_test_name
 def test_key_pressed_event(editor):
     QTest.keyPress(editor, QtCore.Qt.Key_Tab)
     QTest.keyPress(editor, QtCore.Qt.Key_Backtab)
@@ -255,7 +227,6 @@ def test_key_pressed_event(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_key_released_event(editor):
     QTest.keyRelease(editor, QtCore.Qt.Key_Tab)
 
@@ -289,8 +260,6 @@ def test_mouse_events(editor):
     editor.verticalScrollBar().setValue(editor.verticalScrollBar().maximum()/2.0)
 
 
-# @log_test_name
-# @editor_open(__file__)
 def test_show_context_menu(editor):
     assert isinstance(editor, QtWidgets.QPlainTextEdit)
     editor.customContextMenuRequested.emit(QtCore.QPoint(10, 10))
@@ -298,7 +267,6 @@ def test_show_context_menu(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_multiple_panels(editor):
     # append a fourth panel on the top zone
     class SearchPanel(panels.SearchAndReplacePanel):
@@ -361,7 +329,7 @@ def test_goto_line_dlg(editor):
 def test_do_home_key(editor):
     QTest.qWait(2000)
     helper = TextHelper(editor)
-    helper.goto_line(364, 29)
+    helper.goto_line(332, 29)
     assert editor.textCursor().positionInBlock() == 29
     assert TextHelper(editor).line_indent() == 4
     editor._do_home_key()

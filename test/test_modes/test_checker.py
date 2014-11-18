@@ -4,7 +4,7 @@ import sys
 import pytest
 from pyqode.core import modes, panels
 
-from ..helpers import preserve_editor_config, wait_for_connected, editor_open
+from ..helpers import wait_for_connected, editor_open
 from ..helpers import server_path
 
 
@@ -38,7 +38,6 @@ def test_checker_message():
 
 
 @editor_open(__file__)
-@preserve_editor_config
 @pytest.mark.skipif(hasattr(sys, 'real_prefix'),
                     reason="cannot be tested in virtual envs ("
                            "check function cannot be imported)")
@@ -83,7 +82,6 @@ def test_request_analysis(editor):
 
 
 @editor_open(__file__)
-@preserve_editor_config
 def test_add_messages(editor):
     mode = get_mode(editor)
     mode.clear_messages()
@@ -97,7 +95,6 @@ def test_add_messages(editor):
 
 
 @editor_open(__file__)
-@preserve_editor_config
 def test_remove_message(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -118,7 +115,6 @@ def test_remove_message(editor):
 
 
 @editor_open(__file__)
-@preserve_editor_config
 def test_work_finished(editor):
     mode = get_mode(editor)
     mode._on_work_finished(False, [])

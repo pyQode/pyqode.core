@@ -1,10 +1,10 @@
 import os
 import pytest
 from pyqode.core.api import TextHelper, TextBlockHelper
-from pyqode.qt import QtCore, QtWidgets, QtGui
+from pyqode.qt import QtCore
 from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
-from test.helpers import editor_open, preserve_editor_config, ensure_visible
+from test.helpers import editor_open, ensure_visible
 
 
 def get_panel(editor):
@@ -19,7 +19,6 @@ def test_enabled(editor):
 
 
 @ensure_visible
-@preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
 @pytest.mark.skipif('TRAVIS' not in os.environ,
                     reason="tested only on travis")
@@ -52,7 +51,6 @@ def toggle_fold_trigger(editor, line, panel):
 
 
 @ensure_visible
-@preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
 @pytest.mark.skipif('TRAVIS' not in os.environ,
                     reason="tested only on travis")
@@ -99,7 +97,6 @@ def test_mouse_press(editor):
 
 
 @ensure_visible
-@preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
 @pytest.mark.skipif('TRAVIS' not in os.environ,
                     reason="tested only on travis")
@@ -122,7 +119,6 @@ def test_collapse_all(editor):
 
 
 @ensure_visible
-@preserve_editor_config
 @editor_open('test/test_api/folding_cases/foo.py')
 def test_expand_all(editor):
     panel = get_panel(editor)

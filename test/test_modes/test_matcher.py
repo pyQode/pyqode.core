@@ -13,7 +13,7 @@ example_tuple = (
 )
 
 
-from test.helpers import log_test_name, editor_open
+from test.helpers import editor_open
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
 from pyqode.qt import QtGui
@@ -52,7 +52,6 @@ def test_properties(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_matching(editor):
     """
     Moves the text cursor in a few places to execute all statements in
@@ -87,7 +86,6 @@ c = (
 
 
 @editor_open(__file__)
-@log_test_name
 def test_unmatching(editor):
     mode = get_mode(editor)
     # for this test we need to load uncorrect code with non matching symbols
@@ -108,7 +106,6 @@ a = [([1, 2, (45, 3)]), ({2: (45, 10)}),
 
 
 @editor_open(__file__)
-@log_test_name
 def test_complex_matching(editor):
     mode = get_mode(editor)
     # [
@@ -133,7 +130,6 @@ def test_complex_matching(editor):
 
 
 @editor_open(__file__)
-@log_test_name
 def test_symbol_pos(editor):
     """
     Moves the text cursor in a few places to execute all statements in

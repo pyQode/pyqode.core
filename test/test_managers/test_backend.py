@@ -1,12 +1,11 @@
 import os
-from pyqode.core.api.client import JsonTcpClient as JsonTcpClient
-from pyqode.core.backend import NotConnected, NotRunning
+from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets
 import pytest
 from pyqode.qt.QtTest import QTest
 from pyqode.core import backend
 from pyqode.core.managers.backend import BackendManager
-from ..helpers import cwd_at, require_python2, python2_path, server_path, wait_for_connected
+from ..helpers import cwd_at, python2_path, server_path, wait_for_connected
 
 
 from ..helpers import editor_open

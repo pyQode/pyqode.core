@@ -9,7 +9,6 @@ from pyqode.qt.QtTest import QTest
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
 from ..helpers import server_path, wait_for_connected
-from ..helpers import preserve_editor_config
 from ..helpers import ensure_visible
 
 
@@ -80,7 +79,6 @@ def test_properties(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
-@preserve_editor_config
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -104,7 +102,6 @@ def test_request_completion(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
-@preserve_editor_config
 def test_completion_in_string_or_comment(editor):
     mode = get_mode(editor)
     TextHelper(editor).goto_line(2, column=0)
@@ -116,7 +113,6 @@ def test_completion_in_string_or_comment(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
-@preserve_editor_config
 def test_successive_requests(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
@@ -132,7 +128,6 @@ def test_successive_requests(editor):
 @ensure_visible
 @ensure_empty
 @ensure_connected
-@preserve_editor_config
 def test_events(editor):
     assert editor.backend.running
     QTest.qWait(1000)

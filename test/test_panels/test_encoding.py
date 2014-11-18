@@ -1,7 +1,6 @@
 import os
 from pyqode.qt.QtTest import QTest
 from pyqode.core import panels
-from test.helpers import preserve_editor_config
 
 
 PATH = pth = os.path.join(os.getcwd(), 'test', 'files', 'big5hkscs.txt')
@@ -11,7 +10,6 @@ def get_panel(editor):
     return editor.panels.get(panels.EncodingPanel)
 
 
-@preserve_editor_config
 def test_enabled(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
@@ -21,7 +19,6 @@ def test_enabled(editor):
     panel.enabled = True
 
 
-@preserve_editor_config
 def test_reload(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
@@ -36,7 +33,7 @@ def test_reload(editor):
     QTest.qWait(1000)
     assert pnl.isVisible() is False
 
-@preserve_editor_config
+
 def test_edit_anyway(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
@@ -49,7 +46,7 @@ def test_edit_anyway(editor):
     QTest.qWait(1000)
     assert pnl.isVisible() is False
 
-@preserve_editor_config
+
 def test_cancel(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)

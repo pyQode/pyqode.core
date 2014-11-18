@@ -6,13 +6,9 @@ from pyqode.qt.QtTest import QTest
 
 import pytest
 from ..helpers import editor_open
-from ..helpers import log_test_name
-from ..helpers import preserve_editor_config
 
 
 @editor_open(__file__)
-@preserve_editor_config
-@log_test_name
 def test_modes(editor):
     """
     Test to install, retrieve and remove a mode.
@@ -32,8 +28,6 @@ def test_modes(editor):
 
 
 @editor_open(__file__)
-@log_test_name
-@preserve_editor_config
 def test_panels(editor):
     """
     Test to install, retrieve and remove a panel
@@ -55,8 +49,6 @@ def test_panels(editor):
 
 
 @editor_open(__file__)
-@log_test_name
-@preserve_editor_config
 def test_uninstall_all(editor):
     assert len(editor.modes) != 0
     assert len(editor.panels) != 0

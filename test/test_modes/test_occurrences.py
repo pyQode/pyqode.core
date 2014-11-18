@@ -1,10 +1,9 @@
 import pytest
-from pyqode.qt import QtCore, QtGui
+from pyqode.qt import QtGui
 from pyqode.qt.QtTest import QTest
 
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
-from test.helpers import editor_open
 
 
 def get_mode(editor):
@@ -48,6 +47,6 @@ def test_occurrences(editor, underlined):
     mode.underlined = underlined
     assert len(mode._decorations) == 0
     assert mode.delay == 1000
-    TextHelper(editor).goto_line(15, 7)
+    TextHelper(editor).goto_line(16, 7)
     QTest.qWait(2000)
-    assert len(mode._decorations) == 11
+    assert len(mode._decorations) == 23

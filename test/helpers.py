@@ -8,8 +8,9 @@ import functools
 import platform
 from os.path import abspath
 from os.path import dirname
+from pyqode.core.cache import Cache
 from pyqode.qt import QtWidgets
-from pyqode.core.api import CodeEdit, IndentFoldDetector
+from pyqode.core.api import CodeEdit, IndentFoldDetector, ColorScheme
 from pyqode.core import modes
 from pyqode.core import panels
 from pyqode.qt.QtTest import QTest
@@ -110,45 +111,27 @@ def preserve_style(func):
     return wrapper
 
 
-def preserve_editor_config(func):
-    @functools.wraps(func)
-    def wrapper(editor, *args, **kwds):
-        ret = None
-        try:
-            ret = func(editor, *args, **kwds)
-        finally:
-            editor.modes.clear()
-            editor.panels.clear()
-            setup_editor(editor)
-            if not editor.backend.running:
-                editor.backend.start(server_path())
-                wait_for_connected(editor)
-        return ret
-        # return func(editor, *args, **kwds)
-    return wrapper
-
-
-def require_python2():
-    """
-    Skips the test if there is no python2 interpreter.
-    """
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwds):
-            if os.path.exists(python2_path()):
-                return func(*args, **kwds)
-        return wrapper
-    return decorator
-
-
-def log_test_name(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwds):
-        import logging
-        logging.info('---------------- %s ----------------' % func.__name__)
-        return func(*args, **kwds)
-    return wrapper
-
+def reset_editor(editor):
+    assert isinstance(editor, CodeEdit)
+    Cache().clear()
+    editor.modes.clear()
+    editor.panels.clear()
+    setup_editor(editor)
+    editor.font_name = CodeEdit._DEFAULT_FONT
+    editor.font_size = 10
+    editor.use_spaces_instead_of_tabs = True
+    editor.tab_length = 4
+    editor.min_indent_column = 0
+    editor.save_on_focus_out = False
+    pal = QtWidgets.QApplication.instance().palette()
+    editor.selection_background = pal.highlight().color()
+    editor.selection_foreground = pal.highlightedText().color()
+    editor.syntax_highlighter.color_scheme = ColorScheme('qt')
+    editor.zoom_level = 0
+    editor.resize(800, 600)
+    if not editor.backend.running:
+        editor.backend.start(server_path())
+        wait_for_connected(editor)
 
 # -------------------
 # Helper functions

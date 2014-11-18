@@ -34,7 +34,6 @@ def test_enabled(editor):
 
 
 @editor_open(file_path)
-@preserve_settings
 @pytest.mark.skipif('TRAVIS' in os.environ,
                     reason="not tested on travis, require user interaction")
 def test_modif_accept_with_focus(editor):
@@ -98,7 +97,6 @@ def reject_mbox():
 
 
 @editor_open(file_path)
-@preserve_settings
 def test_modif_autoreload(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
@@ -111,7 +109,6 @@ def test_modif_autoreload(editor):
 
 
 @editor_open(file_path)
-@preserve_settings
 def test_delete(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
@@ -123,7 +120,6 @@ def test_delete(editor):
 
 
 @editor_open(file_path)
-@preserve_settings
 def test_none_filepath(editor):
     mode = get_mode(editor)
     mode.auto_reload = False
@@ -135,7 +131,6 @@ def test_none_filepath(editor):
 
 
 @editor_open(file_path)
-@preserve_settings
 def test_non_existing_file_path(editor):
     mode = get_mode(editor)
     mode.auto_reload = False

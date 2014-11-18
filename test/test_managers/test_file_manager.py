@@ -3,7 +3,6 @@ import os
 import pytest
 from pyqode.core import panels
 from pyqode.qt.QtTest import QTest
-from test.helpers import preserve_editor_config
 
 
 PATH = pth = os.path.join(os.getcwd(), 'test', 'files', 'big5hkscs.txt')
@@ -24,7 +23,6 @@ def test_open_non_existing_file(editor):
         editor.file.open('qzdjoi')
 
 
-@preserve_editor_config
 def test_encodings(editor):
     with pytest.raises(UnicodeDecodeError):
         editor.file.open(PATH, encoding='utf-8', use_cached_encoding=False)

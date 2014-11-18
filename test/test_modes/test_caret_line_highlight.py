@@ -15,7 +15,6 @@ def test_enabled(editor):
     mode.enabled = True
 
 
-@preserve_style
 def test_properties(editor):
     mode = get_mode(editor)
     assert isinstance(mode.background, QtGui.QColor)
@@ -24,7 +23,6 @@ def test_properties(editor):
     assert mode.background.name() == c.name()
 
 
-@preserve_style
 def test_style(editor):
     mode = get_mode(editor)
     c = QtGui.QColor('yellow')
