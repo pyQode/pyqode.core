@@ -5,6 +5,7 @@ import mimetypes
 import os
 import platform
 import pytest
+from pyqode.core.api import CodeEdit
 
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import TextHelper
@@ -149,7 +150,7 @@ def test_whitespaces(editor):
 @editor_open(__file__)
 def test_font_name(editor):
     system = platform.system().lower()
-    assert editor.font_name == 'Source Code Pro'
+    assert editor.font_name == CodeEdit._DEFAULT_FONT
     editor.font_name = 'deja vu sans'
     assert editor.font_name == 'deja vu sans'
 
