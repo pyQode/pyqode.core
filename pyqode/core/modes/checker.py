@@ -214,7 +214,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 self.editor.repaint()
                 return False
             message = self._pending_msg.pop(0)
-            if message.line:
+            if message.line >= 0:
                 try:
                     usd = message.block.userData()
                 except AttributeError:
