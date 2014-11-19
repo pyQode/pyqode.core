@@ -129,7 +129,7 @@ def check(data):
     print('CHECKER FUNCTION: i = %d' % i)
     if i == 0:
         i += 1
-        return False, None
+        return True, []
     elif i == 1:
         i += 1
         return True, [('desc', 0, 10)]
