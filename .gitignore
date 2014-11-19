@@ -38,3 +38,4 @@ htmlcov
 *.DS_Store
 file_to_watch.txt
 
+test_file.txt

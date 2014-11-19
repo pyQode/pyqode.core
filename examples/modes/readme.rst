@@ -1,1 +1,2 @@
-This directory contains examples for using the various core modes
+This directory contains minimal examples demonstrating the use of a single
+mode.
