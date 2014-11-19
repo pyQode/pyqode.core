@@ -90,7 +90,11 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         """
         Sends the request to the backend.
         """
-        classname = '%s.%s' % (self._worker.__module__, self._worker.__name__)
+        if isinstance(self._worker, str):
+            classname = self._worker
+        else:
+            classname = '%s.%s' % (self._worker.__module__,
+                                   self._worker.__name__)
         self.request_id = str(uuid.uuid4())
         self.send({'request_id': self.request_id, 'worker': classname,
                    'data': self._args})
