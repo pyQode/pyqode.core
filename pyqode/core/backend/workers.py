@@ -29,7 +29,7 @@ def echo_worker(data):
     :returns: True, data
     """
     print('echo worker running')
-    return True, data
+    return data
 
 
 class CodeCompletionWorker(object):
@@ -112,7 +112,7 @@ class CodeCompletionWorker(object):
                                  % prov)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
-        return True, completions
+        return completions
 
 
 class DocumentWordsProvider(object):
@@ -237,8 +237,8 @@ def findall(data):
             'whole_word': True to match whole words only.
             'case_sensitive': True to match case, False to ignore case
         }
-    :return: status, list of occurrence positions in text
+    :return: list of occurrence positions in text
     """
-    return True, list(findalliter(
+    return list(findalliter(
         data['string'], data['sub'], regex=data['regex'],
         whole_word=data['whole_word'], case_sensitive=data['case_sensitive']))

@@ -285,21 +285,20 @@ class CheckerMode(Mode, QtCore.QObject):
             self._job_runner.cancel_requests()
             self.clear_messages()
 
-    def _on_work_finished(self, status, results):
+    def _on_work_finished(self, results):
         """
         Display results.
 
         :param status: Response status
         :param results: Response data, messages.
         """
-        if status:
-            messages = []
-            for msg in results:
-                msg = CheckerMessage(*msg)
-                block = self.editor.document().findBlockByNumber(msg.line)
-                msg.block = block
-                messages.append(msg)
-            self.add_messages(messages)
+        messages = []
+        for msg in results:
+            msg = CheckerMessage(*msg)
+            block = self.editor.document().findBlockByNumber(msg.line)
+            msg.block = block
+            messages.append(msg)
+        self.add_messages(messages)
 
     def request_analysis(self):
         """

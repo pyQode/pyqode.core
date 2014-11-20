@@ -113,8 +113,8 @@ class BackendManager(Manager):
         :param worker_class_or_function: Worker class or function
         :param args: worker args, any Json serializable objects
         :param on_receive: an optional callback executed when we receive the
-            worker's results. The callback will be called with two arguments:
-            the status (bool) and the results (object)
+            worker's results. The callback will be called with one arguments:
+            the results of the worker (object)
 
         :raise: backend.NotRunning if the backend process is not running.
         """

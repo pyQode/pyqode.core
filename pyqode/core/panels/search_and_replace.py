@@ -501,7 +501,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.editor.backend.send_request(findall, request_data,
                                          self._on_results_available)
 
-    def _on_results_available(self, status, results):
+    def _on_results_available(self, results):
         self._occurrences = results
         self._on_search_finished()
 

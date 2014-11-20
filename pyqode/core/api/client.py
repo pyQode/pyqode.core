@@ -190,10 +190,9 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             obj = json.loads(data)
             _logger().debug('response received: %r', obj)
             results = obj['results']
-            status = obj['status']
             # possible callback
             if self._callback:
-                self._callback(status, results)
+                self._callback(results)
             self._header_complete = False
             self._data_buf = bytes()
             self.finished.emit(self)

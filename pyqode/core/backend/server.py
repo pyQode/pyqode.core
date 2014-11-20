@@ -122,9 +122,6 @@ class JsonServer(socketserver.ThreadingTCPServer):
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
-                response = {'request_id': data['request_id'],
-                            'status': False,
-                            'results': []}
                 try:
                     worker = import_class(data['worker'])
                 except ImportError as e:
@@ -135,15 +132,10 @@ class JsonServer(socketserver.ThreadingTCPServer):
                     print('worker: %r' % worker)
                     print('data: %r' % data['data'])
                     ret_val = worker(data['data'])
-                    try:
-                        status, result = ret_val
-                    except TypeError:
-                        # nothing to send
-                        pass
-                    else:
-                        response = {'request_id': data['request_id'],
-                                    'status': status,
-                                    'results': result}
+                    if ret_val is None:
+                        ret_val = []
+                    response = {'request_id': data['request_id'],
+                                'results': ret_val}
                 finally:
                     print('sending response: %r' % response)
                     try:

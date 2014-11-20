@@ -142,7 +142,7 @@ class OccurrencesHighlighterMode(Mode):
             except NotRunning:
                 self._request_highlight()
 
-    def _on_results_available(self, _, results):
+    def _on_results_available(self, results):
         if len(results) > 1:
             for start, end in results:
                 deco = TextDecoration(self.editor.textCursor(),

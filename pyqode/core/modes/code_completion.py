@@ -246,14 +246,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         self._completer.setWidget(self.editor)
 
-    def _on_results_available(self, status, results):
+    def _on_results_available(self, results):
         _logger().debug("cc: got completion results")
         if self.editor:
             # self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
             all_results = []
-            if status:
-                for res in results:
-                    all_results += res
+            for res in results:
+                all_results += res
             self._request_cnt -= 1
             self._show_completions(all_results)
 

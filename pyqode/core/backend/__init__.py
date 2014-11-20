@@ -41,14 +41,12 @@ Response
 
 For a response, the object will contains the following fields:
     - 'request_id': uuid generated client side that is simply echoed back
-    - 'status': worker status, boolean
     - 'results': worker results (list, tuple, string,...)
 
 E.g::
 
     {
         'request_id': 'a97285af-cc88-48a4-ac69-7459b9c7fa66',
-        'status': True,
         'results': ['some code', 0]
     }
 

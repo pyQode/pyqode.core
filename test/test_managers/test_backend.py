@@ -23,12 +23,11 @@ def test_exit_code(editor):
 backend_manager = None
 
 
-def _on_receive(status, results):
+def _on_receive(results):
     """
     Assert recevied data is the same as the data we send, a string which contains
     'some data'.
     """
-    assert status is True
     assert results == 'some data'
     app = QtWidgets.QApplication.instance()
     app.exit(0)
