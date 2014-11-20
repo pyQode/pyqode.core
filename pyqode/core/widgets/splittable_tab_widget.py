@@ -830,6 +830,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                        constructor.
         :return: The created code editor
         """
+        path = os.path.normpath(path)
         paths = []
         widgets = []
         for w in self.widgets(include_clones=False):
