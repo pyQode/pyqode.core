@@ -4,8 +4,7 @@ from pyqode.core.backend import workers
 
 def test_echo_worker():
     data = b'some data'
-    status, ret_val = workers.echo_worker(data)
-    assert status
+    ret_val = workers.echo_worker(data)
     assert data == ret_val
 
 
@@ -26,8 +25,7 @@ def test_code_completion_worker():
         'encoding': 'utf-8',
         'prefix': ''
     }
-    status, completion_groups = worker(data)
-    assert status
+    completion_groups = worker(data)
     assert len(completion_groups)
     assert len(completion_groups[0])
     print(completion_groups)
@@ -105,5 +103,5 @@ with open('test/files/foo.py', 'r') as f:
         'case_sensitive': False}, 0)
 ])
 def test_find_all(data, nb_expected):
-    status, results = workers.findall(data)
+    results = workers.findall(data)
     assert len(results) == nb_expected

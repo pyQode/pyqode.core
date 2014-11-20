@@ -117,8 +117,8 @@ def test_remove_message(editor):
 @editor_open(__file__)
 def test_work_finished(editor):
     mode = get_mode(editor)
-    mode._on_work_finished(False, [])
-    mode._on_work_finished(False, [('desc', i % 3, 10 + i) for i in range(40)])
+    mode._on_work_finished([])
+    mode._on_work_finished([('desc', i % 3, 10 + i) for i in range(40)])
 
 
 i = 0
