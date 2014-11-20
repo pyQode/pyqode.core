@@ -129,12 +129,12 @@ def check(data):
     print('CHECKER FUNCTION: i = %d' % i)
     if i == 0:
         i += 1
-        return True, []
+        return []
     elif i == 1:
         i += 1
-        return True, [('desc', 0, 10)]
+        return [('desc', 0, 10)]
     elif i == 2:
         i += 1
-        return True, [('desc', i % 3, 10 + i) for i in range(150)]
+        return [('desc', i % 3, 10 + i) for i in range(150)]
     else:
-        return True, [('desc', i % 3, 10 + i) for i in range(20)]
+        return [('desc', i % 3, 10 + i) for i in range(20)]

@@ -25,7 +25,7 @@ def check(request):
     :param request:  request data (dict).
     :return: True, list of messages
     """
-    return True, [
+    return [
         ('An information message', CheckerMessages.INFO, 0),
         ('A warning message', CheckerMessages.WARNING, 1),
         ('An error message', CheckerMessages.ERROR, 2),
