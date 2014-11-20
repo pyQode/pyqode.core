@@ -34,7 +34,7 @@ class Mode(object):
         :rtype: pyqode.core.api.code_edit.CodeEdit
         """
         if self._editor is not None:
-            return self._editor()
+            return self._editor
         else:
             return None
 
@@ -76,7 +76,7 @@ class Mode(object):
 
         .. warning:: Don't forget to call **super** when subclassing
         """
-        self._editor = weakref.ref(editor)
+        self._editor = editor
         self.enabled = True
 
     def on_uninstall(self):
