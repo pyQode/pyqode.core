@@ -1,5 +1,15 @@
+import ctypes
 import os
-from signal import SIGKILL
+import sys
+if sys.platform != 'win32':
+    from signal import SIGKILL
+else:
+    import sys
+    def kill(pid):
+        """kill function for Win32"""
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(1, 0, pid)
+        return (0 != kernel32.TerminateProcess(handle, 0))
 import sys
 from pyqode.core.api.client import JsonTcpClient as JsonTcpClient
 from pyqode.core.backend import server
@@ -50,4 +60,7 @@ def test_json_server():
         pass  # when closed from client we have a ValueError because of a
               # bad file descriptor, this is not a bug in pyqode but in
               # socketserver and the way we call close.
-    os.kill(process.pid, SIGKILL)
+    if sys.platform != 'win32':
+        os.kill(process.pid, SIGKILL)
+    else:
+        kill(process.pid)

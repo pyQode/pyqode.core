@@ -1,4 +1,5 @@
 import os
+import sys
 from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets
 import pytest
@@ -17,7 +18,8 @@ def test_exit_code(editor):
     assert editor.backend.exit_code is None
     editor.backend.stop()
     assert not editor.backend.running
-    assert editor.backend.exit_code == 0
+    if sys.platform != 'win32':
+        assert editor.backend.exit_code == 0
 
 
 backend_manager = None
