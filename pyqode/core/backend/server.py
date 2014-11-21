@@ -125,6 +125,8 @@ class JsonServer(socketserver.ThreadingTCPServer):
                 try:
                     worker = import_class(data['worker'])
                 except ImportError as e:
+                    response = {'request_id': data['request_id'],
+                                'results': []}
                     _logger().exception('Failed to import worker class')
                 else:
                     if inspect.isclass(worker):
