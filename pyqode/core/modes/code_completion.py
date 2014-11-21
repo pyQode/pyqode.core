@@ -257,7 +257,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._show_completions(all_results)
 
     def _on_key_pressed(self, event):
-        QtWidgets.QToolTip.hideText()
         is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
         if self._completer.popup().isVisible():
@@ -430,10 +429,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             event.accept()
 
     def _hide_popup(self):
-        if self._completer.popup() is not None:
+        if (self._completer.popup() is not None and
+                self._completer.popup().isVisible()):
             self._completer.popup().hide()
+            QtWidgets.QToolTip.hideText()
         self._job_runner.cancel_requests()
-        QtWidgets.QToolTip.hideText()
 
     def _show_popup(self, index=0):
         full_prefix = self._helper.word_under_cursor(
