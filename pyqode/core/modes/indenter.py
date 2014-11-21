@@ -47,18 +47,14 @@ class IndenterMode(Mode):
         i = 0
         # indent every lines
         while i < nb_lines:
-            txt = block.text()
-            indentation = (len(txt) - len(txt.lstrip()) -
-                           self.editor.min_indent_column)
-            if indentation >= 0:
-                nb_space_to_add = tab_len - (indentation % tab_len)
-                cursor = QtGui.QTextCursor(block)
-                cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
-                if self.editor.use_spaces_instead_of_tabs:
-                    for _ in range(nb_space_to_add):
-                        cursor.insertText(" ")
-                else:
-                    cursor.insertText('\t')
+            nb_space_to_add = tab_len - (tab_len % tab_len)
+            cursor = QtGui.QTextCursor(block)
+            cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
+            if self.editor.use_spaces_instead_of_tabs:
+                for _ in range(nb_space_to_add):
+                    cursor.insertText(" ")
+            else:
+                cursor.insertText('\t')
             block = block.next()
             i += 1
         cursor.endEditBlock()
@@ -116,7 +112,8 @@ class IndenterMode(Mode):
             tab_len = self.editor.tab_length
             cursor.beginEditBlock()
             if self.editor.use_spaces_instead_of_tabs:
-                cursor.insertText(tab_len * " ")
+                cursor.insertText((
+                    tab_len - cursor.positionInBlock() % tab_len) * " ")
             else:
                 cursor.insertText('\t')
             cursor.endEditBlock()
