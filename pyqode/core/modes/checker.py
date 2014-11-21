@@ -318,9 +318,9 @@ class CheckerMode(Mode, QtCore.QObject):
         if not self.editor:
             return
         request_data = {
-                'code': self.editor.toPlainText(),
-                'path': self.editor.file.path,
-                'encoding': self.editor.file.encoding
+            'code': self.editor.toPlainText(),
+            'path': self.editor.file.path,
+            'encoding': self.editor.file.encoding
         }
         try:
             self.editor.backend.send_request(
