@@ -1,7 +1,10 @@
+"""
+This example show you how to use the FileSystemTreeView (we show the
+content of test_dir).
+"""
 import logging
 import os
 import sys
-import pyqode.core
 from pyqode.core.widgets import FileSystemTreeView, FileSystemContextMenu
 from pyqode.qt import QtWidgets
 
