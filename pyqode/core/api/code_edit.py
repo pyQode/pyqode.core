@@ -477,6 +477,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(True)
         self.setLineWrapMode(self.NoWrap)
 
+    def __repr__(self):
+        return 'CodeEdit(path=%r)' % self.file.path
+
     def split(self):
         """
         Split the code editor widget, return a clone of the widget ready to
