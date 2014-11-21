@@ -940,11 +940,6 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     def _on_current_changed(self, new):
         old, new = super(
             SplittableCodeEditTabWidget, self)._on_current_changed(new)
-        if old:
-            try:
-                old.dirty_changed.disconnect(self.dirty_changed.emit)
-            except (TypeError, RuntimeError):
-                old = None
         if new:
             new.dirty_changed.connect(self.dirty_changed.emit)
         self.dirty_changed.emit(new.dirty)

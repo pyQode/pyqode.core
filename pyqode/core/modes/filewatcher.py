@@ -70,6 +70,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self.editor.text_saving.disconnect(self._cancel_next_change)
             self.editor.text_saved.disconnect(self._restart_monitoring)
             self.editor.focused_in.disconnect(self._check_for_pending)
+            self._timer.stop()
 
     def _cancel_next_change(self):
         self._timer.stop()

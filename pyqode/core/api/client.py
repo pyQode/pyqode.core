@@ -253,17 +253,14 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
+        o = self.readAllStandardOutput()
         try:
-            o = self.readAllStandardOutput()
-            try:
-                output = bytes(o).decode('utf-8')
-            except TypeError:
-                output = bytes(o.data()).decode('utf-8')
-            output = output[:output.rfind('\n')]
-            for line in output.splitlines():
-                self._srv_logger.debug(line)
-        except RuntimeError:
-            pass
+            output = bytes(o).decode('utf-8')
+        except TypeError:
+            output = bytes(o.data()).decode('utf-8')
+        output = output[:output.rfind('\n')]
+        for line in output.splitlines():
+            self._srv_logger.debug(line)
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """
@@ -281,7 +278,4 @@ class BackendProcess(QtCore.QProcess):
     def terminate(self):
         """ Terminate the process """
         self.running = False
-        try:
-            super(BackendProcess, self).terminate()
-        except RuntimeError:
-            pass
+        super(BackendProcess, self).terminate()
