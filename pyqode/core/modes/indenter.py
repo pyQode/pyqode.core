@@ -53,7 +53,6 @@ class IndenterMode(Mode):
             indentation = TextHelper(self.editor).line_indent(block)
             if indentation < self.editor.min_indent_column:
                 nb_space_to_add = self.editor.min_indent_column
-            print(nb_space_to_add)
             cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
             if self.editor.use_spaces_instead_of_tabs:
                 for _ in range(nb_space_to_add):
@@ -133,7 +132,6 @@ class IndenterMode(Mode):
             max_spaces = self.editor.tab_length
         spaces = 0
         trav_cursor = QtGui.QTextCursor(cursor)
-        print(trav_cursor.positionInBlock(), max_spaces, spaces)
         while spaces < max_spaces or trav_cursor.atBlockStart():
             pos = trav_cursor.position()
             trav_cursor.movePosition(cursor.Left, cursor.KeepAnchor)
@@ -143,7 +141,6 @@ class IndenterMode(Mode):
             else:
                 break
             trav_cursor.setPosition(pos - 1)
-        print(spaces)
         return spaces
 
     def unindent(self):
