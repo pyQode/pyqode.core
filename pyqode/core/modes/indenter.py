@@ -3,6 +3,7 @@
 Contains the default indenter.
 """
 import logging
+from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtGui
 
@@ -49,6 +50,10 @@ class IndenterMode(Mode):
         while i < nb_lines:
             nb_space_to_add = tab_len
             cursor = QtGui.QTextCursor(block)
+            indentation = TextHelper(self.editor).line_indent(block)
+            if indentation < self.editor.min_indent_column:
+                nb_space_to_add = self.editor.min_indent_column
+            print(nb_space_to_add)
             cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
             if self.editor.use_spaces_instead_of_tabs:
                 for _ in range(nb_space_to_add):
@@ -110,8 +115,13 @@ class IndenterMode(Mode):
             tab_len = self.editor.tab_length
             cursor.beginEditBlock()
             if self.editor.use_spaces_instead_of_tabs:
-                cursor.insertText((
-                    tab_len - cursor.positionInBlock() % tab_len) * " ")
+                if cursor.positionInBlock() < self.editor.min_indent_column:
+                    nb_space_to_add = self.editor.min_indent_column
+                else:
+                    nb_space_to_add = (
+                        tab_len - (cursor.positionInBlock() -
+                                   self.editor.min_indent_column) % tab_len)
+                cursor.insertText(nb_space_to_add * " ")
             else:
                 cursor.insertText('\t')
             cursor.endEditBlock()
