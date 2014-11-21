@@ -122,18 +122,22 @@ class JsonServer(socketserver.ThreadingTCPServer):
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
+                response = {'request_id': data['request_id'], 'results': []}
                 try:
                     worker = import_class(data['worker'])
                 except ImportError as e:
-                    response = {'request_id': data['request_id'],
-                                'results': []}
                     _logger().exception('Failed to import worker class')
                 else:
                     if inspect.isclass(worker):
                         worker = worker()
                     print('worker: %r' % worker)
                     print('data: %r' % data['data'])
-                    ret_val = worker(data['data'])
+                    try:
+                        ret_val = worker(data['data'])
+                    except Exception:
+                        _logger().exception('something went bad with worker '
+                                            '%r(data=%r)')
+                        ret_val = None
                     if ret_val is None:
                         ret_val = []
                     response = {'request_id': data['request_id'],
