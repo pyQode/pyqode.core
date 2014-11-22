@@ -85,9 +85,8 @@ class InteractiveConsole(QTextEdit):
             self._writer = writer
 
     def _on_stdout(self):
-        txt = bytes(self.process.readAllStandardOutput()).decode(
-            locale.getpreferredencoding())
-        _logger().debug('stdout ready: %s', txt)
+        raw = self.process.readAllStandardOutput()
+        txt = bytes(raw).decode(locale.getpreferredencoding())
         self._writer(self, txt, self.stdout_color)
 
     def _on_stderr(self):
@@ -254,8 +253,10 @@ class InteractiveConsole(QTextEdit):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
+            if sys.platform == 'win32':
+                self._usr_buffer += "\r"
             self._usr_buffer += "\n"
-            self.process.write(bytes(self._usr_buffer, "utf-8"))
+            self.process.write(bytes(self._usr_buffer, locale.getpreferredencoding()))
             self._usr_buffer = ""
         else:
             if event.key() != Qt.Key_Backspace:
