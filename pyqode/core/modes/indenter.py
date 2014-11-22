@@ -44,15 +44,15 @@ class IndenterMode(Mode):
         tab_len = self.editor.tab_length
         cursor.beginEditBlock()
         nb_lines = len(cursor.selection().toPlainText().splitlines())
+        c = self.editor.textCursor()
+        if c.atBlockStart() and c.position() == c.selectionEnd():
+            nb_lines += 1
         block = doc.findBlock(cursor.selectionStart())
         i = 0
         # indent every lines
         while i < nb_lines:
             nb_space_to_add = tab_len
             cursor = QtGui.QTextCursor(block)
-            indentation = TextHelper(self.editor).line_indent(block)
-            if indentation < self.editor.min_indent_column:
-                nb_space_to_add = self.editor.min_indent_column
             cursor.movePosition(cursor.StartOfLine, cursor.MoveAnchor)
             if self.editor.use_spaces_instead_of_tabs:
                 for _ in range(nb_space_to_add):
@@ -84,12 +84,10 @@ class IndenterMode(Mode):
             _logger().debug('self.editor.use_spaces_instead_of_tabs: %r',
                             self.editor.use_spaces_instead_of_tabs)
             if self.editor.use_spaces_instead_of_tabs:
-                indentation = (len(txt) - len(txt.lstrip()) -
-                               self.editor.min_indent_column)
+                indentation = (len(txt) - len(txt.lstrip()))
             else:
                 indentation = len(txt) - len(txt.replace('\t', ''))
-            _logger().debug('unindent line %d: %d spaces (min indent=%d)',
-                            i, indentation, self.editor.min_indent_column)
+            _logger().debug('unindent line %d: %d spaces', i, indentation)
             if indentation > 0:
                 c = QtGui.QTextCursor(block)
                 c.movePosition(c.StartOfLine, cursor.MoveAnchor)
@@ -114,12 +112,7 @@ class IndenterMode(Mode):
             tab_len = self.editor.tab_length
             cursor.beginEditBlock()
             if self.editor.use_spaces_instead_of_tabs:
-                if cursor.positionInBlock() < self.editor.min_indent_column:
-                    nb_space_to_add = self.editor.min_indent_column
-                else:
-                    nb_space_to_add = (
-                        tab_len - (cursor.positionInBlock() -
-                                   self.editor.min_indent_column) % tab_len)
+                nb_space_to_add = tab_len - cursor.positionInBlock() % tab_len
                 cursor.insertText(nb_space_to_add * " ")
             else:
                 cursor.insertText('\t')

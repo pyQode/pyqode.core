@@ -135,22 +135,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._tab_length = value
         for c in self.clones:
             c.tab_length = value
-
-    @property
-    def min_indent_column(self):
-        """
-        Minimum indent column.
-
-        Some languages such as cobol starts coding at column 7.
-        """
-        return self._min_indent_column
-
-    @min_indent_column.setter
-    def min_indent_column(self, value):
-        self._min_indent_column = value
-        for c in self.clones:
-            c.min_indent_column = value
-
     @property
     def save_on_focus_out(self):
         """
@@ -424,7 +408,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             '}', '|', ':', '"', "'", "<", ">", "?", ",", ".", "/", ";", '[',
             ']', '\\', '\n', '\t', '=', '-', ' '
         ]
-        self._min_indent_column = 0
         self._save_on_focus_out = False
         self._use_spaces_instead_of_tabs = True
         self._whitespaces_foreground = None
@@ -530,7 +513,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             panel.clone_settings(original_panel)
         clone.use_spaces_instead_of_tabs = self.use_spaces_instead_of_tabs
         clone.tab_length = self.tab_length
-        clone.min_indent_column = self.min_indent_column
         clone.save_on_focus_out = self.save_on_focus_out
         clone.show_whitespaces = self.show_whitespaces
         clone.font_name = self.font_name

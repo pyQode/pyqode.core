@@ -121,7 +121,6 @@ def reset_editor(editor):
     editor.font_size = 10
     editor.use_spaces_instead_of_tabs = True
     editor.tab_length = 4
-    editor.min_indent_column = 0
     editor.save_on_focus_out = False
     pal = QtWidgets.QApplication.instance().palette()
     editor.selection_background = pal.highlight().color()
