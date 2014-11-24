@@ -97,7 +97,7 @@ def test_add_messages(editor):
 @editor_open(__file__)
 def test_remove_message(editor):
     mode = get_mode(editor)
-    QTest.qWait(1000)
+    QTest.qWait(5000)
     mode.clear_messages()
     status = [modes.CheckerMessages.ERROR, modes.CheckerMessages.WARNING,
               modes.CheckerMessages.INFO]
@@ -105,11 +105,11 @@ def test_remove_message(editor):
                                             10 + i)
                        for i in range(mode.limit * 2)])
     while not mode._finished:
-        QTest.qWait(100)
+        QTest.qWait(5000)
     assert len(mode._messages) == mode.limit
-    QTest.qWait(500)
+    QTest.qWait(5000)
     mode.remove_message(mode._messages[10])
-    QTest.qWait(500)
+    QTest.qWait(5000)
     assert len(mode._messages) == mode.limit - 1
     mode.clear_messages()
 
