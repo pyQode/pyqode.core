@@ -100,7 +100,7 @@ class JsonServer(socketserver.ThreadingTCPServer):
             :param obj: The object to send, must be Json serializable.
             """
             msg = json.dumps(obj).encode('utf-8')
-            print('sending %d bytes for the payload' % len(msg))
+            _logger().debug('sending %d bytes for the payload', len(msg))
             header = struct.pack('=I', len(msg))
             self.request.sendall(header)
             self.request.sendall(msg)
@@ -118,7 +118,7 @@ class JsonServer(socketserver.ThreadingTCPServer):
             Handles a work request.
             """
             try:
-                print('handling request %r' % data)
+                _logger().debug('handling request %r', data)
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
@@ -130,8 +130,8 @@ class JsonServer(socketserver.ThreadingTCPServer):
                 else:
                     if inspect.isclass(worker):
                         worker = worker()
-                    print('worker: %r' % worker)
-                    print('data: %r' % data['data'])
+                    _logger().debug('worker: %r', worker)
+                    _logger().debug('data: %r', data['data'])
                     try:
                         ret_val = worker(data['data'])
                     except Exception:
@@ -143,13 +143,13 @@ class JsonServer(socketserver.ThreadingTCPServer):
                     response = {'request_id': data['request_id'],
                                 'results': ret_val}
                 finally:
-                    print('sending response: %r' % response)
+                    _logger().debug('sending response: %r', response)
                     try:
                         self.send(response)
                     except ConnectionAbortedError:
                         pass
             except:
-                print('error with data=%r' % data)
+                _logger().debug('error with data=%r', data)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
 
@@ -167,8 +167,9 @@ class JsonServer(socketserver.ThreadingTCPServer):
         # print('server running on port %s' % args.port)
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
-        print('started on 127.0.0.1:%d' % int(args.port))
-        print("running with python %d.%d.%d" % (sys.version_info[:3]))
+        _logger().debug('started on 127.0.0.1:%d' % int(args.port))
+        _logger().debug('running with python %d.%d.%d' %
+                        (sys.version_info[:3]))
 
 
 def default_parser():
@@ -208,7 +209,7 @@ def serve_forever(args=None):
     import time
     t = time.time()
     server.shutdown()
-    print('SRV SHUTDOWN TIME: %f' % (time.time() - t), sys.stderr)
+    _logger().debug('SRV SHUTDOWN TIME: %f' % (time.time() - t), sys.stderr)
 
 
 # Server script example

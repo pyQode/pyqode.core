@@ -179,6 +179,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Requests a code completion at the current cursor position.
         """
+        _logger().debug('request code completion')
         self._col = self.editor.textCursor().positionInBlock() - len(
             self.completion_prefix)
         helper = TextHelper(self.editor)
@@ -576,6 +577,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         except NotRunning:
             self._data = data
             QtCore.QTimer.singleShot(100, self._retry_collect)
+            _logger().debug('retry collect_completions in 100ms')
         else:
             self._set_wait_cursor()
 
