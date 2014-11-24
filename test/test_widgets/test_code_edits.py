@@ -11,6 +11,7 @@ def test_generic():
     editor.file.open(__file__)
     editor.show()
     editor.close()
+    del editor
 
 
 def test_text():
@@ -21,4 +22,5 @@ def test_text():
     editor.file.open(__file__)
     editor.show()
     editor.close()
+    del editor
 

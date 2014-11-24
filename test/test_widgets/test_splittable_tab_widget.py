@@ -14,6 +14,7 @@ def test_splittable_tab_widget():
     tw.split(w, QtCore.Qt.Vertical)
     w.close()
     tw.close()
+    del tw
 
 
 def test_splittable_codedit_tab_widget():
