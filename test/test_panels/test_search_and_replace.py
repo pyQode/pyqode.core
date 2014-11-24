@@ -113,17 +113,17 @@ def test_replace(editor):
     replacement_txt = 'REPLACEMENT_TEXT'
     panel.on_actionActionSearchAndReplace_triggered()
     panel.request_search('import')
-    QTest.qWait(2000)
+    QTest.qWait(5000)
     panel.lineEditReplace.setText(replacement_txt)
     nb_occurences = panel.cpt_occurences
-    QTest.qWait(2000)
+    QTest.qWait(5000)
     assert nb_occurences > 2
     panel.replace()
     assert panel.cpt_occurences == nb_occurences - 1
     panel.replace_all()
     assert panel.cpt_occurences == 0
     panel.request_search(replacement_txt)
-    QTest.qWait(2000)
+    QTest.qWait(5000)
     assert panel.cpt_occurences == nb_occurences + 1
 
 
@@ -132,7 +132,7 @@ def test_event_filter(editor):
     panel = get_panel(editor)
     panel.on_actionActionSearchAndReplace_triggered()
     panel.request_search('import')
-    QTest.qWait(1000)
+    QTest.qWait(5000)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Tab)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Return)
     QTest.keyPress(panel.lineEditReplace, QtCore.Qt.Key_Return)

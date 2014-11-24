@@ -35,7 +35,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         from the file system model.
         """
         def __init__(self):
-            super().__init__()
+            super(FileSystemTreeView.FilterProxyModel, self).__init__()
             #: The list of directories to exclude
             self.ignored_directories = ['__pycache__']
             #: The list of file extension to exclude
@@ -90,7 +90,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
     file_created = QtCore.Signal(str)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super(FileSystemTreeView, self).__init__(parent)
         self._fs_model_source = QtWidgets.QFileSystemModel()
         self._fs_model_proxy = self.FilterProxyModel()
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
@@ -186,7 +186,7 @@ class FileSystemHelper:
     """
     class _UrlListMimeData(QtCore.QMimeData):
         def __init__(self, copy=True):
-            super().__init__()
+            super(FileSystemHelper._UrlListMimeData, self).__init__()
             self.copy = copy
 
         def set_list(self, urls):
@@ -437,7 +437,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     """
 
     def __init__(self):
-        super().__init__()
+        super(FileSystemContextMenu, self).__init__()
         #: Reference to the tree view
         self.tree_view = None
         self._init_actions()

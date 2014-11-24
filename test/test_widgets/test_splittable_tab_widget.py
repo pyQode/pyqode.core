@@ -29,9 +29,6 @@ def test_splittable_codedit_tab_widget():
     assert tw.open_document(__file__) == w_file
     QTest.qWait(1000)
     assert tw.count() == 3
-    QTest.keyPress(tw.current_widget(), 'a')
-    QTest.qWait(1000)
-    assert tw.current_widget().dirty is True
     tw.rename_document(__file__, __file__ + '.old')
     QTest.qWait(1000)
     tw.close_document(__file__ + '.old')
@@ -44,3 +41,4 @@ def test_splittable_codedit_tab_widget():
     QTest.qWait(1000)
     assert tw.count() == 0
     tw.close()
+    del tw
