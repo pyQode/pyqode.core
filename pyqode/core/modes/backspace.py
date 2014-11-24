@@ -25,6 +25,9 @@ class SmartBackSpaceMode(Mode):
             if self.editor.textCursor().atBlockStart():
                 return
             tab_len = self.editor.tab_length
+            tab_len = self.editor.textCursor().positionInBlock() % tab_len
+            if tab_len == 0:
+                tab_len = self.editor.tab_length
             # count the number of spaces deletable, stop at tab len
             spaces = 0
             cursor = QtGui.QTextCursor(self.editor.textCursor())
