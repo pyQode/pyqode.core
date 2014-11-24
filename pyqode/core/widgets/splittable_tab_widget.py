@@ -913,7 +913,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             else:
                 filenames.append(w.documentTitle())
         if len(filenames) == 0:
-            self._close_all()
+            self.close_all()
             return
         dlg = DlgUnsavedFiles(self, files=filenames)
         if dlg.exec_() == dlg.Accepted:
@@ -928,11 +928,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                     tw = widget.parent_tab_widget
                     tw.save_widget(widget)
                     tw.remove_tab(tw.indexOf(widget))
-            self._close_all()
+            self.close_all()
         else:
             event.ignore()
 
-    def _close_all(self):
+    def close_all(self):
         for w in self.widgets(include_clones=True):
             tw = w.parent_tab_widget
             tw.remove_tab(tw.indexOf(w))

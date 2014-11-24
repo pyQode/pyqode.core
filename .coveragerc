@@ -7,6 +7,11 @@ omit =
     # do not test designer forms and designer plugins
     *pyqode/core/_designer_plugins/*
     *pyqode/core/_forms/*
+    # dialogs are pretty hard to test reliably (something QTest.keyPress does
+    # not work, that lead to some falsly failing tests).
+    *pyqode/core/dialogs/*
+    *pyqode/core/tools/*
+    *pyqode/core/widgets/tabs.py
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -26,6 +31,8 @@ exclude_lines =
     if __name__ == .__main__.:
     pass
     serve_forever
+
+    def main\(.*:
 
     # Don't complain if non importable code is not run
     except ImportError
