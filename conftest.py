@@ -90,4 +90,3 @@ def editor(request):
     global EDITOR
     reset_editor(EDITOR)
     return EDITOR
-

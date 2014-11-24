@@ -135,6 +135,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._tab_length = value
         for c in self.clones:
             c.tab_length = value
+
     @property
     def save_on_focus_out(self):
         """

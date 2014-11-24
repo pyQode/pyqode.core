@@ -256,7 +256,8 @@ class InteractiveConsole(QTextEdit):
             if sys.platform == 'win32':
                 self._usr_buffer += "\r"
             self._usr_buffer += "\n"
-            self.process.write(bytes(self._usr_buffer, locale.getpreferredencoding()))
+            self.process.write(bytes(
+                self._usr_buffer, locale.getpreferredencoding()))
             self._usr_buffer = ""
         else:
             if event.key() != Qt.Key_Backspace:
