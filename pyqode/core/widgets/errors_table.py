@@ -63,6 +63,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.action_copy.triggered.connect(self._copy_cell_text)
         self.context_mnu.addAction(self.action_details)
         self.context_mnu.addAction(self.action_copy)
+        self.clear()
 
     def _copy_cell_text(self):
         """
