@@ -1,6 +1,7 @@
 """
-Simple interactive process used to demonstrate the use of the
-InteractiveConsole widget.
+This example show you how to use the InteractiveConsole. To make this example
+complete and cross-platform, we created an interactive process which prints some text
+and asks for user inputs. That way you can see that the console is actually interactive.
 """
 import sys
 from pyqode.qt import QtWidgets
