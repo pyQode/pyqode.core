@@ -18,7 +18,9 @@ if __name__ == '__main__':
     editor.resize(800, 600)
     print(editor.modes.append(ZoomMode()))
     editor.appendPlainText(
-        'Use Ctrl+Mouse wheel to zoom/unzoom the editor text')
+        'Use Ctrl+Mouse wheel to zoom in/out\n'
+        'Ctrl++ and Ctrl+- can also be used\n'
+        'Ctrl+0 resets the editor zoom level to 0')
     editor.show()
     app.exec_()
     editor.close()

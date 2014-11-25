@@ -245,8 +245,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             pass
         if not dirty:
             self.remove_tab(index)
-            self.parentWidget()._tabs.remove(widget)
-            widget.deleteLater()
         else:
             # unsaved widget
             path = self._get_widget_path(widget)
@@ -314,6 +312,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         self.tab_closed.emit(widget)
         self.removeTab(index)
         self._restore_original(clones)
+        widget._original_tab_widget._tabs.remove(widget)
         if self.count() == 0:
             self.last_tab_closed.emit()
 
@@ -444,6 +443,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         tab._uuid = self._uuid
         tab.horizontalScrollBar().setValue(0)
         tab.setFocus()
+        tab._original_tab_widget = self
         self._tabs.append(tab)
         self._on_focus_changed(None, tab)
 
