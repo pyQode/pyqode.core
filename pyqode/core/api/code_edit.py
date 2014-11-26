@@ -462,7 +462,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setLineWrapMode(self.NoWrap)
 
     def __repr__(self):
-        return 'CodeEdit(path=%r)' % self.file.path
+        return '%s(path=%r)' % (self.__class__.__name__, self.file.path)
 
     def split(self):
         """
