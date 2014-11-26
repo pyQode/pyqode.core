@@ -831,10 +831,16 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
-        tab = self._create_code_edit(mimetypes.guess_type(name)[0])
+        tab = self._create_code_edit(self.guess_mimetype(name))
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
+
+    def guess_mimetype(self, path):
+        if 'CMakeLists.txt' in path:
+            return 'text/x-cmake-project'
+        else:
+            return mimetypes.guess_type(path)[0]
 
     @utils.with_wait_cursor
     def open_document(self, path, *args, **kwargs):
@@ -865,7 +871,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             assert os.path.exists(path)
             name = os.path.split(path)[1]
-            tab = self._create_code_edit(mimetypes.guess_type(path)[0],
+            tab = self._create_code_edit(self.guess_mimetype(path),
                                          *args, **kwargs)
             tab.file.open(path)
             tab.setDocumentTitle(name)
