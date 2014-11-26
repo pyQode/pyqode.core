@@ -9,10 +9,10 @@ except:
 import logging
 import re
 import sys
+import time
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.core.managers.backend import BackendManager
 from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 from pyqode.core import backend
 
@@ -391,18 +391,20 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def _show_completions(self, completions):
-        _logger().debug("show %d completions" % len(completions))
+        _logger().info("showing %d completions" % len(completions))
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
         if (not self._cancel_next and not self._is_last_char_end_of_word() and
                 not (len(completions) == 1 and
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
-            self._update_model(completions, self._completer.model())
-            _logger().debug("model updated: %d items",
-                            self._completer.model().rowCount())
+            t = time.time()
+            self._update_model(completions)
+            elapsed = time.time() - t
+            _logger().info("completion model updated: %d items in %f seconds",
+                            self._completer.model().rowCount(), elapsed)
             self._show_popup()
-            _logger().debug("popup shown")
+            _logger().info("popup shown")
         self._cancel_next = False
 
     def _handle_completer_events(self, event):
@@ -524,7 +526,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _make_icon(icon):
         return QtGui.QIcon(icon)
 
-    def _update_model(self, completions, cc_model):
+    def _update_model(self, completions):
         """
         Creates a QStandardModel that holds the suggestion from the completion
         models for the QCompleter
@@ -532,23 +534,21 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         :param completionPrefix:
         """
         # build the completion model
-        cc_model.clear()
-        displayed_texts = []
+        cc_model = QtGui.QStandardItemModel()
         self._tooltips.clear()
         for completion in completions:
             name = completion['name']
             # skip redundant completion
-            if (name and name != self.completion_prefix and
-                    name not in displayed_texts):
-                displayed_texts.append(name)
-                item = QtGui.QStandardItem()
-                item.setData(name, QtCore.Qt.DisplayRole)
-                if 'tooltip' in completion and completion['tooltip']:
-                    self._tooltips[name] = completion['tooltip']
-                if 'icon' in completion:
-                    item.setData(self._make_icon(completion['icon']),
-                                 QtCore.Qt.DecorationRole)
-                cc_model.appendRow(item)
+            # if (name and name != self.completion_prefix and
+            #         name not in displayed_texts):
+            item = QtGui.QStandardItem()
+            item.setData(name, QtCore.Qt.DisplayRole)
+            if 'tooltip' in completion and completion['tooltip']:
+                self._tooltips[name] = completion['tooltip']
+            if 'icon' in completion:
+                item.setData(self._make_icon(completion['icon']),
+                             QtCore.Qt.DecorationRole)
+            cc_model.appendRow(item)
         self._completer.setModel(cc_model)
         return cc_model
 
