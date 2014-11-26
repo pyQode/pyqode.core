@@ -31,6 +31,7 @@ class DraggableTabBar(TabBar):
         super(DraggableTabBar, self).__init__(parent)
         self._pos = QtCore.QPoint()
         self.setAcceptDrops(True)
+        self.setMouseTracking(True)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -38,6 +39,18 @@ class DraggableTabBar(TabBar):
         super(DraggableTabBar, self).mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
+        # update tooltip with the tooltip of the tab under mouse cursor.
+        index = self.tabAt(event.pos())
+        tab = self.parent().widget(index)
+        if tab is not None:
+            tooltip = tab.toolTip()
+            if not tooltip:
+                try:
+                    tooltip = tab.file.path
+                except AttributeError:
+                    pass
+            self.setToolTip(tooltip)
+
         # If the distance is too small then return
         if (event.pos() - self._pos).manhattanLength() < \
                 QtWidgets.QApplication.startDragDistance():
