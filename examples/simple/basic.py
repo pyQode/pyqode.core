@@ -32,8 +32,8 @@ def main():
 
     # append some modes and panels
     editor.modes.append(modes.CodeCompletionMode())
-    editor.modes.append(modes.PygmentsSyntaxHighlighter(editor.document()))
     editor.modes.append(modes.CaretLineHighlighterMode())
+    editor.modes.append(modes.PygmentsSyntaxHighlighter(editor.document()))
     editor.panels.append(panels.SearchAndReplacePanel(),
                       api.Panel.Position.BOTTOM)
 
