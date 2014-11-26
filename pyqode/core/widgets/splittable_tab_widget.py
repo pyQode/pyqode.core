@@ -258,7 +258,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                     rm = self.save_widget(widget)
                 if rm:
                     self.remove_tab(index)
-                    self.parentWidget()._tabs.remove(widget)
                     widget.deleteLater()
 
     @staticmethod
