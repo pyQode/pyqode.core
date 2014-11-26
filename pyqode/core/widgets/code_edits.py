@@ -124,7 +124,8 @@ class GenericCodeEdit(CodeEdit):
             mime_type = self.file.mimetype
         if encoding is None:
             encoding = self.file.encoding
-        self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+        if not self.syntax_highlighter.set_mime_type(mime_type):
+            self.syntax_highlighter.set_lexer_from_filename(self.file.path)
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
 
     def clone(self):

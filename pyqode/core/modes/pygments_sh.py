@@ -196,7 +196,9 @@ class PygmentsSH(SyntaxHighlighter):
         try:
             self.set_lexer_from_mime_type(mime_type)
         except:
-            pass
+            return False
+        else:
+            return True
 
     def set_lexer_from_filename(self, filename):
         """
@@ -212,7 +214,9 @@ class PygmentsSH(SyntaxHighlighter):
             _logger().info('lexer for filename (%s): %r', filename,
                            self._lexer)
         except:
-            pass  # lexer not found
+            return False
+        else:
+            return True
 
     def set_lexer_from_mime_type(self, mime, **options):
         """
