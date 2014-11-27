@@ -30,7 +30,7 @@ class BackendManager(Manager):
 
     def __init__(self, editor):
         super(BackendManager, self).__init__(editor)
-        self._process = BackendProcess(editor)
+        self._process = None
         self._sockets = []
         self.server_script = None
         self.interpreter = None
@@ -45,7 +45,7 @@ class BackendManager(Manager):
         test_socket.close()
         return free_port
 
-    def start(self, script, interpreter=sys.executable, args=None):
+    def start(self, script, interpreter=sys.executable, args=None, error_callback=None):
         """
         Starts the backend process.
 
@@ -80,6 +80,9 @@ class BackendManager(Manager):
             pgm_args = [backend_script, str(self._port)]
         if args:
             pgm_args += args
+        self._process = BackendProcess(self.editor)
+        if error_callback:
+            self._process.error.connect(error_callback)
         self._process.start(program, pgm_args)
         _logger().debug('starting backend process: %s %s', program,
                         ' '.join(pgm_args))
@@ -139,7 +142,8 @@ class BackendManager(Manager):
 
         :return: True if the process is running, otherwise False
         """
-        return self._process.state() != self._process.NotRunning
+        return (self._process is not None and
+                self._process.state() != self._process.NotRunning)
 
     @property
     def connected(self):
