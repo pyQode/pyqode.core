@@ -49,7 +49,7 @@ COLOR_SCHEME_KEYS = {
     # any docstring (python docstring, c++ doxygen comment,...)
     "docstring": Token.Literal.String.Doc,
     # any number
-    "number": Token.Literal.Number,
+    "number": Token.Number,
     # any instance variable
     "instance": Token.Name.Variable,
     # whitespace color
@@ -142,11 +142,6 @@ class ColorScheme(object):
         """ Returns a QTextCharFormat for token by reading a Pygments style.
         """
         result = QtGui.QTextCharFormat()
-        # result.setForeground(self._get_brush())
-        if token in [Token.Literal.String, Token.Literal.String.Doc,
-                     Token.Comment]:
-            # mark strings, comments and docstrings regions for further queries
-            result.setObjectType(result.UserObject)
         items = list(style.style_for_token(token).items())
         for key, value in items:
             if value is None and key == 'color':
@@ -171,6 +166,10 @@ class ColorScheme(object):
                     result.setFontStyleHint(QtGui.QFont.Times)
                 elif key == 'mono':
                     result.setFontStyleHint(QtGui.QFont.TypeWriter)
+        if token in [Token.Literal.String, Token.Literal.String.Doc,
+                     Token.Comment]:
+            # mark strings, comments and docstrings regions for further queries
+            result.setObjectType(result.UserObject)
         return result
 
     def _get_brush(self, color):
