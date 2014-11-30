@@ -149,7 +149,6 @@ class ColorScheme(object):
             result.setObjectType(result.UserObject)
         items = list(style.style_for_token(token).items())
         for key, value in items:
-            print(token, key, value)
             if value is None and key == 'color':
                 # make sure to use a default visible color for the foreground
                 # brush
