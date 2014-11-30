@@ -1,6 +1,45 @@
 Change Log
 ==========
 
+2.4.0
+-----
+
+New features:
+
+- add a splittable tab widget
+- add a file system tree view
+- disable waiting cursor when waiting for code completions
+- give more room to fold level value in block user state
+- update qt and darcula pygments styles
+- add support for pygments 2
+- improvements to the syntax highlighter color scheme wrapper: more token types
+  are available through the ``formats`` attribute.
+- linter mode will use icon from theme on linux
+- add more basic examples demonstrating the use of each mode/panel
+
+Fixed bugs:
+
+- many bug fixes and improvements to the indenter mode
+- fix some bugs with pyside
+- fix bugs with stange encoding names (pyQode/pyQode#11)
+- fix a line ending issue with InteractiveConsole on windows (OpenCobolIDE/OpenCobolIDE#77)
+- fix default font on OS X + PyQt4
+- various non critical bug fixes in many modes/panels
+- fix a performance critical issue with code completion model updates: it will
+  now update 100 times faster and will never block the ui even when working with
+  big files (where there is more than 5000 completions items).
+
+Deprecated features:
+
+- pyqode.core.widgets.TabWidget is deprecated and will be removed in version
+  2.6
+- backend: there is no more boolean status returned by the backend, you should
+  adapt both your caller and callee code.
+
+Removed features (that were deprecated since at least 2.2.0):
+
+- pyqode.core.qt has been removed. You should now use pyqode.qt.
+
 2.3.2
 -----
 
@@ -8,7 +47,7 @@ Fixed bugs:
 
 - fix occasional crash when closing an editor
 - fix restore cursor position: center cursor
-- fix useeless rehighlights
+- fix useless calls to rehighlight
 
 2.3.1
 -----

@@ -24,11 +24,13 @@
 
 About
 -----
-**pyqode.core** is the core framework of the `pyQode`_ project. It contains the
-base classes and a set of extensions (modes/panels/managers) that you can use
-to create a specialised code editor. It also provides a basic generic code
-editor that you can use as a fallback when there is no specialised editor for
-a given language.
+**pyqode.core** is the core framework of the `pyQode`_ project.
+
+It contains the base classes and a set of extensions (modes/panels/managers)
+needed to develop a specialised code editor.
+
+It also provides a basic generic code editor that you can use as a fallback
+when there is no specialised editor for a given language.
 
 - `Issue tracker`_
 - `Wiki`_
@@ -43,9 +45,10 @@ Requirements
 
 pyqode.core depends on the following libraries:
 
--  Python 2 (**>=2.7**) or Python 3 (**>= 3.2**)
--  PyQt5 or PyQt4 or PySide
--  pygments
+- Python 2 (**>=2.7**) or Python 3 (**>= 3.2**)
+- PyQt5 or PyQt4 or PySide
+- pygments
+- pyqode.qt
 
 
 Installation
@@ -55,7 +58,7 @@ You need to install PyQt or PySide by yourself. Note that you should prefer
 
 Then you can install pyqode.core using **pip**::
 
-    $ pip install pyqode.core
+    $ pip install pyqode.core --upgrade
 
 Testing
 -------
