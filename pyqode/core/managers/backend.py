@@ -100,6 +100,7 @@ class BackendManager(Manager):
         for socket in self._sockets:
             socket._callback = None
             socket.close()
+
         self._sockets[:] = []
         # prevent crash logs from being written if we are busy killing
         # the process
@@ -143,7 +144,11 @@ class BackendManager(Manager):
             self._sockets.append(socket)
 
     def _rm_socket(self, socket):
-        self._sockets.remove(socket)
+        try:
+            socket.close()
+            self._sockets.remove(socket)
+        except ValueError:
+            pass
 
     @property
     def running(self):

@@ -80,11 +80,16 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._data_buf = bytes()
         self._callback = on_receive
         self.is_connected = False
+        self._closed = False
         self.connected.connect(self._on_connected)
         self.error.connect(self._on_error)
         self.disconnected.connect(self._on_disconnected)
         self.readyRead.connect(self._on_ready_read)
         self._connect()
+
+    def close(self):
+        self._closed = True  # fix issue with QTimer.singleShot
+        super(JsonTcpClient, self).close()
 
     def _send_request(self):
         """
@@ -139,10 +144,15 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_error(self, error):
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
-        if error == 1 and self.is_connected:
+        if error == 1 and self.is_connected or (
+                not self.is_connected and error == 0 and not self._closed):
             log_fct = _logger().debug
         else:
             log_fct = _logger().warning
+
+        if error == 0 and not self.is_connected and not self._closed:
+            QtCore.QTimer.singleShot(100, self._connect)
+
         log_fct(SOCKET_ERROR_STRINGS[error])
 
     def _on_disconnected(self):
