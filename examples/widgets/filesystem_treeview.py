@@ -21,9 +21,6 @@ if __name__ == '__main__':
     tv = FileSystemTreeView()
     tv.set_context_menu(FileSystemContextMenu())
     tv.activated.connect(_on_tv_activated)
-    tv.setHeaderHidden(True)
-    for i in range(1, 4):
-        tv.hideColumn(i)
     path = os.path.join(os.getcwd(), 'test_dir')
     print('watching: %s' % path)
     tv.set_root_path(path)
