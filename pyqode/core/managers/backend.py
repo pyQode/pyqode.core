@@ -100,7 +100,7 @@ class BackendManager(Manager):
         for socket in self._sockets:
             socket._callback = None
             socket.close()
-        self._sockets.clear()
+        self._sockets[:] = []
         # prevent crash logs from being written if we are busy killing
         # the process
         self._process._prevent_logs = True
