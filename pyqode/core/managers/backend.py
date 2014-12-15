@@ -86,8 +86,8 @@ class BackendManager(Manager):
         if error_callback:
             self._process.error.connect(error_callback)
         self._process.start(program, pgm_args)
-        _logger().debug('starting backend process: %s %s', program,
-                        ' '.join(pgm_args))
+        _logger().info('starting backend process: %s %s', program,
+                       ' '.join(pgm_args))
 
     def stop(self):
         """
@@ -95,11 +95,15 @@ class BackendManager(Manager):
         """
         if self._process is None:
             return
+        _logger().debug('stopping backend process')
         # close all sockets
         for socket in self._sockets:
             socket._callback = None
             socket.close()
-        t = time.time()
+        self._sockets.clear()
+        # prevent crash logs from being written if we are busy killing
+        # the process
+        self._process._prevent_logs = True
         while self._process.state() != self._process.NotRunning:
             self._process.waitForFinished(1)
             if sys.platform == 'win32':
@@ -109,7 +113,7 @@ class BackendManager(Manager):
                 self._process.kill()
             else:
                 self._process.terminate()
-        _logger().info('stopping backend took %f [s]', time.time() - t)
+        self._process._prevent_logs = False
         _logger().info('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
@@ -128,6 +132,8 @@ class BackendManager(Manager):
         if not self.running:
             raise NotRunning()
         else:
+            _logger().info('sending request, worker=%r' %
+                           worker_class_or_function)
             # create a socket, the request will be send as soon as the socket
             # has connected
             socket = JsonTcpClient(

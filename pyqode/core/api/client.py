@@ -139,9 +139,11 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def _on_error(self, error):
         if error not in SOCKET_ERROR_STRINGS:  # pragma: no cover
             error = -1
-        _logger().debug(SOCKET_ERROR_STRINGS[error])
-        if error == 0:
-            QtCore.QTimer.singleShot(100, self._connect)
+        if error == 1 and self.is_connected:
+            log_fct = _logger().debug
+        else:
+            log_fct = _logger().warning
+        log_fct(SOCKET_ERROR_STRINGS[error])
 
     def _on_disconnected(self):
         try:
@@ -222,7 +224,7 @@ class BackendProcess(QtCore.QProcess):
         self.running = False
         self.starting = True
         self._srv_logger = logging.getLogger('pyqode.backend')
-        self._test_not_deleted = False
+        self._prevent_logs = False
 
     def _on_process_started(self):
         """ Logs process started """
@@ -234,18 +236,13 @@ class BackendProcess(QtCore.QProcess):
         """ Logs process error """
         if error not in PROCESS_ERROR_STRING:
             error = -1
-        try:
-            self._test_not_deleted
-        except AttributeError:
-            pass
-        else:
-            if self.running:
-                _logger().debug(PROCESS_ERROR_STRING[error])
+        if not self._prevent_logs:
+            _logger().warning(PROCESS_ERROR_STRING[error])
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
         _logger().debug('backend process finished with exit code %d',
-                        exit_code)
+                       exit_code)
         try:
             self.running = False
         except AttributeError:
