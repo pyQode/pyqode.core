@@ -1,5 +1,6 @@
 import pytest
 from pyqode.core.widgets import RecentFilesManager, MenuRecentFiles
+import pyqode.core
 
 
 def test_open_file():
@@ -17,9 +18,11 @@ def test_remove_file():
     manager.max_recent_files = 10
     manager.clear()
     manager.open_file(__file__)
-    manager.open_file(pytest.__file__)
-    assert manager.last_file() == pytest.__file__
-    manager.remove(pytest.__file__)
+    test_path = pyqode.core.__file__
+    manager.open_file(test_path)
+    assert len(manager.get_recent_files()) == 2
+    assert manager.last_file() == test_path
+    manager.remove(test_path)
     assert len(manager.get_recent_files()) == 1
     assert manager.last_file() == __file__
 
