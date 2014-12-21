@@ -43,3 +43,11 @@ def test_menu_recent_files():
     mnu = MenuRecentFiles(None, recent_files_manager=manager, title='Recents',
                           icon_provider=None, clear_icon=None)
     mnu.show()
+
+
+def test_normalized_path():
+    manager = RecentFilesManager('pyQode', 'test')
+    manager.clear()
+    manager.open_file(r'c:\Test/test.cbl')
+    manager.open_file(r'c:\Test\test.cbl')
+    assert len(manager.get_value('list', [])) == 1
