@@ -34,14 +34,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         Excludes :attr:`ignored_directories` and :attr:`ignored_extensions`
         from the file system model.
         """
-        #: The list of directories to exclude
-        ignored_directories = ['__pycache__']
-        #: The list of file extension to exclude
-        ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                              '.egg-info', '.coverage', '.DS_Store']
-
         def __init__(self):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
+            #: The list of directories to ignore
+            self.ignored_directories = ['__pycache__']
+            #: The list of file extension to exclude
+            self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
+                                  '.egg-info', '.coverage', '.DS_Store']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -98,9 +97,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
         self.setSelectionMode(self.ExtendedSelection)
+        self._ignored_extensions = []
+        self._ignored_directories = []
 
-    @classmethod
-    def ignore_directories(cls, *directories):
+    def ignore_directories(self, *directories):
         """
         Adds the specified directories to the list of ignored directories.
 
@@ -109,10 +109,9 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param directories: the directories to ignore
         """
         for d in directories:
-            cls.FilterProxyModel.ignored_directories.append(d)
+            self._ignored_directories.append(d)
 
-    @classmethod
-    def ignore_extensions(cls, *extensions):
+    def ignore_extensions(self, *extensions):
         """
         Adds the specified extensions to the list of ignored directories.
 
@@ -123,7 +122,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         .. note:: extension must have the dot: '.py' and not 'py'
         """
         for d in extensions:
-            cls.FilterProxyModel.ignored_extensions.append(d)
+            self._ignored_extensions.append(d)
 
     def set_context_menu(self, context_menu):
         """
@@ -146,6 +145,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             path = os.path.abspath(os.path.join(path, os.pardir))
         self._fs_model_source = QtWidgets.QFileSystemModel()
         self._fs_model_proxy = self.FilterProxyModel()
+        for item in self._ignored_directories:
+            self._fs_model_proxy.ignored_directories.append(item)
+        for item in self._ignored_extensions:
+            self._fs_model_proxy.ignored_extensions.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self.setModel(self._fs_model_proxy)
         self._fs_model_proxy.set_root_path(path)
