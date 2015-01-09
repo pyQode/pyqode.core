@@ -1,6 +1,24 @@
 Change Log
 ==========
 
+2.4.1
+-----
+
+New features:
+
+- FileWatcherMode: add file_reloaded signal to the
+
+
+Fixed bugs:
+
+- fix an issue with QTimer.singleShot
+- fix encodings issue when pyqode is embedded into FreeCad (see pyQode/pyQode#11, end of topic)
+- SplittableTabWidget: Fix issue when calling save and all editors has been closed
+- SplittableTabWidget: Fix gui issue: panels of cloned editors should be hidden automatically
+- FileSystemTree: fix issue when resetting path or when having two widget instances
+- RecentFilesManager: fix duplicate entries on windows (see OpenCobolIDE/OpenCobolIDE#80
+- FileWatcherMode: don't wait for the editor to get the focus to auto reload changed file
+
 2.4.0
 -----
 
