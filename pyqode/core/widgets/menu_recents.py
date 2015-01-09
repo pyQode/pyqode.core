@@ -43,8 +43,8 @@ class RecentFilesManager(QtCore.QObject):
         :param default: default value.
         :return: value
         """
-        return [os.path.normpath(pth) for pth in
-                self._settings.value('recent_files/%s' % key, default)]
+        return list(set([os.path.normpath(pth) for pth in
+                self._settings.value('recent_files/%s' % key, default)]))
 
     def set_value(self, key, value):
         """
