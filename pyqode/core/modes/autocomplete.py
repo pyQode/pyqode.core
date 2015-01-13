@@ -75,14 +75,17 @@ class AutoCompleteMode(Mode):
         if event.key() == QtCore.Qt.Key_Backspace:
             # get the character that will get deleted
             tc = self.editor.textCursor()
-            tc.movePosition(tc.PreviousCharacter)
-            tc.movePosition(tc.NextCharacter, tc.KeepAnchor)
+            pos = tc.position()
+            tc.movePosition(tc.Left)
+            tc.movePosition(tc.Right, tc.KeepAnchor)
             del_char = tc.selectedText()
-            if self.MAPPING[del_char] == next_char:
+            if del_char in self.MAPPING and self.MAPPING[del_char] == next_char:
                 tc.beginEditBlock()
-                tc.movePosition(tc.NextCharacter, tc.KeepAnchor, 2)
-                tc.removeSelectedText()
+                tc.movePosition(tc.Right, tc.KeepAnchor)
+                tc.insertText('')
+                tc.setPosition(pos - 2)
                 tc.endEditBlock()
+                self.editor.setTextCursor(tc)
                 ignore = True
         elif txt and next_char == txt and next_char in self.MAPPING:
             ignore = True
