@@ -38,6 +38,7 @@ class BackendManager(Manager):
         self.server_script = None
         self.interpreter = None
         self.args = None
+        self._shared = False
 
     @staticmethod
     def pick_free_port():
@@ -75,9 +76,11 @@ class BackendManager(Manager):
             you will need to merge all backend scripts into one single script,
             otherwise the wrong script might be picked up).
         """
+        self._shared = reuse
         if reuse and BackendManager.SHARE_COUNT:
             self._port = BackendManager.LAST_PORT
             self._process = BackendManager.LAST_PROCESS
+            BackendManager.SHARE_COUNT += 1
         else:
             if self.running:
                 self.stop()
@@ -104,12 +107,9 @@ class BackendManager(Manager):
             if reuse:
                 BackendManager.LAST_PROCESS = self._process
                 BackendManager.LAST_PORT = self._port
+                BackendManager.SHARE_COUNT += 1
             _logger().info('starting backend process: %s %s', program,
                            ' '.join(pgm_args))
-        if reuse:
-            BackendManager.SHARE_COUNT += 1
-        else:
-            BackendManager.SHARE_COUNT = 1
 
     def stop(self):
         """
@@ -117,9 +117,10 @@ class BackendManager(Manager):
         """
         if self._process is None:
             return
-        BackendManager.SHARE_COUNT -= 1
-        if BackendManager.SHARE_COUNT:
-            return
+        if self._shared:
+            BackendManager.SHARE_COUNT -= 1
+            if BackendManager.SHARE_COUNT:
+                return
         _logger().debug('stopping backend process')
         # close all sockets
         for socket in self._sockets:
