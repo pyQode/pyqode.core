@@ -109,11 +109,9 @@ class OccurrencesHighlighterMode(Mode):
             self.timer.cancel_requests()
 
     def _clear_decos(self):
-        print('clearing decos')
         for d in self._decorations:
             self.editor.decorations.remove(d)
         self._decorations[:] = []
-        print('decos cleared')
 
     def _request_highlight(self):
         if self.editor is not None:
