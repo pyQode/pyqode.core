@@ -145,7 +145,6 @@ class OccurrencesHighlighterMode(Mode):
                 self._request_highlight()
 
     def _on_results_available(self, results):
-        print('results available', len(results))
         if len(results) > 500:
             # limit number of results (on very big file where a lots of
             # occurrences can be found, this would totally freeze the editor
@@ -164,7 +163,6 @@ class OccurrencesHighlighterMode(Mode):
                 deco.draw_order = 3
                 self.editor.decorations.append(deco)
                 self._decorations.append(deco)
-        print('finished results available')
 
     def clone_settings(self, original):
         self.delay = original.delay
