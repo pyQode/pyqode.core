@@ -109,9 +109,11 @@ class OccurrencesHighlighterMode(Mode):
             self.timer.cancel_requests()
 
     def _clear_decos(self):
+        print('clearing decos')
         for d in self._decorations:
             self.editor.decorations.remove(d)
         self._decorations[:] = []
+        print('decos cleared')
 
     def _request_highlight(self):
         if self.editor is not None:
@@ -143,6 +145,13 @@ class OccurrencesHighlighterMode(Mode):
                 self._request_highlight()
 
     def _on_results_available(self, results):
+        print('results available', len(results))
+        if len(results) > 500:
+            # limit number of results (on very big file where a lots of
+            # occurrences can be found, this would totally freeze the editor
+            # during a few seconds, with a limit of 500 we can make sure
+            # the editor will always remain responsive).
+            results = results[:500]
         if len(results) > 1:
             for start, end in results:
                 deco = TextDecoration(self.editor.textCursor(),
@@ -155,6 +164,7 @@ class OccurrencesHighlighterMode(Mode):
                 deco.draw_order = 3
                 self.editor.decorations.append(deco)
                 self._decorations.append(deco)
+        print('finished results available')
 
     def clone_settings(self, original):
         self.delay = original.delay
