@@ -819,7 +819,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if mimetype in self.editors.keys():
             return self.editors[mimetype](
                 *args, parent=self.main_tab_widget, **kwargs)
-        return self.fallback_editor(parent=self.main_tab_widget)
+        return self.fallback_editor(*args, parent=self.main_tab_widget,
+                                    **kwargs)
 
     def create_new_document(self, base_name='New Document', extension='.txt'):
         """
