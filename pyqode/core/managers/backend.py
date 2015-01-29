@@ -29,6 +29,7 @@ class BackendManager(Manager):
     """
     LAST_PORT = None
     LAST_PROCESS = None
+    SHARE_COUNT = 0
 
     def __init__(self, editor):
         super(BackendManager, self).__init__(editor)
@@ -74,7 +75,7 @@ class BackendManager(Manager):
             you will need to merge all backend scripts into one single script,
             otherwise the wrong script might be picked up).
         """
-        if reuse and BackendManager.LAST_PORT is not None:
+        if reuse and BackendManager.SHARE_COUNT:
             self._port = BackendManager.LAST_PORT
             self._process = BackendManager.LAST_PROCESS
         else:
@@ -105,12 +106,16 @@ class BackendManager(Manager):
                 BackendManager.LAST_PORT = self._port
             _logger().info('starting backend process: %s %s', program,
                            ' '.join(pgm_args))
+        BackendManager.SHARE_COUNT += 1
 
     def stop(self):
         """
         Stops the backend process.
         """
         if self._process is None:
+            return
+        BackendManager.SHARE_COUNT -= 1
+        if BackendManager.SHARE_COUNT:
             return
         _logger().debug('stopping backend process')
         # close all sockets
