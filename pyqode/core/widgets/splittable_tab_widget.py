@@ -814,7 +814,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         open/create.
 
         :type mimetype: mime type
-        :return: CodeEdit instance
+        :param args: Positional arguments that must be forwarded to the editor
+            widget constructor.
+        :param kwargs: Keyworded arguments that must be forwarded to the editor
+            widget constructor.
+        :return: Code editor widget instance.
         """
         if mimetype in self.editors.keys():
             return self.editors[mimetype](
@@ -822,16 +826,21 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         return self.fallback_editor(*args, parent=self.main_tab_widget,
                                     **kwargs)
 
-    def create_new_document(self, base_name='New Document', extension='.txt'):
+    def create_new_document(self, base_name='New Document', extension='.txt',
+                            *args, **kwargs):
         """
         Creates a new document.
 
         The document name will be ``base_name + count + extension``
 
-        :type base_name: Base name of the document. An int will be appended.
-        :type extension: Document extension (must include the DOT)
+        :param base_name: Base name of the document. An int will be appended.
+        :param extension: Document extension (dotted)
+        :param args: Positional arguments that must be forwarded to the editor
+            widget constructor.
+        :param kwargs: Keyworded arguments that must be forwarded to the editor
+            widget constructor.
 
-        :return: The created code editor
+        :return: Code editor widget instance.
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
