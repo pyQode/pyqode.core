@@ -106,7 +106,10 @@ class BackendManager(Manager):
                 BackendManager.LAST_PORT = self._port
             _logger().info('starting backend process: %s %s', program,
                            ' '.join(pgm_args))
-        BackendManager.SHARE_COUNT += 1
+        if reuse:
+            BackendManager.SHARE_COUNT += 1
+        else:
+            BackendManager.SHARE_COUNT = 1
 
     def stop(self):
         """
