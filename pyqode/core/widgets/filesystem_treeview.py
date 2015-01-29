@@ -573,7 +573,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         if system == 'Linux':
             output = subprocess.check_output(
                 ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
-            explorer = output.splitlines()[0].replace('.desktop', '')
+            explorer = output.splitlines()[0].replace(
+                '.desktop', '').split('.')[-1]
             if explorer in ['nautilus', 'dolphin']:
                 subprocess.Popen([explorer, '--select', path])
             else:
