@@ -1,5 +1,5 @@
 from pyqode.qt.QtTest import QTest
-from pyqode.core.api import TextHelper
+from pyqode.core.api import TextHelper, CodeEdit
 from pyqode.core import modes
 
 
@@ -14,9 +14,11 @@ def test_enabled(editor):
     mode.enabled = True
 
 
-def test_key_pressed(editor):
+def test_key_pressed():
     # " -> ""
-    editor.show()
+    editor = CodeEdit()
+    editor.modes.append(modes.AutoCompleteMode())
+    editor.setPlainText('', '', 'utf-8')
     QTest.keyPress(editor, '"')
     assert editor.toPlainText() == '""'
     editor.clear()
