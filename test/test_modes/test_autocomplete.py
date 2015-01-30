@@ -15,15 +15,33 @@ def test_enabled(editor):
 
 
 def test_key_pressed(editor):
+    # " -> ""
+    editor.show()
     QTest.keyPress(editor, '"')
+    assert editor.toPlainText() == '""'
     editor.clear()
+
+    # if a " already exists, cursor should just move after " and a new " should
+    # not be inserted
     editor.setPlainText('"', 'text/x-python', 'utf-8')
     TextHelper(editor).goto_line(0, 0)
     QTest.keyPress(editor, '"')
+    assert editor.toPlainText() == '"'
     editor.clear()
+
+    # if a ) already exists, cursor should just move after ) and a new ) should
+    # not be inserted
     editor.setPlainText(')', 'text/x-python', 'utf-8')
     TextHelper(editor).goto_line(0, 0)
     QTest.keyPress(editor, ')')
+    QTest.qWait(1000)
+    assert editor.toPlainText() == ')'
+
+    # ] should be inserted ")" -> "])"
+    TextHelper(editor).goto_line(0, 0)
+    QTest.keyPress(editor, ']')
+    QTest.qWait(1000)
+    assert editor.toPlainText() == '])'
 
 
 def test_quoting_selection(editor):

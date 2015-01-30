@@ -90,7 +90,11 @@ class AutoCompleteMode(Mode):
         elif txt and next_char == txt and next_char in self.MAPPING:
             ignore = True
         elif event.text() == ')' or event.text() == ']' or event.text() == '}':
-            if next_char == ')' or next_char == ']' or next_char == '}':
+            # if typing the same symbol twice, the symbol should not be written
+            # and the cursor moved just after the char
+            # e.g. if you type ) just before ), the cursor will just move after
+            # the existing )
+            if next_char == event.text():
                 ignore = True
         if ignore:
             event.accept()
