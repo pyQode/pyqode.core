@@ -745,7 +745,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             cursor.select(cursor.LineUnderCursor)
             has_selection = False
         line = cursor.selectedText()
-        line = '\n'.join(line.split(u'\u2029'))
+        line = '\n'.join(line.split('\u2029'))
         end = cursor.selectionEnd()
         cursor.setPosition(end)
         cursor.beginEditBlock()

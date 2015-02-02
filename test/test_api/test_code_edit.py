@@ -56,7 +56,7 @@ def test_duplicate_line(editor):
     editor.setPlainText('foo', '', 'utf-8')
     editor.duplicate_line()
     assert editor.toPlainText() == 'foo\nfoo'
-    assert editor.textCursor().position() == 4
+    assert editor.textCursor().position() == 7
 
 
 def test_bug_duplicate_line_undo_stack(editor):
@@ -69,7 +69,7 @@ def test_bug_duplicate_line_undo_stack(editor):
     editor.duplicate_line()
     editor.undo()
     assert editor.toPlainText() == '    foo\nbar'
-    assert editor.textCursor().position() == 4
+    assert editor.textCursor().position() == 7
 
 
 @editor_open(__file__)
