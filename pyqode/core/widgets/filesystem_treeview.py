@@ -522,7 +522,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.action_delete.triggered.connect(self._on_delete_triggered)
         self.addAction(self.action_delete)
         self.addSeparator()
-        action = self.addAction('Show in explorer')
+
+        system = platform.system()
+        if system == 'Windows':
+            text = 'Open in explorer'
+        elif system == 'Darwin':
+            text = 'Open in finder'
+        else:
+            text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
+        action = self.addAction(text)
         action.triggered.connect(self._on_show_in_explorer_triggered)
 
     def get_new_user_actions(self):
@@ -567,14 +575,18 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _on_create_file_triggered(self):
         self.tree_view.helper.create_file()
 
+    def get_linux_file_explorer(self):
+        output = subprocess.check_output(
+            ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
+        explorer = output.splitlines()[0].replace(
+            '.desktop', '').split('.')[-1].lower()
+        return explorer
+
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
         system = platform.system()
         if system == 'Linux':
-            output = subprocess.check_output(
-                ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
-            explorer = output.splitlines()[0].replace(
-                '.desktop', '').split('.')[-1]
+            explorer = self.get_linux_file_explorer()
             if explorer in ['nautilus', 'dolphin']:
                 subprocess.Popen([explorer, '--select', path])
             else:
