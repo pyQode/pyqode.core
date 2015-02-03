@@ -578,9 +578,11 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def get_linux_file_explorer(self):
         output = subprocess.check_output(
             ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
-        explorer = output.splitlines()[0].replace(
-            '.desktop', '').split('.')[-1].lower()
-        return explorer
+        if output:
+            explorer = output.splitlines()[0].replace(
+                '.desktop', '').split('.')[-1].lower()
+            return explorer
+        return 'nautilus'
 
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
