@@ -1178,7 +1178,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         move = QtGui.QTextCursor.MoveAnchor
         if select:
             move = QtGui.QTextCursor.KeepAnchor
-        if delta:
+        if delta > 0:
             cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
         else:
             cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)
