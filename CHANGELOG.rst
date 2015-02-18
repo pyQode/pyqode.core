@@ -1,6 +1,26 @@
 Change Log
 ==========
 
+2.4.2
+-----
+New features:
+
+- allow to reuse the same backend process for any new editor. This is not recommended but
+  might be inevitable if you're running a proprietary python interpreter (see pyQode/pyQode#21)
+
+
+Fixed bugs:
+
+- fix auto-completion of backspace. Backspace should remove the corresponding character if next
+  char is not empty and is in the mapping.  E.g.: (|), pressing delete at | should remove both parentheses
+- fix show in explorer action (filesystem treeview) on Plasma 5
+- fix cursor position after filewatcher reload (fix OpenCobolIDE/OpenCobolIDE#97)
+- improve performances of OccurencesHighlighterMode
+- fix a bug in auto-completion, mapping was not always respected and it sometimes happen
+  that the closing symbol is not written if another closing symbol is after the text cursor.
+- improve action "Duplicate line", now the entire selection will get duplicated (instead of the last line only).
+- fix a bug with home key if the cursor is in the indentation are (first blank spaces).
+
 2.4.1
 -----
 
