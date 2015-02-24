@@ -108,6 +108,14 @@ OccurrencesHighlighterMode
     :undoc-members:
     :show-inheritance:
 
+OutlineMode
++++++++++++
+
+.. autoclass:: pyqode.core.modes.OutlineMode
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 PygmentsSH
 ++++++++++
 

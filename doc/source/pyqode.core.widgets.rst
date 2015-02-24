@@ -84,6 +84,14 @@ MenuRecentFiles
     :undoc-members:
     :show-inheritance:
 
+OutlineTreeWidget
++++++++++++++++++
+
+.. autoclass:: pyqode.core.widgets.OutlineTreeWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 PromptLineEdit
 ++++++++++++++
 
