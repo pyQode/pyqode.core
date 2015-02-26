@@ -1,6 +1,7 @@
 """
 This module contains the splittable tab widget API
 """
+import inspect
 import logging
 import mimetypes
 import os
@@ -775,6 +776,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
         :param code_edit_class: code edit class to register.
         """
+        if not inspect.isclass(code_edit_class):
+            raise TypeError('must be a class, not an instance.')
         for mimetype in code_edit_class.mimetypes:
             if mimetype in cls.editors:
                 _logger().warn('editor for mimetype already registered, '
