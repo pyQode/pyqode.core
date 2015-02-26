@@ -770,7 +770,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     def register_code_edit(cls, code_edit_class):
         """
         Register an additional code edit **class**
-        :param code_edit_class: code edit class to regiter.
+
+        .. warning: This method expect a class, not an instance!
+
+        :param code_edit_class: code edit class to register.
         """
         for mimetype in code_edit_class.mimetypes:
             if mimetype in cls.editors:
@@ -844,7 +847,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
-        tab = self._create_code_edit(self.guess_mimetype(name))
+        tab = self._create_code_edit(self.guess_mimetype(name), *args, **kwargs)
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
