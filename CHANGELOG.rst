@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+2.5.0
+-----
+
+New features:
+    - Unified API for document outline (see pyQode/pyQode#24)
+    - Imrpove SlittableCodeWidget API: now an exception will be raised if the wrong type
+      is passed to register_code_edit.
+
+Fixed bugs:
+    - InteractiveConsole: fix bugs which prevent from starting a new process (if another one is still running).
+
+
 2.4.2
 -----
 New features:
