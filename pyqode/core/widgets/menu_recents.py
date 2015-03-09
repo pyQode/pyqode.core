@@ -120,7 +120,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
     """
     Menu that manage the list of recent files.
 
-    To use the menu, simply pass connect to the open_requested signal.
+    To use the menu, simply connect to the open_requested signal.
 
     """
     #: Signal emitted when the user clicked on a recent file action.
