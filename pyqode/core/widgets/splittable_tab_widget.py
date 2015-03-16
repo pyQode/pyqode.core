@@ -579,7 +579,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     def _on_current_changed(self, new):
         old = self._current
         self._current = new
-        _logger().info(
+        _logger().debug(
             'current tab changed (old=%r, new=%r)', old, new)
         self.current_changed.emit(new)
         return old, new
@@ -783,7 +783,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 _logger().warn('editor for mimetype already registered, '
                                'skipping')
             cls.editors[mimetype] = code_edit_class
-        _logger().info('registered editors: %r', cls.editors)
+        _logger().debug('registered editors: %r', cls.editors)
 
     def save_current_as(self):
         """

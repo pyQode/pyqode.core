@@ -108,8 +108,8 @@ class BackendManager(Manager):
                 BackendManager.LAST_PROCESS = self._process
                 BackendManager.LAST_PORT = self._port
                 BackendManager.SHARE_COUNT += 1
-            _logger().info('starting backend process: %s %s', program,
-                           ' '.join(pgm_args))
+            _logger().debug('starting backend process: %s %s', program,
+                            ' '.join(pgm_args))
 
     def stop(self):
         """
@@ -141,7 +141,7 @@ class BackendManager(Manager):
             else:
                 self._process.terminate()
         self._process._prevent_logs = False
-        _logger().info('backend process terminated')
+        _logger().debug('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
@@ -159,8 +159,8 @@ class BackendManager(Manager):
         if not self.running:
             raise NotRunning()
         else:
-            _logger().info('sending request, worker=%r' %
-                           worker_class_or_function)
+            _logger().debug('sending request, worker=%r' %
+                            worker_class_or_function)
             # create a socket, the request will be send as soon as the socket
             # has connected
             socket = JsonTcpClient(

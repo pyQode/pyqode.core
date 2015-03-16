@@ -238,7 +238,7 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_started(self):
         """ Logs process started """
-        _logger().info('backend process started')
+        _logger().debug('backend process started')
         self.starting = False
         self.running = True
 

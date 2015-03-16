@@ -391,7 +391,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
 
     def _show_completions(self, completions):
-        _logger().info("showing %d completions" % len(completions))
+        _logger().debug("showing %d completions" % len(completions))
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
         if (not self._cancel_next and not self._is_last_char_end_of_word() and
@@ -401,10 +401,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             t = time.time()
             self._update_model(completions)
             elapsed = time.time() - t
-            _logger().info("completion model updated: %d items in %f seconds",
+            _logger().debug("completion model updated: %d items in %f seconds",
                             self._completer.model().rowCount(), elapsed)
             self._show_popup()
-            _logger().info("popup shown")
+            _logger().debug("popup shown")
         self._cancel_next = False
 
     def _handle_completer_events(self, event):

@@ -545,7 +545,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Cache().set_cursor_position(
             self.file.path, TextHelper(self).cursor_position())
         super(CodeEdit, self).close()
-        _logger().info('closed')
+        _logger().debug('closed')
 
     def set_mouse_cursor(self, cursor):
         """
@@ -589,7 +589,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super(CodeEdit, self).setPlainText(txt)
-        _logger().info('setPlainText duration: %fs' % (time.time() - t))
+        _logger().debug('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
