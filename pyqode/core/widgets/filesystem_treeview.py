@@ -189,6 +189,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         if self.context_menu:
             self.context_menu.exec_(self.mapToGlobal(point))
 
+    def select_path(self, path):
+        self.setCurrentIndex(self._fs_model_proxy.mapFromSource(
+            self._fs_model_source.index(path)))
+
 
 class FileSystemHelper:
     """
