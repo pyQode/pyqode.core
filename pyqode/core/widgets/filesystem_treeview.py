@@ -287,7 +287,15 @@ class FileSystemHelper:
             _logger().info('%s <%s> to <%s>' % (
                 'copying' if copy else 'cutting', src, destination))
             perform_copy = True
-            final_dest = os.path.join(destination, os.path.split(src)[1])
+            ext = os.path.splitext(src)[1]
+            original = os.path.splitext(os.path.split(src)[1])[0]
+            filename, status = QtWidgets.QInputDialog.getText(
+                self.tree_view, 'Copy', 'New name:',
+                QtWidgets.QLineEdit.Normal, original)
+            if filename == '' or not status:
+                return
+            filename = filename + ext
+            final_dest = os.path.join(destination, filename)
             if os.path.exists(final_dest):
                 rep = QtWidgets.QMessageBox.question(
                     self.tree_view, 'File exists',
@@ -300,7 +308,7 @@ class FileSystemHelper:
             if not perform_copy:
                 continue
             try:
-                shutil.copy(src, destination)
+                shutil.copy(src, final_dest)
             except (IOError, OSError) as e:
                 QtWidgets.QMessageBox.warning(
                     self.tree_view, 'Failed to copy file', str(e))
