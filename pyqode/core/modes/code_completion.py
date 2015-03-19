@@ -160,7 +160,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_key = None
         self._trigger_len = None
         self._trigger_symbols = None
-        self._show_tooltips = None
+        self._show_tooltips = False
         self._case_sensitive = None
         self._data = None
         self._completer = None
@@ -172,7 +172,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_key = QtCore.Qt.Key_Space
         self._trigger_len = 1
         self._trigger_symbols = ['.']
-        self._show_tooltips = True
+        self._show_tooltips = False
         self._case_sensitive = False
 
     def request_completion(self):
