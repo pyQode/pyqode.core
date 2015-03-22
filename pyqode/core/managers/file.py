@@ -55,13 +55,24 @@ class FileManager(Manager):
             - Windows: force the use of Windows EOL (\r\n)
         """
         #:
-        System = os.linesep
+        System = 0
         #: Linux EOL: \n
-        Linux = '\n'
+        Linux = 1
         #: Macintosh EOL: \r
-        Mac = '\r'
+        Mac = 2
         #: Windows EOL: \r\n
-        Windows = '\r\n'
+        Windows = 3
+
+        _map = {
+            System: os.linesep,
+            Linux: '\n',
+            Mac: '\r',
+            Windows: '\r\n'
+        }
+
+        @classmethod
+        def string(cls, value):
+            return cls._map[value]
 
     @property
     def path(self):
@@ -103,7 +114,7 @@ class FileManager(Manager):
     def autodetect_eol(self, value):
         self._autodetect_eol = value
         if not self._autodetect_eol:
-            self._eol = self._preferred_eol
+            self._eol = self.EOL.string(self._preferred_eol)
 
     @property
     def preferred_eol(self):
@@ -113,7 +124,7 @@ class FileManager(Manager):
     def preferred_eol(self, eol):
         self._preferred_eol = eol
         if not self._autodetect_eol:
-            self._eol = self._preferred_eol
+            self._eol = self.EOL.string(self._preferred_eol)
 
     def _get_icon(self):
         return QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(self.path))
@@ -147,8 +158,8 @@ class FileManager(Manager):
         self.restore_cursor = True
         #: Preferred EOL convention. This setting will be used for saving the
         #: document unles autodetect_eol is True.
-        self._preferred_eol = FileManager.EOL.System
-        self._eol = self._preferred_eol
+        self._preferred_eol = self.EOL.System
+        self._eol = self.EOL.string(self._preferred_eol)
         #: If true, automatically detects file EOL and use it instead of the
         #: preferred EOL when saving files.
         self._autodetect_eol = True
@@ -214,7 +225,7 @@ class FileManager(Manager):
                 if self.autodetect_eol:
                     self._eol = file.newlines
                 else:
-                    self._eol = self.preferred_eol
+                    self._eol = self.EOL.string(self.preferred_eol)
         except (UnicodeDecodeError, UnicodeError) as e:
             try:
                 from pyqode.core.panels import EncodingPanel
