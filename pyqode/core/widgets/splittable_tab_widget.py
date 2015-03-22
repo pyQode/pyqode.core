@@ -833,6 +833,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                                     **kwargs)
 
     def create_new_document(self, base_name='New Document', extension='.txt',
+                            preferred_eol=0, autodetect_eol=True,
                             *args, **kwargs):
         """
         Creates a new document.
@@ -850,7 +851,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
-        tab = self._create_code_edit(self.guess_mimetype(name), *args, **kwargs)
+        tab = self._create_code_edit(
+            self.guess_mimetype(name), *args, **kwargs)
+        tab.file.autodetect_eol = autodetect_eol
+        tab.file.preferred_eol = preferred_eol
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
@@ -862,7 +866,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return mimetypes.guess_type(path)[0]
 
     @utils.with_wait_cursor
-    def open_document(self, path, *args, **kwargs):
+    def open_document(self, path, replace_tabs_by_spaces=True,
+                      preferred_eol=0, autodetect_eol=True,
+                      *args, **kwargs):
         """
         Opens a document.
 
@@ -892,6 +898,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             name = os.path.split(path)[1]
             tab = self._create_code_edit(self.guess_mimetype(path),
                                          *args, **kwargs)
+            tab.file.replace_tabs_by_spaces = replace_tabs_by_spaces
+            tab.file.autodetect_eol = autodetect_eol
+            tab.file.preferred_eol = preferred_eol
             tab.file.open(path)
             tab.setDocumentTitle(name)
             icon = self._icon(path)
