@@ -14,10 +14,9 @@ import mimetypes
 mimetypes.add_type('text/x-python', '.py')
 mimetypes.add_type('text/xml', '.ui')
 import os
-from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
-from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 from pyqode.core.cache import Cache
 
 
@@ -47,6 +46,23 @@ class FileManager(Manager):
         editor.file.encoding == 'cp1252'
 
     """
+    class EOL:
+        """
+        This class enumerates the possible EOL conventions:
+            - System: apply the system EOL
+            - Linux: force the use of Linux EOL (\n)
+            - Mac: force the use of Macintosh EOL (\r)
+            - Windows: force the use of Windows EOL (\r\n)
+        """
+        #:
+        System = os.linesep
+        #: Linux EOL: \n
+        Linux = '\n'
+        #: Macintosh EOL: \r
+        Mac = '\r'
+        #: Windows EOL: \r\n
+        Windows = '\r\n'
+
     @property
     def path(self):
         """ Gets the file path """
@@ -79,6 +95,26 @@ class FileManager(Manager):
         """ Gets the file icon, provided by _get_icon """
         return self._get_icon()
 
+    @property
+    def autodetect_eol(self):
+        return self._autodetect_eol
+
+    @autodetect_eol.setter
+    def autodetect_eol(self, value):
+        self._autodetect_eol = value
+        if not self._autodetect_eol:
+            self._eol = self._preferred_eol
+
+    @property
+    def preferred_eol(self):
+        return self._preferred_eol
+
+    @preferred_eol.setter
+    def preferred_eol(self, eol):
+        self._preferred_eol = eol
+        if not self._autodetect_eol:
+            self._eol = self._preferred_eol
+
     def _get_icon(self):
         return QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(self.path))
 
@@ -109,6 +145,13 @@ class FileManager(Manager):
         #: True to restore cursor position (if the document has already been
         # opened once).
         self.restore_cursor = True
+        #: Preferred EOL convention. This setting will be used for saving the
+        #: document unles autodetect_eol is True.
+        self._preferred_eol = FileManager.EOL.System
+        self._eol = self._preferred_eol
+        #: If true, automatically detects file EOL and use it instead of the
+        #: preferred EOL when saving files.
+        self._autodetect_eol = True
 
     @staticmethod
     def get_mimetype(path):
@@ -166,8 +209,12 @@ class FileManager(Manager):
                 encoding = cached_encoding
         # open file and get its content
         try:
-            with open(path, 'r', encoding=encoding) as file:
+            with open(path, 'Ur', encoding=encoding) as file:
                 content = file.read()
+                if self.autodetect_eol:
+                    self._eol = file.newlines
+                else:
+                    self._eol = self.preferred_eol
         except (UnicodeDecodeError, UnicodeError) as e:
             try:
                 from pyqode.core.panels import EncodingPanel
@@ -226,6 +273,10 @@ class FileManager(Manager):
         sel_end = self.editor.textCursor().selectionEnd()
         return sel_end, sel_start
 
+    def _get_text(self):
+        plain_text = self.editor.toPlainText()
+        return plain_text.replace('\n', self._eol)
+
     def save(self, path=None, encoding=None, fallback_encoding=None):
         """
         Save the editor content to a file.
@@ -260,7 +311,7 @@ class FileManager(Manager):
         if self.clean_trailing_whitespaces:
             sel_end, sel_start = self._get_selection()
             TextHelper(self.editor).clean_document()
-        plain_text = self.editor.toPlainText()
+        plain_text = self._get_text()
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
