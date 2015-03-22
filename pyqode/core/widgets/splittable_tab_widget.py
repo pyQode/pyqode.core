@@ -832,9 +832,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         return self.fallback_editor(*args, parent=self.main_tab_widget,
                                     **kwargs)
 
-    def create_new_document(self, base_name='New Document', extension='.txt',
-                            preferred_eol=0, autodetect_eol=True,
-                            *args, **kwargs):
+    def create_new_document(self, *args, base_name='New Document',
+                            extension='.txt', preferred_eol=0,
+                            autodetect_eol=True, **kwargs):
         """
         Creates a new document.
 
@@ -866,9 +866,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return mimetypes.guess_type(path)[0]
 
     @utils.with_wait_cursor
-    def open_document(self, path, replace_tabs_by_spaces=True,
-                      preferred_eol=0, autodetect_eol=True,
-                      *args, **kwargs):
+    def open_document(self, path, *args, replace_tabs_by_spaces=True,
+                      preferred_eol=0, autodetect_eol=True, **kwargs):
         """
         Opens a document.
 
