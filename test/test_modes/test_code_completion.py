@@ -121,8 +121,7 @@ def test_successive_requests(editor):
     ret1 = mode.request_completion()
     ret2 = mode.request_completion()
     assert ret1 is True
-    assert ret2 is False
-
+    assert ret2 is True
 
 
 @ensure_visible

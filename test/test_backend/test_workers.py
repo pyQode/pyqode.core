@@ -23,9 +23,13 @@ def test_code_completion_worker():
         'column': 0,
         'path': '',
         'encoding': 'utf-8',
-        'prefix': ''
+        'prefix': '',
+        'request_id': 47
     }
     completion_groups = worker(data)
+    request_id = completion_groups[0]
+    completion_groups = completion_groups[1:]
+    assert request_id == 47
     assert len(completion_groups)
     assert len(completion_groups[0])
     print(completion_groups)
