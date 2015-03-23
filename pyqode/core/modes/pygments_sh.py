@@ -223,15 +223,15 @@ class PygmentsSH(SyntaxHighlighter):
             _logger().info('lexer for filename (%s): %r', filename,
                            self._lexer)
         except ClassNotFound:
-            _logger().warn('failed to get lexer from filename: %s, using '
-                            'plain text instead...', filename)
+            _logger().exception('failed to get lexer from filename: %s, using '
+                                'plain text instead...', filename)
             self._lexer = TextLexer()
             return False
         except ImportError:
             # import error while loading some pygments plugins, the editor
             # should not crash
-            _logger().warn('failed to get lexer from filename: %s, using '
-                           'plain text instead...', filename)
+            _logger().exception('failed to get lexer from filename: %s, using '
+                                'plain text instead...', filename)
             self._lexer = TextLexer()
             return False
         else:
