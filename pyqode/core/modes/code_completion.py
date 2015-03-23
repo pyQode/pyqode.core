@@ -183,28 +183,23 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._col = self.editor.textCursor().positionInBlock() - len(
             self.completion_prefix)
         helper = TextHelper(self.editor)
-        if not self._request_cnt:
-            # only check first byte
-            tc = self.editor.textCursor()
-            while tc.atBlockEnd() and not tc.atBlockStart() and \
-                    tc.position():
-                tc.movePosition(tc.Left)
-            disabled_zone = TextHelper(self.editor).is_comment_or_string(
-                tc)
-            if disabled_zone:
-                _logger().debug(
-                    "cc: cancel request, cursor is in a disabled zone")
-                return False
-            self._request_cnt += 1
-            self._collect_completions(self.editor.toPlainText(),
-                                      helper.current_line_nbr(),
-                                      helper.current_column_nbr() -
-                                      len(self.completion_prefix),
-                                      self.editor.file.path,
-                                      self.editor.file.encoding,
-                                      self.completion_prefix)
-            return True
-        return False
+        tc = self.editor.textCursor()
+        while tc.atBlockEnd() and not tc.atBlockStart() and tc.position():
+            tc.movePosition(tc.Left)
+        disabled_zone = TextHelper(self.editor).is_comment_or_string(tc)
+        if disabled_zone:
+            _logger().debug(
+                "cc: cancel request, cursor is in a disabled zone")
+            return False
+        self._request_cnt += 1
+        self._collect_completions(self.editor.toPlainText(),
+                                  helper.current_line_nbr(),
+                                  helper.current_column_nbr() -
+                                  len(self.completion_prefix),
+                                  self.editor.file.path,
+                                  self.editor.file.encoding,
+                                  self.completion_prefix)
+        return True
 
     def on_install(self, editor):
         self._completer = QtWidgets.QCompleter([""], editor)
@@ -248,13 +243,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._completer.setWidget(self.editor)
 
     def _on_results_available(self, results):
-        _logger().debug("cc: got completion results")
+        request_id = results[0]
+        _logger().debug("cc: got completion results for request %d",
+                          request_id)
+        _logger().debug('request_cnt: %d', self._request_cnt)
+        if request_id != self._request_cnt:
+            # another request has been made, wait for that answer to come
+            return
+        results = results[1:]
         if self.editor:
-            # self.editor.set_mouse_cursor(QtCore.Qt.IBeamCursor)
             all_results = []
             for res in results:
                 all_results += res
-            self._request_cnt -= 1
             self._show_completions(all_results)
 
     def _on_key_pressed(self, event):
@@ -338,7 +338,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
-                self._cancel_next = self._request_cnt
+                self._cancel_next = True
                 return
             else:
                 # trigger symbols
@@ -569,7 +569,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         _logger().debug("cc: completion requested")
         data = {'code': code, 'line': line, 'column': column,
                 'path': path, 'encoding': encoding,
-                'prefix': completion_prefix}
+                'prefix': completion_prefix,
+                'request_id': self._request_cnt}
+        _logger().debug('cc request: %r', data)
         try:
             self.editor.backend.send_request(
                 backend.CodeCompletionWorker, args=data,
