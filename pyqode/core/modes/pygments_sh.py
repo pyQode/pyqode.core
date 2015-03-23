@@ -12,6 +12,7 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
+from pygments.lexers.special import TextLexer
 from pygments.lexers.agile import PythonLexer
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
@@ -195,7 +196,15 @@ class PygmentsSH(SyntaxHighlighter):
         """
         try:
             self.set_lexer_from_mime_type(mime_type)
-        except:
+        except ClassNotFound:
+            _logger().exception('failed to get lexer from mimetype')
+            self._lexer = TextLexer()
+            return False
+        except ImportError:
+            # import error while loading some pygments plugins, the editor
+            # should not crash
+            _logger().exception('failed to get lexer from mimetype')
+            self._lexer = TextLexer()
             return False
         else:
             return True
@@ -213,7 +222,17 @@ class PygmentsSH(SyntaxHighlighter):
             self._lexer = get_lexer_for_filename(filename)
             _logger().info('lexer for filename (%s): %r', filename,
                            self._lexer)
-        except:
+        except ClassNotFound:
+            _logger().warn('failed to get lexer from filename: %s, using '
+                            'plain text instead...', filename)
+            self._lexer = TextLexer()
+            return False
+        except ImportError:
+            # import error while loading some pygments plugins, the editor
+            # should not crash
+            _logger().warn('failed to get lexer from filename: %s, using '
+                           'plain text instead...', filename)
+            self._lexer = TextLexer()
             return False
         else:
             return True
