@@ -154,7 +154,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._job_runner = DelayJobRunner(delay=1000)
         self._tooltips = {}
         self._cursor_line = -1
-        self._cancel_next = False
         self._request_cnt = 0
         self._last_completion_prefix = ""
         self._trigger_key = None
@@ -338,7 +337,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._update_prefix(event, is_end_of_word, is_navigation_key)
         if is_printable:
             if event.text() == " ":
-                self._cancel_next = True
+                self._hide_popup()
                 return
             else:
                 # trigger symbols
@@ -394,7 +393,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         _logger().debug("showing %d completions" % len(completions))
         self._job_runner.cancel_requests()
         # user typed too fast: end of word char has been inserted
-        if (not self._cancel_next and not self._is_last_char_end_of_word() and
+        if (not self._is_last_char_end_of_word() and
                 not (len(completions) == 1 and
                      completions[0]['name'] == self.completion_prefix)):
             # we can show the completer
@@ -405,7 +404,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                             self._completer.model().rowCount(), elapsed)
             self._show_popup()
             _logger().debug("popup shown")
-        self._cancel_next = False
 
     def _handle_completer_events(self, event):
         nav_key = self._is_navigation_key(event)
