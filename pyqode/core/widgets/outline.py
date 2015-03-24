@@ -3,6 +3,8 @@ This document contains the tree widget used to display the editor document
 outline.
 
 """
+import qtawesome as qta
+from pyqode.core.api import CodeEdit
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.modes.outline import OutlineMode
 from pyqode.qt import QtCore, QtGui, QtWidgets
@@ -117,9 +119,14 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         # no data
         root = QtWidgets.QTreeWidgetItem()
         root.setText(0, 'No data')
-        root.setIcon(0, QtGui.QIcon.fromTheme(
-            'dialog-information',
-            QtGui.QIcon(':/pyqode-icons/rc/dialog-info.png')))
+        if CodeEdit.use_qtawesome:
+            root.setIcon(0, qta.icon(
+                'fa.info-circle', color=CodeEdit.qtawesome_color,
+                color_disabled=CodeEdit.qtawesome_disabled_color))
+        else:
+            root.setIcon(0, QtGui.QIcon.fromTheme(
+                'dialog-information',
+                QtGui.QIcon(':/pyqode-icons/rc/dialog-info.png')))
         self.addTopLevelItem(root)
         self._updating = False
 

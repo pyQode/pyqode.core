@@ -4,6 +4,7 @@ you application.
 
 """
 import locale
+import qtawesome as qta
 from pyqode.core.api import encodings
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.cache import Cache
@@ -22,11 +23,22 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self._load_preferred()
         self.ui.pushButtonAdd.clicked.connect(self._add)
-        self.ui.pushButtonAdd.setIcon(QtGui.QIcon.fromTheme(
-            "go-next", QtGui.QIcon(':/pyqode-icons/rc/go-next.png')))
+        from pyqode.core.api import CodeEdit
+        if CodeEdit.use_qtawesome:
+            self.ui.pushButtonAdd.setIcon(qta.icon(
+                'fa.arrow-right', color=CodeEdit.qtawesome_color,
+                color_disabled=CodeEdit.qtawesome_disabled_color))
+            self.ui.pushButtonRemove.setIcon(qta.icon(
+                'fa.arrow-left', color=CodeEdit.qtawesome_color,
+                color_disabled=CodeEdit.qtawesome_disabled_color))
+        else:
+            self.ui.pushButtonAdd.setIcon(QtGui.QIcon.fromTheme(
+                "go-next", QtGui.QIcon(':/pyqode-icons/rc/go-next.png')))
+            self.ui.pushButtonRemove.setIcon(QtGui.QIcon.fromTheme(
+                "go-previous",
+                QtGui.QIcon(':/pyqode-icons/rc/go-previous.png')))
         self.ui.pushButtonRemove.clicked.connect(self._remove)
-        self.ui.pushButtonRemove.setIcon(QtGui.QIcon.fromTheme(
-            "go-previous", QtGui.QIcon(':/pyqode-icons/rc/go-previous.png')))
+
 
     def _load_available(self):
         self.ui.tableWidgetAvailable.setColumnCount(2)

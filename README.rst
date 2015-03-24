@@ -52,6 +52,7 @@ pyqode.core depends on the following libraries:
 - pygments
 - pyqode.qt
 - future
+- qtawesome
 
 
 Installation

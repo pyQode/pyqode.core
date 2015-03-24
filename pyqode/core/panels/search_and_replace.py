@@ -2,8 +2,10 @@
 """
 This module contains the search and replace panel
 """
+import qtawesome as qta
 import re
 import sre_constants
+from pyqode.core.api import CodeEdit
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
@@ -139,40 +141,50 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxWholeWords.setDisabled)
 
     def _init_actions(self):
-        def _icon(val):
-            if isinstance(val, tuple):
-                theme, icon = val
-                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+        def _icon(val, qta_icon=None):
+            if CodeEdit.use_qtawesome and qta_icon is not None:
+                return qta.icon(
+                    qta_icon, color=CodeEdit.qtawesome_color,
+                    color_disabled=CodeEdit.qtawesome_disabled_color)
             else:
-                QtGui.QIcon(val)
+                if isinstance(val, tuple):
+                    theme, icon = val
+                    return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+                elif val.startswith(':'):
+                    QtGui.QIcon(val)
 
         icon_size = QtCore.QSize(16, 16)
 
-        icon = _icon(('edit-find', ':/pyqode-icons/rc/edit-find.png'))
+        icon = _icon(('edit-find', ':/pyqode-icons/rc/edit-find.png'),
+                     'fa.search')
         self.actionSearch.setIcon(icon)
         self.actionSearch.setShortcut(QtGui.QKeySequence.Find)
         self.labelSearch.setPixmap(icon.pixmap(icon_size))
 
         icon = _icon(('edit-find-replace',
-                      ':/pyqode-icons/rc/edit-find-replace.png'))
+                      ':/pyqode-icons/rc/edit-find-replace.png'),
+                      'fa.search-plus')
         self.actionActionSearchAndReplace.setShortcut(
             QtGui.QKeySequence.Replace)
         self.actionActionSearchAndReplace.setIcon(icon)
         self.labelReplace.setPixmap(icon.pixmap(icon_size))
 
-        icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
+        icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'),
+                     'fa.arrow-up')
         self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
         self.actionFindPrevious.setIcon(icon)
         self.toolButtonPrevious.setIcon(icon)
         self.toolButtonPrevious.setIconSize(icon_size)
 
-        icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'))
+        icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'),
+                      'fa.arrow-down')
         self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
         self.actionFindNext.setIcon(icon)
         self.toolButtonNext.setIcon(icon)
         self.toolButtonNext.setIconSize(icon_size)
 
-        icon = _icon(('window-close', ':/pyqode-icons/rc/close.png'))
+        icon = _icon(('window-close', ':/pyqode-icons/rc/close.png'),
+                      'fa.close')
         self.toolButtonClose.setIcon(icon)
         self.toolButtonClose.setIconSize(icon_size)
 

@@ -10,6 +10,7 @@ except:
     pass
 import logging
 import platform
+import qtawesome as qta
 from pyqode.core.cache import Cache
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
@@ -75,6 +76,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     CodeEdit is generic. **Code editors specialised for a specific language
     should define the mime types they support!**
     """
+    #: True to use qtawesome icons, False to use icons from theme/qrc
+    use_qtawesome = True
+    #: color of qtawesome icons
+    qtawesome_color = '#4d4d4d'
+    #: color of disabled qtawesome icons
+    qtawesome_disabled_color = 'gray'
+
     #: Paint hook
     painted = QtCore.Signal(QtGui.QPaintEvent)
     #: Signal emitted when a new text is set on the widget
@@ -992,16 +1000,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self):
         """ Init default QAction """
-        def _icon(val):
-            if isinstance(val, tuple):
-                theme, icon = val
-                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+        def _icon(val, qta_icon=None):
+            if self.use_qtawesome and qta_icon is not None:
+                return qta.icon(qta_icon, color=self.qtawesome_color,
+                                color_disabled=self.qtawesome_disabled_color)
             else:
-                QtGui.QIcon(val)
+                if isinstance(val, tuple):
+                    theme, icon = val
+                    return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
+                elif val.startswith(':'):
+                    QtGui.QIcon(val)
         # Undo
         action = QtWidgets.QAction('Undo', self)
         action.setShortcut(QtGui.QKeySequence.Undo)
-        action.setIcon(_icon(('edit-undo', ':/pyqode-icons/rc/edit-undo.png')))
+        action.setIcon(
+            _icon(('edit-undo', ':/pyqode-icons/rc/edit-undo.png'),
+                  'fa.undo'))
         action.triggered.connect(self.undo)
         self.undoAvailable.connect(action.setEnabled)
         self.add_action(action)
@@ -1009,7 +1023,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # Redo
         action = QtWidgets.QAction('Redo', self)
         action.setShortcut(QtGui.QKeySequence.Redo)
-        action.setIcon(_icon(('edit-redo', ':/pyqode-icons/rc/edit-redo.png')))
+        action.setIcon(
+            _icon(('edit-redo', ':/pyqode-icons/rc/edit-redo.png'),
+                  'fa.repeat'))
         action.triggered.connect(self.redo)
         self.redoAvailable.connect(action.setEnabled)
         self.add_action(action)
@@ -1019,7 +1035,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # Copy
         action = QtWidgets.QAction('Copy', self)
         action.setShortcut(QtGui.QKeySequence.Copy)
-        action.setIcon(_icon(('edit-copy', ':/pyqode-icons/rc/edit-copy.png')))
+        action.setIcon(_icon(('edit-copy', ':/pyqode-icons/rc/edit-copy.png'),
+                             'fa.copy'))
         action.triggered.connect(self.copy)
         self.copyAvailable.connect(action.setEnabled)
         self.add_action(action)
@@ -1027,7 +1044,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # cut
         action = QtWidgets.QAction('Cut', self)
         action.setShortcut(QtGui.QKeySequence.Cut)
-        action.setIcon(_icon(('edit-cut', ':/pyqode-icons/rc/edit-cut.png')))
+        action.setIcon(_icon(('edit-cut', ':/pyqode-icons/rc/edit-cut.png'),
+                             'fa.cut'))
         action.triggered.connect(self.cut)
         self.copyAvailable.connect(action.setEnabled)
         self.add_action(action)
@@ -1035,8 +1053,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # paste
         action = QtWidgets.QAction('Paste', self)
         action.setShortcut(QtGui.QKeySequence.Paste)
-        action.setIcon(_icon(('edit-paste',
-                              ':/pyqode-icons/rc/edit-paste.png')))
+        action.setIcon(_icon(
+            ('edit-paste', ':/pyqode-icons/rc/edit-paste.png'), 'fa.paste'))
         action.triggered.connect(self.paste)
         self.add_action(action)
         self.action_paste = action
@@ -1044,7 +1062,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action = QtWidgets.QAction('Delete', self)
         action.setShortcut(QtGui.QKeySequence.Delete)
         action.setIcon(_icon(('edit-delete',
-                              ':/pyqode-icons/rc/edit-delete.png')))
+                              ':/pyqode-icons/rc/edit-delete.png'),
+                              'fa.remove'))
         action.triggered.connect(self.delete)
         self.add_action(action)
         self.action_delete = action
@@ -1057,8 +1076,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
-        action.setIcon(_icon(('edit-select-all',
-                              ':/pyqode-icons/rc/edit-select-all.png')))
         action.triggered.connect(self.selectAll)
         self.add_action(action)
         self.action_select_all = action
@@ -1067,16 +1084,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # indent
         action = QtWidgets.QAction('Indent', self)
         action.setShortcut('Tab')
-        action.setIcon(_icon(('format-indent-more',
-                              ':/pyqode-icons/rc/format-indent-more.png')))
+        action.setIcon(_icon(
+            ('format-indent-more', ':/pyqode-icons/rc/format-indent-more.png'),
+            'fa.indent'))
         action.triggered.connect(self.indent)
         self.add_action(action)
         self.action_indent = action
         # unindent
         action = QtWidgets.QAction('Un-indent', self)
         action.setShortcut('Shift+Tab')
-        action.setIcon(_icon(('format-indent-less',
-                              ':/pyqode-icons/rc/format-indent-less.png')))
+        action.setIcon(_icon(
+            ('format-indent-less', ':/pyqode-icons/rc/format-indent-less.png'),
+            'fa.dedent'))
         action.triggered.connect(self.un_indent)
         self.add_action(action)
         self.action_un_indent = action
@@ -1085,8 +1104,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # goto
         action = QtWidgets.QAction('Go to line', self)
         action.setShortcut('Ctrl+G')
-        action.setIcon(_icon(('go-jump',
-                              ':/pyqode-icons/rc/goto-line.png')))
+        action.setIcon(_icon(
+            ('go-jump', ':/pyqode-icons/rc/goto-line.png'), 'fa.share'))
         action.triggered.connect(self.goto_line)
         self.add_action(action)
         self.action_goto_line = action
