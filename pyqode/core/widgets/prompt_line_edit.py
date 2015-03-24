@@ -3,13 +3,11 @@ This module contains the PromptLineEdit widget implementation.
 
 """
 import os
-import qtawesome as qta
+from pyqode.core import icons
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.qt import QT_API
 from pyqode.qt import PYQT5_API
 from pyqode.qt import PYQT4_API
 from pyqode.qt import PYSIDE_API
-from pyqode.core.api import CodeEdit
 
 
 class PromptLineEdit(QtWidgets.QLineEdit):
@@ -30,15 +28,9 @@ class PromptLineEdit(QtWidgets.QLineEdit):
 
         self.button = QtWidgets.QToolButton(self)
         if button_icon is None:
-            if CodeEdit.use_qtawesome:
-                button_icon = qta.icon(
-                    'fa.times-circle', color=CodeEdit.qtawesome_color,
-                    color_disabled=CodeEdit.qtawesome_disabled_color)
-            else:
-                button_icon = QtGui.QIcon.fromTheme(
-                    'edit-clear',
-                    QtGui.QIcon(':/pyqode-icons/rc/clear-left.png'))
-
+            button_icon = icons.icon(
+                'edit-clear', ':/pyqode-icons/rc/clear-left.png',
+                'fa.times-circle')
         self.button.setIcon(button_icon)
         self.button.setToolTip("Clear")
         self.button.setStyleSheet(

@@ -4,11 +4,11 @@ This module contains the file system tree view.
 import logging
 import os
 import platform
-import qtawesome as qta
 import shutil
 import subprocess
 from pyqode.qt import QtCore, QtGui, QtWidgets
-from pyqode.core.api import CodeEdit
+from pyqode.core import icons
+
 
 def _logger():
     return logging.getLogger(__name__)
@@ -467,22 +467,10 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self._init_actions()
 
     def _init_actions(self):
-        def _icon(theme, rc_path, qta_icon):
-            if CodeEdit.use_qtawesome and qta_icon:
-                return qta.icon(
-                    qta_icon, color=CodeEdit.qtawesome_color,
-                    color_disabled=CodeEdit.qtawesome_disabled_color)
-            elif theme is None and rc_path is not None:
-                return QtGui.QIcon(rc_path)
-            elif theme is not None and rc_path is None:
-                return QtGui.QIcon.fromTheme(theme)
-            else:
-                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(rc_path))
-
         # New - submenu
         self.menu_new = self.addMenu("&New")
         self.menu_new.setIcon(
-            _icon('document-new', None, 'fa.plus'))
+            icons.icon('document-new', None, 'fa.plus'))
         # https://github.com/pyQode/pyqode.core/pull/153
         new_user_actions = self.get_new_user_actions()
         if len(new_user_actions) > 0:
@@ -508,14 +496,14 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         # cut
         self.action_cut = QtWidgets.QAction('&Cut', self)
         self.action_cut.setShortcut(QtGui.QKeySequence.Cut)
-        self.action_cut.setIcon(_icon(
+        self.action_cut.setIcon(icons.icon(
             'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
         self.addAction(self.action_cut)
         self.action_cut.triggered.connect(self._on_cut_triggered)
         # copy
         self.action_copy = QtWidgets.QAction('&Copy', self)
         self.action_copy.setShortcut(QtGui.QKeySequence.Copy)
-        self.action_copy.setIcon(_icon(
+        self.action_copy.setIcon(icons.icon(
             'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
         self.addAction(self.action_copy)
         self.action_copy.triggered.connect(self._on_copy_triggered)
@@ -527,7 +515,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         # Paste
         self.action_paste = QtWidgets.QAction('&Paste', self)
         self.action_paste.setShortcut(QtGui.QKeySequence.Paste)
-        self.action_paste.setIcon(_icon(
+        self.action_paste.setIcon(icons.icon(
             'edit-paste', ':/pyqode-icons/rc/edit-paste.png', 'fa.paste'))
         self.action_paste.triggered.connect(self._on_paste_triggered)
         self.addAction(self.action_paste)
@@ -540,7 +528,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         # Delete
         self.action_delete = QtWidgets.QAction('&Delete', self)
         self.action_delete.setShortcut(QtGui.QKeySequence.Delete)
-        self.action_delete.setIcon(_icon(
+        self.action_delete.setIcon(icons.icon(
             'edit-delete', ':/pyqode-icons/rc/edit-delete.png', 'fa.remove'))
         self.action_delete.triggered.connect(self._on_delete_triggered)
         self.addAction(self.action_delete)

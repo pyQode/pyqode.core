@@ -4,9 +4,9 @@ which use your application's QSettings to store the list of recent files.
 
 """
 import os
-import qtawesome as qta
+from pyqode.core import icons
 from pyqode.qt import QtCore, QtGui, QtWidgets
-from pyqode.core.api import CodeEdit
+
 
 class RecentFilesManager(QtCore.QObject):
     """
@@ -180,13 +180,13 @@ class MenuRecentFiles(QtWidgets.QMenu):
         action_clear.triggered.connect(self.clear_recent_files)
         if isinstance(self.clear_icon, QtGui.QIcon):
             action_clear.setIcon(self.clear_icon)
-        elif self.clear_icon and len(self.clear_icon) == 2:
-            action_clear.setIcon(QtGui.QIcon.fromTheme(
-                self.clear_icon[0], QtGui.QIcon(self.clear_icon[1])))
-        elif self.clear_icon is None and CodeEdit.use_qtawesome:
-            action_clear.setIcon(
-                qta.icon('fa.times-circle', color=CodeEdit.qtawesome_color,
-                         color_disabled=CodeEdit.qtawesome_disabled_color))
+        elif self.clear_icon:
+            theme = ''
+            if len(self.clear_icon) == 2:
+                theme, path = self.clear_icon
+            else:
+                path = self.clear_icon
+            icons.icon(theme, path, 'fa.times-circle')
         self.addAction(action_clear)
 
     def clear_recent_files(self):
