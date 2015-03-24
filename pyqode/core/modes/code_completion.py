@@ -155,6 +155,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._tooltips = {}
         self._cursor_line = -1
         self._request_cnt = 0
+        self._last_request_cnt = 0
         self._last_completion_prefix = ""
         self._trigger_key = None
         self._trigger_len = None
@@ -244,11 +245,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _on_results_available(self, results):
         request_id = results[0]
         _logger().debug("cc: got completion results for request %d",
-                          request_id)
+                        request_id)
         _logger().debug('request_cnt: %d', self._request_cnt)
-        if request_id != self._request_cnt:
-            # another request has been made, wait for that answer to come
+        _logger().debug('%d-%d-%d',
+                        request_id, self._last_request_cnt, self._request_cnt)
+        if request_id < self._last_request_cnt:
+            # this request is too outdated (next request has already been
+            # handled)
+            _logger().debug('cancel request %d' % request_id)
             return
+        self._last_request_cnt = request_id
         results = results[1:]
         if self.editor:
             all_results = []
@@ -302,10 +308,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._show_popup()
 
     def _on_key_released(self, event):
-        if (event.key() == QtCore.Qt.Key_Backspace and
-                self._skip_next_backspace_released):
-            self._skip_next_backspace_released = False
-            return
         if self._is_shortcut(event):
             return
         if (event.key() == QtCore.Qt.Key_Home or
@@ -325,6 +327,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         cursor.setPosition(cpos)
         cursor.movePosition(cursor.EndOfLine, cursor.KeepAnchor)
         text_after_cursor = cursor.selectedText()
+
+        if (event.key() == QtCore.Qt.Key_Backspace and
+                text_to_cursor.strip() == ''):
+            self._hide_popup()
+            return
 
         if self._completer.popup().isVisible():
             # hide popup if the user is moving the cursor out of the current
