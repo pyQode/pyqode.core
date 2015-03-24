@@ -183,7 +183,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
         elif self.clear_icon and len(self.clear_icon) == 2:
             action_clear.setIcon(QtGui.QIcon.fromTheme(
                 self.clear_icon[0], QtGui.QIcon(self.clear_icon[1])))
-        elif self.clear_icon is None:
+        elif self.clear_icon is None and CodeEdit.use_qtawesome:
             action_clear.setIcon(
                 qta.icon('fa.times-circle', color=CodeEdit.qtawesome_color,
                          color_disabled=CodeEdit.qtawesome_disabled_color))
