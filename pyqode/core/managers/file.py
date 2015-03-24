@@ -224,6 +224,9 @@ class FileManager(Manager):
                 content = file.read()
                 if self.autodetect_eol:
                     self._eol = file.newlines
+                    if self._eol is None:
+                        # empty file has no newlines
+                        self._eol = self.EOL.string(self.preferred_eol)
                 else:
                     self._eol = self.EOL.string(self.preferred_eol)
         except (UnicodeDecodeError, UnicodeError) as e:
