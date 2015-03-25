@@ -100,8 +100,7 @@ class CodeCompletionWorker(object):
         path = data['path']
         encoding = data['encoding']
         prefix = data['prefix']
-        request_id = data['request_id']
-        print('CC request id: %d' % request_id)
+        req_id = data['request_id']
         completions = []
         for prov in CodeCompletionWorker.providers:
             try:
@@ -115,7 +114,7 @@ class CodeCompletionWorker(object):
                                  % prov)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
-        return [request_id] + completions
+        return [(line, column, req_id)] + completions
 
 
 class DocumentWordsProvider(object):

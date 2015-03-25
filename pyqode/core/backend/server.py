@@ -47,7 +47,7 @@ def import_class(klass):
         return klass
 
 
-class JsonServer(socketserver.ThreadingTCPServer):
+class JsonServer(socketserver.TCPServer):
     """
     A server socket based on a json messaging system.
     """
@@ -199,18 +199,6 @@ def serve_forever(args=None):
     """
     server = JsonServer(args=args)
     server.serve_forever()
-    # server_thread = threading.Thread(target=server.serve_forever)
-    # # Exit the server thread when the main thread terminates
-    # server_thread.daemon = True
-    # server_thread.start()
-    # if sys.version_info[0] == 2:
-    #     raw_input('')
-    # else:
-    #     input('')
-    # import time
-    # t = time.time()
-    server.shutdown()
-    _logger().debug('SRV SHUTDOWN TIME: %f' % (time.time() - t), sys.stderr)
 
 
 # Server script example

@@ -191,16 +191,17 @@ def test_insert_completions(editor):
     QTest.qWait(100)
 
 
-@ensure_empty
-@ensure_connected
-def test_show_completion_with_tooltip(editor):
-    mode = get_mode(editor)
-    mode.show_tooltips = True
-    mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
-    mode._display_completion_tooltip('test')
-    mode._display_completion_tooltip('spam')
-    mode.show_tooltips = False
-    mode._display_completion_tooltip('test')
+# this feature has been removed.
+# @ensure_empty
+# @ensure_connected
+# def test_show_completion_with_tooltip(editor):
+#     mode = get_mode(editor)
+#     mode.show_tooltips = True
+#     mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
+#     mode._display_completion_tooltip('test')
+#     mode._display_completion_tooltip('spam')
+#     mode.show_tooltips = False
+#     mode._display_completion_tooltip('test')
 
 
 @ensure_empty
