@@ -3,19 +3,13 @@
 This module contains the code completion mode and the related classes.
 """
 import os
-
-try:
-    from future.builtins import chr
-except:
-    pass  # python 3.2 not supported
 import logging
-import re
 import sys
 import time
 from pyqode.core.api.mode import Mode
 from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
+from pyqode.core.api.utils import TextHelper
 from pyqode.core import backend
 
 
@@ -202,7 +196,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._show_popup(index=self._completer.completionCount() - 1)
                 event.accept()
 
-        _logger().debug('key pressed: %s' % event.text())
+        _logger().warn('key pressed: %s' % event.text())
         is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
         if self._completer.popup().isVisible():
@@ -217,16 +211,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _on_key_released(self, event):
         if self._is_shortcut(event):
             return
-        _logger().debug('key released:%s' % event.text())
+        _logger().warn('key released:%s' % event.text())
         word = self._helper.word_under_cursor(
                 select_whole_word=True).selectedText()
-        _logger().debug('word: %s' % word)
+        _logger().warn('word: %s' % word)
         if event.text():
             if event.key() in [QtCore.Qt.Key_Backspace, QtCore.Qt.Key_Delete] \
                     and (not self._is_popup_visible() or word == ''):
-                self._last_cursor_line = -1
-                self._last_cursor_column = -1
-                self._hide_popup()
+                self._force_request()
                 return
             if event.key() == QtCore.Qt.Key_Return:
                 return
@@ -235,7 +227,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._force_request()
                 self.request_completion()
             elif len(word) >= self._trigger_len and event.text() not in [
-                    ' ', ',', ';', ':', '=', '*', '+', '-', '/']:
+                    ' ', ',', ';', ':', '=', '*', '+', '-', '/',
+                    '(', ')', '{', '}', '[', ']', '\t', '\n']:
                 # Lenght trigger
                 if int(event.modifiers()) in [
                         QtCore.Qt.NoModifier, QtCore.Qt.ShiftModifier]:
@@ -270,15 +263,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.editor.setTextCursor(cursor)
 
     def _on_results_available(self, results):
-        _logger().debug("completion results (completions=%r), prefix=%s",
-                       results, self.completion_prefix)
+        _logger().warn("completion results (completions=%r), prefix=%s",
+                        results, self.completion_prefix)
         context = results[0]
         results = results[1:]
         line, column, request_id = context
-        _logger().debug('request context: %r', context)
-        _logger().debug('latest context: %r', (self._last_cursor_line,
-                                              self._last_cursor_column,
-                                              self._request_id))
+        _logger().warn('request context: %r', context)
+        _logger().warn('latest context: %r', (self._last_cursor_line,
+                                               self._last_cursor_column,
+                                               self._request_id))
         self._last_request_id = request_id
         if (line == self._last_cursor_line and
                 column == self._last_cursor_column):
@@ -288,7 +281,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     all_results += res
                 self._show_completions(all_results)
         else:
-            _logger().debug('outdated request, dropping')
+            _logger().warn('outdated request, dropping')
 
     #
     # Helper methods
@@ -297,11 +290,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return self._completer.popup().isVisible()
 
     def _force_request(self):
-        self._last_cursor_column = -1
         self._last_cursor_line = -1
+        self._last_cursor_column = -1
+        self._hide_popup()
 
     def _in_disabled_zone(self):
-        helper = TextHelper(self.editor)
         tc = self.editor.textCursor()
         while tc.atBlockEnd() and not tc.atBlockStart() and tc.position():
             tc.movePosition(tc.Left)
@@ -312,22 +305,22 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return False
         line = self._helper.current_line_nbr()
         column = self._helper.current_column_nbr() - \
-                 len(self.completion_prefix)
+            len(self.completion_prefix)
         same_context = (line == self._last_cursor_line and
                         column == self._last_cursor_column)
         if same_context:
-            if self._request_id - 1== self._last_request_id:
+            if self._request_id - 1 == self._last_request_id:
                 # context has not changed and the correct results can be
                 # directly shown
-                _logger().debug('request completion ignored, context has not '
-                               'changed')
+                _logger().warn('request completion ignored, context has not '
+                                'changed')
                 self._show_popup()
             else:
                 # same context but result not yet available
                 pass
             return True
         else:
-            _logger().debug('requesting completion')
+            _logger().warn('requesting completion')
             data = {
                 'code': self.editor.toPlainText(),
                 'line': line,
@@ -345,7 +338,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 _logger().exception('failed to send the completion request')
                 return False
             else:
-                _logger().debug('request sent: %r', data)
+                _logger().warn('request sent: %r', data)
                 self._last_cursor_column = column
                 self._last_cursor_line = line
                 self._request_id += 1
@@ -370,7 +363,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Hides the completer popup
         """
-        _logger().debug('hide popup')
+        _logger().warn('hide popup')
         if (self._completer.popup() is not None and
                 self._completer.popup().isVisible()):
             self._completer.popup().hide()
@@ -405,34 +398,30 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         cnt = self._completer.completionCount()
         selected = self._completer.currentCompletion()
         if (full_prefix == selected) and cnt == 1:
-            _logger().debug('user already typed the only completion that we '
+            _logger().warn('user already typed the only completion that we '
                             'have')
             self._hide_popup()
         else:
             # show the completion list
             if self.editor.isVisible():
-                try:
-                    os.environ['PYQODE_CORE_TESTSUITE']
-                except KeyError:
-                    pass
-                else:
-                    # not sure why, but this is needed when running the
-                    # test suite on travis, otherwise it segfaults
+                if self._completer.widget() != self.editor:
+                    print('set widget')
                     self._completer.setWidget(self.editor)
                 self._completer.complete(self._get_popup_rect())
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(index, 0))
-                _logger().debug("popup shown: %r" % self._completer.popup().isVisible())
+                _logger().warn(
+                    "popup shown: %r" % self._completer.popup().isVisible())
             else:
-                _logger().debug('cannot show popup, editor is not visible')
+                _logger().warn('cannot show popup, editor is not visible')
 
     def _show_completions(self, completions):
-        _logger().debug("showing %d completions" % len(completions))
-        _logger().debug('popup state: %r', self._completer.popup().isVisible())
+        _logger().warn("showing %d completions" % len(completions))
+        _logger().warn('popup state: %r', self._completer.popup().isVisible())
         t = time.time()
         self._update_model(completions)
         elapsed = time.time() - t
-        _logger().debug("completion model updated: %d items in %f seconds",
+        _logger().warn("completion model updated: %d items in %f seconds",
                         self._completer.model().rowCount(), elapsed)
         self._show_popup()
 
