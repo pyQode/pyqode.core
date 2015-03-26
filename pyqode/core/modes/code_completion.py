@@ -138,17 +138,20 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     #
     # Mode interface
     #
-    def on_install(self, editor):
-        self._completer = QtWidgets.QCompleter([""], editor)
+    def _create_completer(self):
+        self._completer = QtWidgets.QCompleter([""], self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
-        try:
-            self._completer.setFilterMode(QtCore.Qt.MatchContains)
-        except AttributeError:
-            # not available for Qt < 5.2
-            pass
+        # try:
+        #     self._completer.setFilterMode(QtCore.Qt.MatchContains)
+        # except AttributeError:
+        #     # not available for Qt < 5.2
+        #     pass
+
+    def on_install(self, editor):
+        self._create_completer()
         self._completer.setModel(QtGui.QStandardItemModel())
         self._helper = TextHelper(editor)
         Mode.on_install(self, editor)
@@ -187,7 +190,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             elif (event.key() == QtCore.Qt.Key_Escape or
                   event.key() == QtCore.Qt.Key_Backtab or
                   nav_key and ctrl):
-                self._hide_popup()
+                self._reset_sync_data()
             # move into list
             elif event.key() == QtCore.Qt.Key_Home:
                 self._show_popup(index=0)
@@ -204,7 +207,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if is_shortcut:
                 event.accept()
         if is_shortcut:
-            self._force_request()
+            self._reset_sync_data()
             self.request_completion()
             event.accept()
 
@@ -216,35 +219,37 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 select_whole_word=True).selectedText()
         _logger().warn('word: %s' % word)
         if event.text():
-            if event.key() in [QtCore.Qt.Key_Backspace, QtCore.Qt.Key_Delete] \
-                    and (not self._is_popup_visible() or word == ''):
-                self._force_request()
+            if event.key() == QtCore.Qt.Key_Escape:
+                self._hide_popup()
+                return
+            if self._is_navigation_key(event) and \
+                    (not self._is_popup_visible() or word == ''):
+                self._reset_sync_data()
                 return
             if event.key() == QtCore.Qt.Key_Return:
                 return
             if event.text() in self._trigger_symbols:
                 # symbol trigger, force request
-                self._force_request()
+                self._reset_sync_data()
                 self.request_completion()
             elif len(word) >= self._trigger_len and event.text() not in [
                     ' ', ',', ';', ':', '=', '*', '+', '-', '/',
-                    '(', ')', '{', '}', '[', ']', '\t', '\n']:
+                    '(', ')', '{', '}', '[', ']', '\t', '\n', ' ']:
                 # Lenght trigger
                 if int(event.modifiers()) in [
                         QtCore.Qt.NoModifier, QtCore.Qt.ShiftModifier]:
                     self.request_completion()
                 else:
                     self._hide_popup()
-
             else:
-                self._hide_popup()
+                self._reset_sync_data()
         else:
             if self._is_navigation_key(event):
                 if self._is_popup_visible() and word:
                     self._show_popup()
                     return
                 else:
-                    self._hide_popup()
+                    self._reset_sync_data()
 
     def _on_focus_in(self, event):
         """
@@ -289,7 +294,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _is_popup_visible(self):
         return self._completer.popup().isVisible()
 
-    def _force_request(self):
+    def _reset_sync_data(self):
+        _logger().warn('reset sync data and hide popup')
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._hide_popup()
@@ -367,6 +373,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if (self._completer.popup() is not None and
                 self._completer.popup().isVisible()):
             self._completer.popup().hide()
+            self._last_cursor_column = -1
+            self._last_cursor_line = -1
 
     def _get_popup_rect(self):
         cursor_rec = self.editor.cursorRect()
@@ -442,7 +450,11 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 item.setData(QtGui.QIcon(completion['icon']),
                              QtCore.Qt.DecorationRole)
             cc_model.appendRow(item)
-        self._completer.setModel(cc_model)
+        try:
+            self._completer.setModel(cc_model)
+        except RuntimeError:
+            self._create_completer()
+            self._completer.setModel(cc_model)
         return cc_model
 
     @staticmethod
@@ -450,6 +462,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return (event.key() == QtCore.Qt.Key_Backspace or
                 event.key() == QtCore.Qt.Key_Back or
                 event.key() == QtCore.Qt.Key_Delete or
+                event.key() == QtCore.Qt.Key_End or
+                event.key() == QtCore.Qt.Key_Home or
                 event.key() == QtCore.Qt.Key_Left or
                 event.key() == QtCore.Qt.Key_Right or
                 event.key() == QtCore.Qt.Key_Up or
