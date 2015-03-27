@@ -289,7 +289,7 @@ class FileManager(Manager):
 
     def _get_text(self, encoding):
         lines = self.editor.toPlainText().splitlines()
-        text = self._eol.join(lines)
+        text = self._eol.join(lines) + self._eol
         return text.encode(encoding)
 
     def save(self, path=None, encoding=None, fallback_encoding=None):
