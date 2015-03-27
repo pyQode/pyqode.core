@@ -287,9 +287,10 @@ class FileManager(Manager):
         sel_end = self.editor.textCursor().selectionEnd()
         return sel_end, sel_start
 
-    def _get_text(self):
-        plain_text = self.editor.toPlainText()
-        return plain_text.replace('\n', self._eol)
+    def _get_text(self, encoding):
+        lines = self.editor.toPlainText().splitlines()
+        text = self._eol.join(lines)
+        return text.encode(encoding)
 
     def save(self, path=None, encoding=None, fallback_encoding=None):
         """
@@ -325,7 +326,6 @@ class FileManager(Manager):
         if self.clean_trailing_whitespaces:
             sel_end, sel_start = self._get_selection()
             TextHelper(self.editor).clean_document()
-        plain_text = self._get_text()
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
@@ -335,12 +335,12 @@ class FileManager(Manager):
             tmp_path = path
         try:
             _logger().debug('saving editor content to temp file: %s', path)
-            with open(tmp_path, 'w', encoding=encoding) as file:
-                file.write(plain_text)
+            with open(tmp_path, 'wb') as file:
+                file.write(self._get_text(encoding))
         except UnicodeEncodeError:
             # fallback to utf-8 in case of error.
-            with open(tmp_path, 'w', encoding=fallback_encoding) as file:
-                file.write(plain_text)
+            with open(tmp_path, 'wb') as file:
+                file.write(self._get_text(fallback_encoding))
         except (IOError, OSError) as e:
             self._rm(tmp_path)
             self.saving = False
@@ -357,7 +357,7 @@ class FileManager(Manager):
                 os.rename(tmp_path, path)
                 self._rm(tmp_path)
             # reset dirty flags
-            self.editor._original_text = plain_text
+            self.editor._original_text = self.editor.toPlainText()
             self.editor.document().setModified(False)
             # remember path for next save
             self._path = os.path.normpath(path)
