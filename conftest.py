@@ -7,9 +7,12 @@ This scripts configures the test suite. We do two things:
       this implies that you must use **QApplication.instance** in your
       test scripts.
 """
+import os
 import logging
 import pytest
 import sys
+
+os.environ['PYQODE_CORE_TESTSUITE'] = '1'
 
 
 # -------------------

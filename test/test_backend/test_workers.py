@@ -27,9 +27,14 @@ def test_code_completion_worker():
         'request_id': 47
     }
     completion_groups = worker(data)
-    request_id = completion_groups[0]
+    context = completion_groups[0]
     completion_groups = completion_groups[1:]
-    assert request_id == 47
+    line, column, req_id = context
+    assert req_id == 47
+    assert line == 1
+    assert column == 0
+    import logging
+    logging.info('groups %r' % completion_groups)
     assert len(completion_groups)
     assert len(completion_groups[0])
     print(completion_groups)
