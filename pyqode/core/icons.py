@@ -15,7 +15,7 @@ except ImportError:
     qta = None
 
 #: This flag controls qtawesome icons should be preferred to theme/qrc icons.
-USE_QTAWESOME = True
+USE_QTAWESOME = False
 
 #: Default options used for rendering an icon from qtawesome.
 #: Options cannot be changed after the icon has been rendered so make sure
