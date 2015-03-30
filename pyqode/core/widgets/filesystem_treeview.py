@@ -137,6 +137,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         self.context_menu = context_menu
         self.context_menu.tree_view = self
+        self.context_menu.init_actions()
         for action in self.context_menu.actions():
             self.addAction(action)
 
@@ -469,9 +470,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         super(FileSystemContextMenu, self).__init__()
         #: Reference to the tree view
         self.tree_view = None
-        self._init_actions()
 
-    def _init_actions(self):
+    def init_actions(self):
         # New - submenu
         self.menu_new = self.addMenu("&New")
         self.menu_new.setIcon(
@@ -480,14 +480,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         new_user_actions = self.get_new_user_actions()
         if len(new_user_actions) > 0:
             self.menu_new.addSeparator()
-            for user_new_action in self.get_new_user_actions():
+            for user_new_action in new_user_actions:
                 self.menu_new.addAction(user_new_action)
         # New file
         self.action_create_file = QtWidgets.QAction('&File', self)
         self.action_create_file.triggered.connect(
             self._on_create_file_triggered)
-        icon_provider = QtWidgets.QFileIconProvider()
-        self.action_create_file.setIcon(icon_provider.icon(icon_provider.File))
+        icon_provider = self.tree_view._icon_provider
+        self.action_create_file.setIcon(icon_provider.icon(
+            icon_provider.File))
         self.menu_new.addAction(self.action_create_file)
         # New directory
         self.action_create_directory = QtWidgets.QAction('&Directory', self)
