@@ -100,6 +100,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.setSelectionMode(self.ExtendedSelection)
         self._ignored_extensions = []
         self._ignored_directories = []
+        self._icon_provider = QtWidgets.QFileIconProvider()
+
+    def set_icon_provider(self, icon_provider):
+        self._icon_provider = icon_provider
 
     def ignore_directories(self, *directories):
         """
@@ -145,6 +149,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
         self._fs_model_source = QtWidgets.QFileSystemModel()
+        self._fs_model_source.setIconProvider(self._icon_provider)
         self._fs_model_proxy = self.FilterProxyModel()
         for item in self._ignored_directories:
             self._fs_model_proxy.ignored_directories.append(item)
