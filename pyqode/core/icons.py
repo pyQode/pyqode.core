@@ -5,8 +5,8 @@ could use:
     - icon from qrc
     - icon from qtawesome
 
-qtawesome is an optional dependency, it is automatically disabled if the
-package has not been installed.
+qtawesome is an optional dependency, it is disabled by default. If your application
+use qtawesome, just set ``USE_QTAWESOME`` to True.
 """
 from pyqode.qt import QtGui
 try:
