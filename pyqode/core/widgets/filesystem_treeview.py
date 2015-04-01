@@ -597,7 +597,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
             ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
         if output:
             explorer = output.splitlines()[0].replace(
-                '.desktop', '').split('.')[-1].lower()
+                '.desktop', '').replace('-folder-handler', '').split('.')[-1].lower()
             return explorer
         return 'nautilus'
 
