@@ -812,7 +812,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         Save all editors.
         """
         for w in self.widgets():
-            self.main_tab_widget.save_widget(w)
+            try:
+                self.main_tab_widget.save_widget(w)
+            except OSError as e:
+                _logger().exception('failed to save %s', w.file.path)
 
     def _create_code_edit(self, mimetype, *args, **kwargs):
         """
