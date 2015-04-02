@@ -424,7 +424,13 @@ class FileSystemHelper:
 
             if os.path.isfile(src):
                 src = os.path.dirname(src)
-            os.makedirs(os.path.join(src, name), exist_ok=True)
+            try:
+                os.makedirs(os.path.join(src, name), exist_ok=True)
+            except OSError as e:
+                QtWidgets.QMessageBox.warning(
+                    self.tree_view, 'Failed to create directory',
+                    'Failed to create directory: %s', str(e))
+
 
     def create_file(self):
         """
@@ -445,9 +451,15 @@ class FileSystemHelper:
             if os.path.isfile(src):
                 src = os.path.dirname(src)
             path = os.path.join(src, name)
-            with open(path, 'w'):
-                pass
-            self.tree_view.file_created.emit(os.path.normpath(path))
+            try:
+                with open(path, 'w'):
+                    pass
+            except OSError as e:
+                QtWidgets.QMessageBox.warning(
+                    self.tree_view, 'Failed to create new file',
+                    'Failed to create file: %s', str(e))
+            else:
+                self.tree_view.file_created.emit(os.path.normpath(path))
 
 
 class FileSystemContextMenu(QtWidgets.QMenu):
