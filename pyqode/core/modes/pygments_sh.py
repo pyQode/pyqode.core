@@ -203,7 +203,8 @@ class PygmentsSH(SyntaxHighlighter):
         except ImportError:
             # import error while loading some pygments plugins, the editor
             # should not crash
-            _logger().exception('failed to get lexer from mimetype')
+            _logger().warning('failed to get lexer from mimetype (%s)' %
+                              mime_type)
             self._lexer = TextLexer()
             return False
         else:
@@ -220,17 +221,17 @@ class PygmentsSH(SyntaxHighlighter):
             filename = filename[0:len(filename) - 1]
         try:
             self._lexer = get_lexer_for_filename(filename)
-            _logger().info('lexer for filename (%s): %r', filename,
-                           self._lexer)
+            _logger().debug('lexer for filename (%s): %r', filename,
+                            self._lexer)
         except ClassNotFound:
-            _logger().exception('failed to get lexer from filename: %s, using '
+            _logger().warning('failed to get lexer from filename: %s, using '
                                 'plain text instead...', filename)
             self._lexer = TextLexer()
             return False
         except ImportError:
             # import error while loading some pygments plugins, the editor
             # should not crash
-            _logger().exception('failed to get lexer from filename: %s, using '
+            _logger().warning('failed to get lexer from filename: %s, using '
                                 'plain text instead...', filename)
             self._lexer = TextLexer()
             return False
@@ -245,7 +246,7 @@ class PygmentsSH(SyntaxHighlighter):
         :param options: optional addtional options.
         """
         self._lexer = get_lexer_for_mimetype(mime, **options)
-        _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
+        _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
         """

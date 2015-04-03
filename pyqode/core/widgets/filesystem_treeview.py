@@ -41,7 +41,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             self.ignored_directories = ['__pycache__']
             #: The list of file extension to exclude
             self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                  '.egg-info', '.coverage', '.DS_Store']
+                                       '.egg-info', '.coverage', '.DS_Store']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -267,7 +267,7 @@ class FileSystemHelper:
         for proxy_index in self.tree_view.selectedIndexes():
             finfo = self.tree_view.fileInfo(proxy_index)
             urls.append(finfo.canonicalFilePath())
-        _logger().info('selected urls %r' % [str(url) for url in urls])
+        _logger().debug('selected urls %r' % [str(url) for url in urls])
         return urls
 
     def paste_from_clipboard(self):
@@ -295,7 +295,7 @@ class FileSystemHelper:
         removed if copy is set to False.
         """
         for src in sources:
-            _logger().info('%s <%s> to <%s>' % (
+            _logger().debug('%s <%s> to <%s>' % (
                 'copying' if copy else 'cutting', src, destination))
             perform_copy = True
             ext = os.path.splitext(src)[1]
@@ -326,9 +326,9 @@ class FileSystemHelper:
                 _logger().exception('failed to copy %s to %s', src,
                                     destination)
             else:
-                _logger().info('file copied %s', src)
+                _logger().debug('file copied %s', src)
             if not copy:
-                _logger().info('removing source (cut operation)')
+                _logger().debug('removing source (cut operation)')
                 os.remove(src)
 
     @staticmethod
@@ -368,7 +368,7 @@ class FileSystemHelper:
                     _logger().exception('failed to remove %s', fn)
                 else:
                     for d in deleted_files:
-                        _logger().info('%s removed', d)
+                        _logger().debug('%s removed', d)
                         self.tree_view.file_deleted.emit(os.path.normpath(d))
 
     def get_current_path(self):
@@ -388,7 +388,7 @@ class FileSystemHelper:
         """
         path = self.get_current_path()
         QtWidgets.QApplication.clipboard().setText(path)
-        _logger().info('path copied: %s' % path)
+        _logger().debug('path copied: %s' % path)
 
     def rename(self):
         """
@@ -627,5 +627,4 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         elif system == 'Windows':
             subprocess.Popen(r'explorer /select,"%s"' % os.path.normpath(path))
         elif system == 'Darwin':
-            # todo: need to be tested on OSX
             subprocess.Popen(['open', '-R', path])
