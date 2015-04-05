@@ -42,7 +42,7 @@ class AutoCompleteMode(Mode):
         if not event.isAccepted() and not self._ignore_post:
             txt = event.text()
             next_char = TextHelper(self.editor).get_right_character()
-            if txt in self.MAPPING and not next_char:
+            if txt in self.MAPPING:
                 to_insert = self.MAPPING[txt]
                 if (not next_char or next_char in self.MAPPING.keys() or
                         next_char in self.MAPPING.values() or
@@ -79,8 +79,7 @@ class AutoCompleteMode(Mode):
             tc.movePosition(tc.Left)
             tc.movePosition(tc.Right, tc.KeepAnchor)
             del_char = tc.selectedText()
-            if del_char in self.MAPPING and self.MAPPING[del_char] == \
-                    next_char:
+            if del_char in self.MAPPING and self.MAPPING[del_char] == next_char:
                 tc.beginEditBlock()
                 tc.movePosition(tc.Right, tc.KeepAnchor)
                 tc.insertText('')
