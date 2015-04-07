@@ -490,6 +490,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                 self.checkBoxWholeWords.isChecked())
 
     def _exec_search(self, sub, flags):
+        if self.editor is None:
+            return
         regex, case_sensitive, whole_word = flags
         request_data = {
             'string': self.editor.toPlainText(),
