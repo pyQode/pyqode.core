@@ -17,6 +17,50 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
+    def lessThan(self, left, right):
+        tl = self.sourceModel().data(left).lower()
+        tr = self.sourceModel().data(right).lower()
+        pattern = self.filterRegExp().pattern().lower()
+        return tl.index(pattern) < tr.index(pattern)
+
+
+class SmartCompleter(QtWidgets.QCompleter):
+    def __init__(self, *args):
+        super(SmartCompleter, self).__init__(*args)
+        self.local_completion_prefix = ""
+        self.source_model = None
+        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.usingOriginalModel = False
+        self.popup().setTextElideMode(QtCore.Qt.ElideLeft)
+        self.setModelSorting(self.UnsortedModel)
+
+    def setModel(self, model):
+        self.source_model = model
+        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel.setSourceModel(self.source_model)
+        super(SmartCompleter, self).setModel(self.filterProxyModel)
+        self.usingOriginalModel = True
+
+    def update_model(self):
+        if not self.usingOriginalModel:
+            self.filterProxyModel.setSourceModel(self.source_model)
+
+        pattern = QtCore.QRegExp(self.local_completion_prefix,
+                                 self.caseSensitivity(),
+                                 QtCore.QRegExp.RegExp)
+
+        self.filterProxyModel.setFilterRegExp(pattern)
+        self.filterProxyModel.sort(0)
+
+    def splitPath(self, path):
+        self.local_completion_prefix = path
+        self.update_model()
+        if self.filterProxyModel.rowCount() == 0:
+            self.usingOriginalModel = False
+        return ['']
+
+
 class CodeCompletionMode(Mode, QtCore.QObject):
     """ Provides code completions when typing or when pressing Ctrl+Space.
 
@@ -33,6 +77,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     automatically while the user is typing some code (this can be configured
     using a series of properties).
     """
+
+    @property
+    def smart_completion(self):
+        return self._smart_completion
+
+    @smart_completion.setter
+    def smart_completion(self, value):
+        self._smart_completion = value
+        self._create_completer()
+
     @property
     def trigger_key(self):
         """
@@ -131,6 +185,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
+        self._smart_completion = True
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._request_id = self._last_request_id = 0
@@ -139,7 +194,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     # Mode interface
     #
     def _create_completer(self):
-        self._completer = QtWidgets.QCompleter([""], self.editor)
+        if not self.smart_completion:
+            self._completer = QtWidgets.QCompleter([''], self.editor)
+        else:
+            self._completer = SmartCompleter(self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
@@ -234,8 +292,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self.request_completion()
             elif len(word) >= self._trigger_len and event.text() not in [
                     ' ', ',', ';', ':', '=', '*', '+', '-', '/',
-                    '(', ')', '{', '}', '[', ']', '\t', '\n', ' ']:
-                # Lenght trigger
+                    '(', ')', '{', '}', '[', ']', '\t', '\n', ' ',
+                    '"', "'"]:
+                # Length trigger
                 if int(event.modifiers()) in [
                         QtCore.Qt.NoModifier, QtCore.Qt.ShiftModifier]:
                     self.request_completion()
@@ -370,6 +429,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Hides the completer popup
         """
         _logger().debug('hide popup')
+        print('hide popup')
         if (self._completer.popup() is not None and
                 self._completer.popup().isVisible()):
             self._completer.popup().hide()
