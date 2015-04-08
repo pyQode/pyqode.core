@@ -793,7 +793,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     _new_count = 0
 
     def __init__(self, parent=None, root=True):
-        super().__init__(parent, root)
+        super(SplittableCodeEditTabWidget, self).__init__(parent, root)
         self.main_tab_widget.tabBar().double_clicked.connect(
             self.tab_bar_double_clicked.emit)
 
