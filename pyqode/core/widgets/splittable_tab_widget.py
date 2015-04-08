@@ -110,9 +110,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
     #: - orientation: split orientation (horizontal/vertical)
     split_requested = QtCore.Signal(QtWidgets.QWidget, int)
 
-    #: A list of additional context menu actions
-    context_actions = []
-
     def __init__(self, parent):
         super(BaseTabWidget, self).__init__(parent)
         self._current = None
@@ -125,6 +122,9 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         tab_bar.tab_move_request.connect(self._on_tab_move_request)
         self.setTabBar(tab_bar)
         self.setAcceptDrops(True)
+
+        #: A list of additional context menu actions
+        self.context_actions = []
 
     def tab_under_menu(self):
         """
@@ -181,9 +181,9 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _create_tab_bar_menu(self):
         context_mnu = QtWidgets.QMenu()
-        for action in BaseTabWidget.context_actions:
+        for action in self.context_actions:
             context_mnu.addAction(action)
-        if BaseTabWidget.context_actions:
+        if self.context_actions:
             context_mnu.addSeparator()
         menu = QtWidgets.QMenu('Split', context_mnu)
         menu.addAction('Split horizontally').triggered.connect(
@@ -444,14 +444,15 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self._uuid = uuid.uuid1()
         self._tabs = []
 
-    @classmethod
-    def add_context_action(cls, action):
+    def add_context_action(self, action):
         """
         Adds a custom context menu action
 
         :param action: action to add.
         """
-        cls.tab_widget_klass.context_actions.append(action)
+        self.main_tab_widget.context_actions.append(action)
+        for child_splitter in self.child_splitters:
+            child_splitter.add_context_action(action)
 
     def add_tab(self, tab, title='', icon=None):
         """
@@ -490,6 +491,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 break
         if splitter is None:
             splitter = self.__class__(self, root=False)
+            for action in self.main_tab_widget.context_actions:
+                splitter.add_context_action(action)
         return splitter
 
     def split(self, widget, orientation):
