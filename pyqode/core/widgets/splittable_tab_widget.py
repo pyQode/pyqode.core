@@ -96,20 +96,22 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         - close the current tab
         - close all tabs
         - close all other tabs
-
-    The easiest way to add custom actions to the tab context menu is to
-    override the ``_create_context_menu`` method.
     """
     #: Signal emitted when the last tab has been closed
     last_tab_closed = QtCore.Signal()
+
     #: Signal emitted when a tab has been closed
     tab_closed = QtCore.Signal(QtWidgets.QWidget)
+
     #: Signal emitted when the user clicked on split vertical or split
     #: horizontal
     #: **Parameters**:
     #: - widget: the widget to split
     #: - orientation: split orientation (horizontal/vertical)
     split_requested = QtCore.Signal(QtWidgets.QWidget, int)
+
+    #: A list of additional context menu actions
+    context_actions = []
 
     def __init__(self, parent):
         super(BaseTabWidget, self).__init__(parent)
@@ -122,7 +124,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         tab_bar.customContextMenuRequested.connect(self._show_tab_context_menu)
         tab_bar.tab_move_request.connect(self._on_tab_move_request)
         self.setTabBar(tab_bar)
-        self._context_mnu = self._create_tab_bar_menu()
         self.setAcceptDrops(True)
 
     def tab_under_menu(self):
@@ -179,28 +180,35 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         return True
 
     def _create_tab_bar_menu(self):
-        _context_mnu = QtWidgets.QMenu()
-        menu = QtWidgets.QMenu('Split', _context_mnu)
+        context_mnu = QtWidgets.QMenu()
+        for action in BaseTabWidget.context_actions:
+            context_mnu.addAction(action)
+        if BaseTabWidget.context_actions:
+            context_mnu.addSeparator()
+        menu = QtWidgets.QMenu('Split', context_mnu)
         menu.addAction('Split horizontally').triggered.connect(
             self._on_split_requested)
         menu.addAction('Split vertically').triggered.connect(
             self._on_split_requested)
-        _context_mnu.addMenu(menu)
-        _context_mnu.addSeparator()
+        context_mnu.addMenu(menu)
+        context_mnu.addSeparator()
         for name, slot in [('Close', self.close),
                            ('Close others', self.close_others),
                            ('Close all', self.close_all)]:
             qaction = QtWidgets.QAction(name, self)
             qaction.triggered.connect(slot)
-            _context_mnu.addAction(qaction)
+            context_mnu.addAction(qaction)
             self.addAction(qaction)
-        return _context_mnu
+        self._context_mnu = context_mnu
+        return context_mnu
 
     def _show_tab_context_menu(self, position):
         if self.count():
             self._menu_pos = position
-            # self._context_mnu.popup(self.mapToGlobal(position))
-            self._context_mnu.popup(self.tabBar().mapToGlobal(position))
+            SplittableTabWidget.tab_under_menu = self.widget(
+                self.tab_under_menu())
+            self._create_tab_bar_menu().popup(self.tabBar().mapToGlobal(
+                position))
 
     def _collect_dirty_tabs(self, skip=None):
         """
@@ -408,12 +416,16 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     """
     #: Signal emitted when the last tab has been closed.
     last_tab_closed = QtCore.Signal(QtWidgets.QSplitter)
+
     #: Signal emitted when the active tab changed (takes child tab widgets
     #: into account). Parameter is the new tab widget.
     current_changed = QtCore.Signal(QtWidgets.QWidget)
 
     #: underlying tab widget class
     tab_widget_klass = BaseTabWidget
+
+    #: Reference to the widget under the tab bar menu
+    tab_under_menu = None
 
     def __init__(self, parent=None, root=True):
         super(SplittableTabWidget, self).__init__(parent)
@@ -431,6 +443,15 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 self._on_focus_changed)
         self._uuid = uuid.uuid1()
         self._tabs = []
+
+    @classmethod
+    def add_context_action(cls, action):
+        """
+        Adds a custom context menu action
+
+        :param action: action to add.
+        """
+        cls.tab_widget_klass.context_actions.append(action)
 
     def add_tab(self, tab, title='', icon=None):
         """
@@ -741,6 +762,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     be explicitly registered using ``register_editor``. If there is no
     registered editor for the given mime-type, ``fallback_editor`` is used.
     """
+    #: Signal emitted when a tab bar is double clicked, this should work
+    #: even with child tab bars
+    tab_bar_double_clicked = QtCore.Signal()
+
     #: uses a CodeEditTabWidget which is able to save code editor widgets.
     tab_widget_klass = CodeEditTabWidget
 
@@ -766,6 +791,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
     #: Store the number of new documents created, for internal use.
     _new_count = 0
+
+    def __init__(self, parent=None, root=True):
+        super().__init__(parent, root)
+        self.main_tab_widget.tabBar().double_clicked.connect(
+            self.tab_bar_double_clicked.emit)
 
     @classmethod
     def register_code_edit(cls, code_edit_class):
@@ -814,7 +844,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         for w in self.widgets():
             try:
                 self.main_tab_widget.save_widget(w)
-            except OSError as e:
+            except OSError:
                 _logger().exception('failed to save %s', w.file.path)
 
     def _create_code_edit(self, mimetype, *args, **kwargs):
@@ -998,3 +1028,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             new.dirty_changed.connect(self.dirty_changed.emit)
         self.dirty_changed.emit(new.dirty)
         return old, new
+
+    def split(self, widget, orientation):
+        splitter = super().split(widget, orientation)
+        splitter.tab_bar_double_clicked.connect(
+            self.tab_bar_double_clicked.emit)

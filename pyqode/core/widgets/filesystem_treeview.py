@@ -559,7 +559,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
             text = 'Open in finder'
         else:
             text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
-        action = self.addAction(text)
+        action = self.action_show_in_explorer = self.addAction(text)
         action.triggered.connect(self._on_show_in_explorer_triggered)
 
     def get_new_user_actions(self):
@@ -604,7 +604,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _on_create_file_triggered(self):
         self.tree_view.helper.create_file()
 
-    def get_linux_file_explorer(self):
+    @classmethod
+    def get_linux_file_explorer(cls):
         output = subprocess.check_output(
             ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
         if output:
