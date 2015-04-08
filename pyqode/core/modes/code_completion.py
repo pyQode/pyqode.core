@@ -290,10 +290,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 # symbol trigger, force request
                 self._reset_sync_data()
                 self.request_completion()
-            elif len(word) >= self._trigger_len and event.text() not in [
-                    ' ', ',', ';', ':', '=', '*', '+', '-', '/',
-                    '(', ')', '{', '}', '[', ']', '\t', '\n', ' ',
-                    '"', "'"]:
+            elif len(word) >= self._trigger_len and event.text() not in \
+                    self.editor.word_separators:
                 # Length trigger
                 if int(event.modifiers()) in [
                         QtCore.Qt.NoModifier, QtCore.Qt.ShiftModifier]:
