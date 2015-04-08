@@ -2,7 +2,6 @@
 """
 This module contains the code completion mode and the related classes.
 """
-import os
 import logging
 import sys
 import time
@@ -31,6 +30,7 @@ class SmartCompleter(QtWidgets.QCompleter):
         self.local_completion_prefix = ""
         self.source_model = None
         self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel.dynamicSortFilter = True
         self.usingOriginalModel = False
         self.popup().setTextElideMode(QtCore.Qt.ElideLeft)
         self.setModelSorting(self.UnsortedModel)
@@ -38,6 +38,7 @@ class SmartCompleter(QtWidgets.QCompleter):
     def setModel(self, model):
         self.source_model = model
         self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel.dynamicSortFilter = True
         self.filterProxyModel.setSourceModel(self.source_model)
         super(SmartCompleter, self).setModel(self.filterProxyModel)
         self.usingOriginalModel = True
@@ -46,6 +47,7 @@ class SmartCompleter(QtWidgets.QCompleter):
         if not self.usingOriginalModel:
             self.filterProxyModel.setSourceModel(self.source_model)
 
+        self.filterProxyModel.invalidate()  # force sorting/filtering
         pattern = QtCore.QRegExp(self.local_completion_prefix,
                                  self.caseSensitivity(),
                                  QtCore.QRegExp.RegExp)
@@ -202,11 +204,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
-        # try:
-        #     self._completer.setFilterMode(QtCore.Qt.MatchContains)
-        # except AttributeError:
-        #     # not available for Qt < 5.2
-        #     pass
 
     def on_install(self, editor):
         self._create_completer()
@@ -427,7 +424,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         Hides the completer popup
         """
         _logger().debug('hide popup')
-        print('hide popup')
         if (self._completer.popup() is not None and
                 self._completer.popup().isVisible()):
             self._completer.popup().hide()
@@ -471,7 +467,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             # show the completion list
             if self.editor.isVisible():
                 if self._completer.widget() != self.editor:
-                    print('set widget')
                     self._completer.setWidget(self.editor)
                 self._completer.complete(self._get_popup_rect())
                 self._completer.popup().setCurrentIndex(
