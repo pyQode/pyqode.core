@@ -39,3 +39,8 @@ htmlcov
 file_to_watch.txt
 
 test_file.txt
+
+*.tar.gz
+deb_dist
+*.usr
+*~
