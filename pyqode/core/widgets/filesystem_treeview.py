@@ -459,7 +459,7 @@ class FileSystemHelper:
             except OSError as e:
                 QtWidgets.QMessageBox.warning(
                     self.tree_view, 'Failed to create new file',
-                    'Failed to create file: %s', str(e))
+                    'Failed to create file: %s' % str(e))
             else:
                 self.tree_view.file_created.emit(os.path.normpath(path))
 
