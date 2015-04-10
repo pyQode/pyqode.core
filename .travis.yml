@@ -80,15 +80,15 @@ install:
   # Builds Complete
   - popd
 script:
-  - if [$COV == "1"]; then
-        py.test --cov pyqode test/
-    elif [$PEP8 == "1"]; then
-        py.test --pep8 -m pep8
+  - if [ $COV  ]; then
+        py.test --cov pyqode test/;
+    elif [ $PEP8 ]; then
+        py.test --pep8 -m pep8;
     else
-        py.test
+        py.test;
     fi
 after_script:
-  - if [ $COV == "1" ]; then
+  - if [ $COV ]; then
         pip install --quiet coveralls;
         coveralls;
     fi
