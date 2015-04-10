@@ -39,11 +39,11 @@ before_install:
   - sudo mkdir -p /builds
   - sudo chmod a+rw /builds
 install:
-  - pip install -e .
   - pip install git+https://github.com/pyQode/pyqode.qt.git
   - pip install pytest
   - pip install pytest-cov
   - pip install pytest-pep8
+  - pip install -e .
   # Qt4
   - sudo apt-get install -y libqt4-dev
   # Qt5
