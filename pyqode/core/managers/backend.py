@@ -7,7 +7,6 @@ import sys
 from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
 from pyqode.core.backend import NotRunning
-import time
 
 
 def _logger():
@@ -72,9 +71,9 @@ class BackendManager(Manager):
             the backend process.
         :param reuse: True to reuse an existing backend process. WARNING: to
             use this, your application must have one single server script. If
-            you're creating an app which supports multiple programming languages
-            you will need to merge all backend scripts into one single script,
-            otherwise the wrong script might be picked up).
+            you're creating an app which supports multiple programming
+            languages you will need to merge all backend scripts into one
+            single script, otherwise the wrong script might be picked up).
         """
         self._shared = reuse
         if reuse and BackendManager.SHARE_COUNT:
@@ -123,9 +122,9 @@ class BackendManager(Manager):
                 return
         _logger().debug('stopping backend process')
         # close all sockets
-        for socket in self._sockets:
-            socket._callback = None
-            socket.close()
+        for s in self._sockets:
+            s._callback = None
+            s.close()
 
         self._sockets[:] = []
         # prevent crash logs from being written if we are busy killing

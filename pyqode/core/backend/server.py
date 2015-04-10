@@ -8,9 +8,8 @@ import logging
 import json
 import struct
 import sys
-import threading
 import traceback
-import time
+
 
 try:
     import socketserver
@@ -125,7 +124,7 @@ class JsonServer(socketserver.TCPServer):
                 response = {'request_id': data['request_id'], 'results': []}
                 try:
                     worker = import_class(data['worker'])
-                except ImportError as e:
+                except ImportError:
                     _logger().exception('Failed to import worker class')
                 else:
                     if inspect.isclass(worker):
@@ -135,8 +134,9 @@ class JsonServer(socketserver.TCPServer):
                     try:
                         ret_val = worker(data['data'])
                     except Exception:
-                        _logger().exception('something went bad with worker '
-                                            '%r(data=%r)', worker, data['data'])
+                        _logger().exception(
+                            'something went bad with worker %r(data=%r)',
+                            worker, data['data'])
                         ret_val = None
                     if ret_val is None:
                         ret_val = []

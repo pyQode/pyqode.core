@@ -30,7 +30,6 @@ class DlgPreferredEncodingsEditor(QtWidgets.QDialog):
             'fa.arrow-left'))
         self.ui.pushButtonRemove.clicked.connect(self._remove)
 
-
     def _load_available(self):
         self.ui.tableWidgetAvailable.setColumnCount(2)
         self.ui.tableWidgetAvailable.setSelectionMode(

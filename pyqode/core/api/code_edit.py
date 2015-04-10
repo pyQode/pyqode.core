@@ -755,10 +755,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor.endEditBlock()
         if has_selection:
             pos = cursor.position()
-            cursor.setPosition(end+1)
+            cursor.setPosition(end + 1)
             cursor.setPosition(pos, cursor.KeepAnchor)
         self.setTextCursor(cursor)
-
 
     @QtCore.Slot()
     def indent(self):
@@ -987,8 +986,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             options.setFlags(options.flags() |
                              QtGui.QTextOption.ShowTabsAndSpaces)
         else:
-            options.setFlags(options.flags() &
-                             ~QtGui.QTextOption.ShowTabsAndSpaces)
+            options.setFlags(
+                options.flags() & ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
     def _init_actions(self):

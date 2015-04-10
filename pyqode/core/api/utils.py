@@ -200,8 +200,8 @@ class TextHelper(object):
                 word_separators = editor.word_separators
                 selected_txt = text_cursor.selectedText()
                 if (selected_txt in word_separators and
-                        (selected_txt != "n" and selected_txt != "t")
-                        or char.isspace()):
+                        (selected_txt != "n" and selected_txt != "t") or
+                        char.isspace()):
                     break  # start boundary found
             except IndexError:
                 break  # nothing selectable
@@ -216,8 +216,8 @@ class TextHelper(object):
                 char = text_cursor.selectedText()[0]
                 selected_txt = text_cursor.selectedText()
                 if (selected_txt in word_separators and
-                        (selected_txt != "n" and selected_txt != "t")
-                        or char.isspace()):
+                        (selected_txt != "n" and selected_txt != "t") or
+                        char.isspace()):
                     break  # end boundary found
                 end_pos = text_cursor.position()
                 text_cursor.setPosition(end_pos)

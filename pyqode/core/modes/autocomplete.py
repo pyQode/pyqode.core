@@ -84,7 +84,8 @@ class AutoCompleteMode(Mode):
             tc.movePosition(tc.Left)
             tc.movePosition(tc.Right, tc.KeepAnchor)
             del_char = tc.selectedText()
-            if del_char in self.MAPPING and self.MAPPING[del_char] == next_char:
+            if del_char in self.MAPPING and \
+                    self.MAPPING[del_char] == next_char:
                 tc.beginEditBlock()
                 tc.movePosition(tc.Right, tc.KeepAnchor)
                 tc.insertText('')

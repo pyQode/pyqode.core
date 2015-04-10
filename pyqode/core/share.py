@@ -51,10 +51,12 @@ class Definition(object):
         """
         Deserializes a definition from a simple dict.
         """
-        d = Definition(ddict['name'], ddict['line'], ddict['column'], ddict['icon'])
+        d = Definition(ddict['name'], ddict['line'], ddict['column'],
+                       ddict['icon'])
         for child_dict in ddict['children']:
             d.children.append(Definition.from_dict(child_dict))
         return d
 
     def __repr__(self):
-        return 'Definition(%r, %r, %r, %r)' % (self.name, self.line, self.column, self.icon)
+        return 'Definition(%r, %r, %r, %r)' % (
+            self.name, self.line, self.column, self.icon)

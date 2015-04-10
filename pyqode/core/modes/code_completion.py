@@ -271,7 +271,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return
         _logger().debug('key released:%s' % event.text())
         word = self._helper.word_under_cursor(
-                select_whole_word=True).selectedText()
+            select_whole_word=True).selectedText()
         _logger().debug('word: %s' % word)
         if event.text():
             if event.key() == QtCore.Qt.Key_Escape:
