@@ -934,36 +934,17 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
             use_parent_dir = False
             for tab in self.widgets():
-                title = tab.documentTitle()
+                title = QtCore.QFileInfo(tab.file.path).fileName()
                 if title == name:
                     tw = tab.parent_tab_widget
                     new_name = os.path.join(os.path.split(os.path.dirname(
                         tab.file.path))[1], title)
                     tw.setTabText(tw.indexOf(tab), new_name)
-                    tab.setDocumentTitle(new_name)
                     use_parent_dir = True
 
             if use_parent_dir:
                 name = os.path.join(
                     os.path.split(os.path.dirname(path))[1], name)
-                use_parent_dir = False
-
-            # we might need to do it again
-            for tab in self.widgets():
-                title = tab.documentTitle()
-                if title == name:
-                    tw = tab.parent_tab_widget
-                    pth = tab.file.path.replace(title, '')
-                    new_name = os.path.join(os.path.split(os.path.dirname(
-                        pth))[1], title)
-                    tw.setTabText(tw.indexOf(tab), new_name)
-                    tab.setDocumentTitle(new_name)
-                    use_parent_dir = True
-
-            if use_parent_dir:
-                pth = path.replace(name, '')
-                name = os.path.join(
-                    os.path.split(os.path.dirname(pth))[1], name)
                 use_parent_dir = False
 
             tab = self._create_code_edit(self.guess_mimetype(path),
