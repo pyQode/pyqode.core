@@ -20,8 +20,8 @@ class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
         tl = self.sourceModel().data(left).lower()
         tr = self.sourceModel().data(right).lower()
-        pattern = self.filterRegExp().pattern().lower()
-        return tl.index(pattern) < tr.index(pattern)
+        pattern = self.filterRegExp()
+        return pattern.indexIn(tl) < pattern.indexIn(tr)
 
 
 class SmartCompleter(QtWidgets.QCompleter):
@@ -48,9 +48,9 @@ class SmartCompleter(QtWidgets.QCompleter):
             self.filterProxyModel.setSourceModel(self.source_model)
 
         self.filterProxyModel.invalidate()  # force sorting/filtering
-        pattern = QtCore.QRegExp(self.local_completion_prefix,
-                                 self.caseSensitivity(),
-                                 QtCore.QRegExp.RegExp)
+        pattern = ''.join([x + '.*' for x in self.local_completion_prefix])
+        pattern = QtCore.QRegExp(
+            pattern, self.caseSensitivity(), QtCore.QRegExp.RegExp)
 
         self.filterProxyModel.setFilterRegExp(pattern)
         self.filterProxyModel.sort(0)
