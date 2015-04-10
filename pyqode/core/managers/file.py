@@ -10,14 +10,16 @@ except:
 import locale
 import logging
 import mimetypes
-# needed on windows
-mimetypes.add_type('text/x-python', '.py')
-mimetypes.add_type('text/xml', '.ui')
 import os
 from pyqode.core.api.manager import Manager
 from pyqode.core.api.utils import TextHelper
 from pyqode.qt import QtCore, QtWidgets
 from pyqode.core.cache import Cache
+
+
+# needed on windows
+mimetypes.add_type('text/x-python', '.py')
+mimetypes.add_type('text/xml', '.ui')
 
 
 def _logger():

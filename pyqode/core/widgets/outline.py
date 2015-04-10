@@ -41,7 +41,8 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         """
         if self._outline_mode:
             try:
-                self._outline_mode.document_changed.disconnect(self._on_changed)
+                self._outline_mode.document_changed.disconnect(
+                    self._on_changed)
             except (TypeError, RuntimeError):
                 pass
         if self._folding_panel:

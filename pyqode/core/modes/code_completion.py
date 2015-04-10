@@ -2,7 +2,6 @@
 """
 This module contains the code completion mode and the related classes.
 """
-import os
 import logging
 import sys
 import time
@@ -15,6 +14,53 @@ from pyqode.core import backend
 
 def _logger():
     return logging.getLogger(__name__)
+
+
+class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
+    def lessThan(self, left, right):
+        tl = self.sourceModel().data(left).lower()
+        tr = self.sourceModel().data(right).lower()
+        pattern = self.filterRegExp()
+        return pattern.indexIn(tl) < pattern.indexIn(tr)
+
+
+class SmartCompleter(QtWidgets.QCompleter):
+    def __init__(self, *args):
+        super(SmartCompleter, self).__init__(*args)
+        self.local_completion_prefix = ""
+        self.source_model = None
+        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel.dynamicSortFilter = True
+        self.usingOriginalModel = False
+        self.popup().setTextElideMode(QtCore.Qt.ElideLeft)
+        self.setModelSorting(self.UnsortedModel)
+
+    def setModel(self, model):
+        self.source_model = model
+        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel.dynamicSortFilter = True
+        self.filterProxyModel.setSourceModel(self.source_model)
+        super(SmartCompleter, self).setModel(self.filterProxyModel)
+        self.usingOriginalModel = True
+
+    def update_model(self):
+        if not self.usingOriginalModel:
+            self.filterProxyModel.setSourceModel(self.source_model)
+
+        self.filterProxyModel.invalidate()  # force sorting/filtering
+        pattern = ''.join([x + '.*' for x in self.local_completion_prefix])
+        pattern = QtCore.QRegExp(
+            pattern, self.caseSensitivity(), QtCore.QRegExp.RegExp)
+
+        self.filterProxyModel.setFilterRegExp(pattern)
+        self.filterProxyModel.sort(0)
+
+    def splitPath(self, path):
+        self.local_completion_prefix = path
+        self.update_model()
+        if self.filterProxyModel.rowCount() == 0:
+            self.usingOriginalModel = False
+        return ['']
 
 
 class CodeCompletionMode(Mode, QtCore.QObject):
@@ -33,6 +79,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     automatically while the user is typing some code (this can be configured
     using a series of properties).
     """
+
+    @property
+    def smart_completion(self):
+        return self._smart_completion
+
+    @smart_completion.setter
+    def smart_completion(self, value):
+        self._smart_completion = value
+        self._create_completer()
+
     @property
     def trigger_key(self):
         """
@@ -131,6 +187,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
+        self._smart_completion = True
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._request_id = self._last_request_id = 0
@@ -139,16 +196,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     # Mode interface
     #
     def _create_completer(self):
-        self._completer = QtWidgets.QCompleter([""], self.editor)
+        if not self.smart_completion:
+            self._completer = QtWidgets.QCompleter([''], self.editor)
+        else:
+            self._completer = SmartCompleter(self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
-        # try:
-        #     self._completer.setFilterMode(QtCore.Qt.MatchContains)
-        # except AttributeError:
-        #     # not available for Qt < 5.2
-        #     pass
 
     def on_install(self, editor):
         self._create_completer()
@@ -216,7 +271,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             return
         _logger().debug('key released:%s' % event.text())
         word = self._helper.word_under_cursor(
-                select_whole_word=True).selectedText()
+            select_whole_word=True).selectedText()
         _logger().debug('word: %s' % word)
         if event.text():
             if event.key() == QtCore.Qt.Key_Escape:
@@ -232,10 +287,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 # symbol trigger, force request
                 self._reset_sync_data()
                 self.request_completion()
-            elif len(word) >= self._trigger_len and event.text() not in [
-                    ' ', ',', ';', ':', '=', '*', '+', '-', '/',
-                    '(', ')', '{', '}', '[', ']', '\t', '\n', ' ']:
-                # Lenght trigger
+            elif len(word) >= self._trigger_len and event.text() not in \
+                    self.editor.word_separators:
+                # Length trigger
                 if int(event.modifiers()) in [
                         QtCore.Qt.NoModifier, QtCore.Qt.ShiftModifier]:
                     self.request_completion()
@@ -413,7 +467,6 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             # show the completion list
             if self.editor.isVisible():
                 if self._completer.widget() != self.editor:
-                    print('set widget')
                     self._completer.setWidget(self.editor)
                 self._completer.complete(self._get_popup_rect())
                 self._completer.popup().setCurrentIndex(

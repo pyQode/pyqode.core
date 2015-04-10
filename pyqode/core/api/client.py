@@ -252,7 +252,7 @@ class BackendProcess(QtCore.QProcess):
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
         _logger().debug('backend process finished with exit code %d',
-                       exit_code)
+                        exit_code)
         try:
             self.running = False
         except AttributeError:

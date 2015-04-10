@@ -143,8 +143,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         def inner_action(*args):
             """ Inner action: open file """
-            # cache cursor position before reloading so that the cursor position
-            # is restored automatically after reload has finished.
+            # cache cursor position before reloading so that the cursor
+            # position is restored automatically after reload has finished.
             # See OpenCobolIDE/OpenCobolIDE#97
             Cache().set_cursor_position(
                 self.editor.file.path,
