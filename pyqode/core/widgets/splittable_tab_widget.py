@@ -931,6 +931,22 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             assert os.path.exists(path)
             name = os.path.split(path)[1]
+
+            use_parent_dir = False
+            for tab in self.widgets():
+                title = QtCore.QFileInfo(tab.file.path).fileName()
+                if title == name:
+                    tw = tab.parent_tab_widget
+                    new_name = os.path.join(os.path.split(os.path.dirname(
+                        tab.file.path))[1], title)
+                    tw.setTabText(tw.indexOf(tab), new_name)
+                    use_parent_dir = True
+
+            if use_parent_dir:
+                name = os.path.join(
+                    os.path.split(os.path.dirname(path))[1], name)
+                use_parent_dir = False
+
             tab = self._create_code_edit(self.guess_mimetype(path),
                                          **kwargs)
             tab.file.replace_tabs_by_spaces = replace_tabs_by_spaces

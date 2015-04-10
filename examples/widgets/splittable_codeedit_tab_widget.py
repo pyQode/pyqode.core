@@ -1,3 +1,4 @@
+import os
 import sys
 from pyqode.qt import QtWidgets
 from pyqode.core.widgets import SplittableCodeEditTabWidget
@@ -15,8 +16,10 @@ if __name__ == '__main__':
     action.triggered.connect(open_in_explorer)
     tab_widget.add_context_action(action)
     tab_widget.setMinimumSize(800, 600)
-    tab_widget.open_document(__file__)
-    tab_widget.open_document(QtWidgets.__file__)
+    tab_widget.open_document(
+        os.path.join(os.getcwd(), 'test_dir', 'readme.txt'))
+    tab_widget.open_document(
+        os.path.join(os.getcwd(), 'test_dir', 'subdir', 'readme.txt'))
     tab_widget.create_new_document('My New Document', '.pyw')
     tab_widget.create_new_document('My New Document', '.pyw')
     tab_widget.show()
