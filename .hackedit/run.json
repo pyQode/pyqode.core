@@ -1,0 +1,10 @@
+[
+    {
+        "environment": {},
+        "interpreter_options": [],
+        "name": "splittable_codeedit_tab_widget",
+        "script": "examples/widgets/splittable_codeedit_tab_widget.py",
+        "script_parameters": [],
+        "working_dir": "examples/widgets"
+    }
+]

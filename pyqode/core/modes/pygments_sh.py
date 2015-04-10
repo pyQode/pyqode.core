@@ -344,7 +344,12 @@ class PygmentsSH(SyntaxHighlighter):
         """ Returns a QTextCharFormat for token by reading a Pygments style.
         """
         result = QtGui.QTextCharFormat()
-        for key, value in list(style.style_for_token(token).items()):
+        try:
+            style = style.style_for_token(token)
+        except KeyError:
+            # fallback to plain text
+            style = style.style_for_token(Text)
+        for key, value in list(style.items()):
             if value:
                 if key == 'color':
                     result.setForeground(self._get_brush(value))

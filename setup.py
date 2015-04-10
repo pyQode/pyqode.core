@@ -27,6 +27,15 @@ if sys.version_info[0] == 3 and sys.version_info[1] == 2:
     pygments_req += "==1.6"
 
 
+DESCRIPTION = 'PyQt/PySide Source Code Editor Widget'
+
+
+def readme():
+    if 'bdist_deb' in sys.argv:
+        return DESCRIPTION
+    return str(open('README.rst').read())
+
+
 setup(
     name='pyqode.core',
     namespace_packages=['pyqode'],
@@ -37,8 +46,8 @@ setup(
     license='MIT',
     author='Colin Duquesnoy',
     author_email='colin.duquesnoy@gmail.com',
-    description='Python/Qt Code Editor widget',
-    long_description=str(open('README.rst').read()),
+    description=DESCRIPTION,
+    long_description=readme(),
     install_requires=[pygments_req, 'pyqode.qt', 'future'],
     entry_points={
         'console_scripts': [
