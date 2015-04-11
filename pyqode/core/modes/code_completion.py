@@ -24,7 +24,10 @@ class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
         tl = self.sourceModel().data(left).lower()
         tr = self.sourceModel().data(right).lower()
         if len(self.prefix) == 1:
-            return tl.index(self.prefix) < tr.index(self.prefix)
+            try:
+                return tl.index(self.prefix) < tr.index(self.prefix)
+            except ValueError:
+                pass
         il = -1
         ir = -2
         for i, pattern in enumerate(self.sort_patterns):
