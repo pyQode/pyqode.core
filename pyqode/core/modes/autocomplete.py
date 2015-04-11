@@ -43,7 +43,7 @@ class AutoCompleteMode(Mode):
             txt = event.text()
             trav = self.editor.textCursor()
             assert isinstance(trav, QtGui.QTextCursor)
-            trav.movePosition(trav.Left, trav.MoveAnchor, 1)
+            trav.movePosition(trav.Left, trav.MoveAnchor, 2)
             literal = TextHelper(self.editor).is_comment_or_string(trav)
             if not literal:
                 next_char = TextHelper(self.editor).get_right_character()
