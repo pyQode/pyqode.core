@@ -3,6 +3,7 @@
 This module contains the code completion mode and the related classes.
 """
 import logging
+import re
 import sys
 import time
 from pyqode.core.api.mode import Mode
@@ -18,10 +19,42 @@ def _logger():
 
 class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     def lessThan(self, left, right):
+        if len(self.prefix) == 0:
+            return False
         tl = self.sourceModel().data(left).lower()
         tr = self.sourceModel().data(right).lower()
-        pattern = self.filterRegExp()
-        return pattern.indexIn(tl) < pattern.indexIn(tr)
+        if len(self.prefix) == 1:
+            return tl.index(self.prefix) < tr.index(self.prefix)
+        il = -1
+        ir = -2
+        for i, pattern in enumerate(self.sort_patterns):
+            ml = re.match(pattern, tl)
+            if ml and il == -1:
+                il = ml.start() + (len(self.sort_patterns) - i) * 10
+            mr = re.match(pattern, tr)
+            if mr and ir == -2:
+                ir = mr.start() + (len(self.sort_patterns) - i) * 10
+            if il != -2 and ir != -1:
+                break
+        return il > ir
+
+    def set_prefix(self, prefix):
+        self.filter_patterns = []
+        self.sort_patterns = []
+        flags = re.IGNORECASE
+        for i in reversed(range(1, len(prefix) + 1)):
+            ptrn = '.*%s.*%s' % (prefix[0:i], prefix[i:])
+            self.filter_patterns.append(re.compile(ptrn, flags))
+            ptrn = '%s.*%s' % (prefix[0:i], prefix[i:])
+            self.sort_patterns.append(re.compile(ptrn, flags))
+        self.prefix = prefix
+
+    def filterAcceptsRow(self, row, _):
+        completion = self.sourceModel().data(self.sourceModel().index(row, 0))
+        for pattern in self.filter_patterns:
+            if re.match(pattern, completion):
+                return True
+        return len(self.prefix) == 0
 
 
 class SmartCompleter(QtWidgets.QCompleter):
@@ -39,6 +72,7 @@ class SmartCompleter(QtWidgets.QCompleter):
         self.source_model = model
         self.filterProxyModel = SmarSortFilterProxyModel(self)
         self.filterProxyModel.dynamicSortFilter = True
+        self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.setSourceModel(self.source_model)
         super(SmartCompleter, self).setModel(self.filterProxyModel)
         self.usingOriginalModel = True
@@ -46,13 +80,8 @@ class SmartCompleter(QtWidgets.QCompleter):
     def update_model(self):
         if not self.usingOriginalModel:
             self.filterProxyModel.setSourceModel(self.source_model)
-
+        self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.invalidate()  # force sorting/filtering
-        pattern = ''.join([x + '.*' for x in self.local_completion_prefix])
-        pattern = QtCore.QRegExp(
-            pattern, self.caseSensitivity(), QtCore.QRegExp.RegExp)
-
-        self.filterProxyModel.setFilterRegExp(pattern)
         self.filterProxyModel.sort(0)
 
     def splitPath(self, path):
