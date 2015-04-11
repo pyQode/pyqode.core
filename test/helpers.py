@@ -128,9 +128,11 @@ def reset_editor(editor):
     editor.syntax_highlighter.color_scheme = ColorScheme('qt')
     editor.zoom_level = 0
     editor.resize(800, 600)
-    if not editor.backend.running:
-        editor.backend.start(server_path())
-        wait_for_connected(editor)
+    editor.backend.stop()
+    assert not editor.backend.running
+    editor.backend.start(server_path())
+    wait_for_connected(editor)
+    assert editor.backend.running
 
 # -------------------
 # Helper functions
