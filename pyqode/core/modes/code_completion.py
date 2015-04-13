@@ -49,8 +49,17 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
             mr = re.match(pattern, tr)
             if mr and ir == -2:
                 ir = mr.start() + (len(self.sort_patterns) - i) * 10
-            if il != -2 and ir != -1:
+            if il != -1 and ir != -2:
                 break
+        else:
+            if prefix in tl and prefix in tr:
+                return tl.index(prefix) < tr.index(prefix)
+            elif len(prefix):
+                return tl.index(prefix[0]) < tr.index(prefix[0])
+            elif prefix in tl:
+                return False
+            else:
+                return True
         return il > ir
 
     def set_prefix(self, prefix):
