@@ -17,15 +17,27 @@ def _logger():
     return logging.getLogger(__name__)
 
 
-class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
+class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
+    """
+    Performs subsequence matching/sorting (see pyQode/pyQode#1).
+    """
+    def __init__(self, case, parent=None):
+        QtCore.QSortFilterProxyModel.__init__(self, parent)
+        self.case = case
+
     def lessThan(self, left, right):
         if len(self.prefix) == 0:
             return False
-        tl = self.sourceModel().data(left).lower()
-        tr = self.sourceModel().data(right).lower()
-        if len(self.prefix) == 1:
+        tl = self.sourceModel().data(left)
+        tr = self.sourceModel().data(right)
+        prefix = self.prefix
+        if self.case == QtCore.Qt.CaseInsensitive:
+            tl = tl.lower()
+            tr = tr.lower()
+            prefix = prefix.lower()
+        if len(prefix) == 1:
             try:
-                return tl.index(self.prefix) < tr.index(self.prefix)
+                return tl.index(prefix) < tr.index(prefix)
             except ValueError:
                 pass
         il = -1
@@ -44,7 +56,10 @@ class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     def set_prefix(self, prefix):
         self.filter_patterns = []
         self.sort_patterns = []
-        flags = re.IGNORECASE
+        if self.case == QtCore.Qt.CaseInsensitive:
+            flags = re.IGNORECASE
+        else:
+            flags = 0
         for i in reversed(range(1, len(prefix) + 1)):
             ptrn = '.*%s.*%s' % (prefix[0:i], prefix[i:])
             self.filter_patterns.append(re.compile(ptrn, flags))
@@ -60,12 +75,16 @@ class SmarSortFilterProxyModel(QtCore.QSortFilterProxyModel):
         return len(self.prefix) == 0
 
 
-class SmartCompleter(QtWidgets.QCompleter):
+class SubsequenceCompleter(QtWidgets.QCompleter):
+    """
+    QCompleter specialised for subsequence matching
+    """
     def __init__(self, *args):
-        super(SmartCompleter, self).__init__(*args)
+        super(SubsequenceCompleter, self).__init__(*args)
         self.local_completion_prefix = ""
         self.source_model = None
-        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel = SubsequenceSortFilterProxyModel(
+            self.caseSensitivity(), parent=self)
         self.filterProxyModel.dynamicSortFilter = True
         self.usingOriginalModel = False
         self.popup().setTextElideMode(QtCore.Qt.ElideLeft)
@@ -73,11 +92,12 @@ class SmartCompleter(QtWidgets.QCompleter):
 
     def setModel(self, model):
         self.source_model = model
-        self.filterProxyModel = SmarSortFilterProxyModel(self)
+        self.filterProxyModel = SubsequenceSortFilterProxyModel(
+            self.caseSensitivity(), parent=self)
         self.filterProxyModel.dynamicSortFilter = True
         self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.setSourceModel(self.source_model)
-        super(SmartCompleter, self).setModel(self.filterProxyModel)
+        super(SubsequenceCompleter, self).setModel(self.filterProxyModel)
         self.usingOriginalModel = True
 
     def update_model(self):
@@ -114,6 +134,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
 
     @property
     def smart_completion(self):
+        """
+        True to use smart completion filtering: subsequence matching, False
+        to use a prefix based completer
+        """
         return self._smart_completion
 
     @smart_completion.setter
@@ -210,6 +234,25 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return self._helper.word_under_cursor(
             select_whole_word=False).selectedText().strip()
 
+    @property
+    def show_tooltips(self):
+        """
+        True to show tooltips next to the current completion.
+        """
+        return self._show_tooltips
+
+    @show_tooltips.setter
+    def show_tooltips(self, value):
+        self._show_tooltips = value
+        if self.editor:
+            # propagate changes to every clone
+            for clone in self.editor.clones:
+                try:
+                    clone.modes.get(CodeCompletionMode).show_tooltips = value
+                except KeyError:
+                    # this should never happen since we're working with clones
+                    pass
+
     def __init__(self):
         Mode.__init__(self)
         QtCore.QObject.__init__(self)
@@ -222,7 +265,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._smart_completion = True
         self._last_cursor_line = -1
         self._last_cursor_column = -1
+        self._tooltips = {}
+        self._show_tooltips = False
         self._request_id = self._last_request_id = 0
+
+    def clone_settings(self, original):
+        self.trigger_key = original.trigger_key
+        self.trigger_length = original.trigger_length
+        self.trigger_symbols = original.trigger_symbols
+        self.show_tooltips = original.show_tooltips
+        self.case_sensitive = original.case_sensitive
 
     #
     # Mode interface
@@ -231,8 +283,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         if not self.smart_completion:
             self._completer = QtWidgets.QCompleter([''], self.editor)
         else:
-            self._completer = SmartCompleter(self.editor)
+            self._completer = SubsequenceCompleter(self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
+        if self.case_sensitive:
+            self._completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+        else:
+            self._completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
@@ -253,10 +309,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.focused_in.connect(self._on_focus_in)
             self.editor.key_pressed.connect(self._on_key_pressed)
             self.editor.post_key_pressed.connect(self._on_key_released)
+            self._completer.highlighted.connect(
+                self._display_completion_tooltip)
         else:
             self.editor.focused_in.disconnect(self._on_focus_in)
             self.editor.key_pressed.disconnect(self._on_key_pressed)
             self.editor.post_key_pressed.disconnect(self._on_key_released)
+            self._completer.highlighted.disconnect(
+                self._display_completion_tooltip)
 
     #
     # Slots
@@ -267,16 +327,16 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             mod = QtCore.Qt.ControlModifier
             ctrl = int(event.modifiers() & mod) == mod
             # complete
-            if (event.key() == QtCore.Qt.Key_Enter or
-                    event.key() == QtCore.Qt.Key_Return or
-                    event.key() == QtCore.Qt.Key_Tab):
+            if event.key() in [
+                    QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return,
+                    QtCore.Qt.Key_Tab]:
                 self._insert_completion(self._current_completion)
                 self._hide_popup()
                 event.accept()
             # hide
-            elif (event.key() == QtCore.Qt.Key_Escape or
-                  event.key() == QtCore.Qt.Key_Backtab or
-                  nav_key and ctrl):
+            elif (event.key() in [
+                    QtCore.Qt.Key_Escape, QtCore.Qt.Key_Backtab] or
+                    nav_key and ctrl):
                 self._reset_sync_data()
             # move into list
             elif event.key() == QtCore.Qt.Key_Home:
@@ -290,16 +350,17 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
         if self._completer.popup().isVisible():
-            _handle_completer_events()
             if is_shortcut:
                 event.accept()
-        if is_shortcut:
+            else:
+                _handle_completer_events()
+        elif is_shortcut:
             self._reset_sync_data()
             self.request_completion()
             event.accept()
 
     def _on_key_released(self, event):
-        if self._is_shortcut(event):
+        if self._is_shortcut(event) or event.isAccepted():
             return
         _logger().debug('key released:%s' % event.text())
         word = self._helper.word_under_cursor(
@@ -461,6 +522,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._completer.popup().hide()
             self._last_cursor_column = -1
             self._last_cursor_line = -1
+            QtWidgets.QToolTip.hideText()
 
     def _get_popup_rect(self):
         cursor_rec = self.editor.cursorRect()
@@ -527,10 +589,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         # build the completion model
         cc_model = QtGui.QStandardItemModel()
+        self._tooltips.clear()
         for completion in completions:
             name = completion['name']
             item = QtGui.QStandardItem()
             item.setData(name, QtCore.Qt.DisplayRole)
+            if 'tooltip' in completion and completion['tooltip']:
+                self._tooltips[name] = completion['tooltip']
             if 'icon' in completion:
                 item.setData(QtGui.QIcon(completion['icon']),
                              QtCore.Qt.DecorationRole)
@@ -541,6 +606,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self._create_completer()
             self._completer.setModel(cc_model)
         return cc_model
+
+    def _display_completion_tooltip(self, completion):
+        if not self._show_tooltips:
+            return
+        if completion not in self._tooltips:
+            QtWidgets.QToolTip.hideText()
+            return
+        tooltip = self._tooltips[completion].strip()
+        pos = self._completer.popup().pos()
+        pos.setX(pos.x() + self._completer.popup().size().width())
+        pos.setY(pos.y() - 15)
+        QtWidgets.QToolTip.showText(pos, tooltip, self.editor)
 
     @staticmethod
     def _is_navigation_key(event):
