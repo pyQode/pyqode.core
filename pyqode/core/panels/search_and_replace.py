@@ -193,7 +193,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
-        self._fg = QtGui.QColor('black')
+        self._outline = QtGui.QPen(QtGui.QColor('gray'), 1)
 
     def on_install(self, editor):
         super(SearchAndReplacePanel, self).on_install(editor)
@@ -204,7 +204,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         for deco in self._decorations:
             self.editor.decorations.remove(deco)
             deco.set_background(QtGui.QBrush(self.background))
-            deco.set_foreground(QtGui.QBrush(self.foreground))
+            deco.set_outline(QtGui.QTextFormat.OutlinePen, self._outline)
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):
@@ -542,7 +542,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         deco = TextDecoration(self.editor.document(), selection_start,
                               selection_end)
         deco.set_background(QtGui.QBrush(self.background))
-        deco.set_foreground(QtGui.QBrush(self.foreground))
+        deco.set_outline(self._outline)
         deco.draw_order = 1
         return deco
 
