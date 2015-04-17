@@ -204,7 +204,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         for deco in self._decorations:
             self.editor.decorations.remove(deco)
             deco.set_background(QtGui.QBrush(self.background))
-            deco.set_outline(QtGui.QTextFormat.OutlinePen, self._outline)
+            deco.set_outline(self._outline)
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):

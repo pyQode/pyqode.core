@@ -28,7 +28,7 @@ def test_delay(editor):
 
 def test_background(editor):
     mode = get_mode(editor)
-    assert mode.background.name() == '#80cc80'
+    assert mode.background.name() == '#ccffcc'
     mode.background = QtGui.QColor('#404040')
     assert mode.background.name() == '#404040'
 
