@@ -25,43 +25,6 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
         QtCore.QSortFilterProxyModel.__init__(self, parent)
         self.case = case
 
-    def lessThan(self, left, right):
-        if len(self.prefix) == 0:
-            return False
-        tl = self.sourceModel().data(left)
-        tr = self.sourceModel().data(right)
-        prefix = self.prefix
-        if self.case == QtCore.Qt.CaseInsensitive:
-            tl = tl.lower()
-            tr = tr.lower()
-            prefix = prefix.lower()
-        if len(prefix) == 1:
-            try:
-                return tl.index(prefix) < tr.index(prefix)
-            except ValueError:
-                pass
-        il = -1
-        ir = -2
-        for i, pattern in enumerate(self.sort_patterns):
-            ml = re.match(pattern, tl)
-            if ml and il == -1:
-                il = ml.start() + (len(self.sort_patterns) - i) * 10
-            mr = re.match(pattern, tr)
-            if mr and ir == -2:
-                ir = mr.start() + (len(self.sort_patterns) - i) * 10
-            if il != -1 and ir != -2:
-                break
-        else:
-            if prefix in tl and prefix in tr:
-                return tl.index(prefix) < tr.index(prefix)
-            elif len(prefix):
-                return tl.index(prefix[0]) < tr.index(prefix[0])
-            elif prefix in tl:
-                return False
-            else:
-                return True
-        return il > ir
-
     def set_prefix(self, prefix):
         self.filter_patterns = []
         self.sort_patterns = []
@@ -78,8 +41,19 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
 
     def filterAcceptsRow(self, row, _):
         completion = self.sourceModel().data(self.sourceModel().index(row, 0))
-        for pattern in self.filter_patterns:
-            if re.match(pattern, completion):
+        for i, patterns in enumerate(zip(self.filter_patterns,
+                                         self.sort_patterns)):
+            pattern, sort_pattern = patterns
+            match = re.match(pattern, completion)
+            if match:
+                # compute rank, the lowest rank the closer it is from the
+                # completion
+                start = sys.maxsize
+                for m in sort_pattern.finditer(completion):
+                    start, end = m.span()
+                rank = start + i * 10
+                self.sourceModel().setData(
+                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
                 return True
         return len(self.prefix) == 0
 
@@ -94,20 +68,21 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
         self.source_model = None
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
+        self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
         self.filterProxyModel.dynamicSortFilter = True
         self.usingOriginalModel = False
-        self.popup().setTextElideMode(QtCore.Qt.ElideLeft)
-        self.setModelSorting(self.UnsortedModel)
 
     def setModel(self, model):
         self.source_model = model
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
+        self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
         self.filterProxyModel.dynamicSortFilter = True
         self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.setSourceModel(self.source_model)
         super(SubsequenceCompleter, self).setModel(self.filterProxyModel)
         self.usingOriginalModel = True
+        self.filterProxyModel.sort(0)
 
     def update_model(self):
         if not self.usingOriginalModel:
