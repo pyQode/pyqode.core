@@ -96,9 +96,9 @@ class OccurrencesHighlighterMode(Mode):
         #: Timer used to run the search request with a specific delay
         self.timer = DelayJobRunner(delay=1000)
         self._sub = None
-        self._background = QtGui.QColor('#80CC80')
+        self._background = QtGui.QColor('#CCFFCC')
         self._foreground = QtGui.QColor('#404040')
-        self._underlined = True
+        self._underlined = False
 
     def on_state_changed(self, state):
         if state:
