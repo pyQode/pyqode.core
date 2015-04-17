@@ -101,6 +101,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self._ignored_extensions = []
         self._ignored_directories = []
         self._icon_provider = QtWidgets.QFileIconProvider()
+        self._hide_extra_colums = True
 
     def set_icon_provider(self, icon_provider):
         self._icon_provider = icon_provider
@@ -147,6 +148,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param path: root path - str
         :param hide_extra_columns: Hide extra column (size, paths,...)
         """
+        self._hide_extra_colums = hide_extra_columns
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
         self._fs_model_source = QtWidgets.QFileSystemModel()
@@ -160,17 +162,21 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         for item in self._ignored_extensions:
             self._fs_model_proxy.ignored_extensions.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
-        self.setModel(self._fs_model_proxy)
         self._fs_model_proxy.set_root_path(path)
         self.root_path = os.path.dirname(path)
         file_root_index = self._fs_model_source.setRootPath(self.root_path)
         root_index = self._fs_model_proxy.mapFromSource(file_root_index)
+        self._fs_model_source.directoryLoaded.connect(self._on_path_loaded)
+
+    def _on_path_loaded(self, path):
+        if path != self.root_path:
+            return
+        self.setModel(self._fs_model_proxy)
+        file_root_index = self._fs_model_source.setRootPath(self.root_path)
+        root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
-        # Expand first entry (project name)
-        file_parent_index = self._fs_model_source.index(path)
-        self.setExpanded(self._fs_model_proxy.mapFromSource(
-            file_parent_index), True)
-        if hide_extra_columns:
+        self.expandToDepth(0)
+        if self._hide_extra_colums:
             self.setHeaderHidden(True)
             for i in range(1, 4):
                 self.hideColumn(i)
