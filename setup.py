@@ -31,7 +31,7 @@ DESCRIPTION = 'PyQt/PySide Source Code Editor Widget'
 
 
 def readme():
-    if 'bdist_deb' in sys.argv:
+    if 'bdist_deb' in sys.argv or 'sdist_dsc' in sys.argv:
         return DESCRIPTION
     return str(open('README.rst').read())
 
