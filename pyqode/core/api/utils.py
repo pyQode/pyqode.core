@@ -399,7 +399,7 @@ class TextHelper(object):
         """
         Selects an entire line.
 
-        :param line: Line to select
+        :param line: Line to select. If None, the current line will be selected
         :param apply_selection: True to apply selection on the text editor
             widget, False to just return the text cursor without setting it
             on the editor.
