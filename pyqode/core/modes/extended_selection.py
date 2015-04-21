@@ -75,7 +75,7 @@ class ExtendedSelectionMode(Mode):
         """
         # setup menu
         menu = QtWidgets.QMenu(self.editor)
-        menu.setTitle('Selection')
+        menu.setTitle('Select')
         menu.menuAction().setIcon(self.editor.action_select_all.icon())
         # setup actions
         menu.addAction(self.action_select_word)
@@ -92,12 +92,10 @@ class ExtendedSelectionMode(Mode):
             self.editor.remove_action(self.editor.action_select_all)
         except (ValueError, AttributeError):
             pass
-        else:
-            self.editor.add_action(self.create_menu().menuAction())
-            self.editor.add_separator()
-            self.editor.addActions([
-                self.action_select_extended_word, self.action_select_line,
-                self.action_select_matched, self.action_select_word])
+        self.editor.add_action(self.create_menu().menuAction())
+        self.editor.addActions([
+            self.action_select_extended_word, self.action_select_line,
+            self.action_select_matched, self.action_select_word])
 
     def on_state_changed(self, state):
         if state:

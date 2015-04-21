@@ -986,10 +986,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :return: QMenu
         """
         mnu = QtWidgets.QMenu()
+        mnu.addActions(self._actions)
+        mnu.addSeparator()
         for menu in self._menus:
             mnu.addMenu(menu)
-        mnu.addSeparator()
-        mnu.addActions(self._actions)
         return mnu
 
     def _show_context_menu(self, point):
@@ -1066,6 +1066,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.duplicate_line)
         self.add_action(action)
         self.action_duplicate_line = action
+        # select all
+        action = QtWidgets.QAction('Select all', self)
+        action.setShortcut(QtGui.QKeySequence.SelectAll)
+        action.triggered.connect(self.selectAll)
+        self.action_select_all = action
+        self.addAction(self.action_select_all)
         if create_standard_actions:
             # delete
             action = QtWidgets.QAction('Delete', self)
@@ -1077,12 +1083,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.add_action(action)
             self.action_delete = action
             self.add_separator()
-            # select all
-            action = QtWidgets.QAction('Select all', self)
-            action.setShortcut(QtGui.QKeySequence.SelectAll)
-            action.triggered.connect(self.selectAll)
-            self.add_action(action)
-            self.action_select_all = action
+            self.add_action(self.action_select_all)
             # separator
             self.add_separator()
             # indent
@@ -1113,7 +1114,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.goto_line)
         self.add_action(action)
         self.action_goto_line = action
-        self.add_separator()
 
     def _init_settings(self):
         """ Init setting """

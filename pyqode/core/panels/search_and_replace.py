@@ -211,9 +211,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         super(SearchAndReplacePanel, self).on_state_changed(state)
         if state:
             # menu
-            self.editor.add_separator()
             self.editor.add_action(self.menu.menuAction())
-            self.editor.add_separator()
             # requestSearch slot
             self.editor.textChanged.connect(self.request_search)
             self.lineEditSearch.textChanged.connect(self.request_search)

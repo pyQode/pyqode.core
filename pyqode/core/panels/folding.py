@@ -206,13 +206,7 @@ class FoldingPanel(Panel):
         action.setShortcut('Ctrl+Shift++')
         action.triggered.connect(self._on_action_expand_all_triggered)
         self.context_menu.addAction(action)
-        sep = QtWidgets.QAction(self.editor)
-        sep.setSeparator(True)
-        self.editor.add_action(sep)
-        self.editor.add_action(self.context_menu.menuAction())
-        sep = QtWidgets.QAction(self.editor)
-        sep.setSeparator(True)
-        self.editor.add_action(sep)
+        self.editor.add_menu(self.context_menu)
 
     def sizeHint(self):
         """ Returns the widget size hint (based on the editor font size) """
