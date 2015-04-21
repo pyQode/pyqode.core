@@ -90,11 +90,11 @@ class ExtendedSelectionMode(Mode):
         super(ExtendedSelectionMode, self).on_install(editor)
         try:
             self.editor.remove_action(self.editor.action_select_all)
-        except ValueError:
+        except (ValueError, AttributeError):
             pass
         else:
-            self.editor.insert_action(self.create_menu().menuAction(),
-                                      self.editor.action_duplicate_line)
+            self.editor.add_action(self.create_menu().menuAction())
+            self.editor.add_separator()
             self.editor.addActions([
                 self.action_select_extended_word, self.action_select_line,
                 self.action_select_matched, self.action_select_word])

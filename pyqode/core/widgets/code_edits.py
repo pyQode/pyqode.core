@@ -44,16 +44,14 @@ class TextCodeEdit(CodeEdit):
                            reuse=reuse_backend)
 
         # append panels
-        self.panels.append(panels.FoldingPanel())
-        self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
-        self.panels.append(panels.EncodingPanel(),
-                           Panel.Position.TOP)
+        self.panels.append(panels.FoldingPanel())
+        self.panels.append(panels.LineNumberPanel())
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
-        self.add_separator()
+        self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
@@ -66,6 +64,8 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+
+        self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(
@@ -96,16 +96,14 @@ class GenericCodeEdit(CodeEdit):
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
         # append panels
-        self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
-        self.panels.append(panels.EncodingPanel(),
-                           Panel.Position.TOP)
+        self.panels.append(panels.FoldingPanel())
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
-        self.add_separator()
+        self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
@@ -119,9 +117,10 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
-        self.modes.append(modes.ExtendedSelectionMode())
 
         self.syntax_highlighter.fold_detector = IndentFoldDetector()
+
+        self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
 
     def setPlainText(self, txt, mime_type='', encoding=''):
         if mime_type is None:

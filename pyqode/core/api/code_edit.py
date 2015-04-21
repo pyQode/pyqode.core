@@ -611,9 +611,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param action: action to insert
         :param prev_action: the action after which the new action must be
-            inserted
+            inserted or the insert index
         """
-        index = self._actions.index(prev_action)
+        if isinstance(prev_action, QtWidgets.QAction):
+            index = self._actions.index(prev_action)
+        else:
+            index = prev_action
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self._actions.insert(index, action)
 
@@ -1039,6 +1042,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.paste)
         self.add_action(action)
         self.action_paste = action
+        # duplicate line
+        action = QtWidgets.QAction('Duplicate line', self)
+        action.setShortcut('Ctrl+D')
+        action.triggered.connect(self.duplicate_line)
+        self.add_action(action)
+        self.action_duplicate_line = action
         # delete
         action = QtWidgets.QAction('Delete', self)
         action.setShortcut(QtGui.QKeySequence.Delete)
@@ -1047,12 +1056,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.delete)
         self.add_action(action)
         self.action_delete = action
-        # duplicate line
-        action = QtWidgets.QAction('Duplicate line', self)
-        action.setShortcut('Ctrl+D')
-        action.triggered.connect(self.duplicate_line)
-        self.add_action(action)
-        self.action_duplicate_line = action
+        self.add_separator()
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
