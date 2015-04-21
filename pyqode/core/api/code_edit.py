@@ -3,10 +3,10 @@ This module contains the base code editor widget.
 """
 from __future__ import print_function
 import sys
-
 try:
     from future.builtins import str, super
 except:
+    # not availabe on python 3.2 (but not needed)
     pass
 import logging
 import platform
@@ -388,15 +388,32 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 return mode
         return None
 
-    def __init__(self, parent=None, create_default_actions=True):
+    @property
+    def show_context_menu(self):
+        """
+        Specifies whether we should display the context menu or not.
+
+        Default is True
+        """
+        return self._show_ctx_mnu
+
+    @show_context_menu.setter
+    def show_context_menu(self, value):
+        self._show_ctx_mnu = value
+
+    def __init__(self, parent=None, create_default_actions=False):
         """
         :param parent: Parent widget
 
-        :param create_default_actions: True to create the default context
-            menu actions (copy, paste, edit)
+        :param create_default_actions: True to create the action for the
+            standard shortcuts (copy, paste, delete, undo, redo,...).
+            Non-standard actions will always get created. If you would like
+            to prevent the context menu from showing, just set the
+            :attr:`show_menu_enabled` to False.
         """
         super(CodeEdit, self).__init__(parent)
         self.clones = []
+        self._show_ctx_mnu = True
         self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
@@ -442,8 +459,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # setup context menu
         self._actions = []
         self._menus = []
-        if create_default_actions:
-            self._init_actions()
+        self._init_actions(create_default_actions)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self._mnu = None  # bug with PySide (github #63)
@@ -979,7 +995,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def _show_context_menu(self, point):
         """ Shows the context menu """
         self._mnu = self.get_context_menu()
-        if len(self._mnu.actions()) > 1:
+        if len(self._mnu.actions()) > 1 and self.show_context_menu:
             self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
@@ -994,97 +1010,101 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 options.flags() & ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
-    def _init_actions(self):
-        """ Init default QAction """
-        # Undo
-        action = QtWidgets.QAction('Undo', self)
-        action.setShortcut(QtGui.QKeySequence.Undo)
-        action.setIcon(icons.icon(
-            'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
-        action.triggered.connect(self.undo)
-        self.undoAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_undo = action
-        # Redo
-        action = QtWidgets.QAction('Redo', self)
-        action.setShortcut(QtGui.QKeySequence.Redo)
-        action.setIcon(icons.icon(
-            'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
-        action.triggered.connect(self.redo)
-        self.redoAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_redo = action
-        # separator
-        self.add_separator()
-        # Copy
-        action = QtWidgets.QAction('Copy', self)
-        action.setShortcut(QtGui.QKeySequence.Copy)
-        action.setIcon(icons.icon(
-            'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
-        action.triggered.connect(self.copy)
-        self.copyAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_copy = action
-        # cut
-        action = QtWidgets.QAction('Cut', self)
-        action.setShortcut(QtGui.QKeySequence.Cut)
-        action.setIcon(icons.icon(
-            'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
-        action.triggered.connect(self.cut)
-        self.copyAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_cut = action
-        # paste
-        action = QtWidgets.QAction('Paste', self)
-        action.setShortcut(QtGui.QKeySequence.Paste)
-        action.setIcon(icons.icon(
-            'edit-paste', ':/pyqode-icons/rc/edit-paste.png', 'fa.paste'))
-        action.triggered.connect(self.paste)
-        self.add_action(action)
-        self.action_paste = action
+    def _init_actions(self, create_standard_actions):
+        """ Init context menu action """
+        if create_standard_actions:
+            # Undo
+            action = QtWidgets.QAction('Undo', self)
+            action.setShortcut(QtGui.QKeySequence.Undo)
+            action.setIcon(icons.icon(
+                'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
+            action.triggered.connect(self.undo)
+            self.undoAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_undo = action
+            # Redo
+            action = QtWidgets.QAction('Redo', self)
+            action.setShortcut(QtGui.QKeySequence.Redo)
+            action.setIcon(icons.icon(
+                'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
+            action.triggered.connect(self.redo)
+            self.redoAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_redo = action
+            # separator
+            self.add_separator()
+            # Copy
+            action = QtWidgets.QAction('Copy', self)
+            action.setShortcut(QtGui.QKeySequence.Copy)
+            action.setIcon(icons.icon(
+                'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
+            action.triggered.connect(self.copy)
+            self.copyAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_copy = action
+            # cut
+            action = QtWidgets.QAction('Cut', self)
+            action.setShortcut(QtGui.QKeySequence.Cut)
+            action.setIcon(icons.icon(
+                'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
+            action.triggered.connect(self.cut)
+            self.copyAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_cut = action
+            # paste
+            action = QtWidgets.QAction('Paste', self)
+            action.setShortcut(QtGui.QKeySequence.Paste)
+            action.setIcon(icons.icon(
+                'edit-paste', ':/pyqode-icons/rc/edit-paste.png',
+                'fa.paste'))
+            action.triggered.connect(self.paste)
+            self.add_action(action)
+            self.action_paste = action
         # duplicate line
         action = QtWidgets.QAction('Duplicate line', self)
         action.setShortcut('Ctrl+D')
         action.triggered.connect(self.duplicate_line)
         self.add_action(action)
         self.action_duplicate_line = action
-        # delete
-        action = QtWidgets.QAction('Delete', self)
-        action.setShortcut(QtGui.QKeySequence.Delete)
-        action.setIcon(icons.icon(
-            'edit-delete', ':/pyqode-icons/rc/edit-delete.png', 'fa.remove'))
-        action.triggered.connect(self.delete)
-        self.add_action(action)
-        self.action_delete = action
-        self.add_separator()
-        # select all
-        action = QtWidgets.QAction('Select all', self)
-        action.setShortcut(QtGui.QKeySequence.SelectAll)
-        action.triggered.connect(self.selectAll)
-        self.add_action(action)
-        self.action_select_all = action
-        # separator
-        self.add_separator()
-        # indent
-        action = QtWidgets.QAction('Indent', self)
-        action.setShortcut('Tab')
-        action.setIcon(icons.icon(
-            'format-indent-more', ':/pyqode-icons/rc/format-indent-more.png',
-            'fa.indent'))
-        action.triggered.connect(self.indent)
-        self.add_action(action)
-        self.action_indent = action
-        # unindent
-        action = QtWidgets.QAction('Un-indent', self)
-        action.setShortcut('Shift+Tab')
-        action.setIcon(icons.icon(
-            'format-indent-less', ':/pyqode-icons/rc/format-indent-less.png',
-            'fa.dedent'))
-        action.triggered.connect(self.un_indent)
-        self.add_action(action)
-        self.action_un_indent = action
-        # separator
-        self.add_separator()
+        if create_standard_actions:
+            # delete
+            action = QtWidgets.QAction('Delete', self)
+            action.setShortcut(QtGui.QKeySequence.Delete)
+            action.setIcon(icons.icon(
+                'edit-delete', ':/pyqode-icons/rc/edit-delete.png',
+                'fa.remove'))
+            action.triggered.connect(self.delete)
+            self.add_action(action)
+            self.action_delete = action
+            self.add_separator()
+            # select all
+            action = QtWidgets.QAction('Select all', self)
+            action.setShortcut(QtGui.QKeySequence.SelectAll)
+            action.triggered.connect(self.selectAll)
+            self.add_action(action)
+            self.action_select_all = action
+            # separator
+            self.add_separator()
+            # indent
+            action = QtWidgets.QAction('Indent', self)
+            action.setShortcut('Tab')
+            action.setIcon(icons.icon(
+                'format-indent-more',
+                ':/pyqode-icons/rc/format-indent-more.png', 'fa.indent'))
+            action.triggered.connect(self.indent)
+            self.add_action(action)
+            self.action_indent = action
+            # unindent
+            action = QtWidgets.QAction('Un-indent', self)
+            action.setShortcut('Shift+Tab')
+            action.setIcon(icons.icon(
+                'format-indent-less',
+                ':/pyqode-icons/rc/format-indent-less.png', 'fa.dedent'))
+            action.triggered.connect(self.un_indent)
+            self.add_action(action)
+            self.action_un_indent = action
+            # separator
+            self.add_separator()
         # goto
         action = QtWidgets.QAction('Go to line', self)
         action.setShortcut('Ctrl+G')
