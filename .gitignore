@@ -42,12 +42,12 @@ test_file.txt
 
 *.tar.gz
 deb_dist
-*.usr
-*~
 /gpg_key
 
-# rope files
-globalnames
-history
-objectdb
+
+# gedit temp files
+*~
+
+# hackedit project files
+.hackedit
 
