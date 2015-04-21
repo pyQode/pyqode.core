@@ -79,22 +79,22 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
         self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
-        # self.filterProxyModel.dynamicSortFilter = True
 
     def setModel(self, model):
         self.source_model = model
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
         self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
-        # self.filterProxyModel.dynamicSortFilter = True
         self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.setSourceModel(self.source_model)
         super(SubsequenceCompleter, self).setModel(self.filterProxyModel)
+        self.filterProxyModel.invalidate()
         self.filterProxyModel.sort(0)
 
     def update_model(self):
-        self.filterProxyModel.set_prefix(self.local_completion_prefix)
-        self.filterProxyModel.invalidate()  # force sorting/filtering
+        if self.completionCount() or len(self.local_completion_prefix) <= 1:
+            self.filterProxyModel.set_prefix(self.local_completion_prefix)
+            self.filterProxyModel.invalidate()  # force sorting/filtering
         if self.completionCount() > 1:
             self.filterProxyModel.sort(0)
 
