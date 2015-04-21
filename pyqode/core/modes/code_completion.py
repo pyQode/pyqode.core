@@ -41,6 +41,16 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
 
     def filterAcceptsRow(self, row, _):
         completion = self.sourceModel().data(self.sourceModel().index(row, 0))
+        if len(completion) < len(self.prefix):
+            return False
+        if len(self.prefix) == 1:
+            try:
+                rank = completion.index(self.prefix)
+                self.sourceModel().setData(
+                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
+                return self.prefix in completion
+            except ValueError:
+                return False
         for i, patterns in enumerate(zip(self.filter_patterns,
                                          self.sort_patterns)):
             pattern, sort_pattern = patterns
@@ -69,33 +79,28 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
         self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
-        self.filterProxyModel.dynamicSortFilter = True
-        self.usingOriginalModel = False
+        # self.filterProxyModel.dynamicSortFilter = True
 
     def setModel(self, model):
         self.source_model = model
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
         self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
-        self.filterProxyModel.dynamicSortFilter = True
+        # self.filterProxyModel.dynamicSortFilter = True
         self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.setSourceModel(self.source_model)
         super(SubsequenceCompleter, self).setModel(self.filterProxyModel)
-        self.usingOriginalModel = True
         self.filterProxyModel.sort(0)
 
     def update_model(self):
-        if not self.usingOriginalModel:
-            self.filterProxyModel.setSourceModel(self.source_model)
         self.filterProxyModel.set_prefix(self.local_completion_prefix)
         self.filterProxyModel.invalidate()  # force sorting/filtering
-        self.filterProxyModel.sort(0)
+        if self.completionCount() > 1:
+            self.filterProxyModel.sort(0)
 
     def splitPath(self, path):
         self.local_completion_prefix = path
         self.update_model()
-        if self.filterProxyModel.rowCount() == 0:
-            self.usingOriginalModel = False
         return ['']
 
 
