@@ -45,3 +45,9 @@ deb_dist
 *.usr
 *~
 /gpg_key
+
+# rope files
+globalnames
+history
+objectdb
+

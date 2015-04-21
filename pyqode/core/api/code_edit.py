@@ -967,16 +967,17 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :return: QMenu
         """
         mnu = QtWidgets.QMenu()
-        mnu.addActions(self._actions)
-        mnu.addSeparator()
         for menu in self._menus:
             mnu.addMenu(menu)
+        mnu.addSeparator()
+        mnu.addActions(self._actions)
         return mnu
 
     def _show_context_menu(self, point):
         """ Shows the context menu """
         self._mnu = self.get_context_menu()
-        self._mnu.popup(self.mapToGlobal(point))
+        if len(self._mnu.actions()) > 1:
+            self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
         """ Sets show white spaces flag """
