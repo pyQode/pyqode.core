@@ -250,7 +250,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}
-        self._show_tooltips = False
+        self._show_tooltips = True
         self._request_id = self._last_request_id = 0
 
     def clone_settings(self, original):
@@ -276,6 +276,8 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
+        self._completer.highlighted.connect(
+                self._display_completion_tooltip)
 
     def on_install(self, editor):
         self._create_completer()
@@ -293,14 +295,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             self.editor.focused_in.connect(self._on_focus_in)
             self.editor.key_pressed.connect(self._on_key_pressed)
             self.editor.post_key_pressed.connect(self._on_key_released)
-            self._completer.highlighted.connect(
-                self._display_completion_tooltip)
         else:
             self.editor.focused_in.disconnect(self._on_focus_in)
             self.editor.key_pressed.disconnect(self._on_key_pressed)
             self.editor.post_key_pressed.disconnect(self._on_key_released)
-            self._completer.highlighted.disconnect(
-                self._display_completion_tooltip)
 
     #
     # Slots
