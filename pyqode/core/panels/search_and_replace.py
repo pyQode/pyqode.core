@@ -118,7 +118,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                     pass
 
     def __init__(self):
-        Panel.__init__(self)
+        Panel.__init__(self, dynamic=True)
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)

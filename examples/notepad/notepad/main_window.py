@@ -100,6 +100,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def setup_mnu_panels(self, editor):
         for panel in editor.panels:
+            if panel.dynamic:
+                continue
             a = QtWidgets.QAction(self.menuModes)
             a.setText(panel.name)
             a.setCheckable(True)
