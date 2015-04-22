@@ -280,7 +280,9 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                     rm = self.save_widget(widget)
                 if rm:
                     self.remove_tab(index)
-                    widget.deleteLater()
+                    widget.close()
+                    widget.setParent(None)
+                    del widget
 
     @staticmethod
     def _close_widget(widget):
@@ -734,25 +736,6 @@ class CodeEditTabWidget(BaseTabWidget):
 
     def _get_widget_path(self, editor):
         return editor.file.path
-
-    def _restore_original(self, clones):
-        super(CodeEditTabWidget, self)._restore_original(clones)
-        try:
-            first = clones[0]
-        except (IndexError, TypeError):
-            # empty or None
-            pass
-        else:
-            try:
-                # remove original highlighter (otherwise we get a runtime error
-                # saying the original c++ object has been deleted)
-                new_sh = first.syntax_highlighter.__class__(
-                    first.document(), color_scheme=ColorScheme(
-                        first.syntax_highlighter.color_scheme.name))
-                first.modes.remove(first.syntax_highlighter.name)
-                first.modes.append(new_sh)
-            except (AttributeError, TypeError):
-                pass
 
 
 class SplittableCodeEditTabWidget(SplittableTabWidget):
