@@ -491,6 +491,14 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         #: Reference to the tree view
         self.tree_view = None
 
+    def addAction(self, *args):
+        action = super().addAction(*args)
+        self.tree_view.addAction(action)
+        if action is None:
+            action = args[0]
+        action.setShortcutContext(QtCore.Qt.WidgetShortcut)
+        return action
+
     def init_actions(self):
         # New - submenu
         self.menu_new = self.addMenu("&New")
@@ -548,7 +556,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.addSeparator()
         # Rename
         self.action_rename = QtWidgets.QAction('&Rename', self)
-        self.action_rename.setShortcut('Shift+F2')
+        self.action_rename.setShortcut('F2')
         self.action_rename.triggered.connect(self._on_rename_triggered)
         self.addAction(self.action_rename)
         # Delete
