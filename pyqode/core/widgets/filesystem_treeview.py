@@ -492,7 +492,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.tree_view = None
 
     def addAction(self, *args):
-        action = super().addAction(*args)
+        action = super(FileSystemContextMenu, self).addAction(*args)
         self.tree_view.addAction(action)
         if action is None:
             action = args[0]
