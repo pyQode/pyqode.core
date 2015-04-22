@@ -49,10 +49,10 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
                 if self.case == QtCore.Qt.CaseInsensitive:
                     completion = completion.lower()
                     prefix = self.prefix.lower()
-                rank = completion.index(self.prefix)
+                rank = completion.index(prefix)
                 self.sourceModel().setData(
                     self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
-                return self.prefix in completion
+                return prefix in completion
             except ValueError:
                 return False
         for i, patterns in enumerate(zip(self.filter_patterns,
