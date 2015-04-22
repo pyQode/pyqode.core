@@ -45,6 +45,10 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
             return False
         if len(self.prefix) == 1:
             try:
+                prefix = self.prefix
+                if self.case == QtCore.Qt.CaseInsensitive:
+                    completion = completion.lower()
+                    prefix = self.prefix.lower()
                 rank = completion.index(self.prefix)
                 self.sourceModel().setData(
                     self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
@@ -255,7 +259,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}
-        self._show_tooltips = True
+        self._show_tooltips = False
         self._request_id = self._last_request_id = 0
 
     def clone_settings(self, original):
