@@ -6,6 +6,7 @@ import logging
 import mimetypes
 import os
 import uuid
+import sys
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api import utils, CodeEdit, ColorScheme
 from pyqode.core.dialogs import DlgUnsavedFiles
@@ -39,10 +40,14 @@ class DraggableTabBar(TabBar):
             self._pos = event.pos()  # _pos is a QPoint defined in the header
         super(DraggableTabBar, self).mousePressEvent(event)
 
-    def mouseMoveEvent(self, event):
-        # update tooltip with the tooltip of the tab under mouse cursor.
+    def widget_under_mouse(self, event):
         index = self.tabAt(event.pos())
         tab = self.parent().widget(index)
+        return tab
+
+    def mouseMoveEvent(self, event):
+        # update tooltip with the tooltip of the tab under mouse cursor.
+        tab = self.widget_under_mouse(event)
         if tab is not None:
             tooltip = tab.toolTip()
             if not tooltip:
@@ -63,7 +68,7 @@ class DraggableTabBar(TabBar):
 
         drag = QtGui.QDrag(self)
         data = QtCore.QMimeData()
-        data.tab = self.parent().currentWidget()
+        data.tab = tab
         data.widget = self
         # a crude way to distinguish tab-reodering drags from other drags
         data.setData("action", "tab-reordering")
