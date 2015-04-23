@@ -6,7 +6,6 @@ import logging
 import mimetypes
 import os
 import uuid
-import sys
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api import utils, CodeEdit, ColorScheme
 from pyqode.core.dialogs import DlgUnsavedFiles
