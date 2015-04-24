@@ -412,6 +412,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             :attr:`show_menu_enabled` to False.
         """
         super(CodeEdit, self).__init__(parent)
+        self.installEventFilter(self)
         self.clones = []
         self._show_ctx_mnu = True
         self._default_font_size = 10
@@ -799,6 +800,28 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         perform the actual un-indentation.
         """
         self.unindent_requested.emit()
+
+    def eventFilter(self, obj, event):
+        if obj == self and event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == QtCore.Qt.Key_X and \
+                    int(event.modifiers()) == QtCore.Qt.ControlModifier:
+                self.cut()
+                return True
+            if event.key() == QtCore.Qt.Key_C and \
+                    int(event.modifiers()) == QtCore.Qt.ControlModifier:
+                self.copy()
+                return True
+        return False
+
+    def cut(self):
+        if not self.textCursor().hasSelection():
+            TextHelper(self).select_whole_line()
+        super().cut()
+
+    def copy(self):
+        if not self.textCursor().hasSelection():
+            TextHelper(self).select_whole_line()
+        super().copy()
 
     def resizeEvent(self, e):
         """
