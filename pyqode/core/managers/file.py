@@ -226,6 +226,8 @@ class FileManager(Manager):
                 content = file.read()
                 if self.autodetect_eol:
                     self._eol = file.newlines
+                    if isinstance(self._eol, tuple):
+                        self._eol = self._eol[0]
                     if self._eol is None:
                         # empty file has no newlines
                         self._eol = self.EOL.string(self.preferred_eol)
