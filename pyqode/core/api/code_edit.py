@@ -823,10 +823,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if not self.textCursor().hasSelection():
             TextHelper(self).select_whole_line()
         super().copy()
-        TextHelper(self).clear_selection()
-        tc = self.textCursor()
-        tc.setPosition(pos)
-        self.setTextCursor(tc)
 
     def resizeEvent(self, e):
         """
