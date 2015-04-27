@@ -141,8 +141,6 @@ class GenericCodeEdit(CodeEdit):
         except (AttributeError, IndexError):
             mimetype = ''
 
-        print(mimetype)
-
         if mimetype in self._char_based_mimetypes:
             self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
         else:
