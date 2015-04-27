@@ -318,14 +318,6 @@ class TextHelper(object):
         text_cursor.insertText(new_text)
         editor.setTextCursor(text_cursor)
 
-    def remove_current_line(self):
-        editor = self._editor
-        text_cursor = editor.textCursor()
-        text_cursor.select(text_cursor.LineUnderCursor)
-        text_cursor.removeSelectedText()
-        text_cursor.deletePreviousChar()
-        editor.setTextCursor(text_cursor)
-
     def remove_last_line(self):
         """
         Removes the last line of the document.
