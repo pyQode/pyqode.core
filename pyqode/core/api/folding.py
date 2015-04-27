@@ -155,6 +155,32 @@ class IndentFoldDetector(FoldDetector):
         return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
 
+class CharBasedFoldDetector(FoldDetector):
+    """
+    Fold detector based on trigger charachters (e.g. a { increase fold level
+    and } decrease fold level).
+    """
+    def __init__(self, open_chars=('{'), close_chars= ('}')):
+        super(CharBasedFoldDetector, self).__init__()
+        self.open_chars = open_chars
+        self.close_chars = close_chars
+
+    def detect_fold_level(self, prev_block, block):
+        if prev_block:
+            prev_text = prev_block.text().strip()
+        else:
+            prev_text = ''
+        text = block.text().strip()
+        if text in self.open_chars:
+            return TextBlockHelper.get_fold_lvl(prev_block) + 1
+        if prev_text.endswith(self.open_chars) and prev_text not in \
+                self.open_chars:
+            return TextBlockHelper.get_fold_lvl(prev_block) + 1
+        if self.close_chars in prev_text:
+            return TextBlockHelper.get_fold_lvl(prev_block) - 1
+        return TextBlockHelper.get_fold_lvl(prev_block)
+
+
 class FoldScope(object):
     """
     Utility class for manipulating fold-able code scope (fold/unfold,

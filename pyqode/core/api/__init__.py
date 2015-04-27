@@ -17,12 +17,14 @@ from .utils import get_block_symbol_data
 from .utils import DelayJobRunner
 from .folding import FoldDetector
 from .folding import IndentFoldDetector
+from .folding import CharBasedFoldDetector
 from .folding import FoldScope
 
 
 __all__ = [
     'convert_to_codec_key',
     'get_block_symbol_data',
+    'CharBasedFoldDetector',
     'CodeEdit',
     'ColorScheme',
     'DelayJobRunner',

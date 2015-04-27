@@ -10,7 +10,7 @@ This module contains core code edits:
 import sys
 from pyqode.core.backend import server
 from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
-    IndentFoldDetector, ColorScheme
+    CharBasedFoldDetector, IndentFoldDetector, ColorScheme
 
 
 class TextCodeEdit(CodeEdit):
@@ -86,6 +86,17 @@ class GenericCodeEdit(CodeEdit):
     # generic
     mimetypes = []
 
+    #: the list of mimetypes that use char based fold detector
+    _char_based_mimetypes = [
+        'text/x-php',
+        'text/x-c++hdr',
+        'text/x-c++src',
+        'text/x-chdr',
+        'text/x-csrc',
+        'text/x-csharp',
+        'application/javascript'
+    ]
+
     def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
                  create_default_actions=False, color_scheme='qt',
@@ -117,9 +128,6 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
-
-        self.syntax_highlighter.fold_detector = IndentFoldDetector()
-
         self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
 
     def setPlainText(self, txt, mime_type='', encoding=''):
@@ -128,6 +136,18 @@ class GenericCodeEdit(CodeEdit):
         if encoding is None:
             encoding = self.file.encoding
         self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+        try:
+            mimetype = self.syntax_highlighter._lexer.mimetypes[0]
+        except (AttributeError, IndexError):
+            mimetype = ''
+
+        print(mimetype)
+
+        if mimetype in self._char_based_mimetypes:
+            self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
+        else:
+            self.syntax_highlighter.fold_detector = IndentFoldDetector()
+
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
 
     def clone(self):
