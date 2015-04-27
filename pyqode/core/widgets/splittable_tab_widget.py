@@ -127,6 +127,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         tab_bar.tab_move_request.connect(self._on_tab_move_request)
         self.setTabBar(tab_bar)
         self.setAcceptDrops(True)
+        self.setUsesScrollButtons(True)
 
         #: A list of additional context menu actions
         self.context_actions = []
