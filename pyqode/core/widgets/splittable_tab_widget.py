@@ -9,6 +9,7 @@ import uuid
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api import utils, CodeEdit, ColorScheme
 from pyqode.core.dialogs import DlgUnsavedFiles
+from pyqode.core._forms import popup_open_files_ui
 from .tab_bar import TabBar
 from .code_edits import GenericCodeEdit, TextCodeEdit
 
@@ -398,6 +399,52 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         super(BaseTabWidget, self).addTab(tab, *args)
 
 
+class OpenFilesPopup(QtWidgets.QDialog):
+    triggered = QtCore.Signal(str)
+
+    def __init__(self, *args):
+        super(OpenFilesPopup, self).__init__(*args)
+        self.ui = popup_open_files_ui.Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.listWidget.activated.connect(self._on_item_activated)
+
+    def set_filenames(self, filenames):
+        new_count = 0
+        curated_filenames = []
+        for filename in filenames:
+            if not filename:
+                filename = 'New document %d.txt' % (new_count + 1)
+                new_count += 1
+            curated_filenames.append(filename)
+        self._filenames = sorted(
+            curated_filenames, key=lambda x:
+            QtCore.QFileInfo(x).fileName().lower())
+        self.ui.listWidget.clear()
+        icon_provider = SplittableCodeEditTabWidget.icon_provider_klass()
+        for path in self._filenames:
+            item = QtWidgets.QListWidgetItem(self.ui.listWidget)
+            finfo = QtCore.QFileInfo(path)
+            filename = finfo.fileName()
+            if finfo.exists():
+                icon = icon_provider.icon(finfo)
+                filename += ' (%s)' % path
+            else:
+                icon = icon_provider.icon(icon_provider.File)
+            item.setText(filename)
+            item.setIcon(icon)
+            item.setData(QtCore.Qt.UserRole, path)
+            self.ui.listWidget.addItem(item)
+
+    def _on_item_activated(self, item):
+        self.hide()
+        self.triggered.emit(item.data(QtCore.Qt.UserRole))
+
+    def show(self):
+        super(OpenFilesPopup, self).show()
+        self.ui.listWidget.setFocus()
+        self.ui.listWidget.setCurrentRow(0)
+
+
 class SplittableTabWidget(QtWidgets.QSplitter):
     """
     A splittable tab widget. The widget is implemented as a splitter which
@@ -433,8 +480,34 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     #: Reference to the widget under the tab bar menu
     tab_under_menu = None
 
-    def __init__(self, parent=None, root=True):
+    @property
+    def popup_shortcut(self):
+        """
+        Gets/sets the open files popup shortcut (ctrl+t by default).
+        """
+        if hasattr(self, '_action_popup'):
+            return self._shortcut
+        return None
+
+    @popup_shortcut.setter
+    def popup_shortcut(self, value):
+        if hasattr(self, '_action_popup'):
+            self._shortcut = value
+            self._action_popup.setShortcut(self._shortcut)
+
+    def __init__(self, parent=None, root=True, create_popup=True):
         super(SplittableTabWidget, self).__init__(parent)
+        if root:
+            self._action_popup = QtWidgets.QAction(self)
+            self._action_popup.setShortcutContext(QtCore.Qt.WindowShortcut)
+            self._shortcut = 'Ctrl+T'
+            self._action_popup.setShortcut(self._shortcut)
+            self._action_popup.triggered.connect(self._show_popup)
+            self.addAction(self._action_popup)
+            self.popup = OpenFilesPopup(QtWidgets.qApp.activeWindow())
+            self.popup.setWindowFlags(
+                QtCore.Qt.Popup | QtCore.Qt.FramelessWindowHint)
+            self.popup.triggered.connect(self._on_popup_triggered)
         self.child_splitters = []
         self.main_tab_widget = self.tab_widget_klass(self)
         self.main_tab_widget.last_tab_closed.connect(
@@ -487,6 +560,36 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         tab._original_tab_widget = self
         self._tabs.append(tab)
         self._on_focus_changed(None, tab)
+
+    def _on_popup_triggered(self, path):
+        new_count = 0
+        for w in self.widgets():
+            if w.file.path == path:
+                index = w.parent_tab_widget.indexOf(w)
+                w.parent_tab_widget.setCurrentIndex(index)
+                break
+            elif w.file.path == '':
+                # New document
+                fpath = 'New document %d.txt' % (new_count + 1)
+                if fpath == path:
+                    index = w.parent_tab_widget.indexOf(w)
+                    w.parent_tab_widget.setCurrentIndex(index)
+                    break
+                new_count += 1
+
+    def _show_popup(self):
+        parent_pos = self.main_tab_widget.pos()
+        parent_size = self.main_tab_widget.size()
+        size = self.popup.size()
+        x, y = parent_pos.x(), parent_pos.y()
+        pw, ph = parent_size.width(), parent_size.height()
+        w = size.width()
+        x += pw/2 - w/2
+        y += ph/10
+        self.popup.move(self.mapToGlobal(QtCore.QPoint(x, y)))
+        self.popup.set_filenames(
+            [editor.file.path for editor in self.widgets()])
+        self.popup.show()
 
     def _make_splitter(self):
         splitter = None
