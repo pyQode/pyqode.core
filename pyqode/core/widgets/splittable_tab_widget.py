@@ -408,8 +408,8 @@ class OpenFilesPopup(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.ui.listWidget.activated.connect(self._on_item_activated)
         self.settings = QtCore.QSettings('pyQode', 'pyqode.core')
-        self.sort_enabled = self.settings.value(
-            'sortOpenFilesAlphabetically', False)
+        self.sort_enabled = bool(self.settings.value(
+            'sortOpenFilesAlphabetically', False))
         self.ui.checkBox.setChecked(self.sort_enabled)
         self.ui.checkBox.stateChanged.connect(self._on_sort_changed)
 
