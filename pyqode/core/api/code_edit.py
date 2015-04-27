@@ -816,13 +816,19 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def cut(self):
         if not self.textCursor().hasSelection():
             TextHelper(self).select_whole_line()
-        super().cut()
+        selected_text = self.textCursor().selectedText().strip()
+        if not selected_text:
+            TextHelper(self).remove_current_line()
+            cursor = self.textCursor()
+            cursor.movePosition(cursor.Right, cursor.MoveAnchor, 1)
+            self.setTextCursor(cursor)
+        else:
+            super(CodeEdit, self).cut()
 
     def copy(self):
-        pos = self.textCursor().position()
         if not self.textCursor().hasSelection():
             TextHelper(self).select_whole_line()
-        super().copy()
+        super(CodeEdit, self).copy()
 
     def resizeEvent(self, e):
         """
