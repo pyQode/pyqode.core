@@ -21,8 +21,12 @@ class Ui_Dialog(object):
         self.gridLayout_2 = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.listWidget = QtWidgets.QListWidget(self.groupBox)
+        self.listWidget.setProperty("isWrapping", True)
         self.listWidget.setObjectName("listWidget")
-        self.gridLayout_2.addWidget(self.listWidget, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.listWidget, 1, 0, 1, 1)
+        self.checkBox = QtWidgets.QCheckBox(self.groupBox)
+        self.checkBox.setObjectName("checkBox")
+        self.gridLayout_2.addWidget(self.checkBox, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
 
         self.retranslateUi(Dialog)
@@ -32,3 +36,4 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.groupBox.setTitle(_translate("Dialog", "Open files"))
+        self.checkBox.setText(_translate("Dialog", "Sort alphabetically"))

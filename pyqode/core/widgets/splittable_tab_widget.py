@@ -7,7 +7,7 @@ import mimetypes
 import os
 import uuid
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api import utils, CodeEdit, ColorScheme
+from pyqode.core.api import utils, CodeEdit
 from pyqode.core.dialogs import DlgUnsavedFiles
 from pyqode.core._forms import popup_open_files_ui
 from .tab_bar import TabBar
@@ -407,21 +407,31 @@ class OpenFilesPopup(QtWidgets.QDialog):
         self.ui = popup_open_files_ui.Ui_Dialog()
         self.ui.setupUi(self)
         self.ui.listWidget.activated.connect(self._on_item_activated)
+        self.settings = QtCore.QSettings('pyQode', 'pyqode.core')
+        self.sort_enabled = self.settings.value(
+            'sortOpenFilesAlphabetically', False)
+        self.ui.checkBox.setChecked(self.sort_enabled)
+        self.ui.checkBox.stateChanged.connect(self._on_sort_changed)
 
     def set_filenames(self, filenames):
-        new_count = 0
-        curated_filenames = []
-        for filename in filenames:
-            if not filename:
-                filename = 'New document %d.txt' % (new_count + 1)
-                new_count += 1
-            curated_filenames.append(filename)
-        self._filenames = sorted(
-            curated_filenames, key=lambda x:
-            QtCore.QFileInfo(x).fileName().lower())
+        def clean(filenames):
+            ret_val = []
+            new_count = 0
+            for filename in filenames:
+                if not filename:
+                    filename = 'New document %d.txt' % (new_count + 1)
+                    new_count += 1
+                ret_val.append(filename)
+            return ret_val
+
+        self._filenames = filenames
+        filenames = clean(filenames)
+        if self.sort_enabled:
+            filenames = sorted(filenames, key=lambda x:
+                               QtCore.QFileInfo(x).fileName().lower())
         self.ui.listWidget.clear()
         icon_provider = SplittableCodeEditTabWidget.icon_provider_klass()
-        for path in self._filenames:
+        for path in filenames:
             item = QtWidgets.QListWidgetItem(self.ui.listWidget)
             finfo = QtCore.QFileInfo(path)
             filename = finfo.fileName()
@@ -434,6 +444,12 @@ class OpenFilesPopup(QtWidgets.QDialog):
             item.setIcon(icon)
             item.setData(QtCore.Qt.UserRole, path)
             self.ui.listWidget.addItem(item)
+
+    def _on_sort_changed(self, *_):
+        self.sort_enabled = self.ui.checkBox.isChecked()
+        self.settings.setValue(
+            'sortOpenFilesAlphabetically', self.sort_enabled)
+        self.set_filenames(self._filenames)
 
     def _on_item_activated(self, item):
         self.hide()
