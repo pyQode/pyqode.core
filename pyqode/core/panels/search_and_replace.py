@@ -362,7 +362,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         current_occurences = self._current_occurrence()
         occurrences = self.get_occurences()
         if (current_occurences == -1 or
-                current_occurences == len(occurrences) - 1):
+                current_occurences >= len(occurrences) - 1):
             current_occurences = 0
         else:
             current_occurences += 1
