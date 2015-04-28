@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/colin/dev/pyqode/core/examples/notepad/forms/main_window.ui'
+# Form implementation generated from reading ui file '/Users/Colin/Documents/pyqode/core/examples/notepad/forms/main_window.ui'
 #
-# Created: Mon Nov 17 08:48:01 2014
-#      by: PyQt5 UI code generator 5.3.2
+# Created by: PyQt5 UI code generator 5.4.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -18,9 +17,15 @@ class Ui_MainWindow(object):
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.tabWidget = SplittableCodeEditTabWidget(self.centralwidget)
+        self.tabWidget.setOrientation(QtCore.Qt.Horizontal)
+        self.tabWidget.setObjectName("tabWidget")
+        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -39,6 +44,17 @@ class Ui_MainWindow(object):
         self.toolBar = QtWidgets.QToolBar(MainWindow)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.dockWidget = QtWidgets.QDockWidget(MainWindow)
+        self.dockWidget.setObjectName("dockWidget")
+        self.dockWidgetContents = QtWidgets.QWidget()
+        self.dockWidgetContents.setObjectName("dockWidgetContents")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.dockWidgetContents)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.treeView = FileSystemTreeView(self.dockWidgetContents)
+        self.treeView.setObjectName("treeView")
+        self.gridLayout_2.addWidget(self.treeView, 0, 0, 1, 1)
+        self.dockWidget.setWidget(self.dockWidgetContents)
+        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget)
         self.actionNew = QtWidgets.QAction(MainWindow)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icons/document-new.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -115,6 +131,7 @@ class Ui_MainWindow(object):
         self.menuPanels.setTitle(_translate("MainWindow", "Panels"))
         self.menu.setTitle(_translate("MainWindow", "?"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+        self.dockWidget.setWindowTitle(_translate("MainWindow", "Files"))
         self.actionNew.setText(_translate("MainWindow", "New"))
         self.actionNew.setShortcut(_translate("MainWindow", "Ctrl+N"))
         self.actionOpen.setText(_translate("MainWindow", "Open"))
@@ -131,5 +148,5 @@ class Ui_MainWindow(object):
         self.actionAbout.setText(_translate("MainWindow", "About"))
         self.actionAbout.setShortcut(_translate("MainWindow", "F1"))
 
-from pyqode.core.widgets import SplittableCodeEditTabWidget
+from pyqode.core.widgets import FileSystemTreeView, SplittableCodeEditTabWidget
 from . import resources_rc

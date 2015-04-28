@@ -34,7 +34,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -92,6 +92,21 @@
    <addaction name="separator"/>
    <addaction name="actionSave"/>
    <addaction name="actionSave_as"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>Files</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="FileSystemTreeView" name="treeView"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -214,6 +229,11 @@
    <extends>QSplitter</extends>
    <header>pyqode.core.widgets</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FileSystemTreeView</class>
+   <extends>QTreeView</extends>
+   <header>pyqode.core.widgets</header>
   </customwidget>
  </customwidgets>
  <resources>

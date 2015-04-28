@@ -34,32 +34,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.styles_group = None
 
     @QtCore.Slot(str)
-    def on_tree_view_activated(self, index):
-        path = self.tree_view.filePath(index)
+    def on_treeView_activated(self, index):
+        path = self.treeView.filePath(index)
         if os.path.isfile(path):
             self.open_file(path)
 
     def setup_treeview(self):
-        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal, self)
-
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.tabWidget = SplittableCodeEditTabWidget(self.centralwidget)
-        self.tabWidget.setOrientation(QtCore.Qt.Horizontal)
-        self.tabWidget.setObjectName("tabWidget")
-        self.tabWidget.dirty_changed.connect(self.actionSave.setEnabled)
-
-        self.tree_view = FileSystemTreeView()
-        self.tree_view.set_context_menu(FileSystemContextMenu())
-        self.tree_view.activated.connect(self.on_tree_view_activated)
+        self.treeView.activated.connect(self.on_treeView_activated)
         path = os.path.join(os.getcwd())
-        self.tree_view.set_root_path(path)
-        # tv.show()
-        # self.gridLayout.addWidget(self.tree_view, 0, 0)
-        self.splitter.addWidget(self.tree_view)
-        self.splitter.addWidget(self.tabWidget)
-        self.splitter.setSizes([20, 180])
-        self.gridLayout.addWidget(self.splitter, 0, 1, 1, 1)
+        self.treeView.set_root_path(path)
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
