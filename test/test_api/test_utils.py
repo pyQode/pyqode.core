@@ -97,11 +97,11 @@ def test_block_helper():
     #
     # Test fold trigger state
     #
-    assert utils.TextBlockHelper.get_fold_trigger_state(block) is False
-    utils.TextBlockHelper.set_fold_trigger_state(block, True)
-    assert utils.TextBlockHelper.get_fold_trigger_state(block) is True
-    utils.TextBlockHelper.set_fold_trigger_state(block, False)
-    assert utils.TextBlockHelper.get_fold_trigger_state(block) is False
+    assert utils.TextBlockHelper.is_collapsed(block) is False
+    utils.TextBlockHelper.set_collapsed(block, True)
+    assert utils.TextBlockHelper.is_collapsed(block) is True
+    utils.TextBlockHelper.set_collapsed(block, False)
+    assert utils.TextBlockHelper.is_collapsed(block) is False
     # ensure other values are intact
     assert utils.TextBlockHelper.is_fold_trigger(block) is True
     assert utils.TextBlockHelper.get_fold_lvl(block) == 1023

@@ -159,7 +159,7 @@ class TextHelper(object):
                 if not block.isVisible() or TextBlockHelper.is_fold_trigger(
                         block):
                     block = FoldScope.find_parent_scope(block)
-                    if TextBlockHelper.get_fold_trigger_state(block):
+                    if TextBlockHelper.is_collapsed(block):
                         folding_panel.toggle_fold_trigger(block)
             self._editor.setTextCursor(text_cursor)
         return text_cursor
@@ -962,9 +962,9 @@ class TextBlockHelper(object):
         block.setUserState(state)
 
     @staticmethod
-    def get_fold_trigger_state(block):
+    def is_collapsed(block):
         """
-        Gets the fold trigger state.
+        Checks if the block is expanded or collased.
 
         :param block: QTextBlock
         :return: False for an open trigger, True for for closed trigger
@@ -977,12 +977,12 @@ class TextBlockHelper(object):
         return bool(state & 0x08000000)
 
     @staticmethod
-    def set_fold_trigger_state(block, val):
+    def set_collapsed(block, val):
         """
-        Sets the fold trigger state.
+        Sets the fold trigger state (collapsed or expanded).
 
         :param block: The block to modify
-        :param val: The new trigger state (False = open, True = closed)
+        :param val: The new trigger state (True=collapsed, False=expanded)
         """
         if block is None:
             return

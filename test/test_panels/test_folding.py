@@ -61,7 +61,7 @@ def test_mouse_press(editor):
     toggle_fold_trigger(editor, 15, panel)
     block = editor.document().findBlockByNumber(14)
     assert TextBlockHelper.is_fold_trigger(block) is True
-    assert TextBlockHelper.get_fold_trigger_state(block) is True
+    assert TextBlockHelper.is_collapsed(block) is True
     block = block.next()
     while block.blockNumber() < 21:
         assert block.isVisible() is False
@@ -74,7 +74,7 @@ def test_mouse_press(editor):
     while block.blockNumber() < 27:
         if block.blockNumber() == 14:
             assert TextBlockHelper.is_fold_trigger(block) is True
-            assert TextBlockHelper.get_fold_trigger_state(block) is True
+            assert TextBlockHelper.is_collapsed(block) is True
         assert block.isVisible() is False
         block = block.next()
     # unfold it top level block
@@ -114,7 +114,7 @@ def test_collapse_all(editor):
         else:
             assert block.isVisible() is True
         if TextBlockHelper.is_fold_trigger(block):
-            assert TextBlockHelper.get_fold_trigger_state(block) is True
+            assert TextBlockHelper.is_collapsed(block) is True
         block = block.next()
 
 
@@ -130,5 +130,5 @@ def test_expand_all(editor):
     while block.blockNumber() < editor.document().blockCount() - 1:
         assert block.isVisible()
         if TextBlockHelper.is_fold_trigger(block):
-            assert TextBlockHelper.get_fold_trigger_state(block) is False
+            assert TextBlockHelper.is_collapsed(block) is False
         block = block.next()

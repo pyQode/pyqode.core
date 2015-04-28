@@ -232,7 +232,7 @@ class FoldingPanel(Panel):
         # Draw fold triggers
         for top_position, line_number, block in self.editor.visible_blocks:
             if TextBlockHelper.is_fold_trigger(block):
-                collapsed = TextBlockHelper.get_fold_trigger_state(block)
+                collapsed = TextBlockHelper.is_collapsed(block)
                 mouse_over = self._mouse_over_line == line_number
                 self._draw_fold_indicator(
                     top_position, mouse_over, collapsed, painter)
@@ -509,7 +509,7 @@ class FoldingPanel(Panel):
             self._clear_scope_decos()
             # highlight surrounding parent scopes with a darker color
             start, end = scope.get_range()
-            if not TextBlockHelper.get_fold_trigger_state(block):
+            if not TextBlockHelper.is_collapsed(block):
                 self._add_scope_decorations(block, start, end)
 
     def mouseMoveEvent(self, event):
@@ -658,17 +658,17 @@ class FoldingPanel(Panel):
         Override key press to select the current scope if the user wants
         to deleted a folded scope (without selecting it).
         """
-        keys = [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace]
-        if event.key() in keys:
-            c = self.editor.textCursor()
-            assert isinstance(c, QtGui.QTextCursor)
-            if c.hasSelection():
-                for deco in self._block_decos:
-                    if c.selectedText() == deco.cursor.selectedText():
-                        block = deco.block
-                        self._select_scope(block, c)
-                        event.accept()
-                        break
+        if event.text() or event.key() in [QtCore.Qt.Key_Backspace,
+                                           QtCore.Qt.Key_Delete,
+                                           QtCore.Qt.Key_Return]:
+            cursor = self.editor.textCursor()
+            block = self.editor.document().findBlock(cursor.position())
+            th = TextBlockHelper()
+            if th.is_fold_trigger(block) and th.is_collapsed(block):
+                self.toggle_fold_trigger(block)
+                if event.key() == QtCore.Qt.Key_Return:
+                    # don't process return, just expand tab
+                    event.setAccepted(True)
 
     @staticmethod
     def _show_previous_blank_lines(block):
@@ -732,7 +732,7 @@ class FoldingPanel(Panel):
             if trigger:
                 if lvl == 0:
                     self._show_previous_blank_lines(block)
-                TextBlockHelper.set_fold_trigger_state(block, True)
+                TextBlockHelper.set_collapsed(block, True)
             block.setVisible(lvl == 0)
             if block == last and block.text().strip() == '':
                 block.setVisible(True)
@@ -758,7 +758,7 @@ class FoldingPanel(Panel):
         """
         block = self.editor.document().firstBlock()
         while block.isValid():
-            TextBlockHelper.set_fold_trigger_state(block, False)
+            TextBlockHelper.set_collapsed(block, False)
             block.setVisible(True)
             block = block.next()
         self._clear_block_deco()

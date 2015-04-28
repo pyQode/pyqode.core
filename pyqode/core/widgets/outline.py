@@ -75,7 +75,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         block = item.data(0, QtCore.Qt.UserRole).block
         assert isinstance(item, QtWidgets.QTreeWidgetItem)
         item_state = not item.isExpanded()
-        block_state = TextBlockHelper.get_fold_trigger_state(block)
+        block_state = TextBlockHelper.is_collapsed(block)
         if item_state != block_state:
             self._updating = True
             self._folding_panel.toggle_fold_trigger(block)
@@ -156,7 +156,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             block_data.tree_item = ti
 
             if to_collapse is not None and \
-                    TextBlockHelper.get_fold_trigger_state(name.block):
+                    TextBlockHelper.is_collapsed(name.block):
                 to_collapse.append(ti)
 
             for ch in name.children:

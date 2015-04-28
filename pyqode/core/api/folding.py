@@ -20,7 +20,7 @@ def print_tree(editor, file=sys.stdout, print_blocks=False):
     block = editor.document().firstBlock()
     while block.isValid():
         trigger = TextBlockHelper().is_fold_trigger(block)
-        trigger_state = TextBlockHelper().get_fold_trigger_state(block)
+        trigger_state = TextBlockHelper().is_collapsed(block)
         lvl = TextBlockHelper().get_fold_lvl(block)
         visible = 'V' if block.isVisible() else 'I'
         if trigger:
@@ -112,12 +112,12 @@ class FoldDetector(object):
         if (prev and prev.isValid() and prev.text().strip() == '' and
                 TextBlockHelper.is_fold_trigger(prev)):
             # prev line has the correct trigger fold state
-            TextBlockHelper.set_fold_trigger_state(
-                current_block, TextBlockHelper.get_fold_trigger_state(
+            TextBlockHelper.set_collapsed(
+                current_block, TextBlockHelper.is_collapsed(
                     prev))
             # make empty line not a trigger
             TextBlockHelper.set_fold_trigger(prev, False)
-            TextBlockHelper.set_fold_trigger_state(prev, False)
+            TextBlockHelper.set_collapsed(prev, False)
 
     def detect_fold_level(self, prev_block, block):
         """
@@ -213,7 +213,7 @@ class FoldScope(object):
         Returns True if the block is collasped, False if it is expanded.
 
         """
-        return TextBlockHelper.get_fold_trigger_state(self._trigger)
+        return TextBlockHelper.is_collapsed(self._trigger)
 
     def __init__(self, block):
         """
@@ -264,7 +264,7 @@ class FoldScope(object):
         Folds the region.
         """
         start, end = self.get_range()
-        TextBlockHelper.set_fold_trigger_state(self._trigger, True)
+        TextBlockHelper.set_collapsed(self._trigger, True)
         block = self._trigger.next()
         while block.blockNumber() <= end and block.isValid():
             block.setVisible(False)
@@ -276,7 +276,7 @@ class FoldScope(object):
         """
         # set all direct child blocks which are not triggers to be visible
         self._trigger.setVisible(True)
-        TextBlockHelper.set_fold_trigger_state(self._trigger, False)
+        TextBlockHelper.set_collapsed(self._trigger, False)
         for block in self.blocks(ignore_blank_lines=False):
             block.setVisible(True)
         for region in self.child_regions():
