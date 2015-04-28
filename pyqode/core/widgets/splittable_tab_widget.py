@@ -34,6 +34,7 @@ class DraggableTabBar(TabBar):
         self._pos = QtCore.QPoint()
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
+        self.setElideMode(QtCore.Qt.ElideNone)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
