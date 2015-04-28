@@ -1158,6 +1158,6 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         return old, new
 
     def split(self, widget, orientation):
-        splitter = super().split(widget, orientation)
+        splitter = super(SplittableCodeEditTabWidget, self).split(widget, orientation)
         splitter.tab_bar_double_clicked.connect(
             self.tab_bar_double_clicked.emit)
