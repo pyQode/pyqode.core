@@ -152,8 +152,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         if path:
             editor = self.tabWidget.open_document(path)
-            editor.font_name = "Monaco"
-            editor.font_size = 13
             editor.cursorPositionChanged.connect(
                 self.on_cursor_pos_changed)
             self.recent_files_manager.open_file(path)
@@ -165,8 +163,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Add a new empty code editor to the tab widget
         """
         editor = self.tabWidget.create_new_document()
-        editor.font_name = "Monaco"
-        editor.font_size = 13
         editor.cursorPositionChanged.connect(self.on_cursor_pos_changed)
         self.refresh_color_scheme()
 
