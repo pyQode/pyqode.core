@@ -7,7 +7,6 @@ from __future__ import print_function
 
 import mimetypes
 import os
-import sys
 
 from pyqode.qt import QtCore
 from pyqode.qt import QtWidgets
@@ -16,9 +15,9 @@ from pyqode.core import api
 from pyqode.core import modes
 from pyqode.core import widgets
 
-from .editor import GenericCodeEdit
 from .forms.main_window_ui import Ui_MainWindow
 from pyqode.core.api import ColorScheme
+from pyqode.core.widgets import FileSystemTreeView, FileSystemContextMenu, SplittableCodeEditTabWidget
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -27,12 +26,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Load our UI (made in Qt Designer)
         self.setupUi(self)
         self.setup_recent_files_menu()
+        self.setup_treeview()
         self.setup_actions()
         self.setup_mimetypes()
         self.setup_status_bar_widgets()
         self.on_current_tab_changed(None)
         self.styles_group = None
+
+    @QtCore.Slot(str)
+    def on_tree_view_activated(self, index):
+        path = self.tree_view.filePath(index)
+        if os.path.isfile(path):
+            self.open_file(path)
+
+    def setup_treeview(self):
+        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal, self)
+
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.tabWidget = SplittableCodeEditTabWidget(self.centralwidget)
+        self.tabWidget.setOrientation(QtCore.Qt.Horizontal)
+        self.tabWidget.setObjectName("tabWidget")
         self.tabWidget.dirty_changed.connect(self.actionSave.setEnabled)
+
+        self.tree_view = FileSystemTreeView()
+        self.tree_view.set_context_menu(FileSystemContextMenu())
+        self.tree_view.activated.connect(self.on_tree_view_activated)
+        path = os.path.join(os.getcwd())
+        self.tree_view.set_root_path(path)
+        # tv.show()
+        # self.gridLayout.addWidget(self.tree_view, 0, 0)
+        self.splitter.addWidget(self.tree_view)
+        self.splitter.addWidget(self.tabWidget)
+        self.splitter.setSizes([20, 180])
+        self.gridLayout.addWidget(self.splitter, 0, 1, 1, 1)
 
     def setup_status_bar_widgets(self):
         self.lbl_filename = QtWidgets.QLabel()
@@ -100,8 +127,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def setup_mnu_panels(self, editor):
         for panel in editor.panels:
-            if panel.dynamic:
-                continue
             a = QtWidgets.QAction(self.menuModes)
             a.setText(panel.name)
             a.setCheckable(True)
@@ -144,6 +169,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         if path:
             editor = self.tabWidget.open_document(path)
+            editor.font_name = "Monaco"
+            editor.font_size = 13
             editor.cursorPositionChanged.connect(
                 self.on_cursor_pos_changed)
             self.recent_files_manager.open_file(path)
@@ -155,6 +182,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Add a new empty code editor to the tab widget
         """
         editor = self.tabWidget.create_new_document()
+        editor.font_name = "Monaco"
+        editor.font_size = 13
         editor.cursorPositionChanged.connect(self.on_cursor_pos_changed)
         self.refresh_color_scheme()
 
