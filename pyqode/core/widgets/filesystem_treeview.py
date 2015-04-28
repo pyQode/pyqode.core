@@ -169,7 +169,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self._fs_model_source.directoryLoaded.connect(self._on_path_loaded)
 
     def _on_path_loaded(self, path):
-        if path != self.root_path:
+        if os.path.normpath(path) != self.root_path:
             return
         self.setModel(self._fs_model_proxy)
         file_root_index = self._fs_model_source.setRootPath(self.root_path)
