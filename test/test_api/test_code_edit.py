@@ -347,3 +347,32 @@ def test_clone(editor):
     assert len(editor.clones) == 1
     assert new in editor.clones
     assert editor.document() == new.document()
+
+
+def test_cut_empty_line(editor):
+    assert isinstance(editor, CodeEdit)
+    editor.setPlainText('''
+Line 1
+Line 2
+Line 3''', '', '')
+    helper = TextHelper(editor)
+
+    # eat empty line
+    helper.goto_line(0)
+    assert helper.line_count() == 4
+    editor.cut()
+    assert helper.line_count() == 3
+
+
+def test_cut_no_selection(editor):
+    assert isinstance(editor, CodeEdit)
+    editor.setPlainText('''Line 1
+Line 2
+Line 3''', '', '')
+    helper = TextHelper(editor)
+
+    # eat empty line
+    helper.goto_line(0)
+    assert helper.line_count() == 3
+    editor.cut()
+    assert helper.line_count() == 2
