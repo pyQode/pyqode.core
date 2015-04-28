@@ -2,12 +2,14 @@
 Tests the code completion mode
 """
 import functools
+import pytest
 
-from pyqode.qt import QtCore
+from pyqode.qt import QtCore, QtGui
 from pyqode.qt.QtTest import QTest
 
 from pyqode.core.api import TextHelper
 from pyqode.core import modes
+from pyqode.core.modes.code_completion import SubsequenceCompleter
 from ..helpers import server_path, wait_for_connected
 from ..helpers import ensure_visible
 
@@ -191,17 +193,16 @@ def test_insert_completions(editor):
     QTest.qWait(100)
 
 
-# this feature has been removed.
-# @ensure_empty
-# @ensure_connected
-# def test_show_completion_with_tooltip(editor):
-#     mode = get_mode(editor)
-#     mode.show_tooltips = True
-#     mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
-#     mode._display_completion_tooltip('test')
-#     mode._display_completion_tooltip('spam')
-#     mode.show_tooltips = False
-#     mode._display_completion_tooltip('test')
+@ensure_empty
+@ensure_connected
+def test_show_completion_with_tooltip(editor):
+    mode = get_mode(editor)
+    mode.show_tooltips = True
+    mode._show_completions([{'name': 'test', 'tooltip': 'test desc'}])
+    mode._display_completion_tooltip('test')
+    mode._display_completion_tooltip('spam')
+    mode.show_tooltips = False
+    mode._display_completion_tooltip('test')
 
 
 @ensure_empty
@@ -210,3 +211,42 @@ def test_show_completion_with_icon(editor):
     mode = get_mode(editor)
     mode._show_completions([{'name': 'test',
                              'icon': ':/pyqode-icons/rc/edit-undo.png'}])
+
+
+@pytest.mark.parametrize('case', [
+    QtCore.Qt.CaseSensitive, QtCore.Qt.CaseInsensitive])
+def test_subsequence_completer(case):
+    completer = SubsequenceCompleter()
+    words = ['actionA', 'actionB', 'setMySuperAction',
+             'geTToolTip', 'setStatusTip', 'seTToolTip']
+    model = QtGui.QStandardItemModel()
+    for word in words:
+        item = QtGui.QStandardItem()
+        item.setData(word, QtCore.Qt.DisplayRole)
+        model.appendRow(item)
+    completer.setCaseSensitivity(case)
+    completer.setModel(model)
+    if case == QtCore.Qt.CaseInsensitive:
+        completer.setCompletionPrefix('tip')
+        completer.update_model()
+        assert completer.completionCount() == 3
+        completer.setCompletionPrefix('settip')
+        completer.update_model()
+        assert completer.completionCount() == 2
+        completer.update_model()
+        completer.setCompletionPrefix('action')
+        completer.update_model()
+        assert completer.completionCount() == 3
+    else:
+        completer.setCompletionPrefix('tip')
+        completer.update_model()
+        assert completer.completionCount() == 1  # setStatusTip
+        completer.setCompletionPrefix('Tip')
+        completer.update_model()
+        assert completer.completionCount() == 3  # all word ending with Tip
+        completer.setCompletionPrefix('setTip')
+        completer.update_model()
+        assert completer.completionCount() == 1  # setStatusTip
+        completer.setCompletionPrefix('action')
+        completer.update_model()
+        assert completer.completionCount() == 2
