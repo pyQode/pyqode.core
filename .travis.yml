@@ -71,28 +71,30 @@ install:
   - sudo make install
   - popd
   # PyQt4
-  - if [ "$QT_API" -eq "pyqt4"]; then
-        if [ ! -d "PyQt-x11-gpl-4.11.3" ]; then
-            tar xzf /downloads/pyqt4.tar.gz --keep-newer-files;
-            pushd PyQt-x11-gpl-4.11.3;
-            python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtNetwork -e QtTest;
-            make;
-            popd;
-        fi;
-    pushd PyQt-x11-gpl-4.11.3;
-    sudo make install;
-    popd;
+  # if not cached and needed, build pyqt4 from source
+  - if [ "$QT_API" -eq "pyqt4"] && [ ! -d "PyQt-x11-gpl-4.11.3" ]; then
+        tar xzf /downloads/pyqt4.tar.gz --keep-newer-files;
+        pushd PyQt-x11-gpl-4.11.3;
+        python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtNetwork -e QtTest;
+        make;
+        popd;
     fi
-  # PyQt5
+  # install pyqt4 if needed
+  - if [ "$QT_API" -eq "pyqt4"]; then
+        pushd PyQt-x11-gpl-4.11.3;
+        sudo make install;
+        popd;
+    fi
+  # if not cached and needed, build pyqt5 from source
+  - source /opt/qt54/bin/qt54-env.sh
+  - if [ "$QT_API" -eq "pyqt5"] && [ ! -d "PyQt-gpl-5.4.1" ]; then
+        tar xzf /downloads/pyqt5.tar.gz --keep-newer-files;
+        pushd PyQt-gpl-5.4.1;
+        python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtWidgets -e QtNetwork -e QtTest;
+        make;
+        popd;
+  # install pyqt5 if needed
   - if [ "$QT_API" -eq "pyqt5"]; then
-        source /opt/qt54/bin/qt54-env.sh
-        if [ ! -d "PyQt-gpl-5.4.1" ]; then
-            tar xzf /downloads/pyqt5.tar.gz --keep-newer-files;
-            pushd PyQt-gpl-5.4.1;
-            python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtWidgets -e QtNetwork -e QtTest;
-            make;
-            popd;
-        fi;
         pushd PyQt-gpl-5.4.1;
         sudo make install;
         popd;
