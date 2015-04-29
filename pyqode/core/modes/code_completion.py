@@ -285,8 +285,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._completer.activated.connect(self._insert_completion)
         self._completer.highlighted.connect(
             self._on_selected_completion_changed)
-        self._completer.highlighted.connect(
-                self._display_completion_tooltip)
+        self._completer.highlighted.connect(self._display_completion_tooltip)
 
     def on_install(self, editor):
         self._create_completer()

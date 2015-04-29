@@ -603,8 +603,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         x, y = parent_pos.x(), parent_pos.y()
         pw, ph = parent_size.width(), parent_size.height()
         w = size.width()
-        x += pw/2 - w/2
-        y += ph/10
+        x += pw / 2 - w / 2
+        y += ph / 10
         self.popup.move(self.mapToGlobal(QtCore.QPoint(x, y)))
         self.popup.set_filenames(
             [editor.file.path for editor in self.widgets()])
@@ -1158,6 +1158,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         return old, new
 
     def split(self, widget, orientation):
-        splitter = super(SplittableCodeEditTabWidget, self).split(widget, orientation)
+        splitter = super(SplittableCodeEditTabWidget, self).split(
+            widget, orientation)
         splitter.tab_bar_double_clicked.connect(
             self.tab_bar_double_clicked.emit)
