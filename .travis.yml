@@ -78,7 +78,7 @@ install:
             python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtNetwork -e QtTest;
             make;
             popd;
-        fi
+        fi;
     pushd PyQt-x11-gpl-4.11.3;
     sudo make install;
     popd;
@@ -92,7 +92,7 @@ install:
             python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtWidgets -e QtNetwork -e QtTest;
             make;
             popd;
-        fi
+        fi;
         pushd PyQt-gpl-5.4.1;
         sudo make install;
         popd;
