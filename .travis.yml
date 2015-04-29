@@ -29,15 +29,16 @@ matrix:
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  # Cached Downloads
   - sudo mkdir -p /downloads
   - sudo chmod a+rw /downloads
-  - if [ ! -f /downloads/sip.tar.gz ];   then curl -L -o /downloads/sip.tar.gz http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.7/sip-4.16.7.tar.gz; fi
-  - if [ ! -f /downloads/pyqt4.tar.gz ]; then curl -L -o /downloads/pyqt4.tar.gz http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz; fi
-  - if [ ! -f /downloads/pyqt5.tar.gz ]; then curl -L -o /downloads/pyqt5.tar.gz http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4.1/PyQt-gpl-5.4.1.tar.gz; fi
+  - curl -L -o /downloads/sip.tar.gz http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.7/sip-4.16.7.tar.gz
+  - curl -L -o /downloads/pyqt4.tar.gz http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt-x11-gpl-4.11.3.tar.gz
+  - curl -L -o /downloads/pyqt5.tar.gz http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4.1/PyQt-gpl-5.4.1.tar.gz
   # Builds
-  - sudo mkdir -p /builds
-  - sudo chmod a+rw /builds
+  - if [ ! -d "/builds" ]; then
+        sudo mkdir -p /builds;
+        sudo chmod a+rw /builds;
+    fi
 install:
   - pip install pytest
   - pip install pytest-cov
@@ -59,27 +60,46 @@ install:
   # Builds
   - pushd /builds
   # SIP
-  - tar xzf /downloads/sip.tar.gz --keep-newer-files
+  - if [ ! -d "sip-4.16.7" ]; then
+        tar xzf /downloads/sip.tar.gz --keep-newer-files;
+        pushd sip-4.16.7;
+        python configure.py;
+        make;
+        popd;
+    fi
   - pushd sip-4.16.7
-  - python configure.py
-  - make
   - sudo make install
   - popd
   # PyQt4
-  - tar xzf /downloads/pyqt4.tar.gz --keep-newer-files
-  - pushd PyQt-x11-gpl-4.11.3
-  - python configure.py -c --confirm-license --no-designer-plugin
-  - make
-  - sudo make install
-  - popd
-  # PyQt5
-  - source /opt/qt54/bin/qt54-env.sh  # switch to Qt5
-  - tar xzf /downloads/pyqt5.tar.gz --keep-newer-files
-  - pushd PyQt-gpl-5.4.1
-  - python configure.py -c --confirm-license --no-designer-plugin
-  - make
-  - sudo make install
-  - popd
+  # if not cached and needed, build pyqt4 from source
+  - if [ "$QT_API" = "pyqt4" ] && [ ! -d "PyQt-x11-gpl-4.11.3" ]; then
+        tar xzf /downloads/pyqt4.tar.gz --keep-newer-files;
+        pushd PyQt-x11-gpl-4.11.3;
+        python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtNetwork -e QtTest;
+        make;
+        popd;
+    fi
+  # install pyqt4 if needed
+  - if [ "$QT_API" = "pyqt4" ]; then
+        pushd PyQt-x11-gpl-4.11.3;
+        sudo make install;
+        popd;
+    fi
+  # if not cached and needed, build pyqt5 from source
+  - source /opt/qt54/bin/qt54-env.sh
+  - if [ "$QT_API" = "pyqt5" ] && [ ! -d "PyQt-gpl-5.4.1" ]; then
+        tar xzf /downloads/pyqt5.tar.gz --keep-newer-files;
+        pushd PyQt-gpl-5.4.1;
+        python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtWidgets -e QtNetwork -e QtTest;
+        make;
+        popd;
+    fi
+  # install pyqt5 if needed
+  - if [ "$QT_API" = "pyqt5" ]; then
+        pushd PyQt-gpl-5.4.1;
+        sudo make install;
+        popd;
+    fi
   # Builds Complete
   - popd
 script:
@@ -99,5 +119,5 @@ after_script:
     fi
 cache:
   directories:
-    - /downloads
+    - /builds
   apt: true
