@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/colin/Dev/pyqode.core/forms/popup_open_files.ui'
+# Form implementation generated from reading ui file '/home/colin/Documents/pyqode/core/forms/popup_open_files.ui'
 #
 # Created by: PyQt5 UI code generator 5.4.1
 #
@@ -21,7 +21,7 @@ class Ui_Dialog(object):
         self.gridLayout_2 = QtWidgets.QGridLayout(self.groupBox)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.listWidget = QtWidgets.QListWidget(self.groupBox)
-        self.listWidget.setProperty("isWrapping", True)
+        self.listWidget.setProperty("isWrapping", False)
         self.listWidget.setObjectName("listWidget")
         self.gridLayout_2.addWidget(self.listWidget, 1, 0, 1, 1)
         self.checkBox = QtWidgets.QCheckBox(self.groupBox)
