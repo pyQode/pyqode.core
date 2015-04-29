@@ -38,7 +38,7 @@
       <item row="1" column="0">
        <widget class="QListWidget" name="listWidget">
         <property name="isWrapping" stdset="0">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
