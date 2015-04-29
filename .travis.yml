@@ -71,7 +71,7 @@ install:
   - sudo make install
   - popd
   # PyQt4
-  - if [ "$QT_API" -eq "pyqt4"]
+  - if [ "$QT_API" -eq "pyqt4"]; then
         if [ ! -d "PyQt-x11-gpl-4.11.3" ]; then
             tar xzf /downloads/pyqt4.tar.gz --keep-newer-files;
             pushd PyQt-x11-gpl-4.11.3;
@@ -84,7 +84,7 @@ install:
     popd;
     fi
   # PyQt5
-  - if [ "$QT_API" -eq "pyqt5"]
+  - if [ "$QT_API" -eq "pyqt5"]; then
         source /opt/qt54/bin/qt54-env.sh
         if [ ! -d "PyQt-gpl-5.4.1" ]; then
             tar xzf /downloads/pyqt5.tar.gz --keep-newer-files;
