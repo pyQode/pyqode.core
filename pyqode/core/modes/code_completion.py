@@ -94,13 +94,17 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
         super(SubsequenceCompleter, self).setModel(self.filterProxyModel)
         self.filterProxyModel.invalidate()
         self.filterProxyModel.sort(0)
+        self._force_next_update = True
 
     def update_model(self):
-        if self.completionCount() or len(self.local_completion_prefix) <= 1:
+        if (self.completionCount() or
+                len(self.local_completion_prefix) <= 1 or
+                    self._force_next_update):
             self.filterProxyModel.set_prefix(self.local_completion_prefix)
             self.filterProxyModel.invalidate()  # force sorting/filtering
         if self.completionCount() > 1:
             self.filterProxyModel.sort(0)
+        self._force_next_update = False
 
     def splitPath(self, path):
         self.local_completion_prefix = path
