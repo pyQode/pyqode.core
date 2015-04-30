@@ -7,12 +7,12 @@ python:
 env:
   - QT_API=pyqt4
   - QT_API=pyqt5
-  - COV=1
-  - PEP8=1
+  - QT_API=pyqt4 COV=1
+  - QT_API=pyqt4 PEP8=1
 matrix:
   allow_failures:
-      - env: COV=1
-      - env: PEP8=1
+      - env: QT_API=pyqt4 COV=1
+      - env: QT_API=pyqt4 PEP8=1
   exclude:
       - python: "2.7"
         env: COV=1
