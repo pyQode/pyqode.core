@@ -35,7 +35,7 @@ def test_background(editor):
 
 def test_foreground(editor):
     mode = get_mode(editor)
-    assert mode.foreground.name() == '#404040'
+    assert mode.foreground is None
     mode.foreground = QtGui.QColor('#202020')
     assert mode.foreground.name() == '#202020'
 

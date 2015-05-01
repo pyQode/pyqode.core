@@ -97,7 +97,7 @@ class OccurrencesHighlighterMode(Mode):
         self.timer = DelayJobRunner(delay=1000)
         self._sub = None
         self._background = QtGui.QColor('#CCFFCC')
-        self._foreground = QtGui.QColor('#404040')
+        self._foreground = None
         self._underlined = False
 
     def on_state_changed(self, state):
@@ -160,7 +160,8 @@ class OccurrencesHighlighterMode(Mode):
                     deco.set_as_underlined(self._background)
                 else:
                     deco.set_background(QtGui.QBrush(self._background))
-                    deco.set_foreground(self._foreground)
+                    if self._foreground is not None:
+                        deco.set_foreground(self._foreground)
                 deco.draw_order = 3
                 self.editor.decorations.append(deco)
                 self._decorations.append(deco)
