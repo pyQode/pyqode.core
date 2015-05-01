@@ -28,6 +28,7 @@ New features:
     - Rework context menu: by default standard actions won't be created (copy,
       paste, ...). Those actions are handled by qt and make the context menu
       a bit messy.
+    - Wheel support
 
 Fixed bugs:
     - Fix an issue with draggable tabs on OSX (see pyQode/pyQode#31) and 
