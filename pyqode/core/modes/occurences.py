@@ -96,7 +96,7 @@ class OccurrencesHighlighterMode(Mode):
         #: Timer used to run the search request with a specific delay
         self.timer = DelayJobRunner(delay=1000)
         self._sub = None
-        self._background = QtGui.QColor('#CCFFCC')
+        self._background = QtGui.QColor('#80CCFFCC')
         self._foreground = QtGui.QColor('#404040')
         self._underlined = False
 
@@ -149,8 +149,11 @@ class OccurrencesHighlighterMode(Mode):
             # during a few seconds, with a limit of 500 we can make sure
             # the editor will always remain responsive).
             results = results[:500]
+        current = self.editor.textCursor().position()
         if len(results) > 1:
             for start, end in results:
+                if start <= current <= end:
+                    continue
                 deco = TextDecoration(self.editor.textCursor(),
                                       start_pos=start, end_pos=end)
                 if self.underlined:
