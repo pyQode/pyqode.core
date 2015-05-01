@@ -49,4 +49,4 @@ def test_occurrences(editor, underlined):
     assert mode.delay == 1000
     TextHelper(editor).goto_line(16, 7)
     QTest.qWait(2000)
-    assert len(mode._decorations) == 23
+    assert len(mode._decorations) == 22
