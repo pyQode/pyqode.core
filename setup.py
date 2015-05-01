@@ -9,7 +9,7 @@ from pyqode.core import __version__
 #
 # add ``build_ui command`` (optional, for development only)
 # this command requires the following packages:
-#   - pyqt_distutils
+#   - pyqt-distutils
 #   - pyqode-uic
 #
 import sys

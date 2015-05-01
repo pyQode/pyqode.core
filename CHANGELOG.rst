@@ -1,6 +1,34 @@
 Change Log
 ==========
 
+2.6.0
+-----
+New features:
+    - Add a new filter mode for the code completion frontend: subsequence based
+      matching (see pyQode/pyQode#1)
+    - Improve cut/copy behaviour if there is no selected text (see pyQode/pyQode#29)
+    - Add a new property for dynamic panel (see pyQode/pyQode#30)
+    - Improve generic code folder for C based languages: add a
+      CharBasedFoldDetector which works for C, C++, C#, PHP and Javascript
+    - SplittableTabWidget: improve browsing when there are a lots of tab. There
+      is now a hotkey (Ctrl+T by default) that shows a popup with a list of all
+      the open files.
+    - FileSystemTree: add a select method which allow for sync between a
+      TabWidget and the FileSystemTree.
+    - Implement EOL management: You can now define a preferred EOL to use when
+      saving files and add the ability to detect exisiting EOL and use it
+      instead of the preferred EOL.
+    - Improve CI (travis): now tests are running for both PyQt4 and PyQt5
+      on python 2.7, 3.2, 3.3 and 3.4
+    - Add optional support for QtAwesome (icons)
+
+Fixed bugs:
+    - Fix an issue with draggable tabs on OSX (see pyQode/pyQode#31) and 
+      improve tab bar appearance on OSX (see pyQode/pyQode#37)
+    - Fix a segfault with SplittableTabWidget (see pyQode/pyQode#32)
+    - Fix get_linus_file_explorer on Ubuntu
+    - Fix a few bugs with copy/paste operatins in FileSystemTree
+
 2.5.0
 -----
 
