@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # package info
-ppa="ppa:colin-duquesnoy/experimental"
+ppa="ppa:colin-duquesnoy/stable"
 name="pyqode-core"
 version="2.6.0"
 
