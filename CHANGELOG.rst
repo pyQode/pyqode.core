@@ -21,6 +21,13 @@ New features:
     - Improve CI (travis): now tests are running for both PyQt4 and PyQt5
       on python 2.7, 3.2, 3.3 and 3.4
     - Add optional support for QtAwesome (icons)
+    - SplittableTabWidget: add ability to setup custom context menu action on
+      the tab bar.
+    - SplittableTabWidget: improve names of tabs in case of duplicate filename.
+    - Add support for stdeb: ppa packages will be available soon
+    - Rework context menu: by default standard actions won't be created (copy,
+      paste, ...). Those actions are handled by qt and make the context menu
+      a bit messy.
 
 Fixed bugs:
     - Fix an issue with draggable tabs on OSX (see pyQode/pyQode#31) and 
