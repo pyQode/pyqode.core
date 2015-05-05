@@ -493,10 +493,10 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def addAction(self, *args):
         action = super(FileSystemContextMenu, self).addAction(*args)
-        self.tree_view.addAction(action)
         if action is None:
             action = args[0]
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
+        self.tree_view.addAction(action)
         return action
 
     def init_actions(self):
