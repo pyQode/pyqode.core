@@ -9,8 +9,9 @@ from .encodings import ENCODINGS_MAP, convert_to_codec_key
 from .manager import Manager
 from .mode import Mode
 from .panel import Panel
-from .syntax_highlighter import SyntaxHighlighter
 from .syntax_highlighter import ColorScheme
+from .syntax_highlighter import PYGMENTS_STYLES
+from .syntax_highlighter import SyntaxHighlighter
 from .syntax_highlighter import TextBlockUserData
 from .utils import TextHelper, TextBlockHelper
 from .utils import get_block_symbol_data
@@ -35,6 +36,7 @@ __all__ = [
     'Manager',
     'Mode',
     'Panel',
+    'PYGMENTS_STYLES',
     'SyntaxHighlighter',
     'TextBlockUserData',
     'TextDecoration',
