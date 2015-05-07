@@ -989,9 +989,12 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         :param extension: Document extension (dotted)
         :param args: Positional arguments that must be forwarded to the editor
             widget constructor.
+        :param preferred_eol: Preferred EOL convention. This setting will be
+            used for saving the document unless autodetect_eol is True.
+        :param autodetect_eol: If true, automatically detects file EOL and
+            use it instead of the preferred EOL when saving files.
         :param kwargs: Keyworded arguments that must be forwarded to the editor
             widget constructor.
-
         :return: Code editor widget instance.
         """
         SplittableCodeEditTabWidget._new_count += 1
@@ -1011,14 +1014,29 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return mimetypes.guess_type(path)[0]
 
     @utils.with_wait_cursor
-    def open_document(self, path, replace_tabs_by_spaces=True,
-                      preferred_eol=0, autodetect_eol=True, **kwargs):
+    def open_document(self, path, encoding=None, replace_tabs_by_spaces=True,
+                      clean_trailing_whitespaces=True, safe_save=True,
+                      restore_cursor_position=True, preferred_eol=0,
+                      autodetect_eol=True, **kwargs):
         """
         Opens a document.
 
-        :type path: Path of the document to open
-
-        :param args: additional args to pass to the widget constructor.
+        :param path: Path of the document to open
+        :param encoding: The encoding to use to open the file. Default is
+            locale.getpreferredencoding().
+        :param replace_tabs_by_spaces: Enable/Disable replace tabs by spaces.
+            Default is true.
+        :param clean_trailing_whitespaces: Enable/Disable clean trailing
+            whitespaces (on save). Default is True.
+        :param safe_save: If True, the file is saved to a temporary file first.
+            If the save went fine, the temporary file is renamed to the final
+            filename.
+        :param restore_cursor_position: If true, last cursor position will be
+            restored. Default is True.
+        :param preferred_eol: Preferred EOL convention. This setting will be
+            used for saving the document unless autodetect_eol is True.
+        :param autodetect_eol: If true, automatically detects file EOL and
+            use it instead of the preferred EOL when saving files.
         :param kwargs: addtional keyword args to pass to the widget
                        constructor.
         :return: The created code editor
@@ -1056,12 +1074,14 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                     os.path.split(os.path.dirname(path))[1], name)
                 use_parent_dir = False
 
-            tab = self._create_code_edit(self.guess_mimetype(path),
-                                         **kwargs)
+            tab = self._create_code_edit(self.guess_mimetype(path), **kwargs)
+            tab.file.clean_trailing_whitespaces = clean_trailing_whitespaces
+            tab.file.safe_save = safe_save
+            tab.file.restore_cursor = restore_cursor_position
             tab.file.replace_tabs_by_spaces = replace_tabs_by_spaces
             tab.file.autodetect_eol = autodetect_eol
             tab.file.preferred_eol = preferred_eol
-            tab.file.open(path)
+            tab.file.open(path, encoding=encoding)
             tab.setDocumentTitle(name)
             icon = self._icon(path)
             self.add_tab(tab, title=name, icon=icon)
