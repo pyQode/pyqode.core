@@ -2,6 +2,7 @@
 This module contains the base code editor widget.
 """
 from __future__ import print_function
+import os
 import sys
 try:
     from future.builtins import str, super
@@ -1206,24 +1207,29 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         p.setColor(QtGui.QPalette.Text, self.foreground)
         p.setColor(QtGui.QPalette.Highlight, self.selection_background)
         p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
-        if QtWidgets.QApplication.instance().styleSheet() or (
-                hasattr(self, '_flg_stylesheet') and
-                platform.system() == 'Windows'):
-            # on windows, if the application once had a stylesheet, we must
+        flg_stylesheet = hasattr(self, '_flg_stylesheet')
+        if QtWidgets.QApplication.instance().styleSheet() or flg_stylesheet:
+            self._flg_stylesheet = True
+            # On Window, if the application once had a stylesheet, we must
             # keep on using a stylesheet otherwise strange colors appear
             # see https://github.com/OpenCobolIDE/OpenCobolIDE/issues/65
-            self._flg_stylesheet = True
-            self.setStyleSheet('''QPlainTextEdit
-            {
-                background-color: %s;
-                color: %s;
-            }
-            ''' % (self.background.name(), self.foreground.name()))
-        else:
-            # on linux/osx we just have to set an empty stylesheet to cancel
-            # any previous stylesheet and still keep a correct style for
-            # scrollbars
-            self.setStyleSheet('')
+            # Also happen on plasma 5
+            try:
+                plasma = os.environ['DESKTOP_SESSION'] == 'plasma'
+            except KeyError:
+                plasma = False
+            if sys.platform == 'win32' or plasma:
+                self.setStyleSheet('''QPlainTextEdit
+                {
+                    background-color: %s;
+                    color: %s;
+                }
+                ''' % (self.background.name(), self.foreground.name()))
+            else:
+                # on linux/osx we just have to set an empty stylesheet to
+                # cancel any previous stylesheet and still keep a correct
+                # style for scrollbars
+                self.setStyleSheet('')
         self.setPalette(p)
         self.repaint()
 
