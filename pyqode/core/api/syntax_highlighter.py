@@ -34,6 +34,8 @@ COLOR_SCHEME_KEYS = {
     "normal": Token.Text,
     # any keyword
     "keyword": Token.Keyword,
+    # namespace keywords (from ... import ... as)
+    "namespace": Token.Keyword.Namespace,
     # type keywords
     "type": Token.Keyword.Type,
     # reserved keyword
@@ -66,6 +68,10 @@ COLOR_SCHEME_KEYS = {
     'constant': Token.Name.Constant,
     # function definition
     'function': Token.Name.Function,
+    # operator
+    'operator': Token.Operator,
+    # operator words (and, not)
+    'operator_word': Token.Operator.Word
 }
 
 
