@@ -291,8 +291,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.WHITESPACES = QtCore.QRegExp(r'\s+')
 
     def _highlight_whitespaces(self, text):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(QtGui.QBrush(self.editor.whitespaces_foreground))
         index = self.WHITESPACES.indexIn(text, 0)
         while index >= 0:
             index = self.WHITESPACES.pos(0)
@@ -323,6 +321,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if self.editor:
             self.highlight_block(text, current_block)
             if self.editor.show_whitespaces:
+                print('highlight whitespaces')
                 self._highlight_whitespaces(text)
             if self.fold_detector is not None:
                 self.fold_detector.editor = self.editor

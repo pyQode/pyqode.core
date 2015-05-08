@@ -1017,7 +1017,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     def open_document(self, path, encoding=None, replace_tabs_by_spaces=True,
                       clean_trailing_whitespaces=True, safe_save=True,
                       restore_cursor_position=True, preferred_eol=0,
-                      autodetect_eol=True, **kwargs):
+                      autodetect_eol=True, show_whitespaces=False, **kwargs):
         """
         Opens a document.
 
@@ -1037,6 +1037,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             used for saving the document unless autodetect_eol is True.
         :param autodetect_eol: If true, automatically detects file EOL and
             use it instead of the preferred EOL when saving files.
+        :param show_whitespaces: True to show white spaces.
         :param kwargs: addtional keyword args to pass to the widget
                        constructor.
         :return: The created code editor
@@ -1081,6 +1082,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tab.file.replace_tabs_by_spaces = replace_tabs_by_spaces
             tab.file.autodetect_eol = autodetect_eol
             tab.file.preferred_eol = preferred_eol
+            tab.show_whitespaces = show_whitespaces
             tab.file.open(path, encoding=encoding)
             tab.setDocumentTitle(name)
             icon = self._icon(path)

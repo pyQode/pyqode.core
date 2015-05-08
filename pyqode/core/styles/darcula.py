@@ -60,6 +60,6 @@ class DarculaStyle(Style):
         Operator: '#808080 bold',
         Operator.Word: '#CC7832 bold',
         Text: '#A9B7C6',
-        Text.Whitespace: '#808080',
+        Text.Whitespace: '#656565',
         Punctuation: '#A9B7C6'
     }

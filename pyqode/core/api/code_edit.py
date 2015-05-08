@@ -162,10 +162,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @show_whitespaces.setter
     def show_whitespaces(self, value):
-        self._show_whitespaces = value
-        self._set_whitespaces_flags(value)
-        for c in self.clones:
-            c.show_whitespaces = value
+        if self._show_whitespaces != value:
+            self._show_whitespaces = value
+            self._set_whitespaces_flags(value)
+            for c in self.clones:
+                c.show_whitespaces = value
+            self.rehighlight()
 
     @property
     def font_name(self):
