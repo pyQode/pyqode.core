@@ -83,6 +83,7 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
         self.filterProxyModel = SubsequenceSortFilterProxyModel(
             self.caseSensitivity(), parent=self)
         self.filterProxyModel.setSortRole(QtCore.Qt.UserRole)
+        self._force_next_update = True
 
     def setModel(self, model):
         self.source_model = model
@@ -99,7 +100,7 @@ class SubsequenceCompleter(QtWidgets.QCompleter):
     def update_model(self):
         if (self.completionCount() or
                 len(self.local_completion_prefix) <= 1 or
-                    self._force_next_update):
+                self._force_next_update):
             self.filterProxyModel.set_prefix(self.local_completion_prefix)
             self.filterProxyModel.invalidate()  # force sorting/filtering
         if self.completionCount() > 1:
