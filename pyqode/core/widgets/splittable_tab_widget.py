@@ -284,7 +284,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             if dlg.exec_() == dlg.Accepted:
                 rm = True
                 if not dlg.discarded:
-                    rm = self.save_widget(widget)
+                    try:
+                        rm = self.save_widget(widget)
+                    except OSError:
+                        pass
                 if rm:
                     self.remove_tab(index)
                     widget.close()
