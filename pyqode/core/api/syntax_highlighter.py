@@ -321,7 +321,6 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         if self.editor:
             self.highlight_block(text, current_block)
             if self.editor.show_whitespaces:
-                print('highlight whitespaces')
                 self._highlight_whitespaces(text)
             if self.fold_detector is not None:
                 self.fold_detector.editor = self.editor
