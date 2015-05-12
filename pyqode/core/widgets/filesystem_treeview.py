@@ -1,6 +1,7 @@
 """
 This module contains the file system tree view.
 """
+import fnmatch
 import logging
 import os
 import platform
@@ -37,11 +38,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         def __init__(self):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
-            #: The list of directories to ignore
-            self.ignored_directories = ['__pycache__']
             #: The list of file extension to exclude
-            self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                       '.egg-info', '.coverage', '.DS_Store']
+            self.ignored_patterns = [
+                '*.pyc', '*.pyd', '*.so', '*.dll', '*.exe',
+                '*.egg-info', '*.coverage', '.DS_Store', '__pycache__']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -61,18 +61,15 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
             fp = os.path.normpath(finfo.filePath())
-            extension = '.%s' % finfo.suffix()
-
             if fp in self._ignored_unused:
-                _logger().debug('excluding directory (unused): %s',
+                _logger().debug('excluding unused directory: %s',
                                 finfo.filePath())
                 return False
-            if fn in self.ignored_directories:
-                _logger().debug('excluding directory: %s', finfo.filePath())
-                return False
-            if extension in self.ignored_extensions:
-                _logger().debug('excluding file: %s', finfo.filePath())
-                return False
+            for ptrn in self.ignored_patterns:
+                if fnmatch.fnmatch(fn, ptrn):
+                    _logger().debug('ignoring %s (matching pattern: %s',
+                                    finfo.filePath(), ptrn)
+                    return False
             _logger().debug('accepting %s', finfo.filePath())
             return True
 
@@ -98,8 +95,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
         self.setSelectionMode(self.ExtendedSelection)
-        self._ignored_extensions = []
-        self._ignored_directories = []
+        self._ignored_patterns = []
         self._icon_provider = QtWidgets.QFileIconProvider()
         self._hide_extra_colums = True
 
@@ -112,10 +108,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
         This must be done before calling set_root_path!
 
+        .. deprecated:: 2.6.1
+            Use :func:`add_ignore_pattern` instead.
+
         :param directories: the directories to ignore
         """
         for d in directories:
-            self._ignored_directories.append(d)
+            self.add_ignore_patterns(d)
 
     def ignore_extensions(self, *extensions):
         """
@@ -123,12 +122,39 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
         This must be done before calling set_root_path!
 
+
+        .. deprecated:: 2.6.1
+            Use :func:`add_ignore_pattern` instead.
+
         :param extensions: the extensions to ignore
 
         .. note:: extension must have the dot: '.py' and not 'py'
         """
-        for d in extensions:
-            self._ignored_extensions.append(d)
+        for ext in extensions:
+            self.add_ignore_patterns('*%s' % ext)
+
+    def clear_ignore_patterns(self):
+        """
+        Clears the list of ignore patterns
+        """
+        self._ignored_patterns[:] = []
+
+    def add_ignore_patterns(self, *patterns):
+        """
+        Adds an ignore pattern to the list for ignore patterns.
+
+        Ignore patterns are used to filter out unwanted files or directories
+        from the file system model.
+
+        A pattern is a Unix shell-style wildcards. See :mod:`fnmatch` for a
+        deeper explanation about the shell-style wildcards.
+        """
+        for ptrn in patterns:
+            if isinstance(ptrn, list):
+                for p in ptrn:
+                    self._ignored_patterns.append(p)
+            else:
+                self._ignored_patterns.append(ptrn)
 
     def set_context_menu(self, context_menu):
         """
@@ -157,10 +183,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
                                         QtCore.QDir.Hidden)
         self._fs_model_source.setIconProvider(self._icon_provider)
         self._fs_model_proxy = self.FilterProxyModel()
-        for item in self._ignored_directories:
-            self._fs_model_proxy.ignored_directories.append(item)
-        for item in self._ignored_extensions:
-            self._fs_model_proxy.ignored_extensions.append(item)
+        for item in self._ignored_patterns:
+            self._fs_model_proxy.ignored_patterns.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self._fs_model_proxy.set_root_path(path)
         self.root_path = os.path.dirname(path)
