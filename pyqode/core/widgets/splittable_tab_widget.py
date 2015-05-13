@@ -526,7 +526,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             self._action_popup.setShortcut(self._shortcut)
             self._action_popup.triggered.connect(self._show_popup)
             self.addAction(self._action_popup)
-            self.popup = OpenFilesPopup(QtWidgets.qApp.activeWindow())
+            self.popup = OpenFilesPopup()
             self.popup.setWindowFlags(
                 QtCore.Qt.Popup | QtCore.Qt.FramelessWindowHint)
             self.popup.triggered.connect(self._on_popup_triggered)
