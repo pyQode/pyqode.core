@@ -1204,11 +1204,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Resets stylesheet"""
         self.setFont(QtGui.QFont(self._font_family,
                                  self._font_size + self._zoom_level))
-        p = self.palette()
-        p.setColor(QtGui.QPalette.Base, self.background)
-        p.setColor(QtGui.QPalette.Text, self.foreground)
-        p.setColor(QtGui.QPalette.Highlight, self.selection_background)
-        p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
         flg_stylesheet = hasattr(self, '_flg_stylesheet')
         if QtWidgets.QApplication.instance().styleSheet() or flg_stylesheet:
             self._flg_stylesheet = True
@@ -1232,7 +1227,15 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 # cancel any previous stylesheet and still keep a correct
                 # style for scrollbars
                 self.setStyleSheet('')
-        self.setPalette(p)
+        else:
+            p = self.palette()
+            p.setColor(QtGui.QPalette.Base, self.background)
+            p.setColor(QtGui.QPalette.Text, self.foreground)
+            p.setColor(QtGui.QPalette.Highlight,
+                       self.selection_background)
+            p.setColor(QtGui.QPalette.HighlightedText,
+                       self.selection_foreground)
+            self.setPalette(p)
         self.repaint()
 
     def _do_home_key(self, event=None, select=False):
