@@ -411,7 +411,8 @@ class OpenFilesPopup(QtWidgets.QDialog):
         super(OpenFilesPopup, self).__init__(*args)
         self.ui = popup_open_files_ui.Ui_Dialog()
         self.ui.setupUi(self)
-        self.ui.listWidget.activated.connect(self._on_item_activated)
+        self.ui.tableWidget.itemActivated.connect(self._on_item_activated)
+        self.ui.tableWidget.itemDoubleClicked.connect(self._on_item_activated)
         settings = QtCore.QSettings('pyQode', 'pyqode.core')
         self.sort_enabled = bool(settings.value(
             'sortOpenFilesAlphabetically', False))
@@ -434,21 +435,32 @@ class OpenFilesPopup(QtWidgets.QDialog):
         if self.sort_enabled:
             filenames = sorted(filenames, key=lambda x:
                                QtCore.QFileInfo(x).fileName().lower())
-        self.ui.listWidget.clear()
+        self.ui.tableWidget.clearContents()
         icon_provider = SplittableCodeEditTabWidget.icon_provider_klass()
-        for path in filenames:
-            item = QtWidgets.QListWidgetItem(self.ui.listWidget)
+        self.ui.tableWidget.setRowCount(len(filenames))
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeToContents)
+        for row, path in enumerate(filenames):
             finfo = QtCore.QFileInfo(path)
             filename = finfo.fileName()
             if finfo.exists():
                 icon = icon_provider.icon(finfo)
-                filename += ' (%s)' % path
             else:
                 icon = icon_provider.icon(icon_provider.File)
+            # file name
+            item = QtWidgets.QTableWidgetItem()
             item.setText(filename)
             item.setIcon(icon)
+            item.setToolTip(path)
             item.setData(QtCore.Qt.UserRole, path)
-            self.ui.listWidget.addItem(item)
+            self.ui.tableWidget.setItem(row, 0, item)
+
+            # path
+            item = QtWidgets.QTableWidgetItem()
+            item.setText(path)
+            item.setToolTip(path)
+            item.setData(QtCore.Qt.UserRole, path)
+            self.ui.tableWidget.setItem(row, 1, item)
 
     def _on_sort_changed(self, *_):
         self.sort_enabled = self.ui.checkBox.isChecked()
@@ -463,8 +475,8 @@ class OpenFilesPopup(QtWidgets.QDialog):
 
     def show(self):
         super(OpenFilesPopup, self).show()
-        self.ui.listWidget.setFocus()
-        self.ui.listWidget.setCurrentRow(0)
+        self.ui.tableWidget.setFocus()
+        self.ui.tableWidget.selectRow(0)
 
 
 class SplittableTabWidget(QtWidgets.QSplitter):
