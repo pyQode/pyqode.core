@@ -1,5 +1,26 @@
 Change Log
 ==========
+2.6.1
+-----
+
+This is mostly a bug fix release with a few improvements here and there (fully backward compatible).
+
+New features/Improvements:
+    - Improve highlight occurences mode: the word under cursor is not highlighted anymore, only
+      the other occurences are highlighted now. Also the original foreground color
+      is now preserved.
+    - Add missing PYGMENTS_STYLES list to public API (pyqode.core.api)
+    - Improvre syntax highlighter: add format for namespace keywords and word operators
+    - Improve ignore API of FSTreeView: add support for unix style wildcards (*.py,...)
+    - Improve open files popup (splittable tab widget): use a table view instead of a list view
+
+Fixed bugs:
+    - Fix qt warning: QWidget::insertAction: Attempt to insert null action
+    - Fix graphical bugs when a stylesheet has been setup on the application.
+    - Fix issues whith show whitespaces
+    - Fix unhandled exception in SubsequenceCompleter
+    - Fix unhandled exception in FileManager.save
+    - Fix runtime error with open files popup (splittable tab widget)
 
 2.6.0
 -----
