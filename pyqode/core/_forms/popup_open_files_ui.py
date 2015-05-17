@@ -24,6 +24,7 @@ class Ui_Dialog(object):
         self.checkBox.setObjectName("checkBox")
         self.gridLayout_2.addWidget(self.checkBox, 0, 0, 1, 1)
         self.tableWidget = QtWidgets.QTableWidget(self.groupBox)
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed)
         self.tableWidget.setProperty("showDropIndicator", False)
         self.tableWidget.setDragDropOverwriteMode(False)
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
