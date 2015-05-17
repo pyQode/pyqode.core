@@ -1,8 +1,6 @@
 language: python
 python:
  - "2.7"
- - "3.2"
- - "3.3"
  - "3.4"
 env:
   - QT_API=pyqt4
@@ -17,14 +15,6 @@ matrix:
       - python: "2.7"
         env: QT_API=pyqt4 COV=1
       - python: "2.7"
-        env: QT_API=pyqt4 PEP8=1
-      - python: "3.2"
-        env: QT_API=pyqt4 COV=1
-      - python: "3.2"
-        env: QT_API=pyqt4 PEP8=1
-      - python: "3.3"
-        env: QT_API=pyqt4 COV=1
-      - python: "3.3"
         env: QT_API=pyqt4 PEP8=1
 before_install:
   - "export DISPLAY=:99.0"
