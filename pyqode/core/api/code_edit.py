@@ -877,7 +877,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             elif event.key() == QtCore.Qt.Key_Backtab:
                 self.un_indent()
                 event.accept()
-            elif event.key() == QtCore.Qt.Key_Home:
+            elif event.key() == QtCore.Qt.Key_Home and \
+                    int(event.modifiers()) == QtCore.Qt.NoModifier:
                 self._do_home_key(
                     event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
             if not event.isAccepted():
