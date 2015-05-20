@@ -58,9 +58,14 @@ class RecentFilesManager(QtCore.QObject):
                 seen[marker] = 1
                 result.append(item)
             return result
-
-        return unique([os.path.normpath(pth) for pth in
-                       self._settings.value('recent_files/%s' % key, default)])
+        lst = self._settings.value('recent_files/%s' % key, default)
+        # emtpy list
+        if lst is None:
+            lst = []
+        # single file
+        if isinstance(lst, str):
+            lst = [lst]
+        return unique([os.path.normpath(pth) for pth in lst])
 
     def set_value(self, key, value):
         """
@@ -68,6 +73,8 @@ class RecentFilesManager(QtCore.QObject):
         :param key: value key
         :param value: new value
         """
+        if value is None:
+            value = []
         value = [os.path.normpath(pth) for pth in value]
         self._settings.setValue('recent_files/%s' % key, value)
 
@@ -78,12 +85,6 @@ class RecentFilesManager(QtCore.QObject):
         """
         ret_val = []
         files = self.get_value('list', [])
-        # empty list
-        if files is None:
-            files = []
-        # single file
-        if isinstance(files, str):
-            files = [files]
         # filter files, remove files that do not exist anymore
         for file in files:
             if file is not None and os.path.exists(file):
@@ -114,7 +115,10 @@ class RecentFilesManager(QtCore.QObject):
         Returns the path to the last opened file.
         """
         files = self.get_recent_files()
-        return files[0]
+        try:
+            return files[0]
+        except IndexError:
+            return None
 
 
 class MenuRecentFiles(QtWidgets.QMenu):
