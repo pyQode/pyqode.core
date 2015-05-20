@@ -6,8 +6,7 @@ import pyqode.core
 def test_open_file():
     manager = RecentFilesManager('pyQode', 'test')
     manager.clear()
-    with pytest.raises(IndexError):
-        manager.last_file()
+    assert manager.last_file() is None
     manager.open_file(__file__)
     assert len(manager.get_recent_files()) == 1
     assert manager.last_file() == __file__
