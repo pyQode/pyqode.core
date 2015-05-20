@@ -3,7 +3,7 @@
 # package info
 ppa="ppa:colin-duquesnoy/stable"
 name="pyqode-core"
-version="2.6.0"
+version="2.6.1"
 
 # read pgp key from gpg_key file
 gpg_key=`cat gpg_key`
