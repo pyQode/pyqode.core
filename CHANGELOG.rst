@@ -1,5 +1,13 @@
 Change Log
 ==========
+2.6.2
+-----
+
+Fixed bugs:
+
+    - Fix edit triggers in open files popup (SplittableTabWidget)
+    - Fix an issue which lead to corrupted recent files list (OpenCobolIDE/OpenCobolIDE#115)
+
 2.6.1
 -----
 
