@@ -90,7 +90,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
     def __init__(self, parent=None):
         super(FileSystemTreeView, self).__init__(parent)
         self.context_menu = None
-        self.root_path = None
+        self._root_path = None
+        self.root_path = ''
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
@@ -187,16 +188,18 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             self._fs_model_proxy.ignored_patterns.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self._fs_model_proxy.set_root_path(path)
-        self.root_path = os.path.dirname(path)
-        file_root_index = self._fs_model_source.setRootPath(self.root_path)
-        root_index = self._fs_model_proxy.mapFromSource(file_root_index)
+        # takes parent of the root path, filter will keep only `path`, that
+        # way `path` appear as the top level node of the tree
+        self._root_path = os.path.dirname(path)
+        self.root_path = path
         self._fs_model_source.directoryLoaded.connect(self._on_path_loaded)
+        self._fs_model_source.setRootPath(self._root_path)
 
     def _on_path_loaded(self, path):
-        if os.path.normpath(path) != self.root_path:
+        if os.path.normpath(path) != self._root_path:
             return
         self.setModel(self._fs_model_proxy)
-        file_root_index = self._fs_model_source.setRootPath(self.root_path)
+        file_root_index = self._fs_model_source.setRootPath(self._root_path)
         root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
         self.expandToDepth(0)
