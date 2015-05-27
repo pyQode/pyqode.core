@@ -13,6 +13,7 @@ class LineNumberPanel(Panel):
         Panel.__init__(self)
         self.scrollable = True
         self._selecting = False
+        self._start_line = -1
         self._sel_start = -1
         self._line_color_u = self.palette().color(
             QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
