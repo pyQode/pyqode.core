@@ -185,9 +185,6 @@ class PygmentsSH(SyntaxHighlighter):
         self._update_style()
         super(PygmentsSH, self).on_install(editor)
 
-    def on_state_changed(self, state):
-        self.enabled = state
-
     def set_mime_type(self, mime_type):
         """
         Update the highlighter lexer based on a mime type.
