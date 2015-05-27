@@ -74,7 +74,7 @@ class LineNumberPanel(Panel):
             end_pos = e.pos().y()
             end_line = TextHelper(self.editor).line_nbr_from_position(
                 end_pos)
-            if end_line == -1:
+            if end_line == -1 and self.editor.visible_blocks:
                 # take last visible block
                 if end_pos < 50:
                     _, end_line, _ = self.editor.visible_blocks[0]
