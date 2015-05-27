@@ -401,7 +401,7 @@ class FileManager(Manager):
         :param clear: True to clear the editor content. Default is True.
         """
         Cache().set_cursor_position(
-            self.path, self.editor.cursorPosition())
+            self.path, self.editor.textCursor().position())
         self.editor._original_text = ''
         if clear:
             self.editor.clear()
