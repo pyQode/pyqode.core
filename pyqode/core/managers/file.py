@@ -236,9 +236,9 @@ class FileManager(Manager):
                 pass
             else:
                 encoding = cached_encoding
-        self.editor.syntax_highlighter.enabled = \
-            os.path.getsize(path) < self._limit
-        print(self.editor.syntax_highlighter.enabled)
+        enable_modes = os.path.getsize(path) < self._limit
+        for m in self.editor.modes:
+            m.enabled = enable_modes
         # open file and get its content
         try:
             with open(path, 'Ur', encoding=encoding) as file:
@@ -268,13 +268,11 @@ class FileManager(Manager):
             if self.replace_tabs_by_spaces:
                 content = content.replace("\t", " " * self.editor.tab_length)
             # set plain text
-            import time
-            t = time.time()
             self.editor.setPlainText(
                 content, self.get_mimetype(path), self.encoding)
-            print('Display finished', time.time() - t)
             self.editor.setDocumentTitle(self.editor.file.name)
             ret_val = True
+            _logger().info('file open: %s', path)
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
@@ -282,7 +280,9 @@ class FileManager(Manager):
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
-        TextHelper(self.editor).goto_line(pos[0], pos[1])
+        tc = self.editor.textCursor()
+        tc.setPosition(pos)
+        self.editor.setTextCursor(tc)
         QtCore.QTimer.singleShot(1, self.editor.centerCursor)
 
     def reload(self, encoding):
@@ -332,7 +332,6 @@ class FileManager(Manager):
         """
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
-        self.saving = True
         _logger().debug(
             "saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
@@ -346,12 +345,8 @@ class FileManager(Manager):
         # use cached encoding if None were specified
         if encoding is None:
             encoding = self._encoding
+        self.saving = True
         self.editor.text_saving.emit(str(path))
-        # remember cursor position (clean_document might mess up the
-        # cursor pos)
-        if self.clean_trailing_whitespaces:
-            sel_end, sel_start = self._get_selection()
-            TextHelper(self.editor).clean_document()
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
@@ -373,26 +368,22 @@ class FileManager(Manager):
             self.editor.text_saved.emit(str(path))
             raise e
         else:
-            _logger().debug('save to temp file succeeded')
+            # cache update encoding
             Cache().set_file_encoding(path, encoding)
             self._encoding = encoding
+            # remove path and rename temp file, if safe save is on
             if self.safe_save:
-                # remove path and rename temp file, if safe save is on
                 _logger().debug('rename %s to %s', tmp_path, path)
                 self._rm(path)
                 os.rename(tmp_path, path)
                 self._rm(tmp_path)
             # reset dirty flags
-            self.editor._original_text = self.editor.toPlainText()
             self.editor.document().setModified(False)
             # remember path for next save
             self._path = os.path.normpath(path)
-            # reset selection
-            if self.clean_trailing_whitespaces:
-                if sel_start != sel_end:
-                    self._reset_selection(sel_end, sel_start)
-        self.editor.text_saved.emit(str(path))
-        self.saving = False
+            self.editor.text_saved.emit(str(path))
+            self.saving = False
+            _logger().info('file saved: %s', path)
 
     def close(self, clear=True):
         """
@@ -403,7 +394,7 @@ class FileManager(Manager):
         :param clear: True to clear the editor content. Default is True.
         """
         Cache().set_cursor_position(
-            self.path, TextHelper(self.editor).cursor_position())
+            self.path, self.editor.cursorPosition())
         self.editor._original_text = ''
         if clear:
             self.editor.clear()

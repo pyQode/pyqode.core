@@ -359,16 +359,16 @@ class TextHelper(object):
                         removed.add(line + j)
         editor._modified_lines -= removed
 
-        # ensure there is only one blank line left at the end of the file
-        i = self.line_count()
-        while i:
-            line = self.line_text(i - 1)
-            if line.strip():
-                break
-            self.remove_last_line()
-            i -= 1
-        if self.line_text(self.line_count() - 1):
-            editor.appendPlainText('')
+        # # ensure there is only one blank line left at the end of the file
+        # i = self.line_count()
+        # while i:
+        #     line = self.line_text(i - 1)
+        #     if line.strip():
+        #         break
+        #     self.remove_last_line()
+        #     i -= 1
+        # if self.line_text(self.line_count() - 1):
+        #     editor.appendPlainText('')
 
         # restore cursor and scrollbars
         text_cursor = editor.textCursor()

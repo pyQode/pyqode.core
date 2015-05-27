@@ -564,7 +564,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.panels.clear()
         self.backend.stop()
         Cache().set_cursor_position(
-            self.file.path, TextHelper(self).cursor_position())
+            self.file.path, self.textCursor().position())
         super(CodeEdit, self).close()
         _logger().debug('closed')
 
