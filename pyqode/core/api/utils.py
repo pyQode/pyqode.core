@@ -434,9 +434,8 @@ class TextHelper(object):
         if start < 0:
             start = 0
         text_cursor = editor.textCursor()
-        text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
-        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 start)
+        block = editor.document().findBlockByNumber(start)
+        text_cursor.setPosition(block.position())
         if end > start:  # Going down
             text_cursor.movePosition(text_cursor.Down,
                                      text_cursor.KeepAnchor, end - start)
