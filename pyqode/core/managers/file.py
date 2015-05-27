@@ -239,6 +239,7 @@ class FileManager(Manager):
         enable_modes = os.path.getsize(path) < self._limit
         for m in self.editor.modes:
             m.enabled = enable_modes
+        self.editor.modes.clear()
         # open file and get its content
         try:
             with open(path, 'Ur', encoding=encoding) as file:
