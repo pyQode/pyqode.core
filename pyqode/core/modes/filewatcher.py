@@ -60,6 +60,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
             self.editor.text_saving.connect(self._cancel_next_change)
+            self.editor.text_saved.connect(self._update_mtime)
             self.editor.text_saved.connect(self._restart_monitoring)
             self.editor.focused_in.connect(self._check_for_pending)
         else:
@@ -148,7 +149,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
             # See OpenCobolIDE/OpenCobolIDE#97
             Cache().set_cursor_position(
                 self.editor.file.path,
-                TextHelper(self.editor).cursor_position())
+                self.editor.textCursor().position())
             self.editor.file.open(self.editor.file.path)
             self.file_reloaded.emit()
 
