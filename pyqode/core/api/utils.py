@@ -499,14 +499,14 @@ class TextHelper(object):
         Returns the line number from the y_pos
 
         :param y_pos: Y pos in the editor
-        :return: Line number (0 based)
+        :return: Line number (0 based), -1 if out of range
         """
         editor = self._editor
         height = editor.fontMetrics().height()
         for top, line, block in editor.visible_blocks:
             if top <= y_pos <= top + height:
                 return line
-        return 0
+        return -1
 
     def mark_whole_doc_dirty(self):
         """
