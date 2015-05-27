@@ -315,6 +315,13 @@ class FileManager(Manager):
 
     def _get_text(self, encoding):
         lines = self.editor.toPlainText().splitlines()
+        if self.clean_trailing_whitespaces:
+            lines = [l.rstrip() for l in lines]
+        # remove emtpy ending lines
+        last_line = lines[-1]
+        while last_line == '':
+            lines.pop()
+            last_line = lines[-1]
         text = self._eol.join(lines) + self._eol
         return text.encode(encoding)
 
