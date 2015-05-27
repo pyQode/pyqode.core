@@ -128,6 +128,21 @@ class FileManager(Manager):
         if not self._autodetect_eol:
             self._eol = self.EOL.string(self._preferred_eol)
 
+    @property
+    def file_size_limit(self):
+        """
+        Returns the file size limit. If the size of the file to open
+        is superior to the limit, then we disabled syntax highlighting, code
+        folding,... to improve the load time and the runtime performances.
+
+        Default is 10MB.
+        """
+        return self._limit
+
+    @file_size_limit.setter
+    def file_size_limit(self, value):
+        self._limit = value
+
     def _get_icon(self):
         return QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(self.path))
 
@@ -138,6 +153,7 @@ class FileManager(Manager):
             load/save.
         """
         super(FileManager, self).__init__(editor)
+        self._limit = 10000000
         self._path = ''
         #: File mimetype
         self.mimetype = ''
@@ -220,6 +236,9 @@ class FileManager(Manager):
                 pass
             else:
                 encoding = cached_encoding
+        self.editor.syntax_highlighter.enabled = \
+            os.path.getsize(path) < self._limit
+        print(self.editor.syntax_highlighter.enabled)
         # open file and get its content
         try:
             with open(path, 'Ur', encoding=encoding) as file:
@@ -249,8 +268,11 @@ class FileManager(Manager):
             if self.replace_tabs_by_spaces:
                 content = content.replace("\t", " " * self.editor.tab_length)
             # set plain text
+            import time
+            t = time.time()
             self.editor.setPlainText(
                 content, self.get_mimetype(path), self.encoding)
+            print('Display finished', time.time() - t)
             self.editor.setDocumentTitle(self.editor.file.name)
             ret_val = True
         self.opening = False
