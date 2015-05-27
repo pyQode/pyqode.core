@@ -100,8 +100,6 @@ script:
     else
         py.test;
     fi
-after_failure:
-  - cat pytest.log
 after_script:
   - if [ $COV ]; then
         pip install --quiet coveralls;
