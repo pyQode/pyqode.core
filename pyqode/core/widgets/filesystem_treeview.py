@@ -355,7 +355,10 @@ class FileSystemHelper:
             if not perform_copy:
                 continue
             try:
-                shutil.copy(src, final_dest)
+                if os.path.isfile(src):
+                    shutil.copy(src, final_dest)
+                else:
+                    shutil.copytree(src, final_dest)
             except (IOError, OSError) as e:
                 QtWidgets.QMessageBox.warning(
                     self.tree_view, 'Failed to copy file', str(e))
