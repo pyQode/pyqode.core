@@ -368,6 +368,10 @@ class FoldScope(object):
 
         :param block: block from which the research will start
         """
+        # if we moved up for more than n lines, just give up otherwise this
+        # would take too much time.
+        limit = 5000
+        counter = 0
         original = block
         if not TextBlockHelper.is_fold_trigger(block):
             # search level of next non blank line
@@ -375,8 +379,11 @@ class FoldScope(object):
                 block = block.next()
             ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
             block = original
-            while (block.blockNumber() and
+            while (block.blockNumber() and counter < limit and
                    (not TextBlockHelper.is_fold_trigger(block) or
                     TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
+                counter += 1
                 block = block.previous()
-        return block
+        if counter < limit:
+            return block
+        return None
