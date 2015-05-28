@@ -16,7 +16,8 @@
    :target: https://travis-ci.org/pyQode/pyqode.core
    :alt: Travis-CI build status
 
-.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.png?branch=master
+
+.. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.svg?branch=master
    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master
    :alt: Coverage Status
 
