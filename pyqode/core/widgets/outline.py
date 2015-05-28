@@ -149,6 +149,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             ti.setIcon(0, QtGui.QIcon(name.icon))
             name.block = editor.document().findBlockByNumber(name.line)
             ti.setData(0, QtCore.Qt.UserRole, name)
+            ti.setToolTip(0, name.description)
             block_data = name.block.userData()
             if block_data is None:
                 block_data = TextBlockUserData()
