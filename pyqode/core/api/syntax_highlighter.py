@@ -291,6 +291,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.WHITESPACES = QtCore.QRegExp(r'\s+')
 
     def on_state_changed(self, state):
+        if self._on_close:
+            return
         if state:
             self.setDocument(self.editor.document())
         else:
