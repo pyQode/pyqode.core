@@ -2,19 +2,15 @@
 
 |
 
-.. image:: https://pypip.in/version/pyqode.core/badge.svg
+.. image:: https://img.shields.io/pypi/v/pyqode.core.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Latest PyPI version
 
-.. image:: https://pypip.in/download/pyqode.core/badge.svg
+.. image:: https://img.shields.io/pypi/dm/pyqode.core.svg
    :target: https://pypi.python.org/pypi/pyqode.core/
    :alt: Number of PyPI downloads
 
-.. image:: https://pypip.in/py_versions/pyqode.core/badge.svg
-   :target: https://pypi.python.org/pypi/pyqode.core/
-   :alt: Supported python version
-   
-.. image:: https://pypip.in/license/pyqode.core/badge.svg
+.. image:: https://img.shields.io/pypi/l/pyqode.core.svg
 
 .. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
    :target: https://travis-ci.org/pyQode/pyqode.core
