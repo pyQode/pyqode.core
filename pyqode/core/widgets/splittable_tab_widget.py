@@ -193,10 +193,13 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         if self.context_actions:
             context_mnu.addSeparator()
         menu = QtWidgets.QMenu('Split', context_mnu)
-        menu.addAction('Split horizontally').triggered.connect(
-            self._on_split_requested)
-        menu.addAction('Split vertically').triggered.connect(
-            self._on_split_requested)
+        menu.setIcon(QtGui.QIcon.fromTheme('split'))
+        a = menu.addAction('Split horizontally')
+        a.triggered.connect(self._on_split_requested)
+        a.setIcon(QtGui.QIcon.fromTheme('view-split-left-right'))
+        a = menu.addAction('Split vertically')
+        a.setIcon(QtGui.QIcon.fromTheme('view-split-top-bottom'))
+        a.triggered.connect(self._on_split_requested)
         context_mnu.addMenu(menu)
         context_mnu.addSeparator()
         for name, slot in [('Close', self.close),

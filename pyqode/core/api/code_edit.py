@@ -404,7 +404,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def show_context_menu(self, value):
         self._show_ctx_mnu = value
 
-    def __init__(self, parent=None, create_default_actions=False):
+    def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
 

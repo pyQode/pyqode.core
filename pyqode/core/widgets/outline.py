@@ -146,7 +146,12 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         def convert(name, editor, to_collapse):
             ti = QtWidgets.QTreeWidgetItem()
             ti.setText(0, name.name)
-            ti.setIcon(0, QtGui.QIcon(name.icon))
+            if isinstance(name.icon, list):
+                icon = QtGui.QIcon.fromTheme(
+                    name.icon[0], QtGui.QIcon(name.icon[1]))
+            else:
+                icon = QtGui.QIcon(name.icon)
+            ti.setIcon(0, icon)
             name.block = editor.document().findBlockByNumber(name.line)
             ti.setData(0, QtCore.Qt.UserRole, name)
             ti.setToolTip(0, name.description)

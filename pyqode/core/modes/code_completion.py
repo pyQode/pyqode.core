@@ -592,7 +592,12 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if 'tooltip' in completion and completion['tooltip']:
                 self._tooltips[name] = completion['tooltip']
             if 'icon' in completion:
-                item.setData(QtGui.QIcon(completion['icon']),
+                icon = completion['icon']
+                if isinstance(icon, list):
+                    icon = QtGui.QIcon.fromTheme(icon[0], QtGui.QIcon(icon[1]))
+                else:
+                    icon = QtGui.QIcon(icon)
+                item.setData(QtGui.QIcon(icon),
                              QtCore.Qt.DecorationRole)
             cc_model.appendRow(item)
         try:

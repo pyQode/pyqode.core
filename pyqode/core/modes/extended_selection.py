@@ -76,7 +76,7 @@ class ExtendedSelectionMode(Mode):
         # setup menu
         menu = QtWidgets.QMenu(self.editor)
         menu.setTitle('Select')
-        menu.menuAction().setIcon(self.editor.action_select_all.icon())
+        menu.menuAction().setIcon(QtGui.QIcon.fromTheme('edit-select'))
         # setup actions
         menu.addAction(self.action_select_word)
         menu.addAction(self.action_select_extended_word)
@@ -84,6 +84,10 @@ class ExtendedSelectionMode(Mode):
         menu.addAction(self.action_select_line)
         menu.addSeparator()
         menu.addAction(self.editor.action_select_all)
+        icon = QtGui.QIcon.fromTheme(
+            'edit-select-all', QtGui.QIcon(
+                ':/pyqode-icons/rc/edit-select-all.png'))
+        self.editor.action_select_all.setIcon(icon)
         return menu
 
     def on_install(self, editor):

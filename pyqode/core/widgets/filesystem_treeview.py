@@ -588,6 +588,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.action_rename = QtWidgets.QAction('&Rename', self)
         self.action_rename.setShortcut('F2')
         self.action_rename.triggered.connect(self._on_rename_triggered)
+        self.action_rename.setIcon(QtGui.QIcon.fromTheme('edit-rename'))
         self.addAction(self.action_rename)
         # Delete
         self.action_delete = QtWidgets.QAction('&Delete', self)
@@ -606,6 +607,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         else:
             text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
         action = self.action_show_in_explorer = self.addAction(text)
+        action.setIcon(QtGui.QIcon.fromTheme('system-file-manager'))
         action.triggered.connect(self._on_show_in_explorer_triggered)
 
     def get_new_user_actions(self):
