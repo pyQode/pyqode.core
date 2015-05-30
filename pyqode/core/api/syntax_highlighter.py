@@ -236,7 +236,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     @property
     def color_scheme(self):
         """
-        Returns a reference to the current color scheme.
+        Gets/Sets the color scheme of the syntax highlighter, this will trigger
+        a rehighlight automatically.
         """
         return self._color_scheme
 
