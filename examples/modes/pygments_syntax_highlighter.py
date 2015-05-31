@@ -17,7 +17,7 @@ if __name__ == '__main__':
     editor.backend.start(server.__file__)
     editor.resize(800, 600)
     sh = editor.modes.append(PygmentsSH(editor.document()))
-    sh.color_scheme = ColorScheme('monokai')
+    sh.color_scheme = 'monokai'
     editor.file.open(__file__)
     editor.show()
     app.exec_()
