@@ -1,5 +1,24 @@
 Change Log
 ==========
+2.6.3
+-----
+
+Improvements:
+    - a few improvements to some internal functions which leads to better
+      performances in big files.
+    - add file_size_limit to FileManager, when the file size is bigger than the
+      limit, syntax highligher will get disabled
+    - Improve plasma 5 integration (will use more icons from theme (
+      code-variable, code-function,...))
+    - Simplified color_scheme api, SyntaxHighlighter.color_scheme now accepts
+      a string instead of a ColorScheme instance
+
+Fixed bugs:
+    - Fix Ctrl+Home (jump to first line)
+    - Fix copy of directory in FileSystemTreeView
+    - Fix file watcher notification when saving big files.
+
+
 2.6.2
 -----
 
@@ -59,7 +78,7 @@ New features:
     - Wheel support
 
 Fixed bugs:
-    - Fix an issue with draggable tabs on OSX (see pyQode/pyQode#31) and 
+    - Fix an issue with draggable tabs on OSX (see pyQode/pyQode#31) and
       improve tab bar appearance on OSX (see pyQode/pyQode#37)
     - Fix a segfault with SplittableTabWidget (see pyQode/pyQode#32)
     - Fix get_linus_file_explorer on Ubuntu
