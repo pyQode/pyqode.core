@@ -999,7 +999,6 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 *args, parent=self.main_tab_widget, **kwargs)
         editor = self.fallback_editor(*args, parent=self.main_tab_widget,
                                       **kwargs)
-        self.editor_created.emit(editor)
         return editor
 
     def create_new_document(self, base_name='New Document',
@@ -1026,6 +1025,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         name = '%s%d%s' % (base_name, self._new_count, extension)
         tab = self._create_code_edit(
             self.guess_mimetype(name), **kwargs)
+        self.editor_created.emit(tab)
         tab.file.autodetect_eol = autodetect_eol
         tab.file.preferred_eol = preferred_eol
         tab.setDocumentTitle(name)
@@ -1101,6 +1101,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 use_parent_dir = False
 
             tab = self._create_code_edit(self.guess_mimetype(path), **kwargs)
+            self.editor_created.emit(tab)
             tab.file.clean_trailing_whitespaces = clean_trailing_whitespaces
             tab.file.safe_save = safe_save
             tab.file.restore_cursor = restore_cursor_position
