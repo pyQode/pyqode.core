@@ -919,6 +919,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     #: has been emitted.
     dirty_changed = QtCore.Signal(bool)
 
+    #: signal emitted when an editor has been created but just before the file
+    #: is open. This give you a chance to change some editor settings that
+    #: influence file opening.
+    editor_created = QtCore.Signal(object)
+
     #: Store the number of new documents created, for internal use.
     _new_count = 0
 
@@ -992,8 +997,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if mimetype in self.editors.keys():
             return self.editors[mimetype](
                 *args, parent=self.main_tab_widget, **kwargs)
-        return self.fallback_editor(*args, parent=self.main_tab_widget,
-                                    **kwargs)
+        editor = self.fallback_editor(*args, parent=self.main_tab_widget,
+                                      **kwargs)
+        self.editor_created.emit(editor)
+        return editor
 
     def create_new_document(self, base_name='New Document',
                             extension='.txt', preferred_eol=0,
