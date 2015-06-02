@@ -1017,6 +1017,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Overrides showEvent to update the viewport margins """
         super(CodeEdit, self).showEvent(event)
         _logger().debug('show event: %r' % self)
+        self.panels.refresh()
 
     def get_context_menu(self):
         """
