@@ -180,6 +180,8 @@ class FileWatcherMode(Mode, QtCore.QObject):
         Notify user from external file deletion.
         """
         self.file_deleted.emit(self.editor)
+        # file deleted, disable file watcher
+        self.enabled = False
 
     def clone_settings(self, original):
         self.auto_reload = original.auto_reload
