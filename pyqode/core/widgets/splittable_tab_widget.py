@@ -801,7 +801,9 @@ class CodeEditTabWidget(BaseTabWidget):
         :param mimetype: path from which the filter must be derived.
         :return: Filter string
         """
-        return '%s (*%s)' % (mimetype, mimetypes.guess_extension(mimetype))
+        filters = ' '.join(
+            ['*%s' % ext for ext in mimetypes.guess_all_extensions(mimetype)])
+        return '%s (%s)' % (mimetype, filters)
 
     def addTab(self, widget, *args):
         """
