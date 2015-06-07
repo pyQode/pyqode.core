@@ -1,5 +1,11 @@
 Change Log
 ==========
+2.6.4
+-----
+
+Fixed bugs:
+    - fix panels margins not refreshed if panel.setVisible has been called while the editor widget was not visible.
+    - fix bug with filewatcher on file deleted if the user choose to keep the editor open
 2.6.3
 -----
 
