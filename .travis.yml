@@ -23,18 +23,18 @@ before_install:
 install:
     - sudo apt-get install -qq python-qt4 --fix-missing
     - sudo apt-get install -qq python3-pyqt4 --fix-missing
-    - pip install git+https://github.com/pyQode/pyqode.qt.git@dev
+    - pip install --quiet git+https://github.com/pyQode/pyqode.qt.git@dev
 script:
-    - pip install .
+    - pip install --quiet .
     - if [ $QT_API ]; then
           python runtests.py;
       fi
     - if [ $PEP8 ]; then
-          pip install pytest-pep8;
+          pip install --quiet pytest-pep8;
           python runtests.py --pep8 -m pep8;
       fi
     - if [ $COV ]; then
-          pip install pytest-cov;
+          pip install --quiet pytest-cov;
           python runtests.py --cov pyqode;
       fi
 after_script:
