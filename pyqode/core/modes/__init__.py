@@ -11,6 +11,7 @@ from .case_converter import CaseConverterMode
 from .checker import CheckerMode
 from .checker import CheckerMessage
 from .checker import CheckerMessages
+from .cursor_history import CursorHistoryMode
 from .code_completion import CodeCompletionMode
 from .extended_selection import ExtendedSelectionMode
 from .filewatcher import FileWatcherMode
@@ -36,6 +37,7 @@ __all__ = [
     'CheckerMessage',
     'CheckerMessages',
     'CodeCompletionMode',
+    'CursorHistoryMode',
     'ExtendedSelectionMode',
     'FileWatcherMode',
     'IndenterMode',

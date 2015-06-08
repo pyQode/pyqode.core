@@ -113,6 +113,7 @@ class GenericCodeEdit(CodeEdit):
         self.panels.append(panels.FoldingPanel())
 
         # append modes
+        self.modes.append(modes.CursorHistoryMode())
         self.modes.append(modes.AutoCompleteMode())
         self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
