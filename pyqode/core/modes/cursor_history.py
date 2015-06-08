@@ -54,6 +54,8 @@ class CursorHistoryMode(api.Mode):
             self.editor.remove_action(self.action_redo)
 
     def _on_cursor_position_changed(self):
+        if self.editor.textCursor().hasSelection():
+            return
         new_pos = api.TextHelper(self.editor).cursor_position()
         if new_pos[0] != self._prev_pos[0]:
             # only record when line changed
