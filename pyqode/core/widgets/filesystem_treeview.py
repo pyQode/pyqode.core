@@ -368,7 +368,10 @@ class FileSystemHelper:
                 _logger().debug('file copied %s', src)
             if not copy:
                 _logger().debug('removing source (cut operation)')
-                os.remove(src)
+                if os.path.isfile(src):
+                    os.remove(src)
+                else:
+                    shutil.rmtree(src)
 
     @staticmethod
     def _get_files(path):
@@ -392,23 +395,23 @@ class FileSystemHelper:
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.Yes)
         if rep == QtWidgets.QMessageBox.Yes:
+            deleted_files = []
             for fn in urls:
-                deleted_files = []
                 try:
                     if os.path.isfile(fn):
                         os.remove(fn)
                         deleted_files.append(fn)
                     else:
-                        deleted_files = self._get_files(fn)
+                        files = self._get_files(fn)
                         shutil.rmtree(fn)
+                        deleted_files += files
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
                     _logger().exception('failed to remove %s', fn)
-                else:
-                    for d in deleted_files:
-                        _logger().debug('%s removed', d)
-                        self.tree_view.file_deleted.emit(os.path.normpath(d))
+            for d in deleted_files:
+                _logger().debug('%s removed', d)
+                self.tree_view.file_deleted.emit(os.path.normpath(d))
 
     def get_current_path(self):
         """
