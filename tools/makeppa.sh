@@ -5,6 +5,9 @@ ppa="ppa:colin-duquesnoy/stable"
 name="pyqode-core"
 version="2.6.1"
 
+# go to source root
+cd ..
+
 # read pgp key from gpg_key file
 gpg_key=`cat gpg_key`
 
@@ -22,7 +25,7 @@ do
     # sign our package and prepare it for ppa upload
     pushd deb_dist
     pushd ${name}-${version}
-    
+
     # update changelog to include ubuntu release
     changelog="${name} (${version}-1ppa1~${suite}1) ${suite}; urgency=low
   * Initial release
@@ -35,7 +38,7 @@ do
     popd
 
     # upload to ppa
-    dput ${ppa} *.changes      
+    dput ${ppa} *.changes
     rm -rf *.dsc *.changes
 
     popd

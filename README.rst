@@ -66,34 +66,19 @@ Testing
 
 pyqode.core has a test suite and measure its coverage.
 
-To run the tests, you must first install tox and pytest::
+To run the tests, just run runtests.py with the interpreter you want
+to run the test suite::
 
-    $ pip install tox pytest
+    python2.7 runtests.py
+    python3.4 runtests.py
 
-You might also want to install pytest-cov and pytest-pep8.
+To measure coverage, install pytest-cov package and run::
 
-Then you can run the tests by running the following command::
+    python runtests.py --cov pyqode
 
-    $ tox
+To check for PEP8 warnings, use:
 
-To run the tests for a specifc environment, use the -e option. E.g. to run
-tests with python 2.7 and pyqt4, you would run::
-
-    $ tox -e py27-pyqt4
-
-Here is the list of available test environments:
-
-- py27-pyqt4
-- py27-pyqt5
-- py32-pyqt4
-- py32-pyqt5
-- py33-pyqt4
-- py33-pyqt5
-- py34-pyqt4
-- py34-pyqt5
-- cov
-- pep8
-
+    python runtests.py --pep8 -m pep8
 
 .. _Changelog: https://github.com/pyQode/pyqode.core/blob/master/CHANGELOG.rst
 .. _Contributing: https://github.com/pyQode/pyqode.core/blob/master/CONTRIBUTING.rst
