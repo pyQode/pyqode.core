@@ -40,8 +40,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
             #: The list of file extension to exclude
             self.ignored_patterns = [
-                '*.pyc', '*.pyd', '*.so', '*.dll', '*.exe',
-                '*.egg-info', '*.coverage', '.DS_Store', '__pycache__']
+                '*.pyc', '*.pyo', '*.coverage', '.DS_Store', '__pycache__']
             self._ignored_unused = []
 
         def set_root_path(self, path):
