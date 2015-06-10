@@ -898,6 +898,12 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     #: even with child tab bars
     tab_bar_double_clicked = QtCore.Signal()
 
+    #: Signal emitted when a document has been saved.
+    #: Parameters:
+    #     - save_file_path
+    #     - old_content
+    document_saved = QtCore.Signal(str, str)
+
     #: uses a CodeEditTabWidget which is able to save code editor widgets.
     tab_widget_klass = CodeEditTabWidget
 
@@ -964,6 +970,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if not self.main_tab_widget.save_widget(self._current):
             self._current.file._path = mem
         CodeEditTabWidget.default_directory = os.path.expanduser('~')
+        self.document_saved.emit(self._current.file.path, '')
         return self._current.file.path
 
     def save_current(self):
@@ -972,7 +979,14 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         will be shown.
         """
         if self._current is not None:
-            self.main_tab_widget.save_widget(self._current)
+            self._save(self._current)
+
+    def _save(self, widget):
+        path = widget.file.path
+        with open(path) as f:
+            old_content = f.read()
+        self.main_tab_widget.save_widget(widget)
+        self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """
@@ -980,7 +994,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         for w in self.widgets():
             try:
-                self.main_tab_widget.save_widget(w)
+                self._save(w)
             except OSError:
                 _logger().exception('failed to save %s', w.file.path)
 
