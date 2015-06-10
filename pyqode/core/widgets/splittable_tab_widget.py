@@ -870,10 +870,10 @@ class CodeEditTabWidget(BaseTabWidget):
                 if len(editor.mimetypes):
                     path += mimetypes.guess_extension(editor.mimetypes[0])
             editor.file._path = path
-        text = os.path.split(editor.file.path)[1]
         editor.file.save()
         tw = editor.parent_tab_widget
-        tw.setTabText(tw.indexOf(editor), text)
+        text = tw.tabText(tw.indexOf(editor))
+        tw.setTabText(tw.indexOf(editor), text.replace('*', ''))
         for clone in [editor] + editor.clones:
             if clone != editor:
                 tw = clone.parent_tab_widget
