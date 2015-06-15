@@ -326,8 +326,11 @@ class FileManager(Manager):
             pass  # empty file
         else:
             while last_line == '':
-                lines.pop()
-                last_line = lines[-1]
+                try:
+                    lines.pop()
+                    last_line = lines[-1]
+                except IndexError:
+                    last_line = None
         text = self._eol.join(lines) + self._eol
         return text.encode(encoding)
 
