@@ -363,7 +363,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             pass
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()
-        _logger().info('rehighlight duration: %fs' % (end - start))
+        _logger().debug('rehighlight duration: %fs' % (end - start))
 
     def on_install(self, editor):
         super(SyntaxHighlighter, self).on_install(editor)
