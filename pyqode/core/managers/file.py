@@ -274,7 +274,7 @@ class FileManager(Manager):
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
             ret_val = True
-            _logger().info('file open: %s', path)
+            _logger().debug('file open: %s', path)
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
@@ -399,7 +399,7 @@ class FileManager(Manager):
             self._path = os.path.normpath(path)
             self.editor.text_saved.emit(str(path))
             self.saving = False
-            _logger().info('file saved: %s', path)
+            _logger().debug('file saved: %s', path)
 
     def close(self, clear=True):
         """
