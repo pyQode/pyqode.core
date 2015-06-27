@@ -387,3 +387,6 @@ class FoldScope(object):
         if counter < limit:
             return block
         return None
+
+    def __repr__(self):
+        return 'FoldScope(start=%r, end=%d)' % self.get_range()

@@ -153,8 +153,7 @@ class TextHelper(object):
                 pass
             else:
                 from pyqode.core.api.folding import FoldScope
-                if not block.isVisible() or TextBlockHelper.is_fold_trigger(
-                        block):
+                if not block.isVisible():
                     block = FoldScope.find_parent_scope(block)
                     if TextBlockHelper.is_collapsed(block):
                         folding_panel.toggle_fold_trigger(block)
