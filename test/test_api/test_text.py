@@ -8,7 +8,7 @@ import sys
 import pytest
 from pyqode.core.api.utils import TextHelper, keep_tc_pos
 
-from pyqode.qt import QtGui
+from pyqode.qt import QtGui, QtWidgets
 from pyqode.qt.QtTest import QTest
 from ..helpers import editor_open
 
@@ -129,6 +129,10 @@ def test_open_file(editor):
 def test_save_file(editor):
     path = os.path.join(os.getcwd(), 'tmp.py')
     TextHelper(editor).select_lines(0, 1)
+    assert isinstance(editor, QtWidgets.QPlainTextEdit)
+    assert not editor.dirty
+    editor.appendPlainText('some text')
+    assert editor.dirty
     editor.file.save(path, encoding='utf-8')
     assert os.path.exists(path)
     assert editor.file.encoding == 'utf-8'
@@ -232,7 +236,7 @@ def test_search_text(editor):
     occurences, index = TextHelper(editor).search_text(
         editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively)
     assert index == -1
-    assert len(occurences) == 11
+    assert len(occurences) == 10
 
 
 @editor_open(__file__)
@@ -292,7 +296,7 @@ def test_extended_selection(editor):
 
 @editor_open(__file__)
 def test_matched_selection(editor):
-    line, column, text = 232, 14, '''        editor.textCursor(), 'import', QtGui.QTextDocument.FindCaseSensitively'''
+    line, column, text = 297, 14, '''__file__'''
     cursor = editor.textCursor()
     assert not cursor.hasSelection()
     helper = TextHelper(editor)
