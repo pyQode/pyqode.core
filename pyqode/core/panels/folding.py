@@ -640,35 +640,39 @@ class FoldingPanel(Panel):
                 self._block_nbr = -1
             self.editor.new_text_set.disconnect(self._clear_block_deco)
 
-    def _select_scope(self, block, c):
-        """
-        Select the content of a scope
-        """
-        start_block = block
-        _, end = FoldScope(block).get_range()
-        end_block = self.editor.document().findBlockByNumber(end)
-        c.beginEditBlock()
-        c.setPosition(start_block.position())
-        c.setPosition(end_block.position(), c.KeepAnchor)
-        c.deleteChar()
-        c.endEditBlock()
-
     def _on_key_pressed(self, event):
         """
         Override key press to select the current scope if the user wants
         to deleted a folded scope (without selecting it).
         """
-        if event.text() or event.key() in [QtCore.Qt.Key_Backspace,
-                                           QtCore.Qt.Key_Delete,
-                                           QtCore.Qt.Key_Return]:
+        delete_request = event.key() in [QtCore.Qt.Key_Backspace,
+                                         QtCore.Qt.Key_Delete]
+        if event.text() or delete_request:
             cursor = self.editor.textCursor()
-            block = self.editor.document().findBlock(cursor.position())
-            th = TextBlockHelper()
-            if th.is_fold_trigger(block) and th.is_collapsed(block):
-                self.toggle_fold_trigger(block)
-                if event.key() == QtCore.Qt.Key_Return:
-                    # don't process return, just expand tab
-                    event.setAccepted(True)
+            if cursor.hasSelection():
+                # change selection to encompass the whole scope.
+                positions_to_check = cursor.selectionStart(), cursor.selectionEnd()
+            else:
+                positions_to_check = (cursor.position(), )
+            for pos in positions_to_check:
+                block = self.editor.document().findBlock(pos)
+                th = TextBlockHelper()
+                if th.is_fold_trigger(block) and th.is_collapsed(block):
+                    self.toggle_fold_trigger(block)
+                    if delete_request and cursor.hasSelection():
+                        scope = FoldScope(self.find_parent_scope(block))
+                        tc = TextHelper(self.editor).select_lines(*scope.get_range())
+                        if tc.selectionStart() > cursor.selectionStart():
+                            start = cursor.selectionStart()
+                        else:
+                            start = tc.selectionStart()
+                        if tc.selectionEnd() < cursor.selectionEnd():
+                            end = cursor.selectionEnd()
+                        else:
+                            end = tc.selectionEnd()
+                        tc.setPosition(start)
+                        tc.setPosition(end, tc.KeepAnchor)
+                        self.editor.setTextCursor(tc)
 
     @staticmethod
     def _show_previous_blank_lines(block):
