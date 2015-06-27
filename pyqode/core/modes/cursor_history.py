@@ -57,8 +57,9 @@ class CursorHistoryMode(api.Mode):
         if self.editor.textCursor().hasSelection():
             return
         new_pos = api.TextHelper(self.editor).cursor_position()
-        if new_pos[0] != self._prev_pos[0]:
-            # only record when line changed
+        if abs(new_pos[0] - self._prev_pos[0]) > 1:
+            # only record when line changed and don't record change if the user
+            # just wen to the previous/next line
             cmd = MoveCursorCommand(new_pos, self._prev_pos, self.editor)
             self.undo_stack.push(cmd)
         self._prev_pos = new_pos
