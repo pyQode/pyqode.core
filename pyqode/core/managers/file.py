@@ -346,8 +346,9 @@ class FileManager(Manager):
             error. None to use the locale preferred encoding
 
         """
-        if not self.editor.dirty and (encoding is None or
-                                      encoding == self.encoding):
+        if not self.editor.dirty and \
+                (encoding is None or encoding == self.encoding) and \
+                (path is None or path == self.path):
             return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
