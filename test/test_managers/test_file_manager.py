@@ -78,6 +78,7 @@ def test_preferred_encodings(editor, preferred_eol):
     editor.file.preferred_eol = preferred_eol
     editor.file.open(fn)
     assert editor.file._eol == editor.file.EOL.string(preferred_eol)
+    editor.appendPlainText('some text')
     editor.file.save()
     with open(fn, 'Ur') as f:
         print(f.read())
