@@ -1,5 +1,16 @@
 Change Log
 ==========
+2.6.6
+-----
+
+Fixed bugs:
+    - FSTreeView: fix bug with cut of directories
+    - SplittableCodeEditTabWidget: fix keep unique tab text on save
+    - FileManager: fix bug in clean text when text is empty
+    - FileManager: fix log level of unwanted/parasiting info messages
+    - FileManager: don't save file if editor is not dirty and encoding has not changed
+    - Folding: fix issue with deleting folded scope.
+
 2.6.5
 -----
 
