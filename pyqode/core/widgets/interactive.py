@@ -264,6 +264,8 @@ class InteractiveConsole(QTextEdit):
             self._running = False
 
     def keyPressEvent(self, event):
+        if not self.is_running:
+            return
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
             if sys.platform == 'win32':
