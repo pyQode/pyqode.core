@@ -136,16 +136,20 @@ class GenericCodeEdit(CodeEdit):
             mime_type = self.file.mimetype
         if encoding is None:
             encoding = self.file.encoding
-        self.syntax_highlighter.set_lexer_from_filename(self.file.path)
         try:
-            mimetype = self.syntax_highlighter._lexer.mimetypes[0]
-        except (AttributeError, IndexError):
-            mimetype = ''
+            self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+            try:
+                mimetype = self.syntax_highlighter._lexer.mimetypes[0]
+            except (AttributeError, IndexError):
+                mimetype = ''
 
-        if mimetype in self._char_based_mimetypes:
-            self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
-        else:
-            self.syntax_highlighter.fold_detector = IndentFoldDetector()
+            if mimetype in self._char_based_mimetypes:
+                self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
+            else:
+                self.syntax_highlighter.fold_detector = IndentFoldDetector()
+        except AttributeError:
+            # syntax highlighter removed, e.g. file size > FileManager.limit
+            pass
 
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
 

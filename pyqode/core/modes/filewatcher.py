@@ -105,7 +105,10 @@ class FileWatcherMode(Mode, QtCore.QObject):
             # file path is none, this happen if you use setPlainText instead of
             # openFile. This is perfectly fine, we just do not have anything to
             # watch
-            self._timer.stop()
+            try:
+                self._timer.stop()
+            except AttributeError:
+                pass
 
     def _check_mtime(self):
         """
