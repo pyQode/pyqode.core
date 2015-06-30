@@ -29,8 +29,13 @@ class PanelsManager(Manager):
             Panel.Position.RIGHT: {},
             Panel.Position.BOTTOM: {}
         }
-        editor.blockCountChanged.connect(self._update_viewport_margins)
-        editor.updateRequest.connect(self._update)
+        try:
+            editor.blockCountChanged.connect(self._update_viewport_margins)
+            editor.updateRequest.connect(self._update)
+        except AttributeError:
+            # QTextEdit
+            editor.document().blockCountChanged.connect(
+                self._update_viewport_margins)
 
     def append(self, panel, position=Panel.Position.LEFT):
         """

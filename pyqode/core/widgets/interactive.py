@@ -9,6 +9,8 @@ import os
 import sys
 
 from pyqode.core.api.client import PROCESS_ERROR_STRING
+from pyqode.core.managers.decorations import TextDecorationsManager
+from pyqode.core.managers.panels import PanelsManager
 from pyqode.qt.QtCore import Qt, Signal, QProcess, QProcessEnvironment
 from pyqode.qt.QtWidgets import QTextEdit
 from pyqode.qt.QtGui import QColor, QTextCursor, QFont
@@ -41,6 +43,11 @@ class InteractiveConsole(QTextEdit):
 
     def __init__(self, parent=None):
         super(InteractiveConsole, self).__init__(parent)
+        self.panels = PanelsManager(self)
+        self.decorations = TextDecorationsManager(self)
+        from pyqode.core.panels import SearchAndReplacePanel
+        self.panels.append(SearchAndReplacePanel(),
+                           SearchAndReplacePanel.Position.TOP)
         self._stdout_col = QColor("#404040")
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
@@ -63,6 +70,17 @@ class InteractiveConsole(QTextEdit):
         self._font_family = font
         self.setFont(QFont(font, 10))
         self.setReadOnly(True)
+
+    def showEvent(self, event):
+        super(InteractiveConsole, self).showEvent(event)
+        self.panels.refresh()
+
+    def resizeEvent(self, e):
+        super(InteractiveConsole, self).resizeEvent(e)
+        self.panels.resize()
+
+    def add_action(self, action):
+        self.addAction(action)
 
     def set_writer(self, writer):
         """
@@ -369,3 +387,12 @@ class InteractiveConsole(QTextEdit):
             self.stderr_color = QColor('#FF8080')
         else:
             self.stderr_color = QColor('red')
+
+
+if __name__ == '__main__':
+    from pyqode.qt import QtWidgets
+    app = QtWidgets.QApplication([])
+    console = InteractiveConsole()
+    console.start_process('cal')
+    console.show()
+    app.exec_()

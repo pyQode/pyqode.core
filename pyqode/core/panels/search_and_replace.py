@@ -500,8 +500,11 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             'whole_word': whole_word,
             'case_sensitive': case_sensitive
         }
-        self.editor.backend.send_request(findall, request_data,
-                                         self._on_results_available)
+        try:
+            self.editor.backend.send_request(findall, request_data,
+                                             self._on_results_available)
+        except AttributeError:
+            self._on_results_available(findall(request_data))
 
     def _on_results_available(self, results):
         self._occurrences = results
