@@ -26,7 +26,10 @@ class Marker(QtCore.QObject):
         Gets the marker position (line number)
         :type: int
         """
-        return self._position
+        try:
+            return self.block.blockNumber()
+        except AttributeError:
+            return self._position  # not added yet
 
     @property
     def icon(self):
@@ -45,8 +48,8 @@ class Marker(QtCore.QObject):
         :param position: The marker position/line number.
         :type position: int
 
-        :param icon: the icon filename.
-        :type icon: str
+        :param icon: The icon to display
+        :type icon: QtGui.QIcon
 
         :param parent: The optional parent object.
         :type parent: QtCore.QObject or None
@@ -76,7 +79,9 @@ class MarkerPanel(Panel):
     #: Signal emitted when the user clicked in a place where there is no
     #: marker.
     add_marker_requested = QtCore.Signal(int)
-    #: Signal emitted when the user clicked on an existing marker.
+    #: Signal emitted when the user right clicked on an existing marker.
+    edit_marker_requested = QtCore.Signal(int)
+    #: Signal emitted when the user left clicked on an existing marker.
     remove_marker_requested = QtCore.Signal(int)
 
     def __init__(self):
@@ -89,6 +94,13 @@ class MarkerPanel(Panel):
         self.setMouseTracking(True)
         self._to_remove = []
 
+    @property
+    def markers(self):
+        """
+        Gets all markers.
+        """
+        return self._markers
+
     def add_marker(self, marker):
         """
         Adds the marker to the panel.
@@ -96,36 +108,12 @@ class MarkerPanel(Panel):
         :param marker: Marker to add
         :type marker: pyqode.core.modes.Marker
         """
-        key, val = self.make_marker_icon(marker.icon)
-        if key and val:
-            self._icons[key] = val
         self._markers.append(marker)
         doc = self.editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
-        block = doc.findBlockByLineNumber(marker.position - 1)
-        user_data = block.userData()
-        if user_data is None:
-            user_data = TextBlockUserData()
-            block.setUserData(user_data)
-        marker.panel_ref = self
-        user_data.markers.append(marker)
+        block = doc.findBlockByLineNumber(marker._position)
+        marker.block = block
         self.repaint()
-
-    @staticmethod
-    @memoized
-    def make_marker_icon(icon):
-        """
-        Make (and memoize) an icon from an icon filename.
-
-        :param icon: Icon filename or tuple (to use a theme).
-        """
-        if isinstance(icon, tuple):
-            return icon[0], QtGui.QIcon.fromTheme(
-                icon[0], QtGui.QIcon(icon[1]))
-        elif isinstance(icon, str):
-            return icon, QtGui.QIcon(icon)
-        else:
-            return None, None
 
     def remove_marker(self, marker):
         """
@@ -173,37 +161,14 @@ class MarkerPanel(Panel):
         Panel.paintEvent(self, event)
         painter = QtGui.QPainter(self)
         for top, block_nbr, block in self.editor.visible_blocks:
-            user_data = block.userData()
-            if hasattr(user_data, "markers"):
-                markers = user_data.markers
-                for i, marker in enumerate(markers):
-                    if (hasattr(marker, 'panel_ref') and
-                            marker.panel_ref == self):
-                        # only draw our markers
-                        if marker in self._to_remove:
-                            try:
-                                user_data.markers.remove(None)
-                                self._to_remove.remove(marker)
-                            except ValueError:
-                                pass
-                            continue
-                        if marker and marker.icon:
-                            rect = QtCore.QRect()
-                            rect.setX(0)
-                            rect.setY(top)
-                            rect.setWidth(self.sizeHint().width())
-                            rect.setHeight(self.sizeHint().height())
-                            if isinstance(marker.icon, tuple):
-                                key = marker.icon[0]
-                            else:
-                                key = marker.icon
-                            if key not in self._icons:
-                                key, val = self.make_marker_icon(marker.icon)
-                                if key and val:
-                                    self._icons[key] = val
-                                else:
-                                    continue
-                            self._icons[key].paint(painter, rect)
+            for marker in self._markers:
+                if marker.block == block and marker.icon:
+                    rect = QtCore.QRect()
+                    rect.setX(0)
+                    rect.setY(top)
+                    rect.setWidth(self.sizeHint().width())
+                    rect.setHeight(self.sizeHint().height())
+                    marker.icon.paint(painter, rect)
 
     def mousePressEvent(self, event):
         # Handle mouse press:
@@ -213,8 +178,12 @@ class MarkerPanel(Panel):
         #   the mouse cursor.
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         if self.marker_for_line(line):
-            _logger().debug("remove marker requested")
-            self.remove_marker_requested.emit(line)
+            if event.button() == QtCore.Qt.LeftButton:
+                _logger().debug("remove marker requested")
+                self.remove_marker_requested.emit(line)
+            else:
+                _logger().debug('edit marker requested')
+                self.edit_marker_requested.emit(line)
         else:
             _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)

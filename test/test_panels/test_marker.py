@@ -47,14 +47,6 @@ def test_clear_markers(editor):
 
 
 @editor_open(__file__)
-def test_make_marker_icon(editor):
-    panel = get_panel(editor)
-    # other tests already test icon from tuple or from string
-    # we still need to test empty icons -> None
-    assert panel.make_marker_icon(None) == (None, None)
-
-
-@editor_open(__file__)
 def test_leave_event(editor):
     panel = get_panel(editor)
     panel.leaveEvent()
