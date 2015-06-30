@@ -932,6 +932,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     #: influence file opening.
     editor_created = QtCore.Signal(object)
 
+    #: signal emitted when en editor has been created and the document has
+    #: been sucessfully open
+    document_opened = QtCore.Signal(object)
+
     #: Store the number of new documents created, for internal use.
     _new_count = 0
 
@@ -1046,6 +1050,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         tab.file.preferred_eol = preferred_eol
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
+        self.document_opened.emit(tab)
         return tab
 
     def guess_mimetype(self, path):
@@ -1129,6 +1134,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tab.setDocumentTitle(name)
             icon = self._icon(path)
             self.add_tab(tab, title=name, icon=icon)
+            self.document_opened.emit(tab)
             return tab
 
     def close_document(self, path):
