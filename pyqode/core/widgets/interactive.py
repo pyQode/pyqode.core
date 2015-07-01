@@ -70,6 +70,7 @@ class InteractiveConsole(QTextEdit):
         self._font_family = font
         self.setFont(QFont(font, 10))
         self.setReadOnly(True)
+        self._mask_user_input = False
 
     def showEvent(self, event):
         super(InteractiveConsole, self).showEvent(event)
@@ -218,6 +219,19 @@ class InteractiveConsole(QTextEdit):
         """
         return self._running
 
+    @property
+    def mask_user_input(self):
+        return self._mask_user_input
+
+    @mask_user_input.setter
+    def mask_user_input(self, value):
+        """
+        If true, user input will be replaced by "*".
+
+        Could be useful to run commands as root.
+        """
+        self._mask_user_input = value
+
     def closeEvent(self, *args, **kwargs):
         if self.process.state() == QProcess.Running:
             self.process.terminate()
@@ -281,28 +295,39 @@ class InteractiveConsole(QTextEdit):
             self.setReadOnly(True)
             self._running = False
 
+    def get_user_buffer_as_bytes(self):
+        """
+        Returns the user buffer as a bytes.
+        """
+        return bytes(self._usr_buffer, locale.getpreferredencoding())
+
     def keyPressEvent(self, event):
-        if not self.is_running:
+        if not self.is_running or self.textCursor().hasSelection():
             return
+        propagate_to_parent = True
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # send the user input to the child process
             if sys.platform == 'win32':
                 self._usr_buffer += "\r"
             self._usr_buffer += "\n"
-            self.process.write(bytes(
-                self._usr_buffer, locale.getpreferredencoding()))
+            self.process.write(self.get_user_buffer_as_bytes())
             self._usr_buffer = ""
         else:
-            if event.key() != Qt.Key_Backspace:
+            if event.key() != Qt.Key_Backspace and event.text():
                 txt = event.text()
                 self._usr_buffer += txt
+                if self._mask_user_input:
+                    txt = '*'
                 self.setTextColor(self._stdin_col)
+                self.insertPlainText(txt)
+                propagate_to_parent = False
             elif event.text().isalnum():
                 self._usr_buffer = self._usr_buffer[
                     0:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
-        super(InteractiveConsole, self).keyPressEvent(event)
+        if propagate_to_parent:
+            super(InteractiveConsole, self).keyPressEvent(event)
         self.setTextColor(self._stdout_col)
 
     def _on_process_finished(self, exit_code, exit_status):
