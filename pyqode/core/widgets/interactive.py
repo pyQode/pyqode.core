@@ -306,6 +306,8 @@ class InteractiveConsole(QTextEdit):
         self.setTextColor(self._stdout_col)
 
     def _on_process_finished(self, exit_code, exit_status):
+        if self is None:
+            return
         if not self._user_stop:
             if self._write_app_messages:
                 if exit_status == 0:
@@ -320,8 +322,13 @@ class InteractiveConsole(QTextEdit):
         self._running = False
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
-        self.process_finished.emit(exit_code)
-        self.setReadOnly(True)
+        try:
+            self.process_finished.emit(exit_code)
+        except TypeError:
+            # pyqtSignal must be bound to a QObject, not 'InteractiveConsole'
+            pass
+        else:
+            self.setReadOnly(True)
 
     def _write_started(self):
         if not self._write_app_messages:
@@ -332,6 +339,8 @@ class InteractiveConsole(QTextEdit):
         _logger().debug('process started')
 
     def _write_error(self, error):
+        if self is None:
+            return
         if self._user_stop:
             self._writer(self, '\nProcess stopped by the user',
                          self.app_msg_color)
@@ -356,10 +365,13 @@ class InteractiveConsole(QTextEdit):
         :param color: Desired text color
         :type color: QColor
         """
-        text_edit.moveCursor(QTextCursor.End)
-        text_edit.setTextColor(color)
-        text_edit.insertPlainText(text)
-        text_edit.moveCursor(QTextCursor.End)
+        try:
+            text_edit.moveCursor(QTextCursor.End)
+            text_edit.setTextColor(color)
+            text_edit.insertPlainText(text)
+            text_edit.moveCursor(QTextCursor.End)
+        except RuntimeError:
+            pass
 
     def apply_color_scheme(self, color_scheme):
         """
