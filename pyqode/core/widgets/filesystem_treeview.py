@@ -679,9 +679,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     @classmethod
     def get_file_explorer_name(cls):
-        pgm = cls.get_file_explorer_command().split(' ')[0]
-        if os.path.isabs(pgm):
-            pgm = os.path.split(pgm)[1]
+        system = platform.system()
+        if system == 'Darwin':
+            pgm = 'finder'
+        elif system == 'Windows':
+            pgm = 'explorer'
+        else:
+            pgm = cls.get_file_explorer_command().split(' ')[0]
+            if os.path.isabs(pgm):
+                pgm = os.path.split(pgm)[1]
         return pgm.capitalize()
 
     def _on_show_in_explorer_triggered(self):
