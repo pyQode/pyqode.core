@@ -686,7 +686,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
-        self.show_in_explorer(path)
+        self.show_in_explorer(path, self.tree_view)
 
     @classmethod
     def get_file_explorer_command(cls):
@@ -716,11 +716,13 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         cls._command = command
 
     @classmethod
-    def show_in_explorer(cls, path):
-        cmd = cls.get_file_explorer_command() % os.path.normpath(path)
-        _logger().info('show file in explorer: %s' % cmd)
-        args = cmd.split(' ')
+    def show_in_explorer(cls, path, parent):
         try:
+            cmd = cls.get_file_explorer_command() % os.path.normpath(path)
+            _logger().info('show file in explorer: %s' % cmd)
+            args = cmd.split(' ')
             subprocess.Popen(args)
-        except OSError:
-            _logger().exception('failed to open file in explorer')
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                parent, 'Open in explorer',
+                'Failed to open file in explorer.\n\n%s' % str(e))
