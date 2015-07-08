@@ -86,6 +86,11 @@ class FileSystemTreeView(QtWidgets.QTreeView):
     #: - path (str): path of the file that got created
     file_created = QtCore.Signal(str)
 
+    #: signal emitted just before the context menu is shown
+    #: Parameters:
+    #:   - file path: current file path.
+    about_to_show_context_menu = QtCore.Signal(str)
+
     def __init__(self, parent=None):
         super(FileSystemTreeView, self).__init__(parent)
         self.context_menu = None
@@ -229,6 +234,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
     def _show_context_menu(self, point):
         if self.context_menu:
+            self.about_to_show_context_menu.emit(
+                FileSystemHelper(self).get_current_path())
             self.context_menu.exec_(self.mapToGlobal(point))
 
     def select_path(self, path):
@@ -688,10 +695,9 @@ class FileSystemContextMenu(QtWidgets.QMenu):
             if system == 'Linux':
                 explorer = cls.get_linux_file_explorer()
                 if explorer in ['nautilus', 'dolphin']:
-                    explorer_cmd = '%s --select %s' % (
-                        shutil.which(explorer), '%s')
+                    explorer_cmd = '%s --select %s' % (explorer, '%s')
                 else:
-                    explorer_cmd = '%s %s' % (shutil.which(explorer), '%s')
+                    explorer_cmd = '%s %s' % (explorer, '%s')
             elif system == 'Windows':
                 explorer_cmd = 'explorer /select,"%s"'
             elif system == 'Darwin':
