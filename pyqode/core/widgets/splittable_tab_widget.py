@@ -987,10 +987,16 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
     def _save(self, widget):
         path = widget.file.path
-        with open(path) as f:
-            old_content = f.read()
-        self.main_tab_widget.save_widget(widget)
-        self.document_saved.emit(path, old_content)
+        try:
+            encoding = widget.file.encoding
+        except AttributeError:
+            # not a code edit
+            pass
+        else:
+            with open(path, encoding=encoding) as f:
+                old_content = f.read()
+            self.main_tab_widget.save_widget(widget)
+            self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """
