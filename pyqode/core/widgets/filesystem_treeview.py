@@ -517,6 +517,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         (e.g. you cannot paste what you copied in the app to the explorer)
 
     """
+    _explorer = None
+    _command = None
 
     def __init__(self):
         super(FileSystemContextMenu, self).__init__()
@@ -601,16 +603,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.addAction(self.action_delete)
         self.addSeparator()
 
-        system = platform.system()
-        if system == 'Windows':
-            text = 'Open in explorer'
-        elif system == 'Darwin':
-            text = 'Open in finder'
-        else:
-            text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
+        text = 'Show in %s' % self.get_file_explorer_name()
         action = self.action_show_in_explorer = self.addAction(text)
         action.setIcon(QtGui.QIcon.fromTheme('system-file-manager'))
         action.triggered.connect(self._on_show_in_explorer_triggered)
+        self._action_show_in_explorer = action
+
+    def update_show_in_explorer_action(self):
+        self.action_show_in_explorer.setText(
+            'Show in %s' % self.get_file_explorer_name())
 
     def get_new_user_actions(self):
         """
@@ -656,27 +657,64 @@ class FileSystemContextMenu(QtWidgets.QMenu):
 
     @classmethod
     def get_linux_file_explorer(cls):
-        output = subprocess.check_output(
-            ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
-        if output:
-            explorer = output.splitlines()[0].replace(
-                '.desktop', '').replace('-folder-handler', '').split(
-                    '.')[-1].lower()
-            return explorer
-        return 'nautilus'
+        if cls._explorer is None:
+            output = subprocess.check_output(
+                ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
+            if output:
+                explorer = output.splitlines()[0].replace(
+                    '.desktop', '').replace('-folder-handler', '').split(
+                        '.')[-1].lower()
+                FileSystemContextMenu._explorer = explorer
+                return explorer
+            return ''
+        else:
+            return cls._explorer
+
+    @classmethod
+    def get_file_explorer_name(cls):
+        pgm = cls.get_file_explorer_command().split(' ')[0]
+        if os.path.isabs(pgm):
+            pgm = os.path.split(pgm)[1]
+        return pgm.capitalize()
 
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
-        system = platform.system()
-        if system == 'Linux':
-            explorer = self.get_linux_file_explorer()
-            if explorer in ['nautilus', 'dolphin']:
-                subprocess.Popen([explorer, '--select', path])
-            else:
-                if os.path.isfile(path):
-                    path = os.path.dirname(path)
-                subprocess.Popen([explorer, path])
-        elif system == 'Windows':
-            subprocess.Popen(r'explorer /select,"%s"' % os.path.normpath(path))
-        elif system == 'Darwin':
-            subprocess.Popen(['open', '-R', path])
+        self.show_in_explorer(path)
+
+    @classmethod
+    def get_file_explorer_command(cls):
+        if cls._command is None:
+            system = platform.system()
+            if system == 'Linux':
+                explorer = cls.get_linux_file_explorer()
+                if explorer in ['nautilus', 'dolphin']:
+                    explorer_cmd = '%s --select %s' % (
+                        shutil.which(explorer), '%s')
+                else:
+                    explorer_cmd = '%s %s' % (shutil.which(explorer), '%s')
+            elif system == 'Windows':
+                explorer_cmd = 'explorer /select,"%s"'
+            elif system == 'Darwin':
+                explorer_cmd = 'open -R %s'
+            cls._command = explorer_cmd
+            return explorer_cmd
+        else:
+            return cls._command
+
+    @classmethod
+    def set_file_explorer_command(cls, command):
+        pgm = command.split(' ')[0]
+        if os.path.isabs(pgm):
+            pgm = os.path.split(pgm)[1]
+        cls._explorer = pgm
+        cls._command = command
+
+    @classmethod
+    def show_in_explorer(cls, path):
+        cmd = cls.get_file_explorer_command() % os.path.normpath(path)
+        _logger().info('show file in explorer: %s' % cmd)
+        args = cmd.split(' ')
+        try:
+            subprocess.Popen(args)
+        except OSError:
+            _logger().exception('failed to open file in explorer')
