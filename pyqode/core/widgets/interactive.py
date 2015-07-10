@@ -40,6 +40,7 @@ class InteractiveConsole(QTextEdit):
     """
     #: Signal emitted when the process has finished.
     process_finished = Signal(int)
+    process_started = Signal()
 
     def __init__(self, parent=None):
         super(InteractiveConsole, self).__init__(parent)
@@ -259,6 +260,7 @@ class InteractiveConsole(QTextEdit):
         if not self._running:
             self.process = QProcess()
             self.process.finished.connect(self._on_process_finished)
+            self.process.started.connect(self.process_started.emit)
             self.process.error.connect(self._write_error)
             self.process.readyReadStandardError.connect(self._on_stderr)
             self.process.readyReadStandardOutput.connect(self._on_stdout)
