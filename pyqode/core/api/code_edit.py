@@ -615,13 +615,17 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
 
-    def add_action(self, action):
+    def add_action(self, action, advanced=True):
         """
         Adds an action to the editor's context menu.
 
         :param action: QtWidgets.QAction
+        :param advanced: True to put the action in the advanced submenu.
         """
-        self._actions.append(action)
+        if advanced:
+            self.menu_advanced.addAction(action)
+        else:
+            self._actions.append(action)
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         super(CodeEdit, self).addAction(action)
 
@@ -647,7 +651,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         return self._actions
 
-    def add_separator(self):
+    def add_separator(self, advanced=True):
         """
         Adds a sepqrator to the editor's context menu.
 
@@ -656,8 +660,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
-        self._actions.append(action)
-        self.addAction(action)
+        if advanced:
+            self.menu_advanced.addAction(action)
+        else:
+            self._actions.append(action)
         return action
 
     def remove_action(self, action):
@@ -1052,6 +1058,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self, create_standard_actions):
         """ Init context menu action """
+        self.menu_advanced = QtWidgets.QMenu('Advanced')
+        self.add_menu(self.menu_advanced)
         if create_standard_actions:
             # Undo
             action = QtWidgets.QAction('Undo', self)
@@ -1059,8 +1067,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
             action.triggered.connect(self.undo)
-            self.undoAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.undoAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, advanced=False)
             self.action_undo = action
             # Redo
             action = QtWidgets.QAction('Redo', self)
@@ -1068,19 +1077,19 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
             action.triggered.connect(self.redo)
-            self.redoAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.redoAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, advanced=False)
             self.action_redo = action
-            # separator
-            self.add_separator()
             # Copy
             action = QtWidgets.QAction('Copy', self)
             action.setShortcut(QtGui.QKeySequence.Copy)
             action.setIcon(icons.icon(
                 'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
             action.triggered.connect(self.copy)
-            self.copyAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.copyAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, advanced=False)
             self.action_copy = action
             # cut
             action = QtWidgets.QAction('Cut', self)
@@ -1088,8 +1097,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
             action.triggered.connect(self.cut)
-            self.copyAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.copyAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, advanced=False)
             self.action_cut = action
             # paste
             action = QtWidgets.QAction('Paste', self)
@@ -1098,34 +1108,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 'edit-paste', ':/pyqode-icons/rc/edit-paste.png',
                 'fa.paste'))
             action.triggered.connect(self.paste)
-            self.add_action(action)
+            self.add_action(action, advanced=False)
             self.action_paste = action
         # duplicate line
         action = QtWidgets.QAction('Duplicate line', self)
         action.setShortcut('Ctrl+D')
         action.triggered.connect(self.duplicate_line)
-        self.add_action(action)
+        self.add_action(action, advanced=False)
         self.action_duplicate_line = action
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
         action.triggered.connect(self.selectAll)
         self.action_select_all = action
-        self.addAction(self.action_select_all)
+        self.add_action(self.action_select_all, advanced=False)
+        self.add_separator(advanced=False)
         if create_standard_actions:
-            # delete
-            action = QtWidgets.QAction('Delete', self)
-            action.setShortcut(QtGui.QKeySequence.Delete)
-            action.setIcon(icons.icon(
-                'edit-delete', ':/pyqode-icons/rc/edit-delete.png',
-                'fa.remove'))
-            action.triggered.connect(self.delete)
-            self.add_action(action)
-            self.action_delete = action
-            self.add_separator()
-            self.add_action(self.action_select_all)
-            # separator
-            self.add_separator()
             # indent
             action = QtWidgets.QAction('Indent', self)
             action.setShortcut('Tab')
@@ -1144,7 +1142,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.triggered.connect(self.un_indent)
             self.add_action(action)
             self.action_un_indent = action
-            # separator
             self.add_separator()
         # goto
         action = QtWidgets.QAction('Go to line', self)
