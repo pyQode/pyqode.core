@@ -38,12 +38,15 @@ def test_actions(editor):
     assert len(editor.actions())
     nb_actions_expected = len(editor.actions())
     action = QtWidgets.QAction('my_action', editor)
-    editor.add_action(action)
+    editor.add_action(action, advanced=False)
     nb_actions_expected += 1
     assert len(editor.actions()) == nb_actions_expected
-    editor.add_separator()
+    editor.add_separator(advanced=False)
     nb_actions_expected += 1
     assert len(editor.actions()) == nb_actions_expected
+    editor.add_separator(advanced=True)
+    nb_actions_expected += 1
+    assert len(editor.actions()) != nb_actions_expected
 
 
 @editor_open(__file__)

@@ -627,11 +627,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         else:
             self._actions.append(action)
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
-        super(CodeEdit, self).addAction(action)
+        self.addAction(action)
 
     def insert_action(self, action, prev_action):
         """
-        Inserts an action to the editor's context menu
+        Inserts an action to the editor's context menu.
 
         :param action: action to insert
         :param prev_action: the action after which the new action must be
@@ -666,16 +666,20 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self._actions.append(action)
         return action
 
-    def remove_action(self, action):
+    def remove_action(self, action, advanced=True):
         """
         Removes an action/separator from the editor's context menu.
 
         :param action: Action/seprator to remove.
+        :param advanced: True to remove the action from the advanced submenu.
         """
-        try:
-            self._actions.remove(action)
-        except ValueError:
-            pass
+        if advanced:
+            self.menu_advanced.removeAction(action)
+        else:
+            try:
+                self._actions.remove(action)
+            except ValueError:
+                pass
         self.removeAction(action)
 
     def add_menu(self, menu):
@@ -690,6 +694,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param menu: menu to add
         """
         self._menus.append(menu)
+        self._menus = sorted(self._menus, key=lambda x: x.title())
         for action in menu.actions():
             action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self.addActions(menu.actions())
