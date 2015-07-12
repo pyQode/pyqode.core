@@ -694,7 +694,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param menu: menu to add
         """
         self._menus.append(menu)
-        self._menus = sorted(self._menus, key=lambda x: x.title())
+        self._menus = sorted(list(set(self._menus)), key=lambda x: x.title())
         for action in menu.actions():
             action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self.addActions(menu.actions())

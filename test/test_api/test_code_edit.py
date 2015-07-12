@@ -333,7 +333,7 @@ def test_goto_line_dlg(editor):
 def test_do_home_key(editor):
     QTest.qWait(2000)
     helper = TextHelper(editor)
-    helper.goto_line(332, 29)
+    helper.goto_line(336, 29)
     assert editor.textCursor().positionInBlock() == 29
     assert TextHelper(editor).line_indent() == 4
     editor._do_home_key()
