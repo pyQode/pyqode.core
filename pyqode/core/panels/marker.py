@@ -3,10 +3,11 @@
 This module contains the marker panel
 """
 import logging
-from pyqode.core.api import TextBlockUserData
+
+from pyqode.core.api import TextDecoration
 from pyqode.core.api.panel import Panel
+from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api.utils import DelayJobRunner, memoized, TextHelper
 
 
 def _logger():
@@ -84,8 +85,21 @@ class MarkerPanel(Panel):
     #: Signal emitted when the user left clicked on an existing marker.
     remove_marker_requested = QtCore.Signal(int)
 
+    @property
+    def background(self):
+        """
+        Marker background color in editor. Use None if no text decoration
+        should be used.
+        """
+        return self._background
+
+    @background.setter
+    def background(self, value):
+        self._background = value
+
     def __init__(self):
         Panel.__init__(self)
+        self._background = QtGui.QColor('#FFC8C8')
         self._markers = []
         self._icons = {}
         self._previous_line = -1
@@ -113,6 +127,12 @@ class MarkerPanel(Panel):
         assert isinstance(doc, QtGui.QTextDocument)
         block = doc.findBlockByLineNumber(marker._position)
         marker.block = block
+        d = TextDecoration(block)
+        d.set_full_width()
+        if self._background:
+            d.set_background(QtGui.QBrush(self._background))
+            marker.decoration = d
+        self.editor.decorations.append(d)
         self.repaint()
 
     def remove_marker(self, marker):
@@ -124,6 +144,8 @@ class MarkerPanel(Panel):
         """
         self._markers.remove(marker)
         self._to_remove.append(marker)
+        if hasattr(marker, 'decoration'):
+            self.editor.decorations.remove(marker.decoration)
         self.repaint()
 
     def clear_markers(self):
