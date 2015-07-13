@@ -188,10 +188,14 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _create_tab_bar_menu(self):
         context_mnu = QtWidgets.QMenu()
-        for action in self.context_actions:
-            context_mnu.addAction(action)
-        if self.context_actions:
-            context_mnu.addSeparator()
+        for name, slot in [('Close', self.close),
+                           ('Close others', self.close_others),
+                           ('Close all', self.close_all)]:
+            qaction = QtWidgets.QAction(name, self)
+            qaction.triggered.connect(slot)
+            context_mnu.addAction(qaction)
+            self.addAction(qaction)
+        context_mnu.addSeparator()
         menu = QtWidgets.QMenu('Split', context_mnu)
         menu.setIcon(QtGui.QIcon.fromTheme('split'))
         a = menu.addAction('Split horizontally')
@@ -202,13 +206,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         a.triggered.connect(self._on_split_requested)
         context_mnu.addMenu(menu)
         context_mnu.addSeparator()
-        for name, slot in [('Close', self.close),
-                           ('Close others', self.close_others),
-                           ('Close all', self.close_all)]:
-            qaction = QtWidgets.QAction(name, self)
-            qaction.triggered.connect(slot)
-            context_mnu.addAction(qaction)
-            self.addAction(qaction)
+        if self.context_actions:
+            context_mnu.addSeparator()
+        for action in self.context_actions:
+            context_mnu.addAction(action)
         self._context_mnu = context_mnu
         return context_mnu
 
