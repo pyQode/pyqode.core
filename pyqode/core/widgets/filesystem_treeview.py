@@ -705,7 +705,7 @@ class FileSystemContextMenu(QtWidgets.QMenu):
                 else:
                     explorer_cmd = '%s %s' % (explorer, '%s')
             elif system == 'Windows':
-                explorer_cmd = 'explorer /select,"%s"'
+                explorer_cmd = 'explorer /select,%s'
             elif system == 'Darwin':
                 explorer_cmd = 'open -R %s'
             cls._command = explorer_cmd
