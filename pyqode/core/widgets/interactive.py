@@ -113,6 +113,17 @@ class InteractiveConsole(QTextEdit):
         self._writer(self, txt, self.stderr_color)
 
     @property
+    def exit_code(self):
+        if self.is_running:
+            return None
+        exit_status = self.process.exitStatus()
+        if exit_status == self.process.Crashed:
+            exit_code = 139
+        else:
+            exit_code = self.process.exitCode()
+        return exit_code
+
+    @property
     def write_app_messages(self):
         return self._write_app_messages
 
@@ -335,18 +346,12 @@ class InteractiveConsole(QTextEdit):
     def _on_process_finished(self, exit_code, exit_status):
         if self is None:
             return
+        self._running = False
         if not self._user_stop:
             if self._write_app_messages:
-                if exit_status == 0:
-                    # no crash, log exit code
-                    self._writer(
-                        self, "\nProcess finished with exit code %d" %
-                        exit_code, self._app_msg_col)
-                else:
-                    self._writer(
-                        self, "\nProcess finished by crashing "
-                              "(exit code not available)", self._app_msg_col)
-        self._running = False
+                self._writer(
+                    self, "\nProcess finished with exit code %d" %
+                    self.exit_code, self._app_msg_col)
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
         try:
