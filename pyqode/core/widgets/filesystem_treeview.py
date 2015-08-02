@@ -100,6 +100,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self._ignored_patterns = []
         self._icon_provider = QtWidgets.QFileIconProvider()
         self._hide_extra_colums = True
+        from pyqode.core.widgets import FileIconProvider
+        self.set_icon_provider(FileIconProvider())
 
     def set_icon_provider(self, icon_provider):
         self._icon_provider = icon_provider
