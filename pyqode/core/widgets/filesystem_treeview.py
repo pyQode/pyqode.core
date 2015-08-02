@@ -2,6 +2,7 @@
 This module contains the file system tree view.
 """
 import fnmatch
+import locale
 import logging
 import os
 import platform
@@ -259,8 +260,8 @@ class FileSystemHelper:
             """
             lst = []
             for url in urls:
-                lst.append(url)
-            self.setData(self.format(self.copy), '\n'.join(lst))
+                lst.append(bytes(url, encoding=locale.getpreferredencoding()))
+            self.setData(self.format(self.copy), b'\n'.join(lst))
 
         @classmethod
         def list_from(cls, mime_data, copy=True):
