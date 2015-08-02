@@ -1,4 +1,5 @@
 import mimetypes
+import sys
 from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
@@ -36,19 +37,22 @@ class FileIconProvider(QtWidgets.QFileIconProvider):
         return QtGui.QIcon.fromTheme('text-x-generic')
 
     def icon(self, type_or_info):
-        if isinstance(type_or_info, QtCore.QFileInfo):
-            if type_or_info.isDir():
-                return QtGui.QIcon.fromTheme('folder')
+        if 'linux' in sys.platform:
+            if isinstance(type_or_info, QtCore.QFileInfo):
+                if type_or_info.isDir():
+                    return QtGui.QIcon.fromTheme('folder')
+                else:
+                    ret_val = self.mimetype_icon(
+                        type_or_info.absoluteFilePath())
+                    return ret_val
             else:
-                ret_val = self.mimetype_icon(
-                    type_or_info.absoluteFilePath())
-                return ret_val
+                map = {
+                    FileIconProvider.File: QtGui.QIcon.fromTheme('text-x-generic'),
+                    FileIconProvider.Folder: QtGui.QIcon.fromTheme('folder'),
+                }
+                try:
+                    return map[type_or_info]
+                except KeyError:
+                    return super().icon(type_or_info)
         else:
-            map = {
-                FileIconProvider.File: QtGui.QIcon.fromTheme('text-x-generic'),
-                FileIconProvider.Folder: QtGui.QIcon.fromTheme('folder'),
-            }
-            try:
-                return map[type_or_info]
-            except KeyError:
-                return super().icon(type_or_info)
+            return QtWidgets.QFileIconProvider().icon(type_or_info)
