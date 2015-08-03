@@ -81,6 +81,13 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     #: Signal emitted when a search operation finished
     search_finished = QtCore.Signal()
 
+    #: Define the maximum number of occurences that can be highlighted
+    #: in the document.
+    #:
+    #: .. note:: The search operation itself is fast but the creation of all
+    #:    the extra selection used to highlight search result can be slow.
+    MAX_HIGHLIGHTED_OCCURENCES = 500
+
     @property
     def background(self):
         """ Text decoration background """
@@ -521,13 +528,14 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _on_search_finished(self):
         self._clear_decorations()
-        occurrences = self.get_occurences()
-        for occurrence in occurrences:
+        all_occurences = self.get_occurences()
+        occurrences = all_occurences[:self.MAX_HIGHLIGHTED_OCCURENCES]
+        for i, occurrence in enumerate(occurrences):
             deco = self._create_decoration(occurrence[0],
                                            occurrence[1])
             self._decorations.append(deco)
             self.editor.decorations.append(deco)
-        self.cpt_occurences = len(occurrences)
+        self.cpt_occurences = len(all_occurences)
         if not self.cpt_occurences:
             self._current_occurrence_index = -1
         self._update_label_matches()
