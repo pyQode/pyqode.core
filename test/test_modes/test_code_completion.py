@@ -1,6 +1,7 @@
 """
 Tests the code completion mode
 """
+import sys
 import functools
 import pytest
 
@@ -213,6 +214,8 @@ def test_show_completion_with_icon(editor):
                              'icon': ':/pyqode-icons/rc/edit-undo.png'}])
 
 
+@pytest.mark.skipif(sys.version_info == (3, 2),
+                    reason="python 3.2 not supported")
 @pytest.mark.parametrize('case', [
     QtCore.Qt.CaseSensitive, QtCore.Qt.CaseInsensitive])
 def test_subsequence_completer(case):
