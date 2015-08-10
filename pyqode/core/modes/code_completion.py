@@ -3,21 +3,14 @@
 This module contains the code completion mode and the related classes.
 """
 import logging
+import re
 import sys
 import time
-
-from pyqode.qt import QtWidgets, QtCore, QtGui
-
-from pyqode.core import backend
 from pyqode.core.api.mode import Mode
-from pyqode.core.api.utils import TextHelper
 from pyqode.core.backend import NotRunning
-
-
-try:
-    from fuzzywuzzy import fuzz
-except SyntaxError:
-    fuzz = None  # py32 not supported
+from pyqode.qt import QtWidgets, QtCore, QtGui
+from pyqode.core.api.utils import TextHelper
+from pyqode.core import backend
 
 
 def _logger():
@@ -26,26 +19,57 @@ def _logger():
 
 class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     """
-    Performs subsequence matching/sorting using the fuzzywuzzy library.
+    Performs subsequence matching/sorting (see pyQode/pyQode#1).
     """
     def __init__(self, case, parent=None):
         QtCore.QSortFilterProxyModel.__init__(self, parent)
+        self.case = case
 
     def set_prefix(self, prefix):
+        self.filter_patterns = []
+        self.sort_patterns = []
+        if self.case == QtCore.Qt.CaseInsensitive:
+            flags = re.IGNORECASE
+        else:
+            flags = 0
+        for i in reversed(range(1, len(prefix) + 1)):
+            ptrn = '.*%s.*%s' % (prefix[0:i], prefix[i:])
+            self.filter_patterns.append(re.compile(ptrn, flags))
+            ptrn = '%s.*%s' % (prefix[0:i], prefix[i:])
+            self.sort_patterns.append(re.compile(ptrn, flags))
         self.prefix = prefix
 
     def filterAcceptsRow(self, row, _):
         completion = self.sourceModel().data(self.sourceModel().index(row, 0))
-        if not self.prefix:
-            rank = 100
-        else:
-            rank = fuzz.ratio(self.prefix, completion)
-        if rank:
-            self.sourceModel().setData(
-                self.sourceModel().index(row, 0), 100 - rank,
-                QtCore.Qt.UserRole)
-            return True
-        return False
+        if len(completion) < len(self.prefix):
+            return False
+        if len(self.prefix) == 1:
+            try:
+                prefix = self.prefix
+                if self.case == QtCore.Qt.CaseInsensitive:
+                    completion = completion.lower()
+                    prefix = self.prefix.lower()
+                rank = completion.index(prefix)
+                self.sourceModel().setData(
+                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
+                return prefix in completion
+            except ValueError:
+                return False
+        for i, patterns in enumerate(zip(self.filter_patterns,
+                                         self.sort_patterns)):
+            pattern, sort_pattern = patterns
+            match = re.match(pattern, completion)
+            if match:
+                # compute rank, the lowest rank the closer it is from the
+                # completion
+                start = sys.maxsize
+                for m in sort_pattern.finditer(completion):
+                    start, end = m.span()
+                rank = start + i * 10
+                self.sourceModel().setData(
+                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
+                return True
+        return len(self.prefix) == 0
 
 
 class SubsequenceCompleter(QtWidgets.QCompleter):
@@ -237,10 +261,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
-        if sys.version_info[:2] != (3, 2):
-            self._smart_completion = True
-        else:
-            self._smart_completion = False
+        self._smart_completion = True
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}

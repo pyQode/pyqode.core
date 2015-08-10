@@ -1,7 +1,6 @@
 """
 Tests the code completion mode
 """
-import sys
 import functools
 import pytest
 
@@ -214,8 +213,6 @@ def test_show_completion_with_icon(editor):
                              'icon': ':/pyqode-icons/rc/edit-undo.png'}])
 
 
-@pytest.mark.skipif(sys.version_info[:2] == (3, 2),
-                    reason="python 3.2 not supported")
 @pytest.mark.parametrize('case', [
     QtCore.Qt.CaseSensitive, QtCore.Qt.CaseInsensitive])
 def test_subsequence_completer(case):
@@ -232,24 +229,24 @@ def test_subsequence_completer(case):
     if case == QtCore.Qt.CaseInsensitive:
         completer.setCompletionPrefix('tip')
         completer.update_model()
-        assert completer.completionCount() == 6
+        assert completer.completionCount() == 3
         completer.setCompletionPrefix('settip')
         completer.update_model()
-        assert completer.completionCount() == 6
+        assert completer.completionCount() == 2
         completer.update_model()
         completer.setCompletionPrefix('action')
         completer.update_model()
-        assert completer.completionCount() == 6
+        assert completer.completionCount() == 3
     else:
         completer.setCompletionPrefix('tip')
         completer.update_model()
-        assert completer.completionCount() == 6
+        assert completer.completionCount() == 1  # setStatusTip
         completer.setCompletionPrefix('Tip')
         completer.update_model()
-        assert completer.completionCount() == 6  # all word ending with Tip
+        assert completer.completionCount() == 3  # all word ending with Tip
         completer.setCompletionPrefix('setTip')
         completer.update_model()
-        assert completer.completionCount() == 6  # setStatusTip
+        assert completer.completionCount() == 1  # setStatusTip
         completer.setCompletionPrefix('action')
         completer.update_model()
-        assert completer.completionCount() == 6
+        assert completer.completionCount() == 2
