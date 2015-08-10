@@ -3,17 +3,21 @@
 This module contains the code completion mode and the related classes.
 """
 import logging
-import re
 import sys
 import time
 
-from fuzzywuzzy import fuzz
 from pyqode.qt import QtWidgets, QtCore, QtGui
 
 from pyqode.core import backend
 from pyqode.core.api.mode import Mode
 from pyqode.core.api.utils import TextHelper
 from pyqode.core.backend import NotRunning
+
+
+try:
+    from fuzzywuzzy import fuzz
+except SyntaxError:
+    fuzz = None  # py32 not supported
 
 
 def _logger():
