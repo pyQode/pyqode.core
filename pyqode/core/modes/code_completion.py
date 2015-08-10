@@ -6,11 +6,14 @@ import logging
 import re
 import sys
 import time
-from pyqode.core.api.mode import Mode
-from pyqode.core.backend import NotRunning
+
+from fuzzywuzzy import fuzz
 from pyqode.qt import QtWidgets, QtCore, QtGui
-from pyqode.core.api.utils import TextHelper
+
 from pyqode.core import backend
+from pyqode.core.api.mode import Mode
+from pyqode.core.api.utils import TextHelper
+from pyqode.core.backend import NotRunning
 
 
 def _logger():
@@ -19,57 +22,26 @@ def _logger():
 
 class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     """
-    Performs subsequence matching/sorting (see pyQode/pyQode#1).
+    Performs subsequence matching/sorting using the fuzzywuzzy library.
     """
     def __init__(self, case, parent=None):
         QtCore.QSortFilterProxyModel.__init__(self, parent)
-        self.case = case
 
     def set_prefix(self, prefix):
-        self.filter_patterns = []
-        self.sort_patterns = []
-        if self.case == QtCore.Qt.CaseInsensitive:
-            flags = re.IGNORECASE
-        else:
-            flags = 0
-        for i in reversed(range(1, len(prefix) + 1)):
-            ptrn = '.*%s.*%s' % (prefix[0:i], prefix[i:])
-            self.filter_patterns.append(re.compile(ptrn, flags))
-            ptrn = '%s.*%s' % (prefix[0:i], prefix[i:])
-            self.sort_patterns.append(re.compile(ptrn, flags))
         self.prefix = prefix
 
     def filterAcceptsRow(self, row, _):
         completion = self.sourceModel().data(self.sourceModel().index(row, 0))
-        if len(completion) < len(self.prefix):
-            return False
-        if len(self.prefix) == 1:
-            try:
-                prefix = self.prefix
-                if self.case == QtCore.Qt.CaseInsensitive:
-                    completion = completion.lower()
-                    prefix = self.prefix.lower()
-                rank = completion.index(prefix)
-                self.sourceModel().setData(
-                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
-                return prefix in completion
-            except ValueError:
-                return False
-        for i, patterns in enumerate(zip(self.filter_patterns,
-                                         self.sort_patterns)):
-            pattern, sort_pattern = patterns
-            match = re.match(pattern, completion)
-            if match:
-                # compute rank, the lowest rank the closer it is from the
-                # completion
-                start = sys.maxsize
-                for m in sort_pattern.finditer(completion):
-                    start, end = m.span()
-                rank = start + i * 10
-                self.sourceModel().setData(
-                    self.sourceModel().index(row, 0), rank, QtCore.Qt.UserRole)
-                return True
-        return len(self.prefix) == 0
+        if not self.prefix:
+            rank = 100
+        else:
+            rank = fuzz.token_set_ratio(self.prefix, completion)
+        if rank:
+            self.sourceModel().setData(
+                self.sourceModel().index(row, 0), 100 - rank,
+                QtCore.Qt.UserRole)
+            return True
+        return False
 
 
 class SubsequenceCompleter(QtWidgets.QCompleter):

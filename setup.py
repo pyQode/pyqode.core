@@ -48,7 +48,8 @@ setup(
     author_email='colin.duquesnoy@gmail.com',
     description=DESCRIPTION,
     long_description=readme(),
-    install_requires=[pygments_req, 'pyqode.qt', 'future'],
+    install_requires=[pygments_req, 'pyqode.qt', 'future', 'fuzzywuzzy',
+                      'python-Levenshtein'],
     entry_points={
         'console_scripts': [
             'pyqode-console = pyqode.core.tools.console:main'
