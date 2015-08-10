@@ -233,7 +233,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
-        self._smart_completion = True
+        if sys.version_info[:2] != (3, 2):
+            self._smart_completion = True
+        else:
+            self._smart_completion = False
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}
