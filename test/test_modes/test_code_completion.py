@@ -229,24 +229,24 @@ def test_subsequence_completer(case):
     if case == QtCore.Qt.CaseInsensitive:
         completer.setCompletionPrefix('tip')
         completer.update_model()
-        assert completer.completionCount() == 3
+        assert completer.completionCount() == 6
         completer.setCompletionPrefix('settip')
         completer.update_model()
-        assert completer.completionCount() == 2
+        assert completer.completionCount() == 6
         completer.update_model()
         completer.setCompletionPrefix('action')
         completer.update_model()
-        assert completer.completionCount() == 3
+        assert completer.completionCount() == 6
     else:
         completer.setCompletionPrefix('tip')
         completer.update_model()
-        assert completer.completionCount() == 1  # setStatusTip
+        assert completer.completionCount() == 6
         completer.setCompletionPrefix('Tip')
         completer.update_model()
-        assert completer.completionCount() == 3  # all word ending with Tip
+        assert completer.completionCount() == 6  # all word ending with Tip
         completer.setCompletionPrefix('setTip')
         completer.update_model()
-        assert completer.completionCount() == 1  # setStatusTip
+        assert completer.completionCount() == 6  # setStatusTip
         completer.setCompletionPrefix('action')
         completer.update_model()
-        assert completer.completionCount() == 2
+        assert completer.completionCount() == 6

@@ -35,7 +35,7 @@ class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
         if not self.prefix:
             rank = 100
         else:
-            rank = fuzz.token_set_ratio(self.prefix, completion)
+            rank = fuzz.ratio(self.prefix, completion)
         if rank:
             self.sourceModel().setData(
                 self.sourceModel().index(row, 0), 100 - rank,
