@@ -105,8 +105,9 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     @property
     def smart_completion(self):
         """
-        True to use smart completion filtering: subsequence matching, False
-        to use a prefix based completer
+        True to use smart completion filtering (using the fuzzywuzzy library)
+
+        .. todo: consider renaming that property to fuzzy for pyqode 3.0.
         """
         return self._smart_completion
 
