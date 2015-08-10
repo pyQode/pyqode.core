@@ -282,6 +282,9 @@ class FileManager(Manager):
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
+        max_pos = self.editor.document().characterCount()
+        if pos > max_pos:
+            pos = max_pos - 1
         tc = self.editor.textCursor()
         tc.setPosition(pos)
         self.editor.setTextCursor(tc)
