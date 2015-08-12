@@ -268,7 +268,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
-        self._filter_mode = self.FILTER_CONTAINS
+        self._filter_mode = self.FILTER_PREFIX
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}
