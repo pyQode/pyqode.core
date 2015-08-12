@@ -137,7 +137,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     FILTER_CONTAINS = 1
     #: Fuzzy filtering, using the subsequence matcher. This is the most
     #: powerful filter mode but also the SLOWEST.
-    FILTER_FUZZY = 1
+    FILTER_FUZZY = 2
 
     @property
     def filter_mode(self):
@@ -286,15 +286,14 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     # Mode interface
     #
     def _create_completer(self):
-        if not self.filter_mode != self.FILTER_FUZZY:
+        if self.filter_mode != self.FILTER_FUZZY:
             self._completer = QtWidgets.QCompleter([''], self.editor)
-            try:
-                self._completer.setFilterMode(
-                    QtCore.Qt.MatchContains if self.filter_mode ==
-                    self.FILTER_CONTAINS else QtCore.Qt.MatchStartsWith)
-            except AttributeError:
-                # only available with PyQt5
-                pass
+            if self.filter_mode == self.FILTER_CONTAINS:
+                try:
+                    self._completer.setFilterMode(QtCore.Qt.MatchContains)
+                except AttributeError:
+                    # only available with PyQt5
+                    pass
         else:
             self._completer = SubsequenceCompleter(self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
