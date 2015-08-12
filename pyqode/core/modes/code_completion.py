@@ -129,19 +129,26 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     automatically while the user is typing some code (this can be configured
     using a series of properties).
     """
+    #: Filter completions based on the prefix. FAST
+    FILTER_PREFIX = 0
+    #: Filter completions based on whether the prefix is contained in the
+    #: suggestion. Only available with PyQt5, if set with PyQt4, FILTER_PREFIX
+    #: will be used instead. FAST
+    FILTER_CONTAINS = 1
+    #: Fuzzy filtering, using the subsequence matcher. This is the most
+    #: powerful filter mode but also the SLOWEST.
+    FILTER_FUZZY = 1
 
     @property
-    def smart_completion(self):
+    def filter_mode(self):
         """
-        True to use smart completion filtering (using the fuzzywuzzy library)
-
-        .. todo: consider renaming that property to fuzzy for pyqode 3.0.
+        The completion filter mode
         """
-        return self._smart_completion
+        return self._filter_mode
 
-    @smart_completion.setter
-    def smart_completion(self, value):
-        self._smart_completion = value
+    @filter_mode.setter
+    def filter_mode(self, value):
+        self._filter_mode = value
         self._create_completer()
 
     @property
@@ -261,7 +268,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._trigger_symbols = ['.']
         self._case_sensitive = False
         self._completer = None
-        self._smart_completion = True
+        self._filter_mode = self.FILTER_CONTAINS
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._tooltips = {}
@@ -279,8 +286,15 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     # Mode interface
     #
     def _create_completer(self):
-        if not self.smart_completion:
+        if not self.filter_mode != self.FILTER_FUZZY:
             self._completer = QtWidgets.QCompleter([''], self.editor)
+            try:
+                self._completer.setFilterMode(
+                    QtCore.Qt.MatchContains if self.filter_mode ==
+                    self.FILTER_CONTAINS else QtCore.Qt.MatchStartsWith)
+            except AttributeError:
+                # only available with PyQt5
+                pass
         else:
             self._completer = SubsequenceCompleter(self.editor)
         self._completer.setCompletionMode(self._completer.PopupCompletion)
