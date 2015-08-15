@@ -323,14 +323,17 @@ class InteractiveConsole(QTextEdit):
         return bytes(self._usr_buffer, locale.getpreferredencoding())
 
     def keyPressEvent(self, event):
+        ctrl = event.modifiers() & Qt.ControlModifier != 0
         if not self.is_running or self.textCursor().hasSelection():
+            if event.key() == Qt.Key_C and ctrl:
+                self.copy()
             return
         propagate_to_parent = True
         delete = event.key() in [Qt.Key_Backspace, Qt.Key_Delete]
         if delete and not self._usr_buffer:
             return
-        shift = event.modifiers() & Qt.ShiftModifier != 0
-        if event.key() in [Qt.Key_V, Qt.Key_C] and shift:
+        if event.key() == Qt.Key_V and ctrl:
+            # Paste to usr buffer
             text = QApplication.clipboard().text()
             self._usr_buffer += text
             self.setTextColor(self._stdin_col)
