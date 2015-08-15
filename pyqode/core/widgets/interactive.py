@@ -5,15 +5,14 @@ This module contains interactive widgets:
 """
 import locale
 import logging
-import os
 import sys
 
 from pyqode.core.api.client import PROCESS_ERROR_STRING
 from pyqode.core.managers.decorations import TextDecorationsManager
 from pyqode.core.managers.panels import PanelsManager
 from pyqode.qt.QtCore import Qt, Signal, QProcess, QProcessEnvironment
-from pyqode.qt.QtWidgets import QTextEdit
-from pyqode.qt.QtGui import QColor, QTextCursor, QFont
+from pyqode.qt.QtWidgets import QTextEdit, QAction, QApplication
+from pyqode.qt.QtGui import QColor, QTextCursor, QFont, QKeySequence
 
 
 def _logger():
@@ -72,6 +71,14 @@ class InteractiveConsole(QTextEdit):
         self.setFont(QFont(font, 10))
         self.setReadOnly(True)
         self._mask_user_input = False
+        action = QAction('Copy', self)
+        action.setShortcut(QKeySequence.Copy)
+        action.triggered.connect(self.copy)
+        self.add_action(action)
+        action = QAction('Paste', self)
+        action.setShortcut(QKeySequence.Paste)
+        action.triggered.connect(self.paste)
+        self.add_action(action)
 
     def showEvent(self, event):
         super(InteractiveConsole, self).showEvent(event)
@@ -83,6 +90,7 @@ class InteractiveConsole(QTextEdit):
 
     def add_action(self, action):
         self.addAction(action)
+        action.setShortcutContext(Qt.WidgetShortcut)
 
     def set_writer(self, writer):
         """
@@ -318,7 +326,19 @@ class InteractiveConsole(QTextEdit):
         if not self.is_running or self.textCursor().hasSelection():
             return
         propagate_to_parent = True
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+        delete = event.key() in [Qt.Key_Backspace, Qt.Key_Delete]
+        if delete and not self._usr_buffer:
+            return
+        shift = event.modifiers() & Qt.ShiftModifier != 0
+        if event.key() in [Qt.Key_V, Qt.Key_C] and shift:
+            text = QApplication.clipboard().text()
+            self._usr_buffer += text
+            self.setTextColor(self._stdin_col)
+            if self._mask_user_input:
+                text = len(text) * '*'
+            self.insertPlainText(text)
+            return
+        if event.key() in [Qt.Key_Return, Qt.Key_Enter]:
             # send the user input to the child process
             if sys.platform == 'win32':
                 self._usr_buffer += "\r"
@@ -326,7 +346,7 @@ class InteractiveConsole(QTextEdit):
             self.process.write(self.get_user_buffer_as_bytes())
             self._usr_buffer = ""
         else:
-            if event.key() != Qt.Key_Backspace and event.text():
+            if not delete and len(event.text()):
                 txt = event.text()
                 self._usr_buffer += txt
                 if self._mask_user_input:
@@ -334,9 +354,8 @@ class InteractiveConsole(QTextEdit):
                 self.setTextColor(self._stdin_col)
                 self.insertPlainText(txt)
                 propagate_to_parent = False
-            elif event.text().isalnum():
-                self._usr_buffer = self._usr_buffer[
-                    0:len(self._usr_buffer) - 1]
+            elif delete:
+                self._usr_buffer = self._usr_buffer[:len(self._usr_buffer) - 1]
         # text is inserted here, the text color must be defined before this
         # line
         if propagate_to_parent:
