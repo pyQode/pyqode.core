@@ -72,7 +72,7 @@ class DraggableTabBar(TabBar):
         data.tab = tab
         data.widget = self
         # a crude way to distinguish tab-reodering drags from other drags
-        data.setData("action", "tab-reordering")
+        data.setData("action", b"tab-reordering")
         drag.setMimeData(data)
         drag.setPixmap(self.tabIcon(self.tabAt(event.pos())).pixmap(32, 32))
         drag.exec_()
@@ -455,14 +455,14 @@ class OpenFilesPopup(QtWidgets.QDialog):
             item.setText(filename)
             item.setIcon(icon)
             item.setToolTip(path)
-            item.setData(QtCore.Qt.UserRole, path)
+            item.setData(QtCore.Qt.UserRole, bytes(path, 'utf-8'))
             self.ui.tableWidget.setItem(row, 0, item)
 
             # path
             item = QtWidgets.QTableWidgetItem()
             item.setText(path)
             item.setToolTip(path)
-            item.setData(QtCore.Qt.UserRole, path)
+            item.setData(QtCore.Qt.UserRole, bytes(path, 'utf-8'))
             self.ui.tableWidget.setItem(row, 1, item)
 
     def _on_sort_changed(self, *_):
