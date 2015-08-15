@@ -1,5 +1,13 @@
 Change Log
 ==========
+2.6.7
+-----
+
+Fixed bugs:
+
+- fix TypeError in FileSystemHelper with PyQt5.5
+- fix blank file icons with PyQt5.5
+
 2.6.6
 -----
 
