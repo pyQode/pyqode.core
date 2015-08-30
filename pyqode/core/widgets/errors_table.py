@@ -28,7 +28,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
     msg_activated = QtCore.Signal(CheckerMessage)
 
     ICONS = {
-        CheckerMessages.INFO: ':/ide-icons/rc/accept.png',
+        CheckerMessages.INFO: ':pyqode-icons/rc/dialog-info.png',
         CheckerMessages.WARNING: ':pyqode-icons/rc/dialog-warning.png',
         CheckerMessages.ERROR: ':pyqode-icons/rc/dialog-error.png',
     }
@@ -98,6 +98,8 @@ class ErrorsTable(QtWidgets.QTableWidget):
                 icon[0], QtGui.QIcon(icon[1]))
         elif isinstance(icon, str):
             return QtGui.QIcon(icon)
+        elif isinstance(icon, QtGui.QIcon):
+            return icon
         else:
             return None
 
