@@ -474,7 +474,7 @@ class OpenFilesPopup(QtWidgets.QDialog):
 
     def _on_item_activated(self, item):
         self.hide()
-        self.triggered.emit(item.data(QtCore.Qt.UserRole))
+        self.triggered.emit(item.data(QtCore.Qt.UserRole).decode('utf-8'))
 
     def show(self):
         super(OpenFilesPopup, self).show()
