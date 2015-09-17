@@ -1,5 +1,20 @@
 Change Log
 ==========
+
+2.6.8
+-----
+
+Fixed bugs:
+
+- fix a few more type errors when using PyQt5.5
+- fix runtime error in outline mode if the editor has been deleted before 
+  the timer elapsed.
+
+Fixed bugs:
+
+- fix TypeError in FileSystemHelper with PyQt5.5
+- fix blank file icons with PyQt5.5
+
 2.6.7
 -----
 
