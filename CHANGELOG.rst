@@ -10,11 +10,6 @@ Fixed bugs:
 - fix runtime error in outline mode if the editor has been deleted before 
   the timer elapsed.
 
-Fixed bugs:
-
-- fix TypeError in FileSystemHelper with PyQt5.5
-- fix blank file icons with PyQt5.5
-
 2.6.7
 -----
 
