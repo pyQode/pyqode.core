@@ -33,12 +33,16 @@ class TextCodeEdit(CodeEdit):
 
     mimetypes = ['text/x-plain', 'text/x-log', 'text/plain']
 
-    def __init__(self, parent=None, server_script=server.__file__,
+    DEFAULT_SERVER = server.__file__
+
+    def __init__(self, parent=None, server_script=None,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True, color_scheme='qt',
                  reuse_backend=False):
         from pyqode.core import panels
         from pyqode.core import modes
+        if server_script is None:
+            server_script = TextCodeEdit.DEFAULT_SERVER
         super(TextCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
@@ -97,13 +101,18 @@ class GenericCodeEdit(CodeEdit):
         'application/javascript'
     ]
 
-    def __init__(self, parent=None, server_script=server.__file__,
+    DEFAULT_SERVER = server.__file__
+
+    def __init__(self, parent=None, server_script=None,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True, color_scheme='qt',
                  reuse_backend=False):
         super(GenericCodeEdit, self).__init__(parent, create_default_actions)
         from pyqode.core import panels
         from pyqode.core import modes
+        if server_script is None:
+            server_script = GenericCodeEdit.DEFAULT_SERVER
+
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
         # append panels
