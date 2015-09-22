@@ -1034,6 +1034,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _show_context_menu(self, point):
         """ Shows the context menu """
+        self.setTextCursor(self.cursorForPosition(point))
         self._mnu = self.get_context_menu()
         if len(self._mnu.actions()) > 1 and self.show_context_menu:
             self._mnu.popup(self.mapToGlobal(point))
