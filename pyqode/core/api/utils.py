@@ -569,10 +569,12 @@ class TextHelper(object):
         """
         text_cursor = self._editor.textCursor()
         if keep_position:
-            pos = text_cursor.position()
+            s = text_cursor.selectionStart()
+            e = text_cursor.selectionEnd()
         text_cursor.insertText(text)
         if keep_position:
-            text_cursor.setPosition(pos)
+            text_cursor.setPosition(s)
+            text_cursor.setPosition(e, text_cursor.KeepAnchor)
         self._editor.setTextCursor(text_cursor)
 
     def clear_selection(self):
@@ -600,9 +602,8 @@ class TextHelper(object):
 
     def selected_text_to_lower(self):
         """ Replaces the selected text by its lower version """
-        text_cursor = self._editor.textCursor()
-        text_cursor.insertText(text_cursor.selectedText().lower())
-        self._editor.setTextCursor(text_cursor)
+        txt = self.selected_text()
+        self.insert_text(txt.lower())
 
     def selected_text_to_upper(self):
         """
