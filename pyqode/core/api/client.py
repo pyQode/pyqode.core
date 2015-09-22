@@ -4,6 +4,7 @@ user throught the backend manager (
 :class:`pyqode.core.managers.BackendManager`)
 
 """
+import locale
 import json
 import logging
 import socket
@@ -235,6 +236,7 @@ class BackendProcess(QtCore.QProcess):
         self.starting = True
         self._srv_logger = logging.getLogger('pyqode.backend')
         self._prevent_logs = False
+        self._encoding = locale.getpreferredencoding()
 
     def _on_process_started(self):
         """ Logs process started """
@@ -262,9 +264,9 @@ class BackendProcess(QtCore.QProcess):
         """ Logs process output """
         o = self.readAllStandardOutput()
         try:
-            output = bytes(o).decode('utf-8')
+            output = bytes(o).decode(self._encoding)
         except TypeError:
-            output = bytes(o.data()).decode('utf-8')
+            output = bytes(o.data()).decode(self._encoding)
         output = output[:output.rfind('\n')]
         for line in output.splitlines():
             self._srv_logger.debug(line)
@@ -275,9 +277,9 @@ class BackendProcess(QtCore.QProcess):
             return
         o = self.readAllStandardError()
         try:
-            output = bytes(o).decode('utf-8')
+            output = bytes(o).decode(self._encoding)
         except TypeError:
-            output = bytes(o.data()).decode('utf-8')
+            output = bytes(o.data()).decode(self._encoding)
         output = output[:output.rfind('\n')]
         for line in output.splitlines():
             self._srv_logger.error(line)
