@@ -1,13 +1,22 @@
 Change Log
 ==========
 
+2.6.9
+-----
+
+Fixed bugs:
+
+- fix UnicodeDecodeError with the backend process
+- fix cursor selection lost after a case conversion
+- fix context menu entries not working at mouse position
+
 2.6.8
 -----
 
 Fixed bugs:
 
 - fix a few more type errors when using PyQt5.5
-- fix runtime error in outline mode if the editor has been deleted before 
+- fix runtime error in outline mode if the editor has been deleted before
   the timer elapsed.
 
 2.6.7
