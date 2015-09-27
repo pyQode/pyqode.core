@@ -92,7 +92,7 @@ def test_request_completion(editor):
     QTest.qWait(100)
     mode.request_completion()
     editor.backend.start(server_path())
-    QTest.qWait(2000)
+    QTest.qWait(500)
 
     # now this should work
     TextHelper(editor).goto_line(3)
