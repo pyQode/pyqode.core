@@ -115,6 +115,7 @@ class BackendManager(Manager):
                 BackendManager.SHARE_COUNT += 1
             _logger().debug('starting backend process: %s %s', program,
                             ' '.join(pgm_args))
+            self._heartbeat_timer.start()
 
     def stop(self):
         """
@@ -146,6 +147,7 @@ class BackendManager(Manager):
             else:
                 self._process.terminate()
         self._process._prevent_logs = False
+        self._heartbeat_timer.stop()
         _logger().debug('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
@@ -195,8 +197,11 @@ class BackendManager(Manager):
 
         :return: True if the process is running, otherwise False
         """
-        return (self._process is not None and
-                self._process.state() != self._process.NotRunning)
+        try:
+            return (self._process is not None and
+                    self._process.state() != self._process.NotRunning)
+        except RuntimeError:
+            return False
 
     @property
     def connected(self):
