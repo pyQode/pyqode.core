@@ -4,9 +4,11 @@ This module contains the backend controller
 import logging
 import socket
 import sys
+from pyqode.qt import QtCore
+
 from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
-from pyqode.core.backend import NotRunning
+from pyqode.core.backend import NotRunning, echo_worker
 
 
 def _logger():
@@ -38,6 +40,10 @@ class BackendManager(Manager):
         self.interpreter = None
         self.args = None
         self._shared = False
+        self._heartbeat_timer = QtCore.QTimer()
+        self._heartbeat_timer.setInterval(1000)
+        self._heartbeat_timer.timeout.connect(self._send_heartbeat)
+        self._heartbeat_timer.start()
 
     @staticmethod
     def pick_free_port():
@@ -167,6 +173,13 @@ class BackendManager(Manager):
                 on_receive=on_receive)
             socket.finished.connect(self._rm_socket)
             self._sockets.append(socket)
+            self._heartbeat_timer.start()
+
+    def _send_heartbeat(self):
+        try:
+            self.send_request(echo_worker, {'heartbeat': True})
+        except NotRunning:
+            self._heartbeat_timer.stop()
 
     def _rm_socket(self, socket):
         try:

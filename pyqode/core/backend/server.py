@@ -6,9 +6,12 @@ import argparse
 import inspect
 import logging
 import json
+import os
 import struct
 import sys
+import time
 import traceback
+import threading
 
 
 try:
@@ -50,18 +53,8 @@ class JsonServer(socketserver.TCPServer):
     """
     A server socket based on a json messaging system.
     """
+
     class _Handler(socketserver.BaseRequestHandler):
-        """
-        Our custom request handler. There will always be only 1 request that
-        establish the communication, this is a 1 to 1.
-
-        Once the connection has been establish will loop forever waiting for
-        pending command or for the shutdown signal.
-
-        The handler also implements all the logic for packing/unpacking
-        messages and calling the requested worker instance.
-        """
-
         def read_bytes(self, size):
             """
             Read x bytes
@@ -109,8 +102,13 @@ class JsonServer(socketserver.TCPServer):
             Hanlde the request and keep it alive while shutdown signal
             has not been received
             """
+            self.srv.reset_heartbeat()
+            original_timeout = self.srv.timeout
+            self.srv.timeout = 60
             data = self.read()
             self._handle(data)
+            self.srv.timeout = original_timeout
+            self.srv.reset_heartbeat()
 
         def _handle(self, data):
             """
@@ -159,17 +157,30 @@ class JsonServer(socketserver.TCPServer):
             use its own argument parser (using
             :meth:`pyqode.core.backend.default_parser`)
         """
+        self.reset_heartbeat()
         if not args:
             args = default_parser().parse_args()
         self.port = args.port
+        self.timeout = 2
         self._Handler.srv = self
-        self._running = True
-        # print('server running on port %s' % args.port)
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
-        _logger().debug('started on 127.0.0.1:%d' % int(args.port))
-        _logger().debug('running with python %d.%d.%d' %
-                        (sys.version_info[:3]))
+        print('started on 127.0.0.1:%d' % int(args.port))
+        print('running with python %d.%d.%d' % (sys.version_info[:3]))
+        self._heartbeat_thread = threading.Thread(target=self.heartbeat)
+        self._heartbeat_thread.start()
+
+    def reset_heartbeat(self):
+        self.last_time = time.time()
+        self.elapsed_time = 0
+
+    def heartbeat(self):
+        while True:
+            elapsed_time = time.time() - self.last_time
+            if elapsed_time > self.timeout:
+                self.shutdown()
+                sys.exit(1)
+            time.sleep(1)
 
 
 def default_parser():
