@@ -52,8 +52,7 @@ class ReadOnlyPanel(Panel):
             self._lbl_stylesheet = ('color: %s;background: %s' %
                                     (self._foreground.name(),
                                      self._color.name()))
-            for lbl in self._labels:
-                lbl.setStyleSheet(self._lbl_stylesheet)
+            self.ui.lblDescription.setStyleSheet(self._lbl_stylesheet)
         except AttributeError:
             pass
 
