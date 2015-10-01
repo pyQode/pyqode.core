@@ -350,8 +350,8 @@ class FileManager(Manager):
 
         """
         if not self.editor.dirty and \
-                (encoding is None or encoding == self.encoding) and \
-                (path is None or path == self.path):
+                (encoding is None and encoding == self.encoding) and \
+                (path is None and path == self.path):
             return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()

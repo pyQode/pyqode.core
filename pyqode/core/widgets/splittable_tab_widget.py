@@ -871,10 +871,10 @@ class CodeEditTabWidget(BaseTabWidget):
                 if len(editor.mimetypes):
                     path += mimetypes.guess_extension(editor.mimetypes[0])
             editor.file._path = path
-        editor.file.save()
+        editor.file.save(path)
         tw = editor.parent_tab_widget
-        text = tw.tabText(tw.indexOf(editor))
-        tw.setTabText(tw.indexOf(editor), text.replace('*', ''))
+        text = tw.tabText(tw.indexOf(editor)).replace('*', '')
+        tw.setTabText(tw.indexOf(editor), text)
         for clone in [editor] + editor.clones:
             if clone != editor:
                 tw = clone.parent_tab_widget
@@ -976,6 +976,14 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             self._current.file._path = mem
         CodeEditTabWidget.default_directory = os.path.expanduser('~')
         self.document_saved.emit(self._current.file.path, '')
+
+        # rename tab
+        tw = self._current.parent_tab_widget
+        text = tw.tabText(tw.indexOf(self._current))
+        text = text.replace(os.path.split(mem)[1],
+                            os.path.split(self._current.file.path)[1])
+        tw.setTabText(tw.indexOf(self._current), text)
+
         return self._current.file.path
 
     def save_current(self):
