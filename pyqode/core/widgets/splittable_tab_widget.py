@@ -871,6 +871,8 @@ class CodeEditTabWidget(BaseTabWidget):
                 if len(editor.mimetypes):
                     path += mimetypes.guess_extension(editor.mimetypes[0])
             editor.file._path = path
+        else:
+            path = editor.file.path
         editor.file.save(path)
         tw = editor.parent_tab_widget
         text = tw.tabText(tw.indexOf(editor)).replace('*', '')
