@@ -70,6 +70,7 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
 
         self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
+        self.panels.append(panels.ReadOnlyPanel(), Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(
@@ -138,7 +139,9 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
+
         self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
+        self.panels.append(panels.ReadOnlyPanel(), Panel.Position.TOP)
 
     def setPlainText(self, txt, mime_type='', encoding=''):
         if mime_type is None:

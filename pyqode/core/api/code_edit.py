@@ -877,6 +877,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QKeyEvent
         """
+        if self.isReadOnly():
+            return
         initial_state = event.isAccepted()
         event.ignore()
         self.key_pressed.emit(event)
@@ -906,6 +908,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QKeyEvent
         """
+        if self.isReadOnly():
+            return
         initial_state = event.isAccepted()
         event.ignore()
         self.key_released.emit(event)

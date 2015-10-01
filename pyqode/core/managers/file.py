@@ -278,7 +278,19 @@ class FileManager(Manager):
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
+        self._check_for_readonly()
         return ret_val
+
+    def _check_for_readonly(self):
+        self.read_only = not os.access(self.path, os.W_OK)
+        self.editor.setReadOnly(self.read_only)
+        try:
+            from pyqode.core.panels import ReadOnlyPanel
+            panel = self.editor.panels.get(ReadOnlyPanel)
+        except KeyError:
+            pass
+        else:
+            panel.setVisible(self.read_only)
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
@@ -407,6 +419,7 @@ class FileManager(Manager):
             self.editor.text_saved.emit(str(path))
             self.saving = False
             _logger().debug('file saved: %s', path)
+            self._check_for_readonly()
 
     def close(self, clear=True):
         """
