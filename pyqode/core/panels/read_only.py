@@ -66,6 +66,7 @@ class ReadOnlyPanel(Panel):
         self.color = QtGui.QColor('#8AADD4')
         self._foreground = None
         self.foreground = QtGui.QColor('#FFFFFF')
+        self.hide()
 
     def paintEvent(self, event):
         """ Fills the panel background. """

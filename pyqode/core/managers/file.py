@@ -284,13 +284,6 @@ class FileManager(Manager):
     def _check_for_readonly(self):
         self.read_only = not os.access(self.path, os.W_OK)
         self.editor.setReadOnly(self.read_only)
-        try:
-            from pyqode.core.panels import ReadOnlyPanel
-            panel = self.editor.panels.get(ReadOnlyPanel)
-        except KeyError:
-            pass
-        else:
-            panel.setVisible(self.read_only)
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)

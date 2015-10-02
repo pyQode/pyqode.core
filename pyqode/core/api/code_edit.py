@@ -1034,6 +1034,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         _logger().debug('show event: %r' % self)
         self.panels.refresh()
 
+    def setReadOnly(self, read_only):
+        if read_only != self.isReadOnly():
+            super().setReadOnly(read_only)
+            from pyqode.core.panels import ReadOnlyPanel
+            try:
+                panel = self.panels.get(ReadOnlyPanel)
+            except KeyError:
+                self.panels.append(
+                    ReadOnlyPanel(), ReadOnlyPanel.Position.TOP)
+            else:
+                panel.setVisible(read_only)
+
     def get_context_menu(self):
         """
         Gets the editor context menu.
