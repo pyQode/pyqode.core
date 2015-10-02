@@ -133,6 +133,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         #: A list of additional context menu actions
         self.context_actions = []
 
+        self.detached_tabs = []
+
     def tab_under_menu(self):
         """
         Returns the tab that sits under the context menu.
@@ -175,6 +177,56 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             return True
         return False
 
+    @QtCore.Slot()
+    def detach_tab(self):
+        tab_index = self.tab_under_menu()
+        tab = self.widget(tab_index)
+        try:
+            open_parameters = tab.open_parameters
+        except AttributeError:
+            open_parameters = {
+                'encoding': None,
+                'replace_tabs_by_spaces': True,
+                'clean_trailing_whitespaces': True,
+                'safe_save': True,
+                'restore_cursor_position': True,
+                'preferred_eol': 0,
+                'autodetect_eol': True,
+                'show_whitespaces': False,
+                'kwargs': {}
+            }
+
+        path = tab.file.path
+        self.tabCloseRequested.emit(tab_index)
+
+        # create a new top level widget and add the tab
+        new_tab_widget = self.parent().__class__()
+        self.detached_tabs.append(new_tab_widget)
+        # reopen document with same open settings.
+        new_tab_widget.open_document(
+            path, encoding=open_parameters['encoding'],
+            replace_tabs_by_spaces=open_parameters['replace_tabs_by_spaces'],
+            clean_trailing_whitespaces=open_parameters[
+                'clean_trailing_whitespaces'],
+            safe_save=open_parameters['safe_save'],
+            restore_cursor_position=open_parameters['restore_cursor_position'],
+            preferred_eol=open_parameters['preferred_eol'],
+            autodetect_eol=open_parameters['autodetect_eol'],
+            show_whitespaces=open_parameters['show_whitespaces'],
+            **open_parameters['kwargs'])
+
+        new_tab_widget.resize(800, 600)
+        new_tab_widget.show()
+
+        # if the user has two monitor, move the window to the second monitor
+        desktop = QtWidgets.qApp.desktop()
+        if desktop.screenCount() > 1:
+            primary_screen = desktop.screenNumber(self)
+            other_screen = {0: 1, 1: 0}[primary_screen]
+            l = desktop.screenGeometry(other_screen).left()
+            new_tab_widget.move(l, 0)
+            new_tab_widget.showMaximized()
+
     def save_widget(self, editor):
         """
         Saves the widget. The base implementation does nothing.
@@ -188,11 +240,20 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _create_tab_bar_menu(self):
         context_mnu = QtWidgets.QMenu()
-        for name, slot in [('Close', self.close),
-                           ('Close others', self.close_others),
-                           ('Close all', self.close_all)]:
-            qaction = QtWidgets.QAction(name, self)
-            qaction.triggered.connect(slot)
+        for name, slot, icon in [
+                ('Close', self.close, 'window-close'),
+                ('Close others', self.close_others, 'tab-close-other'),
+                ('Close all', self.close_all, 'project-development-close-all'),
+                (None, None, None),
+                ('Detach tab', self.detach_tab, 'tab-detach')]:
+            if name is None and slot is None:
+                qaction = QtWidgets.QAction(self)
+                qaction.setSeparator(True)
+            else:
+                qaction = QtWidgets.QAction(name, self)
+                qaction.triggered.connect(slot)
+                if icon:
+                    qaction.setIcon(QtGui.QIcon.fromTheme(icon))
             context_mnu.addAction(qaction)
             self.addAction(qaction)
         context_mnu.addSeparator()
@@ -1141,6 +1202,18 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
             tab = self._create_code_edit(self.guess_mimetype(path), **kwargs)
             self.editor_created.emit(tab)
+
+            tab.open_parameters = {
+                'encoding': encoding,
+                'replace_tabs_by_spaces': replace_tabs_by_spaces,
+                'clean_trailing_whitespaces': clean_trailing_whitespaces,
+                'safe_save': safe_save,
+                'restore_cursor_position': restore_cursor_position,
+                'preferred_eol': preferred_eol,
+                'autodetect_eol': autodetect_eol,
+                'show_whitespaces': show_whitespaces,
+                'kwargs': kwargs
+            }
             tab.file.clean_trailing_whitespaces = clean_trailing_whitespaces
             tab.file.safe_save = safe_save
             tab.file.restore_cursor = restore_cursor_position
