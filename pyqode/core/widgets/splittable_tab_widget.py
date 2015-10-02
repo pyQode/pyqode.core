@@ -227,6 +227,12 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             new_tab_widget.move(l, 0)
             new_tab_widget.showMaximized()
 
+        new_tab_widget.last_tab_closed.connect(self._remove_detached_tab)
+
+    def _remove_detached_tab(self):
+        self.detached_tabs.remove(self.sender())
+        self.sender().close()
+
     def save_widget(self, editor):
         """
         Saves the widget. The base implementation does nothing.
