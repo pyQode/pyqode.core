@@ -482,7 +482,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                     else:
                         self.replace()
                 elif obj == self.lineEditSearch:
-                    self.select_next()
+                    if event.modifiers() & QtCore.Qt.ShiftModifier:
+                        self.select_previous()
+                    else:
+                        self.select_next()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
                 self.on_toolButtonClose_clicked()
