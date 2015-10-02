@@ -50,7 +50,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._data = (None, None)
         self._timer = QtCore.QTimer()
         self._timer.setInterval(1000)
-        self._timer.timeout.connect(self._check_mtime)
+        self._timer.timeout.connect(self._check_file)
         self._mtime = 0
         self._notification_pending = False
         self._processing = False
@@ -110,9 +110,9 @@ class FileWatcherMode(Mode, QtCore.QObject):
             except AttributeError:
                 pass
 
-    def _check_mtime(self):
+    def _check_file(self):
         """
-        Checks watched file moficiation time.
+        Checks watched file moficiation time and permission changes.
         """
         if self.editor and self.editor.file.path:
             if not os.path.exists(self.editor.file.path) and self._mtime:
@@ -122,6 +122,9 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 if mtime > self._mtime:
                     self._mtime = mtime
                     self._notify_change()
+                # check for permission change
+                writeable = os.access(self.editor.file.path, os.W_OK)
+                self.editor.setReadOnly(not writeable)
 
     def _notify(self, title, message, expected_action=None):
         """
