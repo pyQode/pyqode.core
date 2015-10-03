@@ -1048,10 +1048,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
         # rename tab
         tw = self._current.parent_tab_widget
-        text = tw.tabText(tw.indexOf(self._current))
-        text = text.replace(os.path.split(mem)[1],
-                            os.path.split(self._current.file.path)[1])
-        tw.setTabText(tw.indexOf(self._current), text)
+        tw.setTabText(tw.indexOf(self._current),
+                      os.path.split(self._current.file.path)[1])
 
         return self._current.file.path
 
