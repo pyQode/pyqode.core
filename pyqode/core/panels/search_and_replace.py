@@ -226,6 +226,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxCase.stateChanged.connect(self.request_search)
             self.checkBoxWholeWords.stateChanged.connect(self.request_search)
             self.checkBoxRegex.stateChanged.connect(self.request_search)
+            self.checkBoxInSelection.stateChanged.connect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.connect(self.select_next)
             self.actionFindNext.triggered.connect(self.select_next)
@@ -246,6 +247,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxWholeWords.stateChanged.disconnect(
                 self.request_search)
             self.checkBoxRegex.stateChanged.disconnect(self.request_search)
+            self.checkBoxInSelection.stateChanged.disconnect(
+                self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.disconnect(self.select_next)
             self.actionFindNext.triggered.disconnect(self.select_next)
@@ -255,7 +258,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.toolButtonReplaceAll.clicked.disconnect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.disconnect(self._update_buttons)
-            self.search_finished.connect(self._on_search_finished)
+            self.search_finished.disconnect(self._on_search_finished)
 
     def close_panel(self):
         """
@@ -518,14 +521,23 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         """
         return (self.checkBoxRegex.isChecked(),
                 self.checkBoxCase.isChecked(),
-                self.checkBoxWholeWords.isChecked())
+                self.checkBoxWholeWords.isChecked(),
+                self.checkBoxInSelection.isChecked())
 
     def _exec_search(self, sub, flags):
         if self.editor is None:
             return
-        regex, case_sensitive, whole_word = flags
+        regex, case_sensitive, whole_word, in_selection = flags
+        tc = self.editor.textCursor()
+        assert isinstance(tc, QtGui.QTextCursor)
+        if in_selection and tc.hasSelection():
+            text = tc.selectedText()
+            self._offset = tc.selectionStart()
+        else:
+            text = self.editor.toPlainText()
+            self._offset = 0
         request_data = {
-            'string': self.editor.toPlainText(),
+            'string': text,
             'sub': sub,
             'regex': regex,
             'whole_word': whole_word,
@@ -538,7 +550,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self._on_results_available(findall(request_data))
 
     def _on_results_available(self, results):
-        self._occurrences = results
+        self._occurrences = [(start + self._offset, end + self._offset)
+                             for start, end in results]
         self._on_search_finished()
 
     def _update_label_matches(self):

@@ -183,6 +183,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="checkBoxInSelection">
+           <property name="text">
+            <string>In Selection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
