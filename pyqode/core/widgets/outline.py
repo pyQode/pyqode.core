@@ -23,6 +23,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
     """
     def __init__(self, parent=None):
         super(OutlineTreeWidget, self).__init__(parent)
+        self._definitions = None
         self._editor = None
         self._outline_mode = None
         self._folding_panel = None
@@ -205,7 +206,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
                     ret_val += flatten(sub_d.children)
             return ret_val
 
-        if self._editor is None:
+        if self._editor is None or not self._definitions:
             return
 
         to_select = None
@@ -225,4 +226,10 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             if previous:
                 to_select = previous.tree_item
 
-        self.setCurrentItem(to_select)
+        if to_select:
+            try:
+                self.setCurrentItem(to_select)
+            except RuntimeError:
+                # RuntimeError: wrapped C/C++ object of type QTreeWidgetItem
+                # has been deleted
+                pass
