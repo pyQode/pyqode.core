@@ -615,15 +615,24 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
 
-    def add_action(self, action, advanced=True):
+    def add_action(self, action, sub_menu='Advanced'):
         """
         Adds an action to the editor's context menu.
 
-        :param action: QtWidgets.QAction
-        :param advanced: True to put the action in the advanced submenu.
+        :param action: QAction to add to the context menu.
+        :param sub_menu: The name of a sub menu where to put the action.
+            'Advanced' by default. If None or empty, the action will be added
+            at the root of the submenu.
         """
-        if advanced:
-            self.menu_advanced.addAction(action)
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                mnu = QtWidgets.QMenu(sub_menu)
+                self.add_menu(mnu)
+                self._sub_menus[sub_menu] = mnu
+            finally:
+                mnu.addAction(action)
         else:
             self._actions.append(action)
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
@@ -651,7 +660,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         return self._actions
 
-    def add_separator(self, advanced=True):
+    def add_separator(self, sub_menu='Advanced'):
         """
         Adds a sepqrator to the editor's context menu.
 
@@ -660,21 +669,31 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
-        if advanced:
-            self.menu_advanced.addAction(action)
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                pass
+            else:
+                mnu.addAction(action)
         else:
             self._actions.append(action)
         return action
 
-    def remove_action(self, action, advanced=True):
+    def remove_action(self, action, sub_menu='Advanced'):
         """
         Removes an action/separator from the editor's context menu.
 
         :param action: Action/seprator to remove.
         :param advanced: True to remove the action from the advanced submenu.
         """
-        if advanced:
-            self.menu_advanced.removeAction(action)
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                pass
+            else:
+                mnu.removeAction(action)
         else:
             try:
                 self._actions.remove(action)
@@ -1083,8 +1102,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self, create_standard_actions):
         """ Init context menu action """
-        self.menu_advanced = QtWidgets.QMenu('Advanced')
-        self.add_menu(self.menu_advanced)
+        menu_advanced = QtWidgets.QMenu('Advanced')
+        self.add_menu(menu_advanced)
+        self._sub_menus = {
+            'Advanced': menu_advanced
+        }
         if create_standard_actions:
             # Undo
             action = QtWidgets.QAction('Undo', self)
@@ -1094,7 +1116,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.triggered.connect(self.undo)
             self.undoAvailable.connect(action.setVisible)
             action.setVisible(False)
-            self.add_action(action, advanced=False)
+            self.add_action(action, sub_menu=None)
             self.action_undo = action
             # Redo
             action = QtWidgets.QAction('Redo', self)
@@ -1104,7 +1126,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.triggered.connect(self.redo)
             self.redoAvailable.connect(action.setVisible)
             action.setVisible(False)
-            self.add_action(action, advanced=False)
+            self.add_action(action, sub_menu=None)
             self.action_redo = action
             # Copy
             action = QtWidgets.QAction('Copy', self)
@@ -1112,9 +1134,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
             action.triggered.connect(self.copy)
-            self.copyAvailable.connect(action.setVisible)
-            action.setVisible(False)
-            self.add_action(action, advanced=False)
+            self.add_action(action, sub_menu=None)
             self.action_copy = action
             # cut
             action = QtWidgets.QAction('Cut', self)
@@ -1122,9 +1142,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
             action.triggered.connect(self.cut)
-            self.copyAvailable.connect(action.setVisible)
-            action.setVisible(False)
-            self.add_action(action, advanced=False)
+            self.add_action(action, sub_menu=None)
             self.action_cut = action
             # paste
             action = QtWidgets.QAction('Paste', self)
@@ -1133,21 +1151,21 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 'edit-paste', ':/pyqode-icons/rc/edit-paste.png',
                 'fa.paste'))
             action.triggered.connect(self.paste)
-            self.add_action(action, advanced=False)
+            self.add_action(action, sub_menu=None)
             self.action_paste = action
         # duplicate line
         action = QtWidgets.QAction('Duplicate line', self)
         action.setShortcut('Ctrl+D')
         action.triggered.connect(self.duplicate_line)
-        self.add_action(action, advanced=False)
+        self.add_action(action, sub_menu=None)
         self.action_duplicate_line = action
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
         action.triggered.connect(self.selectAll)
         self.action_select_all = action
-        self.add_action(self.action_select_all, advanced=False)
-        self.add_separator(advanced=False)
+        self.add_action(self.action_select_all, sub_menu=None)
+        self.add_separator(sub_menu=None)
         if create_standard_actions:
             # indent
             action = QtWidgets.QAction('Indent', self)
