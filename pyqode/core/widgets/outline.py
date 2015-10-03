@@ -3,6 +3,7 @@ This document contains the tree widget used to display the editor document
 outline.
 
 """
+from pyqode.core.share import Definition
 from pyqode.core import icons
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.modes.outline import OutlineMode
@@ -67,6 +68,13 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             else:
                 self._outline_mode = analyser
                 analyser.document_changed.connect(self._on_changed)
+
+            try:
+                editor.cursorPositionChanged.connect(
+                    self._sync_with_editor, QtCore.Qt.UniqueConnection)
+            except TypeError:
+                pass  # already connected
+
         self._on_changed()
 
     def _on_item_state_changed(self, item):
@@ -124,6 +132,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             'fa.info-circle'))
         self.addTopLevelItem(root)
         self._updating = False
+        self._sync_with_editor()
 
     def _on_item_clicked(self, item):
         """
@@ -155,6 +164,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             name.block = editor.document().findBlockByNumber(name.line)
             ti.setData(0, QtCore.Qt.UserRole, name)
             ti.setToolTip(0, name.description)
+            name.tree_item = ti
             block_data = name.block.userData()
             if block_data is None:
                 block_data = TextBlockUserData()
@@ -171,10 +181,48 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
                     ti.addChild(ti_ch)
             return ti, to_collapse
 
+        self._definitions = definitions
+
         items = []
         for d in definitions:
             value, to_collapse = convert(d, self._editor, to_collapse)
             items.append(value)
         if to_collapse is not None:
             return items, to_collapse
+
         return items
+
+    def _sync_with_editor(self):
+        def flatten(definitions):
+            """
+            Flattens the document structure tree as a simple sequential list.
+            """
+            ret_val = []
+            for de in definitions:
+                ret_val.append(de)
+                for sub_d in de.children:
+                    ret_val.append(sub_d)
+                    ret_val += flatten(sub_d.children)
+            return ret_val
+
+        if self._editor is None:
+            return
+
+        to_select = None
+        previous = None
+        current_line = TextHelper(self._editor).current_line_nbr()
+        for d in flatten(self._definitions):
+            if d.line == current_line:
+                to_select = d.tree_item
+            elif d.line > current_line:
+                to_select = d.tree_item
+                if previous is not None:
+                    to_select = previous.tree_item
+            previous = d
+            if to_select is not None:
+                break
+        else:
+            if previous:
+                to_select = previous.tree_item
+
+        self.setCurrentItem(to_select)
