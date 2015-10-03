@@ -366,18 +366,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        current_occurences = self._current_occurrence()
+        current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
-        if (current_occurences == -1 or
-                current_occurences >= len(occurrences) - 1):
-            current_occurences = 0
+        current = self._occurrences[current_occurence]
+        cursor_pos = self.editor.textCursor().position()
+        if cursor_pos not in range(current[0], current[1] + 1):
+            # search first occurrence that occurs after the cursor position
+            current_occurence = 0
+            for i, (start, end) in enumerate(self._occurrences):
+                if end > cursor_pos:
+                    current_occurence = i
+                    break
         else:
-            current_occurences += 1
-        self._set_current_occurrence(current_occurences)
+            if (current_occurence == -1 or
+                    current_occurence >= len(occurrences) - 1):
+                current_occurence = 0
+            else:
+                current_occurence += 1
+        self._set_current_occurrence(current_occurence)
         try:
             cursor = self.editor.textCursor()
-            cursor.setPosition(occurrences[current_occurences][0])
-            cursor.setPosition(occurrences[current_occurences][1],
+            cursor.setPosition(occurrences[current_occurence][0])
+            cursor.setPosition(occurrences[current_occurence][1],
                                cursor.KeepAnchor)
             self.editor.setTextCursor(cursor)
             return True
@@ -391,18 +401,28 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        current_occurences = self._current_occurrence()
+        current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
-        if (current_occurences == -1 or
-                current_occurences == 0):
-            current_occurences = len(occurrences) - 1
+        current = self._occurrences[current_occurence]
+        cursor_pos = self.editor.textCursor().position()
+        if cursor_pos not in range(current[0], current[1] + 1):
+            # search first occurrence that occurs before the cursor position
+            current_occurence = len(self._occurrences) - 1
+            for i, (start, end) in enumerate(self._occurrences):
+                if end > cursor_pos:
+                    current_occurence = i - 1
+                    break
         else:
-            current_occurences -= 1
-        self._set_current_occurrence(current_occurences)
+            if (current_occurence == -1 or
+                    current_occurence == 0):
+                current_occurence = len(occurrences) - 1
+            else:
+                current_occurence -= 1
+        self._set_current_occurrence(current_occurence)
         try:
             cursor = self.editor.textCursor()
-            cursor.setPosition(occurrences[current_occurences][0])
-            cursor.setPosition(occurrences[current_occurences][1],
+            cursor.setPosition(occurrences[current_occurence][0])
+            cursor.setPosition(occurrences[current_occurence][1],
                                cursor.KeepAnchor)
             self.editor.setTextCursor(cursor)
             return True
