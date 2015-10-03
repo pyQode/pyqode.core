@@ -372,6 +372,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         """
         current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
+        if not occurrences:
+            return
         current = self._occurrences[current_occurence]
         cursor_pos = self.editor.textCursor().position()
         if cursor_pos not in range(current[0], current[1] + 1):
@@ -407,6 +409,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         """
         current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
+        if not occurrences:
+            return
         current = self._occurrences[current_occurence]
         cursor_pos = self.editor.textCursor().position()
         if cursor_pos not in range(current[0], current[1] + 1):
