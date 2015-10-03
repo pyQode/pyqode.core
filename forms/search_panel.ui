@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>732</width>
+    <width>884</width>
     <height>90</height>
    </rect>
   </property>
@@ -20,7 +20,16 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -35,13 +44,31 @@
       <property name="spacing">
        <number>9</number>
       </property>
-      <property name="margin">
+      <property name="leftMargin">
+       <number>9</number>
+      </property>
+      <property name="topMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>9</number>
+      </property>
+      <property name="bottomMargin">
        <number>9</number>
       </property>
       <item>
        <widget class="QWidget" name="widgetSearch" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -89,10 +116,16 @@
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Search term</string>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonPrevious">
+           <property name="toolTip">
+            <string>Select previous occurence</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -104,6 +137,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonNext">
+           <property name="toolTip">
+            <string>Select next occurence</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -115,6 +151,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxRegex">
+           <property name="toolTip">
+            <string>Use a regular expression for search occurences</string>
+           </property>
            <property name="text">
             <string>Regex</string>
            </property>
@@ -122,6 +161,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxCase">
+           <property name="toolTip">
+            <string>Enable case sensitive search</string>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
@@ -132,6 +174,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="checkBoxWholeWords">
+           <property name="toolTip">
+            <string>Search for whole words only</string>
+           </property>
            <property name="text">
             <string>Whole words</string>
            </property>
@@ -174,7 +219,16 @@
       <item>
        <widget class="QWidget" name="widgetReplace" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -210,10 +264,16 @@
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Replacement text</string>
+           </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonReplace">
+           <property name="toolTip">
+            <string>Replace current occurence</string>
+           </property>
            <property name="text">
             <string>Replace</string>
            </property>
@@ -221,6 +281,9 @@
          </item>
          <item>
           <widget class="QToolButton" name="toolButtonReplaceAll">
+           <property name="toolTip">
+            <string>Replace all occurences</string>
+           </property>
            <property name="text">
             <string>Replace All</string>
            </property>
