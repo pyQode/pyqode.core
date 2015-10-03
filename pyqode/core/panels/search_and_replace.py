@@ -4,13 +4,14 @@ This module contains the search and replace panel
 """
 import re
 import sre_constants
+
+from pyqode.qt import QtCore, QtGui, QtWidgets
+
 from pyqode.core import icons
-from pyqode.core.api import CodeEdit
+from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
-from pyqode.qt import QtCore, QtGui, QtWidgets
 from pyqode.core.backend.workers import findall
 
 
