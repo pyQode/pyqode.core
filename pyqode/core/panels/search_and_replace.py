@@ -137,7 +137,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._separator = None
         self._decorations = []
         self._occurrences = []
-        self._current_occurrence_index = -1
+        self._current_occurrence_index = 0
         self._bg = None
         self._fg = None
         self._update_buttons(txt="")
@@ -376,7 +376,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             return
         current = self._occurrences[current_occurence]
         cursor_pos = self.editor.textCursor().position()
-        if cursor_pos not in range(current[0], current[1] + 1):
+        if cursor_pos not in range(current[0], current[1] + 1) or \
+                current_occurence == -1:
             # search first occurrence that occurs after the cursor position
             current_occurence = 0
             for i, (start, end) in enumerate(self._occurrences):
@@ -413,11 +414,12 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             return
         current = self._occurrences[current_occurence]
         cursor_pos = self.editor.textCursor().position()
-        if cursor_pos not in range(current[0], current[1] + 1):
+        if cursor_pos not in range(current[0], current[1] + 1) or \
+                current_occurence == -1:
             # search first occurrence that occurs before the cursor position
             current_occurence = len(self._occurrences) - 1
             for i, (start, end) in enumerate(self._occurrences):
-                if end > cursor_pos:
+                if end >= cursor_pos:
                     current_occurence = i - 1
                     break
         else:
@@ -578,6 +580,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.editor.decorations.append(deco)
         self.cpt_occurences = len(all_occurences)
         if not self.cpt_occurences:
+            self._current_occurrence_index = -1
+        else:
             self._current_occurrence_index = -1
         self._update_label_matches()
         self._update_buttons(txt=self.lineEditReplace.text())
