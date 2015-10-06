@@ -27,6 +27,9 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+HEARTBEAT_DELAY = 60  # delay max without heartbeat signal
+
+
 def import_class(klass):
     """
     Imports a class from a fully qualified name string.
@@ -103,11 +106,11 @@ class JsonServer(socketserver.TCPServer):
             has not been received
             """
             self.srv.reset_heartbeat()
-            original_timeout = self.srv.timeout
-            self.srv.timeout = 60
+            # make sure to have enough time to handle the request
+            self.srv.timeout = HEARTBEAT_DELAY * 10
             data = self.read()
             self._handle(data)
-            self.srv.timeout = original_timeout
+            self.srv.timeout = HEARTBEAT_DELAY
             self.srv.reset_heartbeat()
 
         def _handle(self, data):
@@ -161,7 +164,7 @@ class JsonServer(socketserver.TCPServer):
         if not args:
             args = default_parser().parse_args()
         self.port = args.port
-        self.timeout = 2
+        self.timeout = HEARTBEAT_DELAY
         self._Handler.srv = self
         socketserver.TCPServer.__init__(
             self, ('127.0.0.1', int(args.port)), self._Handler)
