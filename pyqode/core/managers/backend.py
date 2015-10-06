@@ -164,7 +164,15 @@ class BackendManager(Manager):
         :raise: backend.NotRunning if the backend process is not running.
         """
         if not self.running:
-            raise NotRunning()
+            try:
+                # try to restart the backend if it crashed.
+                self.start(self.server_script, interpreter=self.interpreter,
+                           args=self.args)
+            except AttributeError:
+                pass  # not started yet
+            finally:
+                # caller should try again, later
+                raise NotRunning()
         else:
             _logger().debug('sending request, worker=%r' %
                             worker_class_or_function)
@@ -175,6 +183,7 @@ class BackendManager(Manager):
                 on_receive=on_receive)
             socket.finished.connect(self._rm_socket)
             self._sockets.append(socket)
+            # restart heartbeat timer
             self._heartbeat_timer.start()
 
     def _send_heartbeat(self):
