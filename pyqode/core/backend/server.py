@@ -171,6 +171,7 @@ class JsonServer(socketserver.TCPServer):
         print('started on 127.0.0.1:%d' % int(args.port))
         print('running with python %d.%d.%d' % (sys.version_info[:3]))
         self._heartbeat_thread = threading.Thread(target=self.heartbeat)
+        self._heartbeat_thread.setDaemon(True)
         self._heartbeat_thread.start()
 
     def reset_heartbeat(self):
