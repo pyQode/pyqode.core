@@ -372,11 +372,13 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             except ImportError:
                 _logger().warning('potential memory leak detected, install '
                                   'objgraph and graphiz to know what objects '
-                                  'are holding to the editor widget!')
+                                  'are holding to the editor widget!' %
+                                  widget)
             else:
                 _logger().warning('potential memory detected on widget %r.\n'
-                                  'see stdout for a backrefs dot graph...')
-                objgraph.show_backrefs([widget], output=sys.stdout)
+                                  'see stderr for a backrefs dot graph...' %
+                                  widget)
+                objgraph.show_backrefs([widget], output=sys.stderr)
 
     @staticmethod
     def _close_widget(widget):

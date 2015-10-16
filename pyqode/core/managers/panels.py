@@ -72,6 +72,7 @@ class PanelsManager(Manager):
         panel = self.get(name_or_klass)
         panel.on_uninstall()
         panel.hide()
+        panel.setParent(None)
         return self._panels[panel.position].pop(panel.name, None)
 
     def clear(self):
@@ -79,10 +80,27 @@ class PanelsManager(Manager):
         Removes all panel from the editor.
 
         """
+        import sys
         for i in range(4):
             while len(self._panels[i]):
-                key = list(self._panels[i].keys())[0]
+                key = sorted(list(self._panels[i].keys()))[0]
                 panel = self.remove(key)
+                panel.setParent(None)
+                panel.deleteLater()
+                refcount = sys.getrefcount(panel)
+                if refcount > 2:
+                    try:
+                        import objgraph
+                    except ImportError:
+                        _logger().warning(
+                            'potential memory leak detected, install objgraph '
+                            'and graphiz to know what objects are holding to '
+                            'panel: %r', panel)
+                    else:
+                        _logger().warning(
+                            'potential memory leak detected on panel: %r.\n'
+                            'see stderr for a backrefs dot graph...', panel)
+                        objgraph.show_backrefs([panel], output=sys.stderr)
                 del panel
 
     def get(self, name_or_klass):
