@@ -5,6 +5,7 @@ import inspect
 import logging
 import mimetypes
 import os
+import sys
 import uuid
 import weakref
 
@@ -363,6 +364,19 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                         pass
                 if rm:
                     self.remove_tab(index)
+
+        cnt = sys.getrefcount(widget)
+        if cnt > 2:
+            try:
+                import objgraph
+            except ImportError:
+                _logger().warning('potential memory leak detected, install '
+                                  'objgraph and graphiz to know what objects '
+                                  'are holding to the editor widget!')
+            else:
+                _logger().warning('potential memory detected on widget %r.\n'
+                                  'see stdout for a backrefs dot graph...')
+                objgraph.show_backrefs([widget], output=sys.stdout)
 
     @staticmethod
     def _close_widget(widget):
