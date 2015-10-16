@@ -3,7 +3,7 @@
 This module contains the main window implementation.
 """
 from __future__ import print_function
-# from future.builtins import super
+import weakref
 
 import mimetypes
 import os
@@ -105,7 +105,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             a.setCheckable(True)
             a.setChecked(True)
             a.changed.connect(self.on_mode_state_changed)
-            a.mode = mode
+            a.mode = weakref.proxy(mode)
             self.menuModes.addAction(a)
 
     def setup_mnu_panels(self, editor):
@@ -115,7 +115,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             a.setCheckable(True)
             a.setChecked(True)
             a.changed.connect(self.on_panel_state_changed)
-            a.panel = panel
+            a.panel = weakref.proxy(panel)
             self.menuPanels.addAction(a)
 
     def setup_mnu_style(self, editor):
