@@ -315,7 +315,9 @@ class CheckerMode(Mode, QtCore.QObject):
 
     def _request(self):
         """ Requests a checking of the editor content. """
-        if not self.editor:
+        try:
+            self.editor.toPlainText()
+        except (TypeError, RuntimeError):
             return
         request_data = {
             'code': self.editor.toPlainText(),

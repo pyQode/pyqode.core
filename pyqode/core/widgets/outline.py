@@ -48,15 +48,15 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
 
         :param editor: CodeEdit
         """
-        if self._outline_mode:
+        if self._outline_mode and self._outline_mode():
             try:
-                self._outline_mode.document_changed.disconnect(
+                self._outline_mode().document_changed.disconnect(
                     self._on_changed)
             except (TypeError, RuntimeError):
                 pass
-        if self._folding_panel:
+        if self._folding_panel and self._folding_panel():
             try:
-                self._folding_panel.trigger_state_changed.disconnect(
+                self._folding_panel().trigger_state_changed.disconnect(
                     self._on_block_state_changed)
             except (TypeError, RuntimeError):
                 pass
@@ -68,18 +68,19 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
 
         if self._editor is not None:
             try:
-                self._folding_panel = editor.panels.get(FoldingPanel)
+                self._folding_panel = weakref.ref(
+                    editor.panels.get(FoldingPanel))
             except KeyError:
                 pass
             else:
-                self._folding_panel.trigger_state_changed.connect(
+                self._folding_panel().trigger_state_changed.connect(
                     self._on_block_state_changed)
             try:
                 analyser = editor.modes.get(OutlineMode)
             except KeyError:
                 self._outline_mode = None
             else:
-                self._outline_mode = analyser
+                self._outline_mode = weakref.ref(analyser)
                 analyser.document_changed.connect(self._on_changed)
 
             try:
@@ -99,7 +100,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         block_state = TextBlockHelper.is_collapsed(block)
         if item_state != block_state:
             self._updating = True
-            self._folding_panel.toggle_fold_trigger(block)
+            self._folding_panel().toggle_fold_trigger(block)
             self._updating = False
 
     def _on_block_state_changed(self, block, state):
@@ -126,9 +127,10 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         self._updating = True
         to_collapse = []
         self.clear()
-        if self._editor and self._outline_mode and self._folding_panel:
+        if self._editor and self._outline_mode and self._outline_mode() and \
+                self._folding_panel and self._folding_panel():
             items, to_collapse = self.to_tree_widget_items(
-                self._outline_mode.definitions, to_collapse=to_collapse)
+                self._outline_mode().definitions, to_collapse=to_collapse)
             if len(items):
                 self.addTopLevelItems(items)
                 self.expandAll()

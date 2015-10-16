@@ -9,7 +9,9 @@ import json
 import logging
 import socket
 import struct
+import sys
 import uuid
+from weakref import ref, proxy
 from pyqode.qt import QtCore, QtNetwork
 
 
@@ -53,6 +55,105 @@ PROCESS_ERROR_STRING = {
 }
 
 
+if sys.version_info[0] >= 3:
+    class WeakMethod(ref):
+        """
+        A custom `weakref.ref` subclass which simulates a weak reference to
+        a bound method, working around the lifetime problem of bound methods.
+        """
+
+        __slots__ = "_func_ref", "_meth_type", "_alive", "__weakref__"
+
+        def __new__(cls, meth, callback=None):
+            try:
+                obj = meth.__self__
+                func = meth.__func__
+            except AttributeError:
+                raise TypeError("argument should be a bound method, not {}"
+                                .format(type(meth)))
+
+            def _cb(arg):
+                # The self-weakref trick is needed to avoid creating a reference
+                # cycle.
+                self = self_wr()
+                if self._alive:
+                    self._alive = False
+                    if callback is not None:
+                        callback(self)
+            self = ref.__new__(cls, obj, _cb)
+            self._func_ref = ref(func, _cb)
+            self._meth_type = type(meth)
+            self._alive = True
+            self_wr = ref(self)
+            return self
+
+        def __call__(self):
+            obj = super().__call__()
+            func = self._func_ref()
+            if obj is None or func is None:
+                return None
+            return self._meth_type(func, obj)
+
+        def __eq__(self, other):
+            if isinstance(other, WeakMethod):
+                if not self._alive or not other._alive:
+                    return self is other
+                return ref.__eq__(self, other) and \
+                    self._func_ref == other._func_ref
+            return False
+
+        def __ne__(self, other):
+            if isinstance(other, WeakMethod):
+                if not self._alive or not other._alive:
+                    return self is not other
+                return ref.__ne__(self, other) or \
+                    self._func_ref != other._func_ref
+            return True
+
+        __hash__ = ref.__hash__
+else:
+    class _weak_callable:
+
+        def __init__(self,obj,func):
+            self._obj = obj
+            self._meth = func
+
+        def __call__(self,*args,**kws):
+            if self._obj is not None:
+                return self._meth(self._obj,*args,**kws)
+            else:
+                return self._meth(*args,**kws)
+
+        def __getattr__(self,attr):
+            if attr == 'im_self':
+                return self._obj
+            if attr == 'im_func':
+                return self._meth
+            raise AttributeError(attr)
+
+    class WeakMethod:
+        """ Wraps a function or, more importantly, a bound method, in
+        a way that allows a bound method's object to be GC'd, while
+        providing the same interface as a normal weak reference. """
+
+        def __init__(self,fn):
+            try:
+                self._obj = ref(fn.im_self)
+                self._meth = fn.im_func
+            except AttributeError:
+                # It's not a bound method.
+                self._obj = None
+                self._meth = fn
+
+        def __call__(self):
+            if self._dead(): return None
+            return _weak_callable(self._obj(),self._meth)
+
+        def _dead(self):
+            return self._obj is not None and self._obj() is None
+
+
+
 class JsonTcpClient(QtNetwork.QTcpSocket):
     """
     A json tcp client socket used to start and communicate with the pyqode
@@ -73,13 +174,17 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                  on_receive=None):
         super(JsonTcpClient, self).__init__(parent)
         self._port = port
+
         self._worker = worker_class_or_function
         self._args = args
         self._header_complete = False
         self._header_buf = bytes()
         self._to_read = 0
         self._data_buf = bytes()
-        self._callback = on_receive
+        if on_receive:
+            self._callback = WeakMethod(on_receive)
+        else:
+            self._callback = None
         self.is_connected = False
         self._closed = False
         self.connected.connect(self._on_connected)
@@ -91,6 +196,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def close(self):
         self._closed = True  # fix issue with QTimer.singleShot
         super(JsonTcpClient, self).close()
+        self._callback = None
 
     def _send_request(self):
         """
@@ -204,8 +310,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             _logger().debug('response received: %r', obj)
             results = obj['results']
             # possible callback
-            if self._callback:
-                self._callback(results)
+            if self._callback and self._callback():
+                self._callback()(results)
             self._header_complete = False
             self._data_buf = bytes()
             self.finished.emit(self)

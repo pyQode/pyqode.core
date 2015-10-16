@@ -110,6 +110,9 @@ class DelayJobRunner(object):
         Cancels pending requests.
         """
         self._timer.stop()
+        self._job = None
+        self._args = None
+        self._kwargs = None
 
     def _exec_requested_job(self):
         """

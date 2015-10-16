@@ -114,6 +114,11 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         Checks watched file moficiation time and permission changes.
         """
+        try:
+            self.editor.toPlainText()
+        except RuntimeError:
+            self._timer.stop()
+            return
         if self.editor and self.editor.file.path:
             if not os.path.exists(self.editor.file.path) and self._mtime:
                 self._notify_deleted_file()

@@ -161,7 +161,6 @@ class PygmentsSH(SyntaxHighlighter):
     def __init__(self, document, lexer=None, color_scheme=None):
         super(PygmentsSH, self).__init__(document, color_scheme=color_scheme)
         self._pygments_style = self.color_scheme.name
-        self._document = document
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
