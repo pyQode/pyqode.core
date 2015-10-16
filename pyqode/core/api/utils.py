@@ -4,6 +4,8 @@ This module contains utility functions/classes.
 """
 import functools
 import logging
+import weakref
+
 from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
@@ -123,11 +125,15 @@ class TextHelper(object):
     Qt text api for an easier usage.
 
     """
+    @property
+    def _editor(self):
+        return self._editor_ref()
+
     def __init__(self, editor):
         """
         :param editor: The editor to work on.
         """
-        self._editor = editor
+        self._editor_ref = weakref.ref(editor)
 
     def goto_line(self, line, column=0, move=True):
         """

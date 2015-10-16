@@ -6,6 +6,8 @@ import logging
 import mimetypes
 import os
 import uuid
+import weakref
+
 from pyqode.qt import QtCore, QtWidgets, QtGui
 from pyqode.core.api import utils, CodeEdit
 from pyqode.core.dialogs import DlgUnsavedFiles
@@ -361,9 +363,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                         pass
                 if rm:
                     self.remove_tab(index)
-                    widget.close()
-                    widget.setParent(None)
-                    del widget
 
     @staticmethod
     def _close_widget(widget):
@@ -419,6 +418,13 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         widget._original_tab_widget._tabs.remove(widget)
         if self.count() == 0:
             self.last_tab_closed.emit()
+        if SplittableTabWidget.tab_under_menu == widget:
+            SplittableTabWidget.tab_under_menu = None
+        if not clones:
+            widget.close()
+            widget.setParent(None)
+            widget.deleteLater()
+            del widget
 
     def _on_split_requested(self):
         """
@@ -766,7 +772,9 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         got the focus.
         :return: QWidget
         """
-        return self._current
+        if self._current:
+            return self._current()
+        return None
 
     def widgets(self, include_clones=False):
         """
@@ -811,12 +819,12 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             pass
         else:
             if result:
-                if new != self._current:
+                if new != self.current_widget():
                     self._on_current_changed(new)
 
     def _on_current_changed(self, new):
-        old = self._current
-        self._current = new
+        old = self.current_widget()
+        self._current = weakref.ref(new)
         _logger().debug(
             'current tab changed (old=%r, new=%r)', old, new)
         self.current_changed.emit(new)
@@ -1036,30 +1044,30 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         Save current widget as.
         """
-        if self._current is None:
+        if self.current_widget():
             return
-        mem = self._current.file.path
-        self._current.file._path = None
+        mem = self.current_widget().file.path
+        self.current_widget().file._path = None
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
-        if not self.main_tab_widget.save_widget(self._current):
-            self._current.file._path = mem
+        if not self.main_tab_widget.save_widget(self.current_widget()):
+            self.current_widget().file._path = mem
         CodeEditTabWidget.default_directory = os.path.expanduser('~')
-        self.document_saved.emit(self._current.file.path, '')
+        self.document_saved.emit(self.current_widget().file.path, '')
 
         # rename tab
-        tw = self._current.parent_tab_widget
-        tw.setTabText(tw.indexOf(self._current),
-                      os.path.split(self._current.file.path)[1])
+        tw = self.current_widget().parent_tab_widget
+        tw.setTabText(tw.indexOf(self.current_widget()),
+                      os.path.split(self.current_widget().file.path)[1])
 
-        return self._current.file.path
+        return self.current_widget().file.path
 
     def save_current(self):
         """
         Save current editor. If the editor.file.path is None, a save as dialog
         will be shown.
         """
-        if self._current is not None:
-            self._save(self._current)
+        if self.current_widget() is not None:
+            self._save(self.current_widget())
 
     def _save(self, widget):
         path = widget.file.path
@@ -1071,9 +1079,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             with open(path, encoding=encoding) as f:
                 old_content = f.read()
-            if widget.dirty:
-                self.main_tab_widget.save_widget(widget)
-                self.document_saved.emit(path, old_content)
+            self.main_tab_widget.save_widget(widget)
+            self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """

@@ -1,3 +1,4 @@
+import weakref
 from pyqode.qt import QtWidgets
 from pyqode.core import api
 
@@ -8,14 +9,14 @@ class MoveCursorCommand(QtWidgets.QUndoCommand):
             '(Goto line %d)' % (new_pos[0] + 1))
         self._new_pos = new_pos
         self._prev_pos = prev_pos
-        self._editor = editor
+        self._editor = weakref.ref(editor)
 
     def _move(self, line, column):
-        self._editor.blockSignals(True)
-        api.TextHelper(self._editor).goto_line(line, column)
-        self._editor.blockSignals(False)
+        self._editor().blockSignals(True)
+        api.TextHelper(self._editor()).goto_line(line, column)
+        self._editor().blockSignals(False)
         try:
-            caret_mode = self._editor.modes.get('CaretLineHighlighterMode')
+            caret_mode = self._editor().modes.get('CaretLineHighlighterMode')
         except KeyError:
             pass
         else:
@@ -33,6 +34,7 @@ class CursorHistoryMode(api.Mode):
         super(CursorHistoryMode, self).__init__()
         self._prev_pos = 0, 0
         self.undo_stack = QtWidgets.QUndoStack()
+        self.undo_stack.setUndoLimit(10)
 
     def on_state_changed(self, state):
         if state:

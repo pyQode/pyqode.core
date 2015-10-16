@@ -4,6 +4,7 @@ This module contains the syntax highlighter API.
 import logging
 import sys
 import time
+import weakref
 from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token, Punctuation
 from pygments.util import ClassNotFound
@@ -336,7 +337,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             if self.editor.show_whitespaces:
                 self._highlight_whitespaces(text)
             if self.fold_detector is not None:
-                self.fold_detector.editor = self.editor
+                self.fold_detector._editor = weakref.ref(self.editor)
                 self.fold_detector.process_block(
                     current_block, previous_block, text)
 

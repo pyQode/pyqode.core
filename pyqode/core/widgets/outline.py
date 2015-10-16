@@ -3,6 +3,7 @@ This document contains the tree widget used to display the editor document
 outline.
 
 """
+import weakref
 from pyqode.core.share import Definition
 from pyqode.core import icons
 from pyqode.core.panels import FoldingPanel
@@ -24,7 +25,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
     def __init__(self, parent=None):
         super(OutlineTreeWidget, self).__init__(parent)
         self._definitions = None
-        self._editor = None
+        self._editor_ref = None
         self._outline_mode = None
         self._folding_panel = None
         self._expanded_items = []
@@ -33,6 +34,12 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         self.itemCollapsed.connect(self._on_item_state_changed)
         self.itemExpanded.connect(self._on_item_state_changed)
         self._updating = True
+
+    @property
+    def _editor(self):
+        if self._editor_ref:
+            return self._editor_ref()
+        return None
 
     def set_editor(self, editor):
         """
@@ -53,7 +60,12 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
                     self._on_block_state_changed)
             except (TypeError, RuntimeError):
                 pass
-        self._editor = editor
+
+        if editor:
+            self._editor_ref = weakref.ref(editor)
+        else:
+            self._editor_ref = None
+
         if self._editor is not None:
             try:
                 self._folding_panel = editor.panels.get(FoldingPanel)

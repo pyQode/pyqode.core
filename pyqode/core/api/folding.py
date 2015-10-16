@@ -49,10 +49,16 @@ class FoldDetector(object):
 
         editor.syntax_highlighter.fold_detector = my_fold_detector
     """
+    @property
+    def editor(self):
+        if self._editor:
+            return self._editor()
+        return None
+
     def __init__(self):
         #: Reference to the parent editor, automatically set by the syntax
         #: highlighter before process any block.
-        self.editor = None
+        self._editor = None
         #: Fold level limit, any level greater or equal is skipped.
         #: Default is sys.maxsize (i.e. all levels are accepted)
         self.limit = sys.maxsize
