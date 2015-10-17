@@ -1060,7 +1060,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         Save current widget as.
         """
-        if self.current_widget():
+        if not self.current_widget():
             return
         mem = self.current_widget().file.path
         self.current_widget().file._path = None
