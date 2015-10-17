@@ -482,6 +482,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(True)
         self.setLineWrapMode(self.NoWrap)
 
+    def __del__(self):
+        _logger().debug('CodeEdit.__del__')
+
     def __repr__(self):
         return '%s(path=%r)' % (self.__class__.__name__, self.file.path)
 
