@@ -182,7 +182,11 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._to_read = 0
         self._data_buf = bytes()
         if on_receive:
-            self._callback = WeakMethod(on_receive)
+            try:
+                self._callback = WeakMethod(on_receive)
+            except TypeError:
+                # unbound method (i.e. free function)
+                self._callback = ref(on_receive)
         else:
             self._callback = None
         self.is_connected = False
