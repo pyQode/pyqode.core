@@ -157,6 +157,6 @@ class ErrorsTable(QtWidgets.QTableWidget):
         QtWidgets.QMessageBox.information(
             self, 'Message details',
             """<p><b>Description:</b><br/>%s</p>
-            <i><p><b>File:</b><br/>%s</p>
-            <p><b>Line: </b>%d</p></i>
+<p><b>File:</b><br/>%s</p>
+<p><b>Line:</b><br/>%d</p>
             """ % (msg.description, msg.path, msg.line + 1, ))
