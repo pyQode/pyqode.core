@@ -77,13 +77,14 @@ def test_client_server_py2(editor):
     with pytest.raises(NotRunning):
         editor.backend.send_request(
             backend.echo_worker, 'some data', on_receive=_on_receive)
-    editor.backend.start(server_path(), interpreter=python2_path())
-    wait_for_connected(editor)
-    editor.backend.send_request(
-        backend.echo_worker, 'some data', on_receive=_on_receive)
-    QTest.qWait(500)
-    editor.backend.stop()
-    editor.backend.start(server_path())
+    if os.path.exists(python2_path()):
+        editor.backend.start(server_path(), interpreter=python2_path())
+        wait_for_connected(editor)
+        editor.backend.send_request(
+            backend.echo_worker, 'some data', on_receive=_on_receive)
+        QTest.qWait(500)
+        editor.backend.stop()
+        editor.backend.start(server_path())
 
 
 def test_frozen_server():
