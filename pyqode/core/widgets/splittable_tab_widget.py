@@ -370,12 +370,12 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             try:
                 import objgraph
             except ImportError:
-                _logger().warning('potential memory leak detected, install '
-                                  'objgraph and graphiz to know what objects '
-                                  'are holding to the editor widget!' %
-                                  widget)
+                _logger().warning(
+                    'potential memory leak detected on widget: %r\n'
+                    'Install the objgraph package to know what objects are '
+                    'holding references the editor widget...' % widget)
             else:
-                _logger().warning('potential memory detected on widget %r.\n'
+                _logger().warning('potential memory detected on widget: %r\n'
                                   'see stderr for a backrefs dot graph...' %
                                   widget)
                 objgraph.show_backrefs([widget], output=sys.stderr)

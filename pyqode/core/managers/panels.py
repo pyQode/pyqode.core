@@ -93,12 +93,12 @@ class PanelsManager(Manager):
                         import objgraph
                     except ImportError:
                         _logger().warning(
-                            'potential memory leak detected, install objgraph '
-                            'and graphiz to know what objects are holding to '
-                            'panel: %r', panel)
+                            'potential memory leak detected on panel: %r\n'
+                            'Install the objgraph package to know what objects'
+                            ' are holding references the panel...', panel)
                     else:
                         _logger().warning(
-                            'potential memory leak detected on panel: %r.\n'
+                            'potential memory leak detected on panel: %r\n'
                             'see stderr for a backrefs dot graph...', panel)
                         objgraph.show_backrefs([panel], output=sys.stderr)
                 del panel

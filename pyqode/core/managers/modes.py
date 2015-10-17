@@ -60,12 +60,12 @@ class ModesManager(Manager):
                     import objgraph
                 except ImportError:
                     _logger().warning(
-                        'potential memory leak detected, install objgraph and '
-                        'graphiz to know what objects are holding to the '
-                        'mode: %r' % mode)
+                        'potential memory leak detected on mode %r...\n'
+                        'Install the objgraph package to know what objects are'
+                        ' holding references the mode.' % mode)
                 else:
                     _logger().warning(
-                        'potential memory detected on mode: %r.\n'
+                        'potential memory leak detected on mode: %r.\n'
                         'see stderr for a backrefs dot graph...' % mode)
                     objgraph.show_backrefs([mode], output=sys.stderr)
             del mode
