@@ -59,7 +59,7 @@ class CheckerPanel(Panel):
 
     def on_uninstall(self):
         self._job_runner.cancel_requests()
-        super().on_uninstall()
+        super(CheckerPanel, self).on_uninstall()
 
     def paintEvent(self, event):
         super(CheckerPanel, self).paintEvent(event)
