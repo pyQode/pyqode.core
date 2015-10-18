@@ -1095,8 +1095,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             with open(path, encoding=encoding) as f:
                 old_content = f.read()
-            self.main_tab_widget.save_widget(widget)
-            self.document_saved.emit(path, old_content)
+            if widget.dirty:
+                self.main_tab_widget.save_widget(widget)
+                self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """
