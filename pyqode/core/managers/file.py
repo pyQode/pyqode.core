@@ -192,7 +192,6 @@ class FileManager(Manager):
         :return: the corresponding mime type.
         """
         filename = os.path.split(path)[1]
-        _logger().debug('detecting mimetype for %s', filename)
         mimetype = mimetypes.guess_type(filename)[0]
         if mimetype is None:
             mimetype = 'text/x-plain'
@@ -362,8 +361,8 @@ class FileManager(Manager):
             return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
-        _logger().debug(
-            "saving %r to %r with %r encoding", self.path, path, encoding)
+        _logger().log(
+            5, "saving %r with %r encoding", path, encoding)
         if path is None:
             if self.path:
                 path = self.path
@@ -385,7 +384,6 @@ class FileManager(Manager):
         else:
             tmp_path = path
         try:
-            _logger().debug('saving editor content to temp file: %s', path)
             with open(tmp_path, 'wb') as file:
                 file.write(self._get_text(encoding))
         except UnicodeEncodeError:
@@ -403,7 +401,6 @@ class FileManager(Manager):
             self._encoding = encoding
             # remove path and rename temp file, if safe save is on
             if self.safe_save:
-                _logger().debug('rename %s to %s', tmp_path, path)
                 self._rm(path)
                 os.rename(tmp_path, path)
                 self._rm(tmp_path)

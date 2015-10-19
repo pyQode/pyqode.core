@@ -15,6 +15,14 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+#: log level for communication
+COMM = 1
+
+
+def comm(msg, *args):
+    _logger().log(COMM, msg, args)
+
+
 class BackendManager(Manager):
     """
     The backend controller takes care of controlling the client-server
@@ -113,8 +121,8 @@ class BackendManager(Manager):
                 BackendManager.LAST_PROCESS = self._process
                 BackendManager.LAST_PORT = self._port
                 BackendManager.SHARE_COUNT += 1
-            _logger().debug('starting backend process: %s %s', program,
-                            ' '.join(pgm_args))
+            comm('starting backend process: %s %s', program,
+                 ' '.join(pgm_args))
             self._heartbeat_timer.start()
 
     def stop(self):
@@ -127,7 +135,7 @@ class BackendManager(Manager):
             BackendManager.SHARE_COUNT -= 1
             if BackendManager.SHARE_COUNT:
                 return
-        _logger().debug('stopping backend process')
+        comm('stopping backend process')
         # close all sockets
         for s in self._sockets:
             s._callback = None
@@ -148,7 +156,7 @@ class BackendManager(Manager):
                 self._process.terminate()
         self._process._prevent_logs = False
         self._heartbeat_timer.stop()
-        _logger().debug('backend process terminated')
+        comm('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
@@ -174,8 +182,7 @@ class BackendManager(Manager):
                 # caller should try again, later
                 raise NotRunning()
         else:
-            _logger().debug('sending request, worker=%r' %
-                            worker_class_or_function)
+            comm('sending request, worker=%r' % worker_class_or_function)
             # create a socket, the request will be send as soon as the socket
             # has connected
             socket = JsonTcpClient(

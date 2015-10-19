@@ -309,7 +309,6 @@ class InteractiveConsole(QTextEdit):
         """
         Stop the process (by killing it).
         """
-        _logger().debug('killing process')
         if self.process is not None:
             self._user_stop = True
             self.process.kill()
@@ -390,7 +389,6 @@ class InteractiveConsole(QTextEdit):
         self._writer(self, "{0} {1}\n".format(
             self._process_name, " ".join(self._args)), self._app_msg_col)
         self._running = True
-        _logger().debug('process started')
 
     def _write_error(self, error):
         if self is None:
@@ -401,7 +399,7 @@ class InteractiveConsole(QTextEdit):
         else:
             err = PROCESS_ERROR_STRING[error]
             self._writer(self, "Error: %s" % err, self.stderr_color)
-            _logger().debug('process error: %s', err)
+            _logger().warn('process error: %s', err)
         self._running = False
 
     @staticmethod

@@ -574,7 +574,6 @@ class FoldingPanel(Panel):
         Add fold decorations (boxes arround a folded block in the editor
         widget).
         """
-        _logger().debug('add fold deco %r', block)
         deco = TextDecoration(block)
         deco.signals.clicked.connect(self._on_fold_deco_clicked)
         deco.tooltip = region.text(max_lines=25)

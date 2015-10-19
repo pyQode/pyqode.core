@@ -342,7 +342,6 @@ class TextHelper(object):
         editor = self._editor
         value = editor.verticalScrollBar().value()
         pos = self.cursor_position()
-        _logger().debug('BEGIN edit blocks for cleaning  ')
         editor.textCursor().beginEditBlock()
 
         # cleanup whitespaces
@@ -393,7 +392,6 @@ class TextHelper(object):
         editor.setTextCursor(text_cursor)
         editor.verticalScrollBar().setValue(value)
 
-        _logger().debug('FINISH editing blocks for cleaning')
         text_cursor.endEditBlock()
         editor._cleaning = False
 
@@ -658,8 +656,6 @@ class TextHelper(object):
                                 cursor.selectionEnd()))
             cursor.setPosition(cursor.position() + 1)
             cursor = text_document.find(search_txt, cursor, search_flags)
-        _logger().debug('search occurences: %r', occurrences)
-        _logger().debug('occurence index: %d', index)
         return occurrences, index
 
     def is_comment_or_string(self, cursor_or_block, formats=None):

@@ -70,7 +70,7 @@ class Mode(object):
         self._on_close = False
 
     def __del__(self):
-        _logger().debug('%s.__del__', type(self))
+        _logger().log(5, '%s.__del__', type(self))
 
     def on_install(self, editor):
         """

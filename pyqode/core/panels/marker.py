@@ -201,13 +201,10 @@ class MarkerPanel(Panel):
         line = TextHelper(self.editor).line_nbr_from_position(event.pos().y())
         if self.marker_for_line(line):
             if event.button() == QtCore.Qt.LeftButton:
-                _logger().debug("remove marker requested")
                 self.remove_marker_requested.emit(line)
             else:
-                _logger().debug('edit marker requested')
                 self.edit_marker_requested.emit(line)
         else:
-            _logger().debug("add marker requested")
             self.add_marker_requested.emit(line)
 
     def mouseMoveEvent(self, event):

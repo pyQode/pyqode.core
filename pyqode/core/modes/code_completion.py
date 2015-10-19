@@ -17,6 +17,15 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+def debug(msg, *args):
+    """
+    Log internal debugger messages (user should not see them, even in debug
+    mode)
+    """
+    return _logger().log(5, msg, *args)
+
+
+
 class SubsequenceSortFilterProxyModel(QtCore.QSortFilterProxyModel):
     """
     Performs subsequence matching/sorting (see pyQode/pyQode#1).
@@ -355,7 +364,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._show_popup(index=self._completer.completionCount() - 1)
                 event.accept()
 
-        _logger().debug('key pressed: %s' % event.text())
+        debug('key pressed: %s' % event.text())
         is_shortcut = self._is_shortcut(event)
         # handle completer popup events ourselves
         if self._completer.popup().isVisible():
@@ -371,10 +380,10 @@ class CodeCompletionMode(Mode, QtCore.QObject):
     def _on_key_released(self, event):
         if self._is_shortcut(event) or event.isAccepted():
             return
-        _logger().debug('key released:%s' % event.text())
+        debug('key released:%s' % event.text())
         word = self._helper.word_under_cursor(
             select_whole_word=True).selectedText()
-        _logger().debug('word: %s' % word)
+        debug('word: %s' % word)
         if event.text():
             if event.key() == QtCore.Qt.Key_Escape:
                 self._hide_popup()
@@ -424,13 +433,13 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self.editor.setTextCursor(cursor)
 
     def _on_results_available(self, results):
-        _logger().debug("completion results (completions=%r), prefix=%s",
+        debug("completion results (completions=%r), prefix=%s",
                         results, self.completion_prefix)
         context = results[0]
         results = results[1:]
         line, column, request_id = context
-        _logger().debug('request context: %r', context)
-        _logger().debug('latest context: %r', (self._last_cursor_line,
+        debug('request context: %r', context)
+        debug('latest context: %r', (self._last_cursor_line,
                                                self._last_cursor_column,
                                                self._request_id))
         self._last_request_id = request_id
@@ -442,7 +451,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                     all_results += res
                 self._show_completions(all_results)
         else:
-            _logger().debug('outdated request, dropping')
+            debug('outdated request, dropping')
 
     #
     # Helper methods
@@ -451,7 +460,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         return self._completer.popup().isVisible()
 
     def _reset_sync_data(self):
-        _logger().debug('reset sync data and hide popup')
+        debug('reset sync data and hide popup')
         self._last_cursor_line = -1
         self._last_cursor_column = -1
         self._hide_popup()
@@ -474,7 +483,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
             if self._request_id - 1 == self._last_request_id:
                 # context has not changed and the correct results can be
                 # directly shown
-                _logger().debug('request completion ignored, context has not '
+                debug('request completion ignored, context has not '
                                 'changed')
                 self._show_popup()
             else:
@@ -482,7 +491,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 pass
             return True
         else:
-            _logger().debug('requesting completion')
+            debug('requesting completion')
             data = {
                 'code': self.editor.toPlainText(),
                 'line': line,
@@ -500,7 +509,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 _logger().exception('failed to send the completion request')
                 return False
             else:
-                _logger().debug('request sent: %r', data)
+                debug('request sent: %r', data)
                 self._last_cursor_column = column
                 self._last_cursor_line = line
                 self._request_id += 1
@@ -525,7 +534,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         """
         Hides the completer popup
         """
-        _logger().debug('hide popup')
+        debug('hide popup')
         if (self._completer.popup() is not None and
                 self._completer.popup().isVisible()):
             self._completer.popup().hide()
@@ -563,7 +572,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         cnt = self._completer.completionCount()
         selected = self._completer.currentCompletion()
         if (full_prefix == selected) and cnt == 1:
-            _logger().debug('user already typed the only completion that we '
+            debug('user already typed the only completion that we '
                             'have')
             self._hide_popup()
         else:
@@ -574,18 +583,18 @@ class CodeCompletionMode(Mode, QtCore.QObject):
                 self._completer.complete(self._get_popup_rect())
                 self._completer.popup().setCurrentIndex(
                     self._completer.completionModel().index(index, 0))
-                _logger().debug(
+                debug(
                     "popup shown: %r" % self._completer.popup().isVisible())
             else:
-                _logger().debug('cannot show popup, editor is not visible')
+                debug('cannot show popup, editor is not visible')
 
     def _show_completions(self, completions):
-        _logger().debug("showing %d completions" % len(completions))
-        _logger().debug('popup state: %r', self._completer.popup().isVisible())
+        debug("showing %d completions" % len(completions))
+        debug('popup state: %r', self._completer.popup().isVisible())
         t = time.time()
         self._update_model(completions)
         elapsed = time.time() - t
-        _logger().debug("completion model updated: %d items in %f seconds",
+        debug("completion model updated: %d items in %f seconds",
                         self._completer.model().rowCount(), elapsed)
         self._show_popup()
 

@@ -16,6 +16,10 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+def debug(msg, *args):
+    return _logger().log(5, msg, *args)
+
+
 class FileSystemTreeView(QtWidgets.QTreeView):
     """
     Extends QtWidgets.QTreeView with a filterable file system model.
@@ -62,15 +66,14 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             fn = finfo.fileName()
             fp = os.path.normpath(finfo.filePath())
             if fp in self._ignored_unused:
-                _logger().debug('excluding unused directory: %s',
-                                finfo.filePath())
+                debug('excluding unused directory: %s', finfo.filePath())
                 return False
             for ptrn in self.ignored_patterns:
                 if fnmatch.fnmatch(fn, ptrn):
-                    _logger().debug('ignoring %s (matching pattern: %s',
-                                    finfo.filePath(), ptrn)
+                    debug('ignoring %s (matching pattern: %s',
+                          finfo.filePath(), ptrn)
                     return False
-            _logger().debug('accepting %s', finfo.filePath())
+            debug('accepting %s', finfo.filePath())
             return True
 
     #: signal emitted when the user deleted a file
@@ -308,11 +311,11 @@ class FileSystemHelper:
         Gets the list of selected items file path (url)
         """
         urls = []
-        _logger().debug('gettings urls')
+        debug('gettings urls')
         for proxy_index in self.tree_view.selectedIndexes():
             finfo = self.tree_view.fileInfo(proxy_index)
             urls.append(finfo.canonicalFilePath())
-        _logger().debug('selected urls %r' % [str(url) for url in urls])
+        debug('selected urls %r' % [str(url) for url in urls])
         return urls
 
     def paste_from_clipboard(self):
@@ -340,7 +343,7 @@ class FileSystemHelper:
         removed if copy is set to False.
         """
         for src in sources:
-            _logger().debug('%s <%s> to <%s>' % (
+            debug('%s <%s> to <%s>' % (
                 'copying' if copy else 'cutting', src, destination))
             perform_copy = True
             ext = os.path.splitext(src)[1]
@@ -374,9 +377,9 @@ class FileSystemHelper:
                 _logger().exception('failed to copy %s to %s', src,
                                     destination)
             else:
-                _logger().debug('file copied %s', src)
+                debug('file copied %s', src)
             if not copy:
-                _logger().debug('removing source (cut operation)')
+                debug('removing source (cut operation)')
                 if os.path.isfile(src):
                     os.remove(src)
                 else:
@@ -419,7 +422,7 @@ class FileSystemHelper:
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
                     _logger().exception('failed to remove %s', fn)
             for d in deleted_files:
-                _logger().debug('%s removed', d)
+                debug('%s removed', d)
                 self.tree_view.file_deleted.emit(os.path.normpath(d))
 
     def get_current_path(self):
@@ -439,7 +442,7 @@ class FileSystemHelper:
         """
         path = self.get_current_path()
         QtWidgets.QApplication.clipboard().setText(path)
-        _logger().debug('path copied: %s' % path)
+        debug('path copied: %s' % path)
 
     def rename(self):
         """

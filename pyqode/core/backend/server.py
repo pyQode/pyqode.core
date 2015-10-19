@@ -95,7 +95,7 @@ class JsonServer(socketserver.TCPServer):
             :param obj: The object to send, must be Json serializable.
             """
             msg = json.dumps(obj).encode('utf-8')
-            _logger().debug('sending %d bytes for the payload', len(msg))
+            _logger().log(1, 'sending %d bytes for the payload', len(msg))
             header = struct.pack('=I', len(msg))
             self.request.sendall(header)
             self.request.sendall(msg)
@@ -118,7 +118,7 @@ class JsonServer(socketserver.TCPServer):
             Handles a work request.
             """
             try:
-                _logger().debug('handling request %r', data)
+                _logger().log(1, 'handling request %r', data)
                 assert data['worker']
                 assert data['request_id']
                 assert data['data'] is not None
@@ -130,8 +130,8 @@ class JsonServer(socketserver.TCPServer):
                 else:
                     if inspect.isclass(worker):
                         worker = worker()
-                    _logger().debug('worker: %r', worker)
-                    _logger().debug('data: %r', data['data'])
+                    _logger().log(1, 'worker: %r', worker)
+                    _logger().log(1, 'data: %r', data['data'])
                     try:
                         ret_val = worker(data['data'])
                     except Exception:
@@ -144,13 +144,13 @@ class JsonServer(socketserver.TCPServer):
                     response = {'request_id': data['request_id'],
                                 'results': ret_val}
                 finally:
-                    _logger().debug('sending response: %r', response)
+                    _logger().log(1, 'sending response: %r', response)
                     try:
                         self.send(response)
                     except ConnectionAbortedError:
                         pass
             except:
-                _logger().debug('error with data=%r', data)
+                _logger().warn('error with data=%r', data)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
 

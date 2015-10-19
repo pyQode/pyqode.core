@@ -26,7 +26,7 @@ class ModesManager(Manager):
         :param mode: The mode instance to append.
 
         """
-        _logger().debug('adding mode %r', mode.name)
+        _logger().log(5, 'adding mode %r', mode.name)
         self._modes[mode.name] = mode
         mode.on_install(self.editor)
         return mode
@@ -38,7 +38,7 @@ class ModesManager(Manager):
         :param name_or_klass: The name (or class) of the mode to remove.
         :returns: The removed mode.
         """
-        _logger().debug('removing mode %r', name_or_klass)
+        _logger().log(5, 'removing mode %r', name_or_klass)
         mode = self.get(name_or_klass)
         mode.on_uninstall()
         self._modes.pop(mode.name)

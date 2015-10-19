@@ -483,7 +483,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setLineWrapMode(self.NoWrap)
 
     def __del__(self):
-        _logger().debug('CodeEdit.__del__')
+        _logger().log(5, 'CodeEdit.__del__')
 
     def __repr__(self):
         return '%s(path=%r)' % (self.__class__.__name__, self.file.path)
@@ -572,7 +572,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Cache().set_cursor_position(
             self.file.path, self.textCursor().position())
         super(CodeEdit, self).close()
-        _logger().debug('closed')
 
     def set_mouse_cursor(self, cursor):
         """
@@ -616,7 +615,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super(CodeEdit, self).setPlainText(txt)
-        _logger().debug('setPlainText duration: %fs' % (time.time() - t))
+        _logger().log(5, 'setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -1056,7 +1055,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         super(CodeEdit, self).showEvent(event)
-        _logger().debug('show event: %r' % self)
         self.panels.refresh()
 
     def setReadOnly(self, read_only):

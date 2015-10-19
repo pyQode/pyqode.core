@@ -961,6 +961,10 @@ class CodeEditTabWidget(BaseTabWidget):
             if not os.path.splitext(path)[1]:
                 if len(editor.mimetypes):
                     path += mimetypes.guess_extension(editor.mimetypes[0])
+            try:
+                _logger().debug('saving %r as %r', editor.file._old_path, path)
+            except AttributeError:
+                _logger().debug('saving %r as %r', editor.file.path, path)
             editor.file._path = path
         else:
             path = editor.file.path
@@ -1054,7 +1058,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 _logger().warn('editor for mimetype already registered, '
                                'skipping')
             cls.editors[mimetype] = code_edit_class
-        _logger().debug('registered editors: %r', cls.editors)
+        _logger().log(5, 'registered editors: %r', cls.editors)
 
     def save_current_as(self):
         """
@@ -1064,6 +1068,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return
         mem = self.current_widget().file.path
         self.current_widget().file._path = None
+        self.current_widget().file._old_path = mem
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
         if not self.main_tab_widget.save_widget(self.current_widget()):
             self.current_widget().file._path = mem
