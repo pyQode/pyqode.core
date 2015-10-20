@@ -1200,14 +1200,15 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                        constructor.
         :return: The created code editor
         """
-        path = os.path.normcase(os.path.normpath(path))
+        original_path = os.path.normpath(path)
+        path = os.path.normcase(original_path)
         paths = []
         widgets = []
         for w in self.widgets(include_clones=False):
             if os.path.exists(w.file.path):
                 # skip new docs
                 widgets.append(w)
-                paths.append(w.file.path)
+                paths.append(os.path.normcase(w.file.path))
         if path in paths:
             i = paths.index(path)
             w = widgets[i]
@@ -1215,8 +1216,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tw.setCurrentIndex(tw.indexOf(w))
             return w
         else:
-            assert os.path.exists(path)
-            name = os.path.split(path)[1]
+            assert os.path.exists(original_path)
+            name = os.path.split(original_path)[1]
 
             use_parent_dir = False
             for tab in self.widgets():
@@ -1256,6 +1257,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tab.show_whitespaces = show_whitespaces
             tab.file.open(path, encoding=encoding)
             tab.setDocumentTitle(name)
+            tab.file._path = original_path
             icon = self._icon(path)
             self.add_tab(tab, title=name, icon=icon)
             self.document_opened.emit(tab)
