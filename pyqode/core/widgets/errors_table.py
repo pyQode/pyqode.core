@@ -154,9 +154,12 @@ class ErrorsTable(QtWidgets.QTableWidget):
         Shows the error details.
         """
         msg = self.currentItem().data(QtCore.Qt.UserRole)
+        desc = msg.description
+        desc = desc.replace('\r\n', '\n').replace('\r', '\n')
+        desc = desc.replace('\n', '<br/>')
         QtWidgets.QMessageBox.information(
             self, 'Message details',
             """<p><b>Description:</b><br/>%s</p>
 <p><b>File:</b><br/>%s</p>
 <p><b>Line:</b><br/>%d</p>
-            """ % (msg.description, msg.path, msg.line + 1, ))
+            """ % (desc, msg.path, msg.line + 1, ))
