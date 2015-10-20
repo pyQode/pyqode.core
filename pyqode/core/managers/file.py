@@ -80,7 +80,7 @@ class FileManager(Manager):
     def path(self):
         """ Gets the file path """
         if self._path:
-            return os.path.normpath(self._path)
+            return os.path.normcase(os.path.normpath(self._path))
         return ''
 
     @property
