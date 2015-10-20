@@ -134,6 +134,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @tab_length.setter
     def tab_length(self, value):
+        if value < 2:
+            value = 2
         self._tab_length = value
         for c in self.clones:
             c.tab_length = value
