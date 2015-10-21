@@ -70,7 +70,18 @@ class Cache(object):
             map = json.loads(self._settings.value('cachedFileEncodings'))
         except TypeError:
             map = {}
-        return map[file_path]
+        try:
+            return map[file_path]
+        except KeyError:
+            for encoding in self.preferred_encodings:
+                try:
+                    with open(file_path, encoding=encoding) as f:
+                        f.read()
+                except UnicodeDecodeError:
+                    pass
+                else:
+                    return encoding
+        return 'utf-8'
 
     def set_file_encoding(self, path, encoding):
         """
