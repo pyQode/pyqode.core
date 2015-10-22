@@ -83,7 +83,7 @@ class Cache(object):
                 try:
                     with open(file_path, encoding=encoding) as f:
                         f.read()
-                except UnicodeDecodeError:
+                except (UnicodeDecodeError, OSError):
                     pass
                 else:
                     return encoding
