@@ -21,6 +21,12 @@ import json
 import locale
 from pyqode.qt import QtCore
 
+try:
+    from future.builtins import open
+    from future.builtins import str
+except:
+    pass  # python 3.2 not supported
+
 
 class Cache(object):
     """
@@ -81,7 +87,7 @@ class Cache(object):
                     pass
                 else:
                     return encoding
-        return 'utf-8'
+            raise KeyError(file_path)
 
     def set_file_encoding(self, path, encoding):
         """

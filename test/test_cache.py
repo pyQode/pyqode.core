@@ -1,6 +1,7 @@
 """
 Test pyqode.core.settings
 """
+import os
 import locale
 import pytest
 from pyqode.core.api import convert_to_codec_key
@@ -25,7 +26,8 @@ def test_cached_encodings():
     s.clear()
     # not in cache
     with pytest.raises(KeyError):
-        s.get_file_encoding(__file__)
+        s.get_file_encoding(os.path.join(os.getcwd(), 'test', 'files',
+                                         'big5hkscs.txt'))
     s.set_file_encoding(__file__, 'utf_16')
     s = Cache(suffix='-pytest')
     assert s.get_file_encoding(__file__) == 'utf_16'
