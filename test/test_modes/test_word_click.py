@@ -20,16 +20,6 @@ def test_events(editor):
     mode._add_decoration(editor.textCursor())
     pt = QtCore.QPoint(10, TextHelper(editor).line_pos_from_number(0))
     QTest.mouseMove(editor, pt)
-    editor.mouseMoveEvent(QtGui.QMouseEvent(
-        QtCore.QEvent.MouseMove, pt,
-        QtCore.Qt.RightButton, QtCore.Qt.RightButton,
-        QtCore.Qt.ControlModifier))
-    # here we have a deco, try to click on it.
-    editor.mousePressEvent(QtGui.QMouseEvent(
-        QtCore.QEvent.MouseButtonPress, pt,
-        QtCore.Qt.LeftButton, QtCore.Qt.RightButton, QtCore.Qt.NoModifier))
-    # move window without control -> remove deco
-    editor.mouseMoveEvent(QtGui.QMouseEvent(
-        QtCore.QEvent.MouseMove, pt,
-        QtCore.Qt.RightButton, QtCore.Qt.RightButton,
-        QtCore.Qt.NoModifier))
+    QTest.mousePress(editor, QtCore.Qt.LeftButton,
+                     QtCore.Qt.ControlModifier, pt)
+    QTest.mouseMove(editor, pt)

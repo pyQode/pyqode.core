@@ -37,7 +37,17 @@ class Marker(QtCore.QObject):
         """
         Gets the icon file name. Read-only.
         """
-        return self._icon
+        if isinstance(self._icon, str):
+            if QtGui.QIcon.hasThemeIcon(self._icon):
+                return QtGui.QIcon.fromTheme(self._icon)
+            else:
+                return QtGui.QIcon(self._icon)
+        elif isinstance(self._icon, tuple):
+            return QtGui.QIcon.fromTheme(self._icon[0],
+                                         QtGui.QIcon(self._icon[1]))
+        elif isinstance(self._icon, QtGui.QIcon):
+            return self._icon
+        return QtGui.QIcon()
 
     @property
     def description(self):

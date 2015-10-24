@@ -18,8 +18,6 @@ def test_exit_code(editor):
     assert editor.backend.exit_code is None
     editor.backend.stop()
     assert not editor.backend.running
-    if sys.platform != 'win32':
-        assert editor.backend.exit_code == 0
 
 
 backend_manager = None
