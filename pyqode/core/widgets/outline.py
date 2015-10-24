@@ -4,7 +4,6 @@ outline.
 
 """
 import weakref
-from pyqode.core.share import Definition
 from pyqode.core import icons
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.modes.outline import OutlineMode
@@ -22,10 +21,21 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
     2. call set_editor with a CodeEdit instance to show it's outline.
 
     """
+    @property
+    def sync_with_editor(self):
+        return self._sync_with_editor
+
+    @sync_with_editor.setter
+    def sync_with_editor(self, value):
+        self._sync_with_editor = value
+        self._action_sync.setChecked(value)
+
     def __init__(self, parent=None):
         super(OutlineTreeWidget, self).__init__(parent)
+        self._context_actions = []
         self._definitions = None
-        self._editor_ref = None
+        self._flattened_defs = None
+        self._editor = None
         self._outline_mode = None
         self._folding_panel = None
         self._expanded_items = []
@@ -34,12 +44,15 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         self.itemCollapsed.connect(self._on_item_state_changed)
         self.itemExpanded.connect(self._on_item_state_changed)
         self._updating = True
-
-    @property
-    def _editor(self):
-        if self._editor_ref:
-            return self._editor_ref()
-        return None
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_context_menu)
+        self._sync_with_editor = True
+        self._action_sync = QtWidgets.QAction(
+            QtGui.QIcon.fromTheme('view-refresh'), 'Sync with editor', None)
+        self._action_sync.setCheckable(True)
+        self._action_sync.setChecked(self._sync_with_editor)
+        self._action_sync.toggled.connect(self._on_action_sync_toggled)
+        self.add_context_action(self._action_sync)
 
     def set_editor(self, editor):
         """
@@ -48,47 +61,42 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
 
         :param editor: CodeEdit
         """
-        if self._outline_mode and self._outline_mode():
-            try:
-                self._outline_mode().document_changed.disconnect(
-                    self._on_changed)
-            except (TypeError, RuntimeError):
-                pass
-        if self._folding_panel and self._folding_panel():
-            try:
-                self._folding_panel().trigger_state_changed.disconnect(
-                    self._on_block_state_changed)
-            except (TypeError, RuntimeError):
-                pass
-
+        try:
+            self._editor.cursorPositionChanged.disconnect(self.sync)
+        except (AttributeError, TypeError, RuntimeError, ReferenceError):
+            pass
+        try:
+            self._outline_mode.document_changed.disconnect(
+                self._on_changed)
+        except (AttributeError, TypeError, RuntimeError, ReferenceError):
+            pass
+        try:
+            self._folding_panel.trigger_state_changed.disconnect(
+                self._on_block_state_changed)
+        except (AttributeError, TypeError, RuntimeError, ReferenceError):
+            pass
         if editor:
-            self._editor_ref = weakref.ref(editor)
+            self._editor = weakref.proxy(editor)
         else:
-            self._editor_ref = None
+            self._editor = None
 
-        if self._editor is not None:
+        if editor is not None:
+            editor.cursorPositionChanged.connect(self.sync)
             try:
-                self._folding_panel = weakref.ref(
+                self._folding_panel = weakref.proxy(
                     editor.panels.get(FoldingPanel))
             except KeyError:
                 pass
             else:
-                self._folding_panel().trigger_state_changed.connect(
+                self._folding_panel.trigger_state_changed.connect(
                     self._on_block_state_changed)
             try:
                 analyser = editor.modes.get(OutlineMode)
             except KeyError:
                 self._outline_mode = None
             else:
-                self._outline_mode = weakref.ref(analyser)
+                self._outline_mode = weakref.proxy(analyser)
                 analyser.document_changed.connect(self._on_changed)
-
-            try:
-                editor.cursorPositionChanged.connect(
-                    self._sync_with_editor, QtCore.Qt.UniqueConnection)
-            except TypeError:
-                pass  # already connected
-
         self._on_changed()
 
     def _on_item_state_changed(self, item):
@@ -100,7 +108,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         block_state = TextBlockHelper.is_collapsed(block)
         if item_state != block_state:
             self._updating = True
-            self._folding_panel().toggle_fold_trigger(block)
+            self._folding_panel.toggle_fold_trigger(block)
             self._updating = False
 
     def _on_block_state_changed(self, block, state):
@@ -127,10 +135,9 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         self._updating = True
         to_collapse = []
         self.clear()
-        if self._editor and self._outline_mode and self._outline_mode() and \
-                self._folding_panel and self._folding_panel():
+        if self._editor and self._outline_mode and self._folding_panel:
             items, to_collapse = self.to_tree_widget_items(
-                self._outline_mode().definitions, to_collapse=to_collapse)
+                self._outline_mode.definitions, to_collapse=to_collapse)
             if len(items):
                 self.addTopLevelItems(items)
                 self.expandAll()
@@ -147,7 +154,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             'fa.info-circle'))
         self.addTopLevelItem(root)
         self._updating = False
-        self._sync_with_editor()
+        self.sync()
 
     def _on_item_clicked(self, item):
         """
@@ -167,6 +174,18 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         Converts the list of top level definitions to a list of top level
         tree items.
         """
+        def flatten(definitions):
+            """
+            Flattens the document structure tree as a simple sequential list.
+            """
+            ret_val = []
+            for de in definitions:
+                ret_val.append(de)
+                for sub_d in de.children:
+                    ret_val.append(sub_d)
+                    ret_val += flatten(sub_d.children)
+            return ret_val
+
         def convert(name, editor, to_collapse):
             ti = QtWidgets.QTreeWidgetItem()
             ti.setText(0, name.name)
@@ -197,6 +216,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             return ti, to_collapse
 
         self._definitions = definitions
+        self._flattened_defs = flatten(self._definitions)
 
         items = []
         for d in definitions:
@@ -207,26 +227,15 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
 
         return items
 
-    def _sync_with_editor(self):
-        def flatten(definitions):
-            """
-            Flattens the document structure tree as a simple sequential list.
-            """
-            ret_val = []
-            for de in definitions:
-                ret_val.append(de)
-                for sub_d in de.children:
-                    ret_val.append(sub_d)
-                    ret_val += flatten(sub_d.children)
-            return ret_val
-
-        if self._editor is None or not self._definitions:
+    def sync(self):
+        if not self.sync_with_editor or self._editor is None or \
+                not self._definitions:
             return
 
         to_select = None
         previous = None
         current_line = TextHelper(self._editor).current_line_nbr()
-        for d in flatten(self._definitions):
+        for d in self._flattened_defs:
             if d.line == current_line:
                 to_select = d.tree_item
             elif d.line > current_line:
@@ -247,3 +256,17 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
                 # RuntimeError: wrapped C/C++ object of type QTreeWidgetItem
                 # has been deleted
                 pass
+
+    def add_context_action(self, action):
+        self._context_actions.append(action)
+
+    def _show_context_menu(self, pos):
+        mnu = QtWidgets.QMenu(self)
+        for action in self._context_actions:
+            mnu.addAction(action)
+        mnu.exec_(self.mapToGlobal(pos))
+
+    def _on_action_sync_toggled(self, value):
+        self._sync_with_editor = value
+        if value:
+            self.sync()
