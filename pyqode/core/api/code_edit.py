@@ -1116,7 +1116,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if create_standard_actions:
             # Undo
             action = QtWidgets.QAction('Undo', self)
-            action.setShortcut(QtGui.QKeySequence.Undo)
+            action.setShortcut('Ctrl+Z')
             action.setIcon(icons.icon(
                 'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
             action.triggered.connect(self.undo)
@@ -1126,7 +1126,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             self.action_undo = action
             # Redo
             action = QtWidgets.QAction('Redo', self)
-            action.setShortcut(QtGui.QKeySequence.Redo)
+            action.setShortcut('Ctrl+Y')
             action.setIcon(icons.icon(
                 'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
             action.triggered.connect(self.redo)
