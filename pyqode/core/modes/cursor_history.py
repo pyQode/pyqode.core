@@ -1,5 +1,5 @@
 import weakref
-from pyqode.qt import QtWidgets
+from pyqode.qt import QtCore, QtWidgets
 from pyqode.core import api
 
 
@@ -42,6 +42,7 @@ class CursorHistoryMode(api.Mode):
             menu.setTitle('Cursor history')
             self.action_undo = self.undo_stack.createUndoAction(self.editor)
             self.action_undo.setShortcut('Ctrl+Alt+Z')
+            self.action_undo.setEnabled(True)
             menu.addAction(self.action_undo)
             self.action_redo = self.undo_stack.createRedoAction(self.editor)
             self.action_redo.setShortcut('Ctrl+Alt+Y')
@@ -49,6 +50,7 @@ class CursorHistoryMode(api.Mode):
             self.editor.add_action(menu.menuAction())
             self.editor.cursorPositionChanged.connect(
                 self._on_cursor_position_changed)
+            self.editor.key_pressed.connect(self._on_key_pressed)
         else:
             self.editor.cursorPositionChanged.disconnect(
                 self._on_cursor_position_changed)
@@ -65,3 +67,7 @@ class CursorHistoryMode(api.Mode):
             cmd = MoveCursorCommand(new_pos, self._prev_pos, self.editor)
             self.undo_stack.push(cmd)
         self._prev_pos = new_pos
+
+    def _on_key_pressed(self, event):
+        if event.text() in ['Z', 'Y']:
+            event.accept()
