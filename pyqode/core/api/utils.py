@@ -130,13 +130,19 @@ class TextHelper(object):
     """
     @property
     def _editor(self):
-        return self._editor_ref()
+        try:
+            return self._editor_ref()
+        except TypeError:
+            return self._editor_ref
 
     def __init__(self, editor):
         """
         :param editor: The editor to work on.
         """
-        self._editor_ref = weakref.ref(editor)
+        try:
+            self._editor_ref = weakref.ref(editor)
+        except TypeError:
+            self._editor_ref = editor
 
     def goto_line(self, line, column=0, move=True):
         """
