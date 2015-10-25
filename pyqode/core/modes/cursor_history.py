@@ -69,5 +69,7 @@ class CursorHistoryMode(api.Mode):
         self._prev_pos = new_pos
 
     def _on_key_pressed(self, event):
-        if event.text() in ['Z', 'Y']:
+        control = event.modifiers() & QtCore.Qt.ControlModifier
+        alt = event.modifiers() & QtCore.Qt.AltModifier
+        if event.text() in ['Z', 'Y'] and control and alt:
             event.accept()
