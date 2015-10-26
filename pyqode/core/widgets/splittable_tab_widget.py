@@ -1255,13 +1255,20 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tab.file.autodetect_eol = autodetect_eol
             tab.file.preferred_eol = preferred_eol
             tab.show_whitespaces = show_whitespaces
-            tab.file.open(path, encoding=encoding)
-            tab.setDocumentTitle(name)
-            tab.file._path = original_path
-            icon = self._icon(path)
-            self.add_tab(tab, title=name, icon=icon)
-            self.document_opened.emit(tab)
-            return tab
+            try:
+                tab.file.open(original_path, encoding=encoding)
+            except OSError:
+                tab.close()
+                tab.setParent(None)
+                tab.deleteLater()
+                return None
+            else:
+                tab.setDocumentTitle(name)
+                tab.file._path = original_path
+                icon = self._icon(path)
+                self.add_tab(tab, title=name, icon=icon)
+                self.document_opened.emit(tab)
+                return tab
 
     def close_document(self, path):
         """
