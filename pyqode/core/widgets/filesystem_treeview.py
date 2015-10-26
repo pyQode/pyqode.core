@@ -54,6 +54,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             :param path: root path (str).
             """
             self._ignored_unused[:] = []
+            self._root = path
             parent_dir = os.path.dirname(path)
             for item in os.listdir(parent_dir):
                 item_path = os.path.join(parent_dir, item)
@@ -65,13 +66,12 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
             fp = os.path.normpath(finfo.filePath())
+            if os.path.ismount(self._root):
+                return True
             if fp in self._ignored_unused:
-                debug('excluding unused directory: %s', finfo.filePath())
                 return False
             for ptrn in self.ignored_patterns:
                 if fnmatch.fnmatch(fn, ptrn):
-                    debug('ignoring %s (matching pattern: %s',
-                          finfo.filePath(), ptrn)
                     return False
             debug('accepting %s', finfo.filePath())
             return True
@@ -212,7 +212,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         file_root_index = self._fs_model_source.setRootPath(self._root_path)
         root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
-        self.expandToDepth(0)
+        if not os.path.ismount(self._root_path):
+            self.expandToDepth(0)
         if self._hide_extra_colums:
             self.setHeaderHidden(True)
             for i in range(1, 4):
