@@ -1257,11 +1257,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             tab.show_whitespaces = show_whitespaces
             try:
                 tab.file.open(original_path, encoding=encoding)
-            except OSError:
+            except Exception as e:
                 tab.close()
                 tab.setParent(None)
                 tab.deleteLater()
-                return None
+                raise e
             else:
                 tab.setDocumentTitle(name)
                 tab.file._path = original_path
