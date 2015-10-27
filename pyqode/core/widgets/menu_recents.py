@@ -3,6 +3,7 @@ Provides a menu that display the list of recent files and a RecentFilesManager
 which use your application's QSettings to store the list of recent files.
 
 """
+import sys
 import os
 from pyqode.core import icons
 from pyqode.qt import QtCore, QtGui, QtWidgets
@@ -88,7 +89,11 @@ class RecentFilesManager(QtCore.QObject):
         # filter files, remove files that do not exist anymore
         for file in files:
             if file is not None and os.path.exists(file):
-                ret_val.append(file)
+                if os.path.ismount(file) and \
+                        sys.platform == 'win32' and not file.endswith('\\'):
+                    file += '\\'
+                if file not in ret_val:
+                    ret_val.append(file)
         return ret_val
 
     def open_file(self, file):
