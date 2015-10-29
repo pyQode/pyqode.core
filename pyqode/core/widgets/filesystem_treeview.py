@@ -1,6 +1,7 @@
 """
 This module contains the file system tree view.
 """
+import sys
 import fnmatch
 import locale
 import logging
@@ -185,9 +186,22 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param path: root path - str
         :param hide_extra_columns: Hide extra column (size, paths,...)
         """
+        if sys.platform == 'win32' and os.path.splitunc(path)[0]:
+            mdl = QtGui.QStandardItemModel(1, 1)
+            item = QtGui.QStandardItem(
+                QtGui.QIcon.fromTheme(
+                    'dialog-warning',
+                    QtGui.QIcon(':/pyqode-icons/rc/dialog-warning.png')),
+                'UNC pathnames not supported.')
+            mdl.setItem(0, 0, item)
+            self.setModel(mdl)
+            self.root_path = None
+            return
         self._hide_extra_colums = hide_extra_columns
+
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
+        print(path)
         self._fs_model_source = QtWidgets.QFileSystemModel()
         self._fs_model_source.setFilter(QtCore.QDir.Dirs | QtCore.QDir.Files |
                                         QtCore.QDir.NoDotAndDotDot |
