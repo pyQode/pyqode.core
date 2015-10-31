@@ -896,7 +896,7 @@ class TextBlockHelper(object):
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
-        higher_part = user_state & 0xFFFF0000
+        higher_part = user_state & 0x7FFF0000
         state &= 0x0000FFFF
         state |= higher_part
         block.setUserState(state)
@@ -931,7 +931,7 @@ class TextBlockHelper(object):
             state = 0
         if val >= 0x3FF:
             val = 0x3FF
-        state &= 0xFC00FFFF
+        state &= 0x7C00FFFF
         state |= val << 16
         block.setUserState(state)
 
@@ -965,7 +965,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xFBFFFFFF
+        state &= 0x7BFFFFFF
         state |= int(val) << 26
         block.setUserState(state)
 
@@ -997,7 +997,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xF7FFFFFF
+        state &= 0x77FFFFFF
         state |= int(val) << 27
         block.setUserState(state)
 
