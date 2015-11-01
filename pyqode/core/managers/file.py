@@ -306,7 +306,8 @@ class FileManager(Manager):
 
     @staticmethod
     def _rm(tmp_path):
-        os.remove(tmp_path)
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
     def _reset_selection(self, sel_end, sel_start):
         text_cursor = self.editor.textCursor()

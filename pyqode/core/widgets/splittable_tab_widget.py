@@ -1070,15 +1070,26 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         self.current_widget().file._path = None
         self.current_widget().file._old_path = mem
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
-        if not self.main_tab_widget.save_widget(self.current_widget()):
-            self.current_widget().file._path = mem
-        CodeEditTabWidget.default_directory = os.path.expanduser('~')
-        self.document_saved.emit(self.current_widget().file.path, '')
+        widget = self.current_widget()
+        try:
+            success = self.main_tab_widget.save_widget(widget)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self, 'Failed to save file as',
+                'Failed to save file as %s\nError=%s' % (
+                    widget.file.path, str(e)))
+            widget.file._path = mem
+        else:
+            if not success:
+                widget.file._path = mem
+            else:
+                CodeEditTabWidget.default_directory = os.path.expanduser('~')
+                self.document_saved.emit(widget.file.path, '')
 
-        # rename tab
-        tw = self.current_widget().parent_tab_widget
-        tw.setTabText(tw.indexOf(self.current_widget()),
-                      os.path.split(self.current_widget().file.path)[1])
+                # rename tab
+                tw = widget.parent_tab_widget
+                tw.setTabText(tw.indexOf(widget),
+                              os.path.split(widget.file.path)[1])
 
         return self.current_widget().file.path
 
@@ -1088,7 +1099,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         will be shown.
         """
         if self.current_widget() is not None:
-            self._save(self.current_widget())
+            editor = self.current_widget()
+            self._save(editor)
 
     def _save(self, widget):
         path = widget.file.path
@@ -1101,8 +1113,15 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             with open(path, encoding=encoding) as f:
                 old_content = f.read()
             if widget.dirty:
-                self.main_tab_widget.save_widget(widget)
-                self.document_saved.emit(path, old_content)
+                try:
+                    self.main_tab_widget.save_widget(widget)
+                except Exception as e:
+                    QtWidgets.QMessageBox.warning(
+                        self, 'Failed to save file',
+                        'Failed to save file: %s\nError=%s' % (
+                            widget.file.path, str(e)))
+                else:
+                    self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """
