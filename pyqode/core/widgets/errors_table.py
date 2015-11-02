@@ -128,7 +128,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.setItem(row, COL_FILE_NAME, item)
 
         # line
-        if msg.line <= 0:
+        if msg.line < 0:
             item = QtWidgets.QTableWidgetItem("-")
         else:
             item = QtWidgets.QTableWidgetItem(str(msg.line + 1))
