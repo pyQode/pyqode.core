@@ -24,7 +24,7 @@ COMM = 1
 
 
 def comm(msg, *args):
-    _logger().log(COMM, msg, args)
+    _logger().log(COMM, msg, *args)
 
 
 #: Dictionary of socket errors messages

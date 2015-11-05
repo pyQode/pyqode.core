@@ -20,7 +20,7 @@ COMM = 1
 
 
 def comm(msg, *args):
-    _logger().log(COMM, msg, args)
+    _logger().log(COMM, msg, *args)
 
 
 class BackendManager(Manager):
