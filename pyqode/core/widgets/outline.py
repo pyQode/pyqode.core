@@ -21,14 +21,19 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
     2. call set_editor with a CodeEdit instance to show it's outline.
 
     """
+
+    sync_with_editor_changed = QtCore.Signal(bool)
+
     @property
     def sync_with_editor(self):
         return self._sync_with_editor
 
     @sync_with_editor.setter
     def sync_with_editor(self, value):
-        self._sync_with_editor = value
-        self._action_sync.setChecked(value)
+        if value != self.sync_with_editor:
+            self._sync_with_editor = value
+            self._action_sync.setChecked(value)
+            self.sync_with_editor_changed.emit(value)
 
     def __init__(self, parent=None):
         super(OutlineTreeWidget, self).__init__(parent)
@@ -267,6 +272,6 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         mnu.exec_(self.mapToGlobal(pos))
 
     def _on_action_sync_toggled(self, value):
-        self._sync_with_editor = value
+        self.sync_with_editor = value
         if value:
             self.sync()
