@@ -51,9 +51,11 @@ class Cache(object):
         menu/combobox.
 
         """
-        default_encodings = [locale.getpreferredencoding()]
+        default_encodings = [
+            locale.getpreferredencoding().lower().replace('-', '_')]
         if 'utf_8' not in default_encodings:
             default_encodings.append('utf_8')
+        default_encodings = list(set(default_encodings))
         return json.loads(self._settings.value(
             'userDefinedEncodings', json.dumps(default_encodings)))
 
