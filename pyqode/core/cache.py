@@ -19,6 +19,7 @@ better handled at the application level.
 """
 import json
 import locale
+import logging
 from pyqode.qt import QtCore
 
 try:
@@ -50,10 +51,11 @@ class Cache(object):
         menu/combobox.
 
         """
-        from pyqode.core.api import encodings
+        default_encodings = [locale.getpreferredencoding()]
+        if 'utf_8' not in default_encodings:
+            default_encodings.append('utf_8')
         return json.loads(self._settings.value(
-            'userDefinedEncodings', '["%s"]' % encodings.convert_to_codec_key(
-                locale.getpreferredencoding())))
+            'userDefinedEncodings', json.dumps(default_encodings)))
 
     @preferred_encodings.setter
     def preferred_encodings(self, value):
@@ -62,7 +64,7 @@ class Cache(object):
         self._settings.setValue('userDefinedEncodings',
                                 json.dumps(list(set(lst))))
 
-    def get_file_encoding(self, file_path):
+    def get_file_encoding(self, file_path, preferred_encoding=None):
         """
         Gets an eventual cached encoding for file_path.
 
@@ -72,6 +74,7 @@ class Cache(object):
         :param file_path: path of the file to look up
         :returns: The cached encoding.
         """
+        _logger().debug('getting encoding for %s', file_path)
         try:
             map = json.loads(self._settings.value('cachedFileEncodings'))
         except TypeError:
@@ -79,7 +82,11 @@ class Cache(object):
         try:
             return map[file_path]
         except KeyError:
-            for encoding in self.preferred_encodings:
+            encodings = self.preferred_encodings
+            if preferred_encoding:
+                encodings.insert(0, preferred_encoding)
+            for encoding in encodings:
+                _logger().debug('trying encoding: %s', encoding)
                 try:
                     with open(file_path, encoding=encoding) as f:
                         f.read()
@@ -137,3 +144,7 @@ class Cache(object):
             map = {}
         map[path] = position
         self._settings.setValue('cachedCursorPosition', json.dumps(map))
+
+
+def _logger():
+    return logging.getLogger(__name__)

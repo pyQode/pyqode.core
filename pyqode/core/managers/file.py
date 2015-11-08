@@ -230,7 +230,8 @@ class FileManager(Manager):
         # get encoding from cache
         if use_cached_encoding:
             try:
-                cached_encoding = settings.get_file_encoding(path)
+                cached_encoding = settings.get_file_encoding(
+                    path, preferred_encoding=encoding)
             except KeyError:
                 pass
             else:
