@@ -97,6 +97,7 @@ class DraggableTabBar(TabBar):
         event.acceptProposedAction()
 
 
+
 class BaseTabWidget(QtWidgets.QTabWidget):
     """
     Base tab widget class used by SplittableTabWidget. This tab widget adds a
@@ -118,6 +119,14 @@ class BaseTabWidget(QtWidgets.QTabWidget):
     #: - widget: the widget to split
     #: - orientation: split orientation (horizontal/vertical)
     split_requested = QtCore.Signal(QtWidgets.QWidget, int)
+
+    #: Signal emitted when a tab got detached from the TabWidget
+    #: **Parameters**:
+    #: - old_tab: the old tab instance (before it get closed)
+    #: - new_tab: the new tab instance (the one that is detached)
+    tab_detached = QtCore.Signal(QtWidgets.QWidget, QtWidgets.QWidget)
+
+    _detached_window_class = None
 
     def __init__(self, parent):
         super(BaseTabWidget, self).__init__(parent)
@@ -204,9 +213,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
         # create a new top level widget and add the tab
         new_tab_widget = self.parent().__class__()
-        self.detached_tabs.append(new_tab_widget)
         # reopen document with same open settings.
-        new_tab_widget.open_document(
+        new_tab = new_tab_widget.open_document(
             path, encoding=open_parameters['encoding'],
             replace_tabs_by_spaces=open_parameters['replace_tabs_by_spaces'],
             clean_trailing_whitespaces=open_parameters[
@@ -218,8 +226,18 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             show_whitespaces=open_parameters['show_whitespaces'],
             **open_parameters['kwargs'])
 
-        new_tab_widget.resize(800, 600)
-        new_tab_widget.show()
+        if self._detached_window_class is None:
+            win = new_tab_widget
+        else:
+            win = self._detached_window_class()
+            #: detached window must be an instance of QMainWindow
+            win.setCentralWidget(new_tab_widget)
+
+        self.detached_tabs.append(win)
+        win.resize(800, 600)
+        win.show()
+
+        self.tab_detached.emit(tab, new_tab)
 
         # if the user has two monitor, move the window to the second monitor
         desktop = QtWidgets.qApp.desktop()
@@ -601,6 +619,16 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     #: into account). Parameter is the new tab widget.
     current_changed = QtCore.Signal(QtWidgets.QWidget)
 
+    #: Signal emitted when a tab got detached from the TabWidget
+    #: **Parameters**:
+    #: - old_tab: the old tab instance (before it get closed)
+    #: - new_tab: the new tab instance (the one that is detached)
+    tab_detached = QtCore.Signal(QtWidgets.QWidget, QtWidgets.QWidget)
+
+    #: The window to use when a type is detached. If None, the detached tab
+    #: widget will be shown directly.
+    detached_window_klass = None
+
     #: underlying tab widget class
     tab_widget_klass = BaseTabWidget
 
@@ -624,6 +652,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
 
     def __init__(self, parent=None, root=True, create_popup=True):
         super(SplittableTabWidget, self).__init__(parent)
+        SplittableTabWidget.tab_widget_klass._detached_window_class = \
+            SplittableTabWidget.detached_window_klass
         if root:
             self._action_popup = QtWidgets.QAction(self)
             self._action_popup.setShortcutContext(QtCore.Qt.WindowShortcut)
@@ -639,6 +669,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self.main_tab_widget = self.tab_widget_klass(self)
         self.main_tab_widget.last_tab_closed.connect(
             self._on_last_tab_closed)
+        self.main_tab_widget.tab_detached.connect(self.tab_detached.emit)
         self.main_tab_widget.split_requested.connect(self.split)
         self.addWidget(self.main_tab_widget)
         self._parent_splitter = None
@@ -760,6 +791,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         clone.original = base
         splitter._parent_splitter = self
         splitter.last_tab_closed.connect(self._on_last_child_tab_closed)
+        splitter.tab_detached.connect(self.tab_detached.emit)
         if hasattr(base, '_icon'):
             icon = base._icon
         else:
@@ -982,6 +1014,19 @@ class CodeEditTabWidget(BaseTabWidget):
         return editor.file.path
 
 
+class DetachedEditorWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(DetachedEditorWindow, self).__init__()
+        tb = QtWidgets.QToolBar('File')
+        action = tb.addAction(QtGui.QIcon.fromTheme('document-save'), 'Save')
+        action.triggered.connect(self._save)
+        action.setShortcut('Ctrl+S')
+        self.addToolBar(tb)
+
+    def _save(self):
+        self.centralWidget().save_current()
+
+
 class SplittableCodeEditTabWidget(SplittableTabWidget):
     """
     SplittableTabWidget specialised for CodeEdit and subclasses.
@@ -1038,6 +1083,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     _new_count = 0
 
     def __init__(self, parent=None, root=True):
+        SplittableTabWidget.detached_window_klass = DetachedEditorWindow
         super(SplittableCodeEditTabWidget, self).__init__(parent, root)
         self.main_tab_widget.tabBar().double_clicked.connect(
             self.tab_bar_double_clicked.emit)
