@@ -201,7 +201,6 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
-        print(path)
         self._fs_model_source = QtWidgets.QFileSystemModel()
         self._fs_model_source.setFilter(QtCore.QDir.Dirs | QtCore.QDir.Files |
                                         QtCore.QDir.NoDotAndDotDot |
