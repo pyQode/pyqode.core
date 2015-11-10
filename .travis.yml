@@ -23,7 +23,7 @@ before_install:
 install:
     - sudo apt-get install -qq python-qt4 --fix-missing
     - sudo apt-get install -qq python3-pyqt4 --fix-missing
-    - pip install --quiet git+https://github.com/pyQode/pyqode.qt.git@dev
+    - pip install --quiet git+https://github.com/pyQode/pyqode.qt.git
 script:
     - pip install --quiet .
     - if [ $QT_API ]; then
