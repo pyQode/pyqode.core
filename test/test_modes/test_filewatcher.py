@@ -33,56 +33,6 @@ def test_enabled(editor):
     mode.enabled = True
 
 
-@editor_open(file_path)
-@pytest.mark.skipif('TRAVIS' in os.environ,
-                    reason="not tested on travis, require user interaction")
-def test_modif_accept_with_focus(editor):
-    mode = get_mode(editor)
-    mode.auto_reload = False
-    with open(file_path, 'r') as f:
-        with open(file_path, 'w') as f2:
-            f2.write("test file %s" % datetime.datetime.now())
-    editor.setFocus()
-    QtCore.QTimer.singleShot(1500, accept_mbox)
-    # wait for the message box to appear
-    QTest.qWait(1000)
-
-
-@editor_open(file_path)
-@pytest.mark.skipif('TRAVIS' in os.environ,
-                    reason="not tested on travis, require user interaction")
-def test_modif_reject_with_focus(editor):
-    mode = get_mode(editor)
-    mode.auto_reload = False
-    with open(file_path, 'r') as f:
-        with open(file_path, 'w') as f2:
-            f2.write("test file %s" % datetime.datetime.now())
-    editor.setFocus()
-    QtCore.QTimer.singleShot(1500, reject_mbox)
-    # wait for the message box to appear
-    QTest.qWait(1000)
-
-
-@editor_open(file_path)
-@pytest.mark.skipif('TRAVIS' in os.environ,
-                    reason="not tested on travis, require user interaction")
-def test_modif_without_focus(editor):
-    mode = get_mode(editor)
-    mode.auto_reload = False
-    win = QtWidgets.QMainWindow()
-    win.show()
-    QTest.qWaitForWindowActive(win)
-    with open(file_path, 'r') as f:
-        with open(file_path, 'w') as f2:
-            f2.write("test file %s" % datetime.datetime.now())
-    QtCore.QTimer.singleShot(1500, accept_mbox)
-    # wait for the filewatcher to detect the changed
-    QTest.qWait(500)
-    QtWidgets.QApplication.instance().setActiveWindow(editor)
-    # wait for the message box to appear
-    QTest.qWait(500)
-
-
 def accept_mbox():
     widgets = QtWidgets.QApplication.instance().topLevelWidgets()
     for w in widgets:

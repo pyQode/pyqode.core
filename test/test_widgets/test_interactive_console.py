@@ -10,4 +10,3 @@ def test_console():
         ic.start_process('ls')
     ic.process.waitForFinished()
     assert ic.process.exitStatus() == 0
-    ic.deleteLater()

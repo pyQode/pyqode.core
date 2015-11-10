@@ -134,6 +134,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @tab_length.setter
     def tab_length(self, value):
+        if value < 2:
+            value = 2
         self._tab_length = value
         for c in self.clones:
             c.tab_length = value
@@ -482,6 +484,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(True)
         self.setLineWrapMode(self.NoWrap)
 
+    def __del__(self):
+        _logger().log(5, 'CodeEdit.__del__')
+
     def __repr__(self):
         return '%s(path=%r)' % (self.__class__.__name__, self.file.path)
 
@@ -559,6 +564,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param clear: True to clear the editor content before closing.
         """
+        if self._tooltips_runner:
+            self._tooltips_runner.cancel_requests()
+            self._tooltips_runner = None
         self.decorations.clear()
         self.modes.clear()
         self.panels.clear()
@@ -566,7 +574,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         Cache().set_cursor_position(
             self.file.path, self.textCursor().position())
         super(CodeEdit, self).close()
-        _logger().debug('closed')
 
     def set_mouse_cursor(self, cursor):
         """
@@ -610,24 +617,37 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super(CodeEdit, self).setPlainText(txt)
-        _logger().debug('setPlainText duration: %fs' % (time.time() - t))
+        _logger().log(5, 'setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
 
-    def add_action(self, action):
+    def add_action(self, action, sub_menu='Advanced'):
         """
         Adds an action to the editor's context menu.
 
-        :param action: QtWidgets.QAction
+        :param action: QAction to add to the context menu.
+        :param sub_menu: The name of a sub menu where to put the action.
+            'Advanced' by default. If None or empty, the action will be added
+            at the root of the submenu.
         """
-        self._actions.append(action)
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                mnu = QtWidgets.QMenu(sub_menu)
+                self.add_menu(mnu)
+                self._sub_menus[sub_menu] = mnu
+            finally:
+                mnu.addAction(action)
+        else:
+            self._actions.append(action)
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
-        super(CodeEdit, self).addAction(action)
+        self.addAction(action)
 
     def insert_action(self, action, prev_action):
         """
-        Inserts an action to the editor's context menu
+        Inserts an action to the editor's context menu.
 
         :param action: action to insert
         :param prev_action: the action after which the new action must be
@@ -647,7 +667,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         return self._actions
 
-    def add_separator(self):
+    def add_separator(self, sub_menu='Advanced'):
         """
         Adds a sepqrator to the editor's context menu.
 
@@ -656,20 +676,36 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         action = QtWidgets.QAction(self)
         action.setSeparator(True)
-        self._actions.append(action)
-        self.addAction(action)
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                pass
+            else:
+                mnu.addAction(action)
+        else:
+            self._actions.append(action)
         return action
 
-    def remove_action(self, action):
+    def remove_action(self, action, sub_menu='Advanced'):
         """
         Removes an action/separator from the editor's context menu.
 
         :param action: Action/seprator to remove.
+        :param advanced: True to remove the action from the advanced submenu.
         """
-        try:
-            self._actions.remove(action)
-        except ValueError:
-            pass
+        if sub_menu:
+            try:
+                mnu = self._sub_menus[sub_menu]
+            except KeyError:
+                pass
+            else:
+                mnu.removeAction(action)
+        else:
+            try:
+                self._actions.remove(action)
+            except ValueError:
+                pass
         self.removeAction(action)
 
     def add_menu(self, menu):
@@ -684,6 +720,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param menu: menu to add
         """
         self._menus.append(menu)
+        self._menus = sorted(list(set(self._menus)), key=lambda x: x.title())
         for action in menu.actions():
             action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self.addActions(menu.actions())
@@ -866,6 +903,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QKeyEvent
         """
+        if self.isReadOnly():
+            return
         initial_state = event.isAccepted()
         event.ignore()
         self.key_pressed.emit(event)
@@ -895,6 +934,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QKeyEvent
         """
+        if self.isReadOnly():
+            return
         initial_state = event.isAccepted()
         event.ignore()
         self.key_released.emit(event)
@@ -916,19 +957,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param event: QFocusEvent
         """
-        # fix a visual bug if the editor was resized while being hidden (
-        # e.g. a dock # widget has been resized and some editors were in a
-        # tab widget. Non visible editor have a visual bug where horizontal
-        # scroll bar range
-        #
-        TextHelper(self).mark_whole_doc_dirty()
-        s = self.size()
-        s.setWidth(s.width() + 1)
-        self.resizeEvent(QtGui.QResizeEvent(self.size(), s))
-
         self.focused_in.emit(event)
         super(CodeEdit, self).focusInEvent(event)
-        self.repaint()
 
     def focusOutEvent(self, event):
         # Saves content if save_on_focus_out is True.
@@ -1016,8 +1046,19 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def showEvent(self, event):
         """ Overrides showEvent to update the viewport margins """
         super(CodeEdit, self).showEvent(event)
-        _logger().debug('show event: %r' % self)
         self.panels.refresh()
+
+    def setReadOnly(self, read_only):
+        if read_only != self.isReadOnly():
+            super().setReadOnly(read_only)
+            from pyqode.core.panels import ReadOnlyPanel
+            try:
+                panel = self.panels.get(ReadOnlyPanel)
+            except KeyError:
+                self.panels.append(
+                    ReadOnlyPanel(), ReadOnlyPanel.Position.TOP)
+            else:
+                panel.setVisible(read_only)
 
     def get_context_menu(self):
         """
@@ -1056,35 +1097,39 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self, create_standard_actions):
         """ Init context menu action """
+        menu_advanced = QtWidgets.QMenu('Advanced')
+        self.add_menu(menu_advanced)
+        self._sub_menus = {
+            'Advanced': menu_advanced
+        }
         if create_standard_actions:
             # Undo
             action = QtWidgets.QAction('Undo', self)
-            action.setShortcut(QtGui.QKeySequence.Undo)
+            action.setShortcut('Ctrl+Z')
             action.setIcon(icons.icon(
                 'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
             action.triggered.connect(self.undo)
-            self.undoAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.undoAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, sub_menu=None)
             self.action_undo = action
             # Redo
             action = QtWidgets.QAction('Redo', self)
-            action.setShortcut(QtGui.QKeySequence.Redo)
+            action.setShortcut('Ctrl+Y')
             action.setIcon(icons.icon(
                 'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
             action.triggered.connect(self.redo)
-            self.redoAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.redoAvailable.connect(action.setVisible)
+            action.setVisible(False)
+            self.add_action(action, sub_menu=None)
             self.action_redo = action
-            # separator
-            self.add_separator()
             # Copy
             action = QtWidgets.QAction('Copy', self)
             action.setShortcut(QtGui.QKeySequence.Copy)
             action.setIcon(icons.icon(
                 'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
             action.triggered.connect(self.copy)
-            self.copyAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.add_action(action, sub_menu=None)
             self.action_copy = action
             # cut
             action = QtWidgets.QAction('Cut', self)
@@ -1092,8 +1137,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.setIcon(icons.icon(
                 'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
             action.triggered.connect(self.cut)
-            self.copyAvailable.connect(action.setEnabled)
-            self.add_action(action)
+            self.add_action(action, sub_menu=None)
             self.action_cut = action
             # paste
             action = QtWidgets.QAction('Paste', self)
@@ -1102,34 +1146,22 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 'edit-paste', ':/pyqode-icons/rc/edit-paste.png',
                 'fa.paste'))
             action.triggered.connect(self.paste)
-            self.add_action(action)
+            self.add_action(action, sub_menu=None)
             self.action_paste = action
         # duplicate line
         action = QtWidgets.QAction('Duplicate line', self)
         action.setShortcut('Ctrl+D')
         action.triggered.connect(self.duplicate_line)
-        self.add_action(action)
+        self.add_action(action, sub_menu=None)
         self.action_duplicate_line = action
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
         action.triggered.connect(self.selectAll)
         self.action_select_all = action
-        self.addAction(self.action_select_all)
+        self.add_action(self.action_select_all, sub_menu=None)
+        self.add_separator(sub_menu=None)
         if create_standard_actions:
-            # delete
-            action = QtWidgets.QAction('Delete', self)
-            action.setShortcut(QtGui.QKeySequence.Delete)
-            action.setIcon(icons.icon(
-                'edit-delete', ':/pyqode-icons/rc/edit-delete.png',
-                'fa.remove'))
-            action.triggered.connect(self.delete)
-            self.add_action(action)
-            self.action_delete = action
-            self.add_separator()
-            self.add_action(self.action_select_all)
-            # separator
-            self.add_separator()
             # indent
             action = QtWidgets.QAction('Indent', self)
             action.setShortcut('Tab')
@@ -1148,7 +1180,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             action.triggered.connect(self.un_indent)
             self.add_action(action)
             self.action_un_indent = action
-            # separator
             self.add_separator()
         # goto
         action = QtWidgets.QAction('Go to line', self)

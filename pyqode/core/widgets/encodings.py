@@ -119,7 +119,7 @@ class EncodingsMenu(QtWidgets.QMenu):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                _logger().debug('KeyError with encoding:', encoding)
+                _logger().warn('KeyError with encoding:', encoding)
             else:
                 action = QtWidgets.QAction('%s (%s)' % (alias, lang), self)
                 action.setData(encoding)

@@ -1,6 +1,68 @@
 Change Log
 ==========
 
+2.7.0
+-----
+
+New features:
+
+- Add a panel to indicate when a file is read-only. The panel will disappear
+  as soon as the file becomes writeable.
+- Add a new mode that remember the cursor history (you can go back and go
+  forward the cursor history by using Ctrl+Alt+Z and Ctrl+AltY)
+- Add a new mode that can highlight a specific line of code (could be used
+  in a debugger plugin to indicate the line where the debugger has been
+  stopped...)
+- SplittableTabWidget: add "Detach tab" option in the context menu.
+- SplittableTabWidget: add a signal for when the editor has been created
+  but the file has not been loaded yet
+- SplittableTabWidget: add a signal for when the editor has been created
+  and the file has been loaded
+- SplittableTabWidget: add a signal for when the editor content has been
+  saved to disk
+- Improve MarkerPanel to be used for a breakpoints panel: add
+  edit_marker_requested signal and improve internals
+- InteractiveConsole: add the SearchPanel to the console so that you
+  can easily search for a word in the process' output
+- FileSystemTreeView: add ability to set a custom file explorer command
+- CodeEdit: Reoganisation of the context menu. By default all new actions
+  (that are not part of QPlainTextEdit) will go to an 'Advanced' sub-menu.
+  You can also specify a custom sub-menu name or None. All languages
+  specific extensions (pyqode.python,...) will use a menu with the name
+  of the language (e.g. Python->Goto definition,
+  COBOL->Compute field offsets, ...)
+- CodeCompletionMode: add support for MatchContains if using PyQt5
+- pyqode.core.share.Definition: add path attribute
+- Backend: add a heartbeat signal. If no signal was received for
+  a certain duration, the backend process will exit. This fix an issue
+  where the backend process were still running as zombies when the parent
+  crashed.
+- SearchPanel: allow to search backward with Shift+Enter when the focus is
+  in the search box
+- SearchPanel: add ability to search in the selected text only.
+- The document outline tree widget is now able to sync with the editor
+- Add two new logging levels: 1 = debug communication, 5 = internal debugging
+
+Fixed bugs:
+
+- CodeEdit: Fix panel margins not refreshed if panel.setVisible has been called
+  before the editor is visible.
+- SplittableTabWidget: Fix save as not working anymore
+- InteractiveConsole: make console read only when process has finished.
+- DarculaStyle: fix diff tokens color
+- Fix a few TypeError with PyQt 5.5.x
+- Fix laggy SearchPanel panel if use enter a space character.
+- Fix an encoding issue on Windows in the client-process communication
+- ErrorTable: Fix newlines not visible in details dialog.
+- Fix many potential memory leaks by breaking the circular dependencies
+  correctly before removing a mode/panel
+- Improve Cache.get_encoding: it will try all preferred encoding if the file
+  is not in the cache before giving up.
+- SplittableTabWidget: Normalize case of input file paths when looking if The
+  file is already open. Since Windows is not case sensitive, the file might be
+  already opened but with a different case...
+- TextBlockHelper: fix TypeError on some 32 bits systems with old Qt5 libraries
+
 2.6.9
 -----
 
@@ -9,6 +71,7 @@ Fixed bugs:
 - fix UnicodeDecodeError with the backend process
 - fix cursor selection lost after a case conversion
 - fix context menu entries not working at mouse position
+
 
 2.6.8
 -----

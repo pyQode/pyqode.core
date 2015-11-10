@@ -192,7 +192,6 @@ class FileManager(Manager):
         :return: the corresponding mime type.
         """
         filename = os.path.split(path)[1]
-        _logger().debug('detecting mimetype for %s', filename)
         mimetype = mimetypes.guess_type(filename)[0]
         if mimetype is None:
             mimetype = 'text/x-plain'
@@ -231,7 +230,8 @@ class FileManager(Manager):
         # get encoding from cache
         if use_cached_encoding:
             try:
-                cached_encoding = settings.get_file_encoding(path)
+                cached_encoding = settings.get_file_encoding(
+                    path, preferred_encoding=encoding)
             except KeyError:
                 pass
             else:
@@ -278,10 +278,18 @@ class FileManager(Manager):
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
+        self._check_for_readonly()
         return ret_val
+
+    def _check_for_readonly(self):
+        self.read_only = not os.access(self.path, os.W_OK)
+        self.editor.setReadOnly(self.read_only)
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
+        max_pos = self.editor.document().characterCount()
+        if pos > max_pos:
+            pos = max_pos - 1
         tc = self.editor.textCursor()
         tc.setPosition(pos)
         self.editor.setTextCursor(tc)
@@ -299,10 +307,8 @@ class FileManager(Manager):
 
     @staticmethod
     def _rm(tmp_path):
-        try:
+        if os.path.exists(tmp_path):
             os.remove(tmp_path)
-        except OSError:
-            pass
 
     def _reset_selection(self, sel_end, sel_start):
         text_cursor = self.editor.textCursor()
@@ -347,13 +353,15 @@ class FileManager(Manager):
 
         """
         if not self.editor.dirty and \
-                (encoding is None or encoding == self.encoding) and \
-                (path is None or path == self.path):
+                (encoding is None and encoding == self.encoding) and \
+                (path is None and path == self.path):
+            # avoid saving if editor not dirty or if encoding or path did not
+            # change
             return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
-        _logger().debug(
-            "saving %r to %r with %r encoding", self.path, path, encoding)
+        _logger().log(
+            5, "saving %r with %r encoding", path, encoding)
         if path is None:
             if self.path:
                 path = self.path
@@ -375,7 +383,6 @@ class FileManager(Manager):
         else:
             tmp_path = path
         try:
-            _logger().debug('saving editor content to temp file: %s', path)
             with open(tmp_path, 'wb') as file:
                 file.write(self._get_text(encoding))
         except UnicodeEncodeError:
@@ -393,7 +400,6 @@ class FileManager(Manager):
             self._encoding = encoding
             # remove path and rename temp file, if safe save is on
             if self.safe_save:
-                _logger().debug('rename %s to %s', tmp_path, path)
                 self._rm(path)
                 os.rename(tmp_path, path)
                 self._rm(tmp_path)
@@ -404,6 +410,7 @@ class FileManager(Manager):
             self.editor.text_saved.emit(str(path))
             self.saving = False
             _logger().debug('file saved: %s', path)
+            self._check_for_readonly()
 
     def close(self, clear=True):
         """

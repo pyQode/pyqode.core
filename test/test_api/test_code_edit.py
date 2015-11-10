@@ -38,12 +38,15 @@ def test_actions(editor):
     assert len(editor.actions())
     nb_actions_expected = len(editor.actions())
     action = QtWidgets.QAction('my_action', editor)
-    editor.add_action(action)
+    editor.add_action(action, sub_menu=None)
     nb_actions_expected += 1
     assert len(editor.actions()) == nb_actions_expected
-    editor.add_separator()
+    editor.add_separator(sub_menu=None)
     nb_actions_expected += 1
     assert len(editor.actions()) == nb_actions_expected
+    editor.add_separator(sub_menu='Advanced')
+    nb_actions_expected += 1
+    assert len(editor.actions()) != nb_actions_expected
 
 
 @editor_open(__file__)
@@ -330,7 +333,7 @@ def test_goto_line_dlg(editor):
 def test_do_home_key(editor):
     QTest.qWait(2000)
     helper = TextHelper(editor)
-    helper.goto_line(332, 29)
+    helper.goto_line(336, 29)
     assert editor.textCursor().positionInBlock() == 29
     assert TextHelper(editor).line_indent() == 4
     editor._do_home_key()

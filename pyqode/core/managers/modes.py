@@ -26,7 +26,7 @@ class ModesManager(Manager):
         :param mode: The mode instance to append.
 
         """
-        _logger().debug('adding mode %r', mode.name)
+        _logger().log(5, 'adding mode %r', mode.name)
         self._modes[mode.name] = mode
         mode.on_install(self.editor)
         return mode
@@ -38,7 +38,7 @@ class ModesManager(Manager):
         :param name_or_klass: The name (or class) of the mode to remove.
         :returns: The removed mode.
         """
-        _logger().debug('removing mode %r', name_or_klass)
+        _logger().log(5, 'removing mode %r', name_or_klass)
         mode = self.get(name_or_klass)
         mode.on_uninstall()
         self._modes.pop(mode.name)
@@ -50,9 +50,24 @@ class ModesManager(Manager):
         and deleted.
 
         """
+        import sys
         while len(self._modes):
-            key = list(self._modes.keys())[0]
+            key = sorted(list(self._modes.keys()))[0]
             mode = self.remove(key)
+            refcount = sys.getrefcount(mode)
+            if refcount > 2:
+                try:
+                    import objgraph
+                except ImportError:
+                    _logger().warning(
+                        'potential memory leak detected on mode %r...\n'
+                        'Install the objgraph package to know what objects are'
+                        ' holding references the mode.' % mode)
+                else:
+                    _logger().warning(
+                        'potential memory leak detected on mode: %r.\n'
+                        'see stderr for a backrefs dot graph...' % mode)
+                    objgraph.show_backrefs([mode], output=sys.stderr)
             del mode
 
     def get(self, name_or_klass):
