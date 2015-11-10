@@ -6,7 +6,7 @@ You can report bugs or ask question on our `centralised issue tracker`_.
 Submitting pull requests:
 -------------------------
 
-Pull Requests are great (on the dev branch)! Readme/Documentation changes are ok in the master branch.
+Pull Requests are great!
 
 1) Fork the Repo on github.
 2) Create a feature/bug fix branch based on the dev branch
