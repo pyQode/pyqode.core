@@ -203,6 +203,7 @@ class BackendManager(Manager):
         try:
             socket.close()
             self._sockets.remove(socket)
+            socket.deleteLater()
         except ValueError:
             pass
 
