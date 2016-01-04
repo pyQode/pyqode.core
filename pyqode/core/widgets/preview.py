@@ -11,7 +11,7 @@ class HtmlPreviewWidget(QtWebWidgets.QWebView):
     def __init__(self, parent=None):
         super(HtmlPreviewWidget, self).__init__(parent)
         self._editor = None
-        self._timer = DelayJobRunner()
+        self._timer = DelayJobRunner(delay=1000)
         try:
             # prevent opening internal links when using QtWebKit
             self.page().setLinkDelegationPolicy(
