@@ -283,7 +283,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         :param parent: parent document (QTextDocument)
         :param color_scheme: color scheme to use.
         """
-        QtGui.QSyntaxHighlighter.__init__(self, None)
+        QtGui.QSyntaxHighlighter.__init__(self, parent)
         Mode.__init__(self)
         if not color_scheme:
             color_scheme = ColorScheme('qt')
@@ -369,6 +369,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     def on_install(self, editor):
         super(SyntaxHighlighter, self).on_install(editor)
         self.refresh_editor(self.color_scheme)
+        self.document().setParent(editor)
+        self.setParent(editor)
 
     def clone_settings(self, original):
         self._color_scheme = original.color_scheme

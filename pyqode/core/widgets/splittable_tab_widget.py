@@ -406,6 +406,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         """
         if widget is None:
             return
+        widget.document().setParent(None)
+        widget.syntax_highlighter.setParent(None)
         # handled cloned widgets
         clones = []
         if hasattr(widget, 'original') and widget.original:
