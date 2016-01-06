@@ -406,8 +406,11 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         """
         if widget is None:
             return
-        widget.document().setParent(None)
-        widget.syntax_highlighter.setParent(None)
+        try:
+            widget.document().setParent(None)
+            widget.syntax_highlighter.setParent(None)
+        except AttributeError:
+            pass  # not a QPlainTextEdit subclass
         # handled cloned widgets
         clones = []
         if hasattr(widget, 'original') and widget.original:
@@ -447,7 +450,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         :param index: index of the tab to remove.
         """
         widget = self.widget(index)
-        document = widget.document()
+        try:
+            document = widget.document()
+        except AttributeError:
+            document = None  # not a QPlainTextEdit
         clones = self._close_widget(widget)
         self.tab_closed.emit(widget)
         self.removeTab(index)
@@ -462,7 +468,10 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             widget.deleteLater()
             del widget
         else:
-            clones[0].syntax_highlighter.setDocument(document)
+            try:
+                clones[0].syntax_highlighter.setDocument(document)
+            except AttributeError:
+                pass  # not a QPlainTextEdit
 
     def _on_split_requested(self):
         """
