@@ -253,7 +253,7 @@ class InteractiveConsole(QTextEdit):
         self._mask_user_input = value
 
     def closeEvent(self, *args, **kwargs):
-        if self.process.state() == QProcess.Running:
+        if self.process and self.process.state() == QProcess.Running:
             self.process.terminate()
 
     def start_process(self, process, args=None, cwd=None, env=None):
