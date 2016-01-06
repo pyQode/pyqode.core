@@ -52,11 +52,15 @@ class HtmlPreviewWidget(QtWebWidgets.QWebView):
         if self._editor is not None:
             url = QtCore.QUrl.fromLocalFile(self._editor.file.path)
         try:
-            pos = self.page().mainFrame().scrollBarValue(QtCore.Qt.Vertical)
-            self.setHtml(self._editor.to_html(), url)
-            self.page().mainFrame().setScrollBarValue(QtCore.Qt.Vertical, pos)
-        except AttributeError:
-            # Not possible with QtWebEngine???
-            # self._scroll_pos = self.page().mainFrame().scrollBarValue(
-                # QtCore.Qt.Vertical)
-            self.setHtml(self._editor.to_html(), url)
+            try:
+                pos = self.page().mainFrame().scrollBarValue(QtCore.Qt.Vertical)
+                self.setHtml(self._editor.to_html(), url)
+                self.page().mainFrame().setScrollBarValue(QtCore.Qt.Vertical, pos)
+            except AttributeError:
+                # Not possible with QtWebEngine???
+                # self._scroll_pos = self.page().mainFrame().scrollBarValue(
+                    # QtCore.Qt.Vertical)
+                self.setHtml(self._editor.to_html(), url)
+        except (TypeError, AttributeError):
+            self.setHtml('<center>No preview available...</center>', url)
+            self.hide_requested.emit()
