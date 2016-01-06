@@ -445,6 +445,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         :param index: index of the tab to remove.
         """
         widget = self.widget(index)
+        document = widget.document()
         clones = self._close_widget(widget)
         self.tab_closed.emit(widget)
         self.removeTab(index)
@@ -455,10 +456,11 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         if SplittableTabWidget.tab_under_menu == widget:
             SplittableTabWidget.tab_under_menu = None
         if not clones:
-            widget.close()
             widget.setParent(None)
             widget.deleteLater()
             del widget
+        else:
+            clones[0].syntax_highlighter.setDocument(document)
 
     def _on_split_requested(self):
         """

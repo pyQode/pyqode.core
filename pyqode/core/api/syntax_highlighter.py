@@ -283,7 +283,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         :param parent: parent document (QTextDocument)
         :param color_scheme: color scheme to use.
         """
-        QtGui.QSyntaxHighlighter.__init__(self, parent)
+        QtGui.QSyntaxHighlighter.__init__(self, None)
         Mode.__init__(self)
         if not color_scheme:
             color_scheme = ColorScheme('qt')
