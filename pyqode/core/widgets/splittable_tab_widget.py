@@ -726,7 +726,13 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             self.main_tab_widget.indexOf(tab))
         self.main_tab_widget.show()
         tab._uuid = self._uuid
-        tab.horizontalScrollBar().setValue(0)
+        try:
+            scroll_bar = tab.horizontalScrollBar()
+        except AttributeError:
+            # not a QPlainTextEdit class
+            pass
+        else:
+            scroll_bar.setValue(0)
         tab.setFocus()
         tab._original_tab_widget = self
         self._tabs.append(tab)
@@ -783,6 +789,13 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         :param orientation: orientation of the splitter
         :return: the new splitter
         """
+        if widget.original:
+            base = widget.original
+        else:
+            base = widget
+        clone = base.split()
+        if not clone:
+            return
         if orientation == int(QtCore.Qt.Horizontal):
             orientation = QtCore.Qt.Horizontal
         else:
@@ -792,11 +805,6 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         splitter.show()
         self.addWidget(splitter)
         self.child_splitters.append(splitter)
-        if widget.original:
-            base = widget.original
-        else:
-            base = widget
-        clone = base.split()
         if clone not in base.clones:
             # code editors maintain the list of clones internally but some
             # other widgets (user widgets) might not.
@@ -1167,20 +1175,20 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             encoding = widget.file.encoding
         except AttributeError:
             # not a code edit
-            pass
+            old_content = ''
         else:
             with open(path, encoding=encoding) as f:
                 old_content = f.read()
-            if widget.dirty:
-                try:
-                    self.main_tab_widget.save_widget(widget)
-                except Exception as e:
-                    QtWidgets.QMessageBox.warning(
-                        self, 'Failed to save file',
-                        'Failed to save file: %s\nError=%s' % (
-                            widget.file.path, str(e)))
-                else:
-                    self.document_saved.emit(path, old_content)
+        if widget.dirty:
+            try:
+                self.main_tab_widget.save_widget(widget)
+            except Exception as e:
+                QtWidgets.QMessageBox.warning(
+                    self, 'Failed to save file',
+                    'Failed to save file: %s\nError=%s' % (
+                        widget.file.path, str(e)))
+            else:
+                self.document_saved.emit(path, old_content)
 
     def save_all(self):
         """
@@ -1441,5 +1449,6 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     def split(self, widget, orientation):
         splitter = super(SplittableCodeEditTabWidget, self).split(
             widget, orientation)
-        splitter.tab_bar_double_clicked.connect(
-            self.tab_bar_double_clicked.emit)
+        if splitter:
+            splitter.tab_bar_double_clicked.connect(
+                self.tab_bar_double_clicked.emit)
