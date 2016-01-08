@@ -966,16 +966,15 @@ class CodeEditTabWidget(BaseTabWidget):
         Adds a star in front of a dirtt tab and emits dirty_changed.
         """
         widget = self.sender()
-        if isinstance(widget, CodeEdit):
-            parent = widget.parent_tab_widget
-            index = parent.indexOf(widget)
-            title = parent.tabText(index)
-            title = title.replace('* ', '')
-            if dirty:
-                parent.setTabText(index, "* " + title)
-            else:
-                parent.setTabText(index, title)
-            parent.dirty_changed.emit(dirty)
+        parent = widget.parent_tab_widget
+        index = parent.indexOf(widget)
+        title = parent.tabText(index)
+        title = title.replace('* ', '')
+        if dirty:
+            parent.setTabText(index, "* " + title)
+        else:
+            parent.setTabText(index, title)
+        parent.dirty_changed.emit(dirty)
 
     @classmethod
     def _ask_path(cls, editor):
