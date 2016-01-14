@@ -1343,6 +1343,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             try:
                 tab.file.open(original_path, encoding=encoding)
             except Exception as e:
+                _logger().exception('exception while opening file')
                 tab.close()
                 tab.setParent(None)
                 tab.deleteLater()
