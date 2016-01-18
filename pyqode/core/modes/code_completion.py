@@ -465,15 +465,7 @@ class CodeCompletionMode(Mode, QtCore.QObject):
         self._last_cursor_column = -1
         self._hide_popup()
 
-    def _in_disabled_zone(self):
-        tc = self.editor.textCursor()
-        while tc.atBlockEnd() and not tc.atBlockStart() and tc.position():
-            tc.movePosition(tc.Left)
-        return TextHelper(self.editor).is_comment_or_string(tc)
-
     def request_completion(self):
-        if self._in_disabled_zone():
-            return False
         line = self._helper.current_line_nbr()
         column = self._helper.current_column_nbr() - \
             len(self.completion_prefix)
