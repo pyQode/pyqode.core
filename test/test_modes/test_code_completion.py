@@ -11,7 +11,7 @@ from pyqode.core.api import TextHelper
 from pyqode.core import modes
 from pyqode.core.modes.code_completion import SubsequenceCompleter
 from ..helpers import server_path, wait_for_connected
-from ..helpers import ensure_visible
+from ..helpers import ensure_visible, editor_open
 
 
 def get_mode(editor):
@@ -101,7 +101,7 @@ def test_request_completion(editor):
     QTest.qWait(100)
 
 
-@ensure_empty
+@editor_open(__file__)
 @ensure_visible
 @ensure_connected
 def test_completion_in_string_or_comment(editor):
