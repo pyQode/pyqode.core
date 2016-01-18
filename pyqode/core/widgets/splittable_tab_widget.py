@@ -1108,6 +1108,19 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         super(SplittableCodeEditTabWidget, self).__init__(parent, root)
         self.main_tab_widget.tabBar().double_clicked.connect(
             self.tab_bar_double_clicked.emit)
+        if root:
+            self.closed_tabs_history_btn = QtWidgets.QToolButton()
+            self.closed_tabs_history_btn.setAutoRaise(True)
+            self.closed_tabs_history_btn.setIcon(QtGui.QIcon.fromTheme(
+                'user-trash', QtGui.QIcon.fromTheme(
+                    ':/pyqode-icons/rc/edit-trash.png')))
+            self.closed_tabs_history_btn.setPopupMode(
+                QtWidgets.QToolButton.InstantPopup)
+            self.closed_tabs_menu = QtWidgets.QMenu()
+            self.closed_tabs_history_btn.setMenu(self.closed_tabs_menu)
+            self.closed_tabs_history_btn.setDisabled(True)
+            self.main_tab_widget.setCornerWidget(self.closed_tabs_history_btn)
+            self.main_tab_widget.tab_closed.connect(self._on_tab_closed)
 
     @classmethod
     def register_code_edit(cls, code_edit_class):
@@ -1453,3 +1466,37 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if splitter:
             splitter.tab_bar_double_clicked.connect(
                 self.tab_bar_double_clicked.emit)
+
+    def _on_tab_closed(self, tab):
+        try:
+            path = tab.file.path
+            open_params = tab.open_parameters
+        except AttributeError:
+            pass
+        else:
+            filename = QtCore.QFileInfo(path).fileName()
+            action = self.closed_tabs_menu.addAction(
+                self._icon(path), filename)
+            action.setToolTip(path)
+            action.triggered.connect(self._open_closed_path)
+            action.setData(open_params)
+            self.closed_tabs_history_btn.setEnabled(True)
+
+    def _open_closed_path(self):
+        action = self.sender()
+        path = action.toolTip()
+        open_parameters = action.data()
+        self.open_document(
+            path, encoding=open_parameters['encoding'],
+            replace_tabs_by_spaces=open_parameters['replace_tabs_by_spaces'],
+            clean_trailing_whitespaces=open_parameters[
+                'clean_trailing_whitespaces'],
+            safe_save=open_parameters['safe_save'],
+            restore_cursor_position=open_parameters['restore_cursor_position'],
+            preferred_eol=open_parameters['preferred_eol'],
+            autodetect_eol=open_parameters['autodetect_eol'],
+            show_whitespaces=open_parameters['show_whitespaces'],
+            **open_parameters['kwargs'])
+        self.closed_tabs_menu.removeAction(action)
+        self.closed_tabs_history_btn.setEnabled(
+            len(self.closed_tabs_menu.actions()) > 0)
