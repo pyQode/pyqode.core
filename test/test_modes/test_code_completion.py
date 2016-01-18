@@ -106,8 +106,11 @@ def test_request_completion(editor):
 @ensure_connected
 def test_completion_in_string_or_comment(editor):
     mode = get_mode(editor)
-    TextHelper(editor).goto_line(2, column=0)
+    TextHelper(editor).goto_line(1, column=0)
     QTest.qWait(100)
+    editor.syntax_highlighter.rehighlight()
+    TextHelper(editor).current_line_text().startswith('Tests')
+    assert mode._in_disabled_zone()
     assert mode.request_completion() is False
     QTest.qWait(1000)
 
