@@ -599,6 +599,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                               selection_end)
         deco.set_background(QtGui.QBrush(self.background))
         deco.set_outline(self._outline)
+        deco.set_foreground(QtCore.Qt.black)
         deco.draw_order = 1
         return deco
 
