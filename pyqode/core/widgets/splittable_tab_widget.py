@@ -97,7 +97,6 @@ class DraggableTabBar(TabBar):
         event.acceptProposedAction()
 
 
-
 class BaseTabWidget(QtWidgets.QTabWidget):
     """
     Base tab widget class used by SplittableTabWidget. This tab widget adds a
@@ -966,6 +965,8 @@ class CodeEditTabWidget(BaseTabWidget):
         Adds a star in front of a dirtt tab and emits dirty_changed.
         """
         widget = self.sender()
+        if isinstance(widget, DraggableTabBar):
+            return
         parent = widget.parent_tab_widget
         index = parent.indexOf(widget)
         title = parent.tabText(index)
