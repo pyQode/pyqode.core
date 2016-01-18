@@ -7,6 +7,4 @@ def test_fs_treeview():
     tv.set_context_menu(FileSystemContextMenu())
     tv.set_root_path(__file__)
     tv.show()
-    QTest.qWait(500)
-    tv.close()
-    del tv
+    QTest.qWait(2000)
