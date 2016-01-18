@@ -38,50 +38,6 @@ def test_checker_message():
 
 
 @editor_open(__file__)
-@pytest.mark.skipif(hasattr(sys, 'real_prefix'),
-                    reason="cannot be tested in virtual envs ("
-                           "check function cannot be imported)")
-def test_request_analysis(editor):
-    try:
-        mode = get_mode(editor)
-    except KeyError:
-        mode = modes.CheckerMode(check)
-        editor.modes.append(mode)
-    editor.backend.stop()
-    mode.clear_messages()
-    if editor.backend.running:
-        editor.backend.stop()
-    # 1st analysis will be retried while server is
-    # not connected
-    mode.request_analysis()
-    QTest.qWait(500)
-    editor.backend.start(server_path())
-    wait_for_connected(editor)
-    # ok now it should complete in a few milliseconds
-    QTest.qWait(500)
-    assert len(mode._messages) == 0
-    editor.panels.append(panels.MarkerPanel())
-    # 2nd analysis should return 1 msg
-    mode.request_analysis()
-    QTest.qWait(3000)
-    assert len(mode._messages) == 1
-    mode.clear_messages()
-    # 3rd analtsus should return 40 msgs
-    mode.request_analysis()
-    QTest.qWait(3000)
-    assert len(mode._messages) == 150
-    mode.request_analysis()
-    QTest.qWait(600)
-    mode.request_analysis()
-    QTest.qWait(3000)
-    mode.request_analysis()
-    QTest.qWait(3000)
-    assert len(mode._messages) == 20
-    editor.panels.remove(panels.MarkerPanel)
-    mode.clear_messages()
-
-
-@editor_open(__file__)
 def test_add_messages(editor):
     mode = get_mode(editor)
     mode.clear_messages()
