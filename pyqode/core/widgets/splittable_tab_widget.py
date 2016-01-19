@@ -1106,6 +1106,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     #: Store the number of new documents created, for internal use.
     _new_count = 0
 
+    CLOSED_TABS_HISTORY_LIMIT = 10
+
     def __init__(self, parent=None, root=True):
         SplittableTabWidget.detached_window_klass = DetachedEditorWindow
         super(SplittableCodeEditTabWidget, self).__init__(parent, root)
@@ -1371,6 +1373,14 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 icon = self._icon(path)
                 self.add_tab(tab, title=name, icon=icon)
                 self.document_opened.emit(tab)
+
+                for action in self.closed_tabs_menu.actions():
+                    if action.toolTip() == original_path:
+                        self.closed_tabs_menu.removeAction(action)
+                        break
+                self.closed_tabs_history_btn.setEnabled(
+                    len(self.closed_tabs_menu.actions()) > 0)
+
                 return tab
 
     def close_document(self, path):
@@ -1477,20 +1487,34 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         except AttributeError:
             pass
         else:
-            filename = QtCore.QFileInfo(path).fileName()
-            try:
-                before = self.closed_tabs_menu.actions()[0]
-            except IndexError:
-                action = self.closed_tabs_menu.addAction(
-                    self._icon(path), filename)
+            for i, action in enumerate(self.closed_tabs_menu.actions()):
+                if action.toolTip() == path:
+                    # already in menu, just move it at the top
+                    if i:
+                        before = self.closed_tabs_menu.actions()[0]
+                        self.closed_tabs_menu.removeAction(action)
+                        self.closed_tabs_menu.insertAction(before, action)
+                    break
             else:
-                action = QtWidgets.QAction(self._icon(path), filename,
-                                           self.closed_tabs_menu)
-                self.closed_tabs_menu.insertAction(before, action)
-            action.setToolTip(path)
-            action.triggered.connect(self._open_closed_path)
-            action.setData(open_params)
-            self.closed_tabs_history_btn.setEnabled(True)
+                filename = QtCore.QFileInfo(path).fileName()
+                try:
+                    before = self.closed_tabs_menu.actions()[0]
+                except IndexError:
+                    action = self.closed_tabs_menu.addAction(
+                        self._icon(path), filename)
+                else:
+                    action = QtWidgets.QAction(self._icon(path), filename,
+                                               self.closed_tabs_menu)
+                    self.closed_tabs_menu.insertAction(before, action)
+                action.setToolTip(path)
+                action.triggered.connect(self._open_closed_path)
+                action.setData(open_params)
+                self.closed_tabs_history_btn.setEnabled(True)
+                nb_actions = len(self.closed_tabs_menu.actions())
+                while nb_actions > self.CLOSED_TABS_HISTORY_LIMIT:
+                    self.closed_tabs_menu.removeAction(
+                        self.closed_tabs_menu.actions()[-1])
+                    nb_actions = len(self.closed_tabs_menu.actions())
 
     def _open_closed_path(self):
         action = self.sender()
