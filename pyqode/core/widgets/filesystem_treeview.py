@@ -485,8 +485,8 @@ class FileSystemHelper:
         if status:
             fatal_names = ['.', '..']
             for i in fatal_names:
-                if i in name:
-                    QtWidgets.QMessageBox.error(
+                if i == name:
+                    QtWidgets.QMessageBox.critical(
                         self.tree_view, "Error", "Wrong directory name")
                     return
 
