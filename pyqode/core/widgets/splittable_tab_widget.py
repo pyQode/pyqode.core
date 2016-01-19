@@ -10,11 +10,14 @@ import uuid
 import weakref
 
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api import utils, CodeEdit
+from pyqode.core.api import utils
 from pyqode.core.dialogs import DlgUnsavedFiles
 from pyqode.core._forms import popup_open_files_ui
 from .tab_bar import TabBar
 from .code_edits import GenericCodeEdit, TextCodeEdit
+
+from pyqode.core._forms import pyqode_core_rc
+assert pyqode_core_rc
 
 
 def _logger():
@@ -1475,8 +1478,15 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             pass
         else:
             filename = QtCore.QFileInfo(path).fileName()
-            action = self.closed_tabs_menu.addAction(
-                self._icon(path), filename)
+            try:
+                before = self.closed_tabs_menu.actions()[0]
+            except IndexError:
+                action = self.closed_tabs_menu.addAction(
+                    self._icon(path), filename)
+            else:
+                action = QtWidgets.QAction(self._icon(path), filename,
+                                           self.closed_tabs_menu)
+                self.closed_tabs_menu.insertAction(before, action)
             action.setToolTip(path)
             action.triggered.connect(self._open_closed_path)
             action.setData(open_params)
