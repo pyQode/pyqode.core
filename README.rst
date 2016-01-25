@@ -89,7 +89,7 @@ We test the following combinations on Travis-CI:
 +--------------------------+---------+---------+
 |                          | PyQt4   | PyQt5   |
 +==========================+=========+=========+
-| GNU/Linux - Python 2.7   | yes     | yes     |
+| GNU/Linux - Python 2.7   | yes     | no      |
 +--------------------------+---------+---------+
 | GNU/Linux - Python 3.4   | yes     | yes     |
 +--------------------------+---------+---------+
