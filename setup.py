@@ -4,6 +4,7 @@
 Setup script for pyqode.core
 """
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 from pyqode.core import __version__
 
 #
@@ -19,6 +20,26 @@ try:
     cmdclass = {'build_ui': build_ui}
 except ImportError:
     cmdclass = {}
+
+class PyTest(TestCommand):
+    """
+    Overrides setup "test" command, taken from here:
+    http://pytest.org/latest/goodpractises.html
+    """
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import pytest
+
+        errno = pytest.main([])
+        sys.exit(errno)
+
+cmdclass['test'] = PyTest
 
 
 pygments_req = 'pygments'
