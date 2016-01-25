@@ -1,5 +1,6 @@
 import os
 import sys
+from pyqode.core.api import CodeEdit
 from pyqode.core.backend import NotRunning
 from pyqode.qt import QtWidgets
 import pytest
@@ -9,10 +10,11 @@ from pyqode.core.managers.backend import BackendManager
 from ..helpers import cwd_at, python2_path, server_path, wait_for_connected
 
 
-from ..helpers import editor_open
+from ..helpers import editor_open, ensure_connected
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_exit_code(editor):
     assert editor.backend.running
     assert editor.backend.exit_code is None

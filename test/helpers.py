@@ -213,3 +213,17 @@ def ensure_visible(func):
         editor.setReadOnly(False)
         return func(editor, *args, **kwds)
     return wrapper
+
+
+def ensure_connected(func):
+    """
+    Ensures the frontend is connect is connected to the server. If that is not
+    the case, the code completion server is started automatically
+    """
+    @functools.wraps(func)
+    def wrapper(editor, *args, **kwds):
+        if not editor.backend.running:
+            editor.backend.start(server_path())
+            wait_for_connected(editor)
+        return func(editor, *args, **kwds)
+    return wrapper

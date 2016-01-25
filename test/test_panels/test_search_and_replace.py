@@ -2,7 +2,7 @@ from pyqode.qt import QtCore, QtGui
 from pyqode.qt.QtTest import QTest
 from pyqode.core.api import TextHelper
 from pyqode.core import panels
-from test.helpers import editor_open
+from test.helpers import editor_open, ensure_connected
 
 
 def get_panel(editor):
@@ -18,6 +18,7 @@ def test_enabled(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_request_search(editor):
     QTest.qWait(1000)
     assert editor.backend.running
@@ -28,6 +29,7 @@ def test_request_search(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_action_search_triggered(editor):
     panel = get_panel(editor)
     # select word under cursor
@@ -45,6 +47,7 @@ def test_action_search_triggered(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_action_search_triggered2(editor):
     panel = get_panel(editor)
     # second search with the same text
@@ -57,6 +60,7 @@ def test_action_search_triggered2(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_action_next(editor):
     panel = get_panel(editor)
     panel.request_search('import')
@@ -66,6 +70,7 @@ def test_action_next(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_action_previous(editor):
     panel = get_panel(editor)
     panel.request_search('import')
@@ -75,6 +80,7 @@ def test_action_previous(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_style(editor):
     panel = get_panel(editor)
     panel.request_search('import')
@@ -85,6 +91,7 @@ def test_style(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_close(editor):
     panel = get_panel(editor)
     panel.on_actionSearch_triggered()
@@ -98,6 +105,7 @@ def test_close(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_focus_out_event(editor):
     panel = get_panel(editor)
     TextHelper(editor).goto_line(0)
@@ -112,6 +120,7 @@ def test_focus_out_event(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_replace(editor):
     panel = get_panel(editor)
     replacement_txt = 'REPLACEMENT_TEXT'
@@ -132,6 +141,7 @@ def test_replace(editor):
 
 
 @editor_open(__file__)
+@ensure_connected
 def test_event_filter(editor):
     panel = get_panel(editor)
     panel.on_actionActionSearchAndReplace_triggered()
