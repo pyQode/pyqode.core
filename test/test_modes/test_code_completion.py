@@ -75,10 +75,10 @@ def test_request_completion(editor):
     # starts the server after the request to test the retry on NotConnected
     # mechanism
     TextHelper(editor).goto_line(0)
-    QTest.qWait(100)
+    QTest.qWait(2000)
     mode.request_completion()
     editor.backend.start(server_path())
-    QTest.qWait(2000)
+    QTest.qWait(1000)
     assert editor.backend.running is True
     # now this should work
     TextHelper(editor).goto_line(3)

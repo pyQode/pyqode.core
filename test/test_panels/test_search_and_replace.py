@@ -20,7 +20,6 @@ def test_enabled(editor):
 @editor_open(__file__)
 @ensure_connected
 def test_request_search(editor):
-    QTest.qWait(1000)
     assert editor.backend.running
     panel = get_panel(editor)
     panel.request_search('import')
@@ -146,7 +145,7 @@ def test_event_filter(editor):
     panel = get_panel(editor)
     panel.on_actionActionSearchAndReplace_triggered()
     panel.request_search('import')
-    QTest.qWait(5000)
+    QTest.qWait(1000)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Tab)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Return)
     QTest.keyPress(panel.lineEditReplace, QtCore.Qt.Key_Return)

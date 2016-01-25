@@ -50,13 +50,14 @@ def test_foreground(editor):
 
 @ensure_connected
 @ensure_visible
-@pytest.mark.parametrize('underlined', [True, False])
-def test_occurrences(editor, underlined):
-    editor.file.open(__file__)
-    mode = get_mode(editor)
-    mode.underlined = underlined
-    assert len(mode._decorations) == 0
-    assert mode.delay == 1000
-    TextHelper(editor).goto_line(16, 7)
-    QTest.qWait(2000)
-    assert len(mode._decorations) > 0
+def test_occurrences(editor):
+    for underlined in [True, False]:
+        editor.file.open(__file__)
+        assert editor.backend.running is True
+        mode = get_mode(editor)
+        mode.underlined = underlined
+        assert len(mode._decorations) == 0
+        assert mode.delay == 1000
+        TextHelper(editor).goto_line(16, 7)
+        QTest.qWait(2000)
+        assert len(mode._decorations) > 0
