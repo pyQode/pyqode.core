@@ -34,8 +34,8 @@ install:
  # coveralls
  - pip install --quiet coveralls --use-wheel
 
- # install pyqode.qt from master branch (pyqode.core thighly tied to pyqode.qt)
- - pip install --quiet git+https://github.com/pyQode/pyqode.qt
+ # install pyqode.qt
+ - bash scripts/install-pyqode.sh
 
 script:
  - pip install -e .
