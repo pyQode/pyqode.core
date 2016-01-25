@@ -65,19 +65,36 @@ Testing
 
 pyqode.core has a test suite and measure its coverage.
 
-To run the tests, just run runtests.py with the interpreter you want
-to run the test suite::
+To run the tests, just run ``python setup.py test``
 
-    python2.7 runtests.py
-    python3.4 runtests.py
+To measure coverage, run::
 
-To measure coverage, install pytest-cov package and run::
+    python setup.py test -a "--cov pyqode"
 
-    python runtests.py --cov pyqode
+To check for PEP8 warnings, install pytest-pep8 and run::
 
-To check for PEP8 warnings, use:
+    python setup.py test -a "--pep8 -m pep8"
 
-    python runtests.py --pep8 -m pep8
+
+To run a single test, use ``-a "-- test_file_path.py::test_function"``, e.g.::
+
+    python setup.py test -a "-- test/test_api/test_code_edit.py::test_set_plain_text"
+
+
+Testing Matrix
+++++++++++++++
+
+We test the following combinations on Travis-CI:
+
++--------------------------+---------+---------+
+|                          | PyQt4   | PyQt5   |
++==========================+=========+=========+
+| GNU/Linux - Python 2.7   | yes     | yes     |
++--------------------------+---------+---------+
+| GNU/Linux - Python 3.4   | yes     | yes     |
++--------------------------+---------+---------+
+
+
 
 .. _Changelog: https://github.com/pyQode/pyqode.core/blob/master/CHANGELOG.rst
 .. _Contributing: https://github.com/pyQode/pyqode.core/blob/master/CONTRIBUTING.rst

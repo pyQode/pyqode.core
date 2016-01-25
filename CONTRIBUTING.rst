@@ -14,13 +14,8 @@ Pull Requests are great!
 4) Add your name to AUTHORS.rst
 5) Push to your fork and submit a pull request to **the master branch**.
 
-Please use **PEP8** to style your code (PEP8 compliance is tested Travis CI).
+Please use **PEP8** to style your code (PEP8 compliance is tested Travis CI)::
 
-*You can check pep8 compliance before pushing by running the test suite with
-the ``--pep8 -m pep8`` option*::
-
-    ($ pip install pytest-pep8)
-    $ python runtests.py --pep8 -m pep8
+    python setup.py test -a "--pep8 -m pep8"
 
 .. _centralised issue tracker: https://github.com/pyQode/pyQode/issues
-
