@@ -1,0 +1,41 @@
+language: python
+sudo: required
+dist: trusty
+
+python:
+  - "2.7"
+  - "3.4"
+
+virtualenv:
+  system_site_packages: true
+
+matrix:
+  exclude:
+    - env: PYTEST_QT_API=pyqt5
+      python: "2.7"
+
+env:
+ - PYTEST_QT_API=pyqt4
+ - PYTEST_QT_API=pyqt5
+
+install:
+ - sudo apt-get update
+
+ # Xvfb
+ - sudo apt-get install -y xvfb
+
+ # Qt
+ - python scripts/install-qt.py
+
+ # PyTest
+ - pip install -U pytest
+
+ # others
+ - pip install coveralls --use-wheel
+
+script:
+ - python setup.py develop
+ - catchsegv xvfb-run coverage run --source=pyqode setup.py test
+
+after_success:
+ - coveralls
