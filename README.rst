@@ -12,9 +12,9 @@
 
 .. image:: https://img.shields.io/pypi/l/pyqode.core.svg
 
-.. image:: https://semaphoreci.com/api/v1/projects/7b0daa6b-f30f-4d00-a8e3-cf4f9943f7fc/664079/shields_badge.svg
-   :target: https://semaphoreci.com/colinduquesnoy/pyqode-core
-   :alt: Semaphore CI build status
+.. image:: https://travis-ci.org/pyQode/pyqode.core.svg?branch=master
+   :target: https://travis-ci.org/pyQode/pyqode.core
+   :alt: Travis-CI build status
 
 .. image:: https://coveralls.io/repos/pyQode/pyqode.core/badge.svg?branch=master
    :target: https://coveralls.io/r/pyQode/pyqode.core?branch=master
