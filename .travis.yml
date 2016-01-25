@@ -33,6 +33,9 @@ install:
  # others
  - pip install coveralls --use-wheel
 
+ # install pyqode.qt from master branch (pyqode.core thighly tied to pyqode.qt)
+ - pip install git+https://github.com/pyQode/pyqode.qt
+
 script:
  - python setup.py develop
  - catchsegv xvfb-run coverage run --source=pyqode setup.py test
