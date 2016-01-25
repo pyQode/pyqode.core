@@ -11,12 +11,12 @@ virtualenv:
 
 matrix:
   exclude:
-    - env: PYTEST_QT_API=pyqt5
+    - env: QT_API=pyqt5
       python: "2.7"
 
 env:
- - PYTEST_QT_API=pyqt4
- - PYTEST_QT_API=pyqt5
+ - QT_API=pyqt4
+ - QT_API=pyqt5
 
 install:
  - sudo apt-get update
