@@ -1,6 +1,40 @@
 Change Log
 ==========
 
+2.8.0
+-----
+
+New features:
+
+- new pyqode package: pyqode.rst (ReStructuredText)
+- enable case sensitive code completion by default
+- add a new widget: HtmlPreviewWidget. This widget display the preview of an
+  editor that implement the ``to_html`` method. (use for the new pyqode
+  package: pyqode.rst)
+- enable code completion in strings (it's up to the cc engine to treat them
+  differently)
+- SplittableCodeEditTabWidget: add a way to repen recently closed tabs
+- CI improvements: tests are now running with both PyQt4 and PyQt5 on Travis CI
+
+Fixed bugs:
+
+- fix PYGMENTS_STYLES not including our own styles if pyqode not in standard path (OCIDE now bundles pyqode)
+- fix wrong modifiers used for indent/unindent: Ctrl+Tab and Ctrl+Shift+Tab can
+  now be used to cycle through the tabs of a QTabWidget
+- fix AttributeError in FSTreeView: msg box does not have an error method,
+  use critical instead
+- fix unable to create directories/files that starts with '.' in FSTreeView (hidden on linux)
+- fix AttributeError in splittable tab widget if editor widget is not a CodeEdit
+- fix AttributeError: 'NoneType' object has no attribute 'state' in InteractiveConsole
+- fix some segmentation faults when using PyQt4
+- fix highlighting not working in split editor if original editor has been
+  closed.
+- fix a memory leak in the backend manager
+- fix unreadable search occurences if foreground color is white (dark themes)
+- fix wrong tag color in QtStyle pygments style
+- fix AttributeError: 'NoneType' object has no attribute '_port' in BackendManager
+
+
 2.7.0
 -----
 
