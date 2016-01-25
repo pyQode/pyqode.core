@@ -10,7 +10,7 @@ import subprocess
 def apt_get_install(packages):
     print('Installing %s...' % ', '.join(packages))
     subprocess.check_call(['sudo', 'apt-get', 'install', '-y', '-qq'] +
-                          packages)
+                          packages + ['--fix-missing'])
 
 py3k = sys.version_info[0] == 3
 pyqt_version = {'pyqt4': 4, 'pyqt5': 5}
