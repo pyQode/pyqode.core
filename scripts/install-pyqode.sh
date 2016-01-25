@@ -1,5 +1,5 @@
 #! /bin/bash
-git clone https://github.com/pyQode/pyqode.qt
+git clone --quiet https://github.com/pyQode/pyqode.qt
 pushd pyqode.qt
-pip install -e .
+pip install --quiet -e .
 popd
