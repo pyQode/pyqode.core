@@ -76,7 +76,7 @@ setup(
     description=DESCRIPTION,
     long_description=readme(),
     install_requires=[pygments_req, 'pyqode.qt', 'future'],
-    tests_require=['pytest-xdist', 'pytest-cov', 'pytest'],
+    tests_require=['pytest-xdist', 'pytest-cov', 'pytest-pep8', 'pytest'],
     entry_points={
         'console_scripts': [
             'pyqode-console = pyqode.core.tools.console:main'
