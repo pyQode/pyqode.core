@@ -31,15 +31,18 @@ install:
  # Qt
  - python scripts/install-qt.py
 
+ # pytest
+ - pip install --quiet pytest pytest-xdist pytest-cov
+
  # others
- - pip install coveralls --use-wheel
+ - pip install --quiet coveralls --use-wheel
 
  # install pyqode.qt from master branch (pyqode.core thighly tied to pyqode.qt)
- - pip install git+https://github.com/pyQode/pyqode.qt
+ - pip install --quiet git+https://github.com/pyQode/pyqode.qt
 
 script:
  - pip install -e .
- - catchsegv python setup.py test -a "--cov pyqode"
+ - catchsegv py.test --boxed --cov pyqode
 
 after_success:
  - coveralls
