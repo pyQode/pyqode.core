@@ -37,6 +37,7 @@ htmlcov
 *.log
 *.DS_Store
 file_to_watch.txt
+*.egg
 
 test_file.txt
 
@@ -50,4 +51,3 @@ deb_dist
 
 # hackedit project files
 .hackedit
-

@@ -18,6 +18,10 @@ env:
  - QT_API=pyqt4
  - QT_API=pyqt5
 
+before_install:
+    - "export DISPLAY=:99.0"
+    - "sh -e /etc/init.d/xvfb start"
+
 install:
  - sudo apt-get update
 
@@ -27,9 +31,6 @@ install:
  # Qt
  - python scripts/install-qt.py
 
- # PyTest
- - pip install -U pytest
-
  # others
  - pip install coveralls --use-wheel
 
@@ -37,8 +38,8 @@ install:
  - pip install git+https://github.com/pyQode/pyqode.qt
 
 script:
- - python setup.py develop
- - catchsegv xvfb-run coverage run --source=pyqode setup.py test
+ - pip install -e .
+ - catchsegv python setup.py test -a "--cov pyqode"
 
 after_success:
  - coveralls
