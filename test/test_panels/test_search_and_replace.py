@@ -34,8 +34,9 @@ def test_action_search_triggered(editor):
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
     panel.on_actionSearch_triggered()
-    assert panel.isVisible()
+    editor.show()
     QTest.qWait(1000)
+    assert panel.isVisible()
     panel.checkBoxCase.setChecked(True)
     panel.checkBoxWholeWords.setChecked(True)
     panel.on_actionSearch_triggered()
@@ -50,8 +51,9 @@ def test_action_search_triggered2(editor):
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
     panel.on_actionSearch_triggered()
-    assert panel.isVisible()
+    editor.show()
     QTest.qWait(1000)
+    assert panel.isVisible()
 
 
 @editor_open(__file__)
@@ -86,6 +88,8 @@ def test_style(editor):
 def test_close(editor):
     panel = get_panel(editor)
     panel.on_actionSearch_triggered()
+    editor.show()
+    QTest.qWait(1000)
     assert panel.isVisible()
     panel.on_toolButtonClose_clicked()
     assert not panel.isVisible()
@@ -139,4 +143,6 @@ def test_event_filter(editor):
     QTest.keyPress(panel.lineEditReplace, QtCore.Qt.Key_Return,
                    QtCore.Qt.ControlModifier)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Escape)
+    editor.show()
+    QTest.qWait(1000)
     assert not panel.isVisible()

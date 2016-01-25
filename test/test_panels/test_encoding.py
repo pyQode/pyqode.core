@@ -23,6 +23,7 @@ def test_reload(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
     editor.file.open(PATH, encoding='utf_8', use_cached_encoding=False)
+    editor.show()
     QTest.qWait(1000)
     pnl = get_panel(editor)
     assert pnl.isVisible() is True
@@ -38,6 +39,7 @@ def test_edit_anyway(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
     editor.file.open(PATH, encoding='utf_8', use_cached_encoding=False)
+    editor.show()
     QTest.qWait(1000)
     pnl = get_panel(editor)
     assert pnl.isVisible() is True
@@ -51,6 +53,7 @@ def test_cancel(editor):
     editor.panels.append(panels.EncodingPanel(),
                          panels.EncodingPanel.Position.TOP)
     editor.file.open(PATH, encoding='utf_8', use_cached_encoding=False)
+    editor.show()
     QTest.qWait(1000)
     pnl = get_panel(editor)
     assert pnl.isVisible() is True
