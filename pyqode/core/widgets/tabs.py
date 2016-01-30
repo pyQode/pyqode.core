@@ -69,9 +69,9 @@ class TabWidget(QTabWidget):
         self.setTabBar(tab_bar)
         self.tab_bar = tab_bar
         self._context_mnu = QtWidgets.QMenu()
-        for name, slot in [('Close', self.close),
-                           ('Close others', self.close_others),
-                           ('Close all', self.close_all)]:
+        for name, slot in [(_('Close'), self.close),
+                           (_('Close others'), self.close_others),
+                           (_('Close all'), self.close_all)]:
             qaction = QtWidgets.QAction(name, self)
             qaction.triggered.connect(slot)
             self._context_mnu.addAction(qaction)
