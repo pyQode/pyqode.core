@@ -131,7 +131,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
-        self.lineEditReplace.prompt_text = ' Replace'
+        self.lineEditReplace.prompt_text = _(' Replace')
         #: Occurrences counter
         self.cpt_occurences = 0
         self._previous_stylesheet = ""

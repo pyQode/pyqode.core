@@ -173,7 +173,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         accepted.
 
         """
-        filename, filter = QtWidgets.QFileDialog.getOpenFileName(self, 'Open')
+        filename, filter = QtWidgets.QFileDialog.getOpenFileName(
+            self, _('Open'))
         if filename:
             self.open_file(filename)
 

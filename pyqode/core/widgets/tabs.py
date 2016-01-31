@@ -141,7 +141,7 @@ class TabWidget(QTabWidget):
         try:
             if not path and not self._current.file.path:
                 path, filter = QtWidgets.QFileDialog.getSaveFileName(
-                    self, 'Choose destination path')
+                    self, _('Choose destination path'))
                 if not path:
                     return False
             old_path = self._current.file.path
@@ -304,7 +304,7 @@ class TabWidget(QTabWidget):
             path = code_edit.file.path
             if not os.path.exists(path):
                 path, status = QtWidgets.QFileDialog.getSaveFileName(
-                    self, 'Save as (%s)' % code_edit.file.path)
+                    self, _('Save as (%s)') % code_edit.file.path)
         if path:
             try:
                 code_edit.file.save(path)

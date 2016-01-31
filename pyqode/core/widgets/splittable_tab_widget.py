@@ -991,9 +991,9 @@ class CodeEditTabWidget(BaseTabWidget):
         try:
             filter = cls.get_filter(editor.mimetypes[0])
         except IndexError:
-            filter = 'All files (*)'
+            filter = _('All files (*)')
         return QtWidgets.QFileDialog.getSaveFileName(
-            editor, 'Save file as', cls.default_directory, filter)
+            editor, _('Save file as'), cls.default_directory, filter)
 
     @classmethod
     def save_widget(cls, editor):

@@ -20,7 +20,7 @@ class PromptLineEdit(QtWidgets.QLineEdit):
     clear_clicked = QtCore.Signal()
 
     def __init__(self, parent=None,
-                 prompt_text=' Search', button_icon=None):
+                 prompt_text=_(' Search'), button_icon=None):
         super(PromptLineEdit, self).__init__(parent)
         self._margin = self.sizeHint().height() - 2
         self._spacing = 0
