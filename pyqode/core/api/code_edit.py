@@ -1096,7 +1096,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _init_actions(self, create_standard_actions):
         """ Init context menu action """
-        menu_advanced = QtWidgets.QMenu('Advanced')
+        menu_advanced = QtWidgets.QMenu(_('Advanced'))
         self.add_menu(menu_advanced)
         self._sub_menus = {
             'Advanced': menu_advanced

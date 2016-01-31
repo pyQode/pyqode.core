@@ -97,7 +97,7 @@ class EncodingsMenu(QtWidgets.QMenu):
         self._current_encoding = convert_to_codec_key(value)
         self._refresh()
 
-    def __init__(self, title='Encodings', parent=None,
+    def __init__(self, title=_('Encodings'), parent=None,
                  selected_encoding=locale.getpreferredencoding()):
         super(EncodingsMenu, self).__init__(parent)
         self.setTitle(title)

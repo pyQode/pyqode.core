@@ -186,7 +186,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.toolButtonClose.setIconSize(icon_size)
 
         self.menu = QtWidgets.QMenu(self.editor)
-        self.menu.setTitle('Search')
+        self.menu.setTitle(_('Search'))
         self.menu.menuAction().setIcon(self.actionSearch.icon())
         self.menu.addAction(self.actionSearch)
         self.actionSearch.setShortcutContext(QtCore.Qt.WidgetShortcut)

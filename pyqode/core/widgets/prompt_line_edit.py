@@ -32,7 +32,7 @@ class PromptLineEdit(QtWidgets.QLineEdit):
                 'edit-clear', ':/pyqode-icons/rc/clear-left.png',
                 'fa.times-circle')
         self.button.setIcon(button_icon)
-        self.button.setToolTip("Clear")
+        self.button.setToolTip(_("Clear"))
         self.button.setStyleSheet(
             "QToolButton { border: none; padding: 5px; }")
         self.button.setCursor(QtCore.Qt.ArrowCursor)

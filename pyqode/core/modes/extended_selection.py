@@ -75,7 +75,7 @@ class ExtendedSelectionMode(Mode):
         """
         # setup menu
         menu = QtWidgets.QMenu(self.editor)
-        menu.setTitle('Select')
+        menu.setTitle(_('Select'))
         menu.menuAction().setIcon(QtGui.QIcon.fromTheme('edit-select'))
         # setup actions
         menu.addAction(self.action_select_word)

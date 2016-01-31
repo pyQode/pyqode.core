@@ -184,7 +184,7 @@ class FoldingPanel(Panel):
         :param editor: editor instance on which the mode has been installed to.
         """
         super(FoldingPanel, self).on_install(editor)
-        self.context_menu = QtWidgets.QMenu('Folding', self.editor)
+        self.context_menu = QtWidgets.QMenu(_('Folding'), self.editor)
         action = self.action_collapse = QtWidgets.QAction(
             _('Collapse'), self.context_menu)
         action.setShortcut('Shift+-')
