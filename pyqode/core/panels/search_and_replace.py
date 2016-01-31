@@ -564,7 +564,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._on_search_finished()
 
     def _update_label_matches(self):
-        self.labelMatches.setText("{0} matches".format(self.cpt_occurences))
+        self.labelMatches.setText(_("{0} matches").format(self.cpt_occurences))
         color = "#DD0000"
         if self.cpt_occurences:
             color = "#00DD00"

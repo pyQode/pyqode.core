@@ -131,7 +131,7 @@ class EncodingsMenu(QtWidgets.QMenu):
                 self._group.addAction(action)
         self._group.triggered.connect(self._on_encoding_triggered)
         self.addSeparator()
-        self._edit_action = QtWidgets.QAction('Add or remove', self)
+        self._edit_action = QtWidgets.QAction(_('Add or remove'), self)
         self._edit_action.triggered.connect(self._on_edit_requested)
         self.addAction(self._edit_action)
 
@@ -186,8 +186,8 @@ class EncodingsContextMenu(EncodingsMenu):
             self.parent().file.reload(self._encoding)
         except UnicodeDecodeError:
             QtWidgets.QMessageBox.warning(
-                self.parent(), 'Decoding error',
-                'Failed to reload file with encoding %s' % self._encoding)
+                self.parent(), _('Decoding error'),
+                _('Failed to reload file with encoding %s') % self._encoding)
         else:
             try:
                 from pyqode.core.panels import EncodingPanel
