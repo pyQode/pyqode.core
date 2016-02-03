@@ -345,7 +345,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                     filename = item.text()
                     widget = None
                     for widget in widgets:
-                        if widget.path == filename:
+                        if widget.file.path == filename:
                             break
                     if widget != exept:
                         self.save_widget(widget)
@@ -355,7 +355,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     def _get_widget_path(self, widget):
         try:
-            return widget.path
+            return widget.file.path
         except AttributeError:
             return ''
 
