@@ -408,10 +408,19 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @property
     def select_line_on_copy_empty(self):
+        """
+        :return: state of "whole line selecting" on copy with empty selection
+        :rtype: bool
+        """
         return self._select_line_on_copy_empty
     
     @select_line_on_copy_empty.setter
     def select_line_on_copy_empty(self, value):
+        """
+        To turn on/off selecting the whole line when copy with empty selection is triggered
+        
+        Default is True
+        """
         self._select_line_on_copy_empty = value
 
     def __init__(self, parent=None, create_default_actions=True):
