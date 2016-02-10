@@ -379,3 +379,26 @@ Line 3''', '', '')
     assert helper.line_count() == 3
     editor.cut()
     assert helper.line_count() == 2
+
+
+def test_copy_no_selection(editor):
+    """
+    Tests the select_line_on_copy_empty option that toggles the
+    "whole line selection on copy with empty selection"-feature 
+    """
+    assert isinstance(editor, CodeEdit)
+    editor.setPlainText('''Line 1
+Line 2
+Line 3''', '', '')
+    helper = TextHelper(editor)
+    helper.goto_line(0)
+    editor.textCursor().clearSelection()
+
+    editor.select_line_on_copy_empty = False
+    editor.copy()
+    assert editor.textCursor().hasSelection() is False
+
+    editor.textCursor().clearSelection()
+    editor.select_line_on_copy_empty = True
+    editor.copy()
+    assert editor.textCursor().hasSelection()
