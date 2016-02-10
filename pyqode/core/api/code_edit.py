@@ -873,7 +873,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         helper = TextHelper(self)
         tc.beginEditBlock()
         no_selection = False
-        if not helper.current_line_text().strip():
+        if not helper.current_line_text():
             tc.deleteChar()
         else:
             if not self.textCursor().hasSelection():
