@@ -413,12 +413,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :rtype: bool
         """
         return self._select_line_on_copy_empty
-    
+
     @select_line_on_copy_empty.setter
     def select_line_on_copy_empty(self, value):
         """
         To turn on/off selecting the whole line when copy with empty selection is triggered
-        
+
         Default is True
         """
         self._select_line_on_copy_empty = value
@@ -869,6 +869,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         return False
 
     def cut(self):
+        """
+        Cuts the selected text or the whole line if no text was selected.
+        """
         tc = self.textCursor()
         helper = TextHelper(self)
         tc.beginEditBlock()
@@ -886,6 +889,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setTextCursor(tc)
 
     def copy(self):
+        """
+        Copy the selected text to the clipboard. If no text was selected, the
+        entire line is copied (this feature can be turned off by
+        setting :attr:`select_line_on_copy_empty` to False.
+        """
         if self.select_line_on_copy_empty and not self.textCursor().hasSelection():
             TextHelper(self).select_whole_line()
         super(CodeEdit, self).copy()
