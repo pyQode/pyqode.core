@@ -392,13 +392,13 @@ Line 2
 Line 3''', '', '')
     helper = TextHelper(editor)
     helper.goto_line(0)
-    editor.textCursor().clearSelection(0)
+    editor.textCursor().clearSelection()
 
     editor.select_line_on_copy_empty = False
     editor.copy()
     assert editor.textCursor().hasSelection() is False
 
-    editor.textCursor().clearSelection(0)
+    editor.textCursor().clearSelection()
     editor.select_line_on_copy_empty = True
     editor.copy()
     assert editor.textCursor().hasSelection()
