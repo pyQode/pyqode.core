@@ -469,9 +469,15 @@ class FileSystemHelper:
             QtWidgets.QLineEdit.Normal, name)
         if status:
             dest = os.path.join(pardir, new_name)
+            files = []
+            if os.path.isdir(src):
+                files = self._get_files(src)
             os.rename(src, dest)
             self.tree_view.file_renamed.emit(os.path.normpath(src),
                                              os.path.normpath(dest))
+            for old_f in files:
+                new_f = old_f.replace(name, new_name)
+                self.tree_view.file_renamed.emit(old_f, new_f)
 
     def create_directory(self):
         """
