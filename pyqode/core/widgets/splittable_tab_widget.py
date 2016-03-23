@@ -1196,8 +1196,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             # not a code edit
             old_content = ''
         else:
-            with open(path, encoding=encoding) as f:
-                old_content = f.read()
+            try:
+                with open(path, encoding=encoding) as f:
+                    old_content = f.read()
+            except OSError:
+                old_content = ''
         if widget.dirty:
             try:
                 self.main_tab_widget.save_widget(widget)
