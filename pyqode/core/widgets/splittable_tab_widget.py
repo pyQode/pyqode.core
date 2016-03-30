@@ -468,8 +468,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             SplittableTabWidget.tab_under_menu = None
         if not clones:
             widget.setParent(None)
-            widget.deleteLater()
-            del widget
         else:
             try:
                 clones[0].syntax_highlighter.setDocument(document)
