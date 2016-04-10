@@ -532,8 +532,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 class OpenFilesPopup(QtWidgets.QDialog):
     triggered = QtCore.Signal(str)
 
-    def __init__(self, *args, qsettings=None):
-        super(OpenFilesPopup, self).__init__(*args)
+    def __init__(self, parent=None, qsettings=None):
+        super(OpenFilesPopup, self).__init__(parent)
         self.ui = popup_open_files_ui.Ui_Dialog()
         self.ui.setupUi(self)
         self.ui.tableWidget.itemActivated.connect(self._on_item_activated)
