@@ -1,6 +1,43 @@
 Change Log
 ==========
 
+2.9.0
+-----
+
+New features:
+
+- add ability to extract translatable strings with gettext
+- add an option to disable copy of whole line when there is no selection, see PR #158
+- add a public method to retrieve the list of submenu of the editor context menu
+- add ``keys`` and ``values`` methods to the mode and panel manager
+- FSTreeView: delay initialisation of tree view until widget is shown
+- Add zoom menu to the editor's context menu
+- Add ability to use own QSettings
+- Add ability to set custom linter rules and add an option for the backend to know about max_line_length (defined in
+  the margin mode).
+- Add ability to close tabs on the left/right of the current tab.
+
+Fixed bugs:
+
+- fix conflicts between WordClickMode and Ctrl+Mouse move (prevent goto when Ctrl+ mouse move).
+- fix text cursor not visible under a margin (solution is to use a 2px wide cursor).
+- fix HackEdit/hackedit#51
+- fix cut not working as intended when cutting a line with only whitespaces
+- fix memory issues in HtmlPreviewWidget, now using QTextEdit::setHtml instead of a full blown webview
+- fix subprocess.CalledError if xdg-mime returns with non-zero exit code
+- fix segfault on Windows (in HackEdit)
+- fix many potential unhandled OSError/subprocess errors
+- fix file_renamed signal not emitted for child file when a parent directory has been renamed (FSTreeView)
+- fix KeyError in backend client if backend function failed due to an exception (result is None)
+- fix UnicodeDecodeError when decoding stdout/stderr in InteractiveConsole
+- fix backend output not shown in logs when running from a frozen application
+- fix mode enabled on install even if enabled was set to False in the constructor
+- fix extra selection spanning over multiple lines when user inserts a line breaks (CheckerMode)
+- restore case insensitive code completion by default which was causing some major issues in OpenCobolIDE
+- fix ImportError when looking for a pygments lexer (and the application has been freezed without all possible
+  pygments lexers)
+
+
 2.8.0
 -----
 
