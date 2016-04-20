@@ -83,10 +83,7 @@ def test_mouse_press(editor):
     assert TextBlockHelper.is_fold_trigger(block)
     block = block.next()
     while block.blockNumber() < 27:
-        if 14 < block.blockNumber() < 22:
-            assert block.isVisible() is False
-        else:
-            assert block.isVisible() is True
+        assert block.isVisible() is True
         block = block.next()
 
     # cleanup
