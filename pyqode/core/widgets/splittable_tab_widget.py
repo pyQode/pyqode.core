@@ -5,6 +5,7 @@ import inspect
 import logging
 import mimetypes
 import os
+import io
 import sys
 import uuid
 import weakref
@@ -1250,7 +1251,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             old_content = ''
         else:
             try:
-                with open(path, encoding=encoding) as f:
+                with io.open(path, encoding=encoding) as f:
                     old_content = f.read()
             except OSError:
                 old_content = ''
