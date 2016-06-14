@@ -374,7 +374,7 @@ class OutputWindow(CodeEdit):
                                        output_format=OutputFormat.CustomFormat)
         self.setReadOnly(True)
         self.process_finished.emit()
-        
+
     def _decode(self, data):
         for encoding in ['utf-8', 'cp850', 'cp1252', 'ascii']:
             try:
@@ -986,7 +986,7 @@ class BufferedInputHandler(InputHandler):
             return False
         if event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
             # send the user input to the child process
-            if self.edit.flg_use_pty:
+            if self.edit.flg_use_pty or 'cmd.exe' in self.process.program():
                 # remove user buffer from text edit, the content of the buffer will be
                 # drawn as soon as we write it to the process stdin
                 tc = self.edit.textCursor()
@@ -999,7 +999,7 @@ class BufferedInputHandler(InputHandler):
             self._input_buffer += "\n"
             self.process.write(self._input_buffer.encode())
             self._input_buffer = ""
-            if self.edit.flg_use_pty:
+            if self.edit.flg_use_pty or 'cmd.exe' in self.process.program():
                 ignore = True
         else:
             if not delete and len(event.text()):

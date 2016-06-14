@@ -43,7 +43,7 @@ class Terminal(output_window.OutputWindow):
         """
         self._process.write(('cd %s\n' % directory).encode())
         if sys.platform == 'win32':
-            self._process.write(b'cls\n')
+            self.clear()
         else:
             self._process.write(b'clear\n')
 
