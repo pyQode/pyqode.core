@@ -1,0 +1,173 @@
+[colin@sirmo ~]$ msgcat --color=test
+Colors (foreground/background):
+       |black  |blue   |green  |cyan   |red    |magenta|yellow |white  |default
+black  | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+blue   | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+green  | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+cyan   | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+red    | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+magenta| Words | Words | Words | Words | Words | Words | Words | Words | Words 
+yellow | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+white  | Words | Words | Words | Words | Words | Words | Words | Words | Words 
+default| Words | Words | Words | Words | Words | Words | Words | Words | Words 
+
+Colors (hue/saturation):
+red:                                                                      
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+yellow:                                                                   
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+green:                                                                    
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+cyan:                                                                     
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+blue:                                                                     
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+magenta:                                                                  
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+red:                                                                      
+
+Weights:
+normal, bold, default 
+
+Postures:
+normal, italic, default 
+
+Text decorations:
+normal, underlined, default 
+
+Colors (foreground) mixed with attributes:
+black  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+blue   |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+green  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+cyan   |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+red    |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+magenta|normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+yellow |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+white  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+default|normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+
+Colors (background) mixed with attributes:
+black  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+blue   |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+green  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+cyan   |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+red    |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+magenta|normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+yellow |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+white  |normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+default|normal|bold|normal|italic|normal|underlined|normal|
+       |normal|bold+italic|normal|bold+underl|normal|italic+underl|normal|
+
+[colin@sirmo ~]$ 

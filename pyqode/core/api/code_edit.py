@@ -914,6 +914,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super(CodeEdit, self).resizeEvent(e)
         self.panels.resize()
 
+    def closeEvent(self, e):
+        self.close()
+        super(CodeEdit, self).closeEvent(e)
+
     def paintEvent(self, e):
         """
         Overrides paint event to update the list of visible blocks and emit
