@@ -259,7 +259,10 @@ class OutputWindow(CodeEdit):
         """
         self.stop_process()
         self.backend.stop()
-        self.modes.remove('_LinkHighlighter')
+        try:
+            self.modes.remove('_LinkHighlighter')
+        except KeyError:
+            pass  # already removed
         super(OutputWindow, self).closeEvent(event)
 
     def keyPressEvent(self, event):
