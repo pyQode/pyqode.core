@@ -374,12 +374,24 @@ class OutputWindow(CodeEdit):
                                        output_format=OutputFormat.CustomFormat)
         self.setReadOnly(True)
         self.process_finished.emit()
+        
+    def _decode(self, data):
+        for encoding in ['utf-8', 'cp1252', 'ascii']:
+            try:
+                string = data.decode(encoding)
+            except UnicodeDecodeError:
+                _logger().debug('failed to decode output with encoding=%r', encoding)
+                continue
+            else:
+                _logger().debug('decoding output with encoding=%r succeeded', encoding)
+                return string
+        return str(data).replace("b'", '')[:-1].replace('\\\\', '\\')
 
     def _read_stdout(self):
         """
         Reads the child process' stdout and process it.
         """
-        output = self._process.readAllStandardOutput().data().decode()
+        output = self._decode(self._process.readAllStandardOutput().data())
         if self._formatter:
             self._formatter.append_message(output, output_format=OutputFormat.NormalMessageFormat)
         else:
@@ -389,7 +401,7 @@ class OutputWindow(CodeEdit):
         """
         Reads the child process' stderr and process it.
         """
-        output = self._process.readAllStandardError().data().decode()
+        output = self._decode(self._process.readAllStandardError().data())
         if self._formatter:
             self._formatter.append_message(output, output_format=OutputFormat.ErrorMessageFormat)
         else:
