@@ -376,7 +376,7 @@ class OutputWindow(CodeEdit):
         self.process_finished.emit()
         
     def _decode(self, data):
-        for encoding in ['utf-8', 'cp1252', 'ascii']:
+        for encoding in ['utf-8', 'cp850', 'cp1252', 'ascii']:
             try:
                 string = data.decode(encoding)
             except UnicodeDecodeError:
