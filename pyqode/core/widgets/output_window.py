@@ -385,7 +385,7 @@ class OutputWindow(CodeEdit):
             else:
                 _logger().debug('decoding output with encoding=%r succeeded', encoding)
                 return string
-        return str(data).replace("b'", '')[:-1].replace('\\\\', '\\')
+        return str(data).replace("b'", '')[:-1].replace('\\r', '\r').replace('\\n', '\n').replace('\\\\', '\\')
 
     def _read_stdout(self):
         """
