@@ -154,6 +154,7 @@ class OutputWindow(CodeEdit):
         """
         # clear previous output
         self.clear()
+        self.setReadOnly(False)
         if arguments is None:
             arguments = []
         if sys.platform != 'win32' and use_pseudo_terminal:
