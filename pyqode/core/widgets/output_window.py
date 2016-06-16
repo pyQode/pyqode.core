@@ -255,6 +255,9 @@ class OutputWindow(CodeEdit):
     #
     # Overriden Qt Methods
     #
+    def setReadOnly(self, value):
+        QtWidgets.QPlainTextEdit.setReadOnly(self, value)
+
     def closeEvent(self, event):
         """
         Terminates the child process on close.

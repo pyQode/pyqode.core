@@ -1086,7 +1086,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def setReadOnly(self, read_only):
         if read_only != self.isReadOnly():
-            super().setReadOnly(read_only)
+            super(CodeEdit, self).setReadOnly(read_only)
             from pyqode.core.panels import ReadOnlyPanel
             try:
                 panel = self.panels.get(ReadOnlyPanel)
