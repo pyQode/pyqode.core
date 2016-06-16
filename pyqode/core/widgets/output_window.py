@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import sys
+import string
 
 from collections import namedtuple
 
@@ -106,7 +107,7 @@ class OutputWindow(CodeEdit):
         self._input_handler.process = self._process
 
     def __init__(self, parent=None, color_scheme=None, formatter=None, input_handler=None, backend=server.__file__,
-                 link_regex=re.compile(r'File "(?P<url>(/|[a-zA-Z]:\\).*)"(, line (?P<line>\d*))?')):
+                 link_regex=re.compile(r'("|\')(?P<url>(/|[a-zA-Z]:\\).*)("|\')(, line (?P<line>\d*))?')):
         """
         :param parent: parent widget, if any
         :param color_scheme: color scheme to use
@@ -811,7 +812,7 @@ def _qkey_to_ascii(event):
         elif event.key() == QtCore.Qt.Key_C:
             return b'\x03'
         elif event.key() == QtCore.Qt.Key_L:
-            return b'clear\n'
+            return b'\x0C'
         elif event.key() == QtCore.Qt.Key_B:
             return b'\x02'
         elif event.key() == QtCore.Qt.Key_F:
@@ -958,6 +959,14 @@ class BufferedInputHandler(InputHandler):
         self._cursor_pos = len(command)
         self.edit.setTextCursor(tc)
 
+    def is_code_completion_popup_visible(self):
+        try:
+            mode = self.edit.modes.get('CodeCompletionMode')
+        except KeyError:
+            pass
+        else:
+            return mode._completer.popup().isVisible()
+
     def key_press_event(self, event):
         """
         Manages our own buffer and send it to the subprocess when user pressed RETURN.
@@ -981,9 +990,13 @@ class BufferedInputHandler(InputHandler):
                 self.process.write(b'\n')
                 return False
         if event.key() == QtCore.Qt.Key_Up:
+            if self.is_code_completion_popup_visible():
+                return True
             self._insert_command(self._history.scroll_up())
             return False
         if event.key() == QtCore.Qt.Key_Down:
+            if self.is_code_completion_popup_visible():
+                return True
             self._insert_command(self._history.scroll_down())
             return False
         if event.key() == QtCore.Qt.Key_Left:
@@ -998,7 +1011,21 @@ class BufferedInputHandler(InputHandler):
                 self._cursor_pos = len(self._input_buffer)
                 ignore = True
             return not ignore
+        if event.key() == QtCore.Qt.Key_Home:
+            tc = self.edit.textCursor()
+            tc.movePosition(tc.Left, tc.MoveAnchor, self._cursor_pos)
+            self.edit.setTextCursor(tc)
+            self._cursor_pos = 0
+            return False
+        if event.key() == QtCore.Qt.Key_End:
+            tc = self.edit.textCursor()
+            tc.movePosition(tc.EndOfBlock)
+            self.edit.setTextCursor(tc)
+            self._cursor_pos = len(self._input_buffer)
+            return False
         if event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+            if self.is_code_completion_popup_visible():
+                return True
             tc = self.edit.textCursor()
             tc.movePosition(tc.EndOfBlock)
             self.edit.setTextCursor(tc)
@@ -1020,16 +1047,31 @@ class BufferedInputHandler(InputHandler):
             if self.edit.flg_use_pty or 'cmd.exe' in self.process.program():
                 ignore = True
         else:
-            if not delete and len(event.text()):
-                txt = event.text()
-                if txt == '\t':
-                    txt = ' ' * 4
-                self._input_buffer = self._input_buffer[:self._cursor_pos] + txt + \
-                    self._input_buffer[self._cursor_pos:]
-                self._cursor_pos += len(txt)
+            printable = len(event.text()) and event.text() in string.printable
+            if not delete and printable:
+                self.insert_text(event.text())
             elif delete:
-                self._input_buffer = self._input_buffer[:len(self._input_buffer) - 1]
+                if event.key() == QtCore.Qt.Key_Backspace:
+                    self.backspace()
+                else:
+                    self.delete()
         return not ignore
+
+    def insert_text(self, txt):
+        if txt == '\t':
+            txt = ' ' * 4
+        self._input_buffer = self._input_buffer[:self._cursor_pos] + txt + \
+            self._input_buffer[self._cursor_pos:]
+        self._cursor_pos += len(txt)
+
+    def backspace(self):
+        self._input_buffer = self._input_buffer[:self._cursor_pos - 1] + self._input_buffer[self._cursor_pos:]
+        self._cursor_pos -= 1
+        if self._cursor_pos < 0:
+            self._cursor_pos = 0
+
+    def delete(self):
+        self._input_buffer = self._input_buffer[:self._cursor_pos] + self._input_buffer[self._cursor_pos + 1:]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
