@@ -45,7 +45,7 @@ class Terminal(output_window.OutputWindow):
         if sys.platform == 'win32':
             self.clear()
         else:
-            self._process.write(b'clear\n')
+            self._process.write(b'\x0C')
 
     def terminate_process(self):
         self._process.write(b'\x04')
