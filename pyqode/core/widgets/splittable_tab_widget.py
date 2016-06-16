@@ -438,21 +438,6 @@ class BaseTabWidget(QtWidgets.QTabWidget):
                 if rm:
                     self.remove_tab(index)
 
-        cnt = sys.getrefcount(widget)
-        if cnt > 2:
-            try:
-                import objgraph
-            except ImportError:
-                _logger().warning(
-                    'potential memory leak detected on widget: %r\n'
-                    'Install the objgraph package to know what objects are '
-                    'holding references the editor widget...' % widget)
-            else:
-                _logger().warning('potential memory detected on widget: %r\n'
-                                  'see stderr for a backrefs dot graph...' %
-                                  widget)
-                objgraph.show_backrefs([widget], output=sys.stderr)
-
     @staticmethod
     def _close_widget(widget):
         """
