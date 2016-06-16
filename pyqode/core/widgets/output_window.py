@@ -944,6 +944,7 @@ class BufferedInputHandler(InputHandler):
         super(BufferedInputHandler, self).__init__()
         self._input_buffer = ''
         self._history = CommandHistory()
+        self._cursor_pos = 0
 
     def _insert_command(self, command):
         """
@@ -954,6 +955,7 @@ class BufferedInputHandler(InputHandler):
             tc.deletePreviousChar()
         tc.insertText(command)
         self._input_buffer = command
+        self._cursor_pos = len(command)
         self.edit.setTextCursor(tc)
 
     def key_press_event(self, event):
@@ -984,7 +986,22 @@ class BufferedInputHandler(InputHandler):
         if event.key() == QtCore.Qt.Key_Down:
             self._insert_command(self._history.scroll_down())
             return False
+        if event.key() == QtCore.Qt.Key_Left:
+            self._cursor_pos -= 1
+            if self._cursor_pos < 0:
+                self._cursor_pos = 0
+                ignore = True
+            return not ignore
+        if event.key() == QtCore.Qt.Key_Right:
+            self._cursor_pos += 1
+            if self._cursor_pos > len(self._input_buffer):
+                self._cursor_pos = len(self._input_buffer)
+                ignore = True
+            return not ignore
         if event.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+            tc = self.edit.textCursor()
+            tc.movePosition(tc.EndOfBlock)
+            self.edit.setTextCursor(tc)
             # send the user input to the child process
             if self.edit.flg_use_pty or 'cmd.exe' in self.process.program():
                 # remove user buffer from text edit, the content of the buffer will be
@@ -999,12 +1016,17 @@ class BufferedInputHandler(InputHandler):
             self._input_buffer += "\n"
             self.process.write(self._input_buffer.encode())
             self._input_buffer = ""
+            self._cursor_pos = 0
             if self.edit.flg_use_pty or 'cmd.exe' in self.process.program():
                 ignore = True
         else:
             if not delete and len(event.text()):
                 txt = event.text()
-                self._input_buffer += txt
+                if txt == '\t':
+                    txt = ' ' * 4
+                self._input_buffer = self._input_buffer[:self._cursor_pos] + txt + \
+                    self._input_buffer[self._cursor_pos:]
+                self._cursor_pos += len(txt)
             elif delete:
                 self._input_buffer = self._input_buffer[:len(self._input_buffer) - 1]
         return not ignore
