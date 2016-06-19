@@ -107,7 +107,7 @@ class OutputWindow(CodeEdit):
         self._input_handler.process = self._process
 
     def __init__(self, parent=None, color_scheme=None, formatter=None, input_handler=None, backend=server.__file__,
-                 link_regex=re.compile(r'("|\')(?P<url>(/|[a-zA-Z]:\\).*)("|\')(, line (?P<line>\d*))?')):
+                 link_regex=re.compile(r'("|\')(?P<url>(/|[a-zA-Z]:\\)[\w/\s\\]*)("|\')(, line (?P<line>\d*))?')):
         """
         :param parent: parent widget, if any
         :param color_scheme: color scheme to use
@@ -286,15 +286,18 @@ class OutputWindow(CodeEdit):
         """
         c = self.cursorForPosition(event.pos())
         block = c.block()
-        if block != self._last_hovered_block:
-            match = self.link_regex.search(block.text())
-            if match:
+        for match in self.link_regex.finditer(block.text()):
+            if not match:
+                continue
+            start, end = match.span()
+            if start <= c.positionInBlock() <= end:
                 self._link_match = match
                 self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+                break
             else:
                 self._link_match = None
                 self.viewport().setCursor(QtCore.Qt.IBeamCursor)
-            self._last_hovered_block = block
+        self._last_hovered_block = block
         super(OutputWindow, self).mouseMoveEvent(event)
 
     def mousePressEvent(self, event):
@@ -418,13 +421,13 @@ class _LinkHighlighter(SyntaxHighlighter):
     Highlights links using OutputWindow.link_regex.
     """
     def highlight_block(self, text, block):
-        match = self.editor.link_regex.search(text)
-        if match:
-            start, end = match.span('url')
-            fmt = QtGui.QTextCharFormat()
-            fmt.setForeground(QtWidgets.qApp.palette().highlight().color())
-            fmt.setUnderlineStyle(fmt.SingleUnderline)
-            self.setFormat(start, end - start, fmt)
+        for match in self.editor.link_regex.finditer(text):
+            if match:
+                start, end = match.span('url')
+                fmt = QtGui.QTextCharFormat()
+                fmt.setForeground(QtWidgets.qApp.palette().highlight().color())
+                fmt.setUnderlineStyle(fmt.SingleUnderline)
+                self.setFormat(start, end - start, fmt)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
