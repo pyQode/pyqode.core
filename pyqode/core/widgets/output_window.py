@@ -755,7 +755,9 @@ def _ansi_color(code, theme):
             '#aaaa00': theme.yellow,
             '#0000aa': theme.blue,
             '#aa00aa': theme.magenta,
-            '#00aaaa': theme.cyan
+            '#00aaaa': theme.cyan,
+            '#000000': theme.background,
+            "#ffffff": theme.foreground
         }
         try:
             return mappings[color.name()]
@@ -995,6 +997,8 @@ class BufferedInputHandler(InputHandler):
                 if sys.platform == 'win32':
                     self.process.write(b'\r')
                 self.process.write(b'\n')
+                return False
+            elif event.key() == QtCore.Qt.Key_Backspace:
                 return False
         if event.key() == QtCore.Qt.Key_Up:
             if self.is_code_completion_popup_visible():
