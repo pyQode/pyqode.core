@@ -188,7 +188,7 @@ class OutputWindow(CodeEdit):
         """
         Paste the content of the clipboard to the child process'stdtin.
         """
-        self._process.write(QtWidgets.qApp.clipboard().text().encode())
+        self.input_handler.paste(QtWidgets.qApp.clipboard().text())
 
     @staticmethod
     def create_color_scheme(background=None, foreground=None, error=None, custom=None, red=None,
@@ -796,6 +796,9 @@ class ImmediateInputHandler(InputHandler):
             self.process.writeData(code)
         return False
 
+    def paste(self, text):
+        self.process.write(text.encode())
+
 
 def _qkey_to_ascii(event):
     """
@@ -1076,6 +1079,10 @@ class BufferedInputHandler(InputHandler):
 
     def delete(self):
         self._input_buffer = self._input_buffer[:self._cursor_pos] + self._input_buffer[self._cursor_pos + 1:]
+
+    def paste(self, text):
+        self.insert_text(text)
+        CodeEdit.paste(self.edit)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
