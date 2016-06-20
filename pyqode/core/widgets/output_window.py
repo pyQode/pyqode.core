@@ -107,7 +107,7 @@ class OutputWindow(CodeEdit):
         self._input_handler.process = self._process
 
     def __init__(self, parent=None, color_scheme=None, formatter=None, input_handler=None, backend=server.__file__,
-                 link_regex=re.compile(r'("|\')(?P<url>(/|[a-zA-Z]:\\)[\w/\s\\]*)("|\')(, line (?P<line>\d*))?')):
+                 link_regex=re.compile(r'("|\')(?P<url>(/|[a-zA-Z]:\\)[\w/\s\\\.\-]*)("|\')(, line (?P<line>\d*))?')):
         """
         :param parent: parent widget, if any
         :param color_scheme: color scheme to use
