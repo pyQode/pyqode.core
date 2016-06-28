@@ -276,6 +276,9 @@ class OutputWindow(CodeEdit):
         """
         if self._process.state() != self._process.Running:
             return
+        tc = self.textCursor()
+        tc.setPosition(self._formatter._last_cursor_pos)
+        self.setTextCursor(tc)
         if self.input_handler.key_press_event(event):
             super(OutputWindow, self).keyPressEvent(event)
             self._formatter._last_cursor_pos = self.textCursor().position()
@@ -286,7 +289,6 @@ class OutputWindow(CodeEdit):
         """
         c = self.cursorForPosition(event.pos())
         block = c.block()
-        found = False
         self._link_match = None
         self.viewport().setCursor(QtCore.Qt.IBeamCursor)
         for match in self.link_regex.finditer(block.text()):
@@ -296,7 +298,6 @@ class OutputWindow(CodeEdit):
             if start <= c.positionInBlock() <= end:
                 self._link_match = match
                 self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
-                found = True
                 break
 
         self._last_hovered_block = block
