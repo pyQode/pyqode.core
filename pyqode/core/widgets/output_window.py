@@ -283,7 +283,7 @@ class OutputWindow(CodeEdit):
         self.setTextCursor(tc)
         if self.input_handler.key_press_event(event):
             super(OutputWindow, self).keyPressEvent(event)
-            self._formatter._last_cursor_pos = self.textCursor().position()
+        self._formatter._last_cursor_pos = self.textCursor().position()
 
     def mouseMoveEvent(self, event):
         """
@@ -333,6 +333,7 @@ class OutputWindow(CodeEdit):
         self._reset_stylesheet()
         self.setCenterOnScroll(False)
         self.setMouseTracking(True)
+        self.setUndoRedoEnabled(False)
         search_panel = panels.SearchAndReplacePanel()
         self.panels.append(search_panel, search_panel.Position.TOP)
         self.action_copy.setShortcut('Ctrl+Shift+C')
