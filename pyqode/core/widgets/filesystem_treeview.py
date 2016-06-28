@@ -435,6 +435,7 @@ class FileSystemHelper:
                     os.remove(src)
                 else:
                     shutil.rmtree(src)
+                self.tree_view.files_renamed.emit([(src, final_dest)])
 
     @staticmethod
     def _get_files(path):
