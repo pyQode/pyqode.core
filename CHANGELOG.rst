@@ -1,6 +1,25 @@
 Change Log
 ==========
 
+2.10.0
+------
+
+New features:
+
+- add a new widget to run interactive process with support for ANSI Escape Codes: pyqode.core.widgets.OutputWindow
+- add a Terminal widget based on the new OutputWindow.
+- [CodeCompletionMode] improvements to the subsequence matching algorithm to put completion with the same case at the top of the list.
+- [SplittableTabWidget] add shortcuts to close current tab (Ctrl+W) or all tabs (Ctrl+Shift+W)
+
+Fixed bugs:
+
+- [FSTreeView] fix file_renamed signal not emitted when moving files
+- [FSTreeView] show a message box if there is an OSError while renaming a file/directory
+
+Deprecated features:
+
+- pyqode.core.widgets.InteractiveConsole is now deprecated, you should use pyqode.core.widgets.OutputWindow
+
 2.9.0
 -----
 
