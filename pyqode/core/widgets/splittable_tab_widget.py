@@ -1450,7 +1450,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         to_close = []
         for widget in self.widgets(include_clones=True):
-            if widget.file.path == path:
+            p = os.path.normpath(os.path.normcase(widget.file.path))
+            path = os.path.normpath(os.path.normcase(path))
+            if p == path:
                 to_close.append(widget)
         for widget in to_close:
             tw = widget.parent_tab_widget
@@ -1470,7 +1472,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         to_rename = []
         title = os.path.split(new_path)[1]
         for widget in self.widgets(include_clones=True):
-            if widget.file.path == old_path:
+            p = os.path.normpath(os.path.normcase(widget.file.path))
+            old_path = os.path.normpath(os.path.normcase(old_path))
+            if p == old_path:
                 to_rename.append(widget)
         for widget in to_rename:
             tw = widget.parent_tab_widget
