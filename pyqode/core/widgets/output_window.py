@@ -19,6 +19,8 @@ from pyqode.qt import QtWidgets, QtGui, QtCore
 from pyqode.qt.QtGui import QColor
 from pyqode.qt.QtWidgets import qApp
 
+from . import pty_wrapper
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Widget
@@ -159,7 +161,7 @@ class OutputWindow(CodeEdit):
             arguments = []
         if sys.platform != 'win32' and use_pseudo_terminal:
             pgm = sys.executable
-            args = [__file__, program] + arguments
+            args = [pty_wrapper.__file__, program] + arguments
             self.flg_use_pty = use_pseudo_terminal
         else:
             pgm = program
@@ -1471,16 +1473,3 @@ def _logger():
     Returns a logger instance for this module.
     """
     return logging.getLogger(__name__)
-
-
-def pty_wrapper_main():
-    """
-    Main function of the pty wrapper script
-    """
-    from pyqode.core.widgets import pty
-    # fixme: find a way to use a pty and keep stdout and stderr as separate channels
-    pty.spawn(sys.argv[1:])
-
-
-if __name__ == '__main__':
-    pty_wrapper_main()
