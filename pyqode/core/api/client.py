@@ -180,7 +180,6 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                  on_receive=None):
         super(JsonTcpClient, self).__init__(parent)
         self._port = port
-        self._wait_for_connected = wait_socket_connection
         self._worker = worker_class_or_function
         self._args = args
         self._header_complete = False
