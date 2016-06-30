@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+2.10.1
+------
+
+Fixed bugs:
+
+- fix some backend issues on OSX (the client socket would remain in conecting state if a request is made before
+  the tcp server is running)
+- fix strange behaviour in buffered input handler of OutputWindow when using backspace or delete
+
 2.10.0
 ------
 
