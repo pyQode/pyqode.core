@@ -34,13 +34,13 @@ def test_action_search_triggered(editor):
     # select word under cursor
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     editor.show()
     QTest.qWait(1000)
     assert panel.isVisible()
     panel.checkBoxCase.setChecked(True)
     panel.checkBoxWholeWords.setChecked(True)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     assert panel.isVisible()
     QTest.qWait(1000)
 
@@ -52,7 +52,7 @@ def test_action_search_triggered2(editor):
     # second search with the same text
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     editor.show()
     QTest.qWait(1000)
     assert panel.isVisible()
@@ -93,14 +93,14 @@ def test_style(editor):
 @ensure_connected
 def test_close(editor):
     panel = get_panel(editor)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     editor.show()
     QTest.qWait(1000)
     assert panel.isVisible()
-    panel.on_toolButtonClose_clicked()
+    panel.on_close()
     assert not panel.isVisible()
     QTest.qWait(100)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
 
 
 @editor_open(__file__)
@@ -110,11 +110,11 @@ def test_focus_out_event(editor):
     TextHelper(editor).goto_line(0)
     tc = TextHelper(editor).word_under_mouse_cursor()
     editor.setTextCursor(tc)
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     panel.focusOutEvent(QtGui.QFocusEvent(QtCore.QEvent.FocusOut))
     assert not panel.hasFocus()
     # reopen panel for next tests
-    panel.on_actionSearch_triggered()
+    panel.on_search()
     panel.setFocus()
 
 
@@ -123,7 +123,7 @@ def test_focus_out_event(editor):
 def test_replace(editor):
     panel = get_panel(editor)
     replacement_txt = 'REPLACEMENT_TEXT'
-    panel.on_actionActionSearchAndReplace_triggered()
+    panel.on_search_and_replace()
     panel.request_search('import')
     QTest.qWait(5000)
     panel.lineEditReplace.setText(replacement_txt)
@@ -143,7 +143,7 @@ def test_replace(editor):
 @ensure_connected
 def test_event_filter(editor):
     panel = get_panel(editor)
-    panel.on_actionActionSearchAndReplace_triggered()
+    panel.on_search_and_replace()
     panel.request_search('import')
     QTest.qWait(1000)
     QTest.keyPress(panel.lineEditSearch, QtCore.Qt.Key_Tab)
