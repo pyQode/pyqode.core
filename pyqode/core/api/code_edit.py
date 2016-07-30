@@ -756,12 +756,10 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         return self._menus
 
-    @QtCore.Slot()
     def delete(self):
         """ Deletes the selected text """
         self.textCursor().removeSelectedText()
 
-    @QtCore.Slot()
     def goto_line(self):
         """
         Shows the *go to line dialog* and go to the selected line.
@@ -773,7 +771,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             return
         return helper.goto_line(line, move=True)
 
-    @QtCore.Slot()
     def rehighlight(self):
         """
         Calls ``rehighlight`` on the installed syntax highlighter mode.
@@ -781,7 +778,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if self.syntax_highlighter:
             self.syntax_highlighter.rehighlight()
 
-    @QtCore.Slot()
     def reset_zoom(self):
         """
         Resets the zoom level.
@@ -789,7 +785,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._zoom_level = 0
         self._reset_stylesheet()
 
-    @QtCore.Slot()
     def zoom_in(self, increment=1):
         """
         Zooms in the editor (makes the font bigger).
@@ -800,7 +795,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
-    @QtCore.Slot()
     def zoom_out(self, decrement=1):
         """
         Zooms out the editor (makes the font smaller).
@@ -815,7 +809,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
 
-    @QtCore.Slot()
     def duplicate_line(self):
         """
         Duplicates the line under the cursor. If multiple lines are selected,
@@ -841,7 +834,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             cursor.setPosition(pos, cursor.KeepAnchor)
         self.setTextCursor(cursor)
 
-    @QtCore.Slot()
     def indent(self):
         """
         Indents the text cursor or the selection.
@@ -852,7 +844,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         self.indent_requested.emit()
 
-    @QtCore.Slot()
     def un_indent(self):
         """
         Un-indents the text cursor or the selection.

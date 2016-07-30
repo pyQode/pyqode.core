@@ -33,7 +33,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.on_current_tab_changed(None)
         self.styles_group = None
 
-    @QtCore.Slot(str)
     def on_treeView_activated(self, index):
         path = self.treeView.filePath(index)
         if os.path.isfile(path):
@@ -142,7 +141,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         self.tabWidget.closeEvent(QCloseEvent)
 
-    @QtCore.Slot(str)
     def open_file(self, path):
         """
         Creates a new GenericCodeEdit, opens the requested file and adds it
@@ -157,7 +155,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.recent_files_manager.open_file(path)
             self.menu_recents.update_actions()
 
-    @QtCore.Slot()
     def on_new(self):
         """
         Add a new empty code editor to the tab widget
@@ -166,7 +163,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         editor.cursorPositionChanged.connect(self.on_cursor_pos_changed)
         self.refresh_color_scheme()
 
-    @QtCore.Slot()
     def on_open(self):
         """
         Shows an open file dialog and open the file if the dialog was
@@ -178,12 +174,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if filename:
             self.open_file(filename)
 
-    @QtCore.Slot()
     def on_save(self):
         self.tabWidget.save_current()
         self._update_status_bar(self.tabWidget.current_widget())
 
-    @QtCore.Slot()
     def on_save_as(self):
         """
         Save the current editor document as.
@@ -191,7 +185,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tabWidget.save_current_as()
         self._update_status_bar(self.tabWidget.current_widget())
 
-    @QtCore.Slot(QtWidgets.QWidget)
     def on_current_tab_changed(self, editor):
         self.menuEdit.clear()
         self.menuModes.clear()
@@ -233,30 +226,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             editor.syntax_highlighter.color_scheme = ColorScheme(style)
             editor.modes.get(modes.CaretLineHighlighterMode).refresh()
 
-    @QtCore.Slot(QtWidgets.QAction)
     def on_style_changed(self, action):
         self.pygments_style = action.text()
         self.refresh_color_scheme()
 
-    @QtCore.Slot()
     def on_panel_state_changed(self):
         action = self.sender()
         action.panel.enabled = action.isChecked()
         action.panel.setVisible(action.isChecked())
 
-    @QtCore.Slot()
     def on_mode_state_changed(self):
         action = self.sender()
         action.mode.enabled = action.isChecked()
 
-    @QtCore.Slot()
     def on_about(self):
         QtWidgets.QMessageBox.about(
             self, 'pyQode notepad',
             'This notepad application is an example of what you can do with '
             'pyqode.core.')
 
-    @QtCore.Slot()
     def on_cursor_pos_changed(self):
         if self.tabWidget.current_widget():
             editor = self.tabWidget.current_widget()
