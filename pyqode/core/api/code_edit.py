@@ -558,7 +558,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 panel.setVisible(False)
         clone.use_spaces_instead_of_tabs = self.use_spaces_instead_of_tabs
         clone.tab_length = self.tab_length
-        clone.save_on_focus_out = self.save_on_focus_out
+        clone._save_on_focus_out = self._save_on_focus_out
         clone.show_whitespaces = self.show_whitespaces
         clone.font_name = self.font_name
         clone.font_size = self.font_size
@@ -989,7 +989,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def focusOutEvent(self, event):
         # Saves content if save_on_focus_out is True.
-        if self.save_on_focus_out and self.dirty and self.file.path:
+        if self._save_on_focus_out and self.dirty and self.file.path:
             self.file.save()
         super(CodeEdit, self).focusOutEvent(event)
 
