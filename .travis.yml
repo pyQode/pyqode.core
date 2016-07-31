@@ -1,45 +1,26 @@
 language: python
-sudo: required
-dist: trusty
 
 python:
-  - "2.7"
-  - "3.4"
-
-virtualenv:
-  system_site_packages: true
-
-matrix:
-  exclude:
-    - env: QT_API=pyqt5
-      python: "2.7"
+  - "3.5"
 
 env:
- - QT_API=pyqt4
- - QT_API=pyqt5
+  - QT_API=pyqt5
 
 before_install:
-    - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 
 install:
- - sudo apt-get update
-
- # Qt
- - python scripts/install-qt.py
-
- # pytest
- - pip install --quiet pytest pytest-xdist pytest-cov
-
- # coveralls
- - pip install --quiet coveralls --use-wheel
-
- # install pyqode.qt
- - bash scripts/install-pyqode.sh
+  # install libegl1-mesa package for the missing libEGL shared object that prevents qt from starting
+  - sudo apt-get update
+  - sudo apt-get --yes --force-yes install libegl1-mesa
+  # make sure pip is up to date so that it can install wheels
+  - pip install pip --upgrade
+  - pip install -e .
+  - pip install -r requirements-dev.txt
 
 script:
- - pip install -e .
- - catchsegv py.test --boxed --cov pyqode
+  - py.test --cov pyqode
 
 after_success:
- - coveralls
+  - coveralls
