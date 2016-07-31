@@ -1,5 +1,6 @@
 PyQt5
 -e git://github.com/pyQode/pyqode.qt.git#egg=pyqode.qt
 pytest
+pytest-xdist
 pytest-cov
 coveralls

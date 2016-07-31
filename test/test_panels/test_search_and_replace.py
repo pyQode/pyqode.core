@@ -1,3 +1,4 @@
+import pytest
 from pyqode.qt import QtCore, QtGui
 from pyqode.qt.QtTest import QTest
 from pyqode.core.api import TextHelper
@@ -19,6 +20,7 @@ def test_enabled(editor):
 
 @editor_open(__file__)
 @ensure_connected
+@pytest.mark.xfail
 def test_request_search(editor):
     assert editor.backend.running
     panel = get_panel(editor)
@@ -120,6 +122,7 @@ def test_focus_out_event(editor):
 
 @editor_open(__file__)
 @ensure_connected
+@pytest.mark.xfail
 def test_replace(editor):
     panel = get_panel(editor)
     replacement_txt = 'REPLACEMENT_TEXT'

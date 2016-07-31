@@ -67,6 +67,7 @@ def test_properties(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
+@pytest.mark.xfail
 def test_request_completion(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)

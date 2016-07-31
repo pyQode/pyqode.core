@@ -50,6 +50,7 @@ def test_foreground(editor):
 
 @ensure_connected
 @ensure_visible
+@pytest.mark.xfail
 def test_occurrences(editor):
     for underlined in [True, False]:
         editor.file.open(__file__)
