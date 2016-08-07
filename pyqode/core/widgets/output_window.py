@@ -972,10 +972,15 @@ class BufferedInputHandler(InputHandler):
         """
         Insert command by replacing the current input buffer and display it on the text edit.
         """
+        self._clear_user_buffer()
+        tc = self.edit.textCursor()
+        tc.insertText(command)
+        self.edit.setTextCursor(tc)
+
+    def _clear_user_buffer(self):
         tc = self.edit.textCursor()
         for _ in self._get_input_buffer():
             tc.deletePreviousChar()
-        tc.insertText(command)
         self.edit.setTextCursor(tc)
 
     def is_code_completion_popup_visible(self):
@@ -995,7 +1000,7 @@ class BufferedInputHandler(InputHandler):
         shift = int(event.modifiers() & QtCore.Qt.ShiftModifier) != 0
         delete = event.key() in [QtCore.Qt.Key_Backspace, QtCore.Qt.Key_Delete]
         ignore = False
-        if delete and not input_buffer:
+        if delete and not input_buffer and not shift:
             return False
         if ctrl:
             if shift and event.key() == QtCore.Qt.Key_V:
@@ -1007,6 +1012,11 @@ class BufferedInputHandler(InputHandler):
                     self.process.write(b'\r')
                 self.process.write(b'\n')
                 return False
+        if (shift or ctrl) and event.key() == QtCore.Qt.Key_Backspace:
+            if input_buffer.strip() != '':
+                return True
+            self._clear_user_buffer()
+            return False
         if event.key() == QtCore.Qt.Key_Up:
             if self.is_code_completion_popup_visible():
                 return True

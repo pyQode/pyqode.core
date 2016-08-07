@@ -1,8 +1,6 @@
 import os
 import sys
 
-from PyQt5 import QtCore
-
 from pyqode.core.backend import server
 from pyqode.core import modes
 
