@@ -91,6 +91,7 @@ def test_request_completion(editor):
 @ensure_empty
 @ensure_visible
 @ensure_connected
+@pytest.mark.xfail
 def test_successive_requests(editor):
     mode = get_mode(editor)
     QTest.qWait(1000)
