@@ -324,6 +324,9 @@ class OutputWindow(CodeEdit):
                 line = 0
             self.open_file_requested.emit(path, line)
 
+    def eventFilter(self, *args):
+        return False
+
     #
     # Utility methods
     #
@@ -369,6 +372,8 @@ class OutputWindow(CodeEdit):
             environ.insert(k, v)
         if sys.platform != 'win32':
             environ.insert('TERM', 'xterm')
+            environ.insert('LINES', '24')
+            environ.insert('COLUMNS', '450')
         environ.insert('PYTHONUNBUFFERED', '1')
         environ.insert('QT_LOGGING_TO_CONSOLE', '1')
         return environ
@@ -808,9 +813,10 @@ class ImmediateInputHandler(InputHandler):
             cursor.movePosition(cursor.EndOfBlock)
             self.edit.setTextCursor(cursor)
         code = _qkey_to_ascii(event)
-        if code is not None:
+        if code:
             self.process.writeData(code)
-        return False
+            return False
+        return True
 
     def paste(self, text):
         self.process.write(text.encode())
@@ -827,7 +833,8 @@ def _qkey_to_ascii(event):
         control_modifier = QtCore.Qt.MetaModifier
     else:
         control_modifier = QtCore.Qt.ControlModifier
-    if event.modifiers() == control_modifier:
+    ctrl = int(event.modifiers() & control_modifier) != 0
+    if ctrl:
         if event.key() == QtCore.Qt.Key_P:
             return b'\x10'
         elif event.key() == QtCore.Qt.Key_N:
