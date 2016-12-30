@@ -1,6 +1,33 @@
 Change Log
 ==========
 
+2.11.0
+------
+
+As of pyqode 2.11, the project has entered in maintainance mode. Only critical bug fixes will be adressed. The core
+team won't add any new features but we will continue to accept PR as long as they are properly tested and not too risky.
+
+This release is mainly a bug fix release, it also adds support for PyQt 5.7.
+
+New features:
+
+- PyQt 5.7 support
+- Allow to set case sensitiveness of current word highlighter
+
+Fixed bugs:
+
+- Fix compatibility issues with PyQt 5.7
+- JSonTcpClient: wait for socket connected on OSX
+- Fix FileNotFoundError in file watcher
+- SplittableTabWidget display file save exception in a message box
+- Many bug fixes to the new OutputWindow/Terminal widget
+- Fix OpenCobolIDE/OpenCobolIDE#365
+- Fix OpenCobolIDE/OpenCobolIDE#376
+- Fix OpenCobolIDE/OpenCobolIDE#377
+- Fix pyQode/pyQode#69
+- Fix pyQode/pyQode#67
+- CodeCompletion: fix regex exception when setting prefix
+
 2.10.1
 ------
 
