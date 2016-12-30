@@ -1,3 +1,9 @@
+Maintainance mode
+-----------------
+
+As of pyqode 2.11, the project has entered in maintainance mode. Only critical bug fixes will be adressed. The core
+team won't add any new features but we will continue to accept PR as long as they are properly tested and not too risky.
+
 Report bugs or ask a question
 -----------------------------
 
