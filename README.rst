@@ -1,4 +1,4 @@
-**NOT MAINTAINED**
+**Bugfix maintenance only**
 
 .. image:: https://raw.githubusercontent.com/pyQode/pyQode/master/media/pyqode-banner.png
 
