@@ -874,7 +874,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         helper = TextHelper(self)
         tc.beginEditBlock()
         no_selection = False
-        if not helper.current_line_text():
+        sText = tc.selection().toPlainText()
+        if not helper.current_line_text() and sText.count("\n") > 1:
             tc.deleteChar()
         else:
             if not self.textCursor().hasSelection():
