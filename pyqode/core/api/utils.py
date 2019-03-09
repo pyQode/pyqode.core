@@ -20,6 +20,7 @@ class memoized(object):
     If called later with the same arguments, the cached value is returned
     (not reevaluated).
     """
+
     def __init__(self, func):
         self.func = func
         self.cache = {}
@@ -76,6 +77,7 @@ class DelayJobRunner(object):
 
     A job is a simple callable.
     """
+
     def __init__(self, delay=500):
         """
         :param delay: Delay to wait before running the job. This delay applies
@@ -155,7 +157,7 @@ class TextHelper(object):
         :return: The new text cursor
         :rtype: QtGui.QTextCursor
         """
-        text_cursor = self._move_cursor_to(line)
+        text_cursor = self.move_cursor_to(line)
         if column:
             text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
                                      column)
@@ -304,6 +306,15 @@ class TextHelper(object):
             return self.line_text(self.current_line_nbr() - 1)
         return ''
 
+    def next_line_text(self):
+        """
+        Gets the next line text (relative to the current cursor pos).
+        :return: next line text (str)
+        """
+        if self.current_line_nbr():
+            return self.line_text(self.current_line_nbr() + 1)
+        return ''
+
     def current_line_text(self):
         """
         Returns the text of the current line.
@@ -321,7 +332,7 @@ class TextHelper(object):
 
         """
         editor = self._editor
-        text_cursor = self._move_cursor_to(line_nbr)
+        text_cursor = self.move_cursor_to(line_nbr)
         text_cursor.select(text_cursor.LineUnderCursor)
         text_cursor.insertText(new_text)
         editor.setTextCursor(text_cursor)
@@ -383,7 +394,7 @@ class TextHelper(object):
         text_cursor = editor.textCursor()
         doc = editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
-        text_cursor = self._move_cursor_to(pos[0])
+        text_cursor = self.move_cursor_to(pos[0])
         text_cursor.movePosition(text_cursor.StartOfLine,
                                  text_cursor.MoveAnchor)
         cpos = text_cursor.position()
@@ -415,7 +426,7 @@ class TextHelper(object):
             line = self.current_line_nbr()
         return self.select_lines(line, line, apply_selection=apply_selection)
 
-    def _move_cursor_to(self, line):
+    def move_cursor_to(self, line):
         cursor = self._editor.textCursor()
         block = self._editor.document().findBlockByNumber(line)
         cursor.setPosition(block.position())
@@ -443,7 +454,7 @@ class TextHelper(object):
             end = self.line_count() - 1
         if start < 0:
             start = 0
-        text_cursor = self._move_cursor_to(start)
+        text_cursor = self.move_cursor_to(start)
         if end > start:  # Going down
             text_cursor.movePosition(text_cursor.Down,
                                      text_cursor.KeepAnchor, end - start)
@@ -1006,6 +1017,7 @@ class ParenthesisInfo(object):
     """
     Stores information about a parenthesis in a line of code.
     """
+
     def __init__(self, pos, char):
         #: Position of the parenthesis, expressed as a number of character
         self.position = pos

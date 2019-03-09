@@ -897,6 +897,27 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             TextHelper(self).select_whole_line()
         super(CodeEdit, self).copy()
 
+    def swapLineUp(self):
+        self.__swapLine(True)
+
+    def swapLineDown(self):
+        self.__swapLine(False)
+
+    def __swapLine(self, up: bool):
+        helper = TextHelper(self)
+        text = helper.current_line_text()
+        line_nbr = helper.current_line_nbr()
+        if up:
+            swap_line_nbr = line_nbr - 1
+        else:
+            swap_line_nbr = line_nbr + 1
+        swap_text = helper.line_text(swap_line_nbr)
+
+        if (swap_line_nbr < helper.line_count()
+                and line_nbr < helper.line_count()):
+            helper.set_line_text(line_nbr, swap_text)
+            helper.set_line_text(swap_line_nbr, text)
+
     def resizeEvent(self, e):
         """
         Overrides resize event to resize the editor's panels.
@@ -1182,6 +1203,18 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         action.triggered.connect(self.duplicate_line)
         self.add_action(action, sub_menu=None)
         self.action_duplicate_line = action
+        # swap line up
+        action = QtWidgets.QAction(_('Swap line up'), self)
+        action.setShortcut("Alt++")
+        action.triggered.connect(self.swapLineUp)
+        self.add_action(action, sub_menu=None)
+        self.action_swap_line_up = action
+        # swap line down
+        action = QtWidgets.QAction(_('Swap line down'), self)
+        action.setShortcut("Alt+-")
+        action.triggered.connect(self.swapLineDown)
+        self.add_action(action, sub_menu=None)
+        self.action_swap_line_down = action
         # select all
         action = QtWidgets.QAction(_('Select all'), self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
