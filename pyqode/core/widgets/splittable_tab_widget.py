@@ -1432,14 +1432,14 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 icon = self._icon(path)
                 self.add_tab(tab, title=name, icon=icon)
                 self.document_opened.emit(tab)
-
-                for action in self.closed_tabs_menu.actions():
-                    if action.toolTip() == original_path:
-                        self.closed_tabs_menu.removeAction(action)
-                        break
-                self.closed_tabs_history_btn.setEnabled(
-                    len(self.closed_tabs_menu.actions()) > 0)
-
+                # Only the root tab has a corner widget with closed tabs
+                if self.root:
+                    for action in self.closed_tabs_menu.actions():
+                        if action.toolTip() == original_path:
+                            self.closed_tabs_menu.removeAction(action)
+                            break
+                    self.closed_tabs_history_btn.setEnabled(
+                        len(self.closed_tabs_menu.actions()) > 0)
                 return tab
 
     def close_document(self, path):
