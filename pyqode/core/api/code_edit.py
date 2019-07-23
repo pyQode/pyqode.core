@@ -875,7 +875,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         tc.beginEditBlock()
         no_selection = False
         sText = tc.selection().toPlainText()
-        if not helper.current_line_text() and sText.count("\n") > 1:
+        # If only whitespace is selected, simply delete it
+        if not helper.current_line_text() and not sText.strip():
             tc.deleteChar()
         else:
             if not self.textCursor().hasSelection():
