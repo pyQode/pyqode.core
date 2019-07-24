@@ -504,6 +504,8 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         :param index: index of the tab to remove.
         """
         widget = self.widget(index)
+        if widget is None:
+            return
         try:
             document = widget.document()
         except AttributeError:
