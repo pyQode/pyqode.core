@@ -1544,8 +1544,6 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
 
     def _icon(self, path):
         provider = self.icon_provider_klass()
-        if not os.path.exists(path):
-            return provider.icon(provider.File)
         return provider.icon(QtCore.QFileInfo(path))
 
     def _on_current_changed(self, new):
