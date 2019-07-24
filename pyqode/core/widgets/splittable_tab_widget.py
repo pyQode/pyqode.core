@@ -978,6 +978,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             if self.root:
                 self.show()
                 self.main_tab_widget.show()
+                self._current = None
             else:
                 self._remove_from_parent()
         else:
