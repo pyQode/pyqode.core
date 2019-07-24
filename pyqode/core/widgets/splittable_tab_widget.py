@@ -875,6 +875,12 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         splitter.add_tab(clone, title=self.main_tab_widget.tabText(
             self.main_tab_widget.indexOf(widget)), icon=icon)
         self.setSizes([1 for i in range(self.count())])
+        # In order for the focus to switch to the newly splitted editor, it
+        # appears that there first needs to be a splitter with a widget in it,
+        # and then first the splitter and then the widget need to explicitly
+        # receive focus. There may be a more elegant way to achieve this.
+        splitter.main_tab_widget.setFocus()
+        clone.setFocus()
         return splitter
 
     def has_children(self):
@@ -927,6 +933,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 # ensure root is visible when there are no children
                 self.show()
                 self.main_tab_widget.show()
+                self._current = None
             else:
                 # hide ourselves (we don't have any other tabs or children)
                 self._remove_from_parent()
@@ -967,6 +974,13 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 self.main_tab_widget.show()
             else:
                 self._remove_from_parent()
+        else:
+            # If a child closed its last tab, but this splitter still has a
+            # tab then we set the focus to that tab. For this to happen we
+            # first need to set the focus to the current splitter, and then to
+            # the widget.
+            self.main_tab_widget.setFocus()
+            self.main_tab_widget.currentWidget().setFocus()
 
     def count(self):
         """
@@ -1542,6 +1556,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if splitter:
             splitter.tab_bar_double_clicked.connect(
                 self.tab_bar_double_clicked.emit)
+        return splitter
 
     def _on_tab_closed(self, tab):
         try:
