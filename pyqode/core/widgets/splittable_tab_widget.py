@@ -552,7 +552,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         icon = parent.tabIcon(index)
         parent.removeTab(index)
         widget.parent_tab_widget = self
-        self.insertTab(new_index, widget, icon, text)
+        new_index = self.insertTab(new_index, widget, icon, text)
         self.setCurrentIndex(new_index)
         widget.setFocus()
         if parent.count() == 0:
