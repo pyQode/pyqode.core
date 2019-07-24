@@ -131,7 +131,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
 
     _detached_window_class = None
 
-    def __init__(self, parent):
+    def __init__(self, parent, tab_bar_shortcuts=True):
         super(BaseTabWidget, self).__init__(parent)
         self._current = None
         self.currentChanged.connect(self._on_current_changed)
@@ -146,6 +146,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         self.setUsesScrollButtons(True)
 
         #: A list of additional context menu actions
+        self._tab_bar_shortcuts = tab_bar_shortcuts
         self.context_actions = []
         self.a_close = None
         self.a_close_all = None
@@ -354,10 +355,12 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         self.a_close_left.setVisible(0 < index <= self.count() - 1)
         self.a_close_others.setVisible(self.count() > 1)
         self.a_close_all.setVisible(self.count() > 1)
-
-        self.a_close.setShortcut('Ctrl+W')
-        self.a_close_all.setShortcut('Ctrl+Shift+W')
-
+        if self._tab_bar_shortcuts:
+            # These should not be set when multiple tabs will be visible in a
+            # splitter, because then they will become ambiguous and hence
+            # ineffective.
+            self.a_close.setShortcut('Ctrl+W')
+            self.a_close_all.setShortcut('Ctrl+Shift+W')
         self._context_mnu = context_mnu
         return context_mnu
 
@@ -731,7 +734,10 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 QtCore.Qt.Popup | QtCore.Qt.FramelessWindowHint)
             self.popup.triggered.connect(self._on_popup_triggered)
         self.child_splitters = []
-        self.main_tab_widget = self.tab_widget_klass(self)
+        self.main_tab_widget = self.tab_widget_klass(
+            self,
+            tab_bar_shortcuts=False
+        )
         self.main_tab_widget.last_tab_closed.connect(
             self._on_last_tab_closed)
         self.main_tab_widget.tab_detached.connect(self.tab_detached.emit)
