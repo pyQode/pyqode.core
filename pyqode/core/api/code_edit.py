@@ -524,6 +524,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         clone = self.clone()
         self.link(clone)
         TextHelper(clone).goto_line(l, c)
+        clone.verticalScrollBar().setValue(self.verticalScrollBar().value())
         self.clones.append(clone)
         return clone
 
