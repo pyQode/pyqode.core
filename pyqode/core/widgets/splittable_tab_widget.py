@@ -1226,13 +1226,15 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         Save current widget as.
         """
-        if not self.current_widget():
-            return
-        mem = self.current_widget().file.path
-        self.current_widget().file._path = None
-        self.current_widget().file._old_path = mem
-        CodeEditTabWidget.default_directory = os.path.dirname(mem)
         widget = self.current_widget()
+        if not widget:
+            return
+        if widget.original:
+            widget = widget.original
+        mem = widget.file.path
+        widget.file._path = None
+        widget.file._old_path = mem
+        CodeEditTabWidget.default_directory = os.path.dirname(mem)
         try:
             success = self.main_tab_widget.save_widget(widget)
         except Exception as e:
@@ -1247,13 +1249,38 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             else:
                 CodeEditTabWidget.default_directory = os.path.expanduser('~')
                 self.document_saved.emit(widget.file.path, '')
+        # Traverse through all splitters and all editors, and change the tab
+        # text whenever the editor is a clone of the current widget or the
+        # current widget itself.
+        current_document = widget.document()
+        for splitter in self.get_all_splitters():
+            for editor in splitter._tabs:
+                if editor.document() != current_document:
+                    continue
+                index = splitter.main_tab_widget.indexOf(editor)
+                splitter.main_tab_widget.setTabText(
+                    index,
+                    widget.file.name
+                )
+        return widget.file.path
 
-                # rename tab
-                tw = widget.parent_tab_widget
-                tw.setTabText(tw.indexOf(widget),
-                              os.path.split(widget.file.path)[1])
+    def get_root_splitter(self):
+        current_splitter = self
+        while not current_splitter.root:
+            current_splitter = current_splitter.parent()
+        return current_splitter
 
-        return self.current_widget().file.path
+    def get_all_splitters(self, parent_splitter=None):
+        """
+        Gets a flat list of all splitters below parent_splitter. If no
+        parent_splitter is specified, the root splitter is used.
+        """
+        if parent_splitter is None:
+            parent_splitter = self.get_root_splitter()
+        splitters = [parent_splitter]
+        for child_splitter in parent_splitter.child_splitters:
+            splitters += self.get_all_splitters(child_splitter)
+        return splitters
 
     def save_current(self):
         """
