@@ -15,6 +15,20 @@ class AutoIndentMode(Mode):
     def __init__(self):
         super(AutoIndentMode, self).__init__()
 
+    @property
+    def _indent_char(self):
+
+        if self.editor.use_spaces_instead_of_tabs:
+            return ' '
+        return '\t'
+
+    @property
+    def _single_indent(self):
+
+        if self.editor.use_spaces_instead_of_tabs:
+            return self.editor.tab_length * ' '
+        return '\t'
+
     def _get_indent(self, cursor):
         """
         Return the indentation text (a series of spaces or tabs)
@@ -23,7 +37,7 @@ class AutoIndentMode(Mode):
 
         :returns: Tuple (text before new line, text after new line)
         """
-        indent = TextHelper(self.editor).line_indent() * ' '
+        indent = TextHelper(self.editor).line_indent() * self._indent_char
         return "", indent
 
     def on_state_changed(self, state):
