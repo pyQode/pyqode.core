@@ -52,7 +52,7 @@ COLOR_SCHEME_KEYS = {
     # any instance variable
     "instance": Token.Name.Variable,
     # whitespace color
-    "whitespace": Token.Text.Whitespace,
+    "whitespace": Token.Comment,
     # any tag name (e.g. shinx doctags,...)
     'tag': Token.Name.Tag,
     # self paramter (or this in other languages)
