@@ -1590,6 +1590,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if splitter:
             splitter.tab_bar_double_clicked.connect(
                 self.tab_bar_double_clicked.emit)
+            splitter.fallback_editor = self.fallback_editor
         return splitter
 
     def _on_tab_closed(self, tab):
