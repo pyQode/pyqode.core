@@ -429,7 +429,7 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         widget = self.widget(index)
         dirty = False
         try:
-            if widget.original is None:
+            if widget.original is None and not widget.clones:
                 dirty = widget.dirty
         except AttributeError:
             pass
