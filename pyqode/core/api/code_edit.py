@@ -905,20 +905,45 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def swapLineDown(self):
         self.__swapLine(False)
 
-    def __swapLine(self, up: bool):
+    def __swapLine(self, up):
+        has_selection = self.textCursor().hasSelection()
         helper = TextHelper(self)
-        text = helper.current_line_text()
-        line_nbr = helper.current_line_nbr()
+        # Remember the cursor position so that we can restore it later
+        line, column = helper.cursor_position()
+        # Check the range that we're going to move and verify that it stays
+        # within the document boundaries
+        start_index, end_index = helper.selection_range()
         if up:
-            swap_line_nbr = line_nbr - 1
+            start_index -= 1
+            if start_index < 0:
+                return
         else:
-            swap_line_nbr = line_nbr + 1
-        swap_text = helper.line_text(swap_line_nbr)
-
-        if (swap_line_nbr < helper.line_count()
-                and line_nbr < helper.line_count()):
-            helper.set_line_text(line_nbr, swap_text)
-            helper.set_line_text(swap_line_nbr, text)
+            end_index += 1
+            if end_index >= helper.line_count():
+                return
+        # Select the current lines and the line that will be swapped, turn
+        # them into a list, and then perform the swap on this list
+        helper.select_lines(start_index, end_index)
+        lines = helper.selected_text().replace(u'\u2029', u'\n').split(u'\n')
+        if up:
+            lines = lines[1:] + [lines[0]]
+        else:
+            lines = [lines[-1]] + lines[:-1]
+        # Replace the selected text by the swapped text in a single undo action
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        cursor.insertText(u'\n'.join(lines))
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+        if has_selection:
+            # If text was originally selected, select the range again
+            if up:
+                helper.select_lines(start_index, end_index - 1)
+            else:
+                helper.select_lines(start_index + 1, end_index)
+        else:
+            # Else restore cursor position, while moving with the swap
+            helper.goto_line(line - 1 if up else line + 1, column)
 
     def resizeEvent(self, e):
         """
