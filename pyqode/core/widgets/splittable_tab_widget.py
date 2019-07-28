@@ -989,7 +989,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             # first need to set the focus to the current splitter, and then to
             # the widget.
             self.main_tab_widget.setFocus()
-            self.main_tab_widget.currentWidget().setFocus()
+            if self.main_tab_widget.currentWidget() is not None:
+                self.main_tab_widget.currentWidget().setFocus()
 
     def count(self):
         """
