@@ -849,27 +849,44 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         :param orientation: orientation of the splitter
         :return: the new splitter
         """
+        # There are two cases, which are treated differently.
+        # 1. The current splitter contains only the current widget. If so, then
+        #    we create a new splitter that contains a clone of the current
+        #    widget and add this new splitter to the current splitter.
+        # 2. The current splitter already contains a splitter in addition to
+        #    the current widget. In that case, we create a new splitter that
+        #    contains the current widget and a clone of it, add this new
+        #    splitter to the current splitter. Finally, we remove the current
+        #    widget from the current splitter. In the end, we're left with
+        #    two splitters but no widget inside the current splitter.
+        widget_to_splitter = bool(self.child_splitters)
         if widget.original:
             base = widget.original
         else:
             base = widget
-        clone = base.split()
-        if not clone:
-            return
-        if orientation == int(QtCore.Qt.Horizontal):
-            orientation = QtCore.Qt.Horizontal
-        else:
-            orientation = QtCore.Qt.Vertical
-        self.setOrientation(orientation)
+        if not widget_to_splitter:
+            clone = base.split()
+            if not clone:
+                return
         splitter = self._make_splitter()
         splitter.show()
-        self.addWidget(splitter)
-        self.child_splitters.append(splitter)
-        if clone not in base.clones:
-            # code editors maintain the list of clones internally but some
-            # other widgets (user widgets) might not.
-            base.clones.append(clone)
-        clone.original = base
+        if not widget_to_splitter:
+            if orientation == int(QtCore.Qt.Horizontal):
+                orientation = QtCore.Qt.Horizontal
+            else:
+                orientation = QtCore.Qt.Vertical
+            self.setOrientation(orientation)
+            self.addWidget(splitter)
+            self.child_splitters.append(splitter)
+        else:
+            self.insertWidget(0, splitter)
+            self.child_splitters.insert(0, splitter)
+        if not widget_to_splitter:
+            if clone not in base.clones:
+                # code editors maintain the list of clones internally but some
+                # other widgets (user widgets) might not.
+                base.clones.append(clone)
+            clone.original = base
         splitter._parent_splitter = self
         splitter.last_tab_closed.connect(self._on_last_child_tab_closed)
         splitter.tab_detached.connect(self.tab_detached.emit)
@@ -880,15 +897,27 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         # same group of tab splitter (user might have a group for editors and
         # another group for consoles or whatever).
         splitter._uuid = self._uuid
-        splitter.add_tab(clone, title=self.main_tab_widget.tabText(
-            self.main_tab_widget.indexOf(widget)), icon=icon)
+        splitter.add_tab(
+            widget if widget_to_splitter else clone,
+            title=self.main_tab_widget.tabText(
+                self.main_tab_widget.indexOf(widget)
+            ),
+            icon=icon
+        )
         self.setSizes([1 for i in range(self.count())])
+        # If the current widget is transferred to a splitter, then we close the
+        # current widget.
+        if widget_to_splitter:
+            splitter.split(widget, orientation)
+            self.main_tab_widget.close()
+            self.main_tab_widget.hide()
         # In order for the focus to switch to the newly splitted editor, it
         # appears that there first needs to be a splitter with a widget in it,
         # and then first the splitter and then the widget need to explicitly
         # receive focus. There may be a more elegant way to achieve this.
-        splitter.main_tab_widget.setFocus()
-        clone.setFocus()
+        else:
+            splitter.main_tab_widget.setFocus()
+            clone.setFocus()
         return splitter
 
     def has_children(self):
@@ -989,7 +1018,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             # first need to set the focus to the current splitter, and then to
             # the widget.
             self.main_tab_widget.setFocus()
-            self.main_tab_widget.currentWidget().setFocus()
+            if self.main_tab_widget.currentWidget() is not None:
+                self.main_tab_widget.currentWidget().setFocus()
 
     def count(self):
         """
