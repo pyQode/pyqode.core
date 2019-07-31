@@ -89,6 +89,7 @@ class IndenterMode(Mode):
         assert isinstance(block, QtGui.QTextBlock)
         i = 0
         debug('unindent selection: %d lines', nb_lines)
+        start_pos = block.position()
         while i < nb_lines:
             cursor.setPosition(block.position(), cursor.MoveAnchor)
             txt = block.text()
@@ -102,8 +103,12 @@ class IndenterMode(Mode):
                 txt = block.text()
                 if len(txt) and txt[0] == self._indent_char:
                     cursor.deleteChar()
+            end_pos = block.position() + block.length()
             block = block.next()
             i += 1
+        # Restore selection
+        cursor.setPosition(start_pos, cursor.MoveAnchor)
+        cursor.setPosition(end_pos, cursor.KeepAnchor)
         return cursor
 
     def indent(self):
