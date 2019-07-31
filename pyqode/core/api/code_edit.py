@@ -792,6 +792,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param increment: zoom level increment. Default is 1.
         """
+        # When called through an action, the first argument is a bool
+        if isinstance(increment, bool):
+            increment = 1
         self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
@@ -803,6 +806,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param decrement: zoom level decrement. Default is 1. The value is
             given as an absolute value.
         """
+        # When called through an action, the first argument is a bool
+        if isinstance(decrement, bool):
+            decrement = 1
         self.zoom_level -= decrement
         # make sure font size remains > 0
         if self.font_size + self.zoom_level <= 0:

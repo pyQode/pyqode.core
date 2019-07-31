@@ -25,23 +25,38 @@ class ZoomMode(Mode):
         if state:
             self.editor.mouse_wheel_activated.connect(
                 self._on_wheel_event)
-            self.editor.key_pressed.connect(self._on_key_pressed)
-            self.mnu_zoom = QtWidgets.QMenu("Zoom")
-            a = self.mnu_zoom.addAction(QtGui.QIcon.fromTheme(
-                'zoom-in'), 'Zoom in')
+            self.mnu_zoom = QtWidgets.QMenu("Zoom", self.editor)
+            # Zoom in
+            a = QtWidgets.QAction(
+                QtGui.QIcon.fromTheme('zoom-in'),
+                'Zoom in',
+                self.editor
+            )
+            a.setShortcutContext(QtCore.Qt.WidgetShortcut)
+            self.mnu_zoom.addAction(a)
             a.setShortcut('Ctrl++')
             a.triggered.connect(self.editor.zoom_in)
-
-            a = self.mnu_zoom.addAction(QtGui.QIcon.fromTheme(
-                'zoom-out'), 'Zoom out')
+            # Zoom out
+            a = QtWidgets.QAction(
+                QtGui.QIcon.fromTheme('zoom-out'),
+                'Zoom out',
+                self.editor
+            )
+            a.setShortcutContext(QtCore.Qt.WidgetShortcut)
+            self.mnu_zoom.addAction(a)
             a.setShortcut('Ctrl+-')
             a.triggered.connect(self.editor.zoom_out)
-
-            a = self.mnu_zoom.addAction(QtGui.QIcon.fromTheme(
-                'zoom-fit-best'), 'Reset zoom')
+            # Reset zoom
+            a = QtWidgets.QAction(
+                QtGui.QIcon.fromTheme('zoom-fit-best'),
+                'Reset zoom',
+                self.editor
+            )
+            a.setShortcutContext(QtCore.Qt.WidgetShortcut)
+            self.mnu_zoom.addAction(a)
             a.setShortcut('Ctrl+0')
             a.triggered.connect(self.editor.reset_zoom)
-
+            # Zoom menu
             a = self.mnu_zoom.menuAction()
             a.setIcon(QtGui.QIcon.fromTheme('zoom'))
             self.editor.add_action(a, sub_menu=None)
@@ -50,26 +65,6 @@ class ZoomMode(Mode):
                 self._on_wheel_event)
             self.editor.remove_action(self.mnu_zoom.menuAction(),
                                       sub_menu=None)
-            self.editor.key_pressed.disconnect(self._on_key_pressed)
-
-    def _on_key_pressed(self, event):
-        """
-        Resets editor font size to the default font size
-
-        :param event: wheelEvent
-        :type event: QKeyEvent
-        """
-        if (int(event.modifiers()) & QtCore.Qt.ControlModifier > 0 and
-                not int(event.modifiers()) & QtCore.Qt.ShiftModifier):
-            if event.key() == QtCore.Qt.Key_0:
-                self.editor.reset_zoom()
-                event.accept()
-            if event.key() == QtCore.Qt.Key_Plus:
-                self.editor.zoom_in()
-                event.accept()
-            if event.key() == QtCore.Qt.Key_Minus:
-                self.editor.zoom_out()
-                event.accept()
 
     def _on_wheel_event(self, event):
         """
