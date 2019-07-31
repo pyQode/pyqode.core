@@ -6,7 +6,6 @@ import logging
 import mimetypes
 import os
 import io
-import sys
 import uuid
 import weakref
 
@@ -841,12 +840,13 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 splitter.add_context_action(action)
         return splitter
 
-    def split(self, widget, orientation):
+    def split(self, widget, orientation, index=None):
         """
         Split the the current widget in new SplittableTabWidget.
 
         :param widget: widget to split
         :param orientation: orientation of the splitter
+        :param index: the index of the new splitter, or None to append
         :return: the new splitter
         """
         if widget.original:
@@ -863,8 +863,12 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self.setOrientation(orientation)
         splitter = self._make_splitter()
         splitter.show()
-        self.addWidget(splitter)
-        self.child_splitters.append(splitter)
+        if index is None:
+            self.addWidget(splitter)
+            self.child_splitters.append(splitter)
+        else:
+            self.insertWidget(index, splitter)
+            self.child_splitters.insert(index, splitter)
         if clone not in base.clones:
             # code editors maintain the list of clones internally but some
             # other widgets (user widgets) might not.
@@ -1585,9 +1589,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         self.dirty_changed.emit(new.dirty)
         return old, new
 
-    def split(self, widget, orientation):
+    def split(self, widget, orientation, index=None):
         splitter = super(SplittableCodeEditTabWidget, self).split(
-            widget, orientation)
+            widget, orientation, index=index)
         if splitter:
             splitter.tab_bar_double_clicked.connect(
                 self.tab_bar_double_clicked.emit)
