@@ -524,6 +524,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         clone = self.clone()
         self.link(clone)
         TextHelper(clone).goto_line(l, c)
+        clone.verticalScrollBar().setValue(self.verticalScrollBar().value())
         self.clones.append(clone)
         return clone
 
@@ -791,6 +792,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param increment: zoom level increment. Default is 1.
         """
+        # When called through an action, the first argument is a bool
+        if isinstance(increment, bool):
+            increment = 1
         self.zoom_level += increment
         TextHelper(self).mark_whole_doc_dirty()
         self._reset_stylesheet()
@@ -802,6 +806,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         :param decrement: zoom level decrement. Default is 1. The value is
             given as an absolute value.
         """
+        # When called through an action, the first argument is a bool
+        if isinstance(decrement, bool):
+            decrement = 1
         self.zoom_level -= decrement
         # make sure font size remains > 0
         if self.font_size + self.zoom_level <= 0:
@@ -875,7 +882,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         tc.beginEditBlock()
         no_selection = False
         sText = tc.selection().toPlainText()
-        if not helper.current_line_text() and sText.count("\n") > 1:
+        # If only whitespace is selected, simply delete it
+        if not helper.current_line_text() and not sText.strip():
             tc.deleteChar()
         else:
             if not self.textCursor().hasSelection():
@@ -903,20 +911,45 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     def swapLineDown(self):
         self.__swapLine(False)
 
-    def __swapLine(self, up: bool):
+    def __swapLine(self, up):
+        has_selection = self.textCursor().hasSelection()
         helper = TextHelper(self)
-        text = helper.current_line_text()
-        line_nbr = helper.current_line_nbr()
+        # Remember the cursor position so that we can restore it later
+        line, column = helper.cursor_position()
+        # Check the range that we're going to move and verify that it stays
+        # within the document boundaries
+        start_index, end_index = helper.selection_range()
         if up:
-            swap_line_nbr = line_nbr - 1
+            start_index -= 1
+            if start_index < 0:
+                return
         else:
-            swap_line_nbr = line_nbr + 1
-        swap_text = helper.line_text(swap_line_nbr)
-
-        if (swap_line_nbr < helper.line_count()
-                and line_nbr < helper.line_count()):
-            helper.set_line_text(line_nbr, swap_text)
-            helper.set_line_text(swap_line_nbr, text)
+            end_index += 1
+            if end_index >= helper.line_count():
+                return
+        # Select the current lines and the line that will be swapped, turn
+        # them into a list, and then perform the swap on this list
+        helper.select_lines(start_index, end_index)
+        lines = helper.selected_text().replace(u'\u2029', u'\n').split(u'\n')
+        if up:
+            lines = lines[1:] + [lines[0]]
+        else:
+            lines = [lines[-1]] + lines[:-1]
+        # Replace the selected text by the swapped text in a single undo action
+        cursor = self.textCursor()
+        cursor.beginEditBlock()
+        cursor.insertText(u'\n'.join(lines))
+        cursor.endEditBlock()
+        self.setTextCursor(cursor)
+        if has_selection:
+            # If text was originally selected, select the range again
+            if up:
+                helper.select_lines(start_index, end_index - 1)
+            else:
+                helper.select_lines(start_index + 1, end_index)
+        else:
+            # Else restore cursor position, while moving with the swap
+            helper.goto_line(line - 1 if up else line + 1, column)
 
     def resizeEvent(self, e):
         """
