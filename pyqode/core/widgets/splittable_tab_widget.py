@@ -915,13 +915,20 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             return self._current()
         return None
 
-    def widgets(self, include_clones=False):
+    def widgets(self, include_clones=False, from_root=False):
         """
         Recursively gets the list of widgets.
 
         :param include_clones: True to retrieve all tabs, including clones,
             otherwise only original widgets are returned.
+        :param from_root: True to get all widgets, rather than only the widgets
+            that are under the current splitter and its child splitters.
         """
+        if from_root and not self.root:
+            return self.parent().widgets(
+                include_clones=include_clones,
+                from_root=True
+            )
         widgets = []
         for i in range(self.main_tab_widget.count()):
             widget = self.main_tab_widget.widget(i)
@@ -1438,7 +1445,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             name = os.path.split(original_path)[1]
 
             use_parent_dir = False
-            for tab in self.widgets():
+            for tab in self.widgets(from_root=True):
                 title = QtCore.QFileInfo(tab.file.path).fileName()
                 if title == name:
                     tw = tab.parent_tab_widget
