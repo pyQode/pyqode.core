@@ -293,6 +293,12 @@ class TextHelper(object):
         :return: Entire line's text
         :rtype: str
         """
+
+        # Under some (apparent) race conditions, this function can be called
+        # with a None line number. This should be fixed in a better way, but
+        # for now we return an empty string to avoid crashes.
+        if line_nbr is None:
+            return ''
         doc = self._editor.document()
         block = doc.findBlockByNumber(line_nbr)
         return block.text()
