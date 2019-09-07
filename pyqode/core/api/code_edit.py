@@ -436,6 +436,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         super(CodeEdit, self).__init__(parent)
         self.installEventFilter(self)
         self.clones = []
+        self._closed = False
         self._show_ctx_mnu = True
         self._default_font_size = 10
         self._backend = BackendManager(self)
@@ -581,6 +582,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param clear: True to clear the editor content before closing.
         """
+        if self._closed:
+            return
+        self._closed = True
         if self._tooltips_runner:
             self._tooltips_runner.cancel_requests()
             self._tooltips_runner = None
