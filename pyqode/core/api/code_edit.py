@@ -183,7 +183,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if value == "":
             value = self._DEFAULT_FONT
         self._font_family = value
-        self._reset_stylesheet()
+        if self._auto_reset_stylesheet:
+            self._reset_stylesheet()
         for c in self.clones:
             c.font_name = value
 
@@ -217,7 +218,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @font_size.setter
     def font_size(self, value):
         self._font_size = value
-        self._reset_stylesheet()
+        if self._auto_reset_stylesheet:
+            self._reset_stylesheet()
         for c in self.clones:
             c.font_size = value
 
@@ -231,7 +233,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @background.setter
     def background(self, value):
         self._background = value
-        self._reset_stylesheet()
+        if self._auto_reset_stylesheet:
+            self._reset_stylesheet()
         for c in self.clones:
             c.background = value
 
@@ -245,7 +248,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @foreground.setter
     def foreground(self, value):
         self._foreground = value
-        self._reset_stylesheet()
+        if self._auto_reset_stylesheet:
+            self._reset_stylesheet()
         for c in self.clones:
             c.foreground = value
 
@@ -275,7 +279,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
     @selection_background.setter
     def selection_background(self, value):
         self._sel_background = value
-        self._reset_stylesheet()
+        if self._auto_reset_stylesheet:
+            self._reset_stylesheet()
         for c in self.clones:
             c.selection_background = value
 
@@ -434,6 +439,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             :attr:`show_menu_enabled` to False.
         """
         super(CodeEdit, self).__init__(parent)
+        self._auto_reset_stylesheet = False
         self.installEventFilter(self)
         self.clones = []
         self._closed = False
@@ -503,6 +509,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setCenterOnScroll(True)
         self.setLineWrapMode(self.NoWrap)
         self.setCursorWidth(2)
+        self._auto_reset_stylesheet = True
+        self._reset_stylesheet()
 
     def __repr__(self):
         return '%s(path=%r)' % (self.__class__.__name__, self.file.path)
@@ -1337,8 +1345,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             ln = TextHelper(self).cursor_position()[0]
             self._modified_lines.add(ln)
 
+
     def _reset_stylesheet(self):
         """ Resets stylesheet"""
+        # This function is called very often during initialization, which
+        # impacts performance. This is a hack to avoid this.
         self.setFont(QtGui.QFont(self._font_family,
                                  self._font_size + self._zoom_level))
         flg_stylesheet = hasattr(self, '_flg_stylesheet')
