@@ -14,6 +14,8 @@ from pyqode.core import __version__
 #   - pyqode-uic
 #
 import sys
+import os
+os.environ['DEB_BUILD_OPTIONS'] = 'nocheck'
 
 try:
     from pyqt_distutils.build_ui import build_ui

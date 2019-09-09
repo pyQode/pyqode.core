@@ -220,7 +220,6 @@ class PygmentsSH(SyntaxHighlighter):
             print('class not found for url', filename)
             try:
                 m = mimetypes.guess_type(filename)
-                print(m)
                 self._lexer = get_lexer_for_mimetype(m[0])
             except (ClassNotFound, IndexError, ImportError):
                 self._lexer = get_lexer_for_mimetype('text/plain')

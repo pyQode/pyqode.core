@@ -156,7 +156,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         icon_size = QtCore.QSize(16, 16)
 
         icon = icons.icon('edit-find', ':/pyqode-icons/rc/edit-find.png',
-                          'fa.search')
+                          'fa.s    earch')
         self.actionSearch.setIcon(icon)
         self.actionSearch.setShortcut('Ctrl+F')
         self.labelSearch.setPixmap(icon.pixmap(icon_size))
@@ -269,13 +269,31 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         Closes the panel
         """
         self.hide()
+        try:
+            self.editor.key_pressed.disconnect(self._on_key_pressed)
+        except TypeError:
+            # In some race conditions, for example when clicking the close
+            # button and pressing escape almost simultaneously, the signal is
+            # already disconnected
+            pass
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
+
+    def _on_key_pressed(self, event):
+
+        if event.isAccepted():
+            return
+        if not self.lineEditSearch.isVisible():
+            return
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.close_panel()
+            event.accept()
 
     def on_close(self):
         self.close_panel()
 
     def on_search(self):
+        self.editor.key_pressed.connect(self._on_key_pressed)
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -290,6 +308,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.request_search(new_text)
 
     def on_search_and_replace(self):
+        self.editor.key_pressed.connect(self._on_key_pressed)
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()

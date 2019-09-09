@@ -17,3 +17,4 @@ recursive-include doc *
 recursive-include examples *
 recursive-include forms *
 recursive-include test *
+recursive-exclude test *.pyc
