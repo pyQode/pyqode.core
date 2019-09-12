@@ -1352,10 +1352,23 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         :return: Code editor widget instance.
         """
         if mimetype in self.editors.keys():
-            return self.editors[mimetype](
-                *args, parent=self.main_tab_widget, **kwargs)
-        editor = self.fallback_editor(*args, parent=self.main_tab_widget,
-                                      **kwargs)
+            editor = self.editors[mimetype](
+                *args,
+                parent=self.main_tab_widget,
+                **kwargs
+            )
+        else:
+            editor = self.fallback_editor(
+                *args,
+                parent=self.main_tab_widget,
+                **kwargs
+            )
+        try:
+            pygments = editor.modes.get('PygmentsSH')
+        except KeyError:
+            pass
+        else:
+            pygments.set_mime_type(mimetype)
         return editor
 
     def create_new_document(self, base_name='New Document',
