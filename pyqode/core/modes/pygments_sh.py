@@ -188,6 +188,11 @@ class PygmentsSH(SyntaxHighlighter):
 
         :param mime_type: mime type of the new lexer to setup.
         """
+
+        if not mime_type:
+            # Don't try to set unspecified mime type. Improves performance and
+            # avoids (harmless) error messages
+            return True
         try:
             self.set_lexer_from_mime_type(mime_type)
         except ClassNotFound:
