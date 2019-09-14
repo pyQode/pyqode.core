@@ -190,9 +190,9 @@ class PygmentsSH(SyntaxHighlighter):
         """
 
         if not mime_type:
-            # Don't try to set unspecified mime type. Improves performance and
-            # avoids (harmless) error messages
-            return True
+            # Fall back to TextLexer
+            self._lexer = TextLexer()
+            return False
         try:
             self.set_lexer_from_mime_type(mime_type)
         except ClassNotFound:
