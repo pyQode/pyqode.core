@@ -1246,6 +1246,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if widget.original:
             widget = widget.original
         mem = widget.file.path
+        old_path = widget.file.path
         widget.file._path = None
         widget.file._old_path = mem
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
@@ -1266,16 +1267,17 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         # Traverse through all splitters and all editors, and change the tab
         # text whenever the editor is a clone of the current widget or the
         # current widget itself.
-        current_document = widget.document()
-        for splitter in self.get_all_splitters():
-            for editor in splitter._tabs:
-                if editor.document() != current_document:
-                    continue
-                index = splitter.main_tab_widget.indexOf(editor)
-                splitter.main_tab_widget.setTabText(
-                    index,
-                    widget.file.name
-                )
+        if old_path != widget.file.path:
+            current_document = widget.document()
+            for splitter in self.get_all_splitters():
+                for editor in splitter._tabs:
+                    if editor.document() != current_document:
+                        continue
+                    index = splitter.main_tab_widget.indexOf(editor)
+                    splitter.main_tab_widget.setTabText(
+                        index,
+                        widget.file.name
+                    )
         return widget.file.path
 
     def get_root_splitter(self):
