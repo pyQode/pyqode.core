@@ -240,8 +240,14 @@ class PygmentsSH(SyntaxHighlighter):
         :param mime: mime type
         :param options: optional addtional options.
         """
-        self._lexer = get_lexer_for_mimetype(mime, **options)
-        _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
+
+        try:
+            self._lexer = get_lexer_for_mimetype(mime, **options)
+        except (ClassNotFound, ImportError):
+            print('class not found for mime', mime)
+            self._lexer = get_lexer_for_mimetype('text/plain')
+        else:
+            _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
         """
