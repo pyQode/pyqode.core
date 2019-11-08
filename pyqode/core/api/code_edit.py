@@ -1328,11 +1328,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         bottom = top + int(self.blockBoundingRect(block).height())
         ebottom_top = 0
         ebottom_bottom = self.height()
+        first_block = True
         while block.isValid():
             visible = (top >= ebottom_top and bottom <= ebottom_bottom)
-            if not visible:
+            if not visible and not first_block:
                 break
-            if block.isVisible():
+            first_block = False
+            if visible and block.isVisible():
                 self._visible_blocks.append((top, block_nbr, block))
             block = block.next()
             top = bottom
