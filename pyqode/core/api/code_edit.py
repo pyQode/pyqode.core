@@ -1388,17 +1388,29 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _do_home_key(self, event=None, select=False):
         """ Performs home key action """
-        # get nb char to first significative char
-        delta = (self.textCursor().positionInBlock() -
-                 TextHelper(self).line_indent())
         cursor = self.textCursor()
         move = QtGui.QTextCursor.MoveAnchor
         if select:
             move = QtGui.QTextCursor.KeepAnchor
-        if delta > 0:
-            cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
+        indent = TextHelper(self).line_indent()
+        # Scenario 1: We're on an unindented block. In that case, we jump back
+        # to the start of the visible line, but not all the way to the back of
+        # the block. This is what you would expect when working with text and
+        # line wrapping is enabled.
+        if not indent:
+            cursor.movePosition(QtGui.QTextCursor.StartOfLine, move)
         else:
-            cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)
+            delta = self.textCursor().positionInBlock() - indent
+            # Scenario 2: We're on an indented block. In that case, we move
+            # back to the indented position. This is what you would expect when
+            # working with code.
+            if delta > 0:
+                cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
+            # Scenario 3: We're on an indented block, but we're already at the
+            # start of the indentation. In that case, we jump back to the
+            # beginning of the block.
+            else:
+                cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)
         self.setTextCursor(cursor)
         if event:
             event.accept()
