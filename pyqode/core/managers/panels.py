@@ -109,13 +109,13 @@ class PanelsManager(Manager):
         """
         Returns the list of installed panel names.
         """
-        return self._modes.keys()
+        return self._panels.keys()
 
     def values(self):
         """
         Returns the list of installed panels.
         """
-        return self._modes.values()
+        return self._panels.values()
 
     def __iter__(self):
         lst = []
