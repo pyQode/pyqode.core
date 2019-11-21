@@ -174,6 +174,11 @@ class PygmentsSH(SyntaxHighlighter):
         """ Init pygments style """
         self._update_style()
 
+    def clone_settings(self, original):
+
+        # The lexer can be shared between clones.
+        self._lexer = original._lexer
+
     def on_install(self, editor):
         """
         :type editor: pyqode.code.api.CodeEdit
