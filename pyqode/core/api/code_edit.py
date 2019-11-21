@@ -557,15 +557,24 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         clone.file._encoding = self.file.encoding
         clone.file._mimetype = self.file.mimetype
         clone.setDocument(self.document())
-        for original_mode, mode in zip(list(self.modes), list(clone.modes)):
-            mode.enabled = original_mode.enabled
-            mode.clone_settings(original_mode)
-        for original_panel, panel in zip(
-                list(self.panels), list(clone.panels)):
-            panel.enabled = original_panel.isEnabled()
-            panel.clone_settings(original_panel)
+        for original_mode in self.modes:
+            try:
+                clone_mode = clone.modes.get(original_mode.name)
+            except KeyError:
+                print('Not cloning', original_mode)
+                continue
+            clone_mode.enabled = original_mode.enabled
+            clone_mode.clone_settings(original_mode)
+        for original_panel in self.panels:
+            try:
+                clone_panel = clone.panels.get(original_panel.name)
+            except KeyError:
+                print('Not cloning', original_panel)
+                continue
+            clone_panel.enabled = original_panel.isEnabled()
+            clone_panel.clone_settings(original_panel)
             if not original_panel.isVisible():
-                panel.setVisible(False)
+                clone_panel.setVisible(False)
         clone.use_spaces_instead_of_tabs = self.use_spaces_instead_of_tabs
         clone.tab_length = self.tab_length
         clone._save_on_focus_out = self._save_on_focus_out
