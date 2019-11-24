@@ -952,7 +952,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 return
         # Select the current lines and the line that will be swapped, turn
         # them into a list, and then perform the swap on this list
-        helper.select_lines(start_index, end_index)
+        helper.select_lines(start_index, end_index, select_blocks=True)
         lines = helper.selected_text().replace(u'\u2029', u'\n').split(u'\n')
         if up:
             lines = lines[1:] + [lines[0]]
@@ -967,9 +967,11 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         if has_selection:
             # If text was originally selected, select the range again
             if up:
-                helper.select_lines(start_index, end_index - 1)
+                helper.select_lines(start_index, end_index - 1,
+                                    select_blocks=True)
             else:
-                helper.select_lines(start_index + 1, end_index)
+                helper.select_lines(start_index + 1, end_index,
+                                    select_blocks=True)
         else:
             # Else restore cursor position, while moving with the swap
             helper.goto_line(line - 1 if up else line + 1, column)
