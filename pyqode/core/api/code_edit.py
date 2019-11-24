@@ -896,25 +896,27 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def cut(self):
         """
-        Cuts the selected text or the whole line if no text was selected.
+        Cuts the selected text or the whole line if no text was selected. When
+        cutting a full line that consists of only whitespace, the line is only
+        deleted, to avoid overwriting the clipboard with whitespace.
         """
+
         tc = self.textCursor()
-        helper = TextHelper(self)
         tc.beginEditBlock()
-        no_selection = False
-        sText = tc.selection().toPlainText()
-        # If only whitespace is selected, simply delete it
-        if not helper.current_line_text() and not sText.strip():
-            tc.deleteChar()
+        if not tc.hasSelection():
+            tc.movePosition(tc.StartOfLine)
+            tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
+            from_selection = False
         else:
-            if not self.textCursor().hasSelection():
-                no_selection = True
-                TextHelper(self).select_whole_line()
-            super(CodeEdit, self).cut()
-            if no_selection:
-                tc.deleteChar()
+            from_selection = True
+        if from_selection or tc.selectedText().strip():
+            need_cut = True
+        else:
+            tc.removeSelectedText()
+            need_cut = False
         tc.endEditBlock()
         self.setTextCursor(tc)
+        super(CodeEdit, self).cut()
 
     def copy(self):
         """
