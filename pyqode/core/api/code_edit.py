@@ -905,6 +905,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         tc.beginEditBlock()
         if not tc.hasSelection():
             tc.movePosition(tc.StartOfLine)
+            tc.movePosition(tc.Left)
+            tc.movePosition(tc.Right, tc.KeepAnchor)
             tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
             from_selection = False
         else:
