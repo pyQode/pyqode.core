@@ -561,7 +561,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             try:
                 clone_mode = clone.modes.get(original_mode.name)
             except KeyError:
-                print('Not cloning', original_mode)
                 continue
             clone_mode.enabled = original_mode.enabled
             clone_mode.clone_settings(original_mode)
@@ -569,7 +568,6 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             try:
                 clone_panel = clone.panels.get(original_panel.name)
             except KeyError:
-                print('Not cloning', original_panel)
                 continue
             clone_panel.enabled = original_panel.isEnabled()
             clone_panel.clone_settings(original_panel)
