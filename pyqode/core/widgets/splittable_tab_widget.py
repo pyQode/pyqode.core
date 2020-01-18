@@ -915,13 +915,20 @@ class SplittableTabWidget(QtWidgets.QSplitter):
             return self._current()
         return None
 
-    def widgets(self, include_clones=False):
+    def widgets(self, include_clones=False, from_root=False):
         """
         Recursively gets the list of widgets.
 
         :param include_clones: True to retrieve all tabs, including clones,
             otherwise only original widgets are returned.
+        :param from_root: True to get all widgets, rather than only the widgets
+            that are under the current splitter and its child splitters.
         """
+        if from_root and not self.root:
+            return self.parent().widgets(
+                include_clones=include_clones,
+                from_root=True
+            )
         widgets = []
         for i in range(self.main_tab_widget.count()):
             widget = self.main_tab_widget.widget(i)
@@ -1239,6 +1246,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         if widget.original:
             widget = widget.original
         mem = widget.file.path
+        old_path = widget.file.path
         widget.file._path = None
         widget.file._old_path = mem
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
@@ -1259,16 +1267,17 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         # Traverse through all splitters and all editors, and change the tab
         # text whenever the editor is a clone of the current widget or the
         # current widget itself.
-        current_document = widget.document()
-        for splitter in self.get_all_splitters():
-            for editor in splitter._tabs:
-                if editor.document() != current_document:
-                    continue
-                index = splitter.main_tab_widget.indexOf(editor)
-                splitter.main_tab_widget.setTabText(
-                    index,
-                    widget.file.name
-                )
+        if old_path != widget.file.path:
+            current_document = widget.document()
+            for splitter in self.get_all_splitters():
+                for editor in splitter._tabs:
+                    if editor.document() != current_document:
+                        continue
+                    index = splitter.main_tab_widget.indexOf(editor)
+                    splitter.main_tab_widget.setTabText(
+                        index,
+                        widget.file.name
+                    )
         return widget.file.path
 
     def get_root_splitter(self):
@@ -1345,10 +1354,23 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         :return: Code editor widget instance.
         """
         if mimetype in self.editors.keys():
-            return self.editors[mimetype](
-                *args, parent=self.main_tab_widget, **kwargs)
-        editor = self.fallback_editor(*args, parent=self.main_tab_widget,
-                                      **kwargs)
+            editor = self.editors[mimetype](
+                *args,
+                parent=self.main_tab_widget,
+                **kwargs
+            )
+        else:
+            editor = self.fallback_editor(
+                *args,
+                parent=self.main_tab_widget,
+                **kwargs
+            )
+        try:
+            pygments = editor.modes.get('PygmentsSH')
+        except KeyError:
+            pass
+        else:
+            pygments.set_mime_type(mimetype)
         return editor
 
     def create_new_document(self, base_name='New Document',
@@ -1438,7 +1460,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             name = os.path.split(original_path)[1]
 
             use_parent_dir = False
-            for tab in self.widgets():
+            for tab in self.widgets(from_root=True):
                 title = QtCore.QFileInfo(tab.file.path).fileName()
                 if title == name:
                     tw = tab.parent_tab_widget

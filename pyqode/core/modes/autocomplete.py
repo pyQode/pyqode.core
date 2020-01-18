@@ -22,6 +22,7 @@ class AutoCompleteMode(Mode):
         super(AutoCompleteMode, self).__init__()
         #: Auto complete mapping, maps input key with completion text.
         self.MAPPING = {'"': '"', "'": "'", "(": ")", "{": "}", "[": "]"}
+        self.AVOID_DUPLICATES = ')', ']', '}'
         #: The format to use for each symbol in mapping when there is a selection
         self.SELECTED_QUOTES_FORMATS = {key: '%s%s%s' for key in self.MAPPING.keys()}
         #: The format to use for each symbol in mapping when there is no selection
@@ -92,15 +93,13 @@ class AutoCompleteMode(Mode):
                 tc.endEditBlock()
                 self.editor.setTextCursor(tc)
                 ignore = True
-        elif txt and next_char == txt and next_char in self.MAPPING:
+        elif (
+            txt and next_char == txt and (
+                next_char in self.MAPPING or
+                txt in self.AVOID_DUPLICATES
+            )
+        ):
             ignore = True
-        elif event.text() == ')' or event.text() == ']' or event.text() == '}':
-            # if typing the same symbol twice, the symbol should not be written
-            # and the cursor moved just after the char
-            # e.g. if you type ) just before ), the cursor will just move after
-            # the existing )
-            if next_char == event.text():
-                ignore = True
         if ignore:
             event.accept()
             TextHelper(self.editor).clear_selection()

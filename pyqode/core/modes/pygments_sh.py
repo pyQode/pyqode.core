@@ -174,6 +174,11 @@ class PygmentsSH(SyntaxHighlighter):
         """ Init pygments style """
         self._update_style()
 
+    def clone_settings(self, original):
+
+        # The lexer can be shared between clones.
+        self._lexer = original._lexer
+
     def on_install(self, editor):
         """
         :type editor: pyqode.code.api.CodeEdit
@@ -188,6 +193,11 @@ class PygmentsSH(SyntaxHighlighter):
 
         :param mime_type: mime type of the new lexer to setup.
         """
+
+        if not mime_type:
+            # Fall back to TextLexer
+            self._lexer = TextLexer()
+            return False
         try:
             self.set_lexer_from_mime_type(mime_type)
         except ClassNotFound:
@@ -235,8 +245,14 @@ class PygmentsSH(SyntaxHighlighter):
         :param mime: mime type
         :param options: optional addtional options.
         """
-        self._lexer = get_lexer_for_mimetype(mime, **options)
-        _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
+
+        try:
+            self._lexer = get_lexer_for_mimetype(mime, **options)
+        except (ClassNotFound, ImportError):
+            print('class not found for mime', mime)
+            self._lexer = get_lexer_for_mimetype('text/plain')
+        else:
+            _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
         """

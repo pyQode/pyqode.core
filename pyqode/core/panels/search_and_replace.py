@@ -6,7 +6,6 @@ import re
 import sre_constants
 
 from pyqode.qt import QtCore, QtGui, QtWidgets
-
 from pyqode.core import icons
 from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
 from pyqode.core.api.decoration import TextDecoration
@@ -144,6 +143,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self._current_occurrence_index = 0
         self._bg = None
         self._fg = None
+        self._working = False
         self._update_buttons(txt="")
         self.lineEditSearch.installEventFilter(self)
         self.lineEditReplace.installEventFilter(self)
@@ -344,6 +344,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if txt is None or isinstance(txt, int):
             txt = self.lineEditSearch.text()
         if txt:
+            self._working = True
             self.job_runner.request_job(
                 self._exec_search, txt, self._search_flags())
         else:
@@ -390,6 +391,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
+
+        if self._working:
+            QtCore.QTimer.singleShot(100, self.select_next)
+            return
         current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
         if not occurrences:
@@ -428,6 +433,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
+
+        if self._working:
+            QtCore.QTimer.singleShot(100, self.select_previous)
+            return
         current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
         if not occurrences:
@@ -592,6 +601,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.labelMatches.clear()
 
     def _on_search_finished(self):
+        self._working = False
         self._clear_decorations()
         all_occurences = self.get_occurences()
         occurrences = all_occurences[:self.MAX_HIGHLIGHTED_OCCURENCES]

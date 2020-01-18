@@ -293,6 +293,12 @@ class TextHelper(object):
         :return: Entire line's text
         :rtype: str
         """
+
+        # Under some (apparent) race conditions, this function can be called
+        # with a None line number. This should be fixed in a better way, but
+        # for now we return an empty string to avoid crashes.
+        if line_nbr is None:
+            return ''
         doc = self._editor.document()
         block = doc.findBlockByNumber(line_nbr)
         return block.text()
@@ -432,7 +438,8 @@ class TextHelper(object):
         cursor.setPosition(block.position())
         return cursor
 
-    def select_lines(self, start=0, end=-1, apply_selection=True):
+    def select_lines(self, start=0, end=-1, apply_selection=True,
+                     select_blocks=False):
         """
         Selects entire lines between start and end line numbers.
 
@@ -447,6 +454,8 @@ class TextHelper(object):
             end of the document
         :param apply_selection: True to apply the selection before returning
          the QTextCursor.
+        :param select_blocks: True to operate on blocks rather than visual
+         lines.
         :returns: A QTextCursor that holds the requested selection
         """
         editor = self._editor
@@ -455,21 +464,31 @@ class TextHelper(object):
         if start < 0:
             start = 0
         text_cursor = self.move_cursor_to(start)
+        if select_blocks:
+            move_start = text_cursor.StartOfBlock
+            move_end = text_cursor.EndOfBlock
+            move_up = text_cursor.PreviousBlock
+            move_down = text_cursor.NextBlock
+        else:
+            move_start = text_cursor.StartOfLine
+            move_end = text_cursor.EndOfLine
+            move_up = text_cursor.Up
+            move_down = text_cursor.Down
         if end > start:  # Going down
-            text_cursor.movePosition(text_cursor.Down,
+            text_cursor.movePosition(move_down,
                                      text_cursor.KeepAnchor, end - start)
-            text_cursor.movePosition(text_cursor.EndOfLine,
+            text_cursor.movePosition(move_end,
                                      text_cursor.KeepAnchor)
         elif end < start:  # going up
             # don't miss end of line !
-            text_cursor.movePosition(text_cursor.EndOfLine,
+            text_cursor.movePosition(move_end,
                                      text_cursor.MoveAnchor)
-            text_cursor.movePosition(text_cursor.Up,
+            text_cursor.movePosition(move_up,
                                      text_cursor.KeepAnchor, start - end)
-            text_cursor.movePosition(text_cursor.StartOfLine,
+            text_cursor.movePosition(move_start,
                                      text_cursor.KeepAnchor)
         else:
-            text_cursor.movePosition(text_cursor.EndOfLine,
+            text_cursor.movePosition(move_end,
                                      text_cursor.KeepAnchor)
         if apply_selection:
             editor.setTextCursor(text_cursor)
